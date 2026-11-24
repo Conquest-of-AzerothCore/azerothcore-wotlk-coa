@@ -1837,6 +1837,1484 @@
       "expire_ms": 1000,
       "void_on_cast_failure": true,
       "observe_source": "Bouncing Thoughts 680607 at 100 Insanity with Dreadnought form passive 680750 learned (suppresses Total Madness 803060 at 100 Insanity, AscensionCultist.cpp:218-220; precondition fixture 500706 x100; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 100 / 20 = 5): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 5 = 8 enemies out of 9 dummies within 7.5 yd jump radius, leaving the 9th dummy untouched (0 in uncast before). Reference search 2026-11-24: coabuildhub 680607 and 680750 match verbatim; coa-history has 0 events for 680607/680750."
+    },
+    {
+      "spell": 300268,
+      "name": "Adaptive Combatant 300268 (parry chance)",
+      "kind": "metric_delta",
+      "variant": "parry",
+      "label_suffix": "parry",
+      "quote": "Increases your parry chance by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 300268,
+      "target": "caster",
+      "metric": "parry_chance",
+      "fields": {},
+      "before_expected": 9,
+      "expected": 12,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          681469,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "300268 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 2 + 1 = 3 ($s1), TARGET_UNIT_CASTER (Spell.dbc). Divine Right 681469 (Effect[1] aura 47 +4%, set by harness set_aura as a named precondition fixture in both phases) unlocks CanParry and 5% base parry in the control reading (before_expected 9), so the judged gain after a real learn of 300268 is only +3 points. Greatness 60235 (+300 Spirit) is the harmless timed self-cast in both phases. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 300268 matches ('parry chance by 3% and dodge chance by 2%')."
+    },
+    {
+      "spell": 300268,
+      "name": "Adaptive Combatant 300268 (dodge chance)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "and dodge chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 300268,
+      "target": "caster",
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300268 Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT, BasePoints 1 + 1 = 2 ($s2), TARGET_UNIT_CASTER (Spell.dbc). Reads live dodge_chance before (control) and after a real learn of 300268: expected gain +2.0 points (tol 0.01). Greatness 60235 (+300 Spirit, does not affect dodge) is the timed self-cast in both phases. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 300268 matches."
+    },
+    {
+      "spell": 301348,
+      "name": "Adaptive Combatant 301348 (parry chance)",
+      "kind": "metric_delta",
+      "variant": "parry",
+      "label_suffix": "parry",
+      "quote": "Increases your parry chance by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 301348,
+      "target": "caster",
+      "metric": "parry_chance",
+      "fields": {},
+      "before_expected": 9,
+      "expected": 15,
+      "expected_gain": 6,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          681469,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "301348 Effect[0] aura 47 SPELL_AURA_MOD_PARRY_PERCENT, BasePoints 5 + 1 = 6 ($s1), TARGET_UNIT_CASTER (Spell.dbc). Divine Right 681469 (Effect[1] aura 47 +4%, set by harness set_aura as a named precondition fixture in both phases) unlocks CanParry and 5% base parry in the control reading (before_expected 9), so the judged gain after a real learn of 301348 is +6 points. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 301348."
+    },
+    {
+      "spell": 301348,
+      "name": "Adaptive Combatant 301348 (dodge chance)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "and dodge chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 301348,
+      "target": "caster",
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301348 Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT, BasePoints 3 + 1 = 4 ($s2), TARGET_UNIT_CASTER (Spell.dbc). Reads live dodge_chance before (control) and after a real learn of 301348: expected gain +4.0 points (tol 0.01). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 301348."
+    },
+    {
+      "spell": 704887,
+      "name": "Empire Commander 704887 (strength)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704887,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 108.0,
+      "expected": 112.32,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704887 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 0 (strength, reference 108.0) before (control) and after a real learn of 704887: expected ratio 1.04 (tol 0.002). Trigger 60235 does not modify stat 0. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704887 matches (+4%)."
+    },
+    {
+      "spell": 704887,
+      "name": "Empire Commander 704887 (agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704887,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 63.0,
+      "expected": 65.52,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704887 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 1 (agility, reference 63.0) before (control) and after a real learn of 704887: expected ratio 1.04 (tol 0.002). Trigger 60235 does not modify stat 1. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704887 matches (+4%)."
+    },
+    {
+      "spell": 704887,
+      "name": "Empire Commander 704887 (stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704887,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 104.0,
+      "expected": 108.16,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704887 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 2 (stamina, reference 104.0) before (control) and after a real learn of 704887: expected ratio 1.04 (tol 0.002). Trigger 60235 does not modify stat 2. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704887 matches (+4%)."
+    },
+    {
+      "spell": 704887,
+      "name": "Empire Commander 704887 (intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704887,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 3
+      },
+      "before_expected": 71.0,
+      "expected": 73.84,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704887 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 3 (intellect, reference 71.0) before (control) and after a real learn of 704887: expected ratio 1.04 (tol 0.002). Trigger 60235 does not modify stat 3. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704887 matches (+4%)."
+    },
+    {
+      "spell": 704887,
+      "name": "Empire Commander 704887 (spirit)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60229,
+      "gate_spell": 704887,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 75.0,
+      "expected": 78.0,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704887 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 4 (spirit, reference 75.0) before (control) and after a real learn of 704887: expected ratio 1.04 (tol 0.002). Trigger 60229 does not modify stat 4. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704887 matches (+4%)."
+    },
+    {
+      "spell": 707781,
+      "name": "Empire Commander 707781 (strength)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 707781,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 108.0,
+      "expected": 116.64,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707781 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 0 (strength, reference 108.0) before (control) and after a real learn of 707781: expected ratio 1.08 (tol 0.002). Trigger 60235 does not modify stat 0. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 707781."
+    },
+    {
+      "spell": 707781,
+      "name": "Empire Commander 707781 (agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 707781,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 63.0,
+      "expected": 68.04,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707781 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 1 (agility, reference 63.0) before (control) and after a real learn of 707781: expected ratio 1.08 (tol 0.002). Trigger 60235 does not modify stat 1. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 707781."
+    },
+    {
+      "spell": 707781,
+      "name": "Empire Commander 707781 (stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 707781,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 104.0,
+      "expected": 112.32,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707781 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 2 (stamina, reference 104.0) before (control) and after a real learn of 707781: expected ratio 1.08 (tol 0.002). Trigger 60235 does not modify stat 2. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 707781."
+    },
+    {
+      "spell": 707781,
+      "name": "Empire Commander 707781 (intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 707781,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 3
+      },
+      "before_expected": 71.0,
+      "expected": 76.68,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707781 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 3 (intellect, reference 71.0) before (control) and after a real learn of 707781: expected ratio 1.08 (tol 0.002). Trigger 60235 does not modify stat 3. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 707781."
+    },
+    {
+      "spell": 707781,
+      "name": "Empire Commander 707781 (spirit)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60229,
+      "gate_spell": 707781,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 75.0,
+      "expected": 81.0,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707781 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 4 (spirit, reference 75.0) before (control) and after a real learn of 707781: expected ratio 1.08 (tol 0.002). Trigger 60229 does not modify stat 4. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 707781."
+    },
+    {
+      "spell": 712470,
+      "name": "Empire Commander 712470 (strength)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 712470,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 108.0,
+      "expected": 120.96,
+      "expected_ratio": 1.12,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "712470 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 11 + 1 = 12 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 0 (strength, reference 108.0) before (control) and after a real learn of 712470: expected ratio 1.12 (tol 0.002). Trigger 60235 does not modify stat 0. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 712470."
+    },
+    {
+      "spell": 712470,
+      "name": "Empire Commander 712470 (agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 712470,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 63.0,
+      "expected": 70.56,
+      "expected_ratio": 1.12,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "712470 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 11 + 1 = 12 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 1 (agility, reference 63.0) before (control) and after a real learn of 712470: expected ratio 1.12 (tol 0.002). Trigger 60235 does not modify stat 1. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 712470."
+    },
+    {
+      "spell": 712470,
+      "name": "Empire Commander 712470 (stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 712470,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 104.0,
+      "expected": 116.48,
+      "expected_ratio": 1.12,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "712470 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 11 + 1 = 12 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 2 (stamina, reference 104.0) before (control) and after a real learn of 712470: expected ratio 1.12 (tol 0.002). Trigger 60235 does not modify stat 2. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 712470."
+    },
+    {
+      "spell": 712470,
+      "name": "Empire Commander 712470 (intellect)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 712470,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 3
+      },
+      "before_expected": 71.0,
+      "expected": 79.52,
+      "expected_ratio": 1.12,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "712470 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 11 + 1 = 12 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 3 (intellect, reference 71.0) before (control) and after a real learn of 712470: expected ratio 1.12 (tol 0.002). Trigger 60235 does not modify stat 3. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 712470."
+    },
+    {
+      "spell": 712470,
+      "name": "Empire Commander 712470 (spirit)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "Increases all primary attributes by $s1%.",
+      "trigger_spell": 60229,
+      "gate_spell": 712470,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 75.0,
+      "expected": 84.0,
+      "expected_ratio": 1.12,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "712470 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 11 + 1 = 12 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 4 (spirit, reference 75.0) before (control) and after a real learn of 712470: expected ratio 1.12 (tol 0.002). Trigger 60229 does not modify stat 4. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 712470."
+    },
+    {
+      "spell": 681107,
+      "name": "Blessing of N'Zoth (AP at baseline Intellect)",
+      "kind": "metric_delta",
+      "variant": "ap_base",
+      "label_suffix": "ap_base",
+      "quote": "Increases your attack power by $s1% of your Intellect.",
+      "trigger_spell": 60235,
+      "gate_spell": 681107,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 447,
+      "expected_gain": 71,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681107 Effect[0] aura 268 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT, MiscValue 3 (Intellect), BasePoints 99 + 1 = 100 ($s1; Spell.dbc). At reference Intellect 71 (reference_stats stat 3) and reference AP 376, a real learn of 681107 adds 100% of 71 = +71 AP (447 vs 376 control). Trigger 60235 (+300 Spirit) does not change Intellect or AP. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 681107 matches ('100% of your Intellect')."
+    },
+    {
+      "spell": 681107,
+      "name": "Blessing of N'Zoth (AP at elevated Intellect +300)",
+      "kind": "metric_delta",
+      "variant": "ap_int",
+      "label_suffix": "ap_int",
+      "quote": "Increases your attack power by $s1% of your Intellect.",
+      "trigger_spell": 60234,
+      "gate_spell": 681107,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 747,
+      "expected_gain": 371,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "681107 Effect[0] aura 268 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT, MiscValue 3 (Intellect), BasePoints 99 + 1 = 100 ($s1; Spell.dbc). With Greatness 60234 (+300 Intellect, SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF, no level scaling) cast in both phases, Intellect = 71 + 300 = 371; a real learn of 681107 adds +371 AP (747 vs 376 control), confirming +300 AP for +300 Intellect (100%). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 681107 matches."
+    },
+    {
+      "spell": 805121,
+      "name": "Void Strength (Shadow SP at baseline Strength)",
+      "kind": "metric_delta",
+      "variant": "shadow_sp_base",
+      "label_suffix": "shadow_sp_base",
+      "quote": "Increases your Shadow spell damage by $s3% of your Strength",
+      "trigger_spell": 60235,
+      "gate_spell": 805121,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 54,
+      "expected_gain": 54,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805121 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 32 (Shadow), MiscValueB 0 (Strength), BasePoints 49 + 1 = 50 ($s3; Spell.dbc). Under G-13, Shadow spell damage is a spell-power stat claim. At reference Strength 108, 50% = +54 Shadow SP (school 5) after a real learn vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 805121 matches ('50% of your Strength and your spell hit chance by 5% of your Strength')."
+    },
+    {
+      "spell": 805121,
+      "name": "Void Strength (Shadow SP at elevated Strength +300)",
+      "kind": "metric_delta",
+      "variant": "shadow_sp_str",
+      "label_suffix": "shadow_sp_str",
+      "quote": "Increases your Shadow spell damage by $s3% of your Strength",
+      "trigger_spell": 60229,
+      "gate_spell": 805121,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 204,
+      "expected_gain": 204,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805121 Effect[2] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 32 (Shadow), MiscValueB 0 (Strength), BasePoints 49 + 1 = 50 ($s3; Spell.dbc). With Greatness 60229 (+300 Strength, no level scaling) cast in both phases, Strength = 108 + 300 = 408; 50% = +204 Shadow SP vs 0 control (+150 SP for +300 Strength). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 805121 matches."
+    },
+    {
+      "spell": 805121,
+      "name": "Void Strength (spell hit rating at elevated Strength +300)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_str",
+      "label_suffix": "spell_hit_str",
+      "quote": "and your spell hit chance by $s1% of your Strength.",
+      "trigger_spell": 60229,
+      "gate_spell": 805121,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10020,
+      "expected_gain": 20,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805121 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1<<7 = CR_HIT_SPELL, rating 7), MiscValueB 0 (Strength), BasePoints 4 + 1 = 5 ($s1; Spell.dbc). With Greatness 60229 (+300 Strength -> 408), int32(408 * 0.05) = +20 spell hit rating on top of reference spell_hit_rating 10000 (10020 vs 10000 control). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 805121 matches."
+    },
+    {
+      "spell": 804286,
+      "name": "Strength of the Sha (SP at elevated Strength +300)",
+      "kind": "metric_delta",
+      "variant": "sp_str",
+      "label_suffix": "sp_str",
+      "quote": "Increases your spell damage by $s1% of your Strength",
+      "trigger_spell": 60229,
+      "gate_spell": 804286,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 119,
+      "expected_gain": 119,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804286 Effect[0] aura 174 (MiscValue 126 all magic schools, MiscValueB 0 Strength, BasePoints 24+1=25) and Effect[2] aura 174 (MiscValue 126, MiscValueB 3 Intellect, BasePoints 24+1=25; Spell.dbc). Under G-13, spell damage is a spell-power stat claim. With Greatness 60229 (+300 Strength -> 408, Intellect 71), int32(408*0.25) + int32(71*0.25) = 102 + 17 = 119 Shadow SP vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 804286 is an older state ('25% of your Strength and your spell hit rating by 6% of your Intellect'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 804286,
+      "name": "Strength of the Sha (SP at elevated Intellect +300)",
+      "kind": "metric_delta",
+      "variant": "sp_int",
+      "label_suffix": "sp_int",
+      "quote": "Increases your spell damage by $s1% of your Strength",
+      "trigger_spell": 60234,
+      "gate_spell": 804286,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 119,
+      "expected_gain": 119,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804286 Effect[0] (25% Strength) + Effect[2] (25% Intellect) aura 174 (MiscValue 126; Spell.dbc). With Greatness 60234 (+300 Intellect -> 371, Strength 108), int32(108*0.25) + int32(371*0.25) = 27 + 92 = 119 Shadow SP vs 0 control, confirming both Strength and Intellect contribute 25%. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 804286,
+      "name": "Strength of the Sha (hit rating at elevated Intellect +300)",
+      "kind": "metric_delta",
+      "variant": "hit_rating_int",
+      "label_suffix": "hit_rating_int",
+      "quote": "and Intellect and your hit rating by $s2% of your Intellect.",
+      "trigger_spell": 60234,
+      "gate_spell": 804286,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 6
+      },
+      "before_expected": 0,
+      "expected": 37,
+      "expected_gain": 37,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804286 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 224 (bits 5,6,7 = CR_HIT_MELEE/RANGED/SPELL), MiscValueB 3 (Intellect), BasePoints 9 + 1 = 10 ($s2; Spell.dbc). With Greatness 60234 (+300 Intellect -> 371), int32(371 * 0.10) = +37 ranged hit rating (rating 6) vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 804286,
+      "name": "Strength of the Sha (spell hit rating at elevated Intellect +300)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_rating_int",
+      "label_suffix": "spell_hit_rating_int",
+      "quote": "and Intellect and your hit rating by $s2% of your Intellect.",
+      "trigger_spell": 60234,
+      "gate_spell": 804286,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10037,
+      "expected_gain": 37,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804286 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 224 (CR_HIT_MELEE/RANGED/SPELL), MiscValueB 3 (Intellect), BasePoints 9 + 1 = 10 ($s2; Spell.dbc). With Greatness 60234 (+300 Intellect -> 371), int32(371 * 0.10) = +37 spell hit rating (rating 7) on top of 10000 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 706915,
+      "name": "Cunning Nature 706915 (melee hit chance)",
+      "kind": "metric_delta",
+      "variant": "melee_hit",
+      "label_suffix": "melee_hit",
+      "quote": "Increases your chance to hit by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 706915,
+      "target": "caster",
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 3 (706915 Effect[0] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + 1 = 3, MiscValue 32; Spell.dbc). StatSystem.cpp adds aura 333 to m_modMeleeHitChance. Reads live melee_hit_chance before (control) and after a real learn of 706915: expected gain +3.0 points (reusing 707784 pattern). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 706915 matches ('3% and -15%')."
+    },
+    {
+      "spell": 706915,
+      "name": "Cunning Nature 706915 (spell hit chance)",
+      "kind": "metric_delta",
+      "variant": "spell_hit",
+      "label_suffix": "spell_hit",
+      "quote": "Increases your chance to hit by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 706915,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 3 (706915 Effect[0] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + 1 = 3, MiscValue 32; Spell.dbc). StatSystem.cpp adds aura 333 to m_modSpellHitChance. Reads live spell_hit_chance before (control) and after a real learn of 706915: expected gain +3.0 points. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 706915 matches."
+    },
+    {
+      "spell": 706915,
+      "name": "Cunning Nature 706915 (Shadow threat control without passive)",
+      "kind": "threat_slope",
+      "variant": "control",
+      "label_suffix": "control",
+      "quote": "and reduces threat generated by Shadow damage spells by $s2%.",
+      "hit_spell": 502182,
+      "expected_slope": 1,
+      "flat": 60,
+      "settle_ms": 500,
+      "observe_source": "Control arm for 706915 Shadow threat reduction: casts Horrorbolt 502182 (level 60 Shadow damage, SpellLevel 60) at a fresh dummy without 706915 learned; (threat - 60) / health_lost must equal 1.0 (reusing 707784 pattern). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 706915,
+      "name": "Cunning Nature 706915 (Shadow threat with passive)",
+      "kind": "threat_slope",
+      "variant": "threat",
+      "label_suffix": "threat",
+      "quote": "and reduces threat generated by Shadow damage spells by $s2%.",
+      "hit_spell": 502182,
+      "learn": [
+        706915
+      ],
+      "expected_slope": 0.85,
+      "flat": 60,
+      "settle_ms": 500,
+      "observe_source": "$s2 = 15 (706915 Effect[1] aura 10 SPELL_AURA_MOD_THREAT, BasePoints -16 + 1 = -15, MiscValue 32 Shadow; Spell.dbc). Casts Horrorbolt 502182 at a fresh dummy with 706915 learned by a real learn; (threat - 60) / health_lost must equal 0.85 (control reads 1.0). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 706915 matches."
+    },
+    {
+      "spell": 806264,
+      "name": "Power of Yogg-Saron (AP from spell crit rating)",
+      "kind": "metric_delta",
+      "variant": "ap",
+      "label_suffix": "ap",
+      "quote": "Increases your attack power by an amount equal to 2.5 times your spell critical strike rating.",
+      "trigger_spell": 60234,
+      "gate_spell": 806264,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 606,
+      "expected_gain": 230,
+      "tolerance": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          574148,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "806264 Power of Yogg-Saron: AscensionCultist::Refresh (AscensionCultist.cpp:303-309) maintains helper 807883 (aura 99 SPELL_AURA_MOD_ATTACK_POWER, DurationIndex 21 via AscensionCultistContracts.cpp:159) at int32(2.5f * CR_CRIT_SPELL). Precondition fixture 574148 (aura 220, 25% of Intellect as CR_CRIT_SPELL, set by harness set_aura in both phases) + Greatness 60234 (+300 Intellect -> 371) produces CR_CRIT_SPELL = int32(371 * 0.25) = 92; 2.5 * 92 = +230 AP (606 vs 376 control, wait_ms 2500 covers periodic refresh). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 806264 is an older state ('3 times'); installed Spell.dbc says '2.5 times' and governs."
+    },
+    {
+      "spell": 806264,
+      "name": "Power of Yogg-Saron (spell crit rating attribution read)",
+      "kind": "metric_delta",
+      "variant": "crit_rating_read",
+      "label_suffix": "crit_rating_read",
+      "quote": "Increases your attack power by an amount equal to 2.5 times your spell critical strike rating.",
+      "trigger_spell": 60234,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 17,
+      "expected": 92,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          574148,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Attribution read for 806264: verifies CR_CRIT_SPELL (combat_rating 10) under fixture 574148 (25% of Intellect) rises from 17 (at reference Intellect 71) to 92 (at Intellect 371 under Greatness 60234), so 2.5 * 92 = 230 AP. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 582308,
+      "name": "In And Out of Insanity (Void Shield absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb",
+      "label_suffix": "absorb",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 582308,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 803,
+      "expected": 963.5,
+      "tolerance": 28,
+      "after_at_least": 931,
+      "after_at_most": 996,
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "582308 Effect[0] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, MiscValue 127, BasePoints 19 + 1 = 20 ($s1; Spell.dbc). Vehicle Void Shield 578115 (Effect[0] aura 69, BasePoints 775 + DieSides 55 = 776..830 at SP 0, ExcludeTargetAuraSpell 805801 Wracked Mind 15s -> expire_ms 16000) is cast on the caster in both phases, then struck by Light of the Naaru 41394 (1100 Holy > max shield) so the full shield is absorbed and read via spell_absorb_total with phase_since. Control: 776..830 (803 +/- 28). Treatment after real learn of 582308: 776..830 x 1.20 = [931, 996]. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 582308 matches (+20%)."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Void Shield absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb",
+      "label_suffix": "absorb",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 706181,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 803,
+      "expected": 963.5,
+      "tolerance": 28,
+      "after_at_least": 931,
+      "after_at_most": 996,
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "706181 Effect[0] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, MiscValue 127, BasePoints 19 + 1 = 20 ($s1; Spell.dbc); Effect[1] is aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 BasePoints 19 (+20%, class mask includes 578115). Tooltip promises +20% absorption effectiveness once: Void Shield 578115 (776..830 at SP 0) struck by Light of the Naaru 41394 (1100 Holy) must absorb [931, 996] after a real learn of 706181 (control 776..830); a double-dip (1.44x) would exceed 996 and alert. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706189,
+      "name": "Gift of C'Thun (Shadow damage +4%)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "Increases your Shadow damage dealt by $s1%",
+      "expected": 1.04,
+      "observe_spell": 502182,
+      "learn": [
+        502182
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          706189
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "706189 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 32 (Shadow), BasePoints 3 + 1 = 4 ($s1; Spell.dbc). Casts Horrorbolt 502182 (Shadow, DmgClass 1) at dummy with +20000 SP and 823764 (beeg spellpen, removes partial resists) as precondition fixtures in both arms; treatment learns 706189 by a real learn. Expected non-critical ratio 1.04 (G-19 band +2% to +6%, excludes 0). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 706189 matches (+4% Shadow, +4% healing)."
+    },
+    {
+      "spell": 706189,
+      "name": "Gift of C'Thun (healing done +4%)",
+      "kind": "hit_ratio",
+      "variant": "healing_done",
+      "label_suffix": "healing_done",
+      "quote": "and healing done by $s2%.",
+      "expected": 1.04,
+      "metric": "spell_heal_total",
+      "observe_spell": 574325,
+      "learn": [
+        574325
+      ],
+      "target": "caster",
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          706189
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "706189 Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT, BasePoints 3 + 1 = 4 ($s2; Spell.dbc). Casts Eldritch Mending 574325 (level 60 rank) on caster with +20000 SP precondition fixture in both arms; treatment learns 706189 by a real learn. Expected non-critical heal ratio 1.04 (G-19 band +2% to +6%, excludes 0). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 706189 matches."
+    },
+    {
+      "spell": 563123,
+      "name": "Dark Magician (critical damage +50%)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases your critical damage dealt by $s1%",
+      "expected": 1.5,
+      "observe_spell": 502182,
+      "learn": [
+        502182
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "force_crit": "spell",
+      "critical": true,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          563123
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "563123 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (all magic schools), BasePoints 49 + 1 = 50 ($s1; Spell.dbc). Native aura 163 semantics (Unit::SpellCriticalDamageBonus, Unit.cpp:10673, applied at Unit.cpp:10692-10701; Templar 705272 / Sun Cleric 300943 precedent): scales the whole critical hit by 1.50x. Forced spell crits of Horrorbolt 502182 with +20000 SP and 823764 in both arms; treatment learns 563123. Expected ratio 1.50. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 563123 matches (+50% crit damage, +30% Intellect as SP)."
+    },
+    {
+      "spell": 563123,
+      "name": "Dark Magician (spell power at baseline Intellect)",
+      "kind": "metric_delta",
+      "variant": "sp_base",
+      "label_suffix": "sp_base",
+      "quote": "and your spell power by $s2% of your Intellect.",
+      "trigger_spell": 60235,
+      "gate_spell": 563123,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 21,
+      "expected_gain": 21,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "563123 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 127, MiscValueB 3 (Intellect), BasePoints 29 + 1 = 30 ($s2; Spell.dbc). At reference Intellect 71, int32(71 * 0.30) = +21 Shadow SP after a real learn vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 563123 matches."
+    },
+    {
+      "spell": 563123,
+      "name": "Dark Magician (spell power at elevated Intellect +300)",
+      "kind": "metric_delta",
+      "variant": "sp_int",
+      "label_suffix": "sp_int",
+      "quote": "and your spell power by $s2% of your Intellect.",
+      "trigger_spell": 60234,
+      "gate_spell": 563123,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 111,
+      "expected_gain": 111,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "563123 Effect[1] aura 174 (30% of Intellect as SP; Spell.dbc). With Greatness 60234 (+300 Intellect -> 371), int32(371 * 0.30) = +111 Shadow SP vs 0 control (+90 SP for +300 Intellect = 30%). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 563123 matches."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (damage taken -3%)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "judge": "damage_ratio",
+      "expected": 0.97,
+      "quote": "Reduces damage taken by party and raid members by $s1%.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            560002
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 560002,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            560002
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 560002,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "560002 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (all schools), BasePoints -4 + 1 = -3 ($s1 = 3), RadiusIndex 287 (100 yd; Spell.dbc). Passive striker casts Void Zone 92559 (1000 Physical, DmgClass 0, never misses or crits) at caster: control without 560002 vs treatment with real learn of 560002 -> ratio 0.97 (band excludes 0). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 560002 matches (-3% damage taken, resistances scaling with level)."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (grouped ally receives raid aura)",
+      "kind": "metric_delta",
+      "variant": "ally_aura",
+      "label_suffix": "ally_aura",
+      "quote": "Reduces damage taken by party and raid members by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "measure_actor": "ally",
+      "grouped_ally": {
+        "dy": 5,
+        "grouped": true
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 560002
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID reaches a grouped ally 5 yd away after a real learn of 560002 (0 before -> 1 after). Paired with damage_taken (-3% hit ratio). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (does not stack with Shrouded Stars 704785)",
+      "kind": "taken_hit",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "Does not stack with similar effects.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "learn": [
+            560002
+          ],
+          "unlearn": [
+            704785
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 560002,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            560002,
+            704785
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 560002,
+              "equals": 1
+            },
+            {
+              "metric": "aura",
+              "spell": 704785,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "spell_group 2000185 (stack_rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; rev_20260909_10_raid_damage_reduction_group.sql and rev_20260909_12_cultist_completion.sql) holds Voidwarding 560002 (-3%) and Shrouded Stars 704785 (-3%). Learning 704785 alongside 560002 must keep Void Zone 92559 damage ratio at 1.0 (not 0.97). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (partner 704785 alone reduces damage by 3%)",
+      "kind": "taken_hit",
+      "variant": "partner_alone",
+      "label_suffix": "partner_alone",
+      "judge": "damage_ratio",
+      "expected": 0.97,
+      "quote": "Does not stack with similar effects.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            560002,
+            704785
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704785,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704785
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704785,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Partner-alone control for 560002 stack cap: Shrouded Stars 704785 alone reduces Void Zone 92559 damage taken to 0.97 (-3%), proving the partner is active on its own. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (holy resistance +19 at level 60)",
+      "kind": "metric_delta",
+      "variant": "res_holy",
+      "label_suffix": "res_holy",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 19,
+      "expected_gain": 19,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 126 (schools 1..6), BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel 31, SpellLevel 31, MaxLevel 0 (uncapped), SkillLineAbility row 23039 (Spell.dbc). At level 60: floor(5 + 0.5 * (60 - 31)) = floor(19.5) = +19 holy resistance (school 1) vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (fire resistance +19 at level 60)",
+      "kind": "metric_delta",
+      "variant": "res_fire",
+      "label_suffix": "res_fire",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 0,
+      "expected": 19,
+      "expected_gain": 19,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 126 (schools 1..6), BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel 31, SpellLevel 31, MaxLevel 0 (uncapped), SkillLineAbility row 23039 (Spell.dbc). At level 60: floor(5 + 0.5 * (60 - 31)) = floor(19.5) = +19 fire resistance (school 2) vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (nature resistance +19 at level 60)",
+      "kind": "metric_delta",
+      "variant": "res_nature",
+      "label_suffix": "res_nature",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 3
+      },
+      "before_expected": 0,
+      "expected": 19,
+      "expected_gain": 19,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 126 (schools 1..6), BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel 31, SpellLevel 31, MaxLevel 0 (uncapped), SkillLineAbility row 23039 (Spell.dbc). At level 60: floor(5 + 0.5 * (60 - 31)) = floor(19.5) = +19 nature resistance (school 3) vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (frost resistance +19 at level 60)",
+      "kind": "metric_delta",
+      "variant": "res_frost",
+      "label_suffix": "res_frost",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 19,
+      "expected_gain": 19,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 126 (schools 1..6), BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel 31, SpellLevel 31, MaxLevel 0 (uncapped), SkillLineAbility row 23039 (Spell.dbc). At level 60: floor(5 + 0.5 * (60 - 31)) = floor(19.5) = +19 frost resistance (school 4) vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (shadow resistance +19 at level 60)",
+      "kind": "metric_delta",
+      "variant": "res_shadow",
+      "label_suffix": "res_shadow",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 19,
+      "expected_gain": 19,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 126 (schools 1..6), BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel 31, SpellLevel 31, MaxLevel 0 (uncapped), SkillLineAbility row 23039 (Spell.dbc). At level 60: floor(5 + 0.5 * (60 - 31)) = floor(19.5) = +19 shadow resistance (school 5) vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (arcane resistance +19 at level 60)",
+      "kind": "metric_delta",
+      "variant": "res_arcane",
+      "label_suffix": "res_arcane",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 6
+      },
+      "before_expected": 0,
+      "expected": 19,
+      "expected_gain": 19,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 126 (schools 1..6), BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel 31, SpellLevel 31, MaxLevel 0 (uncapped), SkillLineAbility row 23039 (Spell.dbc). At level 60: floor(5 + 0.5 * (60 - 31)) = floor(19.5) = +19 arcane resistance (school 6) vs 0 control. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560526,
+      "name": "Visions (party/raid spell haste +3%)",
+      "kind": "party_stat_ratio",
+      "variant": "party_haste",
+      "label_suffix": "party_haste",
+      "raid": true,
+      "quote": "Increases the spell haste of all party and raid members by $s1%.",
+      "expected": 0.9708737864,
+      "metric": "cast_speed_multiplier",
+      "radius_reason": "560526 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = 3 ($s1), RadiusIndex 287 (100 yd; no distance token in tooltip; Spell.dbc). Grouped ally and raid member outside caster subgroup read cast_speed_multiplier before (1.0) and after real learn of 560526 (1 / 1.03 = 0.970874). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 560526 matches (+3% spell haste, +3% Shadow damage)."
+    },
+    {
+      "spell": 560526,
+      "name": "Visions (does not stack with Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 560526,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 0.970874,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Visions 560526 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = +3% ($s1; Spell.dbc) and partner Fiery Passion 560525 Effect[0] 65, aura 216, BasePoints 2 + DieSides 1 = +3% (Spell.dbc); both are in spell_group 2000182 (stack_rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql:344-345,364). Unit::ApplyCastTimePercentMod (Unit.cpp:14991-14999) multiplies cast_speed_multiplier by 100 / (100 + pct): neither active = 1.0; one active or both capped = 1 / 1.03 = 0.970874; both stacked = 1 / (1.03 * 1.03) = 1 / 1.0609 = 0.942596 (additive stack 1 / 1.06 = 0.943396). Partner 560525 is learned up front (before_expected 0.970874 proves partner works alone, excluding 1.0), then Visions 560526 is learned between phases (expected 0.970874 proves capping, excluding both stacked 0.942596 and no-op 1.0; tolerance 0.0001 -> band [0.970774, 0.970974]). Paired with no_stack_aura (560526 aura 0 -> 1 alongside 560525) and party_haste (560526 alone 1.0 -> 0.970874). Replaces group_stack_cap which cannot set relation=inverse on cast_speed_multiplier without swings (behaviours.py:4014-4020). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560526,
+      "name": "Visions (aura present alongside Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack_aura",
+      "label_suffix": "no_stack_aura",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 560526,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 560526
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Companion to 560526 no_stack: with partner Fiery Passion 560525 (spell_group 2000182, +3% aura 216) already learned, Visions 560526 aura is absent before learning 560526 (0) and present on the caster after learning 560526 (1), proving both raid haste auras coexist while no_stack holds cast_speed_multiplier at 1 / 1.03 = 0.970874. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560526,
+      "name": "Visions (Shadow damage +3%)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "In addition, your Shadow damage is increased by $s2%.",
+      "expected": 1.03,
+      "observe_spell": 502182,
+      "learn": [
+        502182
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          560526
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "560526 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 32 (Shadow), BasePoints 2 + 1 = 3 ($s2; Spell.dbc). Casts Horrorbolt 502182 at dummy with +20000 SP and 823764 in both arms; treatment learns 560526 by a real learn. Expected non-critical ratio 1.03 (G-19 band +1% to +5%, excludes 0). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 560526 matches."
+    },
+    {
+      "spell": 704434,
+      "name": "Protection From Light (all damage taken -3%)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "judge": "damage_ratio",
+      "expected": 0.97,
+      "quote": "Reduces all damage taken by party and raid members by $s1%.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704434
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704434,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704434
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704434,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "704434 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 127 (all schools), BasePoints -4 + 1 = -3 ($s1 = 3), RadiusIndex 12 (Spell.dbc). Passive striker casts Void Zone 92559 (1000 Physical, DmgClass 0) at caster: control without 704434 vs treatment with real learn -> ratio 0.97. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704434 matches (-3% all, -10% Holy)."
+    },
+    {
+      "spell": 704434,
+      "name": "Protection From Light (grouped ally receives raid aura)",
+      "kind": "metric_delta",
+      "variant": "ally_aura",
+      "label_suffix": "ally_aura",
+      "quote": "Reduces all damage taken by party and raid members by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704434,
+      "target": "caster",
+      "measure_actor": "ally",
+      "grouped_ally": {
+        "dy": 5,
+        "grouped": true
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 704434
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "704434 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID reaches a grouped ally 5 yd away after a real learn of 704434 (0 before -> 1 after). Paired with damage_taken (-3% hit ratio). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 704434,
+      "name": "Protection From Light (Holy damage taken -10% on top of -3%)",
+      "kind": "taken_hit",
+      "variant": "holy_taken",
+      "label_suffix": "holy_taken",
+      "judge": "damage_ratio",
+      "expected": 0.873,
+      "quote": "In addition, your Holy damage taken is reduced by $s2%.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            704434
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704434,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            704434
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 704434,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "704434 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 2 (Holy), BasePoints -11 + 1 = -10 ($s2 = 10; Spell.dbc). On a Holy strike (Light of the Naaru 41394, 1100 Holy), Effect[0] (-3% all) and Effect[1] (-10% Holy) both apply multiplicatively: 0.97 * 0.90 = 0.873 (control without 704434 vs treatment with real learn). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704434 matches."
     }
   ],
   "player_observations": [],

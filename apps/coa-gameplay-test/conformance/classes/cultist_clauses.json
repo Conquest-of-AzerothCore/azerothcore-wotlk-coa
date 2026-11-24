@@ -146,7 +146,7 @@
     "spell": 300268,
     "clause": "Increases your parry chance by $s1%",
     "labels": [
-      "300268 effect_value e0 #0"
+      "300268 behaviour_metric_delta parry"
     ],
     "kind": "claim"
   },
@@ -154,7 +154,7 @@
     "spell": 300268,
     "clause": "and dodge chance by $s2%.",
     "labels": [
-      "300268 effect_value e1 #1"
+      "300268 behaviour_metric_delta dodge"
     ],
     "kind": "claim"
   },
@@ -809,7 +809,7 @@
     "spell": 301348,
     "clause": "Increases your parry chance by $s1%",
     "labels": [
-      "301348 effect_value e0 #0"
+      "301348 behaviour_metric_delta parry"
     ],
     "kind": "claim"
   },
@@ -817,7 +817,7 @@
     "spell": 301348,
     "clause": "and dodge chance by $s2%.",
     "labels": [
-      "301348 effect_value e1 #1"
+      "301348 behaviour_metric_delta dodge"
     ],
     "kind": "claim"
   },
@@ -1543,14 +1543,18 @@
     "spell": 560002,
     "clause": "Reduces damage taken by party and raid members by $s1%.",
     "labels": [
-      "560002 effect_value e0 #0"
+      "560002 behaviour_hit_ratio damage_taken",
+      "560002 behaviour_metric_delta ally_aura"
     ],
     "kind": "claim"
   },
   {
     "spell": 560002,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560002 behaviour_hit_ratio no_stack",
+      "560002 behaviour_hit_ratio partner_alone"
+    ],
     "kind": "claim"
   },
   {
@@ -1559,7 +1563,8 @@
     "labels": [
       "560002 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tool gap (uncounted): level-60 resistance +19 across all 6 magic schools (floor(5 + 0.5 * (60 - 31)), Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel = SpellLevel = 31, MaxLevel 0, SkillLineAbility 23039) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level arm (e.g. level 50 expecting floor(5 + 0.5 * (50 - 31)) = +14). No existing conformance kind/option sets a single caster level for a passive metric_delta resistance check: phase_caster_level requires two distinct levels per phase for cast buffs while Player::GiveLevel (Player.cpp:2623-2728 / StatSystem.cpp:344-369) does not recalculate already-applied passive aura amounts; hit_ratio.level only measures hits; shifted_control.caster_level only measures dummy spell_resist_chance. Because the amount and 'scaling with level' share one combined claim row, the claim stays uncounted until metric_delta supports a single caster_level option."
   },
   {
     "spell": 560080,
@@ -1701,21 +1706,26 @@
     "spell": 560526,
     "clause": "Increases the spell haste of all party and raid members by $s1%.",
     "labels": [
-      "560526 effect_value e0 #0"
+      "560526 behaviour_party_stat_ratio party_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 560526,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560526 behaviour_metric_delta no_stack",
+      "560526 behaviour_metric_delta no_stack_aura",
+      "560526 behaviour_party_stat_ratio party_haste"
+    ],
+    "kind": "claim",
+    "promise_of": "Increases the spell haste of all party and raid members by $s1%."
   },
   {
     "spell": 560526,
     "clause": "In addition, your Shadow damage is increased by $s2%.",
     "labels": [
-      "560526 effect_value e1 #1"
+      "560526 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -1792,7 +1802,7 @@
     "spell": 563123,
     "clause": "Increases your critical damage dealt by $s1%",
     "labels": [
-      "563123 effect_value e0 #0"
+      "563123 behaviour_hit_ratio crit_damage"
     ],
     "kind": "claim"
   },
@@ -1800,7 +1810,8 @@
     "spell": 563123,
     "clause": "and your spell power by $s2% of your Intellect.",
     "labels": [
-      "563123 effect_value e1 #1"
+      "563123 behaviour_metric_delta sp_base",
+      "563123 behaviour_metric_delta sp_int"
     ],
     "kind": "claim"
   },
@@ -1952,7 +1963,7 @@
     "spell": 582308,
     "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
     "labels": [
-      "582308 effect_value e0 #0"
+      "582308 behaviour_metric_delta absorb"
     ],
     "kind": "claim"
   },
@@ -2440,7 +2451,8 @@
     "spell": 681107,
     "clause": "Increases your attack power by $s1% of your Intellect.",
     "labels": [
-      "681107 effect_value e0 #0"
+      "681107 behaviour_metric_delta ap_base",
+      "681107 behaviour_metric_delta ap_int"
     ],
     "kind": "claim"
   },
@@ -2518,7 +2530,8 @@
     "spell": 704434,
     "clause": "Reduces all damage taken by party and raid members by $s1%.",
     "labels": [
-      "704434 effect_value e0 #0"
+      "704434 behaviour_hit_ratio damage_taken",
+      "704434 behaviour_metric_delta ally_aura"
     ],
     "kind": "claim"
   },
@@ -2526,7 +2539,7 @@
     "spell": 704434,
     "clause": "In addition, your Holy damage taken is reduced by $s2%.",
     "labels": [
-      "704434 effect_value e1 #1"
+      "704434 behaviour_hit_ratio holy_taken"
     ],
     "kind": "claim"
   },
@@ -2666,7 +2679,11 @@
     "spell": 704887,
     "clause": "Increases all primary attributes by $s1%.",
     "labels": [
-      "704887 effect_value e0 #0"
+      "704887 behaviour_metric_delta strength",
+      "704887 behaviour_metric_delta agility",
+      "704887 behaviour_metric_delta stamina",
+      "704887 behaviour_metric_delta intellect",
+      "704887 behaviour_metric_delta spirit"
     ],
     "kind": "claim"
   },
@@ -2739,7 +2756,7 @@
     "spell": 706181,
     "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
     "labels": [
-      "706181 effect_value e0 #0"
+      "706181 behaviour_metric_delta absorb"
     ],
     "kind": "claim"
   },
@@ -2841,7 +2858,7 @@
     "spell": 706189,
     "clause": "Increases your Shadow damage dealt by $s1%",
     "labels": [
-      "706189 effect_value e0 #0"
+      "706189 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -2849,7 +2866,7 @@
     "spell": 706189,
     "clause": "and healing done by $s2%.",
     "labels": [
-      "706189 effect_value e1 #1"
+      "706189 behaviour_hit_ratio healing_done"
     ],
     "kind": "claim"
   },
@@ -2910,7 +2927,8 @@
     "spell": 706915,
     "clause": "Increases your chance to hit by $s1%",
     "labels": [
-      "706915 effect_value e0 #0"
+      "706915 behaviour_metric_delta melee_hit",
+      "706915 behaviour_metric_delta spell_hit"
     ],
     "kind": "claim"
   },
@@ -2918,7 +2936,8 @@
     "spell": 706915,
     "clause": "and reduces threat generated by Shadow damage spells by $s2%.",
     "labels": [
-      "706915 effect_value e1 #1"
+      "706915 behaviour_threat_slope 502182 control",
+      "706915 behaviour_threat_slope 502182 threat"
     ],
     "kind": "claim"
   },
@@ -3035,7 +3054,11 @@
     "spell": 707781,
     "clause": "Increases all primary attributes by $s1%.",
     "labels": [
-      "707781 effect_value e0 #0"
+      "707781 behaviour_metric_delta strength",
+      "707781 behaviour_metric_delta agility",
+      "707781 behaviour_metric_delta stamina",
+      "707781 behaviour_metric_delta intellect",
+      "707781 behaviour_metric_delta spirit"
     ],
     "kind": "claim"
   },
@@ -3085,7 +3108,11 @@
     "spell": 712470,
     "clause": "Increases all primary attributes by $s1%.",
     "labels": [
-      "712470 effect_value e0 #0"
+      "712470 behaviour_metric_delta strength",
+      "712470 behaviour_metric_delta agility",
+      "712470 behaviour_metric_delta stamina",
+      "712470 behaviour_metric_delta intellect",
+      "712470 behaviour_metric_delta spirit"
     ],
     "kind": "claim"
   },
@@ -3446,7 +3473,8 @@
     "spell": 804286,
     "clause": "Increases your spell damage by $s1% of your Strength",
     "labels": [
-      "804286 effect_value e0 #0"
+      "804286 behaviour_metric_delta sp_str",
+      "804286 behaviour_metric_delta sp_int"
     ],
     "kind": "claim"
   },
@@ -3454,7 +3482,8 @@
     "spell": 804286,
     "clause": "and Intellect and your hit rating by $s2% of your Intellect.",
     "labels": [
-      "804286 effect_value e1 #1"
+      "804286 behaviour_metric_delta hit_rating_int",
+      "804286 behaviour_metric_delta spell_hit_rating_int"
     ],
     "kind": "claim"
   },
@@ -3464,7 +3493,8 @@
     "labels": [
       "804633 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tool gap (uncounted, not a server defect): shipped Spell.dbc carries EffectBasePoints[0] = -21 (-20), but data/sql/updates/pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql overrides spell_dbc ID 804633 to EffectBasePoints_1 = 19, EffectDieSides_1 = 1 (+20% SPELL_AURA_MOD_DISPEL_RESIST, verified live in coa_test_00353e74d42a_world.spell_dbc), retracting cu-g1 Alert 3. Stays uncounted because no existing conformance kind measures offensive dispel resist rate on a caster's positive buff (taken_hit resist_rate and debuff_resist_rate test incoming debuff application resist, not dispel survival of a buff)."
   },
   {
     "spell": 804670,
@@ -3646,7 +3676,8 @@
     "spell": 805121,
     "clause": "Increases your Shadow spell damage by $s3% of your Strength",
     "labels": [
-      "805121 effect_value e2 #0"
+      "805121 behaviour_metric_delta shadow_sp_base",
+      "805121 behaviour_metric_delta shadow_sp_str"
     ],
     "kind": "claim"
   },
@@ -3654,7 +3685,7 @@
     "spell": 805121,
     "clause": "and your spell hit chance by $s1% of your Strength.",
     "labels": [
-      "805121 effect_value e0 #1"
+      "805121 behaviour_metric_delta spell_hit_str"
     ],
     "kind": "claim"
   },
@@ -3828,7 +3859,10 @@
   {
     "spell": 806264,
     "clause": "Increases your attack power by an amount equal to 2.5 times your spell critical strike rating.",
-    "labels": [],
+    "labels": [
+      "806264 behaviour_metric_delta ap",
+      "806264 behaviour_metric_delta crit_rating_read"
+    ],
     "kind": "claim"
   },
   {
