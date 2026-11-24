@@ -1,6 +1,6 @@
 # 0002. Tyrant's Gaze heals its displayed points and generates one Felfury per damaged enemy
 
-- Status: accepted (mentor D-17, option A for Felfury, 2026-11-23; heal under owner ruling O-37)
+- Status: accepted (mentor D-17, option A for Felfury, 2026-11-23; heal under owner ruling Sun Cleric O-37 (2026-11-23, Sun Cleric ADR 0044))
 - Date: 2026-11-23
 
 ## Context
@@ -23,7 +23,7 @@ enemy and a 479-point heal at attack power 312 (10479 at 20312).
 - Heal: stock `SpellEffectInfo::CalcValue` adds (60 - 1) x 3.0 = 177 because the player is the caster. The client
   shows a borrowed spell's points at its own skill rank
   ([ADR 0014](../../0014-level-scaled-tooltip-values-use-the-skill-rank.md)); without an ability row that is 146.
-  Owner ruling O-37: when a tooltip borrows a `$m` token without `ppl`, the server follows the displayed value.
+  Owner ruling Sun Cleric O-37 (2026-11-23, Sun Cleric ADR 0044): when a tooltip borrows a `$m` token without `ppl`, the server follows the displayed value.
 
 ## Options
 

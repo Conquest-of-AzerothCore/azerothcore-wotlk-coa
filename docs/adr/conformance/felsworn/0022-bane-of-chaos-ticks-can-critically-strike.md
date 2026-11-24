@@ -42,9 +42,9 @@ the decision names; `CalcPeriodicCritChance` is untouched. A critical tick takes
 - At amount 0 the reference character's ticks crit a little (1 of 42 in an exploratory run): it holds a Chaos crit
   chance of its own whose source was not traced. The forced and damage entries clamp it with the -100 control.
 
-## Amendment: owner ruling O-35 (2026-11-24)
+## Amendment: owner ruling Felsworn O-35 (2026-11-24)
 
-The owner ruled (O-35, night question N-8) that under Inner Demon Bane of Chaos 706420 deals its extra damage every 6
+The owner ruled (Felsworn O-35 (2026-11-24), night question N-8) that under Inner Demon Bane of Chaos 706420 deals its extra damage every 6
 seconds, the tooltip's `every $t2 sec` (EffectAmplitude[1] 6000 ms), and that the 2000 ms tuning is removed.
 
 - `ApplyContracts` (`AscensionFelswornContracts.cpp`, block `Named(info, 704368)`) still turns the Ragefire 803717

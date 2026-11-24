@@ -67,9 +67,9 @@ active".
   not measured.
 - Open owner question: whether "crowd control" also covers snare, daze, silence, disarm or interrupt.
 
-## Amendment: owner ruling O-29 (2026-11-24)
+## Amendment: owner ruling Felsworn O-29 (2026-11-24)
 
-The open question above is answered by the owner (O-29): "crowd control" on Fury of the Illidari 561216 also covers
+The open question above is answered by the owner (Felsworn O-29 (2026-11-24)): "crowd control" on Fury of the Illidari 561216 also covers
 slows and daze, and does not cover silence, disarm or interrupt (option b of the night question fw-fix561216).
 
 - `CrowdControlMechanics` (`AscensionFelswornAuras.cpp`) is now the whole

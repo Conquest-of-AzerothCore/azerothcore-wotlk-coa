@@ -22,7 +22,7 @@ attack power term (owner question N-3, fix-250 note section 5).
 
 ## Decision
 
-Owner ruling O-30: (a). The row `{803089, 0, 0.4 AP}` is removed from `AscensionFelswornData.h`. `ExtendInnerDemon`
+Owner ruling Felsworn O-30 (2026-11-24): (a). The row `{803089, 0, 0.4 AP}` is removed from `AscensionFelswornData.h`. `ExtendInnerDemon`
 still passes `GetEffectValue()` of 803089 to `Extend`, which is now the DBC 3000 ms. No other file, SQL, DBC or client
 text changes; the tooltip already reads 3 sec.
 

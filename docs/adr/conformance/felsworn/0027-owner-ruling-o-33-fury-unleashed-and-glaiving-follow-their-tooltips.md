@@ -1,6 +1,6 @@
-# 0027. Owner ruling O-33: Fury Unleashed and Glaiving follow their tooltips
+# 0027. Owner ruling Felsworn O-33: Fury Unleashed and Glaiving follow their tooltips
 
-- Status: accepted (owner ruling O-33, 2026-11-24)
+- Status: accepted (owner ruling Felsworn O-33 (2026-11-24))
 - Date: 2026-11-24
 
 ## Context
@@ -21,7 +21,7 @@ Measured before (night question N-5; counted pair 20261123-232654 / -232744, bui
 gives 13992 to 14107); Glaiving added +26.13% and +26.15% per non-critical hit (99% interval +24.8% to +27.5%)
 against the stated +50%.
 
-The owner ruled (O-33): the server follows the tooltips. Fury Unleashed deals 200%, Glaiving adds a real +50% damage.
+The owner ruled (Felsworn O-33 (2026-11-24)): the server follows the tooltips. Fury Unleashed deals 200%, Glaiving adds a real +50% damage.
 
 ## Options
 

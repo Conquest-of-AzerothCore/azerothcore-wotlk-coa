@@ -1,6 +1,6 @@
 # 0031. Owner ruling Felsworn O-37: the Hellfire Carver and Carve falloff keeps its 20% floor
 
-- Status: accepted (owner ruling Felsworn O-37, 2026-11-24, question N-12)
+- Status: accepted (owner ruling Felsworn O-37 (2026-11-24), question N-12)
 - Date: 2026-11-24
 
 ## Context
@@ -25,7 +25,7 @@ it cannot see targets 10 and 11, so claim 185.1 (707444) went to the owner as qu
 
 ## Decision
 
-The owner ruled (Felsworn O-37, 2026-11-24): keep the 20% floor, no server change. Targets 9 to 11 of Fel Fireball
+The owner ruled (Felsworn O-37 (2026-11-24)): keep the 20% floor, no server change. Targets 9 to 11 of Fel Fireball
 and every Carve slash target from the 10th are conformant by the ruling.
 
 ## Consequences

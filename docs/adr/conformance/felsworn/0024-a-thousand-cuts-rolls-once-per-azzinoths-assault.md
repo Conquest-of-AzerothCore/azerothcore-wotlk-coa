@@ -21,7 +21,7 @@ Assault against the tooltip's 0.30 (owner question N-4).
 
 ## Decision
 
-Owner ruling O-31: (a). `OnSpellBeforeEffects` of the Felsworn spell script sets `State(player).assaultRoll` for each
+Owner ruling Felsworn O-31 (2026-11-24): (a). `OnSpellBeforeEffects` of the Felsworn spell script sets `State(player).assaultRoll` for each
 cast of a rank of 801904, before its launch phase triggers the strikes. Check case 704610 takes the flag
 (`std::exchange`) on the first landed damage event of 520262 or 572585 and only then rolls the chance, so the second
 strike of the same Assault cannot roll. No other file, SQL, DBC or client text changes.

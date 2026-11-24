@@ -70,7 +70,7 @@
         ]
       }
     ],
-    "reason": "Displayed text to be corrected in a client patch (O-19): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
+    "reason": "Displayed text to be corrected in a client patch (Felsworn O-19 (2026-11-23, Felsworn ADR 0012)): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
   },
   {
     "spell": 92088,
@@ -114,7 +114,7 @@
       }
     ],
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
-    "reason": "Claim 4.1 (mentor D-90, D-111): attack_power_arms (ADR 1284) judges Armor and each magic resistance in its own entry: off/on gain positive at the low attack power and strictly larger at the higher attack power, the fixture Attack Power 980 35785's gain read (3312 then 4292 attack power), coefficient and before value unasserted. Pair fw-bk5 prove run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): all seven ok in both runs; Armor 270 -> 1926 (gain 1656) at 3312 and 270 -> 2416 (gain 2146) at 4292; each resistance 0 -> 165 at 3312 and 0 -> 214 at 4292. The earlier six resist_<school>_ap3000 entries (fw-fa3) stay as single-level direction reads. Tool gap of fw-fa3 (armor baseline, attack power ordering) closed by the option."
+    "reason": "Claim 4.1 (mentor D-90, D-111): attack_power_arms (ADR 1284) judges Armor and each magic resistance in its own entry: off/on gain positive at the low attack power and strictly larger at the higher attack power, the fixture Attack Power 980 35785's gain read (3312 then 4292 attack power), coefficient and before value unasserted. Pair fw-bk5 prove run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): all seven ok in both runs; Armor 270 -> 1926 (gain 1656) at 3312 and 270 -> 2416 (gain 2146) at 4292; each resistance 0 -> 165 at 3312 and 0 -> 214 at 4292. The earlier six resist_<school>_ap3000 entries (fw-fa3) stay as single-level direction reads. Tool gap of fw-fa3 (armor baseline, attack power ordering) closed by the option. Reference search 2026-11-24 (E2): coa-history spell 92089 and 35785: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
   },
   {
     "spell": 300465,
@@ -300,7 +300,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Owner ruling Felsworn O-40 (2026-11-24, Felsworn ADR 0032): the strike 804336 hits with the off hand; the class contracts add SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON to it (mentor D-113). '300476 script_hit 804336 offhand_strike' read 29.75 and 29.45 (expected 29.75; before: 59.6 and 60.2 on the main hand, pair fw-bk3) in the fw-f6 counted pair .cache/verify-all/20261124-094701 / -094822 (build 064daf6610d8, server commit d92a32b1dcf4); 5 focused reruns 20261124-094931 to -095147 all ok (29.45 to 30.175), with every 300476 entry ok, '300476 trigger_count' included. No off-hand weapon and off-hand disarm are code reading only, untested (ADR 0032). No dodge-driven entry reads 804336's damage, so 17.1 is its only damage proof. Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof."
+    "reason": "Owner ruling Felsworn O-40 (2026-11-24, Felsworn ADR 0032): the strike 804336 hits with the off hand; the class contracts add SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON to it (mentor D-113). '300476 script_hit 804336 offhand_strike' read 29.75 and 29.45 (expected 29.75; before: 59.6 and 60.2 on the main hand, pair fw-bk3) in the fw-f6 counted pair .cache/verify-all/20261124-094701 / -094822 (build 064daf6610d8, server commit d92a32b1dcf4); 5 focused reruns 20261124-094931 to -095147 all ok (29.45 to 30.175), with every 300476 entry ok, '300476 trigger_count' included. No off-hand weapon and off-hand disarm are code reading only, untested (ADR 0032). No dodge-driven entry reads 804336's damage, so 17.1 is its only damage proof."
   },
   {
     "spell": 300476,
@@ -309,8 +309,7 @@
       "300476 effect_radius 520256e0 #1",
       "300476 behaviour_metric_delta party_radius"
     ],
-    "kind": "claim",
-    "reason": " Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof."
+    "kind": "claim"
   },
   {
     "spell": 300476,
@@ -472,7 +471,7 @@
         "reason": "Counted by the 50 Energy arm on Azzinoth's Assault 803475, an instant Felfury spender (CastingTimeIndex 1, 0 ms): Energy set to 50 before the cast gives 50 / 10 x 1 = 5 points (band 3 to 7), control arm without 300489 in the same pair. The earlier arm on Ruin 801895 (2.5 s cast) read +7: Energy regenerates about 10 per second during the cast (probe 20261124-034318: 50, 62 at 1.2 s, 47 after the cast and its 30 cost; 50, 50, 20 with regeneration off), so the hook sees about 75 at completion, not 50 and not 'after the cost'. Not tested: whether the Energy counts at the start or at the completion of a cast on a spender with a cast time."
       }
     ],
-    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) on Ruin reads +9.67 / +9.85 / +9.82 points against the stated +10 (all ok). The 50 Energy arm on Ruin read +7 because Energy regenerates about 10 per second during the 2.5 s cast (probe 20261124-034318), so the hook sees about 75 at completion; the earlier explanation that a read after the cost would give 5 at 50 Energy is refuted by that probe. D-89: the half arm is measured on Azzinoth's Assault 803475, an instant Felfury spender, so the Energy at the start and at the completion of the cast are the same (crit_energy_half, stated +5, band 3 to 7). No server change. Owner ruling O-38 (N-10, 2026-11-24): Energy is read at cast completion, as the server does; the cast-start versus completion point named untested under D-89 is ruled, no longer open."
+    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) on Ruin reads +9.67 / +9.85 / +9.82 points against the stated +10 (all ok). The 50 Energy arm on Ruin read +7 because Energy regenerates about 10 per second during the 2.5 s cast (probe 20261124-034318), so the hook sees about 75 at completion; the earlier explanation that a read after the cost would give 5 at 50 Energy is refuted by that probe. D-89: the half arm is measured on Azzinoth's Assault 803475, an instant Felfury spender, so the Energy at the start and at the completion of the cast are the same (crit_energy_half, stated +5, band 3 to 7). No server change. Owner ruling Felsworn O-38 (N-10, 2026-11-24): Energy is read at cast completion, as the server does; the cast-start versus completion point named untested under D-89 is ruled, no longer open."
   },
   {
     "spell": 300490,
@@ -1048,7 +1047,7 @@
       "555738 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim",
-    "reason": " The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
+    "reason": " The off-hand 200% (tooltip token, Felsworn O-33 (2026-11-24, Felsworn ADR 0027)) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
   },
   {
     "spell": 555738,
@@ -1057,7 +1056,7 @@
       "555738 behaviour_metric_delta speed"
     ],
     "kind": "claim",
-    "reason": " The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
+    "reason": " The off-hand 200% (tooltip token, Felsworn O-33 (2026-11-24, Felsworn ADR 0027)) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
   },
   {
     "spell": 555738,
@@ -1084,7 +1083,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit. The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029). 'every $t1 sec' (tool group B-PER, fw-bper, mentor D-103, ADR 1282): '555738 behaviour_metric_delta strike_period' (hit_period read_at_cast) reads the dummy's 555739 hits between the start stamp and the cast, so the tick at the cast (AttributesEx5 0x200 EXTRA_INITIAL_PERIOD) follows a read of none; three main-hand hits in 0 to 2500 ms judged at 1000 ms +- 50 (G-19); the off-hand 806097 is not counted; a first tick one period late reads two hits (unmeasured), or alerts when the clock overruns the window (the first hit must lie in the first poll after the cast, review fw-rbper I-1). The data label '555738 aura_amplitude_ms #3' is not emitted in either run of the fw-bper pair (missing, keeps the claim unproven) and is replaced by strike_period, as Witch Doctor misery_period and Necromancer chain_period did. Reference search 2026-11-24 (fw-fa1): coa-history spell 555738 and 555739 give no tick times; expected values come from the tooltip and the DBC only."
+    "reason": "Owner ruling Felsworn O-33 (2026-11-24) (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit. The off-hand 200% (tooltip token, Felsworn O-33 (2026-11-24, Felsworn ADR 0027)) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029). 'every $t1 sec' (tool group B-PER, fw-bper, mentor D-103, ADR 1282): '555738 behaviour_metric_delta strike_period' (hit_period read_at_cast) reads the dummy's 555739 hits between the start stamp and the cast, so the tick at the cast (AttributesEx5 0x200 EXTRA_INITIAL_PERIOD) follows a read of none; three main-hand hits in 0 to 2500 ms judged at 1000 ms +- 50 (G-19); the off-hand 806097 is not counted; a first tick one period late reads two hits (unmeasured), or alerts when the clock overruns the window (the first hit must lie in the first poll after the cast, review fw-rbper I-1). The data label '555738 aura_amplitude_ms #3' is not emitted in either run of the fw-bper pair (missing, keeps the claim unproven) and is replaced by strike_period, as Witch Doctor misery_period and Necromancer chain_period did. Reference search 2026-11-24 (fw-fa1): coa-history spell 555738 and 555739 give no tick times; expected values come from the tooltip and the DBC only."
   },
   {
     "spell": 555738,
@@ -1116,7 +1115,7 @@
       "555738 immunity movement 555738 expired"
     ],
     "kind": "claim",
-    "reason": " The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
+    "reason": " The off-hand 200% (tooltip token, Felsworn O-33 (2026-11-24, Felsworn ADR 0027)) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
   },
   {
     "spell": 560057,
@@ -1336,7 +1335,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-33 (Felsworn ADR 0027): Glaiving Effect[0] is a percent damage modifier. '560578 behaviour_hit_ratio damage' read +49.31% and +49.54% (74 trials per arm, two parts; before: +26.13% and +26.15%) in the fw-f3 counted pair .cache/verify-all/20261124-062629 / -062700 (same build); 5 focused reruns 20261124-062930 to -063324 all ok."
+    "reason": "Owner ruling Felsworn O-33 (2026-11-24) (Felsworn ADR 0027): Glaiving Effect[0] is a percent damage modifier. '560578 behaviour_hit_ratio damage' read +49.31% and +49.54% (74 trials per arm, two parts; before: +26.13% and +26.15%) in the fw-f3 counted pair .cache/verify-all/20261124-062629 / -062700 (same build); 5 focused reruns 20261124-062930 to -063324 all ok."
   },
   {
     "spell": 560637,
@@ -1508,16 +1507,7 @@
       "561201 behaviour_metric_delta heal_absorb"
     ],
     "kind": "claim",
-    "reason": "fw-g39 (2026-11-24): read by \"561201 behaviour_metric_delta heal_absorb\": Ruin 801895 at an enemy player (Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target, DBC value 99), which then casts Gift of Life 23783 (1500) on itself; the absorbed amount of that heal's own log (spell_heal_absorb_total, ADR 1286) reads 0 without 561201 and 99 with it learned between the phases (prove pair 2/2 ok). The harness now records the heal log's absorb field. The dummy's own heal (fw-vb2b) never lands: six heal spells left its health unchanged and sent no heal log, so the enemy player carries the heal. Earlier reason (fw-vb2b) withdrawn.",
-    "tool_gap": {
-      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
-      "attempts": [
-        {
-          "agent": "fw-vb2",
-          "report": ".agents/plans/fw-vb2/report.md"
-        }
-      ]
-    }
+    "reason": "fw-g39 (2026-11-24): read by \"561201 behaviour_metric_delta heal_absorb\": Ruin 801895 at an enemy player (Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target, DBC value 99), which then casts Gift of Life 23783 (1500) on itself; the absorbed amount of that heal's own log (spell_heal_absorb_total, ADR 1286) reads 0 without 561201 and 99 with it learned between the phases (prove pair 2/2 ok). The harness now records the heal log's absorb field. The dummy's own heal (fw-vb2b) never lands: six heal spells left its health unchanged and sent no heal log, so the enemy player carries the heal. Earlier reason (fw-vb2b) withdrawn. Reference search 2026-11-24 (E2, fw-rg39b m-3): see the 561201 heal_absorb entry observe_source of the class file; coa-history spell 801895 rechecked: 0 events in 186 logs; ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc for the value."
   },
   {
     "spell": 561201,
@@ -1527,16 +1517,7 @@
       "561201 behaviour_metric_delta heal_absorb_r7"
     ],
     "kind": "claim",
-    "reason": "fw-g39 (2026-11-24): read by \"561201 behaviour_metric_delta heal_absorb_r7\": Ruin 501297 at an enemy player (Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target, DBC value 226), which then casts Gift of Life 23783 (1500) on itself; the absorbed amount of that heal's own log (spell_heal_absorb_total, ADR 1286) reads 0 without 561201 and 226 with it learned between the phases (prove pair 2/2 ok). The harness now records the heal log's absorb field. The dummy's own heal (fw-vb2b) never lands: six heal spells left its health unchanged and sent no heal log, so the enemy player carries the heal. Earlier reason (fw-vb2b) withdrawn.",
-    "tool_gap": {
-      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
-      "attempts": [
-        {
-          "agent": "fw-vb2",
-          "report": ".agents/plans/fw-vb2/report.md"
-        }
-      ]
-    }
+    "reason": "fw-g39 (2026-11-24): read by \"561201 behaviour_metric_delta heal_absorb_r7\": Ruin 501297 at an enemy player (Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target, DBC value 226), which then casts Gift of Life 23783 (1500) on itself; the absorbed amount of that heal's own log (spell_heal_absorb_total, ADR 1286) reads 0 without 561201 and 226 with it learned between the phases (prove pair 2/2 ok). The harness now records the heal log's absorb field. The dummy's own heal (fw-vb2b) never lands: six heal spells left its health unchanged and sent no heal log, so the enemy player carries the heal. Earlier reason (fw-vb2b) withdrawn. Reference search 2026-11-24 (E2, fw-rg39b m-3): see the 561201 heal_absorb entry observe_source of the class file; coa-history spell 801895 rechecked: 0 events in 186 logs; ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc for the value."
   },
   {
     "spell": 561201,
@@ -1647,7 +1628,7 @@
       "561216 immunity stun 561216 expired"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-29 (Felsworn ADR 0016, amendment): snare 12323 and daze 1604 refused under the aura and landing after it; silence 15487 and disarm 676 land under it; the six earlier mechanics unchanged; all ok in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok."
+    "reason": "Owner ruling Felsworn O-29 (2026-11-24) (Felsworn ADR 0016, amendment): snare 12323 and daze 1604 refused under the aura and landing after it; silence 15487 and disarm 676 land under it; the six earlier mechanics unchanged; all ok in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok."
   },
   {
     "spell": 561216,
@@ -2072,7 +2053,7 @@
       "706420 behaviour_metric_delta inner_none"
     ],
     "kind": "claim",
-    "reason": "fw-vb2 (2026-11-23): the damage half is proven in game (Chaos 802676 hit with Inner Demon: 598.3 per hit against the tooltip's 551 x 0.98743 x 1.10 = 598.5 to 600.6; +10000 spell power: 5879 against 5879.6). The interval half alerted at 2 s (3 hits by 6.6 s, 2 by 5.4 s, 6 by 12.6 s) from the class contract's 2000 ms periodic (46bf8121e5). Owner ruling O-35 (2026-11-24): the tooltip governs, every $t2 = 6 sec; fw-f3 removed the 2000 ms line, the Bane ranks' Effect[1] keep their own EffectAmplitude 6000 ms (Felsworn ADR 0022, amendment O-35). Re-proven: inner_interval_a 0 by 5.4 s, inner_interval_b 1 by 6.6 s, inner_damage 598.5 and 598.75, inner_damage_sp 5878.5 and 5878.75, inner_none 0, in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok."
+    "reason": "fw-vb2 (2026-11-23): the damage half is proven in game (Chaos 802676 hit with Inner Demon: 598.3 per hit against the tooltip's 551 x 0.98743 x 1.10 = 598.5 to 600.6; +10000 spell power: 5879 against 5879.6). The interval half alerted at 2 s (3 hits by 6.6 s, 2 by 5.4 s, 6 by 12.6 s) from the class contract's 2000 ms periodic (46bf8121e5). Owner ruling Felsworn O-35 (2026-11-24, Felsworn ADR 0022): the tooltip governs, every $t2 = 6 sec; fw-f3 removed the 2000 ms line, the Bane ranks' Effect[1] keep their own EffectAmplitude 6000 ms (Felsworn ADR 0022, amendment Felsworn O-35 (2026-11-24)). Re-proven: inner_interval_a 0 by 5.4 s, inner_interval_b 1 by 6.6 s, inner_damage 598.5 and 598.75, inner_damage_sp 5878.5 and 5878.75, inner_none 0, in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok."
   },
   {
     "spell": 706420,
@@ -2243,7 +2224,7 @@
       "704610 proc_rate"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-31 (2026-11-24): one 30% roll per Azzinoth's Assault, not per hit (Felsworn ADR 0024). Status 1, counted pair fw-f2 prove-2 (build 35135215000b): 0.2986 (6246 extra hits in 20916 Assault casts) and 0.3019 (6315/20916), Wilson 99.95% intervals inside the band [0.28, 0.32]; baseline arm before the learn: no extra hit. Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): 0.2968, 0.3002, 0.3028, 0.2950, 0.3008, all ok. Before the fix (prove-final): 0.2297 and 0.2317 per landed strike, about 0.60 per Assault."
+    "reason": "Owner ruling Felsworn O-31 (2026-11-24, Felsworn ADR 0024): one 30% roll per Azzinoth's Assault, not per hit (Felsworn ADR 0024). Status 1, counted pair fw-f2 prove-2 (build 35135215000b): 0.2986 (6246 extra hits in 20916 Assault casts) and 0.3019 (6315/20916), Wilson 99.95% intervals inside the band [0.28, 0.32]; baseline arm before the learn: no extra hit. Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): 0.2968, 0.3002, 0.3028, 0.2950, 0.3008, all ok. Before the fix (prove-final): 0.2297 and 0.2317 per landed strike, about 0.60 per Assault."
   },
   {
     "spell": 704611,
@@ -2641,7 +2622,7 @@
       "706266 behaviour_metric_delta spell_hit_taken"
     ],
     "kind": "claim",
-    "reason": "fw-bsc (2026-11-24): attacker_miss_share spell_clamp with casts 1100 per arm (ADR 1271, provisional) measured the reduction at exactly 2 points in both runs of the pair (clamp arms missless, edge misses control/treatment 12/15 and 13/11 of 1100; 1 and 3 excluded); residual 0.012% per pair at the 0.94% edge share, under 0.1%. Effect[0] aura 186 only, unchanged by owner ruling O-27 (Effect[2] dummied).",
+    "reason": "fw-bsc (2026-11-24): attacker_miss_share spell_clamp with casts 1100 per arm (ADR 1271, provisional) measured the reduction at exactly 2 points in both runs of the pair (clamp arms missless, edge misses control/treatment 12/15 and 13/11 of 1100; 1 and 3 excluded); residual 0.012% per pair at the 0.94% edge share, under 0.1%. Effect[0] aura 186 only, unchanged by owner ruling Felsworn O-27 (2026-11-24, Felsworn ADR 0025) (Effect[2] dummied).",
     "tool_gap": {
       "reason": "Withheld (fw-vb4b, review I-1): the entry attacker_miss_share spell_clamp of 706266 measured the reduction at exactly 2 points in both runs of 20261123-233905 / -234132 (826 casts per arm, control arm, 1 and 3 points excluded), but the cast count is fixed by the tool (kinds/attacker_miss_share.py spell_clamp_casts: ceil(ln(0.001/4)/ln(0.99)) = 826, from an assumed 1% edge miss chance) and the entry has no cast-count option. The edge misses read in proveF2 average 0.94% of casts (4 to 11 per edge arm), which gives P(no miss in one edge arm) = e^-7.8 = 4.1e-4 and 0.16% per pair for four edge arms: above the 0.1% limit of rule 3, so no label is counted. The risk is a false alert, not a false pass. Reference search 2026-11-23: nothing found for the value beyond the tooltip and the DBC. The extension is a casts option on spell_clamp (about 1100 casts per edge arm for under 0.1%); the entry stays in the class file as evidence.",
       "attempts": [
@@ -2659,7 +2640,7 @@
       "706266 behaviour_metric_delta barrier_absorbed"
     ],
     "kind": "claim",
-    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 706266 known, the tooltip +10% against the DBC amount 831 to 862 (owner ruling O-27, ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
+    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 706266 known, the tooltip +10% against the DBC amount 831 to 862 (owner ruling Felsworn O-27 (2026-11-24), ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
     "evidence": "behaviour",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
@@ -2867,7 +2848,7 @@
       "707844 behaviour_metric_delta spell_hit_taken"
     ],
     "kind": "claim",
-    "reason": "fw-bsc (2026-11-24): attacker_miss_share spell_clamp with casts 1100 per arm (ADR 1271, provisional) measured the reduction at exactly 4 points in both runs of the pair (clamp arms missless, edge misses control/treatment 9/10 and 7/8 of 1100; 3 and 5 excluded); residual 0.012% per pair at the 0.94% edge share, under 0.1%. Effect[0] aura 186 only, unchanged by owner ruling O-27 (Effect[2] dummied).",
+    "reason": "fw-bsc (2026-11-24): attacker_miss_share spell_clamp with casts 1100 per arm (ADR 1271, provisional) measured the reduction at exactly 4 points in both runs of the pair (clamp arms missless, edge misses control/treatment 9/10 and 7/8 of 1100; 3 and 5 excluded); residual 0.012% per pair at the 0.94% edge share, under 0.1%. Effect[0] aura 186 only, unchanged by owner ruling Felsworn O-27 (2026-11-24, Felsworn ADR 0025) (Effect[2] dummied).",
     "tool_gap": {
       "reason": "Withheld (fw-vb4b, review I-1): the entry attacker_miss_share spell_clamp of 707844 measured the reduction at exactly 4 points in both runs of 20261123-233905 / -234132 (826 casts per arm, control arm, 1 and 3 points excluded), but the cast count is fixed by the tool (kinds/attacker_miss_share.py spell_clamp_casts: ceil(ln(0.001/4)/ln(0.99)) = 826, from an assumed 1% edge miss chance) and the entry has no cast-count option. The edge misses read in proveF2 average 0.94% of casts (4 to 11 per edge arm), which gives P(no miss in one edge arm) = e^-7.8 = 4.1e-4 and 0.16% per pair for four edge arms: above the 0.1% limit of rule 3, so no label is counted. The risk is a false alert, not a false pass. Reference search 2026-11-23: nothing found for the value beyond the tooltip and the DBC. The extension is a casts option on spell_clamp (about 1100 casts per edge arm for under 0.1%); the entry stays in the class file as evidence.",
       "attempts": [
@@ -2885,7 +2866,7 @@
       "707844 behaviour_metric_delta barrier_absorbed"
     ],
     "kind": "claim",
-    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 707844 known, the tooltip +20% against the DBC amount 831 to 862 (owner ruling O-27, ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
+    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 707844 known, the tooltip +20% against the DBC amount 831 to 862 (owner ruling Felsworn O-27 (2026-11-24), ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
     "evidence": "behaviour",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
@@ -2987,7 +2968,7 @@
     "spell": 800203,
     "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
     "kind": "claim",
-    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands. The unmodelled readback aura_duration_ms #0 never counted and is dropped; lockout_held and lockout_free judge the lockout duration. fw-bk4 2026-11-24 (controller go, direction only, coefficient unasserted): 'and draining mana from the target based on your Spirit.' is judged by drain (Mylentha Riverbend 11795 channelling Evocation 12051, its mana set to 2434 by dummy_power_after_trigger right after the cast is submitted, 500 ms before Felbreak lands: 2434 without the cast, 2092 after it, with Greatness 60235 +300 Spirit on the caster) and drain_spirit (both phases cast Felbreak, the after phase alone with Greatness: 2401 then 2075, a gain of -326 within [-599, -1]), ok in both runs of the fw-bk4 pair. The tool gap below is superseded: dummy_power_after_trigger at 0 ms precedes the drain because Felbreak has a 500 ms cast time.",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands. The unmodelled readback aura_duration_ms #0 never counted and is dropped; lockout_held and lockout_free judge the lockout duration. fw-bk4 2026-11-24 (controller go, direction only, coefficient unasserted): 'and draining mana from the target based on your Spirit.' is judged by drain (Mylentha Riverbend 11795 channelling Evocation 12051, its mana set to 2434 by dummy_power_after_trigger right after the cast is submitted, 500 ms before Felbreak lands: 2434 without the cast, 2092 after it, with Greatness 60235 +300 Spirit on the caster) and drain_spirit (both phases cast Felbreak, the after phase alone with Greatness: 2401 then 2075, a gain of -326 within [-599, -1]), ok in both runs of the fw-bk4 pair. The tool gap below is superseded: dummy_power_after_trigger at 0 ms precedes the drain because Felbreak has a 500 ms cast time. Reference search 2026-11-24 (E2, fw-rbk4 review): coa-history spell 804809 (Spellbreak): 2 SPELL_DRAIN events of 166 by a player in 1 log; spells 804822 and 807163: 0 events in 186 logs; nothing found that decides the amount beyond the tooltip and Spell.dbc.",
     "claims": [
       {
         "claim": "Interrupt a spell from being cast",
@@ -3009,20 +2990,7 @@
           "800203 behaviour_metric_delta drain_spirit"
         ]
       }
-    ],
-    "tool_gap": {
-      "reason": "The drain of Felbreak ('draining mana from the target based on your Spirit') is Spellbreak 804809 (POWER_DRAIN, value = caster Spirit, AscensionFelswornContracts.cpp:517-518, cast on a successful interrupt, AscensionFelswornAbilities.cpp:414-417), applied at the instant of the interrupt. Reading it needs the target's mana set to a known value BEFORE the interrupt lands. The only option that sets a dummy's power, dummy_power_after_trigger, sets it after_ms >= 0 after the trigger cast (parser rejects after_ms < 0) or, in an uncast before phase, at the point of the cast, so it resets the pool after the drain; the first design (Scarlet Magus 1832 channelling Evocation) read an unset control mana (5206 / 5340, e2ff868f34). Needs tool group B: a dummy_power_before_trigger option (set_power on the dummy before the interrupt, with a Spirit contrast arm: positive drain and a strictly larger drain at a higher Spirit, coefficient unasserted as for 92089). Live reference: coa-history spell 804809 holds 2 SPELL_DRAIN events of 166 mana in 1 log (the caster's Spirit is not logged).",
-      "attempts": [
-        {
-          "agent": "fw-l2b",
-          "report": "e2ff868f34"
-        },
-        {
-          "agent": "fw-fa1",
-          "report": ".agents/plans/fw-fa1/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 800203,
@@ -3311,7 +3279,7 @@
         ]
       }
     ],
-    "reason": "Displayed text to be corrected in a client patch (O-19): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
+    "reason": "Displayed text to be corrected in a client patch (Felsworn O-19 (2026-11-23, Felsworn ADR 0012)): the owner keeps the server value, 34 per tick at level 60 (Spell.dbc 802678 Effect[0] BasePoints 8 + DieSides 1, RealPointsPerLevel 0.5, BaseLevel 10, SpellLevel 10, MaxLevel 0; SpellEffectInfo::CalcValue = 8 + 1 + int(0.5 x (60 - 10)) = 34, the SP term 0 at the reference spell power), while the client shows 54 = 6 x 9 (base points only, ADR 0006). The value is counted on the server formula by the entry 802678 tick_value, not on the displayed 54; the corrected client text is prepared separately. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and coa-history Felstrike ticks (gear and level differ)."
   },
   {
     "spell": 800214,
@@ -3633,7 +3601,7 @@
       }
     ],
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
-    "reason": "Claim 231.1 (mentor D-111): apply_stamp after_trigger with the anchor Blessed Resilience 33143 (ADR 1284) brackets the DoT 805748's age from its own apply, which lands 400 ms after Ruin's cast completes. Pair fw-bk5 prove2 run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): inner_dot_held ok both runs (present, bracket 2800..2818 ms in window 2710..2990, excludes 2700 ms) and inner_dot_gone ok both runs (absent, bracket 3100..3118 ms in window 3010..3290, excludes 3300 ms); $805748d = 3000 ms (DurationIndex 27). A first pair (prove) alerted both entries with a bracket near 5500 ms: timeline_first_ms is an offset from the boss engage time (CoAGameplayTimeline.cpp:104), fixed by the anchor. Tool gap of fw-fa3 closed. The 30% share is proven by inner_dot_share with its control."
+    "reason": "Claim 231.1 (mentor D-111): apply_stamp after_trigger with the anchor Blessed Resilience 33143 (ADR 1284) brackets the DoT 805748's age from its own apply, which lands 400 ms after Ruin's cast completes. Pair fw-bk5 prove2 run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): inner_dot_held ok both runs (present, bracket 2800..2818 ms in window 2710..2990, excludes 2700 ms) and inner_dot_gone ok both runs (absent, bracket 3100..3118 ms in window 3010..3290, excludes 3300 ms); $805748d = 3000 ms (DurationIndex 27). A first pair (prove) alerted both entries with a bracket near 5500 ms: timeline_first_ms is an offset from the boss engage time (CoAGameplayTimeline.cpp:104), fixed by the anchor. Tool gap of fw-fa3 closed. The 30% share is proven by inner_dot_share with its control. Reference search 2026-11-24 (E2, fw-rbk5 M-2): coa-history spell 805748: 1737 SPELL_AURA_APPLIED, 1737 SPELL_AURA_REMOVED, 604 SPELL_AURA_REFRESH in 12 logs; in fight 1318 (log 94, 2026-08-09) the apply-to-remove intervals are 2.9 s x14, 3.0 s x6 and 3.1 s x1, consistent with $805748d = 3000 ms."
   },
   {
     "spell": 801899,
@@ -3718,7 +3686,7 @@
       "803475 behaviour_metric_delta hit_ap_off"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-36 (2026-11-24, N-9): keep the data's 132 for the off-hand strike; the tooltip states the flat only as $m1 = 158 for the main hand. 803475 Effect[1] TRIGGER_SPELL_WITH_VALUE of 572585 has BasePoints 131 + DieSides 1 = 132 (Effect[0] of 520262 is 157 + 1 = 158), passed as the base points by SpellEffects.cpp:1847-1852, so the hit_off entry expects 0.5 x 2 x (23 + 53.49 + 132 + 45.24) = 253.73 at attack power 312 (hit_ap_off 6582.30 at 20312), band 5%, the 158 model (279.72) excluded.",
+    "reason": "Owner ruling Felsworn O-36 (2026-11-24, N-9): keep the data's 132 for the off-hand strike; the tooltip states the flat only as $m1 = 158 for the main hand. 803475 Effect[1] TRIGGER_SPELL_WITH_VALUE of 572585 has BasePoints 131 + DieSides 1 = 132 (Effect[0] of 520262 is 157 + 1 = 158), passed as the base points by SpellEffects.cpp:1847-1852, so the hit_off entry expects 0.5 x 2 x (23 + 53.49 + 132 + 45.24) = 253.73 at attack power 312 (hit_ap_off 6582.30 at 20312), band 5%, the 158 model (279.72) excluded.",
     "evidence": "behaviour",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
@@ -3726,7 +3694,7 @@
     "spell": 803475,
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
     "kind": "claim",
-    "reason": "Owner ruling O-30 (2026-11-24): the extension is $/1000;803089s1 = 3 sec flat, no attack power term (Felsworn ADR 0023). Cast part: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent). Value part, status 1, counted pair fw-f2 prove-5 (build 935450e6b11e, commit 7d97c900af), both runs identical: Inner Demon (10000 ms at the fixtures) present 12844 ms and absent 13154 ms after one Assault (extend_held, extend_gone), absent at 13154 ms at +20000 attack power too (extend_ap_gone, where the removed 0.4 x AP row would hold it to about 21124 ms); remaining duration 9994 ms before and 12879 ms 100 ms after, a gain of 2885 against 2900 at both attack powers (extend, extend_ap). Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): extend and extend_ap 2885 in each. The earlier +28009 ms reading was an incorrect test (fixture order, fix-250/note.md).",
+    "reason": "Owner ruling Felsworn O-30 (2026-11-24, Felsworn ADR 0023): the extension is $/1000;803089s1 = 3 sec flat, no attack power term (Felsworn ADR 0023). Cast part: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent). Value part, status 1, counted pair fw-f2 prove-5 (build 935450e6b11e, commit 7d97c900af), both runs identical: Inner Demon (10000 ms at the fixtures) present 12844 ms and absent 13154 ms after one Assault (extend_held, extend_gone), absent at 13154 ms at +20000 attack power too (extend_ap_gone, where the removed 0.4 x AP row would hold it to about 21124 ms); remaining duration 9994 ms before and 12879 ms 100 ms after, a gain of 2885 against 2900 at both attack powers (extend, extend_ap). Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): extend and extend_ap 2885 in each. The earlier +28009 ms reading was an incorrect test (fixture order, fix-250/note.md).",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
     "claims": [
       {
@@ -4205,7 +4173,7 @@
         ]
       }
     ],
-    "reason": "HELD 'deal $807163s1% increased damage' (mentor D-67): the entry 804822 behaviour_hit_ratio twin_slice_damage measures the +30% on Twin Slice hits with 807163 put by set_aura; no existing kind reads the amount of 807163 or the Twin Slice damage total after the real dodge grant (avoided_proc_instances reads hit counts and Felfury only), so the equivalence arm is missing and the entry label is not attached. Needs tool group B: avoided_proc_instances reading aura_amount of the earned aura and the damage total of its hits. fw-bk4 2026-11-24 (mentor Felsworn D-109 (2), second real design, ADR 1285): 'deal $807163s1% increased damage' is judged by twin_slice_damage_earned: 807163 is never set; 10 strikers swing at the caster (dodge 100%) in both arms and 804822 is learned for the treatment arm only, 807163 read present before every treatment cast and absent before every control cast; plain 808303 hits over 13 parts of 52 trials per arm: +29.65% (99% +28.73 to +30.56) and +29.52% (+28.62 to +30.41) against +30% within 2 points, ok in both runs of the fw-bk4 pair. The not_measured label 804822 effect_value 807163e0 #1 is dropped (it never counted); the set_aura entry twin_slice_damage stays an unattached observation."
+    "reason": "HELD 'deal $807163s1% increased damage' (mentor D-67): the entry 804822 behaviour_hit_ratio twin_slice_damage measures the +30% on Twin Slice hits with 807163 put by set_aura; no existing kind reads the amount of 807163 or the Twin Slice damage total after the real dodge grant (avoided_proc_instances reads hit counts and Felfury only), so the equivalence arm is missing and the entry label is not attached. Needs tool group B: avoided_proc_instances reading aura_amount of the earned aura and the damage total of its hits. fw-bk4 2026-11-24 (mentor Felsworn D-109 (2), second real design, ADR 1285): 'deal $807163s1% increased damage' is judged by twin_slice_damage_earned: 807163 is never set; 10 strikers swing at the caster (dodge 100%) in both arms and 804822 is learned for the treatment arm only, 807163 read present before every treatment cast and absent before every control cast; plain 808303 hits over 13 parts of 52 trials per arm: +29.65% (99% +28.73 to +30.56) and +29.52% (+28.62 to +30.41) against +30% within 2 points, ok in both runs of the fw-bk4 pair. The not_measured label 804822 effect_value 807163e0 #1 is dropped (it never counted); the set_aura entry twin_slice_damage was removed (E2 hygiene, review fw-rbk4 M4). Reference search 2026-11-24 (E2, fw-rbk4 review): coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the +30% beyond the tooltip and Spell.dbc."
   },
   {
     "spell": 804822,
@@ -4265,7 +4233,7 @@
       "804823 behaviour_taken_hit end_leech"
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-32 (Felsworn ADR 0028): the end casts Felfire Blast 804825. '804823 behaviour_taken_hit end_leech' read one blast per trial, no 807347, heal equal to damage, 62-63 at one hit, 64-65 at three, 67-68 at five, in both runs of the fw-f3 counted pair .cache/verify-all/20261124-062629 / -062700 (same build) (before: 807347 for 200 and 600); 5 focused reruns 20261124-062930 to -063324 all ok. Amounts judged since review fw-rf3 I-1 and M-3 (ADR 0028 amendment): per-arm bands of the 804825 damage from its data (zero 61-62, one 62-63, three 64-65, five 67-68) and a zero-hit arm; the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e) read zero 61 / 61, one 62-63 / 62-63, three 64-65 / 65, five 68 / 67-68, heal equal, one blast and no 807347 per trial; 5 focused reruns 20261124-070807 to -071129 all ok."
+    "reason": "Owner ruling Felsworn O-32 (2026-11-24) (Felsworn ADR 0028): the end casts Felfire Blast 804825. '804823 behaviour_taken_hit end_leech' read one blast per trial, no 807347, heal equal to damage, 62-63 at one hit, 64-65 at three, 67-68 at five, in both runs of the fw-f3 counted pair .cache/verify-all/20261124-062629 / -062700 (same build) (before: 807347 for 200 and 600); 5 focused reruns 20261124-062930 to -063324 all ok. Amounts judged since review fw-rf3 I-1 and M-3 (ADR 0028 amendment): per-arm bands of the 804825 damage from its data (zero 61-62, one 62-63, three 64-65, five 67-68) and a zero-hit arm; the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e) read zero 61 / 61, one 62-63 / 62-63, three 64-65 / 65, five 68 / 67-68, heal equal, one blast and no 807347 per trial; 5 focused reruns 20261124-070807 to -071129 all ok."
   },
   {
     "spell": 805235,
@@ -4401,7 +4369,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "Owner ruling O-16 (2026-11-23): \"intimidating them\" is flavour text, not a claim: the spell has no DBC effect for it and states no value (Sun Cleric precedent, sun_cleric_clauses.json, 'Flavour text with no stated mechanic'). The damage claim and the nearby-enemies claim of this row keep their labels."
+    "reason": "Owner ruling Felsworn O-16 (2026-11-23, Felsworn ADR 0012): \"intimidating them\" is flavour text, not a claim: the spell has no DBC effect for it and states no value (Sun Cleric precedent, sun_cleric_clauses.json, 'Flavour text with no stated mechanic'). The damage claim and the nearby-enemies claim of this row keep their labels."
   },
   {
     "spell": 805240,
@@ -4939,7 +4907,7 @@
     "clause": "30 Energy, plus 30 per sec",
     "labels": [],
     "kind": "claim",
-    "reason": "Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on exact Energy reads with regeneration off (disable_regeneration) from a pool set to 100: 70 at 100 ms (up front), 40 at 1450-1900 ms (after one drain) and 10 after the second, each excluding a cost or drain of 27 or 33; the reading before the cast is the control (100). The drain claim reads the Energy the real channel spends over measured intervals. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger. Status 2 by owner ruling O-24 (mentor D-90, 2026-11-24): the cost line is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted; the exact Energy reads above are the evidence, not a behaviour verdict (same shape as 281.0).",
+    "reason": "Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling Felsworn O-24 (2026-11-23, Felsworn ADR 0014): the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on exact Energy reads with regeneration off (disable_regeneration) from a pool set to 100: 70 at 100 ms (up front), 40 at 1450-1900 ms (after one drain) and 10 after the second, each excluding a cost or drain of 27 or 33; the reading before the cast is the control (100). The drain claim reads the Energy the real channel spends over measured intervals. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger. Status 2 by owner ruling Felsworn O-24 (2026-11-23, Felsworn ADR 0014; mentor D-90, 2026-11-24): the cost line is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted; the exact Energy reads above are the evidence, not a behaviour verdict (same shape as 281.0).",
     "claims": [
       {
         "claim": "30 Energy",

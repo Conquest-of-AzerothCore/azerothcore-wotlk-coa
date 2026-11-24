@@ -45,9 +45,9 @@ clears their TargetB. Effect[1] (dummy, no handler) is unchanged. No shared file
 - Readers: 520832 is used only by the Felsworn caster code (`AscensionFelswornAbilities.cpp`), the coefficient row
   (`AscensionFelswornData.h`), the class contract and the Felsworn `spell_bonus_data` row. No other class lists it.
 
-## Amendment: the damage figure is the total over the duration (owner ruling O-34, 2026-11-24)
+## Amendment: the damage figure is the total over the duration (owner ruling Felsworn O-34 (2026-11-24))
 
-O-34 settles owner question N-7: "${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d" is the total over
+Felsworn O-34 (2026-11-24) settles owner question N-7: "${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d" is the total over
 6 seconds, spread over the ticks. Before the amendment each tick of Effect[0] dealt the whole figure: 8 + 2.0 x 50 =
 108 per tick at level 60 (+ 0.1 x spell power from the coefficient row), six ticks, 708 applied damage over the
 duration under the Inner Demon +10% (B1 follow-up fw-vb1b, both runs). Effect[1] is SPELL_EFFECT_DUMMY (3) in the

@@ -21,7 +21,7 @@ Measured on the pre-fix server (fw-t4 runs 20261123-185607 and 20261123-185756; 
 Live evidence: none. coa-history holds 6 casts of 500610 in one log and no event of 500761 in 186 logs, so the hit
 count per cast cannot be read from live play. The basis is the owner's ruling alone.
 
-Ruling O-25: each enemy is damaged once per caster per cast; two Felsworns on the same enemy each land their own hit.
+Ruling Felsworn O-25 (2026-11-23): each enemy is damaged once per caster per cast; two Felsworns on the same enemy each land their own hit.
 
 ## Options
 
