@@ -1,6 +1,6 @@
 # 0008. Fel Haze ignores all enemy armor
 
-- Status: accepted (owner ruling O-13, 2026-11-23)
+- Status: accepted (owner ruling Felsworn O-13 (2026-11-23, Felsworn ADR 0008))
 - Date: 2026-11-23
 
 ## Context
@@ -24,7 +24,7 @@ constant K the damage kept goes from K / (A + K) to K / (A + K - (A + K) / 3): a
 Conformance pair proveC (2026-11-23, build `1e433a3c0c18`, server `ebbeaa0255cf`, runs 20261123-154742 and
 20261123-154842) read the `803903 ignores_armor` hit ratio at 1.5226 and 1.5274 against the dummy at armor 5528
 (K = 5500 at level 60), where ignoring all armor gives (5528 + 5500) / 5500 = 2.0051. The cause is the stock cap
-applied to DBC aura 280, not CoA code, so the case went to the owner, who ruled (O-13) that Fel Haze ignores all enemy
+applied to DBC aura 280, not CoA code, so the case went to the owner, who ruled (Felsworn O-13 (2026-11-23)) that Fel Haze ignores all enemy
 armor.
 
 ## Options

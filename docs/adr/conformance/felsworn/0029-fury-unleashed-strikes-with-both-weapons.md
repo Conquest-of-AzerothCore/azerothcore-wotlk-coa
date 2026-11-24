@@ -7,7 +7,7 @@
 
 Fury Unleashed 555738, server DBC text: "Spin your glaives for $d, increasing movement speed by $s2% and dealing
 $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies." The aura's Effect[0] (aura 23,
-1000 ms) triggers the main-hand hit 555739 only; since owner ruling O-33 (ADR 0027) that hit carries 806095's 200%.
+1000 ms) triggers the main-hand hit 555739 only; since owner ruling Felsworn O-33 (2026-11-24) (ADR 0027) that hit carries 806095's 200%.
 
 The data holds an off-hand twin, 806097 "Fury Unleashed": Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (BasePoints
 149, 150%), Effect[1] SPELL_EFFECT_NORMALIZED_WEAPON_DMG, AttributesEx3 SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, DmgClass
@@ -51,7 +51,7 @@ event (one off-hand hit per main-hand hit) but not its percent or the off-hand f
 
 ## Live-unconfirmed values (review fw-rf3b I-1, mentor D-96)
 
-- The 200% on the off-hand strike comes from the tooltip token $806095s1 and owner ruling O-33, not from a live
+- The 200% on the off-hand strike comes from the tooltip token $806095s1 and owner ruling Felsworn O-33 (2026-11-24, Felsworn ADR 0027), not from a live
   measurement; 806097's own data value (150%) is not used.
 - The off-hand factor 0.5 is the stock engine's off-hand weapon damage, not a live measurement. The archived live
   logs show an off-hand/main-hand non-crit ratio of about 0.71-0.73 (124-127 against 174; coa-history pairs 120/170

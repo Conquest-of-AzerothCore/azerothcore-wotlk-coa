@@ -1,6 +1,6 @@
 # 0011. Grommash's Folly raises Carve critical strikes by 5% per channel step under Inner Demon
 
-- Status: accepted (owner rulings O-21 and O-23, 2026-11-23)
+- Status: accepted (owner rulings Felsworn O-21 (2026-11-23) and Felsworn O-23 (2026-11-23))
 - Date: 2026-11-23
 
 ## Context
@@ -35,7 +35,7 @@ value, so the case went to the owner (question Q-805236).
 
 ## Decision
 
-Option (b) (O-21), gated on Inner Demon 804216 (O-23: the owner reads "While Inner Demon is active" as covering the
+Option (b) (Felsworn O-21 (2026-11-23)), gated on Inner Demon 804216 (Felsworn O-23 (2026-11-23): the owner reads "While Inner Demon is active" as covering the
 Carve sentence). In `AscensionFelswornAbilities.cpp`, keyed to the Felsworn strike 803715 and the talent 805236, a
 critical Carve strike is multiplied by `1 + $807427s1 / 100 x min(10, steps)` when Inner Demon was on the caster as the
 strike was cast (the spell's 804216 script value, set from the caster's auras at the same moment as the step count).

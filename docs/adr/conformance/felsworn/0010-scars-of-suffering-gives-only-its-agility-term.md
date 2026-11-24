@@ -1,6 +1,6 @@
 # 0010. Scars of Suffering gives allies only 15% of the caster's Agility
 
-- Status: accepted (owner ruling O-20, relayed by the mentor, 2026-11-23: the talent text governs; O-22: display
+- Status: accepted (owner ruling Felsworn O-20 (2026-11-23), relayed by the mentor, 2026-11-23: the talent text governs; Felsworn O-22 (2026-11-23): display
   against server cases are decided one by one)
 - Date: 2026-11-23
 

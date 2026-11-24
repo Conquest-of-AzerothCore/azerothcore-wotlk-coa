@@ -68,7 +68,7 @@ At level 60 a spell tooltip (spellbook, talent card, hyperlink) prints `$m`, `$m
 
 A conformance expectation that reads `$m` on an effect with RPPL != 0 states in its `observe_source` the
 SkillLineAbility row it found, the rank level `L` and the MaxLevel cap it used. For a spell without a row the
-expectation waits for an owner ruling; 805241 has one (owner ruling O-37: the server follows the displayed value, see
+expectation waits for an owner ruling; 805241 has one (owner ruling Sun Cleric O-37 (2026-11-23, Sun Cleric ADR 0044): the server follows the displayed value, see
 [ADR 0002](0002-tyrants-gaze-heals-its-displayed-points-and-generates-one-felfury.md)) and Felstrike 802678 stays an
 open owner question. No server change follows from this ADR.
 

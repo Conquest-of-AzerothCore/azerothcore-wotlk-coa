@@ -1,6 +1,6 @@
 # 0007. Demonic Will reduces Physical damage only
 
-- Status: accepted (owner ruling O-12, 2026-11-23)
+- Status: accepted (owner ruling Felsworn O-12 (2026-11-23, Felsworn ADR 0007))
 - Date: 2026-11-23
 
 ## Context
@@ -13,7 +13,7 @@ MiscValue 127 (every school). The engine applies the aura to a hit when its Misc
 school mask (`Unit::SpellDamageBonusTaken` and `Unit::MeleeDamageBonusTaken`), so the DBC aura reduces every school by
 30%. The conformance batch 1 pair measured a 28.8 to 30.3% reduction for every school tried, Physical and magic.
 
-The tooltip names Physical damage only. The owner ruled Physical only (O-12, decision page, 2026-11-23); a player
+The tooltip names Physical damage only. The owner ruled Physical only (Felsworn O-12 (2026-11-23), decision page); a player
 asked the same question also answered "Only Physical". No reference snapshot or combat log gives a value for a
 magic hit under the aura.
 

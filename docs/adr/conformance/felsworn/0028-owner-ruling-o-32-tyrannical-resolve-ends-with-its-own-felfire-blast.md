@@ -1,6 +1,6 @@
-# 0028. Owner ruling O-32: Tyrannical Resolve ends with its own Felfire Blast
+# 0028. Owner ruling Felsworn O-32: Tyrannical Resolve ends with its own Felfire Blast
 
-- Status: accepted (owner ruling O-32, 2026-11-24)
+- Status: accepted (owner ruling Felsworn O-32 (2026-11-24))
 - Date: 2026-11-24
 
 ## Context
@@ -20,7 +20,7 @@ TARGET_UNIT_SRC_AREA_ENEMY, RadiusIndex 13, MaxAffectedTargets 20, DmgClass 2: B
 (BasePoints 1, DieSides 1) on 804825's class flag, StackAmount 100, stacked by 704615 -> 707519 (+1 per hit taken).
 The class contract makes that effect a dummy, and the stacks would leave the caster with the aura before the blast.
 
-The owner ruled (O-32): the end explosion is Felfire Blast with its own data values (about 62, 65 and 67), replacing
+The owner ruled (Felsworn O-32 (2026-11-24)): the end explosion is Felfire Blast with its own data values (about 62, 65 and 67), replacing
 1% of maximum health per hit taken.
 
 ## Decision

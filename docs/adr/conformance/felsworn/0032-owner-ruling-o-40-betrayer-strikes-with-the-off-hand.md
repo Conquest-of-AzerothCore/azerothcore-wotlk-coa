@@ -1,6 +1,6 @@
 # 0032. Owner ruling Felsworn O-40: the Betrayer strike hits with the off hand
 
-- Status: accepted (owner ruling Felsworn O-40, 2026-11-24, question N-13; mentor D-113 for the route)
+- Status: accepted (owner ruling Felsworn O-40 (2026-11-24), question N-13; mentor D-113 for the route)
 - Date: 2026-11-24
 
 ## Context
@@ -26,7 +26,7 @@ hits each, against 29.75 expected for the off hand and 59.43 for the main hand. 
 
 ## Decision
 
-The owner ruled (Felsworn O-40, 2026-11-24): the strike follows the tooltip, off hand. The mentor chose the contract
+The owner ruled (Felsworn O-40 (2026-11-24)): the strike follows the tooltip, off hand. The mentor chose the contract
 route (D-113): `AscensionFelsworn::ApplyContracts` (`AscensionFelswornContracts.cpp`) adds
 SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON to 804336.
 

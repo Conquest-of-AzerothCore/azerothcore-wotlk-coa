@@ -6,7 +6,7 @@
 ## Context
 
 The scaffold armed the Felsworn (class 14) with item 49340 "Monster - Icecrown - 1H Sword", a placeholder, and the
-alternate weapon 72038. Owner ruling O-10 requires a researched weapon table per specialization before any counted
+alternate weapon 72038. Felsworn O-10 (2026-11-23) requires a researched weapon table per specialization before any counted
 pair ([ADR 0681](../../0681-a-specialization-wears-its-own-weapon-set.md)). The class has three `CharacterAdvancement`
 tabs, 18 Demonology, 37 Slaying and 38 Felblood, plus tab 87 for class spells. `ChrSpecs.dbc` rows 7 FELBLOOD,
 8 SLAYING and 9 DEMONOLOGY (class token DEMONHUNTER) display as Infernal, Slayer and Tyrant. ChrSpecs 28-30 belong to

@@ -1,6 +1,6 @@
-# 0026. Owner ruling O-28: Doomstride doubles the resist chance
+# 0026. Owner ruling Felsworn O-28: Doomstride doubles the resist chance
 
-- Status: accepted (owner ruling O-28; implementation mentor decision D-93, 2026-11-24)
+- Status: accepted (owner ruling Felsworn O-28 (2026-11-24); implementation mentor decision D-93, 2026-11-24)
 - Date: 2026-11-24
 
 ## Context
@@ -11,7 +11,7 @@ the stock hit roll let through into `SPELL_MISS_RESIST` (`ResistDebuff`, called 
 cast the 10 s lockout 706818: Curse of Weakness 702 from a level 60 creature was resisted in 3.7% of 4000 trials
 without the passive and 100% with it (pair 20261123-203629 / -203704).
 
-The owner ruled (O-28): "increased by 100%" doubles the base chance ("Increased 'by', not 'to'"); the guaranteed
+The owner ruled (Felsworn O-28 (2026-11-24)): "increased by 100%" doubles the base chance ("Increased 'by', not 'to'"); the guaranteed
 resist is a defect. The base chance p is the stock miss and resist chance of `Unit::MagicSpellHitResult`; no engine
 function returns it.
 

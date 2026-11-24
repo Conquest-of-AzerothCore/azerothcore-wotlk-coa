@@ -1,6 +1,6 @@
-# 0025. Owner ruling O-27: one bonus for Outland Slaver and Armaments of the Legion
+# 0025. Owner ruling Felsworn O-27: one bonus for Outland Slaver and Armaments of the Legion
 
-- Status: accepted (owner ruling O-27, relayed by the controller on 2026-11-24)
+- Status: accepted (owner ruling Felsworn O-27 (2026-11-24), relayed by the controller on 2026-11-24)
 - Date: 2026-11-24
 
 ## Context
@@ -18,7 +18,7 @@ absorb (`SpellAuraEffects.cpp`, `AuraEffect::CalculateAmount`); Effect[2] is aur
 percent on Hateforged Barrier. The absorb read 1016 / 1029 and 1233 / 1207 against 931 and 1016 (1.21x and 1.44x,
 pair 20261123-171751 / -171923).
 
-The owner ruled (O-27): the server follows the tooltip, one bonus only (+10% and +20%), and Felsworn code neutralises
+The owner ruled (Felsworn O-27 (2026-11-24)): the server follows the tooltip, one bonus only (+10% and +20%), and Felsworn code neutralises
 the duplicate. The duplicate comes from the DBC data read by stock paths; no stock or core file changes.
 
 ## Options
@@ -68,8 +68,8 @@ passes it as the base points of the strikes 803462 and 520243 (`SpellEffects.cpp
 - Clear dword1 bit 24 of Effect[2]. Rejected: the mask becomes empty, and `SpellInfo::IsAffected` treats an empty family
   mask as every spell of the family (`SpellInfo.cpp:1467`), so the +10% / +20% would reach every Felsworn spell, Felrend
   and Fel Fireball included.
-- Make Effect[2] `SPELL_AURA_DUMMY`, the option rejected above under O-27 because the ruling did not address Twin Slice.
-  Taken: after O-27 Effect[2] names only Twin Slice, so this removes exactly that bonus.
+- Make Effect[2] `SPELL_AURA_DUMMY`, the option rejected above under Felsworn O-27 (2026-11-24) because the ruling did not address Twin Slice.
+  Taken: after Felsworn O-27 (2026-11-24) Effect[2] names only Twin Slice, so this removes exactly that bonus.
 
 ### Decision
 
