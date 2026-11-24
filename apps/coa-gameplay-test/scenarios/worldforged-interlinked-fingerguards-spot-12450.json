@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Interlinked Fingerguards pickup is at its realm spot (#12450)",
+  "contract": "#12450 reported the Worldforged Interlinked Fingerguards pickup (entry 95862, guid 6940655) missing where the reporter searched, 21 yd from the map-pass point -1597.0, -2558.0. Expected: the pickup stands at its first-pass realm point -1591.85, -2538.9, 42.218 (3.2 yd from the reporter, who stood at z 42.33), within 1.3 yd of the model surface above it (measured -1.20), is not under water and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -1591.851,
+    "y": -2538.9,
+    "z": 42.718,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 95862,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its restored spot",
+      "metric": "spawn_distance",
+      "x": -1591.85,
+      "y": -2538.9,
+      "z": 42.218,
+      "max": 0.3,
+      "guid": 6940655,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup rests on the ground (-1.3 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "min": -1.3,
+      "max": 0.35,
+      "guid": 6940655,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940655,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95862
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

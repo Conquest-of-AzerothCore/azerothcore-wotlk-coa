@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Splintertree Post has no Ashenvale Trees buried in its cliff (#13317)",
+  "contract": "#13317: two Ashenvale Trees (244630, guids 8000677 and 8000708) from the unsourced woodcutting import stood 2.3 and 28.2 yd inside the cliff at Splintertree Post and could not be gathered; no gathered source places a tree there. rev_20261123_13317_splintertree_buried_ashenvale_trees.sql deletes them. A player at each spot finds no Ashenvale Tree nearby, where each count was 1 before the fix.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": 2401.15,
+    "y": -2529.66,
+    "z": 118.5,
+    "o": 0.0
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "SETUP: join the world phase the spawns are in",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Ashenvale Tree at the foot of the cliff",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 244630,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": 2323.04,
+      "y": -2486.97,
+      "z": 134.0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Ashenvale Tree inside the cliff face",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 244630,
+      "equals": 0
+    }
+  ]
+}

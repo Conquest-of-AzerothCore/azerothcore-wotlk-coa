@@ -1,0 +1,62 @@
+{
+    "schema":  1,
+    "name":  "Auberdine campfire rests on the ground (#13168)",
+    "contract":  "#13168 reported the campfire beside Hollee in Auberdine (entry 103687, guid 48633) sunk into the ground. At 6513.71, 484.541, 6.24165 on map 1 it sat 0.40 yd under the ground. Expected: the campfire stands at z 6.639 and rests on the ground.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  1,
+                     "x":  6514.71,
+                     "y":  484.541,
+                     "z":  7.139,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  12,
+                        "level":  60
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "actor":  "p",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "SETUP: the campfire is in the area",
+                      "metric":  "nearby_gameobject_count",
+                      "entry":  103687,
+                      "min":  1
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "DISCRIMINATING: the campfire rests on the ground (-0.2 to 0.35 yd)",
+                      "metric":  "spawn_ground_gap",
+                      "min":  -0.2,
+                      "max":  0.35,
+                      "guid":  48633,
+                      "spawn_type":  "gameobject"
+                  },
+                  {
+                      "action":  "assert",
+                      "actor":  "p",
+                      "label":  "the campfire stands at its corrected height",
+                      "metric":  "spawn_distance",
+                      "x":  6513.71,
+                      "y":  484.541,
+                      "z":  6.639,
+                      "max":  0.3,
+                      "guid":  48633,
+                      "spawn_type":  "gameobject"
+                  }
+              ]
+}

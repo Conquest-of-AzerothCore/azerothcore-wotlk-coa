@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "High Overlord Saurfang stands in Orgrimmar and completes Path to Ascension tutorial 57 (#13368)",
+  "contract": "#13368: Path to Ascension tutorial 57 (quest 1903521) completes when the player talks to High Overlord Saurfang (14720, PathToAscensionProgress RecordNpcVisit), but he had no spawn, so the tutorial could not be finished. rev_20261123_13368_saurfang_orgrimmar_spawn.sql spawns him (guid 7905318) in front of the Warchief's Command Board, where the client's turn-in marker points (QuestSuperTrack 9753 -> SuperTrack 1128). A level 10 Orc Warrior in the Valley of Strength must find him, stand him on the ground, and complete tutorial 57 by talking to him. Before the fix no 14720 was in range and the tutorial stayed unverified.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "grunt",
+      "race": 2,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": 1566.0,
+    "y": -4415.0,
+    "z": 7.5,
+    "o": 0.0
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "SETUP: join the world phase the spawns are in",
+      "actor": "grunt",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let login rewards and the tutorial state settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: tutorial 57 is not verified yet",
+      "actor": "grunt",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 57,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: High Overlord Saurfang stands by the Warchief's Command Board",
+      "actor": "grunt",
+      "metric": "nearby_creature_count",
+      "entry": 14720,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "His spawn stands on the ground",
+      "actor": "grunt",
+      "metric": "spawn_ground_gap",
+      "guid": 7905318,
+      "spawn_type": "creature",
+      "min": -0.1,
+      "max": 0.3
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Talk to High Overlord Saurfang",
+      "actor": "grunt",
+      "entry": 14720
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: talking to him verifies tutorial 57",
+      "actor": "grunt",
+      "metric": "player_setting",
+      "source": "core.ascension.tutorial_verified",
+      "index": 57,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,107 @@
+{
+  "schema": 1,
+  "name": "Manastorm CoA loot mode: clear tokens count toward the account Bazaar Token cap",
+  "contract": [
+    "Requires Manastorm.CoALootMode.Enabled = 1 in manastorm-endless.conf and CoA.BazaarTokens.HourlyCap.Amount = 1250 (WindowSeconds 3600, default) in coa.conf.",
+    "Manastorm Bazaar Tokens (975001) share the account allowance with every other capped token source. The leader's account is put at 1240 of 1250 earned tokens, then the level 60 non-Wildcard leader clears test segment 1 (Taragaman 11520) for the first time: the first-clear reward (25) and any boss-kill or bonus-cache tokens together pay exactly the 10 tokens left, nothing arrives later, and the player is told the limit is reached. Before this change the clear ignored the account cap and paid at least 25."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "leader",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "tokencap set Harnessa 1240"
+    },
+    {
+      "action": "command",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Go to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_before_clear"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Only the 10 tokens left under the account cap are paid",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_before_clear",
+      "equals": 10,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The player is told the account limit is reached",
+      "actor": "leader",
+      "metric": "system_message_contains",
+      "text": "You have reached the limit of 1250 Bazaar Tokens per hour",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "No further tokens arrive after the limit",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_before_clear",
+      "equals": 10
+    }
+  ]
+}

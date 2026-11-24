@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Wailing Spirit Amulet pickup rests on the ground (#12350)",
+  "contract": "#12350 reported the Worldforged Wailing Spirit Amulet pickup (entry 90627, guid 6941317) unreachable. The map-pass point 2199.0, -2931.6, 110.254 was 5 yd under the ground. Expected: the pickup stands at its first-pass realm point 2214.19, -2926.46, 110.254, within 0.45 yd of the ground (measured -0.39), is not under water and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 2215.19,
+    "y": -2926.46,
+    "z": 110.754,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 90627,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its restored spot",
+      "metric": "spawn_distance",
+      "x": 2214.19,
+      "y": -2926.46,
+      "z": 110.254,
+      "max": 0.3,
+      "guid": 6941317,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup rests on the ground (-0.45 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "min": -0.45,
+      "max": 0.35,
+      "guid": 6941317,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941317,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 90627
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

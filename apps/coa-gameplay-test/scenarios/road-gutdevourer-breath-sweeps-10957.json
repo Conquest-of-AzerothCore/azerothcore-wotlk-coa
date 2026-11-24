@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: the Gutdevourer aims Venomous Breath at a player, then sweeps it slowly to one side",
+  "contract": "Issue #10957: the Gutdevourer (162773) is supposed to turn while it channels Venomous Breath (256907, 3 s cast, then a 5 s channel that fires the 11 yd cone 256908 every 0.5 s). Expected (project owner decision, checked in game): the cast is aimed at a random player and held without following them; once the channel starts the Gutdevourer turns slowly to the left or right, a quarter turn over the channel, and every cone tick uses the facing at that moment, so the hits follow the visible breath.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "gut",
+      "owner": "p",
+      "entry": 162773,
+      "distance": 3,
+      "level": 60,
+      "health": 10000000,
+      "reaction": 2
+    },
+    {
+      "id": "mark",
+      "owner": "p",
+      "entry": 19871,
+      "distance": 0,
+      "faction": 35,
+      "level": 60,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "p hits the Gutdevourer and starts the fight",
+      "actor": "p",
+      "entry": 162773,
+      "damage_pct": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Gutdevourer channels Venomous Breath",
+      "actor": "gut",
+      "metric": "aura",
+      "spell": 256907,
+      "min": 1,
+      "within_ms": 18000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the channel starts aimed at p, the only player",
+      "actor": "p",
+      "metric": "nearby_creature_facing_offset",
+      "entry": 162773,
+      "target_entry": 19871,
+      "max": 0.2
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "health",
+      "save_as": "channel_start"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 2 s into the channel the breath has turned about 36 degrees away from p",
+      "actor": "p",
+      "metric": "nearby_creature_facing_offset",
+      "entry": 162773,
+      "target_entry": 19871,
+      "min": 0.45,
+      "max": 0.85
+    },
+    {
+      "action": "assert",
+      "label": "the cone hit p while it still pointed at them",
+      "actor": "p",
+      "metric": "health",
+      "relative_to": "channel_start",
+      "max": -1
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "health",
+      "save_as": "turned_away"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "4 s into the channel it keeps turning the same way, about 72 degrees",
+      "actor": "p",
+      "metric": "nearby_creature_facing_offset",
+      "entry": 162773,
+      "target_entry": 19871,
+      "min": 1.0,
+      "max": 1.6
+    },
+    {
+      "action": "assert",
+      "label": "the hits follow the facing: no tick reached p after the breath turned away",
+      "actor": "p",
+      "metric": "health",
+      "relative_to": "turned_away",
+      "equals": 0
+    }
+  ]
+}

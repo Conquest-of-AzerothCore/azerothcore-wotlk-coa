@@ -14,8 +14,6 @@ Manastorm.CoALootMode.Repeat.Enabled = 1
 # 1 = first clears renew with the personal window; 0 = lifetime first clears.
 # First clears are separate per character, depth, difficulty and normal/endgame track.
 Manastorm.CoALootMode.FirstClear.ResetWithWindow = 1
-# Shared across all difficulties/tracks per character. Range 0..1000000; 0 stops token awards.
-Manastorm.CoALootMode.TokenCap = 1000
 # Window starts on the first eligible completion, then expires after this many hours (1..168).
 Manastorm.CoALootMode.WindowHours = 24
 # Reward amounts/depth overrides/milestones are in manastorm_coa_token_rewards.

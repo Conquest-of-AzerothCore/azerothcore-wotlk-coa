@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "Heroic and Mythic Stratholme and Scholomance kills give Argent Dawn reputation (#13374)",
+  "contract": "#13374: Player::RewardReputation reads creature_onkill_reputation for the active difficulty template, and none of the Stratholme or Scholomance Heroic (difficulty_entry_1) or Mythic (difficulty_entry_2) templates had a row, so their kills gave no Argent Dawn reputation. rev_20261123_13374_strat_scholo_heroic_mythic_reputation.sql copies each Normal entry's row (faction 529, value and standing cap) to both difficulty templates, as Zul'Gurub's templates do. Three neutral-standing level 60 characters each kill an unowned Skeletal Guardian (10390, Heroic 110390) or Risen Guard (10489, Mythic 210489) in their own instance; the Normal kill is the control. The vanilla reputation migration sets both Normal rewards to 5. Human Diplomacy can raise the gain to 5.5, which the server rounds to 5 or 6 from the zero baseline. The scenario expects that same final range for all three kills at default rates, and before the fix the Heroic and Mythic standings stayed at 0.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 329,
+      "x": 3660.48,
+      "y": -3505.01,
+      "z": 137.699
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: normal is in Normal Stratholme",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "set_reputation",
+      "actor": "normal",
+      "id": 529,
+      "value": 0
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "as": "normal_target",
+      "entry": 10390,
+      "distance": 5,
+      "unowned": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "normal",
+      "entry": 10390,
+      "radius": 10,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: killing a Normal Stratholme Skeletal Guardian raises Argent Dawn",
+      "actor": "normal",
+      "metric": "reputation",
+      "id": 529,
+      "min": 5,
+      "max": 6
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 329,
+      "x": 3660.48,
+      "y": -3505.01,
+      "z": 137.699
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: heroic is in Heroic Stratholme",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "set_reputation",
+      "actor": "heroic",
+      "id": 529,
+      "value": 0
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "as": "heroic_target",
+      "entry": 10390,
+      "distance": 5,
+      "unowned": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "heroic",
+      "entry": 10390,
+      "radius": 10,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: killing a Heroic Stratholme Skeletal Guardian raises Argent Dawn",
+      "actor": "heroic",
+      "metric": "reputation",
+      "id": 529,
+      "min": 5,
+      "max": 6
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 289,
+      "x": 196.0,
+      "y": 125.0,
+      "z": 135.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: mythic is in Mythic Scholomance",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "set_reputation",
+      "actor": "mythic",
+      "id": 529,
+      "value": 0
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "as": "mythic_target",
+      "entry": 10489,
+      "distance": 5,
+      "unowned": true
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "mythic",
+      "entry": 10489,
+      "radius": 10,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: killing a Mythic Scholomance Risen Guard raises Argent Dawn",
+      "actor": "mythic",
+      "metric": "reputation",
+      "id": 529,
+      "min": 5,
+      "max": 6
+    }
+  ]
+}

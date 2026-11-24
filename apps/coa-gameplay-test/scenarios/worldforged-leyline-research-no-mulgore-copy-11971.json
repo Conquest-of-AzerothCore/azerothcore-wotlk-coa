@@ -1,0 +1,40 @@
+{
+  "schema": 1,
+  "name": "Leyline Research has no Mulgore copy (#11971)",
+  "contract": "#11971 reported a Worldforged Leyline Research pickup (entry 254502) in Mulgore. The map pass added a third spawn, guid 6941908 at -2464.0, -58.8, -2.987 on map 1, beside the two Eastern Kingdoms spawns. Expected: no Leyline Research pickup stands at the Mulgore point.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -2464,
+    "y": -58.8,
+    "z": -2.487,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: no Leyline Research pickup is left in Mulgore",
+      "metric": "nearby_gameobject_count",
+      "entry": 254502,
+      "equals": 0
+    }
+  ]
+}

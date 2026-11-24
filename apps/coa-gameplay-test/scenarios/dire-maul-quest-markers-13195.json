@@ -1,0 +1,542 @@
+{
+  "schema": 1,
+  "name": "Dire Maul quest markers (1318, 7703, 7461, 8950) are drawn on Dire Maul (#13195)",
+  "contract": "rev_20261123_13195_dire_maul_quest_markers.sql moves the Dire Maul POIs of Unfinished Gordok Business (1318, 7703 ids 0-1), The Madness Within (7461 ids 0-2) and The Instigator's Enchantment (8950 ids 0-1) from Silverpine's map (map 0, world map area 21) to Dire Maul (map 429, area 699); each point is a Dire Maul spawn (The Prince's Chest, Captain Kromcrush, Immol'thar, Prince Tortheldrin, 14358, 16032). Level 60 characters carry the quests and send the CMSG_QUEST_POI_QUERY a real client sends; each SMSG_QUEST_POI_QUERY_RESPONSE must list the moved POIs on map 429 and area 699 with their original points, while 7461's turn-in pin (already 429) and 8950's Scholomance POIs (map 289) stay. Before the fix the moved POIs answered map 0 and area 21, so the map and area assertions discriminate.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    },
+    {
+      "id": "warrior",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the mage carries 1318 unfinished",
+      "actor": "mage",
+      "quest": 1318,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the mage carries 7461 unfinished",
+      "actor": "mage",
+      "quest": 7461,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the mage carries 8950 unfinished",
+      "actor": "mage",
+      "quest": 8950,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the warrior carries 7703 unfinished",
+      "actor": "warrior",
+      "quest": 7703,
+      "complete": false
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 1318 'Unfinished Gordok Business'",
+      "actor": "mage",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 1318
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 1318's own POI list",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 1318,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1318 answers with 2 POIs",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1318: POI 0 is the Gordok Courier's chest objective (index 4)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1318 POI 0 is on map 429 Dire Maul, not map 0",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1318 POI 0 is drawn on WorldMapAreaId 699 Dire Maul, not 21 Silverpine",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1318: POI 0 point x 116 (The Prince's Chest)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 44,
+      "index": 0,
+      "equals": 116,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1318: POI 0 point y 639",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 48,
+      "index": 0,
+      "equals": 639,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1318: POI 1 is the turn-in pin (index -1)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1318 POI 1 is on map 429",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 1318 POI 1 is drawn on WorldMapAreaId 699",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1318: POI 1 point x 624 (Captain Kromcrush)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 624,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 7703 'Unfinished Gordok Business'",
+      "actor": "warrior",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 7703
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 7703's own POI list",
+      "actor": "warrior",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 7703,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7703 answers with 2 POIs",
+      "actor": "warrior",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 2,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7703 POI 0 is on map 429 Dire Maul",
+      "actor": "warrior",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7703 POI 0 is drawn on WorldMapAreaId 699",
+      "actor": "warrior",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7703 POI 1 is on map 429 Dire Maul",
+      "actor": "warrior",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7703 POI 1 is drawn on WorldMapAreaId 699",
+      "actor": "warrior",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 7461 'The Madness Within'",
+      "actor": "mage",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 7461
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 7461's own POI list",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 7461,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7461 answers with 4 POIs",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7461 POI 0 (Immol'thar) is on map 429",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7461 POI 0 is drawn on WorldMapAreaId 699",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7461 POI 1 (Prince Tortheldrin) is on map 429",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 60,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7461 POI 1 is drawn on WorldMapAreaId 699",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7461 POI 2 is on map 429",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 100,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 7461 POI 2 is drawn on WorldMapAreaId 699",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 104,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "7461: POI 3, the turn-in pin, stays on map 429",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 140,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "label": "Ask the map to mark 8950 'The Instigator''s Enchantment'",
+      "actor": "mage",
+      "opcode": 483,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 1
+        },
+        {
+          "u32": 8950
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the answer is 8950's own POI list",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 4,
+      "index": 0,
+      "equals": 8950,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "8950 answers with 6 POIs",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 8,
+      "index": 0,
+      "equals": 6,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "8950: POI 0 is the Eldreth objective (index 4)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 16,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 8950 POI 0 is on map 429 Dire Maul",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 20,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 8950 POI 0 is drawn on WorldMapAreaId 699",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 24,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "8950: POI 0 is the 12-point Eldreth polygon",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 40,
+      "index": 0,
+      "equals": 12,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "8950: POI 1 is the turn-in pin (index -1)",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 144,
+      "index": 0,
+      "equals": 4294967295,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 8950 POI 1 is on map 429 Dire Maul",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 148,
+      "index": 0,
+      "equals": 429,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 8950 POI 1 is drawn on WorldMapAreaId 699",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 152,
+      "index": 0,
+      "equals": 699,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "8950: POI 2 stays on map 289 Scholomance",
+      "actor": "mage",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 188,
+      "index": 0,
+      "equals": 289,
+      "within_ms": 4000
+    }
+  ]
+}
