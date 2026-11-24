@@ -24838,6 +24838,206 @@
       "fields": {},
       "expected": 1,
       "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Whirlwind 13736 (a self channel, 3000 ms, no cost, ChannelInterruptFlags 0x3c3c) carries it. The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Whirlwind 13736 moved the same way reads 0 (moving_channel_whirlwind_moved) and not moved reads 1 (moving_channel_whirlwind_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
+    },
+    {
+      "spell": 574145,
+      "name": "Felcaked Blades (Sargeron Smite Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
+      "talent": 574145,
+      "cast_spell": 802060,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 (aura 123, -9999 target resistance): no partial resist on the dummy, a precondition fixture in every arm, as in sun_cleric.json"
+        },
+        {
+          "spell": 800058,
+          "stacks": 2,
+          "source": "Felfury 800058 at 2 stacks before each Smite: Sargeron Smite 802060 consumes 2 Felfury and is refused without them (as in the cooldown_cut entries of this file); a precondition fixture in every arm"
+        }
+      ],
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_smite",
+      "variant": "agility_smite",
+      "observe_source": "The server adds Agility x 0.15 to effect 0 of Sargeron Smite 802060 while 574145 is known (AscensionFelswornContracts.cpp:521-524, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility is read before and after each arm and the attack power before each arm (mentor D-94 condition 4). Sargeron Smite 802060: instant, Shadowflame school, no power cost, GCD 1000 ms; 30 casts per arm keep at least 10 non-critical hits with the extra Agility crit. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574145,
+      "name": "Felcaked Blades (Twin Slice Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
+      "talent": 574145,
+      "cast_spell": 801901,
+      "hit_spell": 808303,
+      "cast_power": 100,
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_twin_slice",
+      "variant": "agility_twin_slice",
+      "observe_source": "The server adds Agility x 0.15 to effect 0 of Twin Slice (808303/808304) while 574145 is known (AscensionFelswornContracts.cpp:521-524, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility is read before and after each arm and the attack power before each arm (mentor D-94 condition 4). Twin Slice 801901 costs 45 power type 3 (cast_power 100 sets it before each cast) and strikes through 808303 and 808304 (Effect 64 triggers; normalized weapon damage effect 0 is where the Agility term is added); the main-hand strike 808303 is read. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574146,
+      "name": "Felblade (Fel Fireball Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
+      "talent": 574146,
+      "cast_spell": 801312,
+      "cast_power": 100,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 (aura 123, -9999 target resistance): no partial resist on the dummy, a precondition fixture in every arm, as in sun_cleric.json"
+        }
+      ],
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1800,
+      "label_suffix": "agility_fel_fireball",
+      "variant": "agility_fel_fireball",
+      "observe_source": "The server adds Agility x 0.20 to effect 0 of Fel Fireball 801312 while 574146 is known (AscensionFelswornContracts.cpp:521-524, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility is read before and after each arm and the attack power before each arm (mentor D-94 condition 4). Fel Fireball 801312: 1500 ms cast, missile speed 35, costs 35 power type 3 (cast_power 100), Shadowflame school, spell power 0.5 only (AscensionFelswornData.h:67). Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574146,
+      "name": "Felblade (Sargeron Smite Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
+      "talent": 574146,
+      "cast_spell": 802060,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 (aura 123, -9999 target resistance): no partial resist on the dummy, a precondition fixture in every arm, as in sun_cleric.json"
+        },
+        {
+          "spell": 800058,
+          "stacks": 2,
+          "source": "Felfury 800058 at 2 stacks before each Smite: Sargeron Smite 802060 consumes 2 Felfury and is refused without them (as in the cooldown_cut entries of this file); a precondition fixture in every arm"
+        }
+      ],
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_smite",
+      "variant": "agility_smite",
+      "observe_source": "The server adds Agility x 0.20 to effect 0 of Sargeron Smite 802060 while 574146 is known (AscensionFelswornContracts.cpp:521-524, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility is read before and after each arm and the attack power before each arm (mentor D-94 condition 4). Sargeron Smite 802060: instant, Shadowflame school, no power cost, GCD 1000 ms; 30 casts per arm keep at least 10 non-critical hits with the extra Agility crit. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574146,
+      "name": "Felblade (Twin Slice Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
+      "talent": 574146,
+      "cast_spell": 801901,
+      "hit_spell": 808303,
+      "cast_power": 100,
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_twin_slice",
+      "variant": "agility_twin_slice",
+      "observe_source": "The server adds Agility x 0.20 to effect 0 of Twin Slice (808303/808304) while 574146 is known (AscensionFelswornContracts.cpp:521-524, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility is read before and after each arm and the attack power before each arm (mentor D-94 condition 4). Twin Slice 801901 costs 45 power type 3 (cast_power 100 sets it before each cast) and strikes through 808303 and 808304 (Effect 64 triggers; normalized weapon damage effect 0 is where the Agility term is added); the main-hand strike 808303 is read. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 803478,
+      "name": "Pure Hatred (Hateforged Barrier maximum health term direction)",
+      "kind": "power_term_direction",
+      "quote": "Your Hateforged Barrier now also scales with your maximum health.",
+      "talent": 803478,
+      "cast_spell": 707527,
+      "power_metric": "max_health",
+      "power_aura": 805256,
+      "power_aura_source": "Infernal Constitution 805256: Effect[0] aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT, EffectBasePoints[0] 9 (+10% maximum health); Effect[1] aura 122 (off-hand damage) does not reach the barrier",
+      "sample": "absorb",
+      "strike_spell": 54416,
+      "refill_spell": 17683,
+      "casts": 15,
+      "cast_wait_ms": 1000,
+      "label_suffix": "max_health_barrier",
+      "variant": "max_health_barrier",
+      "observe_source": "The server adds 10% of maximum health to effect 0 of the Hateforged Barrier chain (705129 ranks, here rank 6 707527 of spell_ranks) while 803478 is known (AscensionFelswornContracts.cpp:525-526), a value with no tooltip source, not judged. Sample (controller choice (c), mentor D-94): one strike of Ray of Pain 54416 (Effect[0] 2 school damage, EffectBasePoints 1999 = 2000 Shadow, no die, no per-level term) by a passive striker after each barrier; the absorbed amount of that strike (spell_absorb_total, an event read) is one sample when the barrier was up after the cast, gone after the strike and the strike logged once. Margin: the largest learned barrier is 707527 EffectBasePoints 751 + 32 + 2.45 x 60 (per level, an upper bound) + Stamina 79 (reference_stats) + 10% of the maximum health with 805256, (3440 level-60 BaseHP of class 14, rev_20261105_95, + 610 Stamina health) x 1.1 = 4455, so at most about 1455 < 2000 (margin at least 545); the remaining read voids any barrier the strike did not break. Full Heal 17683 (Effect 67, self) refills the caster before each cast; set_aura 0 only clears the previous barrier (D-94 condition 2). The sample proves the direction of the term only (a larger maximum health gives a larger barrier); that the barrier absorbs damage stays proven by the D-81 entry (taken_total_ratio 707527) (D-94 condition 3). Reference search 2026-11-24: coa-history 803478 0 events in 186 logs (passive), 707527 SPELL_CAST_SUCCESS 303 / SPELL_AURA_REFRESH 652 events in 7 logs, no amounts."
     }
   ],
   "player_observations": [],
