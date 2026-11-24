@@ -52,6 +52,10 @@ seconds, the tooltip's `every $t2 sec` (EffectAmplitude[1] 6000 ms), and that th
   802676 while Inner Demon is on, but now keeps the effect's own EffectAmplitude instead of 2000 ms. Every rank,
   704368 and 706415 to 706420, carries 6000 ms there in the server DBC set, so every rank changes from 2 s to 6 s.
   The 2000 ms line came with 46bf8121e5 (2026-09-09) with no stated basis.
+- Archived live evidence for ranks 1 to 6 (night question N-8, live check of 2026-11-24, read-only, coa-history): the
+  Inner Demon hit Chaos 802676 under ranks 1 to 6 sits near 6 s, interval medians 5.87 to 5.95 s; rank 7 (706420)
+  reads a broad spread (1275 intervals, median 2.31 s, one window of 107 hits at a 2.005 s median), which the ruling
+  settles for the tooltip's 6 s. The ranks share one contract line and one data shape, so the ruling moves all seven.
 - Measured before (Felsworn B2 pair, fw-vb2 report, review fw-rvb2 I-5): a Chaos hit every 2 s (3 hits by 6.6 s,
   2 by 5.4 s). The damage per hit and its spell power term are unchanged by this amendment.
 - Re-read of the part 225.0 proof (Malice of Gul'dan 800214, `periodic_crit_no_felstrike`) against the change: that

@@ -1081,6 +1081,13 @@
         "labels": [
           "555738 aura_amplitude_ms #3"
         ]
+      },
+      {
+        "claim": "with both weapons",
+        "labels": [
+          "555738 behaviour_metric_delta hit_oh",
+          "555738 behaviour_metric_delta hit_oh_none"
+        ]
       }
     ],
     "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok.",

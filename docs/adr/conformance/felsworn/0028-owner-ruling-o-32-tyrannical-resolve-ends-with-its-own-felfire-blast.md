@@ -46,3 +46,13 @@ already uses for Carve (`carveSteps`, a state set around a cast).
   striker and no 807347 hit, the 804825 damage rising strictly with the hits and the heal equal to it; 64481 removes the
   blast's melee crit, 984948 its miss and 823764 the striker's partial resistance (Fire and Shadow) in every arm.
 - The blast's Fire and Shadow school can be partially resisted, which the all-school 807347 could not.
+
+## Amendment: the regression judges the amounts (2026-11-24, review fw-rf3 I-1 and M-3)
+
+The rise alone did not tell the ruled amounts from the rejected option (N-6 option A, 1% of maximum health per hit,
+also rising). `804823 end_leech` now gives every arm a band of the 804825 damage, from 804825's own data and 804823
+Effect[0] only: zero hits 61 to 62, one 62 to 63, three 64 to 65, five 67 to 68 (61 or 62 times 1 + 0.02 n,
+truncated). A zero arm takes no strike and still reads one blast at its own points, the end with no hit taken above.
+The bands of one, three and five are disjoint and ordered, so the strict rise is dropped from the judge. The counts
+judge gained optional per-arm bands and arms of no strike for this (`behaviours.py`, `compare.py`); an entry that
+states neither generates as before.

@@ -226,7 +226,7 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].SpellClassMask = flag96(0, 524288, 2);
     if (id == 801902)
         info->Effects[0].MiscValue = SPELLMOD_COST;
-    if (id == 555739)
+    if (id == 555739 || id == 806097)
         if (SpellEntry const* stated = sSpellStore.LookupEntry(806095))
             info->Effects[EFFECT_0].BasePoints = stated->EffectBasePoints[EFFECT_0];
     if (id == 560578)
