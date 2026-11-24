@@ -2476,3 +2476,6 @@ Options with a module:
   the mean damage per distance rank judged strictly falling (ADR 1276)
 - [`channel_lengths`](metric_delta_options/channel_lengths.md): the channel ended by `cancel_aura` at set times and
   its aura read at once (void if still up), the end damage judged rising without overlap across lengths (ADR 1276)
+- [`uncritical_casts`](metric_delta_options/uncritical_casts.md): the treatment cast repeated, each cast whose
+  recorded damage event is critical dropped, the rest judged one by one, below a stated minimum unmeasured (ADR 1288,
+  provisional)
