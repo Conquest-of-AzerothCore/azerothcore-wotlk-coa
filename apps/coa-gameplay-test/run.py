@@ -68,7 +68,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
     'vanity_owned',
-    'mana_regen', 'mana_regen_interrupted', 'resting', 'track_creature_type', 'free_for_all_pvp',
+    'mana_regen', 'mana_regen_interrupted', 'resting', 'track_creature_type', 'free_for_all_pvp', 'pvp_flagged',
     'sent_mana_regen', 'sent_mana_regen_interrupted',
     'moving', 'spline_remaining_ms', 'spline_speed', 'water_walk', 'in_water', 'terrain_in_water', 'ground_height',
     'forced_forward', 'distance_2d',

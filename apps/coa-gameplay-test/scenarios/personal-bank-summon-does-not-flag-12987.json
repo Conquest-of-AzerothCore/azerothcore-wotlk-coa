@@ -1,0 +1,22 @@
+{
+  "schema": 1,
+  "name": "Summoning the Personal Bank with a PvP-flagged ally selected does not flag the summoner (#12987)",
+  "contract": "#12987: 'Got flagged for PVP by opening my personal bank in Gadgetzan'. Summon Personal Bank 100702 (and its Celestial 93416 and Realm 92078 twins, same script spell_ascension_personal_bank) is a DUMMY effect whose Spell.dbc EffectImplicitTargetA[0] is 25 TARGET_UNIT_TARGET_ANY with RangeIndex 13 (anywhere), so the client's selected unit becomes the spell's hit target. Spell::DoSpellHitOnUnit flags a player caster through UpdatePvP(true) whenever the hit unit IsPvP() and the spell lacks SPELL_ATTR0_CU_NO_PVP_FLAG, so summoning the bank while a PvP-flagged player or guard (Gadgetzan Bruisers are faction 475, FactionTemplate flag 0x800) is selected flags the summoner. Summoning one's own bank only affects the caster (SummonBankVault uses the caster alone), so the expected result is independent of the current code: the summoner stays unflagged. The scenario selects a PvP-flagged ally as the explicit target, summons the bank through the item, checks the vault appears (the spell really ran) and asserts the summoner's native PvP flag (Unit::IsPvP) is still clear.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.49, "z": 83.53, "o": 0 },
+  "players": [
+    { "id": "banker", "race": 1, "class": 1, "level": 60 },
+    { "id": "flagged", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the fixture settle", "ms": 3000 },
+    { "action": "pvp", "label": "Flag the ally the banker will have selected", "actor": "flagged", "enabled": true },
+    { "action": "assert", "label": "SETUP: the selected ally is PvP-flagged", "actor": "flagged", "metric": "pvp_flagged", "equals": 1 },
+    { "action": "assert", "label": "SETUP: the banker starts unflagged", "actor": "banker", "metric": "pvp_flagged", "equals": 0 },
+    { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "banker", "item": 134985, "count": 1 },
+    { "action": "use_item", "label": "Summon the bank with the flagged ally as the selected target", "actor": "banker", "item": 134985, "spell": 100702, "target": "flagged" },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the vault was summoned", "actor": "banker", "metric": "nearby_gameobject_count", "entry": 475001, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: summoning the bank did not flag the summoner for PvP", "actor": "banker", "metric": "pvp_flagged", "equals": 0 }
+  ]
+}
