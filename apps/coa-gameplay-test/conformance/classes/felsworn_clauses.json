@@ -3661,20 +3661,15 @@
       {
         "claim": "over $805748d.",
         "labels": [
-          "501298 spell_duration 805748 #1"
-        ]
+          "501298 spell_duration 805748 #1",
+          "501298 behaviour_metric_delta inner_dot_held",
+          "501298 behaviour_metric_delta inner_dot_gone"
+        ],
+        "evidence": "behaviour"
       }
     ],
-    "tool_gap": {
-      "reason": "The duration part ($805748d = 3000 ms, DurationIndex 27 of the DoT 805748) has no behaviour route yet. Design 1 (apply_stamp on 805748 with held read 5750 ms and gone read 6250 ms, windows 2710..2990 and 3010..3290 ms, run 20261124-055254): both verdicts unmeasured, 'apply stamp: 1 apply after the trigger cast, so the last apply is not bounded': the option brackets an aura applied before the trigger cast (a proc or strike), while the DoT is applied by the Ruin hit 2500 ms after the cast plus two projectile flights (2866 ms by the data, fix-805748 note). Design 2 (plain game_time reads without a stamp) cannot exclude a duration 10% long (3300 ms): from an apply at 2866 ms a gone read at 6250 ms leaves 84 ms of margin, and the apply time is not measured. Route: an apply_stamp mode that stamps the apply of an aura applied after the trigger cast (tool group). The 30% share is proven by inner_dot_share with its control.",
-      "attempts": [
-        {
-          "agent": "fw-fa3",
-          "report": ".agents/plans/fw-fa3/report.md"
-        }
-      ]
-    },
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Claim 231.1 (mentor D-111): apply_stamp after_trigger with the anchor Blessed Resilience 33143 (ADR 1284) brackets the DoT 805748's age from its own apply, which lands 400 ms after Ruin's cast completes. Pair fw-bk5 prove2 run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): inner_dot_held ok both runs (present, bracket 2800..2818 ms in window 2710..2990, excludes 2700 ms) and inner_dot_gone ok both runs (absent, bracket 3100..3118 ms in window 3010..3290, excludes 3300 ms); $805748d = 3000 ms (DurationIndex 27). A first pair (prove) alerted both entries with a bracket near 5500 ms: timeline_first_ms is an offset from the boss engage time (CoAGameplayTimeline.cpp:104), fixed by the anchor. Tool gap of fw-fa3 closed. The 30% share is proven by inner_dot_share with its control."
   },
   {
     "spell": 801899,
