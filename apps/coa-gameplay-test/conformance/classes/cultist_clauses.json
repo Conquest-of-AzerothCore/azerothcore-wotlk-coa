@@ -566,7 +566,9 @@
   {
     "spell": 301010,
     "clause": "Your Devour Magic is now instant cast.",
-    "labels": [],
+    "labels": [
+      "301010 behaviour_metric_delta instant_cast"
+    ],
     "kind": "claim"
   },
   {
@@ -863,13 +865,19 @@
       {
         "claim": "slow their movement speed by $804533s1%",
         "labels": [
-          "500704 effect_value 804533e0 #0"
+          "500704 behaviour_metric_delta slow"
         ]
       },
       {
         "claim": "for $804533d",
         "labels": [
-          "500704 spell_duration 804533 #1"
+          "500704 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "Teleport an enemy to your position",
+        "labels": [
+          "500704 behaviour_metric_delta teleport"
         ]
       }
     ]
@@ -1286,7 +1294,9 @@
     "spell": 524804,
     "clause": "Reduces the cooldown of Empire's Grasp by $/1000;s1 sec.",
     "labels": [
-      "524804 effect_value e0 #0"
+      "524804 cost_gate 500704 without",
+      "524804 cost_gate 500704 with",
+      "524804 cost_gate 500704 beyond"
     ],
     "kind": "claim"
   },
@@ -1857,14 +1867,13 @@
       {
         "claim": "slowing their movement speed by $s1%",
         "labels": [
-          "573028 effect_value e0 #0",
-          "573028 aura_amount e0 #0"
+          "573028 behaviour_metric_delta slow"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "573028 aura_duration_ms #1"
+          "573028 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -2019,7 +2028,9 @@
     "spell": 680487,
     "clause": "Reduces the cooldown of your Voidborne by $/1000;s1 sec",
     "labels": [
-      "680487 effect_value e0 #0"
+      "680487 cost_gate 681104 cooldown_without without",
+      "680487 cost_gate 681104 cooldown_with with",
+      "680487 cost_gate 681104 cooldown_beyond beyond"
     ],
     "kind": "claim"
   },
@@ -2027,7 +2038,8 @@
     "spell": 680487,
     "clause": "and increases its duration by $/1000;s2 sec.",
     "labels": [
-      "680487 effect_value e1 #1"
+      "680487 behaviour_metric_delta duration_contrast",
+      "680487 behaviour_metric_delta duration_expiry"
     ],
     "kind": "claim"
   },
@@ -2627,7 +2639,7 @@
     "spell": 704885,
     "clause": "Increases the movement speed slowed by Grasp of Zek'voz by $s1%.",
     "labels": [
-      "704885 effect_value e0 #0"
+      "704885 behaviour_metric_delta slow"
     ],
     "kind": "claim"
   },
@@ -2965,10 +2977,23 @@
   {
     "spell": 707747,
     "clause": "Removes the cooldown of Grasp of Zek'voz, but increases its mana cost by $s2%.",
-    "labels": [
-      "707747 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases its mana cost by $s2%",
+        "labels": [
+          "707747 behaviour_metric_delta mana_cost"
+        ]
+      },
+      {
+        "claim": "Removes the cooldown of Grasp of Zek'voz",
+        "labels": [
+          "707747 cost_gate 573028 cooldown without",
+          "707747 cost_gate 573028 cooldown with",
+          "707747 cost_gate 573028 cooldown with cooldown"
+        ]
+      }
+    ]
   },
   {
     "spell": 707748,
