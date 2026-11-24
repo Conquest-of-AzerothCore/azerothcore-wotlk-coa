@@ -89,6 +89,11 @@ namespace CoAPetBattles::Fixtures
         }
     }
 
+    std::vector<std::string> FixtureLines(std::string const& name)
+    {
+        return ReadLines(name);
+    }
+
     std::string DecodeField(std::string const& text)
     {
         std::string decoded;

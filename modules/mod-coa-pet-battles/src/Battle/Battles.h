@@ -1,0 +1,88 @@
+#ifndef COA_PET_BATTLE_BATTLE_BATTLES_H
+#define COA_PET_BATTLE_BATTLE_BATTLES_H
+
+#include "Engine/Battle.h"
+#include "Engine/Catalog.h"
+#include "PetScale.h"
+#include "Scheduler.h"
+#include "Store/Journal.h"
+#include <map>
+#include <memory>
+#include <optional>
+#include <string>
+#include <string_view>
+#include <vector>
+
+namespace CoAPetBattles::Battle
+{
+    using Side = Engine::Side;
+
+    class World
+    {
+    public:
+        virtual ~World() = default;
+        virtual void Send(uint64_t character, std::string_view module, std::string_view action,
+            std::string const& payload) = 0;
+        virtual bool Online(uint64_t character) const = 0;
+        virtual bool Alive(uint64_t character) const = 0;
+        virtual bool InCombat(uint64_t character) const = 0;
+        virtual bool Gm(uint64_t character) const = 0;
+        virtual uint32_t Account(uint64_t character) const = 0;
+        virtual void MarkOrigin(uint64_t character) = 0;
+        virtual bool Away(uint64_t character) const = 0;
+        virtual std::optional<uint32_t> Spawn(uint64_t character, Side side, uint32_t species, uint32_t display) = 0;
+        virtual void Scale(uint64_t character, Side side, double scale) = 0;
+        virtual void Despawn(uint64_t character, Side side) = 0;
+        virtual std::vector<uint32_t> Displays(uint32_t species) const = 0;
+        virtual uint32_t UnixNow() const = 0;
+        virtual Store::Journal* JournalOf(uint64_t character) = 0;
+        virtual void Flush(Store::Journal& journal) = 0;
+        virtual void SyncCompanions(uint64_t character) = 0;
+    };
+
+    struct EnemySpec
+    {
+        uint32_t species = 0;
+        double level = 1;
+        double quality = 1;
+    };
+
+    class Session;
+
+    class Battles
+    {
+    public:
+        Battles(std::shared_ptr<Engine::Catalog const> catalog, DataSet const& data, ModelInfoLookup modelInfo,
+            World& world, Scheduler& scheduler, Engine::Rng& rng);
+        ~Battles();
+
+        void Message(uint64_t character, std::string const& module, std::string const& action,
+            std::string const& payload);
+        bool Start(uint64_t character, std::optional<std::vector<EnemySpec>> enemies);
+        void Logout(uint64_t character);
+        void Watchdog();
+        bool InBattle(uint64_t character) const;
+        void EndAll();
+
+        World& GetWorld() { return _world; }
+        Scheduler& GetScheduler() { return _scheduler; }
+        Engine::Rng& GetRng() { return _rng; }
+        Engine::Catalog const& GetCatalog() const { return *_catalog; }
+        PetScale const& GetScale() const { return _scale; }
+        void Unregister(uint64_t character, Session const* session);
+
+    private:
+        void Command(uint64_t character, std::string const& payload);
+        void Quit(uint64_t character);
+        bool OtherCharacterFighting(uint64_t character) const;
+
+        std::shared_ptr<Engine::Catalog const> _catalog;
+        PetScale _scale;
+        World& _world;
+        Scheduler& _scheduler;
+        Engine::Rng& _rng;
+        std::map<uint64_t, std::shared_ptr<Session>> _sessions;
+    };
+}
+
+#endif

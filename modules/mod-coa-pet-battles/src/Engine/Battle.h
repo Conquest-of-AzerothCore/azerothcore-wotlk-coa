@@ -67,6 +67,7 @@ namespace CoAPetBattles::Engine
         std::vector<int32_t> captured;
         bool resolving = false;
         std::map<uint16_t, int32_t> unknown;
+        std::map<std::string, std::string> tips;
 
         std::vector<Pet>& Team(Side side) { return pets[static_cast<size_t>(side)]; }
         std::vector<Pet> const& Team(Side side) const { return pets[static_cast<size_t>(side)]; }
@@ -117,7 +118,8 @@ namespace CoAPetBattles::Engine
 
     std::vector<StatusEntry> StatusList(Catalog const& catalog, Pet const& pet);
     std::string StatusTip(Catalog const& catalog, StatusEntry const& entry);
-    std::string StatusString(Catalog const& catalog, Pet const& pet);
+    std::string StatusString(Catalog const& catalog, Pet const& pet,
+        std::map<std::string, std::string>* tips = nullptr);
     std::string TagText(Catalog const& catalog, Pet const& pet);
     std::optional<std::string> LockLabel(Catalog const& catalog, Pet const& pet);
     std::string LockText(Event const& event);

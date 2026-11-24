@@ -195,6 +195,8 @@ end
 function M.LogoutForfeit(player)
     Record("IN", "p" .. player:GetGUIDLow() .. " event logout")
     if PB_BATTLE.InBattle(player) then messageHandlers["pbt|quit"](player, "") end
+    M.saved = M.saved or {}
+    M.saved[player:GetGUIDLow()] = M.Journal(player)
     for _, f in ipairs(playerEvents[4] or {}) do f(4, player) end
     local live = {}
     for low in pairs(objects) do live[#live + 1] = low end
@@ -212,6 +214,7 @@ end
 function M.Note(player, text) Record("IN", "p" .. player:GetGUIDLow() .. " event " .. text) end
 
 function M.Journal(player)
+    if not player.state.online and M.saved and M.saved[player:GetGUIDLow()] then return M.saved[player:GetGUIDLow()] end
     local rows = {}
     for species, p in pairs(PB_STORE.Pets(player)) do
         rows[#rows + 1] = { species = species, level = p.level, xp = p.xp, a1 = p.a[1], a2 = p.a[2], a3 = p.a[3],

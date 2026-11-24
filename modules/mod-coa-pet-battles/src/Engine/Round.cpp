@@ -1262,8 +1262,8 @@ namespace CoAPetBattles::Engine
             Catalog const& catalog = Cat(b);
             std::string const tagP = TagText(catalog, b.Current(Side::P));
             std::string const tagE = TagText(catalog, b.Current(Side::E));
-            std::string const statP = StatusString(catalog, b.Current(Side::P));
-            std::string const statE = StatusString(catalog, b.Current(Side::E));
+            std::string const statP = StatusString(catalog, b.Current(Side::P), &b.tips);
+            std::string const statE = StatusString(catalog, b.Current(Side::E), &b.tips);
             for (size_t i = from; i < ev.size(); ++i)
             {
                 ev[i].fields["tags.P"] = tagP;

@@ -63,6 +63,7 @@ namespace CoAPetBattles::Fixtures
         std::optional<std::pair<uint32_t, double>> weather;
     };
 
+    std::vector<std::string> FixtureLines(std::string const& name);
     std::string DecodeField(std::string const& text);
     std::vector<std::string> SplitLine(std::string const& line);
     DataSet LoadData();

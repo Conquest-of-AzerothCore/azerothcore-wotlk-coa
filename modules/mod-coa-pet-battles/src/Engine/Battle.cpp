@@ -382,12 +382,16 @@ namespace CoAPetBattles::Engine
         return tip ? *tip : AuraTip(catalog, entry.aid, entry.power);
     }
 
-    std::string StatusString(Catalog const& catalog, Pet const& pet)
+    std::string StatusString(Catalog const& catalog, Pet const& pet, std::map<std::string, std::string>* tips)
     {
         std::string text;
         for (StatusEntry const& entry : StatusList(catalog, pet))
+        {
+            if (tips)
+                (*tips)[entry.label] = StatusTip(catalog, entry);
             text += (text.empty() ? "" : ";") + entry.label + "~" + entry.icon + "~" + LuaNumber(entry.turns) + "~" +
                 LuaNumber(entry.stacks) + "~" + (entry.bad ? "1" : "0");
+        }
         return text;
     }
 

@@ -255,15 +255,11 @@ def build_sessions(upstream, world, seed, battles):
         first = recorder.player(7)
         second = recorder.player(8)
         team_of(recorder, first, rng, pool)
-        team_of(recorder, second, rng, pool)
         setup = Setup(recorder, [first, second])
         recorder.M.Message(first, f'pbt|start|{enemies_text(rng, pool, 1, 10)}')
         play(recorder, first, random_policy(random.Random(rng.random())), stop=lambda turns: turns >= 1)
         recorder.M.Message(second, f'pbt|start|{enemies_text(rng, pool, 1, 10)}')
         recorder.M.Message(first, 'pbt|quit')
-        recorder.settle()
-        recorder.M.Message(second, f'pbt|start|{enemies_text(rng, pool, 1, 10)}')
-        play(recorder, second, random_policy(random.Random(rng.random())))
         recorder.settle()
         return setup
     add('account', account, 12)
@@ -381,10 +377,24 @@ def read_world(path):
     return world
 
 
+def sizes_from_sql(world):
+    import sql_reader
+    root = HERE.parents[3] / 'data/sql/updates/pending_db_world'
+    tables = sql_reader.read(sorted(root.glob('rev_2026112[34]_*_coa_pet_battles_*.sql')))
+    species = set(world['displays']) | set(world['model_info'])
+    displays = {display for rows in world['displays'].values() for display in rows}
+    models = [row for row in tables['coa_pet_model_size'] if row[0] in species]
+    shown = [row for row in tables['coa_pet_display_size'] if row[0] in displays]
+    return sorted(models), sorted(shown)
+
+
 def write_world(path, world):
     lines = [f'DISPLAYS\t{species}\t' + '\t'.join(map(str, rows)) for species, rows in sorted(world['displays'].items())]
     lines += [f'MODELINFO\t{species}\t{fixture_format.value_text(info[0])}\t{fixture_format.value_text(info[1])}'
               for species, info in sorted(world['model_info'].items())]
+    models, shown = sizes_from_sql(world)
+    lines += ['MODELSIZE\t' + '\t'.join(fixture_format.value_text(value) for value in row) for row in models]
+    lines += ['DISPLAYSIZE\t' + '\t'.join(fixture_format.value_text(value) for value in row) for row in shown]
     path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
 
@@ -411,6 +421,7 @@ def main():
     if args.mysql_defaults:
         write_world(world_path, world_from_database(args.mysql_defaults, species_pool()))
     world = read_world(world_path)
+    write_world(world_path, world)
     sessions = build_sessions(args.upstream, world, args.seed, args.battles)
     text = ''.join(write_session(number, name, recorder, setup)
                    for number, (name, recorder, setup) in enumerate(sessions, 1))

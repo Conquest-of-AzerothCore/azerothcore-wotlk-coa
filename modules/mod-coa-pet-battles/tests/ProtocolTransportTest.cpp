@@ -1,4 +1,5 @@
 #include "Protocol/AddonMessage.h"
+#include "Protocol/WireText.h"
 #include <gtest/gtest.h>
 #include <string>
 
@@ -45,6 +46,28 @@ TEST(CoAPetBattlesProtocol, ChunksNumberEveryPart)
 {
     EXPECT_EQ(Chunks({ "a", "b", "c" }), (std::vector<std::string> { "1/3;a", "2/3;b", "3/3;c" }));
     EXPECT_TRUE(Chunks({}).empty());
+}
+
+TEST(CoAPetBattlesProtocol, LongStatusListsSplitLikeUpstream)
+{
+    std::string text;
+    std::vector<std::string> items;
+    for (int i = 0; i < 7; ++i)
+        items.push_back("Very Long Status Name Number " + std::to_string(i) + "~Spell_Holy_PowerWordShield~" +
+            std::to_string(i) + "~1~" + std::to_string(i % 2));
+    for (std::string const& item : items)
+        text += (text.empty() ? "" : ";") + item;
+    EXPECT_EQ(SplitStatusList(text), (std::vector<std::string> { items[0] + ";" + items[1] + ";",
+        items[2] + ";" + items[3] + ";", items[4] + ";" + items[5] + ";", items[6] + ";" }));
+    EXPECT_EQ(SplitStatusList(""), (std::vector<std::string> { "" }));
+    EXPECT_EQ(SplitStatusList("A~i~1~1~0"), (std::vector<std::string> { "A~i~1~1~0;" }));
+}
+
+TEST(CoAPetBattlesProtocol, CapCutsAtSentencesLikeUpstream)
+{
+    EXPECT_EQ(Cap("Hits #the| target;", 40), "Hits  the  target ");
+    EXPECT_EQ(Cap("First sentence here. Second sentence is long.", 30), "First sentence here.");
+    EXPECT_EQ(Cap("A. Then a very long second sentence goes on", 30), "A. Then a very long second ...");
 }
 
 TEST(CoAPetBattlesProtocol, HelloRemembersAddons)

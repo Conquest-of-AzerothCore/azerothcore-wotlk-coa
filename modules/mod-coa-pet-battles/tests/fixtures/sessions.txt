@@ -842,6 +842,9 @@ OUT	8250	p7 pbj|pet|24198,5,0,1,1,2,Undead,Spell_Nature_NullifyDisease,295,52,3,
 OUT	8250	p7 pbt|end|loss
 WORLD	8250	despawn 117
 WORLD	8250	despawn 21902
+JOURNAL_AFTER	p7	117	10	0	1	1	1	3	175	1	1700000008
+JOURNAL_AFTER	p7	2338	10	0	2	2	2	4	2873	1	1700000008
+JOURNAL_AFTER	p7	24198	5	0	1	1	2	3	22192	1	1700000008
 END
 SESSION	11	restart
 PLAYER	p7	1	3	0
@@ -1170,9 +1173,6 @@ JOURNAL	p7	6352	14	0	2	2	2	2	0	0	0
 JOURNAL	p7	20279	12	0	1	1	1	4	0	0	0
 JOURNAL	p7	21055	22	0	1	1	2	3	0	0	0
 PLAYER	p8	1	3	0
-JOURNAL	p8	2323	9	0	1	2	2	1	0	0	0
-JOURNAL	p8	16548	17	0	1	1	2	4	0	0	0
-JOURNAL	p8	37881	15	0	2	1	2	3	0	0	0
 ROLL	1	100	84
 ROLL	1	2	1
 ROLL	1	2	1
@@ -1181,67 +1181,31 @@ ROLL	1	1	1
 ROLL	1	1	1
 ROLL	1	1	1
 ROLL	1	1	1
-ROLL	1	100	70
-ROLL	1	2	2
-ROLL	1	2	2
-ROLL	1	2	2
-ROLL	1	1	1
-ROLL	1	4	4
-ROLL	1	1	1
-ROLL	1	1	1
-ROLL	1	3	2
-ROLL	1	100	9
-ROLL	1	2	1
-ROLL	1	100	6
-ROLL	1	100	17
-ROLL	1	1	1
-ROLL	1	100	23
-ROLL	1	100	75
-ROLL	1	100	16
-ROLL	1	100	50
-ROLL	1	100	45
-ROLL	1	100	33
-ROLL	1	100	93
-ROLL	1	2	2
-ROLL	1	100	63
-ROLL	1	2	1
-ROLL	1	100	91
-ROLL	1	100	45
-ROLL	1	100	6
-ROLL	1	1	1
-ROLL	1	100	40
-ROLL	1	100	64
-ROLL	1	100	53
-ROLL	1	100	71
-ROLL	1	100	46
-ROLL	1	100	78
-ROLL	1	2	1
-ROLL	1	100	90
-IN	0	p7 pbt|start|2956@10
+IN	0	p7 pbt|start|2323@10
 OUT	0	p7 pbj|team|1,21055,6352,20279
 OUT	0	p7 pbt|msg|No team was set up: using your highest level pets. Change it in /pets > Teams.
 OUT	0	p7 pbt|begin|
 OUT	0	p7 pbt|st|P,1,22,1459,1459,INV_Misc_Head_Dragon_01,3,9120026,34,Golden Dragonhawk Hatchling
 OUT	0	p7 pbt|st|P,2,14,730,730,Ability_Racial_BearForm,2,9110947,13,Coralshell Lurker
 OUT	0	p7 pbt|st|P,3,12,856,856,Ability_Racial_BearForm,4,9116879,17,Ragestone Threshalisk
-OUT	0	p7 pbt|st|E,1,10,685,685,Ability_Druid_FlightForm,3,9101220,43,Adult Plainstrider
+OUT	0	p7 pbt|st|E,1,10,669,669,Ability_Druid_FlightForm,3,9101283,28,Giant Foreststrider
 OUT	0	p7 pbt|own|1,0,0,0
 OUT	0	p7 pbt|abil|1|Ability_Druid_Rake#Claw#50% hit chance. Hits the target, dealing 498 Dragonkin damage.#0
 OUT	0	p7 pbt|abil|2|Spell_Nature_WispHeal#Elemental Mastery#Increases your damage dealt by 50% and damage taken by 25% for 5 rounds.#0
 OUT	0	p7 pbt|abil|3|Spell_Nature_ChainLightning#Chain Lightning#100% hit chance. Leap up high, becoming unattackable for one round. On the next round, you attack, dealing 373 Flying damage.#4
 WORLD	300	spawn 21055
 OUT	300	p7 pbt|in|P,1
-WORLD	1300	spawn 2956
+WORLD	1300	spawn 2323
 OUT	1300	p7 pbt|in|E,1
 OUT	2600	p7 pbt|tag|P|
 OUT	2600	p7 pbt|tag|E|
 OUT	2600	p7 pbt|info|P|Dragonkin|Magic|Undead|Humanoid|Flying
 OUT	2600	p7 pbt|info|E|Flying|Aquatic|Dragonkin|Magic|Beast
-OUT	2600	p7 pbt|eabil|1|Ability_Hunter_Pet_Bear#Charge#100% hit chance. Hits the target, dealing 151 Magic damage.#0#0
-OUT	2600	p7 pbt|eabil|2|Ability_Druid_FerociousBite#Ferocious Bite#100% hit chance. Hits the target, dealing 69 Dragonkin damage and increasing the damage they deal by 25% for 3 rounds.#0#0
-OUT	2600	p7 pbt|eabil|3|Ability_Druid_Lacerate#Lacerate#100% hit chance. Deals 206 Flying damage and has a 25% chance to stun the target.#4#0
+OUT	2600	p7 pbt|eabil|1|Ability_Hunter_Pet_Bear#Charge#100% hit chance. Hits the target, dealing 127 Flying damage.#0#0
+OUT	2600	p7 pbt|eabil|2|Ability_Druid_Mangle.tga#Maim#50% hit chance. Unleashes a vicious swing which deals 318 Critter damage. If the ability misses, the user is stunned for 1 round.#3#0
+OUT	2600	p7 pbt|eabil|3|Spell_Nature_ShamanRage#Thick Hide#Reduces up to 95 damage from each attack against you. Lasts 2 rounds.#4#0
 OUT	2600	p7 pbt|turn|go;0,0,0;0
-IN	2600	p8 pbt|start|24916@10
+IN	2600	p8 pbt|start|16548@10
 OUT	2600	p8 pbt|msg|Another character of your account is in a pet battle.
 IN	2600	p7 pbt|quit
 OUT	2600	p7 pbt|msg|You forfeited the battle: your pets are knocked out.
@@ -1250,178 +1214,11 @@ OUT	2600	p7 pbj|pet|6352,14,0,2,2,2,Beast,Ability_Hunter_Pet_Cat,730,143,2,1,115
 OUT	2600	p7 pbj|pet|20279,12,0,1,1,1,Beast,Ability_Hunter_Pet_Wolf,856,134,4,1,945,Ragestone Threshalisk
 OUT	2600	p7 pbt|end|loss
 WORLD	3800	despawn 21055
-WORLD	3800	despawn 2956
+WORLD	3800	despawn 2323
 OUT	3800	p7 pbt|done|
-IN	4400	p8 pbt|start|2893@10
-OUT	4400	p8 pbj|team|1,16548,37881,2323
-OUT	4400	p8 pbt|msg|No team was set up: using your highest level pets. Change it in /pets > Teams.
-OUT	4400	p8 pbt|begin|
-OUT	4400	p8 pbt|st|P,1,17,1052,1052,INV_Egg_01,4,9116257,100,Mr. Wiggles
-OUT	4400	p8 pbt|st|P,2,15,807,807,Spell_Shadow_AnimateDead,3,9125528,37,Wretched Ghoul
-OUT	4400	p8 pbt|st|P,3,9,533,533,Ability_Druid_FlightForm,1,9101283,28,Giant Foreststrider
-OUT	4400	p8 pbt|st|E,1,10,580,580,INV_Misc_Head_Human_01,2,9101194,30,Stonevault Bonesnapper
-OUT	4400	p8 pbt|own|1,0,0,0
-OUT	4400	p8 pbt|abil|1|Ability_Druid_Lacerate#Snout Bash#100% hit chance. Hits the target, dealing 158 Beast damage. Damage increases by 53 each time it is used. Max 263 Beast damage.#0
-OUT	4400	p8 pbt|abil|2|Ability_BullRush#Herd Instinct#Heals you for 210 and increases your team's hit and critical strike chance by 50% for 2 rounds.#4
-OUT	4400	p8 pbt|abil|3|Ability_Hunter_MendPet#Wallow#Restores 316 health to the user.#3
-WORLD	4700	spawn 16548
-OUT	4700	p8 pbt|in|P,1
-WORLD	5700	spawn 2893
-OUT	5700	p8 pbt|in|E,1
-OUT	7000	p8 pbt|tag|P|
-OUT	7000	p8 pbt|tag|E|
-OUT	7000	p8 pbt|info|P|Critter|Undead|Humanoid|Beast|Elemental
-OUT	7000	p8 pbt|info|E|Humanoid|Dragonkin|Beast|Undead|Critter
-OUT	7000	p8 pbt|eabil|1|Ability_Shaman_Lavalash#Lava Lash#100% hit chance. Deals 116 Elemental damage and has a 25% chance to stun the target for 1 round.#1#0
-OUT	7000	p8 pbt|eabil|2|Ability_Shaman_Stormstrike#Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.#0#0
-OUT	7000	p8 pbt|eabil|3|INV_ThrowingKnife_04#Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each rou...#1#0
-OUT	7000	p8 pbt|turn|go;0,0,0;0
-IN	7000	p8 pbt|cmd|A2
-OUT	7000	p8 pbt|act|P,1,Herd Instinct
-IN	7000	p8 pbt|cmd|A1
-OUT	8500	p8 pbt|tag|P|Herd Instinct~Spell_Holy_PowerWordShield~2~1~0;
-OUT	8500	p8 pbt|stip|Herd Instinct#Heals you for 210 and increases your team's hit and critical strike chance by 50% for 2 rounds.
-OUT	8500	p8 pbt|tag|E|
-OUT	9200	p8 pbt|act|E,1,Stormstrike
-OUT	10200	p8 pbt|hp|P,1,1013,1052,-39
-OUT	11200	p8 pbt|tag|P|Herd Instinct~Spell_Holy_PowerWordShield~2~1~0;
-OUT	11200	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~2~1~0;
-OUT	11200	p8 pbt|stip|Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.
-OUT	11900	p8 pbt|tag|P|Herd Instinct~Spell_Holy_PowerWordShield~1~1~0;
-OUT	11900	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~2~1~0;
-OUT	11900	p8 pbt|info|P|Critter|Undead|Humanoid|Beast|Elemental
-OUT	11900	p8 pbt|info|E|Humanoid|Dragonkin|Beast|Undead|Critter
-OUT	11900	p8 pbt|eabil|1|Ability_Shaman_Lavalash#Lava Lash#100% hit chance. Deals 116 Elemental damage and has a 25% chance to stun the target for 1 round.#1#0
-OUT	11900	p8 pbt|eabil|2|Ability_Shaman_Stormstrike#Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.#0#0
-OUT	11900	p8 pbt|eabil|3|INV_ThrowingKnife_04#Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each rou...#1#0
-OUT	11900	p8 pbt|turn|go;0,4,0;0
-IN	11900	p8 pbt|cmd|A3
-OUT	11900	p8 pbt|act|E,1,Lava Lash
-OUT	12900	p8 pbt|hp|P,1,936,1052,-77
-OUT	13900	p8 pbt|act|P,1,Wallow
-OUT	15400	p8 pbt|hp|P,1,1052,1052,+116
-OUT	16400	p8 pbt|tag|P|
-OUT	16400	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~1~1~0;
-OUT	16400	p8 pbt|info|P|Critter|Undead|Humanoid|Beast|Elemental
-OUT	16400	p8 pbt|info|E|Humanoid|Dragonkin|Beast|Undead|Critter
-OUT	16400	p8 pbt|eabil|1|Ability_Shaman_Lavalash#Lava Lash#100% hit chance. Deals 116 Elemental damage and has a 25% chance to stun the target for 1 round.#1#1
-OUT	16400	p8 pbt|eabil|2|Ability_Shaman_Stormstrike#Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.#0#0
-OUT	16400	p8 pbt|eabil|3|INV_ThrowingKnife_04#Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each rou...#1#0
-OUT	16400	p8 pbt|turn|go;0,3,3;0
-IN	16400	p8 pbt|cmd|S2
-OUT	16400	p8 pbt|msg|Go, Wretched Ghoul!
-WORLD	16400	despawn 16548
-IN	16400	p8 pbt|cmd|A1
-WORLD	17100	spawn 37881
-OUT	17100	p8 pbt|in|P,2
-OUT	17100	p8 pbt|abil|1|Spell_DeathKnight_Thrash_Ghoul#Claw#100% hit chance. Hits the target, dealing 186 Undead damage.#0
-OUT	17100	p8 pbt|abil|2|Spell_Shadow_LifeDrain#Rally#Heals you for 186 and increases your team's hit and critical strike chance by 50% for 2 rounds.#4
-OUT	17100	p8 pbt|abil|3|Spell_DeathKnight_Thrash_Ghoul#Claw#100% hit chance. Fly up high, becoming unattackable for one round. On the next round, you attack, dealing 279 Elemental damage.#4
-OUT	17100	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~2~1~1;
-OUT	17100	p8 pbt|stip|Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each round for 3 rounds.
-OUT	18000	p8 pbt|act|E,1,Shiv
-OUT	19000	p8 pbt|hp|P,2,755,807,-52
-OUT	20000	p8 pbt|hp|P,2,709,807,-46
-OUT	21000	p8 pbt|hp|P,2,657,807,-52
-OUT	22000	p8 pbt|hp|P,2,657,807,Miss!
-OUT	23000	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~3~1~1;
-OUT	23000	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~1~1~0;
-OUT	23700	p8 pbt|hp|P,2,634,807,-23
-OUT	23700	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~2~1~1;
-OUT	23700	p8 pbt|tag|E|
-OUT	24700	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~2~1~1;
-OUT	24700	p8 pbt|tag|E|
-OUT	24700	p8 pbt|info|P|Undead|Humanoid|Aquatic|Critter|Dragonkin
-OUT	24700	p8 pbt|info|E|Humanoid|Dragonkin|Beast|Undead|Critter
-OUT	24700	p8 pbt|eabil|1|Ability_Shaman_Lavalash#Lava Lash#100% hit chance. Deals 116 Elemental damage and has a 25% chance to stun the target for 1 round.#1#0
-OUT	24700	p8 pbt|eabil|2|Ability_Shaman_Stormstrike#Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.#0#0
-OUT	24700	p8 pbt|eabil|3|INV_ThrowingKnife_04#Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each rou...#1#1
-OUT	24700	p8 pbt|turn|go;0,0,0;0
-IN	24700	p8 pbt|cmd|A2
-OUT	24700	p8 pbt|act|P,2,Rally
-OUT	26200	p8 pbt|hp|P,2,807,807,+173
-OUT	27200	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~2~1~1;Rally~Spell_Holy_PowerWordShield~2~1~0;
-OUT	27200	p8 pbt|stip|Rally#Heals you for 186 and increases your team's hit and critical strike chance by 50% for 2 rounds.
-OUT	27200	p8 pbt|tag|E|
-OUT	27900	p8 pbt|act|E,1,Stormstrike
-OUT	28900	p8 pbt|hp|P,2,749,807,-58
-OUT	29900	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~2~1~1;Rally~Spell_Holy_PowerWordShield~2~1~0;
-OUT	29900	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~2~1~0;
-OUT	30600	p8 pbt|hp|P,2,726,807,-23
-OUT	30600	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~1~1~1;Rally~Spell_Holy_PowerWordShield~1~1~0;
-OUT	30600	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~2~1~0;
-OUT	31600	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~1~1~1;Rally~Spell_Holy_PowerWordShield~1~1~0;
-OUT	31600	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~2~1~0;
-OUT	31600	p8 pbt|info|P|Undead|Humanoid|Aquatic|Critter|Dragonkin
-OUT	31600	p8 pbt|info|E|Humanoid|Dragonkin|Beast|Undead|Critter
-OUT	31600	p8 pbt|eabil|1|Ability_Shaman_Lavalash#Lava Lash#100% hit chance. Deals 116 Elemental damage and has a 25% chance to stun the target for 1 round.#1#0
-OUT	31600	p8 pbt|eabil|2|Ability_Shaman_Stormstrike#Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.#0#0
-OUT	31600	p8 pbt|eabil|3|INV_ThrowingKnife_04#Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each rou...#1#0
-OUT	31600	p8 pbt|turn|go;0,4,0;0
-IN	31600	p8 pbt|cmd|A1
-OUT	31600	p8 pbt|act|E,1,Lava Lash
-OUT	32600	p8 pbt|hp|P,2,610,807,-116
-OUT	33600	p8 pbt|act|P,2,Claw
-OUT	34600	p8 pbt|hp|E,1,22,580,-558!
-OUT	35600	p8 pbt|hp|P,2,587,807,-23
-OUT	35600	p8 pbt|tag|P|
-OUT	35600	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~1~1~0;
-OUT	36600	p8 pbt|tag|P|
-OUT	36600	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~1~1~0;
-OUT	36600	p8 pbt|info|P|Undead|Humanoid|Aquatic|Critter|Dragonkin
-OUT	36600	p8 pbt|info|E|Humanoid|Dragonkin|Beast|Undead|Critter
-OUT	36600	p8 pbt|eabil|1|Ability_Shaman_Lavalash#Lava Lash#100% hit chance. Deals 116 Elemental damage and has a 25% chance to stun the target for 1 round.#1#1
-OUT	36600	p8 pbt|eabil|2|Ability_Shaman_Stormstrike#Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.#0#0
-OUT	36600	p8 pbt|eabil|3|INV_ThrowingKnife_04#Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each rou...#1#0
-OUT	36600	p8 pbt|turn|go;0,3,0;1
-IN	36600	p8 pbt|cmd|A3
-OUT	36600	p8 pbt|act|E,1,Shiv
-OUT	37600	p8 pbt|hp|P,2,535,807,-52
-OUT	38600	p8 pbt|hp|E,1,45,580,+23
-OUT	39050	p8 pbt|hp|P,2,535,807,Miss!
-OUT	39700	p8 pbt|hp|P,2,535,807,Miss!
-OUT	40350	p8 pbt|hp|P,2,489,807,-46
-OUT	41350	p8 pbt|hp|E,1,68,580,+23
-OUT	41800	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~3~1~1;
-OUT	41800	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~1~1~0;
-OUT	42500	p8 pbt|act|P,2,Claw
-OUT	43500	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~3~1~1;Claw~Ability_Stealth~1~1~0;
-OUT	43500	p8 pbt|stip|Claw#100% hit chance. Hits the target, dealing 186 Undead damage.
-OUT	43500	p8 pbt|tag|E|Stormstrike~Ability_Rogue_Sprint~1~1~0;
-OUT	44200	p8 pbt|hp|P,2,466,807,-23
-OUT	44200	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~2~1~1;Claw~Ability_Stealth~1~1~0;
-OUT	44200	p8 pbt|tag|E|
-OUT	45200	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~2~1~1;Claw~Ability_Stealth~1~1~0;
-OUT	45200	p8 pbt|tag|E|
-OUT	45200	p8 pbt|info|P|Undead|Humanoid|Aquatic|Critter|Dragonkin
-OUT	45200	p8 pbt|info|E|Humanoid|Dragonkin|Beast|Undead|Critter
-OUT	45200	p8 pbt|eabil|1|Ability_Shaman_Lavalash#Lava Lash#100% hit chance. Deals 116 Elemental damage and has a 25% chance to stun the target for 1 round.#1#0
-OUT	45200	p8 pbt|eabil|2|Ability_Shaman_Stormstrike#Stormstrike#100% hit chance. Hits the target, dealing 58 Elemental damage and increasing the user's speed by 100% for 2 rounds.#0#0
-OUT	45200	p8 pbt|eabil|3|INV_ThrowingKnife_04#Shiv#50% hit chance. Hits the target, dealing 196 Humanoid damage. Eggs continue to fall on the enemy's current pet, dealing 23 Humanoid damage each rou...#1#1
-OUT	45200	p8 pbt|turn|lock;0,0,0;0;Claw: round 2 of 2
-OUT	46700	p8 pbt|act|P,2,Claw
-OUT	47700	p8 pbt|hp|E,1,0,580,-279
-WORLD	49700	despawn 2893
-OUT	49700	p8 pbt|fnt|E,1
-OUT	50400	p8 pbt|hp|P,2,443,807,-23
-OUT	50400	p8 pbt|tag|P|Shiv~Spell_Shadow_CurseOfTounges~1~1~1;
-OUT	50400	p8 pbt|tag|E|
-OUT	51400	p8 pbj|pet|16548,17,0,1,1,2,Critter,Ability_Druid_Dash,1052,190,4,1052,1430,Mr. Wiggles
-OUT	51400	p8 pbj|pet|37881,15,0,2,1,2,Undead,Spell_Nature_NullifyDisease,807,166,3,443,1200,Wretched Ghoul
-OUT	51400	p8 pbj|pet|2323,9,0,1,2,2,Flying,Ability_Hunter_Pet_Bat,533,82,1,533,720,Giant Foreststrider
-OUT	51400	p8 pbt|end|win
-OUT	52000	p8 pbj|pet|16548,17,0,1,1,2,Critter,Ability_Druid_Dash,1052,190,4,1052,1430,Mr. Wiggles
-OUT	52000	p8 pbt|xp|Mr. Wiggles,0,17,0
-OUT	52000	p8 pbj|pet|37881,15,0,2,1,2,Undead,Spell_Nature_NullifyDisease,807,166,3,443,1200,Wretched Ghoul
-OUT	52000	p8 pbt|xp|Wretched Ghoul,0,15,0
-OUT	52000	p8 pbt|done|
-WORLD	52500	despawn 37881
 JOURNAL_AFTER	p7	6352	14	0	2	2	2	2	10947	1	1700000002
 JOURNAL_AFTER	p7	20279	12	0	1	1	1	4	16879	1	1700000002
 JOURNAL_AFTER	p7	21055	22	0	1	1	2	3	20026	1	1700000002
-JOURNAL_AFTER	p8	2323	9	0	1	2	2	1	1283	0	0
-JOURNAL_AFTER	p8	16548	17	0	1	1	2	4	16257	0	0
-JOURNAL_AFTER	p8	37881	15	0	2	1	2	3	25528	443	1700000051
 END
 SESSION	13	bot
 PLAYER	p9	3	3	1

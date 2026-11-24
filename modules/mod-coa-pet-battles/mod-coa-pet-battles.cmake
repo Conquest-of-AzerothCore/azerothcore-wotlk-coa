@@ -7,7 +7,12 @@ file(GLOB COA_PET_BATTLES_STORE_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Store/JournalSql.cpp"
     "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Store/AccountRefs.cpp"
     "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Store/LearnQueue.cpp"
-    "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Protocol/AddonMessage.cpp")
+    "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Protocol/AddonMessage.cpp"
+    "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Protocol/WireText.cpp"
+    "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Protocol/JournalMessages.cpp"
+    "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Battle/Scheduler.cpp"
+    "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Battle/PetScale.cpp"
+    "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/src/Battle/Battles.cpp")
 file(GLOB COA_PET_BATTLES_TEST_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_SOURCE_DIR}/modules/mod-coa-pet-battles/tests/*.cpp")
 set_property(GLOBAL APPEND PROPERTY ACORE_MODULE_TEST_SOURCES
