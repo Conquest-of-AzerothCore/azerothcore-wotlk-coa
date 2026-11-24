@@ -18271,10 +18271,10 @@
       "fields": {
         "spell": 520832
       },
-      "before_expected": 3,
-      "expected": 7,
+      "before_expected": 0,
+      "expected": 3,
       "tolerance": 0,
-      "wait_ms": 3500,
+      "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "area_dummies": [
@@ -18307,16 +18307,40 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          520832,
-          3,
-          "dummy",
-          "caster"
         ]
       ],
-      "observe_source": "520832 StackAmount 3 ($u), DurationIndex 32 = 6000 ms. One real Felwrath cast with Inner Demon strikes five enemies (the dummy and four area dummies at 4 to 7 yd) and applies 520832 to each (AscensionFelswornAbilities.cpp:361-373; inner_five proves one stack on a clean dummy). The dummy holds 3 stacks as a precondition fixture (harness set_aura), the stack count read is the sum over the dummy and the four area dummies (area_sum): 3 before the cast; after it 3 on the capped dummy plus 1 on each of the four others is 7, where an uncapped dummy would read 4 and the sum 8. A cast that applied nothing reads 3. Felfury x6, 803468, 804216 and 823764 are fixtures as in inner_five. Reference search 2026-11-24: nothing found beyond the tooltip.",
-      "area_sum": true
+      "observe_source": "520832 StackAmount 3 ($u), DurationIndex 32 = 6000 ms. Four real Felwrath casts (the trigger and three setup casts 1800 ms apart, the cast time is CastingTimeIndex 5) each strike five enemies (the dummy and four area dummies at 4 to 7 yd) with Inner Demon and apply 520832 (AscensionFelswornAbilities.cpp:361-373); stack_feed counts the applications on the dummy (aura_apply_count) and reads its stacks after every cast: a trial is valid with at least 4 counted applications and passes at exactly 3 stacks, never more. Felfury x6, 803468, 804216 and 823764 are precondition fixtures set again after every feed cast (refeed), as the cost of Felwrath is 2 Felfury. Control: the same casts with nothing learned read 0. Reference search 2026-11-24: nothing found beyond the tooltip.",
+      "setup_casts": [
+        520693,
+        520693,
+        520693
+      ],
+      "setup_wait_ms": 1800,
+      "stack_feed": {
+        "aura": 520832,
+        "cap": 3,
+        "window_ms": 6000,
+        "trials": 2,
+        "refeed_auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            804216,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "source": "520832 StackAmount 3, DurationIndex 32 = 6000 ms"
+      }
     },
     {
       "spell": 681376,
