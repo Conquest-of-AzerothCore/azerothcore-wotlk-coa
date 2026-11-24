@@ -2229,8 +2229,10 @@ class TakenHitStackCompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'ok')
         self.assertAlmostEqual(verdict.measured, 400 / 2000)
 
-    def test_a_seeded_server_that_procs_at_another_rate_alerts(self):
+    def test_a_seeded_server_that_procs_more_often_alerts(self):
         self.assertEqual(self.verdict(600).status, 'alert')
+
+    def test_a_seeded_server_that_procs_less_often_alerts(self):
         self.assertEqual(self.verdict(200).status, 'alert')
 
     def test_a_stack_gained_in_the_baseline_arm_alerts(self):
@@ -2238,10 +2240,13 @@ class TakenHitStackCompareTest(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('baseline trials without the passive', verdict.explanation)
 
-    def test_a_read_at_the_cap_voids_the_part(self):
-        verdict = self.verdict(400, peak='6')
-        self.assertNotEqual(verdict.status, 'ok')
-        self.assertIn('stacks at the cap', verdict.explanation)
+    def test_a_read_at_the_cap_leaves_the_part_uncounted(self):
+        from proc_stacks import capped
+        model = {'event_labels': STACK_READS, 'baseline': TAKEN_STACK_BASELINE,
+                 'stack_events': {'aura': 800058, 'set': 0, 'per_cast': 0, 'cap': 6, 'completed': LABELS['attempts']}}
+        self.assertEqual(capped(model, {STACK_READS[0]: 6.0}), [STACK_READS[0]])
+        self.assertEqual(capped(model, {STACK_READS[0]: 5.0}), [])
+        self.assertNotIn(self.verdict(400, peak='6').status, ('ok', 'alert'))
 
 
 if __name__ == '__main__':
