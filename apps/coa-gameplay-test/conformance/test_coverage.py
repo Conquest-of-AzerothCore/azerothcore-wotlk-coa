@@ -929,7 +929,8 @@ class EvidenceTablesTest(unittest.TestCase):
 
     def test_cross_class_guard_the_sun_cleric_lockout_read_without_its_evidence_row_is_found(self):
         seeded = {metric: kind for metric, kind in metric_evidence().items() if metric != 'school_prohibited'}
-        self.assertEqual(self.unclassed_metrics(seeded), {'sun_cleric.json': ['school_prohibited']})
+        self.assertEqual(self.unclassed_metrics(seeded),
+                         {'felsworn.json': ['school_prohibited'], 'sun_cleric.json': ['school_prohibited']})
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
     def test_cross_class_guard_every_metric_classed_expectation_of_the_class_files_carries_its_metric(self):

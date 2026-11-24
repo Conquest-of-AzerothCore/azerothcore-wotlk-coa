@@ -1489,7 +1489,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_TOTEM_CREATED &&
         packet.GetOpcode() != SMSG_MIRRORIMAGE_DATA && packet.GetOpcode() != SMSG_TRIGGER_MOVIE &&
         packet.GetOpcode() != SMSG_ATTACKSTOP && packet.GetOpcode() != SMSG_GOSSIP_COMPLETE &&
-        packet.GetOpcode() != SMSG_SPELLDAMAGESHIELD && packet.GetOpcode() != SMSG_PLAY_SPELL_VISUAL)
+        packet.GetOpcode() != SMSG_SPELLDAMAGESHIELD && packet.GetOpcode() != SMSG_PLAY_SPELL_VISUAL &&
+        packet.GetOpcode() != SMSG_MOVE_FEATHER_FALL && packet.GetOpcode() != SMSG_MOVE_NORMAL_FALL)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];
@@ -7962,7 +7963,7 @@ private:
             float const height = step.get<float>("height");
             Require(height > 0.0f, "Fall needs a positive height");
             Require(player->IsAlive() && !player->IsGameMaster() && !player->GetCommandStatus(CHEAT_GOD) &&
-                !player->HasHoverAura() && !player->HasFeatherFallAura() && !player->HasFlyAura() &&
+                !player->HasHoverAura() && !player->HasFlyAura() &&
                 !player->IsInFlight() && !player->IsInWater() &&
                 !player->IsImmunedToDamageOrSchool(SPELL_SCHOOL_MASK_NORMAL),
                 "Fall needs a living player that a landing can hurt");
