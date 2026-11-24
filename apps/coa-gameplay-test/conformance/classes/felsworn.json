@@ -7305,6 +7305,209 @@
       "observe_source": "Contrast arm of crit_inner for the condition 'While Inner Demon is active' (owner ruling O-23: it covers the Carve sentence): the same arms with no Inner Demon 804216 on the caster, so the critical Carve strike at 10 steps is unchanged by 805236: 1.0. The previous code ignored Inner Demon and read 1.3. 807427 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 4 + EffectDieSides 1 = 5 ($807427s1); Carve 800206 channels 2500 ms (DurationIndex 66) with Effect[0] made periodic every 250 ms by the Felsworn contract (AscensionFelswornContracts.cpp:161-163), so a full channel counts 10 steps (AscensionFelswornAuras.cpp:112-118, an expired channel is forced to 10 at :210-216) and releases one Carve strike 803715 per enemy in front. AscensionFelswornAbilities.cpp:192-193 multiplies a critical 803715 hit by 1 + $807427s1 / 100 x min(10, steps) when 805236 is known and Inner Demon 804216 was on the caster when the strike was cast (owner rulings O-21 and O-23, Felsworn ADR 0011: +5% of the whole critical hit per step, +50% at 10 steps; the tooltip's 60% is unreachable). Both arms channel Carve to its end at the one dummy with Felfury 800058 set to 4 before every trial, melee crits forced and attack power +20000 (fixtures, the same in both arms), so the weapon dice (17.25-28.75 of about 3450 normalized points) move a hit under 0.2%; the treatment learns 805236 for real. The one-step arm (1.05) needs a channel cancelled after one step, which hit_ratio cannot schedule; the scenario felsworn-grommash-folly-carve-crit.json covers it. Reference search 2026-11-23: coa-history spell 807427: 3 logs, 3-4 stacks per channel that expire 0.5 s after the first step, crit/non-crit median ratio 1.94-1.98 against 1.94 without the talent (no measurable bonus on live); the bindmysoul and coabuildhub snapshots repeat the tooltip with 5%; nothing found that states another value."
     },
     {
+      "spell": 805236,
+      "name": "Grommash's Folly (critical auto attacks heal 50% with Inner Demon)",
+      "variant": "crit_swing_heal",
+      "label_suffix": "crit_swing_heal",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560839,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "critical": true
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0.5,
+      "observe_source": "807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, the Felsworn contract gives Inner Demon DurationIndex 1, AscensionFelswornContracts.cpp:81-85, and the script sets its duration) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition, removed and set again as phase auras after Felfury 800058 set to 4 stacks, 500 ms before each phase's attack. Inner Demon lasts 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:81-85): without Felfury it ended inside the window (the first pair read 0.379 and 0.373; a diagnostic run read Inner Demon present at the attack and gone at the stop, 4 heals for 14 critical swings, each heal about half its swing), so 4 stacks give it 20000 ms, past the 500 + 8400 ms phase; 807426 was read present at the attack after the 500 ms wait (the harness set_aura keeps the running duration of an aura already present, as the crit_inner entry notes). The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 805236,
+      "name": "Grommash's Folly (control: no critical auto attack heal without Inner Demon)",
+      "variant": "crit_swing_heal_no_inner_demon",
+      "label_suffix": "crit_swing_heal_no_inner_demon",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560839,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "critical": true
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected": 0,
+      "observe_source": "Contrast arm of crit_swing_heal for the condition 'While Inner Demon is active': the same layout with no Inner Demon 804216 on the caster in either phase (Felfury 800058 set to 4 stacks in both, as in the treatment); the after ratio must stay 0. 807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, the Felsworn contract gives Inner Demon DurationIndex 1, AscensionFelswornContracts.cpp:81-85, and the script sets its duration) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition; this arm never sets it, and Felfury 800058 is set to 4 stacks 500 ms before each phase's attack. The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set.",
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 805236,
+      "name": "Grommash's Folly (control: no auto attack heal on non-critical swings with Inner Demon)",
+      "variant": "crit_swing_heal_non_crit",
+      "label_suffix": "crit_swing_heal_non_crit",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560839,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "critical": false
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "observe_source": "Contrast arm of crit_swing_heal for the qualifier 'critical strikes': the same layout with Inner Demon held, but no swing can crit, so the after ratio (the increase of the caster's 560839 heal total over the increase of its non-critical swing damage, melee_damage_total critical false) must stay 0; a server that healed on every auto attack reads 0.5. Reduce Critical Strike Chance -100% 64481 (Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints -1000, EquippedItemClass -1, server DBC set) is set on the caster in both phases as a precondition fixture (guide 3.4), with Felfury 800058 at 4 stacks and Inner Demon 804216 held as in crit_swing_heal; no force_crit. 805236 is learned for real between the phases (mentor D-67); each phase auto-attacks the dummy for 3 swing intervals. Its sibling crit_suppressed reads the critical swing damage share at 0, so the arm is not void. Code: Check case 807426 returns Inner(player) && autoAttack && crit (AscensionFelswornEvents.cpp:112-113); Proc case 807426 calls Copy(player, player, 560839, damage / 2) (:263-264). Reference search: as crit_swing_heal (bindmysoul talents 805236 text 'critical strikes with auto attacks'; coa-history 807426 and 560839: 0 events in 186 logs); expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 805236,
+      "name": "Grommash's Folly (fixture check: no critical swing under 64481 with Inner Demon)",
+      "variant": "crit_suppressed",
+      "label_suffix": "crit_suppressed",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "measure_actor": "caster",
+      "metric": "melee_damage_total",
+      "fields": {
+        "critical": true
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "observe_source": "Fixture check of crit_swing_heal_non_crit: in the same layout the caster's critical swing damage (melee_damage_total critical true) over its whole swing damage stays 0 in both phases, so every counted swing of the non-critical arm is non-critical. Reduce Critical Strike Chance -100% 64481 (Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints -1000, EquippedItemClass -1, server DBC set) is set on the caster in both phases as a precondition fixture (guide 3.4), with Felfury 800058 at 4 stacks and Inner Demon 804216 held as in crit_swing_heal; no force_crit. 805236 is learned for real between the phases (mentor D-67); each phase auto-attacks the dummy for 3 swing intervals. Code reading only: Unit::RollMeleeOutcomeAgainst rolls a crit only for a positive chance (Unit.cpp:3539); the reading, not that line, is the proof."
+    },
+    {
       "spell": 805235,
       "kind": "metric_delta",
       "trigger_spell": 805235,
@@ -8303,6 +8506,85 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks). The charges of the aura on the caster (script value 803904, set to 5 plus the SPELLMOD_CHARGES mods, AscensionFelswornAuras.cpp:68-72) are read 500 ms after a real cast: 0 before the cast (control) and 5 after. Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
+    },
+    {
+      "spell": 802076,
+      "name": "Pit Lord's Strength 802076 (Annihilation attacks consumed)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802076,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 6,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 12500,
+      "script_count": {
+        "noun": "attack",
+        "swings": 1
+      },
+      "observe_source": "802076 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + 1 = 1 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 6 after a real learn of 802076. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 6th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 802110,
+      "name": "Pit Lord's Strength 802110 (Annihilation attacks consumed)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802110,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 7,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 12500,
+      "script_count": {
+        "noun": "attack",
+        "swings": 1
+      },
+      "observe_source": "802110 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 7 after a real learn of 802110. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 7th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 803904,
+      "name": "Annihilation (attacks consumed)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Lasts for $n attacks or $d.",
+      "trigger_spell": 803904,
+      "gate_spell": 803904,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 12500,
+      "script_count": {
+        "noun": "attack",
+        "swings": 1
+      },
+      "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks): 0 without a cast (the control arm reads the absent aura, no swings) and 5 attacks after a real cast. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 5th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
     },
     {
       "spell": 806109,

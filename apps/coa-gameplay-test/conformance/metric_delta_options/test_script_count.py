@@ -5,6 +5,7 @@ from unittest import mock
 from behaviours import behaviour_scenario, metric_delta_spec
 from compare import judge_behaviour
 from metric_delta_options import script_count
+from procs import swing_interval
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -166,6 +167,145 @@ class ScriptCountTests(unittest.TestCase):
                 mock.patch.object(script_count, 'METRIC_EVIDENCE', {'aura_script_count': 'state'}):
             _, evidence = judged_read(without_option(annihilation()), ANNIHILATION_TEXT, 0, 5)
             self.assertEqual(evidence, ['behaviour'])
+
+
+
+SWUNG = {'noun': 'attack', 'swings': 2}
+
+
+def swung_values(entry: dict, readings: dict) -> dict:
+    _, [expectation] = generated(entry)
+    values = {}
+    for moment, (cast_count, count, cast_landed, landed) in readings.items():
+        label = expectation.model[f'{moment}_label']
+        values.update({label: count, script_count.cast_count_label(label): cast_count,
+                       script_count.cast_landed_label(label): cast_landed, script_count.landed_label(label): landed})
+    return values
+
+
+def judged_swings(entry: dict, text: str, values: dict):
+    _, [expectation] = generated(entry)
+    verdict = judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+    evidence = evidence_of([claim(text, verdict.label, spell=entry['spell'])],
+                           [replace(verdict, spell_id=entry['spell'], build=BUILD)])[0]
+    return verdict, evidence
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ScriptCountSwingTests(unittest.TestCase):
+    def labels(self, scenario: dict) -> list:
+        return [step.get('label') or step['action'] for step in scenario['steps']]
+
+    def test_each_cast_arm_reads_the_count_and_landed_attacks_around_its_swings(self):
+        scenario, [expectation] = generated(pit_lord(script_count=SWUNG, expire_ms=12500))
+        run.validate(scenario)
+        labels = self.labels(scenario)
+        for moment in ('before', 'after'):
+            label = expectation.model[f'{moment}_label']
+            start = labels.index(script_count.cast_count_label(label))
+            self.assertEqual(labels[start:start + 5], [script_count.cast_count_label(label),
+                                                       script_count.cast_landed_label(label), 'attack',
+                                                       script_count.SWING_WAIT_LABEL, 'stop_attack'])
+            self.assertEqual(labels[labels.index(label) + 1], script_count.landed_label(label))
+            self.assertEqual(scenario['steps'][labels.index(label) - 1]['ms'], 500)
+            self.assertEqual(scenario['steps'][start - 1]['action'], 'cast')
+        waits = [step['ms'] for step in scenario['steps'] if step.get('label') == script_count.SWING_WAIT_LABEL]
+        self.assertEqual(waits, [2 * swing_interval(load_fixture_class_file(19))] * 2)
+        self.assertEqual([creature['id'] for creature in scenario['creatures']], ['dummy'])
+        self.assertEqual(expectation.model['script_count']['swings'],
+                         {'count': 2, 'readings': [expectation.model['before_label'],
+                                                   expectation.model['after_label']]})
+
+    def test_an_uncast_before_arm_has_no_swings_and_stays_a_plain_count(self):
+        scenario, [expectation] = generated(annihilation(script_count=SWUNG))
+        labels = self.labels(scenario)
+        before = expectation.model['before_label']
+        self.assertNotIn(script_count.landed_label(before), labels)
+        self.assertEqual(labels.count('attack'), 1)
+        self.assertEqual(expectation.model['script_count']['swings']['readings'], [expectation.model['after_label']])
+
+    def test_without_swings_the_scenario_and_model_are_unchanged(self):
+        for entry in (annihilation(), pit_lord()):
+            with self.subTest(spell=entry['spell']):
+                plain, [expectation] = generated(entry)
+                self.assertNotIn('swings', expectation.model['script_count'])
+                self.assertNotIn('attack', self.labels(plain))
+                self.assertNotIn('creatures', plain)
+
+    def test_the_swing_count_is_a_positive_integer_for_attacks_inside_the_count(self):
+        for raw in ({'noun': 'attack', 'swings': 0}, {'noun': 'attack', 'swings': 1.5},
+                    {'noun': 'attack', 'swings': True}, {'noun': 'attack', 'swings': '2'}):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                generated(annihilation(script_count=raw))
+        for entry in (pit_lord(script_count={'noun': 'attack', 'swings': 4}),
+                      annihilation(script_count={'noun': 'attack', 'swings': 4}),
+                      annihilation(script_count={'noun': 'charge', 'swings': 1}, quote='Lasts for $n charges')):
+            with self.subTest(entry=entry['script_count']), self.assertRaisesRegex(ValueError, 'swings'):
+                generated(entry)
+        with mock.patch('metric_delta_options.script_count.swing_window', lambda *args: None):
+            scenario, _ = generated(pit_lord(script_count={'noun': 'attack', 'swings': 4}))
+            self.assertTrue(scenario['steps'])
+
+    def test_the_window_bound_counts_every_equipped_melee_hand(self):
+        class_file = load_fixture_class_file(19)
+        main, off = class_file['weapon'], class_file['off_hand_weapons'][0]
+        one_hand = [{'action': 'equip', 'actor': 'caster', 'item': main['item'], 'slot': 15}]
+        dual = one_hand + [{'action': 'equip', 'actor': 'caster', 'item': off['item'], 'slot': 16}]
+        window = 2 * main['speed_ms']
+        self.assertEqual(script_count.landed_bound(class_file, one_hand, window), 3)
+        self.assertEqual(script_count.landed_bound(class_file, dual, window),
+                         3 + window // off['speed_ms'] + 1)
+        spec = metric_delta_spec(pit_lord(script_count=SWUNG))
+        counted = script_count.Counted('attack', 2)
+        self.assertIsNone(script_count.swing_window(spec, counted, script_count.landed_bound(class_file, one_hand,
+                                                                                             window)))
+        self.assertRegex(script_count.swing_window(spec, counted, script_count.landed_bound(class_file, dual, window)),
+                         'equipped melee hands')
+        with self.assertRaisesRegex(ValueError, 'speed of equipped item'):
+            script_count.landed_bound(class_file, [{**one_hand[0], 'item': 1}], window)
+
+    def test_mutant_counting_the_main_hand_only_lets_a_dual_wield_window_pass(self):
+        class_file = load_fixture_class_file(19)
+        dual = [{'action': 'equip', 'actor': 'caster', 'item': class_file['weapon']['item'], 'slot': 15},
+                {'action': 'equip', 'actor': 'caster', 'item': class_file['off_hand_weapons'][0]['item'], 'slot': 16}]
+        spec = metric_delta_spec(pit_lord(script_count=SWUNG))
+        counted = script_count.Counted('attack', 2)
+        window = 2 * class_file['weapon']['speed_ms']
+        main_only = script_count.equipped_melee_speeds(class_file, dual)[:1]
+        with mock.patch.object(script_count, 'equipped_melee_speeds', lambda *args: main_only):
+            self.assertIsNone(script_count.swing_window(spec, counted,
+                                                        script_count.landed_bound(class_file, dual, window)))
+        self.assertIsNotNone(script_count.swing_window(spec, counted,
+                                                       script_count.landed_bound(class_file, dual, window)))
+
+    def test_the_count_plus_landed_attacks_is_judged_against_the_stated_count(self):
+        entry = pit_lord(script_count=SWUNG, expire_ms=12500)
+        values = swung_values(entry, {'before': (5, 3, 0, 2), 'after': (6, 3, 2, 5)})
+        verdict, evidence = judged_swings(entry, PIT_LORD_TEXT, values)
+        self.assertEqual((verdict.status, evidence), ('ok', ['behaviour']))
+        verdict, _ = judged_swings(annihilation(script_count=SWUNG), ANNIHILATION_TEXT,
+                                   {**swung_values(annihilation(script_count=SWUNG), {'after': (5, 2, 0, 3)}),
+                                    generated(annihilation(script_count=SWUNG))[1][0].model['before_label']: 0})
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_mutant_reads_without_consumption_alert(self):
+        entry = pit_lord(script_count=SWUNG, expire_ms=12500)
+        for name, after in (('no consumption', (6, 6, 2, 5)), ('no landed attack', (6, 6, 2, 2)),
+                            ('two per attack', (6, 0, 2, 5)), ('wrong stored count', (7, 4, 2, 5))):
+            with self.subTest(mutant=name):
+                values = swung_values(entry, {'before': (5, 3, 0, 2), 'after': after})
+                verdict, evidence = judged_swings(entry, PIT_LORD_TEXT, values)
+                self.assertEqual((verdict.status, evidence), ('alert', ['unproven']))
+
+    def test_mutant_without_the_landed_sum_lets_an_unconsumed_count_pass(self):
+        entry = pit_lord(script_count=SWUNG, expire_ms=12500)
+        values = swung_values(entry, {'before': (5, 5, 0, 2), 'after': (6, 6, 2, 5)})
+        with mock.patch('metric_delta_options.script_count.counted_reading',
+                        lambda values, label: values.get(label)):
+            verdict, _ = judged_swings(entry, PIT_LORD_TEXT, values)
+            self.assertEqual(verdict.status, 'ok')
+        verdict, _ = judged_swings(entry, PIT_LORD_TEXT, values)
+        self.assertEqual(verdict.status, 'alert')
 
 
 if __name__ == '__main__':

@@ -3860,18 +3860,11 @@
     "clause": "Your Annihilation now affects $s1 additional attack",
     "labels": [
       "802076 effect_value e0 #0",
-      "802076 behaviour_metric_delta charges"
+      "802076 behaviour_metric_delta charges",
+      "802076 behaviour_metric_delta consumed"
     ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802076 learned the count reads 6 at the cast and 5 after 1 landed auto attack, 6 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802076,
@@ -3909,20 +3902,9 @@
   {
     "spell": 802110,
     "clause": "Your Annihilation now affects $s1 additional attack",
-    "labels": [
-      "802110 effect_value e0 #0",
-      "802110 behaviour_metric_delta charges"
-    ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802110 learned the count reads 7 at the cast and 6 after 1 landed auto attack, 7 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set. HELD (review fw-rbswb I-1): with swings 1 every window lands one attack, and the pre-fix server (2 native charges, ADR 0030) also reads 6+1=7, so this entry cannot fail on the fixed defect; needs >= 3 landed attacks per window within the bound."
   },
   {
     "spell": 802110,
@@ -4088,7 +4070,8 @@
       {
         "claim": "Lasts for $n attacks",
         "labels": [
-          "803904 behaviour_metric_delta charges"
+          "803904 behaviour_metric_delta charges",
+          "803904 behaviour_metric_delta consumed"
         ]
       },
       {
@@ -4099,17 +4082,8 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
     "kind": "claim",
-    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges claim and the $d part the held and gone claims. The $n part stays unproven (tool gap): the charges read is the stored count, not the attacks the aura lasts."
+    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at its 5th landed attack is reachable within the 12000 ms duration with both hands, up to 12 landed attacks, but the 1-interval window stops at 4 at most). Counted on the fw-bswb pair (prove1, no flip): 5 at the cast, 4 after 1 landed attack. Missed or avoided swings untested (the rule counts landed swings only)."
   },
   {
     "spell": 803905,
@@ -4395,9 +4369,13 @@
     "spell": 805236,
     "clause": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
     "labels": [
-      "805236 effect_value 807426e0 #1"
+      "805236 behaviour_metric_delta crit_swing_heal",
+      "805236 behaviour_metric_delta crit_swing_heal_no_inner_demon",
+      "805236 behaviour_metric_delta crit_swing_heal_non_crit",
+      "805236 behaviour_metric_delta crit_suppressed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The value label 805236 effect_value 807426e0 #1 (not_measured in the pair of record) is replaced by the crit_swing_heal ratio: the caster's 560839 heal over its critical auto attack damage with Inner Demon 804216 held (condition fixture, phase auras) and 805236 learned for real (0.5 expected, 0 before the learn), and the contrast arm without Inner Demon (0). The qualifier 'critical strikes' is contrasted by crit_swing_heal_non_crit: Inner Demon held, every swing kept non-critical by the 64481 fixture (aura 52, -1000% weapon crit), the 560839 heal over the non-critical swing damage reads 0 (heal 0 over a non-critical swing damage increase of 917 and 903 after the learn) in both runs of the fw-bswb pair (prove1, no flip), and crit_suppressed reads 0 critical swing damage under the same fixture, so a heal on every auto attack would read 0.5 and alert. 'auto attacks' (against special attacks) has no arm. Reference search: see the entries' observe_source (bindmysoul talents 805236 text; coa-history 807426 and 560839: 0 events in 186 logs)."
   },
   {
     "spell": 805236,
