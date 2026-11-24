@@ -24166,15 +24166,14 @@
       ],
       "fields": {},
       "expected": 1,
-      "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Mind Flay 15407 carries it (0x7c0c). The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Mind Flay 15407 moved the same way reads 0 (moving_channel_mindflay_moved) and not moved reads 1 (moving_channel_mindflay_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
+      "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Whirlwind 13736 (a self channel, 3000 ms, no cost, ChannelInterruptFlags 0x3c3c) carries it. The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Whirlwind 13736 moved the same way reads 0 (moving_channel_whirlwind_moved) and not moved reads 1 (moving_channel_whirlwind_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
     },
     {
       "spell": 800206,
       "kind": "metric_delta",
       "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-      "target": "dummy",
+      "target": "caster",
       "measure_actor": "caster",
-      "cast_power": 100,
       "cast_in_before": false,
       "gate_timing": "start",
       "trigger_only_after": true,
@@ -24188,22 +24187,21 @@
         "dy": 1.5
       },
       "metric": "casting",
-      "name": "Mind Flay (control: a channel with the movement interrupt is interrupted by the same moves)",
-      "variant": "moving_channel_mindflay_moved",
-      "label_suffix": "moving_channel_mindflay_moved",
-      "trigger_spell": 15407,
+      "name": "Whirlwind (control: a channel with the movement interrupt is interrupted by the same moves)",
+      "variant": "moving_channel_whirlwind_moved",
+      "label_suffix": "moving_channel_whirlwind_moved",
+      "trigger_spell": 13736,
       "phase_auras": [],
       "fields": {},
       "expected": 0,
-      "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Mind Flay 15407 carries it (0x7c0c). The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Mind Flay 15407 moved the same way reads 0 (moving_channel_mindflay_moved) and not moved reads 1 (moving_channel_mindflay_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
+      "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Whirlwind 13736 (a self channel, 3000 ms, no cost, ChannelInterruptFlags 0x3c3c) carries it. The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Whirlwind 13736 moved the same way reads 0 (moving_channel_whirlwind_moved) and not moved reads 1 (moving_channel_whirlwind_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
     },
     {
       "spell": 800206,
       "kind": "metric_delta",
       "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-      "target": "dummy",
+      "target": "caster",
       "measure_actor": "caster",
-      "cast_power": 100,
       "cast_in_before": false,
       "gate_timing": "start",
       "trigger_only_after": true,
@@ -24212,14 +24210,14 @@
       "void_on_cast_failure": true,
       "before_expected": 0,
       "metric": "casting",
-      "name": "Mind Flay (control: the same cast without moves keeps channeling)",
-      "variant": "moving_channel_mindflay_still",
-      "label_suffix": "moving_channel_mindflay_still",
-      "trigger_spell": 15407,
+      "name": "Whirlwind (control: the same cast without moves keeps channeling)",
+      "variant": "moving_channel_whirlwind_still",
+      "label_suffix": "moving_channel_whirlwind_still",
+      "trigger_spell": 13736,
       "phase_auras": [],
       "fields": {},
       "expected": 1,
-      "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Mind Flay 15407 carries it (0x7c0c). The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Mind Flay 15407 moved the same way reads 0 (moving_channel_mindflay_moved) and not moved reads 1 (moving_channel_mindflay_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
+      "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Whirlwind 13736 (a self channel, 3000 ms, no cost, ChannelInterruptFlags 0x3c3c) carries it. The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Whirlwind 13736 moved the same way reads 0 (moving_channel_whirlwind_moved) and not moved reads 1 (moving_channel_whirlwind_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
     }
   ],
   "player_observations": [],
