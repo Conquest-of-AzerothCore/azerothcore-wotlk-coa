@@ -13,7 +13,10 @@
     "lookups fail with 'Spell has no proc entry' and every rate reads 0, so the discriminating checks fail",
     "instead of flaking.",
     "A proc's payload, Mythical Discharge Zone 823749, is applied directly: over its 5 s it pulses Mythical",
-    "Discharge Zone 823748 once a second, so the dummy 4 yards away takes exactly five pulses of Chaos damage."
+    "Discharge Zone 823748 once a second, so the dummy 4 yards away takes exactly five pulses of Chaos damage.",
+    "The record gives a pulse 2 base points, 1 die side and 0.3125 per level up to level 80: 28 at level 80, and",
+    "spell_effect_value reads that value. Five pulses come to 140 before resists; a melee class pulse can crit",
+    "for double, and even four crits stay at 252, while twice the intended damage would reach at least 280."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -137,12 +140,22 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the pulses dealt damage",
+      "label": "SETUP: a pulse is the record's 28 at level 80",
       "actor": "caster",
-      "metric": "spell_damage_total",
+      "metric": "spell_effect_value",
+      "spell": 823748,
+      "effect": 0,
+      "equals": 28
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: five pulses deal 140 before resists, up to four crits",
+      "actor": "caster",
+      "metric": "spell_damage_with_resist_total",
       "spell": 823748,
       "target": "dummy",
-      "min": 5
+      "min": 140,
+      "max": 252
     }
   ]
 }
