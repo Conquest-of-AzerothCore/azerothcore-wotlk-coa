@@ -1,4 +1,4 @@
-# Fed charge casts (`behaviour_metric_delta`, `kind: "fed_charge_casts"`, ADR 1272, provisional)
+# Fed charge casts (`behaviour_metric_delta`, `kind: "fed_charge_casts"`, ADR 1272 and 1275, provisional)
 
 The cast time cut of a proc-granted aura that lasts a stated number of casts ("Your next 3 Fel Fireballs have a $s1%
 reduced cast time"), with the aura earned by a real feed instead of set by the harness (mentor D-67, D-97).
@@ -18,19 +18,22 @@ Each trial:
    (no talent, no aura): it must lie in the uncut band, else the trial is void;
 2. learns `spell` and runs `cast_until_aura` with `feed_spell` every `every_ms` ms, at most `max_casts` casts
    (`ceil(ln(residual_target / (2 * trials)) / ln(1 - ProcChance))`, one roll per feed cast, conservative);
-3. unlearns `spell` at the stop, so no later tick grants `aura` again or resets its charges, then reads `aura`
+3. reads `game_time_ms` at the stop (`fed at`), unlearns `spell`, so no later tick grants `aura` again or resets its charges, then reads `aura`
    present, `spell` unknown, the application count, `aura_amount` of Effect[`cut_effect`] and the used-charge
    script value, and the cast speed multiplier again;
 4. casts `effect_spell` `charges + 1` times with `ignore_gcd`, one per slot (the uncut band's last poll + 100 ms);
    each cast reads `aura` and the cast count before it, is stamped by `game_time_ms` right before and after the cast
    step, and is polled every `poll_ms` from 50 ms before its band to 50 ms past it, each poll a cast count between
    two `game_time_ms` stamps. The cast time lies after the last pending poll's first stamp minus the sent stamp and at
-   or before the first completed poll's last stamp minus the start stamp. The last cast must be judged before 0.9
-   of the aura's duration, else the entry is refused.
+   or before the first completed poll's last stamp minus the start stamp. Generation refuses an entry whose nominal
+   slots put the last cast past 0.9 of the aura's duration; at run time the last cast's start stamp minus `fed at`
+   must stay below 0.9 of the duration (the aura is granted at or before `fed at`), else the trial is void, so an
+   uncut last cast is not the natural expiry (review fw-rbaf I-1: the slots drift by about one tick each).
 
 A trial is void when the cast speed multiplier is not 1, the control cast ran with the aura or outside the uncut
 band, the talent is not known before the feed or still known after the unlearn, the feed did not grant exactly once,
-`aura` is gone right after the unlearn, `aura` is applied again after the stop, or a cast did not go off.
+`aura` is gone right after the unlearn, `aura` is applied again after the stop, a cast did not go off, or the last
+cast started 0.9 of the aura's duration or later after `fed at`.
 
 Placement of a bracket against its band: inside (wholly in it), outside (wholly beyond it) or straddling. Two
 expectations share the scenario:

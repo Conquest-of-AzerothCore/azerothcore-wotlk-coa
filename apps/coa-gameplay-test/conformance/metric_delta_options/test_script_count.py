@@ -308,5 +308,68 @@ class ScriptCountSwingTests(unittest.TestCase):
         self.assertEqual(verdict.status, 'alert')
 
 
+DAGGER = {'item': 2208, 'speed_ms': 1300, 'skill_line': 173, 'proficiency': 1180}
+DAGGER_SWUNG = {'noun': 'attack', 'swings': 2, 'main_hand': DAGGER}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ScriptCountMainHandTests(unittest.TestCase):
+    def melee(self, steps: list) -> list:
+        return [(step['action'], step.get('item'), step.get('slot')) for step in steps
+                if step['action'] in ('add_item', 'equip')]
+
+    def test_the_main_hand_replaces_every_melee_equip_step_before_the_casts(self):
+        scenario, [expectation] = generated(pit_lord(script_count=DAGGER_SWUNG, expire_ms=12500))
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertEqual(self.melee(steps), [('add_item', 2208, None), ('equip', 2208, 15)])
+        equip = next(index for index, step in enumerate(steps) if step['action'] == 'equip')
+        self.assertEqual(steps[equip - 2], {'action': 'learn', 'actor': 'caster', 'spell': 1180})
+        self.assertEqual(steps[equip + 1], {'action': 'set_skill', 'actor': 'caster', 'skill': 173, 'value': 300,
+                                            'maximum': 300})
+        first_cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
+        self.assertLess(equip, first_cast)
+        waits = [step['ms'] for step in steps if step.get('label') == script_count.SWING_WAIT_LABEL]
+        self.assertEqual(waits, [2 * swing_interval(load_fixture_class_file(19))] * 2)
+        self.assertEqual(expectation.model['script_count']['swings']['main_hand'], 2208)
+        self.assertIn('item 2208 (1300 ms', scenario['contract'])
+
+    def test_the_bound_uses_the_main_hand_speed(self):
+        class_file = load_fixture_class_file(19)
+        steps = [{'action': 'equip', 'actor': 'caster', 'item': 2208, 'slot': 15}]
+        main_hand = script_count.parse_main_hand(DAGGER)
+        self.assertEqual(script_count.landed_bound(class_file, steps, 5000, main_hand), 4)
+        with self.assertRaisesRegex(ValueError, 'speed of equipped item'):
+            script_count.landed_bound(class_file, steps, 5000)
+
+    def test_without_main_hand_the_class_weapons_stay(self):
+        plain, _ = generated(pit_lord(script_count=SWUNG, expire_ms=12500))
+        self.assertNotIn(('equip', 2208, 15), self.melee(plain['steps']))
+        self.assertNotIn(1180, [step.get('spell') for step in plain['steps'] if step['action'] == 'learn'])
+
+    def test_a_malformed_main_hand_is_refused(self):
+        for raw in ({'noun': 'attack', 'main_hand': DAGGER},
+                    {**DAGGER_SWUNG, 'main_hand': {**DAGGER, 'speed_ms': 0}},
+                    {**DAGGER_SWUNG, 'main_hand': {**DAGGER, 'speed_ms': 1300.0}},
+                    {**DAGGER_SWUNG, 'main_hand': {key: DAGGER[key] for key in ('item', 'speed_ms')}},
+                    {**DAGGER_SWUNG, 'main_hand': {**DAGGER, 'proficiency': 803904}}):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                generated(pit_lord(script_count=raw, expire_ms=12500))
+
+    def test_mutant_keeping_an_off_hand_beside_the_main_hand_is_refused_by_the_bound(self):
+        entry = pit_lord(script_count=DAGGER_SWUNG, expire_ms=12500)
+        self.assertTrue(generated(entry)[0]['steps'])
+        original = script_count.melee_equip_indexes
+
+        def main_only(steps):
+            return {index for index in original(steps)
+                    if 16 not in (steps[index].get('slot'), steps[min(index + 1, len(steps) - 1)].get('slot'))}
+
+        for name, patched in (('one_main_hand', lambda class_file, main_hand, steps: steps),
+                              ('melee_equip_indexes', main_only)):
+            with self.subTest(mutant=name), mock.patch.object(script_count, name, patched), \
+                    self.assertRaisesRegex(ValueError, 'equipped melee hands'):
+                generated(entry)
+
 if __name__ == '__main__':
     unittest.main()
