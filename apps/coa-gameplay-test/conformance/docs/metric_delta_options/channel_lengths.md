@@ -13,8 +13,8 @@ Judge (after the plain before/after judge, which it keeps): each cast must land 
 cast whose channel aura is still up after its cancel is void; over the kept casts (only plain hits, not void), every
 damage of a length must lie below every damage of the next length, from the shortest channel to the full one (a rise
 without overlap, mentor D-106); a length that keeps fewer than `k` casts is `unmeasured`, `k` the smallest
-integer with `k!^L / (L k)! <= 1e-3` for `L` lengths (the chance that a length-independent damage falls in ordered
-blocks; `L = 3` gives `k = 3`, 216/362880 = 6.0e-4). A missing read alerts. It states no amount:
+integer with `k!^L / (L k)! <= 5e-4` for `L` lengths, 1e-3 per pair (the chance that a length-independent damage
+falls in ordered blocks; `L = 3` gives `k = 4`, 2.9e-5 per run). A missing read alerts. It states no amount:
 a direction-only claim (mentor D-100).
 
 Named point: `verdict(verdict, run, value)` (`metric_delta_options.option_verdict`); `fixtures` adds the casts and

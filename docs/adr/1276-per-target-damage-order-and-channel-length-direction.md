@@ -43,8 +43,9 @@ Two opt-in `metric_delta` option modules:
   damage of a length must lie below every kept plain damage of the next length (a rise without overlap; with `n` casts
   per length and a length-independent damage, the reads fall in ordered blocks with probability `n!^k / (k n)!` for
   `k` lengths, 1.3e-6 for 5 casts and 3 lengths); a length that keeps fewer than `m` casts is unmeasured, `m`
-  the smallest integer with `m!^k / (k m)! <= 1e-3` (voids and critical hits shrink the kept count; `k = 3` gives
-  `m = 3`, 216/362880 = 6.0e-4, where 2 kept casts would pass a length-independent damage once in 90).
+  the smallest integer with `m!^k / (k m)! <= 5e-4` per run, so at most 1e-3 per pair (voids and critical hits
+  shrink the kept count; `k = 3` gives `m = 4`, 13824/479001600 = 2.9e-5, where 3 kept casts would pass a
+  length-independent damage with 6.0e-4 per run, 1.2e-3 per pair).
 
 Both keep the plain before/after judge: an entry's own reading (the hit count) is judged first and the option's
 result is added to its explanation. Neither adds a metric, evidence class, tolerance or closing key; both read

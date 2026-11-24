@@ -82,7 +82,7 @@ class ChannelLengthsTests(unittest.TestCase):
                 behaviour_scenario(load_fixture_class_file(23), lengths_entry(channel_lengths=lengths))
 
     def test_three_lengths_need_three_kept_casts_each(self):
-        self.assertEqual([channel_lengths.minimum_kept(count) for count in (2, 3, 4)], [7, 3, 2])
+        self.assertEqual([channel_lengths.minimum_kept(count) for count in (2, 3, 4)], [7, 4, 2])
 
     def test_damage_rising_with_the_channel_length_is_ok(self):
         expectation = expectation_of(judged_entry())

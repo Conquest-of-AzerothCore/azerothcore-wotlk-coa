@@ -8,7 +8,7 @@ PLAIN = {'critical': False, 'resisted': False, 'blocked': False}
 READS = (('total', 'spell_damage_total', PLAIN), ('plain', 'spell_damage_count', PLAIN),
          ('struck', 'spell_damage_count', {}))
 FULL = 'full'
-CHANCE_CAP = 1e-3
+CHANCE_CAP = 5e-4
 
 
 def positive(value) -> bool:
