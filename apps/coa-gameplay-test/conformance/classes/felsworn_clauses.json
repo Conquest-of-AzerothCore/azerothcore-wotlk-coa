@@ -1010,8 +1010,7 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "555738 aura_amplitude_ms #3",
-          "555738 behaviour_metric_delta tick_period"
+          "555738 aura_amplitude_ms #3"
         ]
       }
     ]
@@ -1461,8 +1460,7 @@
     "spell": 561216,
     "clause": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
     "labels": [
-      "561216 aura_amplitude_ms #0",
-      "561216 behaviour_metric_delta strike_period"
+      "561216 aura_amplitude_ms #0"
     ],
     "kind": "claim"
   },

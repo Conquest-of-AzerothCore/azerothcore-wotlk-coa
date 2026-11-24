@@ -5550,35 +5550,6 @@
     },
     {
       "spell": 572617,
-      "name": "Immolation Aura (one hit every 3 seconds)",
-      "kind": "metric_delta",
-      "variant": "tick_period",
-      "label_suffix": "tick_period",
-      "quote": "to nearby enemies every $t1 sec.",
-      "trigger_spell": 572617,
-      "target": "dummy",
-      "metric": "event_interval_median_ms",
-      "fields": {
-        "stream": "spell_damage",
-        "spell": 800208,
-        "caster": "caster",
-        "target": "dummy",
-        "since_spell": 572617
-      },
-      "before_expected": 3000,
-      "expected": 3000,
-      "tolerance": 150,
-      "wait_ms": 15500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The median interval between the damage events of the tick 800208 on the dummy (within 5 yd of the caster) since the last cast of 572617 (since_spell) is read 15500 ms after a real cast (hits at 0, 3, 6, 9, 12 and 15 s, five intervals; 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD), in both phases (the same cast twice; the no-hit control is the tick_count entry), within 150 ms (5%, the G-19 band) which excludes a period 10% off (2700 or 3300). Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
-      "caster_health": [
-        10000,
-        10000
-      ]
-    },
-    {
-      "spell": 572617,
       "name": "Immolation Aura (hits only after the cast)",
       "kind": "metric_delta",
       "variant": "tick_count",
@@ -18254,47 +18225,6 @@
       "label_suffix": "dash_gone"
     },
     {
-      "spell": 555738,
-      "name": "Fury Unleashed (a strike every 1 sec on the dummy)",
-      "kind": "hit_period",
-      "variant": "tick_period",
-      "quote": "and dealing $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies.",
-      "trigger_spell": 555738,
-      "hit_spell": 555739,
-      "expected_ms": 1000,
-      "window": [
-        1,
-        4800
-      ],
-      "fixtures": [],
-      "poll_ms": 25,
-      "observe_source": "555738 Effect[0] aura 23 PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1 sec), EffectTriggerSpell 555739 (Effect[0] WEAPON_PERCENT_DAMAGE on enemies within its radius), DurationIndex 28 = 5000 ms. One real cast at the dummy; the 555739 hits on the dummy are polled in game time over 1300-4700 ms after the cast and (last - first) / (hits - 1) is judged against 1000 ms in the G-19 band. Reference search 2026-11-24: coa-history spell 555738: 0 events in 186 logs; bindmysoul snapshot: nothing beyond the tooltip.",
-      "label_suffix": "tick_period"
-    },
-    {
-      "spell": 561216,
-      "name": "Fury of the Illidari (a strike every 0.5 sec on the dummy)",
-      "kind": "hit_period",
-      "variant": "strike_period",
-      "quote": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
-      "trigger_spell": 561216,
-      "hit_spell": 808303,
-      "expected_ms": 500,
-      "window": [
-        1,
-        3200
-      ],
-      "fixtures": [
-        [
-          804216,
-          "caster"
-        ]
-      ],
-      "poll_ms": 10,
-      "observe_source": "561216 Effect[0] aura 226 PERIODIC_DUMMY, EffectAmplitude 500 ($t1 = 0.5 sec), 6 assaults; the strike spell is Twin Slice 808303 (proven by the felfury entry of 561216, same_arm_ratio on spell_cast_count 808303). With one enemy near the caster every strike lands on the dummy. Inner Demon 804216 (CasterAuraSpell of 561216) is a precondition fixture. (last - first) / (hits - 1) is judged against 500 ms in the G-19 band. Reference search 2026-11-24: coa-history spell 561216: 0 events in 186 logs; bindmysoul: nothing beyond the tooltip.",
-      "label_suffix": "strike_period"
-    },
-    {
       "spell": 300483,
       "name": "Chaotic Intuition (stacks cap at 10)",
       "kind": "metric_delta",
@@ -18389,7 +18319,10 @@
       "setup_casts": [
         520693
       ],
-      "setup_wait_ms": 1100
+      "setup_wait_ms": 1800,
+      "refill_power_after_setup_casts": {
+        "power": 3
+      }
     },
     {
       "spell": 681376,
@@ -18412,7 +18345,6 @@
       "setup_casts": [
         555738,
         555738,
-        555738,
         555738
       ],
       "setup_wait_ms": 3000,
@@ -18431,11 +18363,11 @@
       "stack_feed": {
         "aura": 572782,
         "cap": 3,
-        "window_ms": 8000,
-        "trials": 4,
-        "source": "572782 StackAmount 3, DurationIndex 31 = 8000 ms"
+        "window_ms": 13000,
+        "trials": 2,
+        "source": "572782 StackAmount 3, DurationIndex 31 = 8000 ms; window_ms is 13000 because four Fury Unleashed casts leave 5000 ms of strikes and 8000 ms of aura behind the last one, so the next trial opens 14000 ms after the previous read; the polls are 3000 ms apart, the consecutive applications read at most 6000 ms apart"
       },
-      "observe_source": "572782 StackAmount 3 ($u), DurationIndex 31 = 8000 ms. Chaotic 681376 (AscensionFelswornEvents.cpp:56-57,148-149) rolls Chance() on the raw ProcChance 8 once per outgoing non-derived damage event and casts 572782 on the caster; no spell modifier forces it, so the stacks are earned: five real casts of Fury Unleashed 555738 3000 ms apart (a 5000 ms aura striking every 1000 ms up to 8 enemies, 8 dummies within its radius, 40 events a cast, 120 in all) feed 4 trials (stack_feed); a trial is valid with at least 4 counted applications and a span below 8000 ms, and passes at exactly 3 stacks. Residual per pair: P(fewer than 4 applications in 120 events) is about 1.5% per trial, voided, never a fail; the pair's residual is v^4 (about 5e-8) and the void rate sizes the rest as v^4. Reference search 2026-11-24: coa-history spell 572782 and 681376: nothing found that decides the cap.",
+      "observe_source": "572782 StackAmount 3 ($u), DurationIndex 31 = 8000 ms. Chaotic 681376 (AscensionFelswornEvents.cpp:56-57,148-149) rolls Chance() on the raw ProcChance 8 once per outgoing non-derived damage event and casts 572782 on the caster; no spell modifier forces it, so the stacks are earned: four real casts of Fury Unleashed 555738 3000 ms apart (a 5000 ms aura striking every 1000 ms up to 8 enemies, 8 dummies within its radius, 40 events a cast, 120 in all) feed 2 trials (stack_feed); a trial is valid with at least 4 counted applications and a span below 13000 ms (see stack_feed source), and passes at exactly 3 stacks. Residual per pair: P(fewer than 4 applications in about 110 events) is about 1.5% per trial, voided, never a fail; the pair's residual is v^2 (about 2e-4) and the void rate sizes the rest as v^4. Reference search 2026-11-24: coa-history spell 572782 and 681376: nothing found that decides the cap.",
       "label_suffix": "stack_cap"
     },
     {
