@@ -1,6 +1,7 @@
 import unittest
 
 from behaviours import behaviour_scenario
+from metric_delta_options import channel_lengths
 from compare import judge_behaviour
 from profile import DBC_DIR, load_fixture_class_file
 import run
@@ -13,6 +14,10 @@ def lengths_entry(**changes) -> dict:
             'expected': 2, 'before_expected': 0, 'trigger_spell': 500237, 'target': 'dummy',
             'metric': 'spell_damage_count', 'fields': {'spell': 500237, 'target': 'dummy'}, 'wait_ms': 3000,
             'channel_lengths': {'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': 2}, **changes}
+
+
+def judged_entry() -> dict:
+    return lengths_entry(channel_lengths={'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': 4})
 
 
 def expectation_of(entry: dict):
@@ -76,54 +81,65 @@ class ChannelLengthsTests(unittest.TestCase):
             with self.subTest(lengths=lengths), self.assertRaises(ValueError):
                 behaviour_scenario(load_fixture_class_file(23), lengths_entry(channel_lengths=lengths))
 
+    def test_three_lengths_need_three_kept_casts_each(self):
+        self.assertEqual([channel_lengths.minimum_kept(count) for count in (2, 3, 4)], [7, 3, 2])
+
     def test_damage_rising_with_the_channel_length_is_ok(self):
-        expectation = expectation_of(lengths_entry())
-        damages = {600: [80, 84], 1500: [170, 175], 'full': [330, 320]}
+        expectation = expectation_of(judged_entry())
+        damages = {600: [80, 84, 82, 81], 1500: [170, 175, 172, 171], 'full': [330, 320, 325, 322]}
         self.assertEqual(self.judged(run_values(expectation, damages), expectation), 'ok')
 
     def test_flat_or_falling_damage_alerts(self):
-        expectation = expectation_of(lengths_entry())
-        for damages in ({600: [330, 320], 1500: [170, 175], 'full': [80, 84]},
-                        {600: [200, 200], 1500: [200, 200], 'full': [200, 200]},
-                        {600: [80, 84], 1500: [340, 340], 'full': [330, 320]}):
+        expectation = expectation_of(judged_entry())
+        for damages in ({600: [330, 320, 325, 322], 1500: [170, 175, 172, 171], 'full': [80, 84, 82, 81]},
+                        {600: [200] * 4, 1500: [200] * 4, 'full': [200] * 4},
+                        {600: [80, 84, 82, 81], 1500: [340] * 4, 'full': [330, 320, 325, 322]}):
             with self.subTest(damages=damages):
                 self.assertEqual(self.judged(run_values(expectation, damages), expectation), 'alert')
 
     def test_critical_repeats_leave_the_mean_and_a_wholly_critical_length_is_unmeasured(self):
-        expectation = expectation_of(lengths_entry())
-        damages = {600: [80, 400], 1500: [170, 175], 'full': [330, 320]}
-        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [2, 1]}), expectation), 'ok')
-        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [1, 1]}), expectation),
+        expectation = expectation_of(judged_entry())
+        damages = {600: [80, 400, 82, 81], 1500: [170, 175, 172, 171], 'full': [330, 320, 325, 322]}
+        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [2, 1, 2, 2]}), expectation),
+                         'ok')
+        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [1] * 4}), expectation),
                          'unmeasured')
 
     def test_a_missing_end_strike_alerts(self):
-        expectation = expectation_of(lengths_entry())
-        damages = {600: [80, 84], 1500: [170, 175], 'full': [330, 320]}
-        values = run_values(expectation, damages, struck={1500: [2, 1]}, plain={1500: [2, 1]})
+        expectation = expectation_of(judged_entry())
+        damages = {600: [80, 84, 82, 81], 1500: [170, 175, 172, 171], 'full': [330, 320, 325, 322]}
+        values = run_values(expectation, damages, struck={1500: [2, 1, 2, 2]}, plain={1500: [2, 1, 2, 2]})
         self.assertEqual(self.judged(values, expectation), 'alert')
 
     def test_a_cancel_that_leaves_the_channel_up_voids_its_cast(self):
-        expectation = expectation_of(lengths_entry())
-        damages = {600: [80, 900], 1500: [170, 175], 'full': [330, 320]}
-        values = run_values(expectation, damages, still_up={600: [0, 1]})
+        expectation = expectation_of(judged_entry())
+        damages = {600: [80, 900, 82, 81], 1500: [170, 175, 172, 171], 'full': [330, 320, 325, 322]}
+        values = run_values(expectation, damages, still_up={600: [0, 1, 0, 0]})
         self.assertEqual(self.judged(values, expectation), 'ok')
 
     def test_failed_cancels_never_pass_on_full_channels_read_in_rising_order(self):
-        expectation = expectation_of(lengths_entry())
-        damages = {600: [300, 310], 1500: [320, 325], 'full': [330, 335]}
-        values = run_values(expectation, damages, still_up={600: [1, 1], 1500: [1, 1]})
+        expectation = expectation_of(judged_entry())
+        damages = {600: [300, 310, 305, 306], 1500: [320, 325, 322, 321], 'full': [330, 335, 332, 331]}
+        values = run_values(expectation, damages, still_up={600: [1] * 4, 1500: [1] * 4})
         self.assertEqual(self.judged(values, expectation), 'unmeasured')
 
     def test_a_missing_channel_read_alerts(self):
-        expectation = expectation_of(lengths_entry())
-        damages = {600: [80, 84], 1500: [170, 175], 'full': [330, 320]}
+        expectation = expectation_of(judged_entry())
+        damages = {600: [80, 84, 82, 81], 1500: [170, 175, 172, 171], 'full': [330, 320, 325, 322]}
         values = run_values(expectation, damages)
         del values[expectation.model['channel_lengths']['channel']['1500'][0]]
         self.assertEqual(self.judged(values, expectation), 'alert')
 
     def test_length_independent_damage_with_rising_means_never_passes(self):
-        expectation = expectation_of(lengths_entry())
-        for damages in ({600: [300, 330], 1500: [310, 335], 'full': [320, 340]},
-                        {600: [80, 175], 1500: [170, 330], 'full': [320, 335]}):
+        expectation = expectation_of(judged_entry())
+        for damages in ({600: [300, 330, 301, 329], 1500: [310, 335, 311, 334], 'full': [320, 340, 321, 339]},
+                        {600: [80, 175, 81, 174], 1500: [170, 330, 171, 329], 'full': [320, 335, 321, 334]}):
             with self.subTest(damages=damages):
                 self.assertEqual(self.judged(run_values(expectation, damages), expectation), 'alert')
+
+    def test_two_kept_casts_per_length_read_unmeasured_even_in_ordered_blocks(self):
+        expectation = expectation_of(judged_entry())
+        damages = {600: [200, 900, 201, 950], 1500: [202, 960, 203, 970], 'full': [204, 205, 980, 990]}
+        values = run_values(expectation, damages, still_up={600: [0, 1, 0, 1], 1500: [0, 1, 0, 1]},
+                            plain={'full': [2, 2, 1, 1]})
+        self.assertEqual(self.judged(values, expectation), 'unmeasured')

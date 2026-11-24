@@ -1,4 +1,5 @@
 from dataclasses import replace
+from math import factorial
 
 NAME = 'channel_lengths'
 ORDER = 42
@@ -7,6 +8,7 @@ PLAIN = {'critical': False, 'resisted': False, 'blocked': False}
 READS = (('total', 'spell_damage_total', PLAIN), ('plain', 'spell_damage_count', PLAIN),
          ('struck', 'spell_damage_count', {}))
 FULL = 'full'
+CHANCE_CAP = 1e-3
 
 
 def positive(value) -> bool:
@@ -95,6 +97,13 @@ def fixtures(class_file: dict, spec, lengths: dict, scenario: dict):
                              f'the next length.')
 
 
+def minimum_kept(lengths_count: int) -> int:
+    kept = 1
+    while factorial(kept) ** lengths_count / factorial(lengths_count * kept) > CHANCE_CAP:
+        kept += 1
+    return kept
+
+
 def model(spec, lengths: dict) -> dict:
     return {NAME: {**lengths, 'cancel_ms': list(lengths['cancel_ms']), 'arms': arms(lengths),
                    'base': {read: read_label(spec, 'base', 0, read) for read, _, _ in READS},
@@ -134,12 +143,14 @@ def verdict(verdict, run, lengths: dict):
                      and not still_up.get(arm, [False] * len(rows_of_arm))[index]]
                for arm, rows_of_arm in per_arm.items()}
     voided = [(arm, index + 1) for arm, flags in still_up.items() for index, up in enumerate(flags) if up]
-    empty = [arm for arm, values_of_arm in damages.items() if not values_of_arm]
-    if empty:
-        return replace(verdict, status='unmeasured', explanation=f'channel lengths {empty} took a critical, '
-                                                                 f'resisted or blocked hit or kept the channel aura '
-                                                                 f'after the cancel in every repeat (void (length, '
-                                                                 f'repeat) {voided})')
+    minimum = minimum_kept(len(lengths['arms']))
+    short = [arm for arm, values_of_arm in damages.items() if len(values_of_arm) < minimum]
+    if short:
+        return replace(verdict, status='unmeasured', explanation=f'channel lengths {short} keep fewer than '
+                                                                 f'{minimum} casts without a critical, resisted or '
+                                                                 f'blocked hit and with the channel aura gone after '
+                                                                 f'the cancel (void (length, repeat) {voided}), '
+                                                                 f'kept {[len(damages[arm]) for arm in short]}')
     means = [sum(damages[arm]) / len(damages[arm]) for arm in lengths['arms']]
     ordered = [damages[arm] for arm in lengths['arms']]
     rising = all(max(low) < min(high) for low, high in zip(ordered, ordered[1:]))

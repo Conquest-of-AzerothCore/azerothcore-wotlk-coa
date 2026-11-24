@@ -12,7 +12,9 @@ of those hits and the count of all hits. Labels are `<spell> <metric> after chan
 Judge (after the plain before/after judge, which it keeps): each cast must land `spell` `events` times (else alert); a
 cast whose channel aura is still up after its cancel is void; over the kept casts (only plain hits, not void), every
 damage of a length must lie below every damage of the next length, from the shortest channel to the full one (a rise
-without overlap, mentor D-106); a length with no kept cast is `unmeasured`. A missing read alerts. It states no amount:
+without overlap, mentor D-106); a length that keeps fewer than `k` casts is `unmeasured`, `k` the smallest
+integer with `k!^L / (L k)! <= 1e-3` for `L` lengths (the chance that a length-independent damage falls in ordered
+blocks; `L = 3` gives `k = 3`, 216/362880 = 6.0e-4). A missing read alerts. It states no amount:
 a direction-only claim (mentor D-100).
 
 Named point: `verdict(verdict, run, value)` (`metric_delta_options.option_verdict`); `fixtures` adds the casts and
