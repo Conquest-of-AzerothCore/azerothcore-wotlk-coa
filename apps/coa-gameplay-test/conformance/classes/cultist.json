@@ -714,6 +714,144 @@
         "source": "Psychic Suppression 800432 has single-target EffectImplicitTargetA 6/1 with EffectRadiusIndex 0 and EffectChainTarget 0 on all effects; triggered 803296 (EffectImplicitTargetA 1, EffectRadiusIndex 0) and lifecycle-cast 802789 / 803746 (AscensionCultistAuras.cpp:66-70,155-159; EffectImplicitTargetA 6, EffectRadiusIndex 0) have zero radius and target only the stream's own dummy; cast at dummy_distance 10 yd (outside 5 yd melee range, inside 30 yd RangeIndex 4); 823764 is caster-only; Mind Rot 560943 has EffectImplicitTargetA 6, EffectRadiusIndex 0; aura_ascension_cultist_event only accepts the caster's own outgoing damage (AscensionCultistEvents.cpp:71,82,165); streams are ungrouped."
       },
       "observe_source": "Mind Rot 300300 (passive, ProcChance 25 = $h; AscensionCultistEvents.cpp:82 checks dealt && (periodic || (info && info->IsChanneled())) && Chance(player, id) and :165 casts 560943). Trigger: Psychic Suppression 800432 (channeled AttributesEx 0x4, GCD 1500 ms, RecoveryTime 90000 ms reset before each cast by flat_chance_rate, 17% of 1512 BaseMana = 257 mana, cast_power 2000 <= 2297 MaxMana; Duration 5000 ms, Effect[0] aura 3 periodic Shadow damage, EffectAmplitude 500 ms, no START_PERIODIC_AT_APPLY -> 10 ticks per cast inside 5500 ms). Unlearned control: 2 cycles x 10 ticks x 5 parts x 8 streams = 800 trials (>= 50), expects 0 procs. Treatment: 47 cycles x 10 ticks x 5 parts x 8 streams = 18800 trials (>= 18576 flip-proof trials for 25% with G-19 +-2 pt band over 5 parts, residual edge-crossing failure <= 0.1% per pair). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 300300 matches verbatim; ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 301182,
+      "name": "Bulwark of Shadow (Void Shield +30% absorb above 80 Insanity)",
+      "kind": "metric_delta",
+      "variant": "above_80",
+      "label_suffix": "above_80",
+      "quote": "While above 80 Insanity, your Void Shield has $572758s2% increased value.",
+      "trigger_spell": 578115,
+      "gate_spell": 301182,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          81,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 6,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 6243,
+      "after_at_least": 6208,
+      "after_at_most": 6279,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Bulwark of Shadow 301182 tooltip: 'While above 80 Insanity, your Void Shield has $572758s2% increased value.' ($572758s2 = 30; 572758 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, EffectBasePoints 29 + EffectDieSides 1 = +30%, EffectMiscValue 127, EffectSpellClassMask[4] 536870912 matching Void Shield 578115 SpellFamilyName 31 SpellFamilyFlags[1] 536870912; Spell.dbc). AscensionCultistData.h:140 {301182, 572758, 80} and AscensionCultist.cpp:272-273 grant 572758 during Refresh (every 500 ms) when 301182 is present and Insanity 500706 > 80. Level-60 Void Shield 578115 (BaseLevel 60, SpellLevel 60, MaxLevel 66, no SkillLineAbility row, EffectBasePoints[0] 775, EffectDieSides[0] 55, tooltip '${$m1+$SP*2}', AscensionCultistData.h:96 coeff 2.0) at player_spell_power 2000 rolls [776..830] + 4000 = [4776..4830]. With 572758 (+30%, SpellAuraEffects.cpp:656 int32(float(amount) * 1.3f)), absorbed capacity is [6208..6279], strictly excluding +28% (max 6182) and +32% (min 6304) around G-19 +-2 pt band. Precondition fixture: Insanity 500706 set to 81 stacks; expire_ms 1000 allows Refresh to grant 572758 before the cast while staying well under 500727's 10000 ms out-of-combat decay tick. Striker casts Light of the Naaru 41394 (1100 Holy) 6 times (6600 > 6279) at the caster (20000 HP) in treatment only; spell_absorb_total reads 0 in uncast before and [6208..6279] after. Reference search 2026-11-24: coabuildhub spells_master_index.json 301182 matches verbatim ('While above 80 Insanity, your Void Shield has 30% increased value.'); coa-history has 0 events for 301182/572758 and 5660 casts / 7999 applies for 578115 Void Shield (no absorb magnitudes logged)."
+    },
+    {
+      "spell": 301182,
+      "name": "Bulwark of Shadow (no bonus at 80 Insanity threshold)",
+      "kind": "metric_delta",
+      "variant": "at_80",
+      "label_suffix": "at_80",
+      "quote": "While above 80 Insanity,",
+      "trigger_spell": 578115,
+      "gate_spell": 301182,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 6,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4803,
+      "after_at_least": 4776,
+      "after_at_most": 4830,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold boundary control for Bulwark of Shadow 301182 ('While above 80 Insanity'): identical to above_80 with 301182 learned, except precondition fixture Insanity 500706 is set to 80 stacks (not > 80, AscensionCultist.cpp:272-273). Helper 572758 is not granted, so level-60 Void Shield 578115 at player_spell_power 2000 absorbs only its unboosted [776..830] + 4000 = [4776..4830] against 6x Light of the Naaru 41394 (6600 Holy); uncast before reads 0. Reference search 2026-11-24: coabuildhub spells_master_index.json 301182 matches verbatim; coa-history has 0 events for 301182/572758."
+    },
+    {
+      "spell": 301182,
+      "name": "Bulwark of Shadow (control without talent at 81 Insanity)",
+      "kind": "metric_delta",
+      "variant": "control",
+      "label_suffix": "control",
+      "quote": "your Void Shield has $572758s2% increased value.",
+      "trigger_spell": 578115,
+      "gate_spell": 60235,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          81,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 6,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4803,
+      "after_at_least": 4776,
+      "after_at_most": 4830,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control arm for Bulwark of Shadow 301182: identical to above_80 with Insanity 500706 at 81 stacks (precondition fixture), except 301182 is NOT learned (gate_spell 60235). Without 301182, Refresh does not grant 572758 and level-60 Void Shield 578115 at player_spell_power 2000 absorbs only its unboosted [776..830] + 4000 = [4776..4830] against 6x Light of the Naaru 41394 (6600 Holy); uncast before reads 0. Reference search 2026-11-24: coabuildhub spells_master_index.json 301182 matches verbatim; coa-history has 0 events for 301182/572758."
     }
   ],
   "player_observations": [],

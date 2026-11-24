@@ -621,14 +621,18 @@
   {
     "spell": 301182,
     "clause": "While above 80 Insanity,",
-    "labels": [],
+    "labels": [
+      "301182 behaviour_metric_delta above_80",
+      "301182 behaviour_metric_delta at_80"
+    ],
     "kind": "claim"
   },
   {
     "spell": 301182,
     "clause": "your Void Shield has $572758s2% increased value.",
     "labels": [
-      "301182 effect_value 572758e1 #0"
+      "301182 behaviour_metric_delta above_80",
+      "301182 behaviour_metric_delta control"
     ],
     "kind": "claim"
   },
