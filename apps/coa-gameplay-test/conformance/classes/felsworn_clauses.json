@@ -510,11 +510,15 @@
       },
       {
         "claim": "Your next 3 Fel Fireballs",
-        "labels": []
+        "labels": [
+          "300490 behaviour_metric_delta felforged_fed charges"
+        ]
       },
       {
         "claim": "have a $s1% reduced cast time",
-        "labels": []
+        "labels": [
+          "300490 behaviour_metric_delta felforged_fed cut"
+        ]
       },
       {
         "claim": "for $d",

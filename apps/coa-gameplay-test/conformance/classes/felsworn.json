@@ -25085,6 +25085,26 @@
       "fields": {},
       "expected": 1,
       "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Whirlwind 13736 (a self channel, 3000 ms, no cost, ChannelInterruptFlags 0x3c3c) carries it. The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Whirlwind 13736 moved the same way reads 0 (moving_channel_whirlwind_moved) and not moved reads 1 (moving_channel_whirlwind_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
+    },
+    {
+      "spell": 300490,
+      "name": "Felforged (earned: 3 reduced Fel Fireballs, the 4th full)",
+      "kind": "fed_charge_casts",
+      "label_suffix": "felforged_fed",
+      "quote": "Your next 3 Fel Fireballs have a $s1% reduced cast time",
+      "quote_spell": 806104,
+      "feed_spell": 704368,
+      "aura": 806104,
+      "effect_spell": 801312,
+      "charges": 3,
+      "every_ms": 3200,
+      "residual_target": 0.001,
+      "feed_power": 100,
+      "effect_power": 100,
+      "trials": 3,
+      "min_judged": 2,
+      "poll_ms": 15,
+      "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), all inside 0.9 of the 8000 ms aura (DurationIndex 31). A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
     }
   ],
   "player_observations": [],
