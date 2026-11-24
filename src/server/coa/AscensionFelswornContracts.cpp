@@ -224,6 +224,10 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].SpellClassMask = flag96(1048576, 16777216, 0);
     if (id == 806128)
         info->Effects[0].SpellClassMask = flag96(0, 524288, 2);
+    if (id == 705123 || id == 707846)
+        info->Effects[2].SpellClassMask[1] &= ~uint32(1);
+    if (id == 706266 || id == 707844)
+        dummy(2);
     if (id == 801902)
         info->Effects[0].MiscValue = SPELLMOD_COST;
     if (id == 555739 || id == 806097)

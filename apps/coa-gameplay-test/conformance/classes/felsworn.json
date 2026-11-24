@@ -11363,10 +11363,23 @@
       "learn": [
         801312
       ],
-      "control": {},
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
       "treatment": {
         "learn": [
           705123
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
         ]
       },
       "critical": false,
@@ -11374,7 +11387,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "observe_source": "$s2 = 10 (705123 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 9 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 705123: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says +15% where the DBC tooltip and Effect[1] say 10% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only.",
+      "observe_source": "$s2 = 10 (705123 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 9 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract drops the Fel Fireball bit of Effect[2] (AscensionFelswornContracts.cpp, Felsworn ADR 0025), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 705123: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says +15% where the DBC tooltip and Effect[1] say 10% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only.",
       "cast_wait_ms": 2500
     },
     {
@@ -11414,10 +11427,23 @@
       "learn": [
         801312
       ],
-      "control": {},
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
       "treatment": {
         "learn": [
           707846
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
         ]
       },
       "critical": false,
@@ -11425,7 +11451,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "observe_source": "$s2 = 20 (707846 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707846: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: not listed (the snapshot lists 705123 only); expected values come from the tooltip and the DBC only.",
+      "observe_source": "$s2 = 20 (707846 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract drops the Fel Fireball bit of Effect[2] (AscensionFelswornContracts.cpp, Felsworn ADR 0025), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707846: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: not listed (the snapshot lists 705123 only); expected values come from the tooltip and the DBC only.",
       "cast_wait_ms": 2500
     },
     {
@@ -12492,7 +12518,7 @@
       "tolerance": 16.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "706266 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 9 + 1 = 10 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10, both aimed at Hateforged Barrier. The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.10 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.21) is excluded. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'increases the absorption value of Hateforged Barrier by 10%' (705129-era state for the first rank); expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [914.1, 948.2] (831..862 times 1.10); a doubled bonus would read 1006..1043.",
+      "observe_source": "706266 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 9 + 1 = 10 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + 1 = 10, both aimed at Hateforged Barrier. O-27 (owner): one bonus only; the Felsworn contract turns Effect[2] into a dummy (AscensionFelswornContracts.cpp, Felsworn ADR 0025) and keeps aura 317, which scales the completed absorb (SpellAuraEffects.cpp); before the fix the reads were 1016 / 1029 (rank 1) and 1233 / 1207 (rank 2), 1.21x and 1.44x (merged/fw-b3g3/proveF2). The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.10 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.21) is excluded. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'increases the absorption value of Hateforged Barrier by 10%' (705129-era state for the first rank); expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [914.1, 948.2] (831..862 times 1.10); a doubled bonus would read 1006..1043.",
       "after_at_least": 914.1,
       "after_at_most": 948.2
     },
@@ -12517,7 +12543,7 @@
       "tolerance": 16.5,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "707844 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 19 + 1 = 20 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 19 + 1 = 20, both aimed at Hateforged Barrier. The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.20 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.44) is excluded. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [997.2, 1034.4] (831..862 times 1.20); a doubled bonus would read 1197..1241.",
+      "observe_source": "707844 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 19 + 1 = 20 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 19 + 1 = 20, both aimed at Hateforged Barrier. O-27 (owner): one bonus only; the Felsworn contract turns Effect[2] into a dummy (AscensionFelswornContracts.cpp, Felsworn ADR 0025) and keeps aura 317, which scales the completed absorb (SpellAuraEffects.cpp); before the fix the reads were 1016 / 1029 (rank 1) and 1233 / 1207 (rank 2), 1.21x and 1.44x (merged/fw-b3g3/proveF2). The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.20 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.44) is excluded. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [997.2, 1034.4] (831..862 times 1.20); a doubled bonus would read 1197..1241.",
       "after_at_least": 997.2,
       "after_at_most": 1034.4
     },
@@ -14825,35 +14851,35 @@
     },
     {
       "spell": 804613,
-      "name": "Doomstride (the next Curse or Magic effect is resisted at full health)",
-      "kind": "taken_hit",
-      "variant": "resist_next",
-      "label_suffix": "resist_next",
-      "judge": "resist_rate",
-      "expected_points": 100,
+      "name": "Doomstride (the curse resist chance is doubled at full health)",
+      "kind": "debuff_resist_rate",
+      "variant": "resist_curse",
+      "label_suffix": "resist_curse",
       "quote": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
       "strike_spell": 702,
-      "trials": 800,
-      "parts": 5,
-      "arms": [
-        {
-          "name": "control"
-        },
-        {
-          "name": "treatment",
-          "auras": [
-            [
-              804613,
-              1
-            ],
-            [
-              706818,
-              0
-            ]
-          ]
-        }
+      "base_chance_pct": 4,
+      "clear_auras": [
+        706818
       ],
-      "observe_source": "804613 tooltip: 'increased by 100%' read as 100 points added to the resist chance, the reading the Templar precedent Holy Constitution 706323 uses ('increases your chance to resist disease effects by 30%' judged as 30 points, ADR 0196). A level 60 striker (entry 36) casts Curse of Weakness 702 (Dispel 2 curse, DmgClass 1 magic, two SPELL_EFFECT_APPLY_AURA effects, SpellDuration.dbc index 4) at the caster; each trial reads whether 702 took hold on the caster 300 ms later and removes it. The control arm's resisted share is the same-level spell miss chance; the treatment arm sets the passive aura 804613 (the precondition fixture; the caster stays at full health, the fixture default) and removes the 706818 aura before every trial, so each trial is the first Curse after a rest (the 10 s rule belongs to clause 282, not measured here), and must resist it 100 points more often. 800 trials per arm in each of 5 pooled parts. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot (~/CoaServer/reference/snapshots/bindmysoul): spellId 804613 Doomstride reads 'Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.', a different text from the installed DBC tooltip; the installed DBC wins over a snapshot (general rules), so the expectation is the DBC tooltip; nothing else found."
+      "low_health_pct": 90,
+      "parts": 11,
+      "observe_source": "Owner ruling O-28: 'increased by 100%' doubles the base chance ('Increased \"by\", not \"to\"'); mentor D-93: the server rolls the stock hit result a second time (AscensionFelsworn.cpp ResistDebuff, Unit::SpellHitResult), a miss or resist of that roll resists the effect, so the full-health chance is 1 - (1 - p)^2 = 2p - p^2, a stated engine approximation of 2p (Felsworn ADR 0026). A level 60 striker (creature 36, no spell hit bonus) casts Curse of Weakness 702 (Dispel 2 curse, DmgClass 1 magic, two APPLY_AURA effects) at the caster once per trial; the stock chance p is the same-level spell miss: Unit::MagicSpellHitResult gives 96 - levelDiff = 96% hit at levelDiff 0 (Unit.cpp:3995-3998), so p = 0.04 and the full-health chance is 0.0784; the earlier same-level control read 3.7% of 4000 trials (merged/fw-ea1/prove2). The control arm runs before 804613 is learned (a real learn, D-91, no set_aura of the talent); the treatment at full health and the low-health arm at 90% health after it. 706818, the 10 s lockout the resist casts, is removed before every strike (a precondition fixture: each trial is the first effect after a rest; the lockout is the resist_lockout entry). Arms sized by the exact binomial false-fail through the judge (review fw-rf1b I-2b: the earlier normal-approximation sizing, 3860 / 7270 / 3860 trials, failed a conformant claim with probability 4.5e-3 per pair): 4466 / 7656 / 4466 trials (11 parts of 406 / 696 / 406), each arm leaving its G-20 band with probability at most 1.67e-4 per run (exact: control and low health 1.62e-4, treatment 1.66e-4), so a conformant server fails this claim with probability 9.79e-4 per counted pair (3 arms x 2 runs). Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot lists 804613 with another text ('Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.'); the installed DBC wins over a snapshot (general rules)."
+    },
+    {
+      "spell": 804613,
+      "name": "Doomstride (the magic resist chance is doubled at full health)",
+      "kind": "debuff_resist_rate",
+      "variant": "resist_magic",
+      "label_suffix": "resist_magic",
+      "quote": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
+      "strike_spell": 31589,
+      "base_chance_pct": 4,
+      "clear_auras": [
+        706818
+      ],
+      "low_health_pct": 90,
+      "parts": 11,
+      "observe_source": "Owner ruling O-28: 'increased by 100%' doubles the base chance ('Increased \"by\", not \"to\"'); mentor D-93: the server rolls the stock hit result a second time (AscensionFelsworn.cpp ResistDebuff, Unit::SpellHitResult), a miss or resist of that roll resists the effect, so the full-health chance is 1 - (1 - p)^2 = 2p - p^2, a stated engine approximation of 2p (Felsworn ADR 0026). A level 60 striker (creature 36, no spell hit bonus) casts Slow 31589 (Dispel 1 magic, DmgClass 1 magic, three APPLY_AURA effects, Arcane) at the caster once per trial; the stock chance p is the same-level spell miss: Unit::MagicSpellHitResult gives 96 - levelDiff = 96% hit at levelDiff 0 (Unit.cpp:3995-3998), so p = 0.04 and the full-health chance is 0.0784; the earlier same-level control read 3.7% of 4000 trials (merged/fw-ea1/prove2). The control arm runs before 804613 is learned (a real learn, D-91, no set_aura of the talent); the treatment at full health and the low-health arm at 90% health after it. 706818, the 10 s lockout the resist casts, is removed before every strike (a precondition fixture: each trial is the first effect after a rest; the lockout is the resist_lockout entry). Arms sized by the exact binomial false-fail through the judge (review fw-rf1b I-2b: the earlier normal-approximation sizing, 3860 / 7270 / 3860 trials, failed a conformant claim with probability 4.5e-3 per pair): 4466 / 7656 / 4466 trials (11 parts of 406 / 696 / 406), each arm leaving its G-20 band with probability at most 1.67e-4 per run (exact: control and low health 1.62e-4, treatment 1.66e-4), so a conformant server fails this claim with probability 9.79e-4 per counted pair (3 arms x 2 runs). Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot lists 804613 with another text ('Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.'); the installed DBC wins over a snapshot (general rules)."
     },
     {
       "spell": 570158,
@@ -18360,41 +18386,25 @@
     {
       "spell": 804613,
       "name": "Doomstride (the resist occurs at most once every 10 sec)",
-      "kind": "taken_hit",
-      "variant": "resist_icd",
-      "label_suffix": "resist_icd",
-      "judge": "resist_rate",
-      "expected_points": 100,
+      "kind": "debuff_resist_rate",
+      "variant": "resist_lockout",
+      "label_suffix": "resist_lockout",
       "quote": "Can only occur once every 10 sec.",
+      "mode": "lockout",
       "strike_spell": 702,
-      "trials": 6,
-      "learn": [
-        804613
+      "base_chance_pct": 20,
+      "striker_level": 56,
+      "clear_auras": [
+        706818
       ],
-      "striker_spell_hit": true,
-      "arms": [
-        {
-          "name": "control",
-          "auras": [
-            [
-              706818,
-              0
-            ]
-          ],
-          "prime_gap_ms": 9000
-        },
-        {
-          "name": "treatment",
-          "auras": [
-            [
-              706818,
-              0
-            ]
-          ],
-          "prime_gap_ms": 11000
-        }
-      ],
-      "observe_source": "804613 Doomstride tooltip: 'While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%. Can only occur once every 10 sec.' The server resists a non-positive Curse or Magic all-aura spell at a full-health owner of 804613 without 706818, then casts 706818 on the owner (AscensionFelsworn.cpp:76-93, ResistDebuff); 706818 lasts SpellDuration index 1 = 10000 ms (forced in AscensionFelswornContracts.cpp:263-266). 804613 is learned for every arm (D-67, a real learn) and the caster stays at full health (Curse of Weakness 702 deals no damage). A stationary creature striker (entry 36) with a spell hit bonus of 100 (no natural miss, Unit.cpp:4039-4051) casts 702 (Dispel 2 curse, DmgClass magic, two APPLY_AURA effects) at the caster: each trial removes 706818, casts a priming 702, waits the arm's gap, removes any 702 and casts the judged 702, read 300 ms later. Control gap 9000 ms (inside the 10 s): the judged curse must land; treatment gap 11000 ms (past it): it must be resisted; treatment resists 100 points more often. Deterministic with no natural miss, so 6 trials per arm. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "lockout_aura": 706818,
+      "lockout_ms": 10000,
+      "locked_gap_ms": 300,
+      "locked_trials": 460,
+      "expiry_trials": 10,
+      "expiry_margin_ms": 500,
+      "parts": 10,
+      "observe_source": "Owner ruling O-28: 'increased by 100%' doubles the base chance ('Increased \"by\", not \"to\"'); mentor D-93: the server rolls the stock hit result a second time (AscensionFelsworn.cpp ResistDebuff, Unit::SpellHitResult), a miss or resist of that roll resists the effect, so the full-health chance is 1 - (1 - p)^2 = 2p - p^2, a stated engine approximation of 2p (Felsworn ADR 0026). Mentor D-93: the 10 s lockout 706818 is cast when the second roll resists (the mentor's reading of 'Can only occur once every 10 sec', not an owner ruling); 706818 lasts SpellDuration index 1 = 10000 ms (AscensionFelswornContracts.cpp). Design 2 of clause 282 (design 1, two prime gaps against a striker with a spell hit bonus of 100, relied on the guaranteed resist O-28 removed: with p = 0 the passive never resists). 804613 is learned (real learn) and the caster stays at full health. A level 56 striker (creature 36, no spell hit bonus; an open-world creature is shown to a level 60 character at least at 60 - 4 = 56, LocalLevelScaling.h:314-319, and Creature::getLevelForTarget rolls the hit at that level) gives levelDiff 4 and p = 1 - (94 - (4 - 2) x 7)% = 0.20 (Unit.cpp:3995-3998, Rate.MissChanceMultiplier.TargetPlayer 7 in the test worldserver.conf). The first run of this design used a level 54 striker with p = 0.34 and missed the scaling floor: it read 0.19 / 0.17 on primed trials and 0.344 / 0.356 on the others (pair fw-f1/prove1), which is p = 0.20 and 1 - (1 - 0.20)^2 = 0.36. A trial is primed when the priming 702 leaves 706818 on the caster (share (1 - p) p = 0.16). Locked arm: the judged 702 300 ms after the primed read resists at p on primed trials and at 1 - (1 - p)^2 = 0.36 on the others; each group's Wilson interval at z 3.93 holds its own chance and its Wilson 99% interval excludes the other (minimum 642 trials per group; 460 trials x 10 parts give about 736 primed, 3.8 standard deviations above it), and the primed share of the locked trials holds (1 - p) p = 0.16 in the z 3.93 interval, so a lockout started by any landed effect (share (1 - p)^2 = 0.64) alerts (review fw-rf1 I-3; pair fw-f1/prove2 read 0.160 and 0.158). A conformant server fails the locked label with probability at most 6.4e-4 per counted pair: 5.0e-4 from the 3 holds, 1.4e-4 from a group below its minimum, under 1e-8 from an interval that keeps the other chance (normal approximation; review fw-rf1 I-1). Expiry arm: on primed trials 706818 is on the caster 9500 ms after the priming strike and gone at 10500 ms. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot lists 804613 with another text ('Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.'); the installed DBC wins over a snapshot (general rules)."
     },
     {
       "spell": 804823,

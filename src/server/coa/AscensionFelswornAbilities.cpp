@@ -132,7 +132,7 @@ class felsworn_casts : public AllSpellScript
         for (TargetInfo& target : *spell->GetUniqueTargetInfo())
             if (target.missCondition == SPELL_MISS_NONE && target.targetGUID != caster->GetGUID())
                 if (Player* victim = Owner(ObjectAccessor::GetUnit(*caster, target.targetGUID));
-                    ResistDebuff(victim, info))
+                    ResistDebuff(victim, caster, spell))
                     target.missCondition = SPELL_MISS_RESIST;
         Player* player = Owner(caster);
         if (player && info->Id == 500610)
