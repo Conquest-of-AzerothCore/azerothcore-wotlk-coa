@@ -1,0 +1,135 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: after the Chimeric Embryo dies, a released player is revived on its arena",
+  "contract": "Issue #10293: on Ascension, releasing in Road to De Other Side revived you in the room of the last boss killed. Muzah and Drak'math set that checkpoint when they die (#11222), the Chimeric Embryo (162716) did not, so a player who released after it was sent back to an earlier start. Expected: once the Embryo dies, a player of that run who releases is revived on the middle of the Embryo arena (304.43, -206.08, 341.84), the same safe spot the boss lifts fallen players to.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "killer",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "runner",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "group",
+      "actor": "killer",
+      "target": "runner"
+    },
+    {
+      "action": "teleport",
+      "label": "killer enters the group's Road to De Other Side on the Embryo arena",
+      "actor": "killer",
+      "map": 937,
+      "x": 304.429,
+      "y": -206.081,
+      "z": 341.841,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: killer is in Road to De Other Side",
+      "actor": "killer",
+      "metric": "map_id",
+      "equals": 937,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "runner stands in Drak'math's hall, far from the Embryo arena",
+      "actor": "runner",
+      "map": 937,
+      "x": 291.0,
+      "y": 152.1,
+      "z": 248.0,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: runner is in Road to De Other Side",
+      "actor": "runner",
+      "metric": "map_id",
+      "equals": 937,
+      "within_ms": 10000
+    },
+    {
+      "action": "summon",
+      "label": "the Chimeric Embryo rises beside the killer",
+      "actor": "killer",
+      "as": "embryo",
+      "entry": 162716,
+      "distance": 8
+    },
+    {
+      "action": "wait",
+      "label": "the Embryo wakes and becomes attackable",
+      "ms": 5000
+    },
+    {
+      "action": "attack_nearby",
+      "label": "the party kills the Chimeric Embryo",
+      "actor": "killer",
+      "entry": 162716,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "die",
+      "actor": "runner"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: runner dies in Drak'math's hall",
+      "actor": "runner",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "release_spirit",
+      "actor": "runner",
+      "label": "runner releases the spirit inside the dungeon"
+    },
+    {
+      "action": "assert",
+      "label": "runner stays in Road to De Other Side",
+      "actor": "runner",
+      "metric": "map_id",
+      "equals": 937,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "runner is revived",
+      "actor": "runner",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: runner is revived on the Embryo arena",
+      "actor": "runner",
+      "metric": "point_distance_2d",
+      "x": 304.429,
+      "y": -206.081,
+      "max": 3
+    }
+  ]
+}
