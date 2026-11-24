@@ -1,8 +1,10 @@
 from random import Random
 import unittest
 
-from behaviours import behaviour_scenario
+from behaviours import LEARNED_CONTRAST, behaviour_scenario
 from compare import judge_behaviour
+from coverage import BEHAVIOUR, DATA, verdict_evidence
+from kinds.avoided_swing_reads import avoided_swing_reads_spec, learned_contrast
 from profile import DBC_DIR, load_fixture_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -18,6 +20,9 @@ CRIT = {'spell': 300476, 'kind': 'avoided_swing_reads', 'name': 'Betrayer (party
 DURATION = {'spell': 300476, 'kind': 'avoided_swing_reads', 'name': 'Betrayer (party crit duration)',
             'label_suffix': 'party_crit_duration', 'quote': 'for $520256d.', 'read': 'duration_max',
             'observe_spell': 520256, 'ally_yd': 10, **STRIKERS, 'windows': 30}
+BASELINE = {**CRIT, 'metric': 'melee_crit_chance_refreshed', 'baseline_read': True}
+EXPIRY = {**DURATION, 'read': 'expiry_edge', 'windows': 20}
+CRIT_CLAUSE = 'increasing their critical strike chance by $520256s1%'
 ENERGY = {'spell': 805249, 'kind': 'avoided_swing_reads', 'name': 'Illidari Training (energy per dodge)',
           'label_suffix': 'energy_per_dodge', 'quote': 'Dodging an attack now generates $521210s1 Energy.',
           'read': 'per_event', 'observe_spell': 521210, **STRIKERS, 'windows': 60}
@@ -141,9 +146,97 @@ class AvoidedSwingReadsTests(unittest.TestCase):
         self.assertEqual(self.judge(expectation, values, failures={805249: [134]}).status, 'unmeasured')
         self.assertEqual(self.judge(expectation, values, failures={805249: [0]}).status, 'ok')
 
+    def baseline_values(self, expectation, baseline: float, control: float, treatment: float) -> dict:
+        values = self.values(expectation, {'ally': 0, 'stat': control}, {'ally': 1, 'stat': treatment})
+        values[expectation.model['baseline']] = baseline
+        return values
+
+    def test_a_baseline_read_stamps_the_learned_contrast_from_the_step_list(self):
+        scenario, expectation = self.generated(BASELINE)
+        run.validate(scenario)
+        self.assertEqual(expectation.model['contrast'], LEARNED_CONTRAST)
+        labels = [step.get('label') for step in scenario['steps']]
+        learn = next(index for index, step in enumerate(scenario['steps'])
+                     if step['action'] == 'learn' and step['spell'] == 300476)
+        self.assertLess(labels.index(expectation.model['baseline']),
+                        labels.index(expectation.model['reads']['control']['stat']))
+        self.assertLess(labels.index(expectation.model['reads']['control']['stat']), learn)
+        _, plain = self.generated(CRIT)
+        self.assertNotIn('contrast', plain.model)
+        self.assertNotIn('baseline', plain.model)
+
+    def test_a_mutant_step_list_learning_before_the_control_read_or_without_dodges_gets_no_stamp(self):
+        scenario, expectation = self.generated(BASELINE)
+        spec = avoided_swing_reads_spec(BASELINE)
+        reads = (expectation.model['baseline'], expectation.model['reads']['control']['stat'],
+                 expectation.model['reads']['treatment']['stat'])
+        self.assertEqual(learned_contrast(spec, scenario['steps'], *reads), LEARNED_CONTRAST)
+        steps = scenario['steps']
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step['spell'] == 300476)
+        control = [step.get('label') for step in steps].index(reads[1])
+        early = steps[:control] + [steps[learn]] + steps[control:learn] + steps[learn + 1:]
+        self.assertIsNone(learned_contrast(spec, early, *reads))
+        undodged = [step for step in steps if step['action'] != 'set_combat_avoidance']
+        self.assertIsNone(learned_contrast(spec, undodged, *reads))
+
+    def test_a_still_control_arm_and_the_tooltip_gain_is_ok_and_reads_as_behaviour(self):
+        _, expectation = self.generated(BASELINE)
+        verdict = self.judge(expectation, self.baseline_values(expectation, 5.25, 5.25, 7.25))
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+        self.assertEqual(verdict.detail['contrast'], LEARNED_CONTRAST)
+        self.assertEqual(verdict_evidence(verdict, CRIT_CLAUSE, {}), BEHAVIOUR)
+        _, plain = self.generated({**CRIT, 'metric': 'melee_crit_chance_refreshed'})
+        unstamped = self.judge(plain, self.values(plain, {'ally': 0, 'stat': 5.25}, {'ally': 1, 'stat': 7.25}))
+        self.assertEqual(unstamped.status, 'ok')
+        self.assertEqual(verdict_evidence(unstamped, CRIT_CLAUSE, {}), DATA)
+
+    def test_a_mutant_control_arm_drift_alerts(self):
+        _, expectation = self.generated(BASELINE)
+        verdict = self.judge(expectation, self.baseline_values(expectation, 5.25, 7.25, 9.25))
+        self.assertEqual(verdict.status, 'alert')
+        self.assertEqual(verdict.measured, 2.0)
+        self.assertEqual(self.judge(expectation, self.baseline_values(expectation, 5.25, 5.255, 7.255)).status, 'ok')
+
+    def expiry_values(self, expectation, held, gone, counts=(40, 42, 42)):
+        values = self.values(expectation, {'ally': 0}, {'held': held, 'gone': gone})
+        values.update(zip(expectation.model['dodge_counts'].values(), counts))
+        return values
+
+    def test_the_expiry_edge_reads_held_before_and_gone_after_the_duration(self):
+        scenario, expectation = self.generated(EXPIRY)
+        run.validate(scenario)
+        self.assertEqual(expectation.model['band'], [9600, 11000])
+        self.assertEqual(expectation.model['metric'], 'aura')
+        waits = {step['label']: step['ms'] for step in scenario['steps']
+                 if step['action'] == 'wait' and step.get('label', '').startswith('expiry')}
+        self.assertEqual(waits, {'expiry held': 8800, 'expiry gone': 2000})
+        verdict = self.judge(expectation, self.expiry_values(expectation, 1, 0))
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+
+    def test_mutant_shorter_and_longer_durations_alert_at_the_edge(self):
+        _, expectation = self.generated(EXPIRY)
+        for held, gone in ((0, 0), (1, 1)):
+            with self.subTest(held=held, gone=gone):
+                self.assertEqual(self.judge(expectation, self.expiry_values(expectation, held, gone)).status, 'alert')
+
+    def test_an_expiry_without_a_dodge_in_the_last_window_or_with_a_later_dodge_is_void(self):
+        _, expectation = self.generated(EXPIRY)
+        for counts in ((42, 42, 42), (40, 42, 43)):
+            with self.subTest(counts=counts):
+                verdict = self.judge(expectation, self.expiry_values(expectation, 1, 0, counts))
+                self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_an_expiry_aura_held_before_the_learn_alerts(self):
+        _, expectation = self.generated(EXPIRY)
+        values = self.expiry_values(expectation, 1, 0)
+        values[expectation.model['reads']['control']['ally']] = 1
+        self.assertEqual(self.judge(expectation, values).status, 'alert')
+
     def test_entries_without_their_read_fields_are_refused(self):
         for entry in ({**CRIT, 'metric': None}, {**CRIT, 'ally_yd': 4}, {**RADIUS, 'ally_yd': 10},
-                      {**ENERGY, 'learn': [805249]}, {**ENERGY, 'read': 'chance'}):
+                      {**ENERGY, 'learn': [805249]}, {**ENERGY, 'read': 'chance'},
+                      {**RADIUS, 'baseline_read': True}, {**EXPIRY, 'swing_ms': 950}):
             with self.subTest(entry=entry), self.assertRaises(ValueError):
                 self.generated({key: value for key, value in entry.items() if value is not None})
 

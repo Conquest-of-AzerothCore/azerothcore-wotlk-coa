@@ -1,8 +1,8 @@
 from dataclasses import dataclass, replace
 from pathlib import Path
 
-from behaviours import BEHAVIOUR_METRIC_DELTA, behaviour_entry, prose_rule, waited_ms
-from compare import Verdict, describe_failures, failure_reasons, missing_measurement
+from behaviours import BEHAVIOUR_METRIC_DELTA, LEARNED_CONTRAST, behaviour_entry, prose_rule, waited_ms
+from compare import CONTRAST, Verdict, describe_failures, failure_reasons, missing_measurement
 from hits import timed
 from metric_delta_options.ally_offsets import relocate_steps
 import proc_avoided
@@ -13,9 +13,11 @@ from values import Expectation, dataset
 KIND = 'avoided_swing_reads'
 ORDER = 52
 AURA_EDGE, STAT_DELTA, DURATION_MAX, PER_EVENT = 'aura_edge', 'stat_delta', 'duration_max', 'per_event'
-READS = (AURA_EDGE, STAT_DELTA, DURATION_MAX, PER_EVENT)
+EXPIRY_EDGE = 'expiry_edge'
+READS = (AURA_EDGE, STAT_DELTA, DURATION_MAX, PER_EVENT, EXPIRY_EDGE)
 STAT_METRICS = frozenset({'melee_crit_chance', 'melee_crit_chance_refreshed'})
-READ_METRICS = {AURA_EDGE: 'aura', DURATION_MAX: 'aura_duration_ms', PER_EVENT: 'spell_energize_total'}
+READ_METRICS = {AURA_EDGE: 'aura', DURATION_MAX: 'aura_duration_ms', PER_EVENT: 'spell_energize_total',
+                EXPIRY_EDGE: 'aura'}
 INSIDE, OUTSIDE = 'ally', 'ally2'
 DODGE, PARRY = 100, 0
 MARGIN_YD = 0.5
@@ -26,9 +28,10 @@ TICK_MS = 100
 MIN_EVENTS = 20
 QUIET_SHIFT_YD = 20
 QUIET_WAIT_MS = 200
+EXPIRY_MARGIN_MS = 1000
 FIELDS = {'spell', 'name', 'kind', 'variant', 'label_suffix', 'quote', 'read', 'observe_spell', 'effect',
           'striker_entry', 'strikers', 'striker_auras', 'swing_ms', 'control_windows', 'windows', 'ally_yd',
-          'margin_yd', 'metric', 'min_events', 'learn', 'observe_source'}
+          'margin_yd', 'metric', 'min_events', 'learn', 'observe_source', 'baseline_read'}
 
 
 @dataclass(frozen=True)
@@ -51,6 +54,7 @@ class AvoidedSwingReadsSpec:
     metric: str | None = None
     min_events: int = MIN_EVENTS
     learn: tuple[int, ...] = ()
+    baseline_read: bool = False
 
 
 def avoided_swing_reads_spec(entry: dict) -> AvoidedSwingReadsSpec:
@@ -63,7 +67,7 @@ def avoided_swing_reads_spec(entry: dict) -> AvoidedSwingReadsSpec:
         int(entry['control_windows']), int(entry['windows']), entry.get('label_suffix', KIND),
         float(entry['ally_yd']) if entry.get('ally_yd') is not None else None,
         float(entry.get('margin_yd', MARGIN_YD)), entry.get('metric'), int(entry.get('min_events', MIN_EVENTS)),
-        tuple(int(spell) for spell in entry.get('learn', ())))
+        tuple(int(spell) for spell in entry.get('learn', ())), bool(entry.get('baseline_read', False)))
     if spec.read not in READS:
         raise ValueError(f'{spec.spell} {KIND} read is one of {list(READS)}, not {spec.read!r}')
     if spec.control_windows < 1 or spec.windows < 1 or spec.min_events < 1 or not 0 <= spec.effect <= 2:
@@ -72,7 +76,12 @@ def avoided_swing_reads_spec(entry: dict) -> AvoidedSwingReadsSpec:
     if (spec.metric is not None) != (spec.read == STAT_DELTA) or (
             spec.read == STAT_DELTA and spec.metric not in STAT_METRICS):
         raise ValueError(f'{spec.spell} {KIND} stat_delta and only it names a metric of {sorted(STAT_METRICS)}')
-    wants_ally = spec.read in (STAT_DELTA, DURATION_MAX)
+    if spec.baseline_read and spec.read != STAT_DELTA:
+        raise ValueError(f'{spec.spell} {KIND} baseline_read reads the stat of a stat_delta read only')
+    if spec.read == EXPIRY_EDGE and spec.swing_ms + TICK_MS >= EXPIRY_MARGIN_MS:
+        raise ValueError(f'{spec.spell} {KIND} expiry_edge needs a window and a tick shorter than the '
+                         f'{EXPIRY_MARGIN_MS} ms margin')
+    wants_ally = spec.read in (STAT_DELTA, DURATION_MAX, EXPIRY_EDGE)
     if (spec.ally_yd is not None) != wants_ally or (wants_ally and spec.ally_yd < ALLY_MIN_YD):
         raise ValueError(f'{spec.spell} {KIND} {spec.read} {"needs" if wants_ally else "takes no"} ally_yd'
                          + (f' of at least {ALLY_MIN_YD:g} yd, out of the strikers\' reach' if wants_ally else ''))
@@ -95,7 +104,7 @@ def mark(spec: AvoidedSwingReadsSpec, read: str) -> str:
 def expected_value(records: Records, spec: AvoidedSwingReadsSpec) -> float:
     if spec.read == AURA_EDGE:
         return float(records.radius(spec.observe_spell, spec.effect))
-    if spec.read == DURATION_MAX:
+    if spec.read in (DURATION_MAX, EXPIRY_EDGE):
         return float(records.duration_ms(spec.observe_spell))
     return float(records.single_value(spec.observe_spell, spec.effect))
 
@@ -121,6 +130,9 @@ def arm_reads(spec: AvoidedSwingReadsSpec, arm: str, offsets: dict[str, float]) 
     if spec.read == PER_EVENT:
         return {'events': measurement(mark(spec, f'{arm} events'), CASTER, 'spell_energize_count', **aura),
                 'total': measurement(mark(spec, f'{arm} total'), CASTER, 'spell_energize_total', **aura)}
+    if spec.read == EXPIRY_EDGE and arm == 'treatment':
+        return {edge: measurement(mark(spec, f'treatment aura {INSIDE} {edge}'), INSIDE, 'aura', **aura)
+                for edge in ('held', 'gone')}
     reads = {ally: measurement(mark(spec, f'{arm} aura {ally}'), ally, 'aura', **aura) for ally in offsets}
     if spec.read == STAT_DELTA:
         reads['stat'] = measurement(mark(spec, f'{arm} stat'), INSIDE, spec.metric)
@@ -131,7 +143,20 @@ def duration_label(spec: AvoidedSwingReadsSpec, window: int) -> str:
     return mark(spec, f'remaining {window}')
 
 
+def dodge_count_label(spec: AvoidedSwingReadsSpec, moment: str) -> str:
+    return mark(spec, f'dodges {moment}')
+
+
+def dodge_count(spec: AvoidedSwingReadsSpec, moment: str) -> dict:
+    return measurement(dodge_count_label(spec, moment), CASTER, 'melee_attacks_taken',
+                       victim_state=proc_avoided.TRIAL_STATES['dodged'])
+
+
 def treatment_steps(spec: AvoidedSwingReadsSpec, avoided: dict) -> list[dict]:
+    if spec.read == EXPIRY_EDGE:
+        return (proc_avoided.attempt_steps(avoided, spec.windows - 1, spec.swing_ms)
+                + [dodge_count(spec, 'before last window')]
+                + proc_avoided.attempt_steps(avoided, 1, spec.swing_ms))
     if spec.read != DURATION_MAX:
         return proc_avoided.attempt_steps(avoided, spec.windows, spec.swing_ms)
     steps = []
@@ -149,6 +174,31 @@ def quiet_steps(spec: AvoidedSwingReadsSpec, avoided: dict) -> list[dict]:
                for striker in proc_avoided.striker_ids(avoided)])
 
 
+def expiry_steps(spec: AvoidedSwingReadsSpec, expected: float, reads: dict[str, dict]) -> list[dict]:
+    return [dodge_count(spec, 'after quiet'),
+            {'action': 'wait', 'label': 'expiry held', 'ms': int(expected) - EXPIRY_MARGIN_MS - QUIET_WAIT_MS},
+            reads['held'],
+            {'action': 'wait', 'label': 'expiry gone', 'ms': 2 * EXPIRY_MARGIN_MS},
+            reads['gone'], dodge_count(spec, 'final')]
+
+
+def learned_contrast(spec: AvoidedSwingReadsSpec, steps: list[dict], baseline: str,
+                     control: str, treatment: str) -> str | None:
+    labels = [step.get('label') for step in steps]
+    if not {baseline, control, treatment} <= set(labels):
+        return None
+    learns = [index for index, step in enumerate(steps)
+              if step['action'] == 'learn' and step.get('spell') == spec.spell]
+    dodging = [index for index, step in enumerate(steps) if step['action'] == 'set_combat_avoidance'
+               and step.get('dodge') == DODGE]
+    first, before, after = labels.index(baseline), labels.index(control), labels.index(treatment)
+    if len(learns) != 1 or not first < before < learns[0] < after:
+        return None
+    if not any(first < index < before for index in dodging) or not any(learns[0] < index < after for index in dodging):
+        return None
+    return LEARNED_CONTRAST
+
+
 def quiet_minimum_yd() -> float:
     from behaviours import STRIKER_DISTANCE
     return QUIET_SHIFT_YD - STRIKER_DISTANCE
@@ -157,6 +207,8 @@ def quiet_minimum_yd() -> float:
 def band(spec: AvoidedSwingReadsSpec, expected: float) -> tuple[float, float]:
     if spec.read == DURATION_MAX:
         return expected - spec.swing_ms - TICK_MS, expected
+    if spec.read == EXPIRY_EDGE:
+        return expected - EXPIRY_MARGIN_MS + spec.swing_ms + TICK_MS, expected + EXPIRY_MARGIN_MS
     if spec.read == STAT_DELTA:
         return expected - STAT_TOLERANCE, expected + STAT_TOLERANCE
     return expected, expected
@@ -170,8 +222,15 @@ def rule_text(spec: AvoidedSwingReadsSpec, expected: float) -> str:
                 f'yd; Spell.cpp WorldObjectSpellAreaTargetCheck adds no combat reach for a player target of a '
                 f'player caster), and neither holds it before the learn')
     if spec.read == STAT_DELTA:
+        baseline = (f'; the same read before the dodges equals the read after the dodges before the learn within '
+                    f'{STAT_TOLERANCE:g}' if spec.baseline_read else '')
         return (f'the grouped ally\'s {spec.metric} after the dodges with {spec.spell} learned less the same read '
-                f'after the dodges before the learn lies in [{low:g}, {high:g}]')
+                f'after the dodges before the learn lies in [{low:g}, {high:g}]{baseline}')
+    if spec.read == EXPIRY_EDGE:
+        return (f'the grouped ally holds {spec.observe_spell} {expected - EXPIRY_MARGIN_MS:g} ms after the '
+                f'quieting relocation and no longer holds it {expected + EXPIRY_MARGIN_MS:g} ms after it; the last '
+                f'dodge falls in the last {spec.swing_ms} ms window before the relocation, so the aura lasts within '
+                f'[{low:g}, {high:g}] ms of the last dodge')
     if spec.read == DURATION_MAX:
         return (f'the largest remaining duration of {spec.observe_spell} on the grouped ally, read after each '
                 f'{spec.swing_ms} ms window, lies in [{low:g}, {high:g}] ms: every read is at most the full duration, '
@@ -187,12 +246,15 @@ def avoided_swing_reads_scenario(class_file: dict, spec: AvoidedSwingReadsSpec) 
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, expected)
     avoided = avoided_entry(spec)
     offsets = ally_offsets(spec, expected)
-    steps = (base_steps(class_file) + placement_steps(spec, offsets) + proc_avoided.engage_steps(avoided)
+    baseline = [measurement(mark(spec, 'baseline stat'), INSIDE, spec.metric)] if spec.baseline_read else []
+    treatment = arm_reads(spec, 'treatment', offsets)
+    tail = (expiry_steps(spec, expected, treatment) + proc_avoided.guard_steps(avoided) if spec.read == EXPIRY_EDGE
+            else proc_avoided.guard_steps(avoided) + list(treatment.values()))
+    steps = (base_steps(class_file) + placement_steps(spec, offsets) + proc_avoided.engage_steps(avoided) + baseline
              + proc_avoided.attempt_steps(avoided, spec.control_windows, spec.swing_ms)
              + list(arm_reads(spec, 'control', offsets).values())
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.spell}]
-             + treatment_steps(spec, avoided) + quiet_steps(spec, avoided) + proc_avoided.guard_steps(avoided)
-             + list(arm_reads(spec, 'treatment', offsets).values()))
+             + treatment_steps(spec, avoided) + quiet_steps(spec, avoided) + tail)
     low, high = band(spec, expected)
     learned = f' {spec.learn} are learned before the engage and' if spec.learn else ''
     scenario = {
@@ -224,6 +286,15 @@ def avoided_swing_reads_scenario(class_file: dict, spec: AvoidedSwingReadsSpec) 
              'quiet_distances': [mark(spec, f'quiet distance {striker}')
                                  for striker in proc_avoided.striker_ids(avoided)],
              'quiet_minimum_yd': quiet_minimum_yd()}
+    if spec.read == EXPIRY_EDGE:
+        model['dodge_counts'] = {moment: dodge_count_label(spec, moment)
+                                 for moment in ('before last window', 'after quiet', 'final')}
+    if baseline:
+        model['baseline'] = baseline[0]['label']
+        contrast = learned_contrast(spec, steps, model['baseline'], reads['control']['stat'],
+                                    reads['treatment']['stat'])
+        if contrast is not None:
+            model[CONTRAST] = contrast
     expectation = Expectation(mark(spec, '').rstrip(), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.observe_spell, None,
                               f'{expected:g}', prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
@@ -241,7 +312,8 @@ def judged(base: Verdict, model: dict, measured: float, why: str) -> Verdict:
 
 
 def avoided_swing_reads_verdict(base: Verdict, run, model: dict) -> Verdict:
-    labels = ([*model['distances'].values(), *model['quiet_distances'], *model['remaining']]
+    labels = ([*model['distances'].values(), *model['quiet_distances'], *model['remaining'],
+               *model.get('dodge_counts', {}).values(), *([model['baseline']] if 'baseline' in model else [])]
               + [label for arm in model['reads'].values() for label in arm.values()])
     missing = next((label for label in labels if run.values.get(label) is None), None)
     if missing is not None:
@@ -273,6 +345,8 @@ def avoided_swing_reads_verdict(base: Verdict, run, model: dict) -> Verdict:
     if held:
         return replace(base, measured=1.0, expected=0.0,
                        explanation=f'{sorted(held)} hold the aura before the passive is learned')
+    if read == EXPIRY_EDGE:
+        return expiry_verdict(base, run, model, treatment)
     if read == AURA_EDGE:
         inside, outside = treatment[INSIDE], treatment[OUTSIDE]
         status = 'ok' if inside and not outside else 'alert'
@@ -283,12 +357,33 @@ def avoided_swing_reads_verdict(base: Verdict, run, model: dict) -> Verdict:
     if not treatment[INSIDE]:
         return replace(base, measured=0.0, expected=model['expected'],
                        explanation='the grouped ally does not hold the aura after the dodges')
+    if read == STAT_DELTA and 'baseline' in model:
+        drift = control['stat'] - run.values[model['baseline']]
+        if abs(drift) > STAT_TOLERANCE:
+            return replace(base, status='alert', measured=drift, expected=0.0,
+                           explanation=f'{model["metric"]} moved {drift:g} over the dodges before the passive is '
+                                       f'learned, beyond {STAT_TOLERANCE:g}')
     if read == STAT_DELTA:
         delta = treatment['stat'] - control['stat']
         return judged(base, model, delta, f'{model["metric"]} {control["stat"]:g} before, {treatment["stat"]:g} after')
     largest = max(run.values[label] for label in model['remaining'])
     return judged(base, model, largest, f'largest remaining duration {largest:g} ms over {len(model["remaining"])} '
                                         f'reads')
+
+
+def expiry_verdict(base: Verdict, run, model: dict, treatment: dict) -> Verdict:
+    counts = {moment: run.values[label] for moment, label in model['dodge_counts'].items()}
+    if counts['after quiet'] - counts['before last window'] < 1:
+        return void(base, 'no dodge in the last window before the relocation')
+    if counts['final'] != counts['after quiet']:
+        return void(base, f'{counts["final"] - counts["after quiet"]:g} dodges after the quieting relocation')
+    held, gone = bool(treatment['held']), bool(treatment['gone'])
+    status = 'ok' if held and not gone else 'alert'
+    low, high = model['band']
+    return replace(base, status=status, measured=model['expected'] if status == 'ok' else None,
+                   expected=model['expected'], low=low, high=high,
+                   explanation=f'the grouped ally holds the aura {model["expected"] - EXPIRY_MARGIN_MS:g} ms after '
+                               f'the relocation: {held}; {model["expected"] + EXPIRY_MARGIN_MS:g} ms after it: {gone}')
 
 
 def scenario(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:

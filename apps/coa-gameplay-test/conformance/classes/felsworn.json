@@ -17687,6 +17687,7 @@
       "read": "stat_delta",
       "observe_spell": 520256,
       "metric": "melee_crit_chance_refreshed",
+      "baseline_read": true,
       "ally_yd": 10,
       "striker_entry": 36,
       "strikers": 10,
@@ -17707,7 +17708,7 @@
       "variant": "party_crit_duration",
       "label_suffix": "party_crit_duration",
       "quote": "for $520256d.",
-      "read": "duration_max",
+      "read": "expiry_edge",
       "observe_spell": 520256,
       "ally_yd": 10,
       "striker_entry": 36,
@@ -17719,7 +17720,7 @@
       ],
       "swing_ms": 500,
       "control_windows": 10,
-      "windows": 30,
+      "windows": 20,
       "observe_source": "AscensionFelswornEvents.cpp:42-47 passes an incoming dodge when Chance(player, 300476) succeeds (ProcChance 100) and :223-224 casts 804336 at the attacker and 520256 on the caster; 520256 Effect[0] APPLY_AURA SPELL_AURA_MOD_CRIT_PCT, TargetA 22 SRC_CASTER, TargetB 30 UNIT_SRC_AREA_ALLY, RadiusIndex 9, DurationIndex 1 (server DBC). Spell.cpp:9449-9459 adds no combat reach for a player target of a player caster. Strikers: the 804822 proc shape, ten aggressive stationary creature 36 with 42716, 62531 and 2116852, dodge 100 before every 500 ms window. Reference search 2026-11-24: coa-history spell 300476: 0 events in 186 logs; 520256 Betrayer: 42 SPELL_AURA_APPLIED and 42 SPELL_AURA_REMOVED in 2 logs (2026-08-10, logs 103 and 104), player to player (party and raid members), about 10.0 s each; it supports the 10 s duration."
     },
     {
