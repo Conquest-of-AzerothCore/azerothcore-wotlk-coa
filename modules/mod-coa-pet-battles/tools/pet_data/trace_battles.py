@@ -43,7 +43,13 @@ class Recorder:
         self.players = {}
         self.seen = 0
 
-    def roll(self, lo, hi):
+    def roll(self, lo=None, hi=None):
+        if lo is None:
+            value = self.rng.random()
+            self.rolls.append(('F', None, value))
+            return value
+        if hi is None:
+            lo, hi = 1, lo
         lo, hi = int(lo), int(hi)
         value = self.rng.randint(lo, hi)
         self.rolls.append((lo, hi, value))
@@ -338,7 +344,8 @@ def write_session(number, name, recorder, setup):
     for low, account, rank, bot, journal in setup.players:
         lines.append(f'PLAYER\tp{low}\t{account}\t{rank}\t{bot}')
         lines += [journal_line('JOURNAL', low, row) for row in journal]
-    lines += [f'ROLL\t{lo}\t{hi}\t{value}' for lo, hi, value in recorder.rolls]
+    lines += [f'ROLL_F\t{value!r}' if lo == 'F' else f'ROLL\t{lo}\t{hi}\t{value}'
+              for lo, hi, value in recorder.rolls]
     for record in recorder.records():
         lines.append(f'{record.kind}\t{int(record.t)}\t{fixture_format.encode_field(record.text)}')
     for low, *_ in setup.players:

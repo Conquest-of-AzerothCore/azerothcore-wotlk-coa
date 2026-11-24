@@ -145,6 +145,42 @@ namespace CoAPetBattles
             LOG_ERROR("server.loading", "{} '{}' is not a decimal number; using {}", key, text, fallback);
             return fallback;
         }
+
+        uint32_t Whole(std::string const& name, uint32_t fallback)
+        {
+            return sConfigMgr->GetOption<uint32>("CoAPetBattles.Wild." + name, fallback);
+        }
+
+        float Distance(std::string const& name, float fallback)
+        {
+            return float(ReadDecimal("CoAPetBattles.Wild." + name, fallback));
+        }
+
+        WildSettings ReadWild()
+        {
+            WildSettings wild;
+            wild.enabled = sConfigMgr->GetOption<bool>("CoAPetBattles.Wild.Enable", wild.enabled);
+            wild.tickMs = Whole("TickMs", wild.tickMs);
+            wild.blipMs = Whole("BlipMs", wild.blipMs);
+            wild.search = Distance("Search", wild.search);
+            wild.spacing = Distance("Spacing", wild.spacing);
+            wild.maxArea = Whole("MaxArea", wild.maxArea);
+            wild.cooldownSeconds = Whole("CooldownSeconds", wild.cooldownSeconds);
+            wild.lifetimeSeconds = Whole("LifetimeSeconds", wild.lifetimeSeconds);
+            wild.leave = Distance("Leave", wild.leave);
+            wild.awayGraceSeconds = Whole("AwayGraceSeconds", wild.awayGraceSeconds);
+            wild.moveRescan = Distance("MoveRescan", wild.moveRescan);
+            wild.rescanIdleSeconds = Whole("RescanIdleSeconds", wild.rescanIdleSeconds);
+            wild.talkRange = Distance("TalkRange", wild.talkRange);
+            wild.soloMaxLevel = uint8_t(Whole("SoloMaxLevel", wild.soloMaxLevel));
+            wild.spotMin = Distance("SpotMin", wild.spotMin);
+            wild.spotMax = Distance("SpotMax", wild.spotMax);
+            wild.maxHeightDifference = Distance("MaxHeightDifference", wild.maxHeightDifference);
+            wild.tries = Whole("Tries", wild.tries);
+            wild.fallbackDistance = Distance("FallbackDistance", wild.fallbackDistance);
+            wild.wander = Distance("Wander", wild.wander);
+            return wild;
+        }
     }
 
     PetBattleDataStore* PetBattleDataStore::instance()
@@ -173,6 +209,7 @@ namespace CoAPetBattles
         settings.fedSeconds = sConfigMgr->GetOption<uint32>("CoAPetBattles.FedSeconds", settings.fedSeconds);
         settings.xpStep = ReadDecimal("CoAPetBattles.XpStep", settings.xpStep);
         _settings = settings;
+        _wild = ReadWild();
         if (_loaded)
             _catalog = std::make_shared<Engine::Catalog const>(_data, _settings);
     }

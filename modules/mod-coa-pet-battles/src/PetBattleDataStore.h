@@ -18,6 +18,7 @@ namespace CoAPetBattles
         bool IsLoaded() const { return _loaded; }
         DataSet const& Data() const { return _data; }
         Settings const& Config() const { return _settings; }
+        WildSettings const& Wild() const { return _wild; }
         std::shared_ptr<Engine::Catalog const> Catalog() const { return _catalog; }
 
         Species const* FindSpecies(uint32_t entry) const;
@@ -31,6 +32,7 @@ namespace CoAPetBattles
         bool _loaded = false;
         DataSet _data;
         Settings _settings;
+        WildSettings _wild;
         std::shared_ptr<Engine::Catalog const> _catalog;
     };
 }

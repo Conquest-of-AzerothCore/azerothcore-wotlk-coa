@@ -44,6 +44,7 @@ namespace
         std::map<uint64_t, uint32_t> live;
         std::vector<std::string> sent;
         uint64_t spawned = 0;
+        std::vector<uint32_t> displays;
 
         void Send(uint64_t, std::string_view module, std::string_view action, std::string const& payload) override
         {
@@ -58,6 +59,7 @@ namespace
         bool Away(uint64_t) const override { return false; }
         std::optional<Spawned> Spawn(uint64_t, Side, uint32_t species, uint32_t display) override
         {
+            displays.push_back(display);
             live[++spawned] = species;
             return Spawned { spawned, display };
         }
@@ -183,4 +185,15 @@ TEST(CoAPetBattlesLifecycle, ShutdownKickCancelsTheBattleWithoutPenalty)
     for (Store::OwnedPet const* pet : arena.world.journal->Pets())
         EXPECT_EQ(pet->health, 0u) << pet->species;
     EXPECT_FALSE(arena.battles.InBattle(7));
+}
+
+TEST(CoAPetBattlesLifecycle, WildEnemyWearsTheGivenDisplay)
+{
+    Arena arena;
+    EnemySpec enemy;
+    enemy.species = arena.world.enemy;
+    enemy.display = 4321;
+    ASSERT_TRUE(arena.battles.Start(7, std::vector<EnemySpec> { enemy }));
+    arena.RunFor(3000);
+    EXPECT_NE(std::find(arena.world.displays.begin(), arena.world.displays.end(), 4321u), arena.world.displays.end());
 }

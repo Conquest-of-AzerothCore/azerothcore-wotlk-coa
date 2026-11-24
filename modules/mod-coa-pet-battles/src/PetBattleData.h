@@ -196,7 +196,32 @@ namespace CoAPetBattles
         double xpStep = 0.20;
     };
 
+    struct WildSettings
+    {
+        bool enabled = true;
+        uint32_t tickMs = 5000;
+        uint32_t blipMs = 1000;
+        float search = 60;
+        float spacing = 90;
+        uint32_t maxArea = 3;
+        uint32_t cooldownSeconds = 90;
+        uint32_t lifetimeSeconds = 600;
+        float leave = 90;
+        uint32_t awayGraceSeconds = 60;
+        float moveRescan = 25;
+        uint32_t rescanIdleSeconds = 45;
+        float talkRange = 12;
+        uint8_t soloMaxLevel = 2;
+        float spotMin = 5;
+        float spotMax = 50;
+        float maxHeightDifference = 2.5f;
+        uint32_t tries = 8;
+        float fallbackDistance = 3;
+        float wander = 3;
+    };
+
     uint32_t StandInEntry(DataSet const& data, uint32_t species);
+    uint8_t PetLevel(DataSet const& data, uint8_t maxLevel, uint32_t mobLevel, uint32_t zone);
     Report Validate(DataSet const& data, std::function<bool(uint32_t)> const& creatureTemplateExists);
     std::optional<std::array<uint32_t, 4>> ParseQualityWeights(std::string const& text);
     std::optional<double> ParseDecimal(std::string const& text);

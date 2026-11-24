@@ -15,6 +15,7 @@ namespace CoAPetBattles::Engine
     public:
         virtual ~Rng() = default;
         virtual int32_t Roll(int32_t lo, int32_t hi) = 0;
+        virtual double Fraction() = 0;
     };
 
     class SeededRng : public Rng
@@ -22,6 +23,7 @@ namespace CoAPetBattles::Engine
     public:
         explicit SeededRng(uint32_t seed) : _engine(seed) { }
         int32_t Roll(int32_t lo, int32_t hi) override;
+        double Fraction() override;
 
     private:
         std::mt19937 _engine;
@@ -32,6 +34,8 @@ namespace CoAPetBattles::Engine
         int32_t lo = 0;
         int32_t hi = 0;
         int32_t value = 0;
+        bool fraction = false;
+        double real = 0;
     };
 
     class ReplayRng : public Rng
@@ -39,6 +43,7 @@ namespace CoAPetBattles::Engine
     public:
         explicit ReplayRng(std::vector<RecordedRoll> rolls) : _rolls(std::move(rolls)) { }
         int32_t Roll(int32_t lo, int32_t hi) override;
+        double Fraction() override;
         bool Exhausted() const { return _next >= _rolls.size(); }
         std::string const& Divergence() const { return _divergence; }
         size_t Used() const { return _next; }

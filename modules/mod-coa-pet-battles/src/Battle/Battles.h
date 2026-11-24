@@ -51,6 +51,7 @@ namespace CoAPetBattles::Battle
         uint32_t species = 0;
         double level = 1;
         double quality = 1;
+        uint32_t display = 0;
     };
 
     class Session;

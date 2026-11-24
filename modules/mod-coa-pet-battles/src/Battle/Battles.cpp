@@ -742,8 +742,12 @@ namespace CoAPetBattles::Battle
         {
             level = enemies->front().level;
             for (EnemySpec const& enemy : *enemies)
-                theirs.push_back(Engine::NewPet(*_catalog, enemy.species, enemy.level, std::nullopt, _rng, enemy.quality,
-                    std::nullopt));
+            {
+                theirs.push_back(Engine::NewPet(*_catalog, enemy.species, enemy.level, std::nullopt, _rng,
+                    enemy.quality, std::nullopt));
+                if (enemy.display)
+                    theirs.back().display = enemy.display;
+            }
         }
         else
         {

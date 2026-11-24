@@ -1,5 +1,6 @@
 #include "PetBattleData.h"
 #include "Engine/Rules.h"
+#include <algorithm>
 #include <charconv>
 #include <cmath>
 #include <cstdlib>
@@ -151,6 +152,21 @@ namespace CoAPetBattles
             return 0;
         uint64_t const entry = uint64_t(StandInBase) + species;
         return entry > StandInLimit ? 0 : uint32_t(entry);
+    }
+
+    uint8_t PetLevel(DataSet const& data, uint8_t maxLevel, uint32_t mobLevel, uint32_t zone)
+    {
+        auto const found = data.zones.find(zone);
+        if (found == data.zones.end())
+        {
+            double const proportional = std::floor(double(mobLevel) * maxLevel / 80.0 + 0.5);
+            return uint8_t(std::max(1.0, std::min(double(maxLevel), proportional)));
+        }
+        Zone const& z = found->second;
+        double const span = double(z.mobLevelMax) - z.mobLevelMin + 1;
+        double const steps = double(z.petLevelMax) - z.petLevelMin + 1;
+        double const level = z.petLevelMin + std::floor((double(mobLevel) - z.mobLevelMin) * steps / span);
+        return uint8_t(std::max<double>(z.petLevelMin, std::min<double>(z.petLevelMax, level)));
     }
 
     Report Validate(DataSet const& data, std::function<bool(uint32_t)> const& creatureTemplateExists)

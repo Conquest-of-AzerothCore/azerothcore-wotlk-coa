@@ -23,6 +23,7 @@ namespace
     public:
         explicit ConstantRng(int32_t value) : _value(value) { }
         int32_t Roll(int32_t lo, int32_t hi) override { return std::clamp(_value, lo, hi); }
+        double Fraction() override { return 0; }
 
     private:
         int32_t _value;

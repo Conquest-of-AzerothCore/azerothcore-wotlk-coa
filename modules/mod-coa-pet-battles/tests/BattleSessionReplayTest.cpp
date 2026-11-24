@@ -89,6 +89,13 @@ namespace
                     list.back().after.push_back(ReadJournal(f));
                 else if (f[0] == "ROLL")
                     list.back().rolls.push_back({ std::stoi(f[1]), std::stoi(f[2]), std::stoi(f[3]) });
+                else if (f[0] == "ROLL_F")
+                {
+                    Engine::RecordedRoll roll;
+                    roll.fraction = true;
+                    roll.real = std::stod(f[1]);
+                    list.back().rolls.push_back(roll);
+                }
                 else if (f[0] == "IN" || f[0] == "OUT" || f[0] == "WORLD")
                     list.back().records.push_back({ f[0], std::stoull(f[1]), f[2] });
             }
