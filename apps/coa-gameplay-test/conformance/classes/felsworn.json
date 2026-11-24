@@ -23841,56 +23841,6 @@
       "observe_source": "Carve 800206 is a channel (DurationIndex 66 = 2500 ms) whose ChannelInterruptFlags 4733956 (0x483C04) carry no movement bit in Spell.dbc, and the server adds none. The caster is moved by the harness relocate step (the native position update of a client movement packet, which interrupts a channel carrying AURA_INTERRUPT_FLAG_MOVE) 1.5 yd along y and back at 500 and 1000 ms; cast_remaining_ms of the caster's own cast is read 800 ms after the last move (about 1800 ms after the cast), the channel must still run (at least 300 of the 2500 ms). Before (control): no cast, 0. Felfury x6 and 803468 are set as precondition fixtures. Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel (the precedent shape); nothing else found beyond the tooltip and Spell.dbc. "
     },
     {
-      "spell": 555738,
-      "name": "Fury Unleashed (a strike every second)",
-      "kind": "hit_period",
-      "variant": "strike_period",
-      "label_suffix": "strike_period",
-      "quote": "every $t1 sec with both weapons to all nearby enemies",
-      "trigger_spell": 555738,
-      "hit_spell": 555739,
-      "expected_ms": 1000,
-      "window": [
-        1,
-        4700
-      ],
-      "fixtures": [
-        [
-          984948,
-          "caster"
-        ]
-      ],
-      "poll_ms": 10,
-      "observe_source": "555738 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 1000 ($t1 = 1 sec), triggers 555739 (Effect[0] SCHOOL_DAMAGE 31, Effect[1] NORMALIZED_WEAPON_DMG 121), DurationIndex 28 (5000 ms). One real cast at the dummy; the damage hits of 555739 on the dummy are polled every 10 ms of wait with game-time stamps from 1 ms after the cast and (last stamped hit - first stamped hit) / (hits - 1) must read 1000 ms inside the G-19 band (5%, 50 ms), which excludes a period 10% (100 ms) shorter or longer; a hit before the cast alerts (control read). Hit-rating fixture 984948 (Reg's Hit rating) on the caster so that no tick is missed, named as a precondition. Reference search 2026-11-24: coa-history spell 555738 and 555739: 555738: 2 casts in 2 logs; 555739: 48 SPELL_DAMAGE events in 2 logs, 38 crits, amounts 170 to 445; the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
-    },
-    {
-      "spell": 561216,
-      "name": "Fury of the Illidari (an assault every half second)",
-      "kind": "hit_period",
-      "variant": "assault_period",
-      "label_suffix": "assault_period",
-      "quote": "attacking them every $t1 sec with both weapons until 6 assaults are made,",
-      "trigger_spell": 561216,
-      "hit_spell": 808303,
-      "expected_ms": 500,
-      "window": [
-        1,
-        3300
-      ],
-      "fixtures": [
-        [
-          804216,
-          "caster"
-        ],
-        [
-          984948,
-          "caster"
-        ]
-      ],
-      "poll_ms": 10,
-      "observe_source": "561216 Effect[0] aura 226 SPELL_AURA_PERIODIC_DUMMY, EffectAmplitude 500 ($t1 = 0.5 sec), DurationIndex 66 (2500 ms); the strike is the main-hand Twin Slice 808303 (Effect[0] NORMALIZED_WEAPON_DMG 121), cast by the periodic handler (AscensionFelswornAuras.cpp:130-156). One real cast at the dummy; the damage hits of 808303 on the dummy are polled every 10 ms of wait with game-time stamps from 1 ms after the cast and (last - first) / (hits - 1) must read 500 ms inside the G-19 band (5%, 25 ms), which excludes a period 10% (50 ms) shorter or longer. Inner Demon 804216 (CasterAuraSpell of 561216) and the hit-rating fixture 984948 are set by harness set_aura as preconditions. Reference search 2026-11-24: coa-history spell 561216 and 808303: 0 events in 186 logs for both (positive control 806109: 6 casts); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
-    },
-    {
       "trigger_spell": 561216,
       "gate_spell": 561216,
       "target": "dummy",

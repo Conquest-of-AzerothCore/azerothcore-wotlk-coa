@@ -1067,10 +1067,19 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "555738 behaviour_metric_delta strike_period"
+          "555738 aura_amplitude_ms #3"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
+      "attempts": [
+        {
+          "agent": "fw-fa1",
+          "report": ".agents/plans/fw-fa1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 555738,
@@ -1546,12 +1555,21 @@
     "spell": 561216,
     "clause": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
     "labels": [
-      "561216 behaviour_metric_delta assault_period",
+      "561216 aura_amplitude_ms #0",
       "561216 behaviour_metric_delta assaults_sum",
       "561216 behaviour_metric_delta assaults_first",
       "561216 behaviour_metric_delta assaults_off_hand"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
+      "attempts": [
+        {
+          "agent": "fw-fa1",
+          "report": ".agents/plans/fw-fa1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561216,
