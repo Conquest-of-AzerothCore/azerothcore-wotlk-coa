@@ -52,7 +52,7 @@ bool Named(SpellInfo const* info, uint32 root);
 bool CanLearnRift(Player const* player, uint32 spellId);
 bool Spender(SpellInfo const* info);
 bool SpenderImpact(SpellInfo const* info);
-bool ResistDebuff(Player* player, SpellInfo const* info);
+bool ResistDebuff(Player* player, Unit* caster, Spell const* spell);
 void SettleDebt(Player* player);
 bool Direct(SpellInfo const* info);
 bool Derived(SpellInfo const* info);

@@ -14541,35 +14541,35 @@
     },
     {
       "spell": 804613,
-      "name": "Doomstride (the next Curse or Magic effect is resisted at full health)",
-      "kind": "taken_hit",
-      "variant": "resist_next",
-      "label_suffix": "resist_next",
-      "judge": "resist_rate",
-      "expected_points": 100,
+      "name": "Doomstride (the curse resist chance is doubled at full health)",
+      "kind": "debuff_resist_rate",
+      "variant": "resist_curse",
+      "label_suffix": "resist_curse",
       "quote": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
       "strike_spell": 702,
-      "trials": 800,
-      "parts": 5,
-      "arms": [
-        {
-          "name": "control"
-        },
-        {
-          "name": "treatment",
-          "auras": [
-            [
-              804613,
-              1
-            ],
-            [
-              706818,
-              0
-            ]
-          ]
-        }
+      "base_chance_pct": 4,
+      "clear_auras": [
+        706818
       ],
-      "observe_source": "804613 tooltip: 'increased by 100%' read as 100 points added to the resist chance, the reading the Templar precedent Holy Constitution 706323 uses ('increases your chance to resist disease effects by 30%' judged as 30 points, ADR 0196). A level 60 striker (entry 36) casts Curse of Weakness 702 (Dispel 2 curse, DmgClass 1 magic, two SPELL_EFFECT_APPLY_AURA effects, SpellDuration.dbc index 4) at the caster; each trial reads whether 702 took hold on the caster 300 ms later and removes it. The control arm's resisted share is the same-level spell miss chance; the treatment arm sets the passive aura 804613 (the precondition fixture; the caster stays at full health, the fixture default) and removes the 706818 aura before every trial, so each trial is the first Curse after a rest (the 10 s rule belongs to clause 282, not measured here), and must resist it 100 points more often. 800 trials per arm in each of 5 pooled parts. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot (~/CoaServer/reference/snapshots/bindmysoul): spellId 804613 Doomstride reads 'Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.', a different text from the installed DBC tooltip; the installed DBC wins over a snapshot (general rules), so the expectation is the DBC tooltip; nothing else found."
+      "low_health_pct": 90,
+      "parts": 10,
+      "observe_source": "Owner ruling O-28: 'increased by 100%' doubles the base chance ('Increased \"by\", not \"to\"'); mentor D-93: the server rolls the stock hit result a second time (AscensionFelsworn.cpp ResistDebuff, Unit::SpellHitResult), a miss or resist of that roll resists the effect, so the full-health chance is 1 - (1 - p)^2 = 2p - p^2, a stated engine approximation of 2p (Felsworn ADR 0026). A level 60 striker (creature 36, no spell hit bonus) casts Curse of Weakness 702 (Dispel 2 curse, DmgClass 1 magic, two APPLY_AURA effects) at the caster once per trial; the stock chance p is the same-level spell miss: Unit::MagicSpellHitResult gives 96 - levelDiff = 96% hit at levelDiff 0 (Unit.cpp:3995-3998), so p = 0.04 and the full-health chance is 0.0784; the earlier same-level control read 3.7% of 4000 trials (merged/fw-ea1/prove2). The control arm runs before 804613 is learned (a real learn, D-91, no set_aura of the talent); the treatment at full health and the low-health arm at 90% health after it. 706818, the 10 s lockout the resist casts, is removed before every strike (a precondition fixture: each trial is the first effect after a rest; the lockout is the resist_lockout entry). Arms sized for a 1e-3 residual per arm and run (G-20 band, normal approximation). Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot lists 804613 with another text ('Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.'); the installed DBC wins over a snapshot (general rules)."
+    },
+    {
+      "spell": 804613,
+      "name": "Doomstride (the magic resist chance is doubled at full health)",
+      "kind": "debuff_resist_rate",
+      "variant": "resist_magic",
+      "label_suffix": "resist_magic",
+      "quote": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
+      "strike_spell": 31589,
+      "base_chance_pct": 4,
+      "clear_auras": [
+        706818
+      ],
+      "low_health_pct": 90,
+      "parts": 10,
+      "observe_source": "Owner ruling O-28: 'increased by 100%' doubles the base chance ('Increased \"by\", not \"to\"'); mentor D-93: the server rolls the stock hit result a second time (AscensionFelsworn.cpp ResistDebuff, Unit::SpellHitResult), a miss or resist of that roll resists the effect, so the full-health chance is 1 - (1 - p)^2 = 2p - p^2, a stated engine approximation of 2p (Felsworn ADR 0026). A level 60 striker (creature 36, no spell hit bonus) casts Slow 31589 (Dispel 1 magic, DmgClass 1 magic, three APPLY_AURA effects, Arcane) at the caster once per trial; the stock chance p is the same-level spell miss: Unit::MagicSpellHitResult gives 96 - levelDiff = 96% hit at levelDiff 0 (Unit.cpp:3995-3998), so p = 0.04 and the full-health chance is 0.0784; the earlier same-level control read 3.7% of 4000 trials (merged/fw-ea1/prove2). The control arm runs before 804613 is learned (a real learn, D-91, no set_aura of the talent); the treatment at full health and the low-health arm at 90% health after it. 706818, the 10 s lockout the resist casts, is removed before every strike (a precondition fixture: each trial is the first effect after a rest; the lockout is the resist_lockout entry). Arms sized for a 1e-3 residual per arm and run (G-20 band, normal approximation). Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot lists 804613 with another text ('Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.'); the installed DBC wins over a snapshot (general rules)."
     },
     {
       "spell": 570158,
@@ -17995,41 +17995,25 @@
     {
       "spell": 804613,
       "name": "Doomstride (the resist occurs at most once every 10 sec)",
-      "kind": "taken_hit",
-      "variant": "resist_icd",
-      "label_suffix": "resist_icd",
-      "judge": "resist_rate",
-      "expected_points": 100,
+      "kind": "debuff_resist_rate",
+      "variant": "resist_lockout",
+      "label_suffix": "resist_lockout",
       "quote": "Can only occur once every 10 sec.",
+      "mode": "lockout",
       "strike_spell": 702,
-      "trials": 6,
-      "learn": [
-        804613
+      "base_chance_pct": 34,
+      "striker_level": 54,
+      "clear_auras": [
+        706818
       ],
-      "striker_spell_hit": true,
-      "arms": [
-        {
-          "name": "control",
-          "auras": [
-            [
-              706818,
-              0
-            ]
-          ],
-          "prime_gap_ms": 9000
-        },
-        {
-          "name": "treatment",
-          "auras": [
-            [
-              706818,
-              0
-            ]
-          ],
-          "prime_gap_ms": 11000
-        }
-      ],
-      "observe_source": "804613 Doomstride tooltip: 'While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%. Can only occur once every 10 sec.' The server resists a non-positive Curse or Magic all-aura spell at a full-health owner of 804613 without 706818, then casts 706818 on the owner (AscensionFelsworn.cpp:76-93, ResistDebuff); 706818 lasts SpellDuration index 1 = 10000 ms (forced in AscensionFelswornContracts.cpp:263-266). 804613 is learned for every arm (D-67, a real learn) and the caster stays at full health (Curse of Weakness 702 deals no damage). A stationary creature striker (entry 36) with a spell hit bonus of 100 (no natural miss, Unit.cpp:4039-4051) casts 702 (Dispel 2 curse, DmgClass magic, two APPLY_AURA effects) at the caster: each trial removes 706818, casts a priming 702, waits the arm's gap, removes any 702 and casts the judged 702, read 300 ms later. Control gap 9000 ms (inside the 10 s): the judged curse must land; treatment gap 11000 ms (past it): it must be resisted; treatment resists 100 points more often. Deterministic with no natural miss, so 6 trials per arm. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "lockout_aura": 706818,
+      "lockout_ms": 10000,
+      "locked_gap_ms": 300,
+      "locked_trials": 388,
+      "expiry_trials": 12,
+      "expiry_margin_ms": 500,
+      "parts": 4,
+      "observe_source": "Owner ruling O-28: 'increased by 100%' doubles the base chance ('Increased \"by\", not \"to\"'); mentor D-93: the server rolls the stock hit result a second time (AscensionFelsworn.cpp ResistDebuff, Unit::SpellHitResult), a miss or resist of that roll resists the effect, so the full-health chance is 1 - (1 - p)^2 = 2p - p^2, a stated engine approximation of 2p (Felsworn ADR 0026). Mentor D-93: the 10 s lockout 706818 is cast when the second roll resists (the mentor's reading of 'Can only occur once every 10 sec', not an owner ruling); 706818 lasts SpellDuration index 1 = 10000 ms (AscensionFelswornContracts.cpp). Design 2 of clause 282 (design 1, two prime gaps against a striker with a spell hit bonus of 100, relied on the guaranteed resist O-28 removed: with p = 0 the passive never resists). 804613 is learned (real learn) and the caster stays at full health. A level 54 striker (creature 36, no spell hit bonus) gives p = 1 - (94 - (6 - 2) x 7)% = 0.34 (Unit.cpp:3995-3998, Rate.MissChanceMultiplier.TargetPlayer 7 in the test worldserver.conf); a trial is primed when the priming 702 leaves 706818 on the caster (share (1 - p) p = 0.2244). Locked arm: the judged 702 300 ms after the primed read resists at p on primed trials and at 1 - (1 - p)^2 = 0.5644 on the others; each Wilson 99% interval holds its own chance and excludes the other, sized at 348 trials per group for a 1e-3 residual (388 trials x 4 parts give about 348 primed). Expiry arm: on primed trials 706818 is on the caster 9500 ms after the priming strike and gone at 10500 ms. Reference search 2026-11-23: coa-history spell 804613 and 706818: 0 events in 186 logs; bindmysoul talents snapshot lists 804613 with another text ('Using Chaos Rush twice in a row now refreshes a charge of Chaos Rush.'); the installed DBC wins over a snapshot (general rules)."
     },
     {
       "spell": 804823,

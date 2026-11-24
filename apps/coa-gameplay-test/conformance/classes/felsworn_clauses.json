@@ -4061,17 +4061,32 @@
   {
     "spell": 804613,
     "clause": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
-    "labels": [],
-    "reason": "HELD (review fw-rea1 I-1..I-3): resist_next (804613 behaviour_taken_hit) proves the Curse leg only; the Magic leg (AscensionFelsworn.cpp:78-80) and the full-health gate are not contrasted, and the treatment sets 804613 itself (mentor ruling pending). fw-l3: the Magic leg, the below-full-health arm and the learned route (D-67) need taken_rate_arm_steps to honour the arm's learn and caster health (behaviours.py:7619-7629 ignores both for judge resist_rate); that shared tool belongs to batch L1 (part 282.0), so no entry was written here.",
     "kind": "claim",
     "evidence": "behaviour",
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "claims": [
+      {
+        "claim": "While at full health, your chance to resist the next Curse",
+        "labels": [
+          "804613 behaviour_metric_delta resist_curse",
+          "804613 behaviour_metric_delta resist_curse_low_health"
+        ]
+      },
+      {
+        "claim": "or Magic effect on you is increased by 100%.",
+        "labels": [
+          "804613 behaviour_metric_delta resist_magic",
+          "804613 behaviour_metric_delta resist_magic_low_health"
+        ]
+      }
+    ]
   },
   {
     "spell": 804613,
     "clause": "Can only occur once every 10 sec.",
     "labels": [
-      "804613 behaviour_taken_hit resist_icd"
+      "804613 behaviour_metric_delta resist_lockout",
+      "804613 behaviour_metric_delta resist_lockout_expiry"
     ],
     "kind": "claim"
   },
