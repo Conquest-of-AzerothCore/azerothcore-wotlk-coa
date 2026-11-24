@@ -278,7 +278,7 @@ void ApplyContracts(SpellInfo* info)
     if (Named(info, 704368))
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].TriggerSpell == 803717)
-                periodic(i, 2000);
+                periodic(i, info->Effects[i].Amplitude);
     if (id >= 552210 && id <= 552213)
     {
         periodic(0, 2000);

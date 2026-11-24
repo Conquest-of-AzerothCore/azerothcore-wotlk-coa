@@ -41,3 +41,23 @@ the decision names; `CalcPeriodicCritChance` is untouched. A critical tick takes
   Malice of Gul'dan learned: no Felstrike 802678 in either arm).
 - At amount 0 the reference character's ticks crit a little (1 of 42 in an exploratory run): it holds a Chaos crit
   chance of its own whose source was not traced. The forced and damage entries clamp it with the -100 control.
+
+## Amendment: owner ruling O-35 (2026-11-24)
+
+The owner ruled (O-35, night question N-8) that under Inner Demon Bane of Chaos 706420 deals its extra damage every 6
+seconds, the tooltip's `every $t2 sec` (EffectAmplitude[1] 6000 ms), and that the 2000 ms tuning is removed.
+
+- `ApplyContracts` (`AscensionFelswornContracts.cpp`, block `Named(info, 704368)`) still turns the Ragefire 803717
+  trigger effect of every Bane of Chaos rank into a periodic dummy, which the class aura script resolves into Chaos
+  802676 while Inner Demon is on, but now keeps the effect's own EffectAmplitude instead of 2000 ms. Every rank,
+  704368 and 706415 to 706420, carries 6000 ms there in the server DBC set, so every rank changes from 2 s to 6 s.
+  The 2000 ms line came with 46bf8121e5 (2026-09-09) with no stated basis.
+- Measured before (Felsworn B2 pair, fw-vb2 report, review fw-rvb2 I-5): a Chaos hit every 2 s (3 hits by 6.6 s,
+  2 by 5.4 s). The damage per hit and its spell power term are unchanged by this amendment.
+- Re-read of the part 225.0 proof (Malice of Gul'dan 800214, `periodic_crit_no_felstrike`) against the change: that
+  entry counts critical ticks of Effect[0] (SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000 ms), which this
+  amendment does not touch, and sets no Inner Demon 804216, so no Chaos 802676 hit occurs in it at either interval.
+  Its 0 Felstrike over the critical ticks stands; the decision above (periodic crit chance of Effect[0]) is unchanged.
+- Regressions: the existing interval entries of 706420 (`inner_interval_a`, none by 5.4 s; `inner_interval_b`, one by
+  6.6 s) and the damage entries (`inner_damage`, `inner_damage_sp`, one hit inside their 6.5 s read) judge the 6 s
+  interval; `inner_none` stays the control without Inner Demon.

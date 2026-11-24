@@ -2054,7 +2054,7 @@
       "706420 behaviour_metric_delta inner_none"
     ],
     "kind": "claim",
-    "reason": "fw-vb2 (2026-11-23): the damage half is proven in game (Chaos 802676 hit with Inner Demon: 598.3 per hit against the tooltip's 551 x 0.98743 x 1.10 = 598.5 to 600.6; +10000 spell power: 5879 against 5879.6). The interval half alerts: the tooltip and EffectAmplitude[1] say every $t2 = 6 sec, the server hits every 2 s (3 hits by 6.6 s, 2 by 5.4 s, 6 by 12.6 s; AscensionFelswornContracts.cpp:276-279 sets the Bane's periodic dummy to 2000 ms). Fix note in the fw-vb2 report; no server change."
+    "reason": "fw-vb2 (2026-11-23): the damage half is proven in game (Chaos 802676 hit with Inner Demon: 598.3 per hit against the tooltip's 551 x 0.98743 x 1.10 = 598.5 to 600.6; +10000 spell power: 5879 against 5879.6). The interval half alerted at 2 s (3 hits by 6.6 s, 2 by 5.4 s, 6 by 12.6 s) from the class contract's 2000 ms periodic (46bf8121e5). Owner ruling O-35 (2026-11-24): the tooltip governs, every $t2 = 6 sec; fw-f3 removed the 2000 ms line, the Bane ranks' Effect[1] keep their own EffectAmplitude 6000 ms (Felsworn ADR 0022, amendment O-35). Re-proven by the fw-f3 counted pair (report .agents/plans/fw-f3/report.md)."
   },
   {
     "spell": 706420,
