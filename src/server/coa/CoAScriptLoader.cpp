@@ -440,6 +440,7 @@ void AddSC_AscensionTankStanceCritReduction();
 void AddSC_AscensionBattleResurrection();
 void AddSC_AscensionBloodmageProcs();
 void AddSC_AscensionTierSetHarvest();
+void AddSC_AscensionNinjasFocus();
 void AddSC_AscensionReaperReflexes();
 void AddSC_AscensionPrimalistMountain();
 void AddSC_AscensionChronomancerRipple();
@@ -751,6 +752,7 @@ void AddCoAScripts()
     AddSC_AscensionBattleResurrection();
     AddSC_AscensionBloodmageProcs();
     AddSC_AscensionTierSetHarvest();
+    AddSC_AscensionNinjasFocus();
     AddSC_AscensionReaperReflexes();
     AddSC_AscensionPrimalistMountain();
     AddSC_AscensionChronomancerRipple();

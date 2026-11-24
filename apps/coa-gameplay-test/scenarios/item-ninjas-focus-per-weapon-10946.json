@@ -1,0 +1,341 @@
+{
+  "schema": 1,
+  "name": "Ninja's Focus keeps one Agility buff per enchanted weapon (#10946)",
+  "contract": [
+    "#10946: Scroll of Enchant Weapon - Ninja's Focus (967770) casts 968686, enchant 5115, whose equip spell",
+    "968716 (Ninja's Focus II) gives each enchanted weapon its own proc aura: a 25% chance on spells and",
+    "abilities to cast the 15 s +110 Agility buff 968746. The PR author's review on 2026-11-24 of original",
+    "Ascension footage (https://youtu.be/6kBk2joQmwQ) shows both weapons' buffs active at once, each proccing on",
+    "its own. The server cast the buff without its weapon and did not keep it per weapon, so a second weapon's",
+    "proc only refreshed the first buff and the gain never exceeded 110 Agility. A Mage with both one-handers",
+    "enchanted and equipped casts Arcane Explosion on ten dummies five times: each cast rolls each weapon's aura",
+    "ten times, so the chance that a weapon has no buff after the last cast is below 0.75^10 = 6% per cast and",
+    "below 1e-6 over five casts; Agility then reads 220 above the baseline (two buffs). Before the repair it",
+    "cannot exceed 110, so the check fails."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "m",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy0",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 2.0,
+      "stationary": true
+    },
+    {
+      "id": "dummy1",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 2.5,
+      "stationary": true
+    },
+    {
+      "id": "dummy2",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 3.0,
+      "stationary": true
+    },
+    {
+      "id": "dummy3",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 3.5,
+      "stationary": true
+    },
+    {
+      "id": "dummy4",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 4.0,
+      "stationary": true
+    },
+    {
+      "id": "dummy5",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 4.5,
+      "stationary": true
+    },
+    {
+      "id": "dummy6",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 5.0,
+      "stationary": true
+    },
+    {
+      "id": "dummy7",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 5.5,
+      "stationary": true
+    },
+    {
+      "id": "dummy8",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 6.0,
+      "stationary": true
+    },
+    {
+      "id": "dummy9",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 6.5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "m",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "m",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "m",
+      "spell": 674
+    },
+    {
+      "action": "learn",
+      "actor": "m",
+      "spell": 1449
+    },
+    {
+      "action": "add_item",
+      "actor": "m",
+      "item": 25
+    },
+    {
+      "action": "add_item",
+      "actor": "m",
+      "item": 2092
+    },
+    {
+      "action": "add_item",
+      "actor": "m",
+      "item": 967770,
+      "count": 2
+    },
+    {
+      "action": "use_item",
+      "label": "Enchant the sword with Ninja's Focus",
+      "actor": "m",
+      "item": 967770,
+      "spell": 968686,
+      "target_item": 25
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "use_item",
+      "label": "Enchant the dagger with Ninja's Focus",
+      "actor": "m",
+      "item": 967770,
+      "spell": 968686,
+      "target_item": 2092
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "equip",
+      "label": "The enchanted sword in the main hand",
+      "actor": "m",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "label": "The enchanted dagger in the off hand",
+      "actor": "m",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the sword is in the main hand",
+      "actor": "m",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the dagger is in the off hand",
+      "actor": "m",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 2092
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enchant's proc aura is on",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 968716,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Agility buff before any cast",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 968746,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Agility before any proc",
+      "actor": "m",
+      "metric": "stat",
+      "stat": 1,
+      "save_as": "agility"
+    },
+    {
+      "action": "set_power",
+      "actor": "m",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Arcane Explosion 1 on the ten dummies",
+      "actor": "m",
+      "spell": 1449
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "m",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Arcane Explosion 2 on the ten dummies",
+      "actor": "m",
+      "spell": 1449
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "m",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Arcane Explosion 3 on the ten dummies",
+      "actor": "m",
+      "spell": 1449
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "m",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Arcane Explosion 4 on the ten dummies",
+      "actor": "m",
+      "spell": 1449
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "m",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Arcane Explosion 5 on the ten dummies",
+      "actor": "m",
+      "spell": 1449
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arcane Explosion hit the dummies",
+      "actor": "m",
+      "metric": "spell_damage_count",
+      "spell": 1449,
+      "min": 40
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both weapons' Ninja's Focus buffs are up, 220 Agility",
+      "actor": "m",
+      "metric": "stat",
+      "stat": 1,
+      "relative_to": "agility",
+      "min": 219,
+      "max": 221
+    }
+  ]
+}
