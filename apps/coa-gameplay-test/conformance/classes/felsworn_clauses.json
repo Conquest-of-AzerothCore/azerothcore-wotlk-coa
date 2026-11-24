@@ -53,7 +53,7 @@
   },
   {
     "spell": 92088,
-    "clause": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
+    "clause": "Burn an enemy for ${($d*1000/$T1)*($802678m1+$802678ppl1+$SP*.05)} Shadowflame Damage over $d,",
     "kind": "claim",
     "claims": [
       {
@@ -3179,7 +3179,7 @@
   },
   {
     "spell": 800214,
-    "clause": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
+    "clause": "Burn an enemy for ${($d*1000/$T1)*($802678m1+$802678ppl1+$SP*.05)} Shadowflame Damage over $d,",
     "kind": "claim",
     "claims": [
       {

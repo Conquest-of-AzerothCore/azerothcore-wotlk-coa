@@ -13126,7 +13126,7 @@
     {
       "spell": 802678,
       "kind": "metric_delta",
-      "quote": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
+      "quote": "Burn an enemy for ${($d*1000/$T1)*($802678m1+$802678ppl1+$SP*.05)} Shadowflame Damage over $d,",
       "trigger_spell": 802678,
       "target": "dummy",
       "cast_in_before": false,
@@ -13164,7 +13164,7 @@
     {
       "spell": 802678,
       "kind": "metric_delta",
-      "quote": "Burn an enemy for ${($d*1000/$T1)*($m1+0+$SP*.05)} Shadowflame Damage over $d,",
+      "quote": "Burn an enemy for ${($d*1000/$T1)*($802678m1+$802678ppl1+$SP*.05)} Shadowflame Damage over $d,",
       "trigger_spell": 802678,
       "target": "dummy",
       "cast_in_before": false,
