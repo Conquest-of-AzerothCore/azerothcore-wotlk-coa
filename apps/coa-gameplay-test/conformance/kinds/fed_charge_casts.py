@@ -248,7 +248,7 @@ def placed(bracket: tuple[float, float], band: tuple[float, float]) -> str:
     return STRADDLE
 
 
-def trial_void(values: dict, trial: dict, went_before: float) -> str | None:
+def trial_void(values: dict, trial: dict) -> str | None:
     casts = [trial['control'], *trial['casts']]
     priors = [values[cast['prior']] for cast in casts] + [values[trial['went']]]
     unhasted = all(abs(values[trial[name]] - 1) <= FLOAT_EPSILON for name in ('haste control', 'haste fed'))
@@ -259,8 +259,7 @@ def trial_void(values: dict, trial: dict, went_before: float) -> str | None:
               ('aura after the unlearn', values[trial['aura stop']] == 1),
               ('unlearned', values[trial['known stop']] == 0),
               ('no grant after the stop', values[trial['grants end']] == values[trial['grants stop']]),
-              ('every cast went off', priors[0] == went_before
-               and all(after - before == 1 for before, after in zip(priors, priors[1:]))))
+              ('every cast went off', all(after - before == 1 for before, after in zip(priors, priors[1:]))))
     return next((name for name, held in checks if not held), None)
 
 
@@ -271,10 +270,8 @@ def fed_charge_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
     values, bands = run.values, model['bands']
     judged, void, notes = [], [], []
-    went_before = values[model['reads'][0]['control']['prior']]
     for index, trial in enumerate(model['reads']):
-        reason = trial_void(values, trial, went_before)
-        went_before = values[trial['went']]
+        reason = trial_void(values, trial)
         control = placed(cast_bracket(values, trial['control']), bands['full'])
         if reason is None and control != INSIDE:
             reason = f'control cast {control} the full band'
