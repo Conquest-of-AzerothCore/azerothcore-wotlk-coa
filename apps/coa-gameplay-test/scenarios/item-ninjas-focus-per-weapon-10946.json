@@ -166,8 +166,21 @@
       "target_item": 25
     },
     {
-      "action": "wait",
-      "ms": 2000
+      "action": "assert",
+      "label": "SETUP: the 5 s enchant cast has finished",
+      "actor": "m",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: item 25 carries Ninja's Focus enchant 5115",
+      "actor": "m",
+      "metric": "item_enchantment",
+      "item": 25,
+      "slot": 0,
+      "equals": 5115
     },
     {
       "action": "use_item",
@@ -178,8 +191,21 @@
       "target_item": 2092
     },
     {
-      "action": "wait",
-      "ms": 2000
+      "action": "assert",
+      "label": "SETUP: the 5 s enchant cast has finished",
+      "actor": "m",
+      "metric": "casting",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: item 2092 carries Ninja's Focus enchant 5115",
+      "actor": "m",
+      "metric": "item_enchantment",
+      "item": 2092,
+      "slot": 0,
+      "equals": 5115
     },
     {
       "action": "equip",
