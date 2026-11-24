@@ -803,41 +803,8 @@ namespace CoAPetBattles::Battle
         {
             if (action == "start")
             {
-                if (!_world.Gm(character))
-                    return;
-                if (OtherCharacterFighting(character))
-                {
-                    _world.Send(character, "pbt", "msg", "Another character of your account is in a pet battle.");
-                    return;
-                }
-                std::vector<EnemySpec> list;
-                size_t at = 0;
-                while (at < payload.size())
-                {
-                    if (payload[at] < '0' || payload[at] > '9')
-                    {
-                        ++at;
-                        continue;
-                    }
-                    size_t end = at;
-                    while (end < payload.size() && payload[end] >= '0' && payload[end] <= '9')
-                        ++end;
-                    std::string const id = payload.substr(at, end - at);
-                    if (end < payload.size() && payload[end] == '@')
-                        ++end;
-                    size_t levelEnd = end;
-                    while (levelEnd < payload.size() && payload[levelEnd] >= '0' && payload[levelEnd] <= '9')
-                        ++levelEnd;
-                    std::string const levelText = payload.substr(end, levelEnd - end);
-                    at = levelEnd;
-                    std::optional<double> const species = Protocol::LuaNumberOf(id);
-                    if (!species || !_catalog->Species(static_cast<uint32_t>(*species)) || list.size() >= MaxEnemies)
-                        continue;
-                    std::optional<double> const wanted = Protocol::LuaNumberOf(levelText);
-                    double const level = std::max(1.0, std::min<double>(_catalog->Config().maxLevel, wanted ? *wanted : 5));
-                    list.push_back({ static_cast<uint32_t>(*species), level, Engine::RollQuality(*_catalog, _rng) });
-                }
-                Start(character, list.empty() ? std::nullopt : std::optional<std::vector<EnemySpec>>(list));
+                if (_world.Gm(character))
+                    Challenge(character, payload);
             }
             else if (action == "cmd")
                 Command(character, payload);
@@ -857,5 +824,42 @@ namespace CoAPetBattles::Battle
         reply.syncCompanions = [this, character] { _world.SyncCompanions(character); };
         Protocol::HandleJournalMessage(*_catalog, *journal, action, payload, reply);
         _world.Flush(*journal);
+    }
+
+    bool Battles::Challenge(uint64_t character, std::string const& payload)
+    {
+        if (OtherCharacterFighting(character))
+        {
+            _world.Send(character, "pbt", "msg", "Another character of your account is in a pet battle.");
+            return false;
+        }
+        std::vector<EnemySpec> list;
+        size_t at = 0;
+        while (at < payload.size())
+        {
+            if (payload[at] < '0' || payload[at] > '9')
+            {
+                ++at;
+                continue;
+            }
+            size_t end = at;
+            while (end < payload.size() && payload[end] >= '0' && payload[end] <= '9')
+                ++end;
+            std::string const id = payload.substr(at, end - at);
+            if (end < payload.size() && payload[end] == '@')
+                ++end;
+            size_t levelEnd = end;
+            while (levelEnd < payload.size() && payload[levelEnd] >= '0' && payload[levelEnd] <= '9')
+                ++levelEnd;
+            std::string const levelText = payload.substr(end, levelEnd - end);
+            at = levelEnd;
+            std::optional<double> const species = Protocol::LuaNumberOf(id);
+            if (!species || !_catalog->Species(static_cast<uint32_t>(*species)) || list.size() >= MaxEnemies)
+                continue;
+            std::optional<double> const wanted = Protocol::LuaNumberOf(levelText);
+            double const level = std::max(1.0, std::min<double>(_catalog->Config().maxLevel, wanted ? *wanted : 5));
+            list.push_back({ static_cast<uint32_t>(*species), level, Engine::RollQuality(*_catalog, _rng) });
+        }
+        return Start(character, list.empty() ? std::nullopt : std::optional<std::vector<EnemySpec>>(list));
     }
 }

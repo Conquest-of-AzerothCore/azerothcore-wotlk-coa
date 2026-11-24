@@ -1,4 +1,5 @@
 #include "AccountScript.h"
+#include "Battle/PetBattles.h"
 #include "PetBattleDataStore.h"
 #include "Player.h"
 #include "PlayerScript.h"
@@ -9,11 +10,19 @@
 
 namespace
 {
+    void Forward(std::string const& module, std::string const& action)
+    {
+        sAddonChannel->On(module, action, [module, action](Player* player, std::string const& payload)
+        {
+            sPetBattles->Message(player, module, action, payload);
+        });
+    }
+
     class PetBattlesWorld : public WorldScript
     {
     public:
         PetBattlesWorld() : WorldScript("coa_pet_battles_world",
-            { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_UPDATE }) { }
+            { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP, WORLDHOOK_ON_UPDATE, WORLDHOOK_ON_SHUTDOWN }) { }
 
         void OnAfterConfigLoad(bool) override
         {
@@ -23,12 +32,22 @@ namespace
         void OnStartup() override
         {
             sPetBattleData->Load();
+            for (char const* action : { "start", "cmd", "quit" })
+                Forward("pbt", action);
+            for (char const* action : { "list", "abil", "setabil", "setteam", "active" })
+                Forward("pbj", action);
         }
 
         void OnUpdate(uint32 diff) override
         {
             sAddonChannel->Update(diff);
+            sPetBattles->Update(diff);
             sPetJournals->Update();
+        }
+
+        void OnShutdown() override
+        {
+            sPetBattles->Shutdown();
         }
     };
 
@@ -54,6 +73,7 @@ namespace
 
         void OnPlayerLogout(Player* player) override
         {
+            sPetBattles->Logout(player);
             sAddonChannel->Forget(player);
             sPetJournals->Logout(player);
         }

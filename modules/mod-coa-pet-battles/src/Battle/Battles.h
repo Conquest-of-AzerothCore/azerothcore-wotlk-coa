@@ -59,6 +59,7 @@ namespace CoAPetBattles::Battle
         void Message(uint64_t character, std::string const& module, std::string const& action,
             std::string const& payload);
         bool Start(uint64_t character, std::optional<std::vector<EnemySpec>> enemies);
+        bool Challenge(uint64_t character, std::string const& payload);
         void Logout(uint64_t character);
         void Watchdog();
         bool InBattle(uint64_t character) const;

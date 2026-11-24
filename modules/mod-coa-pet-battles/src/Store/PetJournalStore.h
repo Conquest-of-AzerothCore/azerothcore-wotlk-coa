@@ -23,6 +23,7 @@ namespace CoAPetBattles::Store
         void Login(Player* player);
         void Logout(Player* player);
         void LearnSpell(Player* player, uint32_t spell);
+        void SyncCompanions(Player* player);
         void Flush(Journal& journal);
         size_t Pending(uint32_t account) const;
         bool Reload(uint32_t account);

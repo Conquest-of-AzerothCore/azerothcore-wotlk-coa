@@ -3,7 +3,8 @@
 Open-world, turn-based pet battles for Conquest of Azeroth, ported from the ALE (Lua) pet battle system of
 [azerothcore-linux-server](https://github.com/catastrophic-impact/azerothcore-linux-server) (GPL-3.0, commit
 `22bb7f3`). The port is staged; this module currently holds **phase 1: the data**, **phase 2: the battle
-engine** with a GM command to try it, and **phase 3: per-account pet journals**.
+engine** with a GM command to try it, **phase 3: per-account pet journals** and **phase 4a: battle sessions and
+upstream's addon protocol**.
 
 ## What it does now
 
@@ -63,6 +64,31 @@ and the active team. Playerbot sessions get no journal.
   `team <n> <s1> <s2> <s3>`, `team active <n>` and `reload` (reads the journal back from the database).
 - Two characters of one account online at once share one journal; the gameplay harness gives every actor its own
   account, so that rule is covered by a unit test only.
+
+## Battles and the addon protocol (phase 4a)
+
+Players fight through upstream's client addons (`wotlk_petbattle`, `wotlk_pets`; required, shipped in phase 5). The
+server speaks upstream's protocol exactly: hidden `ACORE` addon whispers of the form `module|action|payload` (240
+characters sent, 255 accepted, numbered chunks for long lists, the `core` hello/who/ping handshake), the `pbt` battle
+messages and the `pbj` journal messages.
+
+- **Sessions** (`src/Battle/`): one battle per account; the account's battle team (the phase 3 fill when no team is
+  set) against up to three enemies; the turn offer (`go`, `force`, and `lock`/`stun` turns that pass by themselves),
+  playback of every engine event with upstream's delays, capture, XP for every pet that acted, health kept after the
+  battle (fainted pets at 1). A battle ends on win, loss, forfeit (`pbt|quit`), five idle minutes, death, changing map
+  or moving more than 40 yards away. Starting a new battle silently replaces a running one.
+- **Differences from upstream, by decision**: logging out mid-battle counts as a forfeit (every pet at 1 health; upstream
+  let players escape); no creature freeze around a battle; a second character of the same account cannot battle while
+  another fights; status tooltips are kept per battle; the journal list sends pets by species.
+- **Stand-ins**: both active pets appear next to the player as their stand-in creatures with the pet's model and size.
+  Spell visuals, lunges and emotes are phase 5.
+- **Proof**: `tools/pet_data/trace_battles.py` runs upstream's `pb_battle.lua` and `pb_store.lua` under stubbed server
+  functions and records 41 sessions (`tests/fixtures/sessions.txt`): refusals, forfeit, watchdog, interruptions,
+  logout, restart, the account rule, bots, the three capture outcomes, the journal messages and 24 random battles. The
+  unit tests replay every session through the C++ code and require identical messages, delays, stand-in spawns, rolls
+  and final journals.
+- **GM commands**: `.petbattle fight <species>[@level] ...` (up to three enemies, level 5 by default) starts a battle for
+  the selected player or yourself; `.petbattle send <module|action|payload>` acts as that player's addon.
 
 ## Trying it: `.petbattle sim`
 
@@ -161,4 +187,12 @@ PYTHONPATH=/tmp/lupa-lib python3 -B modules/mod-coa-pet-battles/tools/pet_data/t
   --upstream <azerothcore-linux-server checkout> --export /tmp/export.json \
   --out-dir modules/mod-coa-pet-battles/tests/fixtures --seed 20261123 --battles 400 \
   --max-bytes 3300000 --random-bytes 1650000
+```
+
+The battle sessions are recorded the same way; `--mysql-defaults` (read-only) refreshes the display and model rows in
+`battle_world.txt` from a world database:
+
+```sh
+PYTHONPATH=/tmp/lupa-lib python3 -B modules/mod-coa-pet-battles/tools/pet_data/trace_battles.py \
+  --upstream <azerothcore-linux-server checkout> --seed 20261124 --battles 24
 ```

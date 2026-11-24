@@ -1,4 +1,6 @@
+#include "Battle/PetBattles.h"
 #include "Chat.h"
+#include "Protocol/AddonMessage.h"
 #include "CommandScript.h"
 #include "Engine/Sim.h"
 #include "GameTime.h"
@@ -76,6 +78,8 @@ namespace
                 { "picks", HandlePicks, SEC_GAMEMASTER, Console::No },
                 { "team", teamCommands },
                 { "reload", HandleReload, SEC_GAMEMASTER, Console::No },
+                { "fight", HandleFight, SEC_GAMEMASTER, Console::No },
+                { "send", HandleSend, SEC_GAMEMASTER, Console::No },
             };
             static ChatCommandTable commands =
             {
@@ -253,6 +257,34 @@ namespace
             }
             sPetJournals->Flush(*target->journal);
             handler->SendSysMessage("Active team " + std::to_string(team));
+            return true;
+        }
+
+        static bool HandleFight(ChatHandler* handler, Tail enemies)
+        {
+            std::optional<Target> target = JournalOf(handler);
+            if (!target)
+                return false;
+            if (!sPetBattles->Challenge(target->player, std::string(enemies)))
+            {
+                handler->SendErrorMessage("no pet battle started", false);
+                return false;
+            }
+            handler->SendSysMessage("Pet battle started");
+            return true;
+        }
+
+        static bool HandleSend(ChatHandler* handler, Tail text)
+        {
+            Player* player = handler->getSelectedPlayerOrSelf();
+            std::optional<CoAPetBattles::Protocol::AddonMessage> const message =
+                CoAPetBattles::Protocol::ParseAddonMessage(std::string(text));
+            if (!player || !message)
+            {
+                handler->SendErrorMessage("expected <module>|<action>|<payload>", false);
+                return false;
+            }
+            sPetBattles->Message(player, message->module, message->action, message->payload);
             return true;
         }
 

@@ -140,6 +140,12 @@ namespace CoAPetBattles::Store
             _journals.erase(account);
     }
 
+    void PetJournalStore::SyncCompanions(Player* player)
+    {
+        if (Journal* journal = For(player))
+            Sync(player, *journal);
+    }
+
     void PetJournalStore::LearnSpell(Player* player, uint32_t spell)
     {
         if (!Eligible(player) || !sPetBattleData->Data().companions.count(spell))
