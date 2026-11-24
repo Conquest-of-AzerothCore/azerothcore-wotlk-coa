@@ -895,7 +895,7 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 1600,
-      "observe_source": "300302 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 5 (SPELLMOD_RANGE), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3 yd ($s1 = 3), EffectSpellClassMask[0..2] [131148, 10747952, 0] matching Darkwither 502220 (SpellFamilyName 31, SpellFamilyFlags [0, 2097152, 0], RangeIndex 4 = 30 yd, instant; Spell.dbc). Spell::CheckRange adds caster + dummy combat reaches (1.5 + 1.5 = 3 yd): 33 yd base, 36 yd with 300302. At dummy_distance 35 yd, Darkwither is refused out of range (97 SPELL_FAILED_OUT_OF_RANGE) without 300302 (control) and accepted (0) after a real learn of 300302. Paired with range_capped at 37 yd. Reference search 2026-11-24: coa-history spell 300302: 0 events in 186 logs (passive; positive control 502220 Darkwither: 109 casts in 2 logs); coabuildhub spells_master_index.json entry 300302 matches verbatim."
+      "observe_source": "300302 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 5 (SPELLMOD_RANGE), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3 yd ($s1 = 3), EffectSpellClassMask[0..2] [131148, 10747952, 0] matching Darkwither 502220 (SpellFamilyName 31, SpellFamilyFlags [0, 2097152, 0], RangeIndex 4 = 30 yd, instant; G-23 subset: 1 of 13 Corruption spell names covered by the same Effect[0] class mask in Spell.dbc). Spell::CheckRange adds caster + dummy combat reaches (1.5 + 1.5 = 3 yd): 33 yd base, 36 yd with 300302. At dummy_distance 35 yd, Darkwither is refused out of range (97 SPELL_FAILED_OUT_OF_RANGE) without 300302 (control) and accepted (0) after a real learn of 300302. Paired with range_capped at 37 yd. Reference search 2026-11-24: coa-history spell 300302: 0 events in 186 logs (passive; positive control 502220 Darkwither: 109 casts in 2 logs); coabuildhub spells_master_index.json entry 300302 matches verbatim."
     },
     {
       "spell": 300302,
@@ -940,7 +940,7 @@
       "tolerance": 0.0001,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "300302 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints[1] 1 + EffectDieSides[1] 1 = +2% ($s2 = 2), EffectSpellClassMask[3..5] [64, 2097200, 1073741824] matching Horrorbolt 502182 (SpellFamilyName 31, SpellFamilyFlags [0, 16, 256]; Spell.dbc). Reads Player::SpellDoneCritChance for Horrorbolt 502182 before (control) and after a real learn of 300302: expected gain +2.0 points (tol 0.0001). Reference search 2026-11-24: coa-history spell 300302: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 300302 matches verbatim."
+      "observe_source": "300302 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints[1] 1 + EffectDieSides[1] 1 = +2% ($s2 = 2), EffectSpellClassMask[3..5] [64, 2097200, 1073741824] matching Horrorbolt 502182 (SpellFamilyName 31, SpellFamilyFlags [0, 16, 256]; G-23 subset: 1 of 7 Corruption spell names covered by the same Effect[1] class mask in Spell.dbc). Reads Player::SpellDoneCritChance for Horrorbolt 502182 before (control) and after a real learn of 300302: expected gain +2.0 points (tol 0.0001). Reference search 2026-11-24: coa-history spell 300302: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 300302 matches verbatim."
     },
     {
       "spell": 301347,
@@ -962,7 +962,7 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 1600,
-      "observe_source": "301347 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 5 (SPELLMOD_RANGE), EffectBasePoints[0] 5 + EffectDieSides[0] 1 = +6 yd ($s1 = 6), EffectSpellClassMask[0..2] [131148, 10747952, 0] matching Darkwither 502220 (RangeIndex 4 = 30 yd; Spell.dbc). With 3 yd combat reach: 33 yd base, 39 yd with 301347. At dummy_distance 38 yd, Darkwither is refused out of range (97) without 301347 (control) and accepted (0) after a real learn of 301347. Paired with range_capped at 40 yd. Reference search 2026-11-24: coa-history spell 301347: 0 events in 186 logs (passive); coabuildhub spells_master_index.json has no entry for 301347; installed Spell.dbc governs."
+      "observe_source": "301347 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 5 (SPELLMOD_RANGE), EffectBasePoints[0] 5 + EffectDieSides[0] 1 = +6 yd ($s1 = 6), EffectSpellClassMask[0..2] [131148, 10747952, 0] matching Darkwither 502220 (RangeIndex 4 = 30 yd; G-23 subset: 1 of 13 Corruption spell names covered by the same Effect[0] class mask in Spell.dbc). With 3 yd combat reach: 33 yd base, 39 yd with 301347. At dummy_distance 38 yd, Darkwither is refused out of range (97) without 301347 (control) and accepted (0) after a real learn of 301347. Paired with range_capped at 40 yd. Reference search 2026-11-24: coa-history spell 301347: 0 events in 186 logs (passive); coabuildhub spells_master_index.json has no entry for 301347; installed Spell.dbc governs."
     },
     {
       "spell": 301347,
@@ -1007,7 +1007,7 @@
       "tolerance": 0.0001,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "301347 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints[1] 3 + EffectDieSides[1] 1 = +4% ($s2 = 4), EffectSpellClassMask[3..5] [64, 2097200, 1073741824] matching Horrorbolt 502182 (SpellFamilyName 31, SpellFamilyFlags [0, 16, 256]; Spell.dbc). Reads Player::SpellDoneCritChance for Horrorbolt 502182 before (control) and after a real learn of 301347: expected gain +4.0 points (tol 0.0001). Reference search 2026-11-24: coa-history spell 301347: 0 events in 186 logs; coabuildhub spells_master_index.json has no entry for 301347; installed Spell.dbc governs."
+      "observe_source": "301347 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints[1] 3 + EffectDieSides[1] 1 = +4% ($s2 = 4), EffectSpellClassMask[3..5] [64, 2097200, 1073741824] matching Horrorbolt 502182 (SpellFamilyName 31, SpellFamilyFlags [0, 16, 256]; G-23 subset: 1 of 7 Corruption spell names covered by the same Effect[1] class mask in Spell.dbc). Reads Player::SpellDoneCritChance for Horrorbolt 502182 before (control) and after a real learn of 301347: expected gain +4.0 points (tol 0.0001). Reference search 2026-11-24: coa-history spell 301347: 0 events in 186 logs; coabuildhub spells_master_index.json has no entry for 301347; installed Spell.dbc governs."
     },
     {
       "spell": 525019,
@@ -1552,7 +1552,56 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "301255 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, EffectMiscValue[1] 128 (1 << CR_HIT_SPELL = 7), EffectMiscValueB[1] 3 (STAT_INTELLECT), EffectBasePoints[1] 4 + EffectDieSides[1] 1 = 5% ($s2 = 5; Spell.dbc). Reference level 60 Cultist Intellect = 71 (cultist.json), base spell_hit_rating = 10000: Player.cpp:7237 ApplyRatingMod(CR_HIT_SPELL, int32(71 * 0.05f)) = int32(3.55) = +3 spell hit rating (10000 -> 10003, tol 0) after a real learn of 301255. Reference search 2026-11-24: coa-history spell 301255: 0 events in 186 logs (passive); coabuildhub spells_master_index.json entry 301255 matches verbatim."
+      "observe_source": "301255 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, EffectMiscValue[1] 128 (1 << CR_HIT_SPELL = 7), EffectMiscValueB[1] 3 (STAT_INTELLECT), EffectBasePoints[1] 4 + EffectDieSides[1] 1 = 5% ($s2 = 5; Spell.dbc). Reference level 60 Cultist Intellect = 71 (cultist.json), base spell_hit_rating = 10000: Player::UpdateRating (PlayerUpdates.cpp:669-670) adds int32(CalculatePct(GetStat(STAT_INTELLECT), 5)) = int32(3.55) = +3 spell hit rating (10000 -> 10003, tol 0) after a real learn of 301255. Paired with spell_hit_rating_int (+300 Intellect fixture -> +18) to prove Intellect scaling and the 5% slope. Reference search 2026-11-24: coa-history spell 301255: 0 events in 186 logs (passive); coabuildhub spells_master_index.json entry 301255 matches verbatim."
+    },
+    {
+      "spell": 301255,
+      "name": "Blessing of C'Thun (spell hit rating scales with +300 Intellect)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_rating_int",
+      "label_suffix": "spell_hit_rating_int",
+      "quote": "your spell hit rating is increased by $s2% of your Intellect.",
+      "trigger_spell": 60235,
+      "gate_spell": 301255,
+      "target": "caster",
+      "phase_auras": [
+        [
+          60234,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "stat",
+            "fields": {
+              "stat": 3
+            },
+            "before_expected": 371,
+            "expected": 371,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Reference Cultist Intellect 71 (cultist.json) plus fixture 60234 Greatness (+300 Intellect, Spell.dbc Effect[0] aura 29 misc 3 bp 299+1, DurationIndex 8 = 15000 ms) equals 371 in both phases."
+          }
+        ]
+      },
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10018,
+      "expected_gain": 18,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "High-Intellect arm for 301255 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT (5% of Intellect -> CR_HIT_SPELL; Spell.dbc). Precondition fixture 60234 Greatness (+300 Intellect, verified by stat 3 precondition arm = 371 in both phases) raises Intellect from 71 to 371: Player::UpdateRating (PlayerUpdates.cpp:669-670) adds int32(CalculatePct(371, 5)) = int32(18.55) = +18 spell hit rating (10000 -> 10018, tol 0) after a real learn of 301255. Excludes zero effect (10000), flat +3 or Agility/Spirit scaling (10003), double application 10% (10037), and +-10% off the 5% slope (4.5% -> 10016, 5.5% -> 10020). Paired with spell_hit_rating at base Intellect 71. Reference search 2026-11-24: coa-history spell 301255: 0 events in 186 logs (passive); coabuildhub spells_master_index.json entry 301255 matches verbatim."
     },
     {
       "spell": 301255,
@@ -1595,26 +1644,27 @@
     },
     {
       "spell": 706928,
-      "name": "Shadow Words (Whispers of N'Zoth Strength effectiveness +25%)",
+      "name": "Shadow Words (Whispers of C'Thun spell power effectiveness +25%)",
       "kind": "effectiveness_delta",
-      "variant": "whispers_str",
-      "label_suffix": "whispers_str",
+      "variant": "whispers_sp",
+      "label_suffix": "whispers_sp",
       "quote": "Increases the effectiveness of your Whispers by $s1%.",
-      "trigger_spell": 561386,
+      "trigger_spell": 572905,
       "gate_spell": 706928,
       "target": "caster",
       "cast_power": 2000,
-      "metric": "stat",
+      "metric": "spell_power",
       "fields": {
-        "stat": 0
+        "school": 5
       },
-      "before_expected": 119,
-      "expected": 121,
-      "tolerance": 1,
+      "before_expected": 62,
+      "expected": 77,
+      "expected_gain": 15,
+      "tolerance": 0,
       "wait_ms": 1000,
       "expire_ms": 1801000,
       "void_on_cast_failure": true,
-      "observe_source": "706928 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[2] 16 = SpellFamilyFlags[2] 16 of Whispers of N'Zoth 561386 (Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE misc -1, BasePoints 9 + 1 = +10%, Duration 1800000 ms; Spell.dbc). Level 60 Cultist reference Strength = 108 (cultist.json): without 706928 (control), +10% gives round(108 * 1.10) = 119; with 706928 learned, int32(10 * 1.25) = +12% gives round(108 * 1.12) = 121 (gain +2; tol 1 covers floor/round; expire_ms 1801000 lets the 30 min buff expire between phases). Reference search 2026-11-24: coa-history spell 706928: 0 events in 186 logs (passive; positive control 561386 Whispers of N'Zoth: 24 casts in 7 logs); coabuildhub spells_master_index.json entry 706928 matches verbatim."
+      "observe_source": "706928 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[2] 16 = SpellFamilyFlags[2] 16 of Whispers of C'Thun 572905 (Effect[0] aura 345 SPELL_AURA_ASCENSION_MOD_SPELL_POWER_FLAT, EffectMiscValue[0] 127 all schools, EffectBasePoints[0] 61 + EffectDieSides[0] 1 = +62 SP, DurationIndex 30 = 1800000 ms, ManaCostPercentage 5; Spell.dbc; no pending SQL override alters amount). Exact engine rounding: SpellEffectInfo::CalcValue (SpellInfo.cpp:506,518,531,592) calls Unit::ApplyEffectModifiers (Unit.cpp:12982-13000) -> Player::ApplySpellMod(572905, SPELLMOD_ALL_EFFECTS, value) (Player.cpp:10555-10688), yielding 62.0f * 1.25f = 77.5f, then truncates via int32(value) (SpellInfo.cpp:592) to +77 SP; Unit::SpellBaseDamageBonusDone (Unit.cpp:10270-10274) sums aura 345 directly onto reference Shadow spell power 0 (cultist.json): 62 before learning 706928 (control) and 77 after (gain +15, tol 0; expire_ms 1801000 lets the 30 min buff expire between phases). Tolerance 0 excludes zero effect (62), double application +50% (93), and +-10% off +25% (+22.5% -> 75, +27.5% -> 79). Reference search 2026-11-24: coa-history spell 706928: 0 events in 186 logs (passive; positive control 572905 Whispers of C'Thun: 2 casts / 1 apply in 2 logs); coabuildhub spells_master_index.json entry 706928 matches verbatim."
     },
     {
       "spell": 706917,
@@ -1677,18 +1727,18 @@
       "before_expected": 0,
       "expected": 0,
       "wait_ms": 9300,
-      "expire_ms": 500,
+      "expire_ms": 0,
       "game_time": {
         "after": [
           9250,
           9600
         ]
       },
-      "observe_source": "Lower bracket for 706917 Effect[0] EffectAmplitude 10000 ms ($t1 = 10 s; Spell.dbc): reads spell_energize_count of 504829 at 9300 ms after learning 706917 (game_time [9250, 9600], above 9000 = 0.9 * 10000): 0 in both phases (no tick before 9300 ms). Paired with period_after at 10500 ms. Reference search 2026-11-24: coa-history spell 504829: 96 energize events; coabuildhub spells_master_index.json entry 706917 matches every 10 sec."
+      "observe_source": "Lower bracket for 706917 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL EffectAmplitude 10000 ms ($t1 = 10 s, triggers 504829; Spell.dbc). Periodic timer starts immediately on learn 706917 (SpellAuraEffects.cpp:749-755); expire_ms 0 completes immediately on the same tick (CoAGameplayTest.cpp:7240-7244), leaving 0 ms between learn 706917 and game_time cast. Reads spell_energize_count of 504829 at 9300 ms (game_time [9250, 9600], strictly above 9000 = 0.9 * 10000 and below 10000): 0 in both phases (excludes -10% period 9000 ms and 2x fast 5000 ms). Paired with period_after at 10300 ms. Reference search 2026-11-24: coa-history spell 504829: 96 energize events; coabuildhub spells_master_index.json entry 706917 matches every 10 sec."
     },
     {
       "spell": 706917,
-      "name": "Worrysome Idol (periodic trigger fires by 10500 ms)",
+      "name": "Worrysome Idol (periodic trigger fires by 10300 ms)",
       "kind": "metric_delta",
       "variant": "period_after",
       "label_suffix": "period_after",
@@ -1704,15 +1754,15 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 10500,
-      "expire_ms": 500,
+      "wait_ms": 10300,
+      "expire_ms": 0,
       "game_time": {
         "after": [
-          10450,
-          10800
+          10250,
+          10600
         ]
       },
-      "observe_source": "Upper bracket for 706917 Effect[0] EffectAmplitude 10000 ms ($t1 = 10 s; Spell.dbc): reads spell_energize_count of 504829 at 10500 ms (game_time [10450, 10800], below 11000 = 1.1 * 10000): 0 before learning 706917 (control) and 1 after a real learn of 706917. With period_before, brackets the first tick inside [9250, 10800] ms (excluding 9000 and 11000 ms, 10% off on both sides). Reference search 2026-11-24: coa-history spell 504829: 96 energize events; coabuildhub spells_master_index.json entry 706917 matches every 10 sec."
+      "observe_source": "Upper bracket for 706917 Effect[0] EffectAmplitude 10000 ms ($t1 = 10 s, triggers 504829; Spell.dbc). Periodic timer starts on learn 706917 (SpellAuraEffects.cpp:749-755); expire_ms 0 completes in 0 ms (CoAGameplayTest.cpp:7240-7244) so elapsed time since learn matches game_time [10250, 10600] (strictly above 10000 and well below 11000 = 1.1 * 10000): 0 before learning 706917 (control) and 1 after a real learn of 706917 (excludes 0x, 2x double-tick, 2x slow 20000 ms, and +10% period 11000 ms). With period_before, brackets the first tick inside [9250, 10600] ms, excluding +-10% on both sides. Reference search 2026-11-24: coa-history spell 504829: 96 energize events; coabuildhub spells_master_index.json entry 706917 matches every 10 sec."
     },
     {
       "spell": 301317,
@@ -1753,7 +1803,7 @@
       "wait_ms": 23000,
       "expire_ms": 6000,
       "void_on_cast_failure": true,
-      "observe_source": "301317 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 31 (SPELLMOD_MAX_STACKS), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3 ($s1 = 3), EffectSpellClassMask[2] 2 = SpellFamilyFlags[2] 2 of Withered 706913 (StackAmount 4, Duration 5000 ms; triggered by Darkwither 502220 Effect[2] every tick; Spell.dbc). Precondition fixtures: 300306 Call of N'Zoth learned at start so Darkwither lasts 24000 ms (7+ ticks before 23000 ms in control, 10 ticks with 301317), 823764 (spellpen), 500706 cleared to 0. Reads aura_stacks of 706913 on dummy at 23000 ms: caps at 4 without 301317 (control) and 7 after a real learn of 301317 (gain +3). Reference search 2026-11-24: coa-history spell 301317: 0 events in 186 logs (passive; positive control 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs); coabuildhub spells_master_index.json entry 301317 matches verbatim."
+      "observe_source": "301317 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 31 (SPELLMOD_MAX_AURA_STACKS), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3 ($s1 = 3), EffectSpellClassMask[2] 2 = SpellFamilyFlags[2] 2 of Withered 706913 (StackAmount 4, Duration 5000 ms; triggered by Darkwither 502220 Effect[2] every tick; Spell.dbc). Precondition fixtures: 300306 Call of N'Zoth learned at start so Darkwither lasts 24000 ms (7+ ticks before 23000 ms in control, 10 ticks with 301317), 823764 (spellpen), 500706 cleared to 0. Reads aura_stacks of 706913 on dummy at 23000 ms: caps at 4 without 301317 (control) and 7 after a real learn of 301317 (gain +3). Reference search 2026-11-24: coa-history spell 301317: 0 events in 186 logs (passive; positive control 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs); coabuildhub spells_master_index.json entry 301317 matches verbatim."
     },
     {
       "spell": 301317,
@@ -2002,11 +2052,25 @@
         502241
       ],
       "setup_target": "dummy",
-      "setup_wait_ms": 1600,
+      "setup_wait_ms": 1800,
       "gate_spell": 712471,
       "target": "dummy",
       "measure_actor": "caster",
       "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
       "metric": "aura_stacks",
       "fields": {
         "spell": 804153
@@ -2014,10 +2078,11 @@
       "before_expected": 1,
       "expected": 2,
       "expected_gain": 1,
-      "wait_ms": 500,
+      "tolerance": 0,
+      "wait_ms": 2000,
       "expire_ms": 13000,
       "void_on_cast_failure": true,
-      "observe_source": "712471 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 31 (SPELLMOD_MAX_STACKS), EffectBasePoints[1] 0 + EffectDieSides[1] 1 = +1, EffectSpellClassMask[4] 32768 = SpellFamilyFlags[1] 32768 of Black Blood 804153 (StackAmount 1, Duration 12000 ms; applied to caster/allies by Malevolence 502241 via AscensionCultistAbilities.cpp:262-288; Spell.dbc). Both phases cast Malevolence 502241 twice 1600 ms apart (expire_ms 13000 clears 12000 ms Black Blood between phases): aura_stacks of 804153 on caster caps at 1 without 712471 (control) and reaches 2 after a real learn of 712471. Reference search 2026-11-24: coa-history spell 712471: 0 events in 186 logs (positive control 804153 Black Blood: 12941 applies in 28 logs); coabuildhub spells_master_index.json entry 712471 matches verbatim."
+      "observe_source": "712471 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 31 (SPELLMOD_MAX_AURA_STACKS, SpellDefines.h:107), EffectBasePoints[1] 0 + EffectDieSides[1] 1 = +1, EffectSpellClassMask[4] 32768 = SpellFamilyFlags[1] 32768 of Black Blood 804153 (StackAmount 1, DurationIndex 29 = 12000 ms; applied to caster/allies by Malevolence 502241, CastingTimeIndex 16 = 1500 ms cast time, via AscensionCultistAbilities.cpp:262-288; Spell.dbc). Precondition fixtures: 823764 (spellpen so Malevolence never resists) and 500706 cleared to 0. Both phases cast Malevolence 502241 twice: setup_wait_ms 1800 lets the first 1500 ms cast finish, then wait_ms 2000 reads 500 ms after the second 1500 ms cast finishes (expire_ms 13000 clears 12000 ms Black Blood between phases): aura_stacks of 804153 on caster caps at 1 without 712471 (control) and reaches 2 after a real learn of 712471 (gain +1, tol 0). Reference search 2026-11-24: coa-history spell 712471: 0 events in 186 logs (positive control 804153 Black Blood: 12941 applies in 28 logs); coabuildhub spells_master_index.json entry 712471 matches verbatim."
     },
     {
       "spell": 502273,
@@ -2155,6 +2220,187 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "observe_source": "Control arm for 502273 Forbidden Ritual absorb: same three Light of the Naaru 41394 strikes without casting 502273 -> 0 damage absorbed. Reference search 2026-11-24: coa-history spell 502273: 354 casts in 14 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502273,
+      "name": "Forbidden Ritual (shield reaches nearby party and raid members within 30 yd, not beyond)",
+      "kind": "metric_delta",
+      "variant": "raid_reach",
+      "label_suffix": "raid_reach",
+      "quote": "places a shield on all nearby party and raid members",
+      "trigger_spell": 502273,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_offsets": {
+        "ally": 33,
+        "ally2": 35.5,
+        "ally5": 33
+      },
+      "ally_arm": {
+        "allies": 5,
+        "arms": [
+          {
+            "actors": [
+              "ally5"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 502273,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "reach_source": "Spell.dbc 502273 Effect[0] EffectImplicitTargetA 56 (TARGET_UNIT_CASTER_AREA_RAID), EffectRadiusIndex 10 (SpellRadius.dbc 30.0 yd): SpellInfo.cpp:273 maps target 56 to TARGET_CHECK_RAID and Spell.cpp:9385-9393 filters by _referer->IsInRaidWith(unitTarget), reaching raid subgroup 2 (ally5) with no party-only script filter.",
+            "source": "ally5 stands in raid subgroup 2 at 33 yd, inside the 34.16 yd edge (30.0 radius + 2.66 leeway + 1.5 object size) and beyond the -10% radius edge 31.16 yd (27.0 + 2.66 + 1.5): absent before cast (control) and shielded (1) 500 ms after the 3000 ms cast finishes."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 502273,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally2 stands in the party at 35.5 yd, beyond the 34.16 yd edge (30.0 radius + 2.66 leeway + 1.5 object size) and inside the +10% radius edge 37.16 yd (33.0 + 2.66 + 1.5): remains unshielded (0) in both phases, bracketing the 30 yd nearby reach."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 502273,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "caster witnesses that the real 502273 cast applied its shield (0 -> 1)."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 33,
+            "expected": 33,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets moves party member ally 33 yd along x from caster (dz 0, flat spawn ground)."
+          },
+          {
+            "actors": [
+              "ally5"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 33,
+            "expected": 33,
+            "tolerance": 0.25,
+            "precondition": true,
+            "reach_source": "Spell.dbc 502273 Effect[0] EffectImplicitTargetA 56 (TARGET_UNIT_CASTER_AREA_RAID): SpellInfo.cpp:273 TARGET_CHECK_RAID and Spell.cpp:9385-9393 IsInRaidWith reach raid subgroup 2 (ally5).",
+            "source": "ally_offsets moves raid subgroup-2 member ally5 33 yd along x from caster (dz 0, flat spawn ground)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 35.5,
+            "expected": 35.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets moves party member ally2 35.5 yd along x from caster (dz 0, flat spawn ground)."
+          },
+          {
+            "actors": [
+              "ally",
+              "ally2"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.02,
+            "precondition": true,
+            "source": "Player combat reach / object size is 1.5 yd each (sum 3.0 yd for ally and ally2), entering IsWithinDist3d (Object.cpp:1355-1358) in the 34.16 yd edge."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 502273,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "502273 Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, EffectImplicitTargetA 56 (TARGET_UNIT_CASTER_AREA_RAID), EffectRadiusIndex 10 (SpellRadius.dbc 30.0 yd), CastingTimeIndex 14 (3000 ms), DurationIndex 1 (10000 ms; Spell.dbc). SpellInfo.cpp:273 maps target 56 to TARGET_CHECK_RAID and Spell.cpp:9385-9393 selects units satisfying IsInRaidWith; Spell.cpp:1396-1401 adds GetLeewayBonusRadius() = LEEWAY_BONUS_RANGE = 2.66 yd (Object.cpp:1787-1808, ObjectDefines.h:51) and WorldObjectSpellAreaTargetCheck (Spell.cpp:9465, Object.cpp:1355-1358) checks IsWithinDist3d adding the target's object size 1.5 yd (verified by combat_reach precondition arm): effective edge = 30.0 + 2.66 + 1.5 = 34.16 yd (-10% radius edge 31.16 yd, +10% edge 37.16 yd). Five grouped allies convert the party to a raid (ally..ally4 subgroup 1, ally5 subgroup 2): after a real 502273 cast (read at 3500 ms = 500 ms past cast completion), party member ally at 33 yd (main reading) and raid subgroup-2 member ally5 at 33 yd both gain aura 502273 (0 -> 1), while party member ally2 at 35.5 yd stays at 0 (excluding +-10% of 30 yd, caster-only, and party-only bugs). Paired with stranger_unshielded (ungrouped player at 10 yd). Reference search 2026-11-24: coa-history spell 502273: 354 casts / 7593 applies in 14 logs; coabuildhub spells_master_index.json has no entry for 502273; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502273,
+      "name": "Forbidden Ritual (ungrouped nearby player is not shielded)",
+      "kind": "metric_delta",
+      "variant": "stranger_unshielded",
+      "label_suffix": "stranger_unshielded",
+      "quote": "places a shield on all nearby party and raid members",
+      "trigger_spell": 502273,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "grouped_ally": {
+        "dy": 10,
+        "grouped": false
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 502273,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "witnesses that the real 502273 cast succeeded and shielded the caster while the ungrouped bystander at 10 yd received no shield."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 502273,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative group-membership control for 502273 Effect[0] TARGET_UNIT_CASTER_AREA_RAID (Spell.dbc; Spell.cpp:9385-9393 IsInRaidWith): an ungrouped same-faction player stands 10 yd from the caster (well inside 30 yd) and reads aura 502273 = 0 both before and 3500 ms after a real 502273 cast, while the caster arm witnesses aura 502273 = 1 on the caster. Paired with raid_reach. Reference search 2026-11-24: coa-history spell 502273: 354 casts / 7593 applies in 14 logs; installed Spell.dbc governs."
     },
     {
       "spell": 803283,

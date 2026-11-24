@@ -700,7 +700,8 @@
       {
         "claim": "your spell hit rating is increased by $s2% of your Intellect.",
         "labels": [
-          "301255 behaviour_metric_delta spell_hit_rating"
+          "301255 behaviour_metric_delta spell_hit_rating",
+          "301255 behaviour_metric_delta spell_hit_rating_int"
         ]
       },
       {
@@ -2952,7 +2953,7 @@
     "spell": 706928,
     "clause": "Increases the effectiveness of your Whispers by $s1%.",
     "labels": [
-      "706928 behaviour_metric_delta whispers_str"
+      "706928 behaviour_metric_delta whispers_sp"
     ],
     "kind": "claim"
   },
@@ -3084,7 +3085,9 @@
   {
     "spell": 712471,
     "clause": "and allows Black Blood to stack up to 2 times.",
-    "labels": [],
+    "labels": [
+      "712471 behaviour_metric_delta black_blood_stacks"
+    ],
     "kind": "claim"
   },
   {
@@ -3104,6 +3107,13 @@
           "502273 behaviour_metric_delta shield_absorb",
           "502273 behaviour_metric_delta shield_absorb_sp",
           "502273 behaviour_metric_delta shield_absorb_control"
+        ]
+      },
+      {
+        "claim": "places a shield on all nearby party and raid members",
+        "labels": [
+          "502273 behaviour_metric_delta raid_reach",
+          "502273 behaviour_metric_delta stranger_unshielded"
         ]
       }
     ]
