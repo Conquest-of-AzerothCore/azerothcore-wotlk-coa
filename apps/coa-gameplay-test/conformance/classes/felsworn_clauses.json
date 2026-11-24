@@ -1811,7 +1811,6 @@
     "spell": 685321,
     "clause": "increasing your allies' attack power against them by ${$563271m1+$563271ppl1+$AGI*0.15}.",
     "labels": [
-      "685321 effect_value 563271e0 #2",
       "685321 behaviour_metric_delta scar_ap_gaze_pin"
     ],
     "kind": "claim",
@@ -4460,7 +4459,6 @@
       {
         "claim": "by $521234s1%",
         "labels": [
-          "807431 behaviour_metric_delta regen_amount",
           "807431 behaviour_metric_delta regen_energy"
         ]
       },
@@ -4471,7 +4469,8 @@
           "807431 behaviour_metric_delta gone"
         ]
       }
-    ]
+    ],
+    "reason": "The Energy regeneration amount of 5% is read through the Energy regained over 8000 ms after a real Azzinoth's Assault (80 without 807431, 84 with it, within 1.5); the aura_amount value label regen_amount stays a data read outside the claims."
   },
   {
     "spell": 807431,
