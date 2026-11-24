@@ -2,6 +2,8 @@
 #include "PetBattleDataStore.h"
 #include "Player.h"
 #include "PlayerScript.h"
+#include "Protocol/AddonChannel.h"
+#include "SharedDefines.h"
 #include "Store/PetJournalStore.h"
 #include "WorldScript.h"
 
@@ -23,8 +25,9 @@ namespace
             sPetBattleData->Load();
         }
 
-        void OnUpdate(uint32) override
+        void OnUpdate(uint32 diff) override
         {
+            sAddonChannel->Update(diff);
             sPetJournals->Update();
         }
     };
@@ -33,7 +36,16 @@ namespace
     {
     public:
         PetBattlesPlayer() : PlayerScript("coa_pet_battles_player",
-            { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LEARN_SPELL }) { }
+            { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_LEARN_SPELL,
+              PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT }) { }
+
+        bool OnPlayerCanUseChat(Player* player, uint32 type, uint32 language, std::string& message,
+            Player* receiver) override
+        {
+            if (type != CHAT_MSG_WHISPER || language != LANG_ADDON || receiver != player)
+                return true;
+            return !sAddonChannel->Receive(player, message);
+        }
 
         void OnPlayerLogin(Player* player) override
         {
@@ -42,6 +54,7 @@ namespace
 
         void OnPlayerLogout(Player* player) override
         {
+            sAddonChannel->Forget(player);
             sPetJournals->Logout(player);
         }
 
