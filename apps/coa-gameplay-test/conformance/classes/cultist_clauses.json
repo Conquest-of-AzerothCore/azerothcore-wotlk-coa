@@ -1976,7 +1976,7 @@
     "spell": 582836,
     "clause": "Increases the critical strike chance of Blade of the Empire by $s1%",
     "labels": [
-      "582836 effect_value e0 #0"
+      "582836 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -1984,7 +1984,7 @@
     "spell": 582836,
     "clause": "and reduces its mana cost by $s2%.",
     "labels": [
-      "582836 effect_value e1 #1"
+      "582836 behaviour_metric_delta mana_cost"
     ],
     "kind": "claim"
   },

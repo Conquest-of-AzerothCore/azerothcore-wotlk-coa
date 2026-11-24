@@ -737,6 +737,53 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "$s1 = 10 (300305 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 SPELLMOD_CRITICAL_CHANCE, EffectBasePoints 9 + EffectDieSides 1, EffectSpellClassMask[1] 256, SpellFamilyName 31; Spell.dbc). Wrath of the Black Empire 504904 (level 60 rank, AscensionSpellProgressionData.h:1707) carries SpellFamilyFlags[1] 288 (0x120, matching 0x100). Reads live Player::SpellDoneCritChance for 504904 before (control: 300305 not learned) and after a real learn of 300305: expected gain +10.0 points. Reference search 2026-11-24: coa-history spell 300305: 0 events in 186 logs (passive; positive control 502122 Blade of the Empire: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 300305 matches verbatim ('Increases the critical strike chance of Wrath of the Black Empire by 10%.')."
+    },
+    {
+      "spell": 582836,
+      "name": "Abyssal Edge (Blade of the Empire critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Blade of the Empire by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 582836,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 502122,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 2 (582836 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 SPELLMOD_CRITICAL_CHANCE, EffectBasePoints 1 + EffectDieSides 1, EffectSpellClassMask[1] 1048576, SpellFamilyName 31; Spell.dbc). Blade of the Empire 502122 (level 60 rank, AscensionSpellProgressionData.h:1669, DmgClass 2 melee, EquippedItemClass 2 sub 173555 satisfied by default Godblade 2531 2H Axe) carries SpellFamilyFlags[1] 1048576 (0x100000). Unit::SpellDoneCritChance (Unit.cpp:10410) applies SPELLMOD_CRITICAL_CHANCE to DmgClass 2 spells. Reads live Player::SpellDoneCritChance for 502122 before (control: 582836 not learned) and after a real learn of 582836: expected gain +2.0 points. Reference search 2026-11-24: coa-history spell 582836: 0 events in 186 logs (passive; positive control 502122 Blade of the Empire: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 582836 matches ('by 2%')."
+    },
+    {
+      "spell": 582836,
+      "name": "Abyssal Edge (Blade of the Empire mana cost)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "and reduces its mana cost by $s2%.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1000,
+      "expected": 1045.25,
+      "expected_gain": 45.25,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 25 (582836 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 SPELLMOD_COST, EffectBasePoints -26 + EffectDieSides 1 = -25%, EffectSpellClassMask[4] 1048576, SpellFamilyName 31; Spell.dbc). Blade of the Empire 502122 (level 60 rank, ManaCostPercentage 12, GCD 1500 ms, 3 charges) costs CalculatePct(1512 BaseMana, 12) = 181 mana (SpellInfo.cpp:3216); -25% via ApplySpellMod SPELLMOD_COST saves 45.25 mana (181 -> 135 or 136, saving 45 or 46). Sets caster mana to 2000 (<= 2297 MaxMana) with regeneration off before each cast of 502122 (1600 ms expire_ms clears GCD between phases) and reads remaining mana after the cast before (control: 582836 not learned) and after a real learn of 582836: expected gain 45.25 +- 1.0 mana. Reference search 2026-11-24: coa-history spell 582836: 0 events in 186 logs (passive; positive control 502122: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 582836 matches ('reduces its mana cost by -25%')."
     }
   ],
   "player_observations": [],
