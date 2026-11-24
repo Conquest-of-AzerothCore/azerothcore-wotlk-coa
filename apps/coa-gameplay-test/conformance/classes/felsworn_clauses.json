@@ -680,7 +680,8 @@
     "kind": "claim",
     "labels": [
       "520251 behaviour_metric_delta intuition"
-    ]
+    ],
+    "reason": "Same wording and shape as Necromancer Improved Mandates 560613 (claim 117.0, kind effectiveness_delta, Foul Mandate Stamina 122 -> 132). Measured on Illidari Intuition 800212 only (Agility 150 -> 154); the other Intuition ranks carry the same SpellFamilyFlags mask, so one mask holds them; that every member behaves alike is not separately tested (G-23). Reference search 2026-11-24: coa-history spell 520251: 0 events in 186 logs (passive); bindmysoul snapshot: 'Increases the effectiveness of your Intuitions by 20%.'; nothing else found."
   },
   {
     "spell": 520252,
@@ -1877,9 +1878,10 @@
     "spell": 685321,
     "clause": "increasing your allies' attack power against them by ${$563271m1+$563271ppl1+$AGI*0.15}.",
     "labels": [
-      "685321 effect_value 563271e0 #2"
+      "685321 behaviour_metric_delta scar_ap_gaze_pin"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tyrant's Gaze 805240 against the scarred dummy: 453 without the scar, 475 with it (one Twin Slice with 685321 learned); the scar is 18 + 27 (level 60 from BaseLevel 33) + int32(0.15 x 130) = 64 attack power, 344 + int(0.35 x 376) = 475."
   },
   {
     "spell": 704360,
@@ -2394,7 +2396,16 @@
     "labels": [
       "705135 effect_value 680318e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Casting Chaos Rush dashes the caster 10 yd forward (Chaos Rush Jump 802028, CHARGE_DEST on the caster's front, EffectRadiusIndex 13), past a dummy placed at DUMMY_DISTANCE, and cost_gate has no step that moves or faces the caster again before the attempt of Felhoof Charge 800204 (a charge that needs its target in front). Design 1 (cost_gate after_casts, one scenario for the three arms): the without arm read 67 (not ready) and the with and beyond arms read 134 and 97 (SPELL_FAILED_UNIT_NOT_INFRONT, SPELL_FAILED_OUT_OF_RANGE: the position the previous arm's dash left). Design 2 (cost_gate only_arm, one scenario per arm, Sun Cleric 805581 precedent, counted-pair run vb6-prove3): without 67 and beyond 67 as expected, with 134 instead of 0 (the attempt 18100 ms after the priming cast, 2000 - 100 ms of the 20000 ms category recovery, is no longer refused as not ready but fails its facing); the order of those two checks in Spell::CheckCast was not read, so the 134 is a lead, not a proof. Route: a cost_gate option that re-places the caster before the attempt (a shared behaviours.py change) or a dash-free source of the 680318 cut; not a final status.",
+      "attempts": [
+        {
+          "agent": "fw-vb6",
+          "report": ".agents/plans/fw-vb6/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 705137,
@@ -3898,7 +3909,16 @@
     "labels": [
       "804219 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The 25% chance not to consume Felfury needs a keep-rate read on Ruin: Ruin consumes 2 Felfury and needs At Least 2 Felfury 803468, but the aura_keep_rate kind sets the consumed aura to 1 stack and applies no other fixture in the treatment arm. Design 1 (aura_keep_rate, Witch Hunter Lightbringer 680538 shape, Ruin 501298, control Twin Slice 801901, 20 treatment casts) measured 20 of 20 casts refused SPELL_FAILED_NO_POWER (85): no trial. No server mutant reaches the roll (a script constant), and flat_chance_rate reads no aura or stack event. The route is an aura_keep_rate extension (an aura_stacks option and treatment_auras); the band then needs 12443 casts and 15000 or more for a residual under 0.1% per pair (about 16 parts of 1000 casts at 2.5 s). Not a final status.",
+      "attempts": [
+        {
+          "agent": "fw-vb6",
+          "report": ".agents/plans/fw-vb6/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804609,
@@ -3908,7 +3928,8 @@
     ],
     "kind": "claim",
     "evidence": "data",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068",
+    "effectiveness_of": 800225
   },
   {
     "spell": 804609,
@@ -4393,9 +4414,13 @@
     "spell": 805255,
     "clause": "Reduces the cooldown of Burning Hatred by $/1000;s1 sec.",
     "labels": [
-      "805255 behaviour_metric_delta cooldown"
+      "805255 behaviour_metric_delta cooldown",
+      "805255 cost_gate 805239 cd without",
+      "805255 cost_gate 805239 cd with",
+      "805255 cost_gate 805239 cd beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "cost_gate on Burning Hatred 805239 (120000 ms recovery, 60000 ms cut): refused at 60500 ms without the talent, through at 60500 ms with it, refused at 59500 ms with it."
   },
   {
     "spell": 805256,
@@ -4541,7 +4566,9 @@
       {
         "claim": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec (Sargeron Smite)",
         "labels": [
-          "806235 behaviour_metric_delta duration"
+          "806235 behaviour_metric_delta duration",
+          "806235 behaviour_metric_delta duration_sargeron_held",
+          "806235 behaviour_metric_delta duration_sargeron_gone"
         ]
       },
       {
@@ -4549,10 +4576,21 @@
         "labels": [
           "806235 behaviour_metric_delta duration_azzinoth",
           "806235 behaviour_metric_delta duration_felwrath",
-          "806235 behaviour_metric_delta duration_ruin"
+          "806235 behaviour_metric_delta duration_ruin",
+          "806235 behaviour_metric_delta duration_azzinoth_held",
+          "806235 behaviour_metric_delta duration_azzinoth_gone",
+          "806235 behaviour_metric_delta duration_felwrath_held",
+          "806235 behaviour_metric_delta duration_felwrath_gone",
+          "806235 behaviour_metric_delta duration_ruin_held",
+          "806235 behaviour_metric_delta duration_ruin_gone",
+          "806235 behaviour_metric_delta duration_carve_held",
+          "806235 behaviour_metric_delta duration_carve_gone",
+          "806235 behaviour_metric_delta duration_sunder_held",
+          "806235 behaviour_metric_delta duration_sunder_gone"
         ]
       }
-    ]
+    ],
+    "reason": "Held/gone reads of Inner Demon 804216 around its stated end, one pair per spender (Sargeron Smite, Ruin, Felwrath: 5000 ms at application, 6000 ms with one critical strike, present at about 5934 ms, absent at about 6059 ms; Azzinoth's Assault: 8000 ms including its own 3000 ms, 10000 ms with two critical strikes, present at 9844 ms, absent at 10154 ms; Carve 800206 (impact 803715, a strike per weapon hand: 7000 ms with two critical strikes, present at 6925 ms, absent at 7050 ms) and Sunder 705121 (impact 712399 of the first explosion only, dummy 1 yd in front: 6000 ms with one critical strike, present at 5925 ms, absent at 6050 ms), the two other scripted spenders of AscensionFelsworn.cpp:56-60; every scripted spender is tested); the control phase (806235 not learned) is gone at both reads."
   },
   {
     "spell": 806235,
@@ -4587,9 +4625,12 @@
     "spell": 807430,
     "clause": "Increases the duration of Skull of Gul'dan by $/1000;S1 sec.",
     "labels": [
-      "807430 behaviour_metric_delta duration"
+      "807430 behaviour_metric_delta duration",
+      "807430 behaviour_metric_delta skull_held",
+      "807430 behaviour_metric_delta skull_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Held/gone reads of Skull of Gul'dan 800225 (10000 ms, 15000 ms with the talent): present at about 14589 ms, absent at about 15400 ms; the control phase (807430 not learned) is gone at both reads."
   },
   {
     "spell": 807431,
@@ -4605,7 +4646,7 @@
       {
         "claim": "by $521234s1%",
         "labels": [
-          "807431 behaviour_metric_delta regen_amount"
+          "807431 behaviour_metric_delta regen_energy"
         ]
       },
       {
@@ -4615,7 +4656,8 @@
           "807431 behaviour_metric_delta gone"
         ]
       }
-    ]
+    ],
+    "reason": "The Energy regeneration amount of 5% is read through the Energy regained over 8000 ms after a real Azzinoth's Assault (80 without 807431, 84 with it, within 1.5); the aura_amount value label regen_amount stays a data read outside the claims."
   },
   {
     "spell": 807431,
@@ -4629,9 +4671,12 @@
     "spell": 807438,
     "clause": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
     "labels": [
-      "807438 behaviour_metric_delta duration"
+      "807438 behaviour_metric_delta duration",
+      "807438 behaviour_metric_delta inner_demon_held",
+      "807438 behaviour_metric_delta inner_demon_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Held/gone reads of Inner Demon 804216 around 5500 ms (5000 ms at application, 500 ms per Felfury generated by a real Twin Slice): present at about 5449 ms, absent at about 5519 ms; the control phase (807438 not learned) is gone at both reads."
   },
   {
     "spell": 807461,
