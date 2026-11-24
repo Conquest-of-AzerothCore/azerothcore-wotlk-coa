@@ -11,7 +11,10 @@
     "enchanted and equipped casts Arcane Explosion on ten dummies five times: each cast rolls each weapon's aura",
     "ten times, so the chance that a weapon has no buff after the last cast is below 0.75^10 = 6% per cast and",
     "below 1e-6 over five casts; Agility then reads 220 above the baseline (two buffs). Before the repair it",
-    "cannot exceed 110, so the check fails."
+    "cannot exceed 110, so the check fails.",
+    "By the PR author's ruling the proc carries the 35 s cooldown of the data's own marker aura 968894 (Ninja's",
+    "Focus Equip ICD); the loaded entry keeps the record's 25% chance and reads that 35000 ms cooldown, which",
+    "each weapon's aura tracks on its own. Before the repair the entry has no cooldown."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -248,6 +251,22 @@
       "metric": "aura",
       "spell": 968716,
       "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 968716 keeps the record's 25% chance",
+      "actor": "m",
+      "metric": "spell_proc_chance",
+      "spell": 968716,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 968716 loads the data's 35 s internal cooldown",
+      "actor": "m",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 968716,
+      "equals": 35000
     },
     {
       "action": "assert",
