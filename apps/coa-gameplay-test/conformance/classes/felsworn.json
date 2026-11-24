@@ -17162,21 +17162,34 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          1459,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          1459,
+          1,
+          "dummy",
+          "dummy"
         ]
       ],
-      "metric": "aura",
+      "metric": "carried_aura_count",
       "fields": {
-        "spell": 1243
-      },
-      "fields_sum": {
-        "spell": 1126
+        "spells": [
+          1243,
+          1126,
+          1459
+        ]
       },
       "before_expected": 1,
       "expected": 2,
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Two stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243 and Mark of the Wild 1126, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later the number of the two auras held by the caster is read: 1 before the learn (control), 2 after. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Three stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243, Mark of the Wild 1126 and Arcane Intellect 1459, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later carried_aura_count of the three auras on the caster is read: 1 before the learn (control), 2 after; a third stolen aura (an over-steal) reads 3. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705145,
@@ -17963,17 +17976,22 @@
       "target": "dummy",
       "measure_actor": "caster",
       "cast_power": 100,
-      "metric": "spell_cast_count",
+      "metric": "spell_damage_count",
       "fields": {
-        "spell": 800598
+        "spell": 808303,
+        "target": "dummy"
       },
-      "before_expected": 0,
-      "expected": 0,
+      "fields_sum": {
+        "spell": 800598,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 1,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "after_at_least": 0,
-      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 is cast 0 times; a server triggering on every melee hit reads 2. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
-      "after_at_most": 0,
+      "after_at_least": 1,
+      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 lands 0 times. Same-arm strike read (review fw-rl3b I-1): each judged reading is the sum of the applied damage events of the Twin Slice strike 808303 (Effect[0] 121 weapon damage, EffectTriggerSpell[0] of 801901) and of 800598 on the dummy, so a landed strike with no trigger reads exactly 1; a strike that did not land reads 0, and a server triggering on every melee hit reads 2 or more. The same sum is 1 before the learn. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
+      "after_at_most": 1,
       "phase_auras": [
         [
           64481,
@@ -19007,6 +19025,497 @@
         }
       ],
       "observe_source": "705129 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 1 (Physical), BasePoints -11 + 1 = -10 ($s2); Effect[0] aura 69 absorbs 176 + 1..32 + 2.45 per level (60 x 2.45 = 147) + Stamina 79 x 1, about 419. Same design as the 707527 entry (Void Zone 92559, 40 strikes, 4 trials, barrier recast per trial): expected mean (40 x 0.90 x 954 - 419) / (40 x 954) = 0.8902, 0.9803 if the 10% were not applied; the 2-point band holds any absorb of this rank. Control entry: rank 1 carries MiscValue 1 in the DBC where ranks 2 to 6 (707523 to 707527) carry MiscValue 0. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "force_crit": "spell",
+      "wait_ms": 22500,
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "metric": "spell_damage_count",
+      "name": "Bane of Chaos (periodic critical strikes)",
+      "variant": "periodic_crit",
+      "label_suffix": "periodic_crit",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy",
+        "critical": true
+      },
+      "expected": 7,
+      "tolerance": 0.5,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: 7 ticks (the ticks entry reads 7). The sentence is in the 706420 Description (@ext). The caster's spell crit rating is forced (force_crit spell, the Necromancer 501861 periodic_crit shape, ADR necromancer/0012), the dummy's Chaos resistance removed (823764, precondition fixture, set_aura); the crit-removal fixture 984954 of the total entry is not set. Reference search 2026-11-24: Necromancer 501861 'Periodic damage dealt by this can critically strike' (status 1 after FN-c4-1, 12 of 12 critical ticks; pre-fix 0 of 12) is the precedent; coa-history spell 706420: 324 casts, no tick-crit figure decides; nothing else found beyond the tooltip and Spell.dbc. Read: critical Bane of Chaos ticks on the dummy 22500 ms after a real cast under the forced spell crit: 7 (every tick); no cast before (control, 0)."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "force_crit": "spell",
+      "wait_ms": 22500,
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "metric": "spell_damage_count",
+      "name": "Bane of Chaos (ticks under forced crit)",
+      "variant": "periodic_ticks",
+      "label_suffix": "periodic_ticks",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy"
+      },
+      "expected": 7,
+      "tolerance": 0.5,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: 7 ticks (the ticks entry reads 7). The sentence is in the 706420 Description (@ext). The caster's spell crit rating is forced (force_crit spell, the Necromancer 501861 periodic_crit shape, ADR necromancer/0012), the dummy's Chaos resistance removed (823764, precondition fixture, set_aura); the crit-removal fixture 984954 of the total entry is not set. Reference search 2026-11-24: Necromancer 501861 'Periodic damage dealt by this can critically strike' (status 1 after FN-c4-1, 12 of 12 critical ticks; pre-fix 0 of 12) is the precedent; coa-history spell 706420: 324 casts, no tick-crit figure decides; nothing else found beyond the tooltip and Spell.dbc. Companion of periodic_crit: every 706420 tick on the dummy, critical or not, under the same forcing: 7, so periodic_crit's 7 critical ticks are all of them; no cast before (0)."
+    },
+    {
+      "spell": 706420,
+      "name": "Bane of Chaos (direct spell crit under the same forcing)",
+      "kind": "metric_delta",
+      "variant": "direct_crit_control",
+      "label_suffix": "direct_crit_control",
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 100,
+      "force_crit": "spell",
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "wait_ms": 2800,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy",
+        "critical": true
+      },
+      "observe_source": "Forcing check for periodic_crit: under the same forced spell crit rating a direct Felsworn spell, Fel Fireball 801312, lands one critical hit on the dummy (no cast before: 0)."
+    },
+    {
+      "spell": 561216,
+      "kind": "metric_delta",
+      "quote": "@ext:Requires a nearby enemy to cast.:ext@",
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 561216
+      },
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Fury of the Illidari (refused with no enemy nearby)",
+      "variant": "no_enemy",
+      "label_suffix": "no_enemy",
+      "relocate_before_trigger": {
+        "dx": -40
+      },
+      "expected": 12,
+      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Arm: the caster is moved 40 yd away from the only dummy right before the cast (relocate_before_trigger), so no enemy is within 15 yd; expected the refusal 12."
+    },
+    {
+      "spell": 561216,
+      "kind": "metric_delta",
+      "quote": "@ext:Requires a nearby enemy to cast.:ext@",
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 561216
+      },
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Fury of the Illidari (control: cast with an enemy beside the caster)",
+      "variant": "enemy_near",
+      "label_suffix": "enemy_near",
+      "expected": 0,
+      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Control arm of no_enemy: the same cast with the dummy beside the caster (not moved): accepted, cast_failure 0."
+    },
+    {
+      "spell": 300468,
+      "name": "Illidari Barrier (the absorb follows Stamina)",
+      "kind": "taken_hit",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "judge": "absorb",
+      "quote": "@ext:Absorption shield scales with Stamina.:ext@",
+      "strike_spell": 41394,
+      "trials": 5,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "absorb_constant": 328,
+      "absorb_terms": [
+        {
+          "coefficient": 1.0,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.2,
+          "reads": [
+            {
+              "metric": "spell_power",
+              "school": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.08,
+          "reads": [
+            {
+              "metric": "attack_power"
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "shield",
+          "learn": [
+            300469
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "stamina",
+          "learn": [
+            300469
+          ],
+          "auras": [
+            [
+              9119,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        }
+      ],
+      "observe_source": "Companion of amount for the sentence 'Absorption shield scales with Stamina.' (@ext; the tooltip of 300468 gives the term $STA*1). Arms: no shield (control), the shield of 300469 cast at the caster (Stamina as is) and the same shield after Stamina +12 (9119, MOD_STAT Stamina BasePoints 11 + 1, a precondition fixture of the stamina arm; the claim's subject is the shield). Each arm's absorb is judged against the formula with the Stamina read on the caster at the arm start, so the stamina arm's absorb exceeds the shield arm's by the Stamina gained times the tooltip coefficient 1.0. Reference search 2026-11-24: coa-history spell 300468 and 300469; nothing found beyond the tooltip, Spell.dbc and the amount entry; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (dodge while channeling)",
+      "kind": "metric_delta",
+      "variant": "channel_dodge",
+      "label_suffix": "channel_dodge",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 0,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control of this arm: the _control entry with Sargeras Embrace 800355 reads 3 landed strikes under the same fixture. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (parry while channeling)",
+      "kind": "metric_delta",
+      "variant": "channel_parry",
+      "label_suffix": "channel_parry",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 0,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control of this arm: the _control entry with Sargeras Embrace 800355 reads 3 landed strikes under the same fixture. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "name": "Sargeras Embrace (control: a channel without the exemption does not dodge)",
+      "kind": "metric_delta",
+      "variant": "channel_dodge_control",
+      "label_suffix": "channel_dodge_control",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 3,
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control: Sargeras Embrace 800355, a Felsworn channel (ChannelInterruptFlags 0, no exemption), the same strikes land: 3 events, so the 0 of Carve is the exemption and not a failed strike. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "name": "Sargeras Embrace (control: a channel without the exemption does not parry)",
+      "kind": "metric_delta",
+      "variant": "channel_parry_control",
+      "label_suffix": "channel_parry_control",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 3,
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control: Sargeras Embrace 800355, a Felsworn channel (ChannelInterruptFlags 0, no exemption), the same strikes land: 3 events, so the 0 of Carve is the exemption and not a failed strike. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "kind": "metric_delta",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "before_expected": 0,
+      "relocate_during_wait": {
+        "every_ms": 500,
+        "count": 2,
+        "dy": 1.5
+      },
+      "metric": "cast_remaining_ms",
+      "name": "Carve (the channel continues while the caster moves)",
+      "variant": "moving_channel",
+      "label_suffix": "moving_channel",
+      "trigger_spell": 800206,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "fields": {
+        "spell": 800206
+      },
+      "expected": 1,
+      "after_at_least": 300,
+      "observe_source": "Carve 800206 is a channel (DurationIndex 66 = 2500 ms) whose ChannelInterruptFlags 4733956 (0x483C04) carry no movement bit in Spell.dbc, and the server adds none. The caster is moved by the harness relocate step (the native position update of a client movement packet, which interrupts a channel carrying AURA_INTERRUPT_FLAG_MOVE) 1.5 yd along y and back at 500 and 1000 ms; cast_remaining_ms of the caster's own cast is read 800 ms after the last move (about 1800 ms after the cast), the channel must still run (at least 300 of the 2500 ms). Before (control): no cast, 0. Felfury x6 and 803468 are set as precondition fixtures. Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel (the precedent shape); nothing else found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 800206,
+      "kind": "metric_delta",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "before_expected": 0,
+      "relocate_during_wait": {
+        "every_ms": 500,
+        "count": 2,
+        "dy": 1.5
+      },
+      "metric": "cast_remaining_ms",
+      "name": "Ruin (control: a cast with the movement interrupt is cut by the same moves)",
+      "variant": "moving_channel_control",
+      "label_suffix": "moving_channel_control",
+      "trigger_spell": 501298,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ]
+      ],
+      "fields": {
+        "spell": 501298
+      },
+      "expected": 0,
+      "observe_source": "Control arm of moving_channel: Ruin 501298 (the cast refused while moving with SPELL_FAILED_MOVING 51 in the Felbreak moving_cast_control entry, so it carries the movement interrupt) is cast and the caster moved the same way (relocate_during_wait, 500 and 1000 ms); cast_remaining_ms of 501298 reads 0 after the moves: the harness moves do cut a cast that carries the interrupt, so Carve's continuing channel is the exemption. Felfury x6 as the consumes entry fixture."
     }
   ],
   "player_observations": [],
