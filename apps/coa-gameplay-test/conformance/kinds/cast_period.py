@@ -264,6 +264,11 @@ def cast_period_verdict(base, run, model: dict):
     low = (times[last - 1] - times[first]) / (count - 1)
     high = (times[last] - times[first - 1]) / (count - 1)
     start = run.values[model['start_label']]
+    if model.get('first_at_cast') and first != 1:
+        return replace(base, status='alert', measured=float(count),
+                       explanation=f'the first hit lies in ({times[first - 1] - start:g}, {times[first] - start:g}] '
+                                   f'ms of game time after the command, not in the first poll after the cast: no '
+                                   f'tick at the cast')
     status = 'ok' if expected - band <= low and high <= expected + band else 'alert'
     return replace(base, status=status, measured=(low + high) / 2, expected=expected, low=expected - band,
                    high=expected + band,

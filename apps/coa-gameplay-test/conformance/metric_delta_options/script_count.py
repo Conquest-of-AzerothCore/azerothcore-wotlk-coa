@@ -17,17 +17,43 @@ LANDED_METRIC = 'melee_damage_count'
 SWING_NOUN = 'attack'
 
 
+MAIN_HAND_FIELDS = ('item', 'speed_ms', 'skill_line', 'proficiency')
+WEAPON_PROFICIENCY_EFFECT = 25
+WEAPON_ITEM_CLASS = 2
+
+
+class MainHand(NamedTuple):
+    item: int
+    speed_ms: int
+    skill_line: int
+    proficiency: int
+
+
 class Counted(NamedTuple):
     noun: str
     swings: int = 0
+    main_hand: MainHand | None = None
+
+
+def parse_main_hand(raw) -> MainHand | None:
+    if raw is None:
+        return None
+    if not isinstance(raw, dict) or set(raw) != set(MAIN_HAND_FIELDS) \
+            or any(type(raw[field]) is not int or raw[field] < 1 for field in MAIN_HAND_FIELDS):
+        raise ValueError(f'script_count main_hand is {{{", ".join(MAIN_HAND_FIELDS)}}} as positive integers, '
+                         f'not {raw!r}')
+    return MainHand(*(raw[field] for field in MAIN_HAND_FIELDS))
 
 
 def parse(raw) -> Counted:
-    if not isinstance(raw, dict) or not {'noun'} <= set(raw) <= {'noun', 'swings'} or raw['noun'] not in NOUNS \
-            or ('swings' in raw and (type(raw['swings']) is not int or raw['swings'] < 1)):
+    if not isinstance(raw, dict) or not {'noun'} <= set(raw) <= {'noun', 'swings', 'main_hand'} \
+            or raw['noun'] not in NOUNS \
+            or ('swings' in raw and (type(raw['swings']) is not int or raw['swings'] < 1)) \
+            or ('main_hand' in raw and 'swings' not in raw):
         raise ValueError(f'script_count is {{"noun": one of {list(NOUNS)}, "swings": a positive swing interval '
-                         f'count (optional)}}, not {raw!r}')
-    return Counted(raw['noun'], raw.get('swings', 0))
+                         f'count (optional), "main_hand": the one melee weapon of the swings (optional, with '
+                         f'swings)}}, not {raw!r}')
+    return Counted(raw['noun'], raw.get('swings', 0), parse_main_hand(raw.get('main_hand')))
 
 
 def read_aura(spec) -> int:
@@ -88,9 +114,11 @@ def class_weapon_speeds(class_file: dict) -> dict[int, int]:
     return {weapon['item']: weapon['speed_ms'] for weapon in weapons if 'item' in weapon and 'speed_ms' in weapon}
 
 
-def equipped_melee_speeds(class_file: dict, steps: list[dict]) -> list[int]:
+def equipped_melee_speeds(class_file: dict, steps: list[dict], main_hand: MainHand | None = None) -> list[int]:
     from profile import CASTER, EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND
     speeds = class_weapon_speeds(class_file)
+    if main_hand is not None:
+        speeds[main_hand.item] = main_hand.speed_ms
     slots = {}
     for step in steps:
         if step.get('action') == 'equip' and step.get('actor') == CASTER \
@@ -101,8 +129,46 @@ def equipped_melee_speeds(class_file: dict, steps: list[dict]) -> list[int]:
     return [slots[slot] for slot in sorted(slots)]
 
 
-def landed_bound(class_file: dict, steps: list[dict], window: int) -> int:
-    return sum(window // speed + 1 for speed in equipped_melee_speeds(class_file, steps))
+def landed_bound(class_file: dict, steps: list[dict], window: int, main_hand: MainHand | None = None) -> int:
+    return sum(window // speed + 1 for speed in equipped_melee_speeds(class_file, steps, main_hand))
+
+
+def melee_equip_indexes(steps: list[dict]) -> set[int]:
+    from profile import CASTER, EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND
+    indexes = set()
+    for index, step in enumerate(steps):
+        if step.get('action') == 'equip' and step.get('actor') == CASTER \
+                and step.get('slot') in (EQUIPMENT_SLOT_MAIN_HAND, EQUIPMENT_SLOT_OFF_HAND):
+            indexes.add(index)
+            previous = steps[index - 1] if index else {}
+            if previous.get('action') == 'add_item' and previous.get('actor') == CASTER \
+                    and previous.get('item') == step['item']:
+                indexes.add(index - 1)
+    return indexes
+
+
+def proficiency_refusal(main_hand: MainHand, records) -> str | None:
+    spell = main_hand.proficiency
+    if records.field('Spell', spell, 'Effect[0]') != WEAPON_PROFICIENCY_EFFECT \
+            or records.field('Spell', spell, 'EquippedItemClass') != WEAPON_ITEM_CLASS:
+        return f'main_hand proficiency {spell} is no weapon proficiency spell in Spell.dbc'
+    return None
+
+
+def one_main_hand(class_file: dict, main_hand: MainHand, steps: list[dict]) -> list[dict]:
+    from profile import CASTER, EQUIPMENT_SLOT_MAIN_HAND, skill_target
+    dropped = melee_equip_indexes(steps)
+    if not dropped:
+        raise ValueError(f'{NAME} main_hand replaces the melee equip steps of the scenario, and it has none')
+    first = min(dropped)
+    skill = skill_target(class_file)
+    armed = [{'action': 'learn', 'actor': CASTER, 'spell': main_hand.proficiency},
+             {'action': 'add_item', 'actor': CASTER, 'item': main_hand.item},
+             {'action': 'equip', 'actor': CASTER, 'item': main_hand.item, 'slot': EQUIPMENT_SLOT_MAIN_HAND},
+             {'action': 'set_skill', 'actor': CASTER, 'skill': main_hand.skill_line, 'value': skill,
+              'maximum': skill}]
+    kept = [step for index, step in enumerate(steps) if index not in dropped]
+    return kept[:first] + armed + kept[first:]
 
 
 def swing_window(spec, counted: Counted, bound: int) -> str | None:
@@ -212,7 +278,9 @@ def swing_fixtures(class_file: dict, spec, counted: Counted, scenario: dict):
     from profile import measurement
     judged = {metric_delta_label(spec, name) for name in counted_moments(spec)}
     window = counted.swings * swing_interval(class_file)
-    refusal = swing_window(spec, counted, landed_bound(class_file, scenario['steps'], window))
+    if counted.main_hand is not None:
+        scenario['steps'] = one_main_hand(class_file, counted.main_hand, scenario['steps'])
+    refusal = swing_window(spec, counted, landed_bound(class_file, scenario['steps'], window, counted.main_hand))
     if refusal is not None:
         raise ValueError(f'{spec.spell} {NAME} {refusal}')
     steps = []
@@ -224,6 +292,12 @@ def swing_fixtures(class_file: dict, spec, counted: Counted, scenario: dict):
             steps.append(measurement(landed_label(step['label']), step['actor'], LANDED_METRIC))
     scenario['steps'] = steps
     scenario.setdefault('creatures', [creature_fixture(class_file)])
+    if counted.main_hand is not None:
+        scenario['contract'] += (f' The caster swings one main-hand weapon only: item {counted.main_hand.item} '
+                                 f'({counted.main_hand.speed_ms} ms, skill line {counted.main_hand.skill_line}, '
+                                 f'proficiency {counted.main_hand.proficiency}) replaces the melee equip steps, so '
+                                 f'up to {landed_bound(class_file, scenario["steps"], window, counted.main_hand)} '
+                                 f'attacks land in each window.')
     scenario['contract'] += (f' After each real cast of {spec.trigger_spell} the caster reads the count and its '
                              f'{LANDED_METRIC}, auto-attacks the dummy for {counted.swings} swing intervals '
                              f'({window} ms), stops, '
@@ -236,7 +310,10 @@ def fixtures(class_file: dict, spec, counted: Counted, scenario: dict):
     from behaviours import dataset
     from profile import DBC_DIR
     from tooltip import Records
-    refusal = scenario_refusal(spec, scenario['steps'], Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR)))))
+    records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
+    refusal = scenario_refusal(spec, scenario['steps'], records)
+    if refusal is None and counted.main_hand is not None:
+        refusal = proficiency_refusal(counted.main_hand, records)
     if refusal is not None:
         raise ValueError(f'{spec.spell} {NAME} {refusal}')
     scenario['contract'] += (f' The {READ_METRIC} of aura {read_aura(spec)} is the {counted.noun} count the quote '
@@ -252,6 +329,8 @@ def model(spec, counted: Counted) -> dict:
         from behaviours import metric_delta_label
         found['swings'] = {'count': counted.swings,
                            'readings': [metric_delta_label(spec, name) for name in counted_moments(spec)]}
+        if counted.main_hand is not None:
+            found['swings']['main_hand'] = counted.main_hand.item
     return {'evidence_metric': EVIDENCE_METRIC, NAME: found}
 
 

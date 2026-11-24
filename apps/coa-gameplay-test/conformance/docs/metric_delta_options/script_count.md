@@ -33,4 +33,14 @@ mentor D-95). An uncast before arm (driver `absent`) keeps its plain count and h
 landed-attack bound is not below the least expected count of a cast arm (the aura could end inside the window); the
 bound sums `window // speed + 1` over every melee hand the scenario equips, since `melee_damage_count` counts both
 hands. Untested by the rule: missed or avoided swings (only landed attacks count) and the aura's end at the last
-count. Felsworn: Annihilation 803904, Pit Lord's Strength 802076 and 802110 (`consumed`, 1 swing, both hands).
+count.
+
+`main_hand` (ADR 1277, optional, with `swings` only) is `{"item", "speed_ms", "skill_line", "proficiency"}`, all
+positive integers read from `item_template` (`delay`, the subclass's skill line) and Spell.dbc. It replaces the
+scenario's melee equip steps (slots 15 and 16 with their `add_item`) by one main-hand weapon: the caster learns
+`proficiency` (refused unless Spell.dbc gives it Effect[0] 25 on item class 2), equips `item` in slot 15 and sets
+`skill_line` to the class's skill target. The bound then uses `speed_ms`; the judge is unchanged. Use it when the
+window must land more attacks than one interval of the class weapons allows below the count (with a fast weapon,
+`swings` intervals of the class's reference weapon hold several landed attacks). Felsworn: Annihilation 803904,
+Pit Lord's Strength 802076 and 802110 (`consumed`, 2 swings = 4600 ms, Poniard 2208 at 1300 ms, Daggers 1180: bound
+4, below the least count 5; the class file's hit and expertise ratings remove misses, dodges and parries).

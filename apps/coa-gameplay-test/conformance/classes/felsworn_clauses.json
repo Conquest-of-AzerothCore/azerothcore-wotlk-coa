@@ -307,7 +307,8 @@
         }
       ]
     },
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof."
   },
   {
     "spell": 300476,
@@ -316,7 +317,8 @@
       "300476 effect_radius 520256e0 #1",
       "300476 behaviour_metric_delta party_radius"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof."
   },
   {
     "spell": 300476,
@@ -338,6 +340,7 @@
       }
     ],
     "kind": "claim",
+    "reason": "fw-bab (2026-11-24): avoided_swing_reads (ADR 1273, provisional, mentor D-91). party_crit opts in to baseline_read: the ally's melee_crit_chance_refreshed read 4.32 before the dodges and 4.32 after the not-learned control windows (zero delta), 6.32 after the dodges with 300476 learned (gain 2.00 in [1.99, 2.01]); the tool derives contrast learned from the step list. party_crit_duration reads the expiry edge: the ally held 520256 9000 ms after the quieting relocation and no longer held it at 11000 ms, with 8 and 9 dodges in the last window and none after the relocation. Counted pair: both runs ok on build 2d78de5092 (server f7b1214fe2). Superseded detail (review fw-rbab2 I-2): the duration claim now rests on the stamped expiry reads of ADR 1273 (held/gone measured from the last dodge stamp), counted pair fw-bab2 prove1 on build 1544a8df; the reads 9000/11000 after the relocation and build 2d78de5092 cited above are no longer the proof.",
     "tool_gap": {
       "reason": "Both behaviour labels resolve to data under coverage.py. party_crit is a stat_delta read of melee_crit_chance_refreshed, a state metric whose verdict carries no contrast stamp (coverage.py:711-712, 741-742, 792), although the windows are in substance a learned contrast; stamping it is an evidence decision for the mentor. party_crit_duration reads aura_duration_ms, a readback metric (coverage.py:423), not an observed expiry. The nearest kind is avoided_swing_reads with a learned contrast stamp on the crit read and an expiry edge after the last dodge (held at 9 s, gone by 11 s).",
       "attempts": [
@@ -477,7 +480,7 @@
         "reason": "Counted by the 50 Energy arm on Azzinoth's Assault 803475, an instant Felfury spender (CastingTimeIndex 1, 0 ms): Energy set to 50 before the cast gives 50 / 10 x 1 = 5 points (band 3 to 7), control arm without 300489 in the same pair. The earlier arm on Ruin 801895 (2.5 s cast) read +7: Energy regenerates about 10 per second during the cast (probe 20261124-034318: 50, 62 at 1.2 s, 47 after the cast and its 30 cost; 50, 50, 20 with regeneration off), so the hook sees about 75 at completion, not 50 and not 'after the cost'. Not tested: whether the Energy counts at the start or at the completion of a cast on a spender with a cast time."
       }
     ],
-    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) on Ruin reads +9.67 / +9.85 / +9.82 points against the stated +10 (all ok). The 50 Energy arm on Ruin read +7 because Energy regenerates about 10 per second during the 2.5 s cast (probe 20261124-034318), so the hook sees about 75 at completion; the earlier explanation that a read after the cost would give 5 at 50 Energy is refuted by that probe. D-89: the half arm is measured on Azzinoth's Assault 803475, an instant Felfury spender, so the Energy at the start and at the completion of the cast are the same (crit_energy_half, stated +5, band 3 to 7). No server change."
+    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) on Ruin reads +9.67 / +9.85 / +9.82 points against the stated +10 (all ok). The 50 Energy arm on Ruin read +7 because Energy regenerates about 10 per second during the 2.5 s cast (probe 20261124-034318), so the hook sees about 75 at completion; the earlier explanation that a read after the cost would give 5 at 50 Energy is refuted by that probe. D-89: the half arm is measured on Azzinoth's Assault 803475, an instant Felfury spender, so the Energy at the start and at the completion of the cast are the same (crit_energy_half, stated +5, band 3 to 7). No server change. Owner ruling O-38 (N-10, 2026-11-24): Energy is read at cast completion, as the server does; the cast-start versus completion point named untested under D-89 is ruled, no longer open."
   },
   {
     "spell": 300490,
@@ -506,7 +509,7 @@
       {
         "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
         "labels": [],
-        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which fourth_cast, third_cast, other_spell and duration_left judge (Felsworn ADR 0021); the clause is judged by the three exact-word claims below (D-22, review I-1)."
+        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which felforged_fed charges judges on a real feed (ADR 1272); the clause is judged by the three exact-word claims below (D-22, review I-1; review fw-rbaf M-1)."
       },
       {
         "claim": "Your next 3 Fel Fireballs",
@@ -527,7 +530,7 @@
         ]
       }
     ],
-    "reason": "'Your next 3 Fel Fireballs' and 'have a $s1% reduced cast time' are judged on a real feed by fed_charge_casts (ADR 1272, mentor D-97, which lifts the D-67 hold of reviews fw-rf300490 I-2 and fw-rvb7b I-3a): Felforged 806104 earned through Bane of Chaos 704368 with 300490 unlearned at the grant, 806104 present after the unlearn with amount -30 (tooltip $s1 = 30: BasePoints -31 + 1 die side; earlier set_aura reasons that cite 31 are superseded), three Fel Fireballs in 1005 to 1095 ms and the fourth in 1350 to 1650 ms, no haste (fw-baf pair prove1). The set_aura arms (fourth_cast, third_cast, other_spell, duration_left, cast_*) remain supporting data for Felsworn ADR 0021."
+    "reason": "'Your next 3 Fel Fireballs' and 'have a $s1% reduced cast time' are judged on a real feed by fed_charge_casts (ADR 1272, mentor D-97, which lifts the D-67 hold of reviews fw-rf300490 I-2 and fw-rvb7b I-3a): Felforged 806104 earned through Bane of Chaos 704368 with 300490 unlearned at the grant, 806104 present after the unlearn with amount -30 (tooltip $s1 = 30: BasePoints -31 + 1 die side; the set_aura cast_landed and cast_early entries that cited 31 are removed), three Fel Fireballs in 1005 to 1095 ms and the fourth in 1350 to 1650 ms, no haste. Counted on the fw-baf pair prove1 and again on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, server 52749f63f814, no flip), where each trial also checks that the fourth cast starts before 0.9 of the 8000 ms aura after the feed stop (ADR 1277, review fw-rbaf I-1; read 5932 to 5934 ms, below 7200), so the full fourth cast is not the natural expiry. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc. The set_aura arms (fourth_cast, third_cast, other_spell, duration_left, cast_control) remain supporting data for Felsworn ADR 0021."
   },
   {
     "spell": 301287,
@@ -1085,7 +1088,7 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "555738 aura_amplitude_ms #3"
+          "555738 behaviour_metric_delta strike_period"
         ]
       },
       {
@@ -1096,16 +1099,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit. The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029).",
-    "tool_gap": {
-      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
-      "attempts": [
-        {
-          "agent": "fw-fa1",
-          "report": ".agents/plans/fw-fa1/report.md"
-        }
-      ]
-    }
+    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit. The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029). 'every $t1 sec' (tool group B-PER, fw-bper, mentor D-103, ADR 1282): '555738 behaviour_metric_delta strike_period' (hit_period read_at_cast) reads the dummy's 555739 hits between the start stamp and the cast, so the tick at the cast (AttributesEx5 0x200 EXTRA_INITIAL_PERIOD) follows a read of none; three main-hand hits in 0 to 2500 ms judged at 1000 ms +- 50 (G-19); the off-hand 806097 is not counted; a first tick one period late reads two hits (unmeasured), or alerts when the clock overruns the window (the first hit must lie in the first poll after the cast, review fw-rbper I-1). The data label '555738 aura_amplitude_ms #3' is not emitted in either run of the fw-bper pair (missing, keeps the claim unproven) and is replaced by strike_period, as Witch Doctor misery_period and Necromancer chain_period did. Reference search 2026-11-24 (fw-fa1): coa-history spell 555738 and 555739 give no tick times; expected values come from the tooltip and the DBC only."
   },
   {
     "spell": 555738,
@@ -1586,21 +1580,13 @@
     "spell": 561216,
     "clause": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
     "labels": [
-      "561216 aura_amplitude_ms #0",
       "561216 behaviour_metric_delta assaults_sum",
       "561216 behaviour_metric_delta assaults_first",
-      "561216 behaviour_metric_delta assaults_off_hand"
+      "561216 behaviour_metric_delta assaults_off_hand",
+      "561216 behaviour_metric_delta assault_period"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
-      "attempts": [
-        {
-          "agent": "fw-fa1",
-          "report": ".agents/plans/fw-fa1/report.md"
-        }
-      ]
-    }
+    "reason": "assaults_sum (6 strikes of 808303 over two enemies), assaults_first (3 on the first enemy: moves from enemy to enemy) and assaults_off_hand (6 off-hand strikes 808304) carry the assaults and both weapons. 'every $t1 sec' (tool group B-PER, fw-bper, mentor D-103, ADR 1282): '561216 behaviour_metric_delta assault_period' (hit_period read_at_cast) reads the dummy's 808303 hits between the start stamp and the cast, so the assault at the cast (AttributesEx5 0x200 EXTRA_INITIAL_PERIOD) follows a read of none; three assaults in 0 to 1250 ms judged at 500 ms +- 25 (G-19); a first assault one period late reads two hits (unmeasured), or alerts when the clock overruns the window (the first hit must lie in the first poll after the cast, review fw-rbper I-1). The data label '561216 aura_amplitude_ms #0' is not emitted in either run of the fw-bper pair (missing, keeps the claim unproven) and is replaced by assault_period, as Witch Doctor misery_period and Necromancer chain_period did. Reference search 2026-11-24 (fw-fa1): coa-history spell 561216 and 808303: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
   },
   {
     "spell": 561216,
@@ -2308,10 +2294,11 @@
     "clause": "Increases the effectiveness of your Pacts by $s1%.",
     "labels": [
       "704612 behaviour_metric_delta pact_resist",
-      "704612 behaviour_metric_delta pact_resist_hunter"
+      "704612 behaviour_metric_delta pact_resist_hunter",
+      "704612 behaviour_metric_delta pact_effectiveness"
     ],
     "kind": "claim",
-    "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), a live stat read after a real cast with its control entry, but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). fw-vb2b (2026-11-24): not status 3. The effectiveness_of route (ADR 0268, coverage.py subject_claims) was examined as the second design: it extends the claim only when the named spell's ledger clauses state exactly one value, and Vengeful Pact 803885 (Description: 'increases nearby allies' Shadow Resistance by ${$m1+0} and causes them to deal $s2 Shadow damage') states two values (resistance 65, shield damage 50) and has no Felsworn ledger row, while the claim says 'your Pacts' in the plural. The route does not apply to this clause; the resistance read stays data.",
+    "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), a live stat read after a real cast with its control entry, but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). fw-vb2b (2026-11-24): not status 3. The effectiveness_of route (ADR 0268, coverage.py subject_claims) was examined as the second design: it extends the claim only when the named spell's ledger clauses state exactly one value, and Vengeful Pact 803885 (Description: 'increases nearby allies' Shadow Resistance by ${$m1+0} and causes them to deal $s2 Shadow damage') states two values (resistance 65, shield damage 50) and has no Felsworn ledger row, while the claim says 'your Pacts' in the plural. The route does not apply to this clause; the resistance read stays data. fw-bsp (2026-11-24): effectiveness_delta reads resistance (mentor D-99, ADR 1275 provisional): '704612 behaviour_metric_delta pact_effectiveness' casts a real Vengeful Pact without and with Pact Hunter learned between the casts and reads the ally's Shadow resistance, 65 then floor(65 x 1.5) = 97 (tolerance 0.5; the truncation of 97.5 is the known engine rounding), promised by the clause word 'effectiveness'.",
     "tool_gap": {
       "reason": "The clause 'effectiveness of your Pacts' has no counting route: the resistance read (65 to 97) is a stat read the audit counts as data, the damage shield read of the same Pact observed no hit (design 1), and the effectiveness_of route, checked by fw-vb2b and not a second built design, needs one stated value on a single named spell, which Vengeful Pact 803885 (two values) and the plural 'Pacts' do not give. A route needs either a mentor reading of effectiveness_of for a two-value Pact or a harness read that makes the Pact's damage shield strike a real attacker (the shield hit read no event after a real 2653 cast by the dummy at the holder). The gap stays pending until a second design is built (guide 9.7).",
       "attempts": [
@@ -2329,7 +2316,7 @@
       "704613 behaviour_metric_delta stolen_effects"
     ],
     "kind": "claim",
-    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture. The audit classes carried_aura_count as data (coverage.py state metric, promise word 'empower'), so this read does not count: the clause stays uncounted until a behaviour read exists on an existing kind. The data read 'stolen' is dropped from the labels."
+    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture. The real Consume Magic 800353 cast with the no-talent control reading one fewer is a behaviour read since carried_aura_count is promised by steal words (mentor D-91 item 2, ADR 1274 provisional)."
   },
   {
     "spell": 705102,
@@ -2415,7 +2402,8 @@
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
       "705123 behaviour_hit_ratio felrend_damage",
-      "705123 behaviour_hit_ratio fel_fireball_damage"
+      "705123 behaviour_hit_ratio fel_fireball_damage",
+      "705123 behaviour_hit_ratio twin_slice_unchanged"
     ],
     "kind": "claim"
   },
@@ -2817,7 +2805,7 @@
     "clause": "up to a maximum of 10 enemies, dealing less damage with each target struck.",
     "kind": "claim",
     "tool_gap": {
-      "reason": "The cap claim is judged by extras_cap (area_dummies admits 11 dummies since fw-l2). The claim 'dealing less damage with each target struck.' needs a per-target damage order of one Fel Fireball cast: no kind or metric_delta option reads the damage of each target of one cast in hit order, and ratio_to_metric refuses a summed reading. Earlier attempt (fw-ea5): fixed_count cap arm refused for the cap. The nearest kind is fixed_count.",
+      "reason": "The cap claim is judged by extras_cap (area_dummies admits 11 dummies since fw-l2). The claim 'dealing less damage with each target struck.' needed a per-target damage order of one Fel Fireball cast, which no kind or metric_delta option read (ratio_to_metric refuses a summed reading; earlier attempt fw-ea5: fixed_count cap arm refused for the cap). Closed by fw-bdir (ADR 1276): the metric_delta option target_order reads each target's plain damage and position per cast; the claim's remaining question was the server floor (owner question N-12), not a tool gap.",
       "attempts": [
         {
           "agent": "fw-ea5",
@@ -2825,7 +2813,7 @@
         }
       ]
     },
-    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). 'dealing less damage with each target struck.' stays unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218.",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). Until fw-bdir, 'dealing less damage with each target struck.' stayed unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:228-238. fw-bdir (mentor D-100 (5), D-101): the 9-target proof is '707444 behaviour_metric_delta target_order' (Fel Fireball on the primary and 8 dummies, 16 casts, mean plain damage strictly falling along the measured distance from the primary, ADR 1276); the claim stayed unlabelled, status 5 on owner question N-12: the server factor reaches 0.2 at the 9th target and its floor binds from the 10th target struck (AscensionFelswornAbilities.cpp:238), which the tooltip does not state, and 'up to a maximum of 10 enemies' allows 11 targets. Owner ruling Felsworn O-37 (2026-11-24, Felsworn ADR 0031): keep the 20% floor, no server change; the claim is labelled with the 9-target proof '707444 behaviour_metric_delta target_order' and counts by the ruling, targets 9 to 11 conformant by it (fw-bdir2).",
     "claims": [
       {
         "claim": "up to a maximum of 10 enemies",
@@ -2835,7 +2823,9 @@
       },
       {
         "claim": "dealing less damage with each target struck.",
-        "labels": []
+        "labels": [
+          "707444 behaviour_metric_delta target_order"
+        ]
       }
     ]
   },
@@ -2959,7 +2949,8 @@
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
       "707846 behaviour_hit_ratio felrend_damage",
-      "707846 behaviour_hit_ratio fel_fireball_damage"
+      "707846 behaviour_hit_ratio fel_fireball_damage",
+      "707846 behaviour_hit_ratio twin_slice_unchanged"
     ],
     "kind": "claim"
   },
@@ -3092,17 +3083,31 @@
   {
     "spell": 800206,
     "clause": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel, dealing less damage with each target struck.",
-    "labels": [],
     "kind": "claim",
+    "claims": [
+      {
+        "claim": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel,",
+        "labels": [
+          "800206 behaviour_metric_delta channel_lengths"
+        ]
+      },
+      {
+        "claim": "dealing less damage with each target struck.",
+        "labels": [
+          "800206 behaviour_metric_delta target_order"
+        ]
+      }
+    ],
     "tool_gap": {
-      "reason": "The tooltip gives no figure for the end slash: it states a direction only (more Weapon Damage with a longer channel, less with each target struck). The check needs the damage of the end slash 803715 at two channel lengths (a channel ended at a set time, see the 707444 gap) and a direction judge across them; power_term_direction judges attack power only and no existing kind compares a spell's damage across channel lengths. The nearest is hit_ratio with a stated bonus, which the tooltip does not give.",
+      "reason": "The tooltip gives no figure for the end slash: it states a direction only (more Weapon Damage with a longer channel, less with each target struck). No existing kind compared a spell's damage across channel lengths or across the targets of one cast (fw-ea5); power_term_direction judges attack power only and hit_ratio needs a stated bonus. Closed by fw-bdir (ADR 1276): the metric_delta options channel_lengths (the end slash 803715 after channels ended at set times) and target_order (per-target damage order) carry the two directions.",
       "attempts": [
         {
           "agent": "fw-ea5",
           "report": ".agents/plans/fw-ea5/report.md"
         }
       ]
-    }
+    },
+    "reason": "fw-bdir (mentor D-100, D-101, ADR 1276): 'Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel' is judged by channel_lengths (the end slash 803715 lands twice, one per weapon, after a full channel and after the channel is ended at 650 and 1400 ms; the mean plain damage over 5 casts per length rises strictly with the length); 'dealing less damage with each target struck' by target_order (9 targets in front, 8 full channels, mean plain damage strictly falling along the measured distance from the caster). The server's 0.2 floor binds from the 10th target struck (AscensionFelswornAuras.cpp:237; no target cap, the loop stops at 25, AscensionFelswornAuras.cpp:248), outside the 9 judged targets; owner ruling Felsworn O-37 (2026-11-24, question N-12, Felsworn ADR 0031) keeps the floor. The channel_lengths judge reads the channel aura after each cancel (void if still up) and requires a rise without overlap (review fw-rbdir I-1, mentor D-106)."
   },
   {
     "spell": 800206,
@@ -3859,7 +3864,7 @@
       "802076 behaviour_metric_delta consumed"
     ],
     "kind": "claim",
-    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802076 learned the count reads 6 at the cast and 5 after 1 landed auto attack, 6 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
+    "reason": "Counted on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, build ff59e55c, server 52749f63f814, no flip), after the Annihilation charges fix (Felsworn ADR 0030): with 802076 learned the count reads 6 at the cast and 2 after 4 landed auto attacks, 6 in all, and the control arm without the talent reads 5 then 1 after 4, in both runs (script_count swings 2 with main_hand (ADR 1277): one main-hand Poniard 2208 (1300 ms) for 4600 ms, bound 4 landed attacks, below 5; the class file's hit and expertise ratings remove misses, dodges and parries). The consumption part counts on mentor D-95 condition 1, and each window landed 4 attacks in both runs, so a server that kept the 1 native charge Felsworn ADR 0030 removed (the aura gone after 1 landed attack) would read 0 and alert (review fw-rbswb I-1). Expiry edge untested (the window stops before the last count); the off hand's share of consumption untested (one main hand). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802076,
@@ -3897,9 +3902,13 @@
   {
     "spell": 802110,
     "clause": "Your Annihilation now affects $s1 additional attack",
-    "labels": [],
+    "labels": [
+      "802110 effect_value e0 #0",
+      "802110 behaviour_metric_delta charges",
+      "802110 behaviour_metric_delta consumed"
+    ],
     "kind": "claim",
-    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802110 learned the count reads 7 at the cast and 6 after 1 landed auto attack, 7 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set. HELD (review fw-rbswb I-1): with swings 1 every window lands one attack, and the pre-fix server (2 native charges, ADR 0030) also reads 6+1=7, so this entry cannot fail on the fixed defect; needs >= 3 landed attacks per window within the bound."
+    "reason": "Counted on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, build ff59e55c, server 52749f63f814, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802110 learned the count reads 7 at the cast and 3 after 4 landed auto attacks, 7 in all, and the control arm without the talent reads 5 then 1 after 4, in both runs (script_count swings 2 with main_hand (ADR 1277): one main-hand Poniard 2208 (1300 ms) for 4600 ms, bound 4 landed attacks, below 5; the class file's hit and expertise ratings remove misses, dodges and parries). The consumption part counts on mentor D-95 condition 1, and each window landed 4 attacks in both runs, so a server that kept the 2 native charges Felsworn ADR 0030 removed (the aura gone after 2 landed attacks) would read 0 and alert (review fw-rbswb I-1). Expiry edge untested (the window stops before the last count); the off hand's share of consumption untested (one main hand). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802110,
@@ -4066,7 +4075,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at its 5th landed attack is reachable within the 12000 ms duration with both hands, up to 12 landed attacks, but the 1-interval window stops at 4 at most). Counted on the fw-bswb pair (prove1, no flip): 5 at the cast, 4 after 1 landed attack. Missed or avoided swings untested (the rule counts landed swings only)."
+    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Counted on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, build ff59e55c, server 52749f63f814, no flip): 5 at the cast, 1 after 4 landed attacks, in both runs (script_count swings 2 with main_hand (ADR 1277): one main-hand Poniard 2208 (1300 ms) for 4600 ms, bound 4 landed attacks, below 5; the class file's hit and expertise ratings remove misses, dodges and parries). Expiry edge untested (the aura ending at its 5th landed attack: the window stops at 4)."
   },
   {
     "spell": 803905,

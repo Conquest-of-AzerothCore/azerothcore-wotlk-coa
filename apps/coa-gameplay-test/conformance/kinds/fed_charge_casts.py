@@ -151,8 +151,8 @@ def fed_charge_scenario(class_file: dict, spec: FedChargeSpec) -> tuple[dict, li
 
     def trial_steps(index: int) -> tuple[list[dict], dict]:
         trial = f'trial {index}'
-        names = ('haste control', 'known start', 'grants start', 'aura stop', 'known stop', 'grants stop', 'amount',
-                 'used', 'haste fed', 'grants end', 'went')
+        names = ('haste control', 'known start', 'grants start', 'fed at', 'aura stop', 'known stop', 'grants stop',
+                 'amount', 'used', 'haste fed', 'grants end', 'went')
         labels = {name: mark(spec, f'{trial} {name}') for name in names}
         steps = [{'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.aura},
                  {'action': 'unlearn', 'actor': CASTER, 'spell': spec.spell},
@@ -166,6 +166,7 @@ def fed_charge_scenario(class_file: dict, spec: FedChargeSpec) -> tuple[dict, li
                    'spell': spec.feed_spell, 'target': target, 'aura': spec.aura, 'every_ms': spec.every_ms,
                    'max_casts': max_casts, 'cast_power': spec.feed_power, 'power': feed.power_type,
                    'reset_cooldown': True},
+                  read(trial, 'fed at', 'game_time_ms'),
                   {'action': 'unlearn', 'actor': CASTER, 'spell': spec.spell},
                   read(trial, 'aura stop', 'aura', spell=spec.aura),
                   read(trial, 'known stop', 'knows_spell', spell=spec.spell),
@@ -204,7 +205,9 @@ def fed_charge_scenario(class_file: dict, spec: FedChargeSpec) -> tuple[dict, li
         f'multiplier is read 1 (no haste) before the control cast and after the unlearn. The first '
         f'{spec.charges} casts must lie in {bands["cut"][0]:g} to {bands["cut"][1]:g} ms (a {figure:g}% cut, '
         f'{FIGURE_BAND:g} of the figure), cast {spec.charges + 1} in {bands["full"][0]:g} to {bands["full"][1]:g} '
-        f'ms (no cut), all of it inside {1 - FIGURE_BAND:g} of the {duration} ms aura. A control cast without the '
+        f'ms (no cut). The game time is read when the feed stops; cast {spec.charges + 1} must start before '
+        f'{1 - FIGURE_BAND:g} of the {duration} ms aura has passed since that stamp, so an uncut cast {spec.charges + 1} '
+        f'is not the natural expiry; a trial past it is void. A control cast without the '
         f'talent or the aura opens each trial and must lie in the full band. A trial off a precondition is void; '
         f'fewer than {spec.min_judged} judged trials is unmeasured.')
     scenario = {
@@ -215,7 +218,7 @@ def fed_charge_scenario(class_file: dict, spec: FedChargeSpec) -> tuple[dict, li
         'creatures': [dummy_fixture(0, class_file, distance)],
         'steps': steps}
     shared = {'kind': KIND, 'metric': 'spell_cast_count', 'quote': entry.quote, 'reads': reads, 'bands': bands,
-              'cast_ms': cast_ms,
+              'cast_ms': cast_ms, 'duration': duration,
               'charges': spec.charges, 'amount': amount, 'min_judged': spec.min_judged, 'max_casts': max_casts}
     expectations = [
         Expectation(mark(spec, 'charges'), BEHAVIOUR_METRIC_DELTA, spec.spell, spec.aura, None, f'{spec.charges}',
@@ -248,7 +251,11 @@ def placed(bracket: tuple[float, float], band: tuple[float, float]) -> str:
     return STRADDLE
 
 
-def trial_void(values: dict, trial: dict) -> str | None:
+def before_expiry(values: dict, trial: dict, duration: int) -> bool:
+    return values[trial['casts'][-1]['start']] - values[trial['fed at']] < (1 - FIGURE_BAND) * duration
+
+
+def trial_void(values: dict, trial: dict, duration: int) -> str | None:
     casts = [trial['control'], *trial['casts']]
     priors = [values[cast['prior']] for cast in casts] + [values[trial['went']]]
     unhasted = all(abs(values[trial[name]] - 1) <= FLOAT_EPSILON for name in ('haste control', 'haste fed'))
@@ -259,7 +266,8 @@ def trial_void(values: dict, trial: dict) -> str | None:
               ('aura after the unlearn', values[trial['aura stop']] == 1),
               ('unlearned', values[trial['known stop']] == 0),
               ('no grant after the stop', values[trial['grants end']] == values[trial['grants stop']]),
-              ('every cast went off', all(after - before == 1 for before, after in zip(priors, priors[1:]))))
+              ('every cast went off', all(after - before == 1 for before, after in zip(priors, priors[1:]))),
+              (f'last cast past {1 - FIGURE_BAND:g} of the aura', before_expiry(values, trial, duration)))
     return next((name for name, held in checks if not held), None)
 
 
@@ -271,7 +279,7 @@ def fed_charge_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     values, bands = run.values, model['bands']
     judged, void, notes = [], [], []
     for index, trial in enumerate(model['reads']):
-        reason = trial_void(values, trial)
+        reason = trial_void(values, trial, model['duration'])
         control = placed(cast_bracket(values, trial['control']), bands['full'])
         if reason is None and control != INSIDE:
             reason = f'control cast {control} the full band'
