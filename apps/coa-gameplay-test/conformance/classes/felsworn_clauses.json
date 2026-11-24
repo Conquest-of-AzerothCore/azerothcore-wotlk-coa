@@ -63,7 +63,8 @@
       {
         "claim": "over $d",
         "labels": [
-          "92088 spell_duration 802678 #1"
+          "92088 behaviour_metric_delta held",
+          "92088 behaviour_metric_delta gone"
         ]
       }
     ],
@@ -259,7 +260,8 @@
       {
         "claim": "for $d",
         "labels": [
-          "300474 spell_duration 300475 #2"
+          "300474 behaviour_metric_delta held",
+          "300474 behaviour_metric_delta gone"
         ]
       }
     ]
@@ -450,7 +452,7 @@
       {
         "claim": "grant you Felforged for $806104d",
         "labels": [
-          "300490 spell_duration 806104 #1"
+          "300490 behaviour_metric_delta felforged_duration"
         ]
       }
     ]
@@ -546,7 +548,8 @@
       {
         "claim": "over $520832d",
         "labels": [
-          "520693 spell_duration 520832 #2"
+          "520693 behaviour_metric_delta held",
+          "520693 behaviour_metric_delta gone"
         ]
       },
       {
@@ -1407,9 +1410,10 @@
         ]
       },
       {
-        "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
+        "claim": "for $572163d",
         "labels": [
-          "560840 spell_duration 572163 #0"
+          "560840 behaviour_metric_delta held",
+          "560840 behaviour_metric_delta gone"
         ]
       }
     ]
@@ -1799,7 +1803,7 @@
       {
         "claim": "for $572782d",
         "labels": [
-          "681376 spell_duration 572782 #2"
+          "681376 behaviour_metric_delta chaotic_duration"
         ]
       }
     ]
@@ -1826,7 +1830,8 @@
     "spell": 685321,
     "clause": "and scars enemies for $563271d,",
     "labels": [
-      "685321 spell_duration 563271 #1"
+      "685321 behaviour_metric_delta held",
+      "685321 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
