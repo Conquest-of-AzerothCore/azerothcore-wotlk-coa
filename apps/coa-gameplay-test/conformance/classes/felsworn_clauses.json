@@ -4362,11 +4362,22 @@
   {
     "spell": 806109,
     "clause": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
-    "labels": [
-      "806109 behaviour_metric_delta dash_held",
-      "806109 behaviour_metric_delta dash_gone"
+    "labels": null,
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $806128d",
+        "labels": [
+          "806109 behaviour_metric_delta dash_held",
+          "806109 behaviour_metric_delta dash_gone"
+        ]
+      },
+      {
+        "claim": "now dashes an additional 20 yds.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is not measured (uncounted)."
   },
   {
     "spell": 806111,
