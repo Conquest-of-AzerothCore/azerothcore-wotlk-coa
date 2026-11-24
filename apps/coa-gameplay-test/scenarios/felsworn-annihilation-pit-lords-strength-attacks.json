@@ -1,0 +1,825 @@
+{
+  "schema": 1,
+  "name": "Annihilation lasts its full attack count with Pit Lord's Strength",
+  "contract": [
+    "Annihilation 803904 (server Spell.dbc Description[enUS]): 'Lasts for $n attacks or $d.' ($n = ProcCharges 5,",
+    "$d = 12000 ms). Pit Lord's Strength 802076 / 802110: 'Your Annihilation now affects $s1 additional attack' ($s1 =",
+    "1 / 2, SPELLMOD_CHARGES on 803904). Expected: 5, 6 and 7 attacks.",
+    "The Felsworn contract clears 803904's ProcCharges and counts the attacks in the aura's script value; the talents'",
+    "SPELLMOD_CHARGES still gave the aura 1 / 2 native charges (Aura::CalcMaxCharges), which the native proc path",
+    "dropped on the first landed attacks and removed the aura. Measured before the fix (scratch diagnostic, dual wield):",
+    "native charges 0 / 1 / 2 at the cast, and with a talent the aura was gone after the first landed pair (count 6 / 7",
+    "to 0). The fix sets the aura's native charges to 0 on apply and reapply (Felsworn ADR 0030).",
+    "Each arm is its own Felsworn with one 1300 ms main-hand dagger (2208), so one attack lands per swing and the",
+    "seventh lands near 9.1 s, inside the 12 s duration; hit rating and expertise remove misses, dodges and parries.",
+    "After each landed attack (exactly k landed), the count must read n - k with the aura present, and the aura must be",
+    "gone after the n-th. The no-talent arm is the control."
+  ],
+  "players": [
+    {
+      "id": "base",
+      "race": 1,
+      "class": 14,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 14,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 14,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "base_dummy",
+      "owner": "base",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "rank1_dummy",
+      "owner": "rank1",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "rank2_dummy",
+      "owner": "rank2",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "base",
+      "item": 2208
+    },
+    {
+      "action": "equip",
+      "actor": "base",
+      "item": 2208,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "base",
+      "skill": 173,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "skill_value",
+      "skill": 173,
+      "equals": 300
+    },
+    {
+      "action": "learn",
+      "actor": "base",
+      "spell": 803904
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rank1",
+      "item": 2208
+    },
+    {
+      "action": "equip",
+      "actor": "rank1",
+      "item": 2208,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "rank1",
+      "skill": 173,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "skill_value",
+      "skill": 173,
+      "equals": 300
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 803904
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 802076
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 1180
+    },
+    {
+      "action": "add_item",
+      "actor": "rank2",
+      "item": 2208
+    },
+    {
+      "action": "equip",
+      "actor": "rank2",
+      "item": 2208,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "rank2",
+      "skill": 173,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "skill_value",
+      "skill": 173,
+      "equals": 300
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 803904
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 802110
+    },
+    {
+      "action": "cast",
+      "actor": "base",
+      "spell": 803904,
+      "target": "base"
+    },
+    {
+      "action": "assert",
+      "label": "no talent: Annihilation lasts 5 attacks",
+      "actor": "base",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "no talent: no native proc charge to drop",
+      "actor": "base",
+      "metric": "aura_charges",
+      "spell": 803904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "base",
+      "target": "base_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "no talent: attack 1 lands",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "no talent: 4 attacks left after 1",
+      "actor": "base",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "no talent: attack 2 lands",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "no talent: 3 attacks left after 2",
+      "actor": "base",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "no talent: attack 3 lands",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "no talent: 2 attacks left after 3",
+      "actor": "base",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "no talent: attack 4 lands",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "min": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "no talent: 1 attacks left after 4",
+      "actor": "base",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "no talent: attack 5 lands",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "min": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "base",
+      "metric": "melee_damage_count",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "no talent: Annihilation removed after its last attack",
+      "actor": "base",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "base"
+    },
+    {
+      "action": "cast",
+      "actor": "rank1",
+      "spell": 803904,
+      "target": "rank1"
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: Annihilation lasts 6 attacks",
+      "actor": "rank1",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: no native proc charge to drop",
+      "actor": "rank1",
+      "metric": "aura_charges",
+      "spell": 803904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "rank1",
+      "target": "rank1_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: attack 1 lands",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: 5 attacks left after 1",
+      "actor": "rank1",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: attack 2 lands",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: 4 attacks left after 2",
+      "actor": "rank1",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: attack 3 lands",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: 3 attacks left after 3",
+      "actor": "rank1",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: attack 4 lands",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "min": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: 2 attacks left after 4",
+      "actor": "rank1",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: attack 5 lands",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "min": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: 1 attacks left after 5",
+      "actor": "rank1",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: attack 6 lands",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "min": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank1",
+      "metric": "melee_damage_count",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802076: Annihilation removed after its last attack",
+      "actor": "rank1",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "rank1"
+    },
+    {
+      "action": "cast",
+      "actor": "rank2",
+      "spell": 803904,
+      "target": "rank2"
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: Annihilation lasts 7 attacks",
+      "actor": "rank2",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: no native proc charge to drop",
+      "actor": "rank2",
+      "metric": "aura_charges",
+      "spell": 803904,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 0
+    },
+    {
+      "action": "attack",
+      "actor": "rank2",
+      "target": "rank2_dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: attack 1 lands",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: 6 attacks left after 1",
+      "actor": "rank2",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: attack 2 lands",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "min": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: 5 attacks left after 2",
+      "actor": "rank2",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: attack 3 lands",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "min": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: 4 attacks left after 3",
+      "actor": "rank2",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: attack 4 lands",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "min": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: 3 attacks left after 4",
+      "actor": "rank2",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: attack 5 lands",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "min": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: 2 attacks left after 5",
+      "actor": "rank2",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: attack 6 lands",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "min": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 6
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: 1 attacks left after 6",
+      "actor": "rank2",
+      "metric": "aura_script_value",
+      "spell": 803904,
+      "key": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: attack 7 lands",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "min": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "rank2",
+      "metric": "melee_damage_count",
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "Pit Lord's Strength 802110: Annihilation removed after its last attack",
+      "actor": "rank2",
+      "metric": "aura",
+      "spell": 803904,
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "rank2"
+    }
+  ]
+}
