@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Call Board: a turned-in Dungeon Diving daily can be taken again while the week still holds completions",
+  "contract": "Call Board contracts bank one completion per day of the week begun (CoA.CallboardContracts.DailyCompletions 1). On live Ascension a player who had not done Dungeon Diving for several days could take and turn in the same Call Board quest once per banked day in a row (reported by the project owner, #11083). A level-60 Human turns in Heroic Dungeon Diving (81245); with at least two days of the week begun the quest is takeable again the same day and can be turned in a second time. The weekly quest reset is Thursday 06:00, so on a Thursday only one completion is banked and this case does not apply.",
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "hero", "race": 1, "class": 1, "level": 60}
+  ],
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "steps": [
+    {"action": "set_phase", "label": "Join the world phase the board is spawned in", "actor": "hero", "value": 1},
+    {"action": "prepare_quest", "label": "Heroic Dungeon Diving is complete", "actor": "hero", "quest": 81245},
+    {"action": "reward_quest", "label": "Turn in Heroic Dungeon Diving", "actor": "hero", "quest": 81245},
+    {"action": "assert", "label": "It is takeable again the same day", "actor": "hero", "metric": "quest_takeable", "quest": 81245, "equals": 1},
+    {"action": "prepare_quest", "label": "Take and complete it a second time", "actor": "hero", "quest": 81245},
+    {"action": "assert", "label": "It is in the quest log", "actor": "hero", "metric": "quest_log_slot", "quest": 81245, "min": 0},
+    {"action": "snapshot", "actor": "hero", "metric": "item_count", "item": 375250, "save_as": "runes_before_second"},
+    {"action": "reward_quest", "label": "Turn it in a second time", "actor": "hero", "quest": 81245},
+    {"action": "assert", "label": "The second turn-in pays 1500 Runes of Ascension", "actor": "hero", "metric": "item_count", "item": 375250, "relative_to": "runes_before_second", "equals": 1500}
+  ]
+}

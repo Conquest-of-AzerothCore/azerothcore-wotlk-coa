@@ -1,0 +1,121 @@
+{
+  "schema": 1,
+  "name": "Dungeon Spoils used in combat say why they stay closed, and open once combat ends (#10080)",
+  "contract": "#10080: at the end of a Vaults of Inquisition run Dungeon Spoils (2021814) could not be opened and nothing told the player why. The spoils, like the Adventurer Caches, refuse to open in combat or while dead, but sent the client an empty error, so the click did nothing visible. In the same place players were kept in combat after the last boss (#10924). Expected: used in combat the spoils stay in the bags and the client gets InventoryResult 60 (not in combat); after combat they open as before.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where the Northshire wolves are spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "label": "p stands next to a Young Wolf",
+      "actor": "p",
+      "map": 0,
+      "x": -8876.07,
+      "y": -114.909,
+      "z": 81.48
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 2021814,
+      "count": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "p attacks the wolf and enters combat",
+      "actor": "p",
+      "entry": 299
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p is in combat",
+      "actor": "p",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "use_item",
+      "label": "p uses the spoils in combat",
+      "actor": "p",
+      "item": 2021814,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the client is told it cannot do that in combat",
+      "actor": "p",
+      "metric": "server_packet_u8",
+      "opcode": 274,
+      "index": 0,
+      "equals": 60,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "the spoils stay in the bags",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1
+    },
+    {
+      "action": "attack_nearby",
+      "label": "p kills the wolf",
+      "actor": "p",
+      "entry": 299,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "combat ends",
+      "actor": "p",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "use_item",
+      "label": "p uses the spoils out of combat",
+      "actor": "p",
+      "item": 2021814,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: out of combat the spoils open",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    }
+  ]
+}

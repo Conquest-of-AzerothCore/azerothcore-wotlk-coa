@@ -110,7 +110,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'client_cooldown_blocked_casts', 'initial_spells_at', 'learned_spell_at',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
-    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows',
+    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows', 'chat_log_dropped',
     'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
     'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
@@ -121,7 +121,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_scale', 'owned_creature_visible', 'owned_creature_display', 'owned_creature_virtual_item',
     'owned_creature_armor', 'owned_creature_stat', 'owned_creature_aura_max_duration_ms',
     'owned_creature_applied_aura_count', 'owned_creature_max_health',
-    'owned_creature_health', 'owned_creature_health_modifier', 'power_type', 'active_power',
+    'owned_creature_health', 'owned_creature_health_modifier', 'power_type', 'active_power', 'unit_flag_set',
     'owned_creature_attack_time_ms', 'owned_creature_crit_chance',
     'owned_creature_run_speed_rate', 'owned_creature_attack_power', 'owned_creature_spell_power',
     'owned_creature_resistance', 'owned_creature_melee_hit_chance', 'owned_creature_cast_speed',
@@ -141,7 +141,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_position_y', 'owned_creature_position_z',
     'charm_entry', 'charm_distance', 'charm_aura_stacks', 'controls_self', 'charmed', 'viewpoint_entry', 'seer_entry', 'private_instance',
     'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms', 'dynamic_object_height',
-    'gossip_options', 'gossip_option_text',
+    'dynamic_object_radius', 'dynamic_object_size', 'gossip_options', 'gossip_option_text',
     'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale', 'at_homebind', 'summon_pending',
     'spellbook_rows', 'spellbook_offers_spell', 'spellbook_covers_spell', 'spellbook_learned_alerts',
     'spellbook_buy_succeeded', 'spellbook_buy_failed',
@@ -200,8 +200,9 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_effect_radius', 'spell_calc_amount_hooks',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
-    'melee_attacks_taken',
+    'melee_attacks_taken', 'melee_missed_taken',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
+    'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
     'equipped_item', 'visible_item',
@@ -255,8 +256,9 @@ PLAYER_STAT_METRICS = {
     'spell_calc_amount_hooks',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'melee_attack_count',
-    'melee_attacks_taken',
+    'melee_attacks_taken', 'melee_missed_taken',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
+    'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
     'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
     'equipped_item', 'visible_item',
@@ -269,7 +271,7 @@ PLAYER_STAT_METRICS = {
     'owned_creature_heal_count', 'owned_creature_heal_total', 'owned_creature_effective_heal_total',
     'pet_run_speed_rate',
 }
-METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'caster', 'effect', 'item', 'entry', 'button',
+METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster', 'effect', 'item', 'entry', 'button',
                  'relative_to', 'ratio_to', 'target', 'quest', 'id', 'stat', 'aura_state', 'school', 'hand',
                  'rating', 'op', 'subclass', 'part',
                  'base', 'key', 'index', 'pet', 'critical', 'target_pet', 'periodic', 'name', 'text',
@@ -307,9 +309,9 @@ ACTIONS = {
     'game_event': ({'event', 'active'}, {'event', 'active'}),
     'placement_audit': ({'map'}, {'map', 'zone', 'tolerance', 'gameobject_types'}),
     'command': ({'actor', 'command'}, {'actor', 'command', 'rejected'}),
-    'whisper': ({'actor', 'to', 'text'}, {'actor', 'to', 'text', 'language'}),
+    'whisper': ({'actor', 'to', 'text'}, {'actor', 'to', 'text', 'language', 'repeat'}),
     'addon_message': ({'actor', 'prefix', 'text'}, {'actor', 'prefix', 'text'}),
-    'chat_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead'}),
+    'chat_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead', 'background'}),
     'wait': ({'ms'}, {'ms'}),
     'snapshot': ({'actor', 'metric', 'save_as'}, METRIC_FIELDS | {'save_as'}),
     'assert': ({'actor', 'metric'}, METRIC_FIELDS | {'equals', 'min', 'max', 'within_ms'}),
@@ -326,8 +328,11 @@ ACTIONS = {
     'cancel_aura': ({'actor', 'spell'}, {'actor', 'spell'}),
     'cancel_mount': ({'actor'}, {'actor'}),
     'cast': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'destination', 'target_pet', 'target_item',
-                                  'target_gameobject', 'target_owned_entry', 'target_owner', 'allowed_refusal',
-                                  'destination_unit', 'triggered'}),
+                                  'target_gameobject', 'target_owned_entry', 'target_owner', 'ignore_gcd',
+                                  'allowed_refusal', 'destination_unit', 'triggered'}),
+    'cast_until_aura': ({'actor', 'spell', 'aura', 'every_ms', 'max_casts'},
+                        {'actor', 'spell', 'target', 'aura', 'every_ms', 'max_casts', 'cast_power', 'power',
+                         'reset_cooldown'}),
     'creature_attack': ({'actor'}, {'actor', 'target', 'stop'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
@@ -414,7 +419,7 @@ ACTIONS = {
     'set_reputation': ({'actor', 'id', 'value'}, {'actor', 'id', 'value'}),
     'set_health': ({'actor', 'value'}, {'actor', 'value', 'pet', 'maximum'}),
     'set_health_pct': ({'actor', 'pct'}, {'actor', 'pct', 'entry', 'target'}),
-    'set_combat_avoidance': ({'actor'}, {'actor', 'target', 'dodge', 'parry'}),
+    'set_combat_avoidance': ({'actor'}, {'actor', 'target', 'dodge', 'parry', 'block', 'rejected'}),
     'reset_cooldown': ({'actor', 'spell'}, {'actor', 'spell'}),
     'restore_charges': ({'actor', 'spell'}, {'actor', 'spell'}),
     'set_power': ({'actor', 'value'}, {'actor', 'value', 'power', 'pet', 'target'}),
@@ -609,7 +614,7 @@ def validate(scenario, clock=REAL_CLOCK):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
-          'two_side', 'quest_log_size', 'chat_log', 'battleground_kill_xp'},
+          'two_side', 'quest_log_size', 'chat_log', 'chat_log_max_pending', 'battleground_kill_xp'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -619,6 +624,9 @@ def validate(scenario, clock=REAL_CLOCK):
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
     require(type(scenario.get('chat_log', False)) is bool, 'chat_log must be boolean')
+    if 'chat_log_max_pending' in scenario:
+        require(scenario.get('chat_log') is True, 'chat_log_max_pending needs chat_log')
+        number(scenario['chat_log_max_pending'], 'chat_log_max_pending', 1, 1000000, True)
     require(type(scenario.get('battleground_kill_xp', False)) is bool, 'battleground_kill_xp must be boolean')
     require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'ptr_character_copy_interruption' in scenario:
@@ -750,8 +758,11 @@ def validate(scenario, clock=REAL_CLOCK):
                     f'{where}: whisper needs a target and text')
             if 'language' in step:
                 number(step['language'], f'{where}.language', 0, 2**32 - 1, True)
+            if 'repeat' in step:
+                number(step['repeat'], f'{where}.repeat', 1, 100, True)
         if action == 'chat_log_cleanup':
             number(step['days_ahead'], f'{where}.days_ahead', 0, 3650, True)
+            require(type(step.get('background', False)) is bool, f'{where}: background must be boolean')
         if action == 'group' and 'raid' in step:
             require(type(step['raid']) is bool, f'{where}: raid must be boolean')
         if action == 'guild':
@@ -980,6 +991,22 @@ def validate(scenario, clock=REAL_CLOCK):
         for key in ('ms', 'within_ms'):
             if key in step:
                 number(step[key], f'{where}.{key}', 0, scenario.get('timeout_ms', 90000), True)
+        if action == 'cast' and 'ignore_gcd' in step:
+            require(type(step['ignore_gcd']) is bool and step['actor'] in player_ids,
+                    f'{where}: ignore_gcd must be boolean on a player cast')
+        if action == 'cast_until_aura':
+            number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
+            number(step['aura'], f'{where}.aura', 1, 2**32 - 1, True)
+            number(step['max_casts'], f'{where}.max_casts', 1, 200, True)
+            number(step['every_ms'], f'{where}.every_ms', 1, scenario.get('timeout_ms', 90000) // step['max_casts'],
+                   True)
+            if 'cast_power' in step:
+                number(step['cast_power'], f'{where}.cast_power', 0, 2**31 - 1, True)
+            if 'power' in step:
+                number(step['power'], f'{where}.power', 0, 6, True)
+                require('cast_power' in step, f'{where}: power selects the type of cast_power')
+            if 'reset_cooldown' in step:
+                require(type(step['reset_cooldown']) is bool, f'{where}: reset_cooldown must be boolean')
         if action in {'set_skill', 'gather_skill'}:
             number(step['skill'], f'{where}.skill', 1, 65535, True)
         if action == 'set_skill':
@@ -1117,9 +1144,14 @@ def validate(scenario, clock=REAL_CLOCK):
         if action == 'set_combat_avoidance':
             require(step.get('target', step['actor']) in player_ids,
                     f'{where}: combat avoidance fixture needs a player target')
-            for key in ('dodge', 'parry'):
+            for key in ('dodge', 'parry', 'block'):
                 if key in step:
                     number(step[key], f'{where}.{key}', 0, 100)
+            if 'rejected' in step:
+                require(type(step['rejected']) is bool and 'block' in step,
+                        f'{where}: rejected is a boolean that expects the block fixture to be refused')
+                require(step['rejected'] is not True or step['block'] > 0,
+                        f'{where}: a block chance of 0 is always reached, so it cannot be refused')
         if action == 'set_health' and 'maximum' in step:
             require(step['actor'] in player_ids, f'{where}: maximum health fixture needs a player or their pet')
             number(step['maximum'], f'{where}.maximum', 1, 2**31 - 1, True)
@@ -1146,6 +1178,8 @@ def validate(scenario, clock=REAL_CLOCK):
                         require(type(step[field]) is bool, f'{where}: {field} must be boolean')
                 if 'chat_emote' in step:
                     number(step['chat_emote'], f'{where}.chat_emote', 0, 65535, True)
+            if metric == 'chat_log_dropped':
+                require(scenario.get('chat_log') is True, f'{where}: chat_log_dropped needs chat_log')
             if metric in EVENT_TIME_METRICS:
                 validate_event_time_step(step, where, actor_ids, player_ids)
             else:
@@ -1342,7 +1376,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     'client_cooldown_ready', 'client_cooldown_clears', 'client_cooldown_blocked_casts',
                     'pet_aura_stacks', 'pet_aura_duration_ms', 'charm_aura_stacks', 'spell_active',
                     'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms', 'dynamic_object_height',
-                    'spell_power_cost',
+                    'dynamic_object_radius', 'dynamic_object_size', 'spell_power_cost',
                     'skill_line_for_spell',
                     'spell_damage_done', 'spell_damage_taken', 'spell_healing_taken', 'spell_hit_bonus_taken',
                     'spell_cast_count', 'spell_go_count', 'spell_modifier', 'spell_cast_time_ms',
@@ -1357,7 +1391,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     'script_heal_received', 'spell_effect_value', 'spell_effect_radius', 'spell_critical_damage',
                     'armor_reduced_damage', 'spell_calc_amount_hooks',
                     'spell_immune', 'spell_effect_immune', 'spell_damage_count', 'spell_damage_total',
-                    'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
+                    'spell_log_count', 'spell_absorb_total', 'spell_resist_total', 'spell_damage_with_resist_total',
                     'spell_uses_armor', 'pet_aura_amount', 'pet_aura_amplitude_ms', 'spell_heal_count', 'spell_heal_total',
                     'spell_effective_heal_total', 'spell_energize_count', 'spell_energize_total',
                     'spell_proc_count', 'spell_proc_chance', 'spell_proc_cooldown_ms', 'aura_proc_rate',
@@ -1400,7 +1434,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     require(metric in {'spell_damage_count', 'spell_damage_total', 'spell_heal_count',
                                        'spell_heal_total', 'spell_effective_heal_total', 'spell_log_count',
                                        'spell_absorb_total', 'spell_resist_total'}
-                            or (key == 'critical' and metric in MELEE_OUTCOME_METRICS | EVENT_TIME_METRICS)
+                            or (key == 'critical' and metric in MELEE_OUTCOME_METRICS | EVENT_TIME_METRICS
+                                | {'spell_damage_with_resist_total'})
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',
                                                            'spell_energize_total',
                                                            'armor_reduced_damage', 'spell_effect_value',
@@ -1432,6 +1467,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step['owned_entry'], f'{where}.owned_entry', 1, 2**32 - 1, True)
             if metric == 'school_prohibited':
                 number(step.get('school_mask'), f'{where}.school_mask', 1, 127, True)
+            elif metric in SPELL_DAMAGE_METRICS and 'school_mask' in step:
+                number(step['school_mask'], f'{where}.school_mask', 1, 127, True)
             if metric == 'aura_proc_rate':
                 require('target' in step, f'{where}: {metric} metric needs target')
                 number(step.get('type_mask'), f'{where}.type_mask', 1, 2**32 - 1, True)
@@ -1575,6 +1612,12 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'active_power':
                 require('power' in step, f'{where}: metric needs the power type')
                 number(step['power'], f'{where}.power', 0, 6, True)
+            if metric == 'unit_flag_set':
+                require('target' in step, f'{where}: metric needs the unit as target')
+                number(step.get('field'), f'{where}.field', 1, 2, True)
+                number(step.get('mask'), f'{where}.mask', 1, 2**32 - 1, True)
+            elif 'field' in step or 'mask' in step:
+                require(False, f'{where}: field and mask only apply to unit_flag_set')
             if metric == 'owned_creature_health_modifier':
                 require('part' in step, f'{where}: metric needs the health modifier part')
                 number(step['part'], f'{where}.part', 0, 3, True)
@@ -1708,7 +1751,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',
                           'charm_aura_stacks', 'controls_self', 'charmed', 'private_instance',
                           'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms',
-                          'dynamic_object_height',
+                          'dynamic_object_height', 'dynamic_object_radius', 'dynamic_object_size',
                           'gossip_options', 'gossip_option_text',
                           'owned_gameobject_count', 'gameobject_remaining_ms', 'gameobject_display', 'gameobject_scale',
                           'nearby_gameobject_display', 'nearby_gameobject_orientation', 'at_homebind', 'summon_pending',

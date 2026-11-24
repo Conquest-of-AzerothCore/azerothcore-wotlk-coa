@@ -7,6 +7,7 @@
 #include "GridNotifiersImpl.h"
 #include "Item.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -301,6 +302,13 @@ void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
     if (player->HasAura(707081) && target && player->IsValidAttackTarget(target))
         Cast(player, target, 657125);
 }
+static bool IsBoss(Unit const* target)
+{
+    Creature const* creature = target->ToCreature();
+    return creature && !creature->GetOwnerGUID().IsPlayer() && (creature->IsDungeonBoss() ||
+        sObjectMgr->IsRaidEncounterKillCredit(creature->GetEntry()) ||
+        creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS);
+}
 void Eclipse(Player* player, Unit* target, uint32 amount)
 {
     if (!amount || !target || !player->IsValidAttackTarget(target))
@@ -309,7 +317,7 @@ void Eclipse(Player* player, Unit* target, uint32 amount)
         effect->SetAmount(int32(std::min<uint64>(INT32_MAX, uint64(std::max(0, effect->GetAmount())) + amount)));
     else
         Copy(player, target, 505340, amount);
-    if (player->HasAura(704579) && (!target->ToCreature() || !target->ToCreature()->IsDungeonBoss()))
+    if (player->HasAura(704579) && !IsBoss(target))
         Cast(player, target, 505342);
 }
 bool Daytime()
@@ -394,7 +402,7 @@ void Refresh(Player* player)
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231))
             player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);
-    if (!replacement)
+    if (!replacement && !player->HasAura(807059))
         player->removeSpell(504764, SPEC_MASK_ALL, true);
     bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
     bool const converted = player->HasSpell(RadiantConversion);
@@ -415,8 +423,6 @@ void Refresh(Player* player)
         if (converted)
             player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
     }
-    if (!player->IsInCombat())
-        state.firstAttacks.clear();
     state.refreshing = false;
 }
 }

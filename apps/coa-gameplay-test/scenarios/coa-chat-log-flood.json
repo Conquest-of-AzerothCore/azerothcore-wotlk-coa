@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Chat log: a whisper flood beyond CoA.ChatLog.MaxPendingRows is delivered but not logged, and logging resumes once rows are written",
+  "contract": [
+    "With CoA.ChatLog.MaxPendingRows = 3, five whispers sent in one update all reach the receiver, three are logged and two are counted as dropped.",
+    "Once the waiting rows are written, the next whisper is logged again."
+  ],
+  "timeout_ms": 60000,
+  "chat_log": true,
+  "chat_log_max_pending": 3,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {"id": "sender", "name": "Chatlogflood", "race": 1, "class": 1, "level": 20},
+    {"id": "friend", "name": "Chatlogfldfr", "race": 1, "class": 1, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "whisper", "label": "Five whispers in one update", "actor": "sender", "to": "Chatlogfldfr", "text": "🙂🙂🙂 flood", "repeat": 5},
+    {"action": "assert", "label": "The friend received all five", "actor": "friend", "metric": "whispers_received", "from": "sender", "text": "🙂🙂🙂 flood", "equals": 5, "within_ms": 2000},
+    {"action": "assert", "label": "Three rows were logged", "actor": "sender", "metric": "chat_log_rows", "chat_type": "whisper", "chat_target": "friend", "chat_text": "🙂🙂🙂 flood", "equals": 3},
+    {"action": "assert", "label": "Two rows were dropped", "actor": "sender", "metric": "chat_log_dropped", "equals": 2},
+    {"action": "whisper", "label": "One more whisper after the rows were written", "actor": "sender", "to": "Chatlogfldfr", "text": "after"},
+    {"action": "assert", "label": "It is logged", "actor": "sender", "metric": "chat_log_rows", "chat_type": "whisper", "chat_target": "friend", "chat_text": "after", "equals": 1},
+    {"action": "assert", "label": "Nothing more was dropped", "actor": "sender", "metric": "chat_log_dropped", "equals": 2}
+  ]
+}

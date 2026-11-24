@@ -14,5 +14,14 @@ With `corpse` (`entry`, `health`, `kill_spell`, `reach`) the primary is that cre
 cast before the arms; the edge adds its object size as well (a script search with `IsWithinDistInMap`). `cast_at:
 caster` casts a self-targeted spell. A `gate_spell` equal to `cast_spell` is learned only between the arms.
 
+With `leeway: true` (ADR 1190) the edge adds the player caster's area leeway, computed from the engine rule: 2.66 yd
+(`LEEWAY_BONUS_RANGE`) when the caster's run speed rate times 7.0 exceeds 4.97 (`LEEWAY_MIN_MOVE_SPEED`), else 0
+(`Spell.cpp:1388-1394`, `Object.cpp:1787-1808`). Generation refuses it unless the caster is the player (no
+`caster_entry`) and an effect of `cast_spell` has TargetA or TargetB 15, 20 or 56; the dummies stand on the edge at
+the base rate 1, the caster's `run_speed_rate` is read with the geometry and the judge recomputes the leeway from it.
+Run mode is required by construction (no movement step; the harness sets no walking flag), and the verdict says so.
+
 Fields: `gate_spell`, `cast_spell`, `hit_spell`, `radius`, `dummy_reach`, `reach_source`, optional `caster_entry`,
-`learn`, `setup_casts`, `power` (set before each cast), `repeats` (3), `settle_ms` (1500), `margin_yd` (0.5).
+`learn`, `setup_casts`, `power` (set before each cast), `repeats` (3), `settle_ms` (1500), `margin_yd` (0.5),
+`cast_at`, `corpse`, `primary_yd` (3), `center_reach`, `hit_metric` (`spell_damage_count` or `aura`), `leeway`
+(false).

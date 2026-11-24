@@ -536,6 +536,7 @@ public: /* PlayerScript */
     void OnPlayerTakeMailItem(Player* player, Mail const* mail, uint32 itemEntry);
     bool OnPlayerCanTakeQuest(Player const* player, Quest const* quest);
     bool OnPlayerCanRewardQuest(Player const* player, Quest const* quest);
+    bool OnPlayerCanRepeatDailyQuest(Player const* player, Quest const* quest);
     bool OnPlayerQuestGiverChooseReward(Player* player, Object* questGiver, Quest const* quest, uint32 reward);
     bool OnPlayerRefreshQuestGiver(Player* player, Object* questGiver, Quest const* quest);
     void OnPlayerCoAProgress(Player* player, CoAProgressEvent event, uint32 value);

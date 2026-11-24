@@ -897,6 +897,57 @@ class SummonAuraCarrierTest(unittest.TestCase):
         self.assertTrue(expectations[f'{DECIMATE} aura_amount e0 #1'].rule.startswith('read '))
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ValueAllyCastTest(unittest.TestCase):
+    ALLY_ONLY = 503498
+    BLESSED_ONLY = 804250
+    BLESS = 804247
+
+    @classmethod
+    def setUpClass(cls):
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
+
+    def build(self, spell_id, entries):
+        class_file = {**self.class_file, **({'value_ally_casts': entries} if entries is not None else {})}
+        scenario, _, _ = value_scenario(class_file, ClassSpell(spell_id, 'Test', (spell_id,), spell_id, 0, False),
+                                        spell_id)
+        return scenario
+
+    def casts(self, scenario):
+        return [step for step in scenario['steps'] if step['action'] == 'cast']
+
+    def test_a_listed_ally_spell_is_cast_at_the_ally_fixture(self):
+        scenario = self.build(self.ALLY_ONLY, [{'spell': self.ALLY_ONLY}])
+        run.validate(scenario)
+        cast, = self.casts(scenario)
+        self.assertEqual((cast['spell'], cast['target']), (self.ALLY_ONLY, ALLY))
+        self.assertEqual([player['id'] for player in scenario['players']], [CASTER, ALLY])
+
+    def test_without_the_list_the_cast_keeps_no_target(self):
+        for entries in (None, [], [{'spell': self.BLESS}]):
+            cast, = self.casts(self.build(self.ALLY_ONLY, entries))
+            self.assertNotIn('target', cast)
+
+    def test_setup_casts_are_learned_and_cast_at_the_ally_with_a_settle_before_the_cast(self):
+        scenario = self.build(self.BLESSED_ONLY, [{'spell': self.BLESSED_ONLY, 'setup_casts': [self.BLESS]}])
+        run.validate(scenario)
+        steps = scenario['steps']
+        setup, cast = self.casts(scenario)
+        self.assertEqual((setup['spell'], setup['target'], cast['spell'], cast['target']),
+                         (self.BLESS, ALLY, self.BLESSED_ONLY, ALLY))
+        self.assertIn({'action': 'learn', 'actor': CASTER, 'spell': self.BLESS}, steps)
+        between = steps[steps.index(setup) + 1:steps.index(cast)]
+        self.assertEqual([step['action'] for step in between if step['action'] == 'wait'], ['wait'])
+        self.assertGreaterEqual(sum(step['ms'] for step in between if step['action'] == 'wait'), 1500)
+
+    def test_an_entry_takes_spell_and_setup_casts_only(self):
+        for entry in ({'spell': self.ALLY_ONLY, 'target': 'ally'}, {'spell': self.ALLY_ONLY, 'setup_casts': 804247},
+                      {'spell': self.ALLY_ONLY, 'setup_casts': ['804247']}):
+            with self.assertRaises(ValueError):
+                self.build(self.ALLY_ONLY, [entry])
+        with self.assertRaises(ValueError):
+            self.build(self.ALLY_ONLY, [{'spell': self.ALLY_ONLY}, {'spell': self.ALLY_ONLY}])
+
 
 class FirstAuraEffectTest(unittest.TestCase):
     FACTS = RankFacts(passive=False, effects=(50, 28, 27), aura_names=(0, 0, 8), target_a=(47, 47, 31),

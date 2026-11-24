@@ -28,3 +28,19 @@ global cooldown trigger holds about 2200 casts per case.
 
 An optional `dummy_distance` (0 to 100 yd) places the dummy at that distance, for a ranged trigger with a minimum range
 (Witch Hunter: Expulsion of Evil 139778, Shadowblast 680269 at 17.5 yd; claim 8.0, 2 pooled parts).
+
+Options for a trigger with a cooldown and a percent cost (ADR 1192, provisional), all optional and absent by default:
+
+- `residual_target` and `min_detectable`: the residual sizing of proc entries (`procs.residual_sizing`, ADR 0781); the
+  judge takes Wilson at that confidence, the minimum trials are the larger of the band's and the residual's, and the
+  verdict states the residual probabilities.
+- `reset_between_attempts`: a harness `reset_cooldown` of the trigger before every cast. That fixture sends one
+  `SMSG_CLEAR_COOLDOWN` of the trigger itself, so when `reset_spell` is the trigger the control must read exactly one
+  packet per fixture reset (else alert, "fixture packets not 1:1") and the treatment fixture resets are subtracted.
+- `base_mana_per_attempt`: the caster's mana is set to the class file's `base_mana` before every cast
+  (`hits.base_mana_steps`); it lifts the refusal of a percent-cost trigger and is refused without such a cost.
+- `trial_casts`: the trials are the trigger's completed casts (`spell_cast_count`), for a handler that rolls on the
+  cast, hit or not.
+
+Sun Cleric: Piety 300367 on Horusath Blast 572801 (11 parts) and Rapture 806477 (19 parts), 20%, with all four,
+`residual_target` 0.001 and `min_detectable` 4 (twice the 2-point band).

@@ -1,0 +1,921 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Solemn Priest doubles the Gavel of Light heal, Arbiter of Light does not",
+  "contract": "Solemn Priest 804269: 'Increases your melee attack power by $s1% of your Intellect and causes Gavel of Light to heal you for an additional $s2% of its damage dealt.' ($s2 = 50). Gavel of Light 800611 copies a share of its damage to the caster as 707522; the share is 707521 effect 0 (50) plus Solemn Priest effect 1 (50) while the caster has 804269 (Sun Cleric ADR 0004). Each arm casts one Gavel of Light, learns its spells, casts again, and reads the second heal as a ratio of the first: every hit is a critical strike (fixture 984954) with +20000 attack power, so one hit matches the next to within about 1%, and 707522 cannot crit. Control arm: nothing learned, ratio 1. Solemn Priest: ratio 2 (100% against 50%). Arbiter of Light 302914 (a passive SPELLMOD_EFFECT1 +100 on 707521 whose tooltip gates it on Vow of Light) leaves the heal unchanged, alone (ratio 1) and with Solemn Priest (ratio 2); a share read with the caster's spell modifiers would give 3 and 4. Bands of 0.15 around each ratio.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    },
+    {
+      "id": "solemn",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    },
+    {
+      "id": "arbiter",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    },
+    {
+      "id": "both",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "solemn_dummy",
+      "owner": "solemn",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "arbiter_dummy",
+      "owner": "arbiter",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "both_dummy",
+      "owner": "both",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 477
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 477,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 228,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800611
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800611,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "control: the first Gavel of Light lands",
+      "actor": "control",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "control_dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "control: the first Gavel of Light heals its caster",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "control",
+      "save_as": "control_first_heal"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800611,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "control: the second Gavel of Light heals its caster",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "control",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING control: nothing learned between the casts, the second heal equals the first",
+      "actor": "control",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "control",
+      "relative_to": "control_first_heal",
+      "ratio_to": "control_first_heal",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "add_item",
+      "actor": "solemn",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "solemn",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "solemn",
+      "item": 477
+    },
+    {
+      "action": "equip",
+      "actor": "solemn",
+      "item": 477,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "solemn",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "solemn",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "solemn",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "solemn",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "solemn",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "solemn",
+      "skill": 228,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "solemn",
+      "spell": 800611
+    },
+    {
+      "action": "set_aura",
+      "actor": "solemn",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "solemn",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "solemn",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "solemn",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "solemn",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "solemn",
+      "spell": 800611,
+      "target": "solemn_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "solemn: the first Gavel of Light lands",
+      "actor": "solemn",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "solemn_dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "solemn: the first Gavel of Light heals its caster",
+      "actor": "solemn",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "solemn",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "solemn",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "solemn",
+      "save_as": "solemn_first_heal"
+    },
+    {
+      "action": "learn",
+      "actor": "solemn",
+      "spell": 804269
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "solemn",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "solemn",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "solemn",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "solemn",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "solemn",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "solemn",
+      "spell": 800611,
+      "target": "solemn_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "solemn: the second Gavel of Light heals its caster",
+      "actor": "solemn",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "solemn",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING Solemn Priest learned: the second heal is twice the first (50% + 50% of the damage)",
+      "actor": "solemn",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "solemn",
+      "relative_to": "solemn_first_heal",
+      "ratio_to": "solemn_first_heal",
+      "min": 1.85,
+      "max": 2.15
+    },
+    {
+      "action": "add_item",
+      "actor": "arbiter",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "arbiter",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "arbiter",
+      "item": 477
+    },
+    {
+      "action": "equip",
+      "actor": "arbiter",
+      "item": 477,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "arbiter",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "arbiter",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "arbiter",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "arbiter",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "arbiter",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "arbiter",
+      "skill": 228,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "arbiter",
+      "spell": 800611
+    },
+    {
+      "action": "set_aura",
+      "actor": "arbiter",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "arbiter",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "arbiter",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "arbiter",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "arbiter",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "arbiter",
+      "spell": 800611,
+      "target": "arbiter_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "arbiter: the first Gavel of Light lands",
+      "actor": "arbiter",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "arbiter_dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "arbiter: the first Gavel of Light heals its caster",
+      "actor": "arbiter",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "arbiter",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "arbiter",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "arbiter",
+      "save_as": "arbiter_first_heal"
+    },
+    {
+      "action": "learn",
+      "actor": "arbiter",
+      "spell": 302914
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "arbiter",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "arbiter",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "arbiter",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "arbiter",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "arbiter",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "arbiter",
+      "spell": 800611,
+      "target": "arbiter_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "arbiter: the second Gavel of Light heals its caster",
+      "actor": "arbiter",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "arbiter",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING Arbiter of Light learned without Vow of Light: the second heal equals the first",
+      "actor": "arbiter",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "arbiter",
+      "relative_to": "arbiter_first_heal",
+      "ratio_to": "arbiter_first_heal",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "add_item",
+      "actor": "both",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "both",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "both",
+      "item": 477
+    },
+    {
+      "action": "equip",
+      "actor": "both",
+      "item": 477,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "both",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "both",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "both",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "both",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "both",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "both",
+      "skill": 228,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "both",
+      "spell": 800611
+    },
+    {
+      "action": "set_aura",
+      "actor": "both",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "both",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "both",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "both",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "both",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "both",
+      "spell": 800611,
+      "target": "both_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "both: the first Gavel of Light lands",
+      "actor": "both",
+      "metric": "spell_damage_count",
+      "spell": 800611,
+      "target": "both_dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "both: the first Gavel of Light heals its caster",
+      "actor": "both",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "both",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "both",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "both",
+      "save_as": "both_first_heal"
+    },
+    {
+      "action": "learn",
+      "actor": "both",
+      "spell": 804269
+    },
+    {
+      "action": "learn",
+      "actor": "both",
+      "spell": 302914
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "both",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "both",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "both",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "both",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "both",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "both",
+      "spell": 800611,
+      "target": "both_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "both: the second Gavel of Light heals its caster",
+      "actor": "both",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "both",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING both learned: Solemn Priest doubles the heal, Arbiter of Light adds nothing",
+      "actor": "both",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "both",
+      "relative_to": "both_first_heal",
+      "ratio_to": "both_first_heal",
+      "min": 1.85,
+      "max": 2.15
+    }
+  ]
+}
