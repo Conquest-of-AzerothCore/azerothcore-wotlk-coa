@@ -97,7 +97,8 @@
         "claim": "Allows you to wield a Two-Handed Axe, Mace, Polearm or Sword in each hand",
         "labels": [
           "92089 behaviour_metric_delta equip"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "grants you additional Armor and magic resistance based on your attack power",
@@ -112,7 +113,8 @@
           "92089 behaviour_metric_delta resist_frost_ap3000",
           "92089 behaviour_metric_delta resist_shadow_ap3000",
           "92089 behaviour_metric_delta resist_arcane_ap3000"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ],
     "tool_gap": {
@@ -123,7 +125,8 @@
           "report": ".agents/plans/fw-fa3/report.md"
         }
       ]
-    }
+    },
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 300465,
@@ -2418,7 +2421,9 @@
       "707527 behaviour_metric_delta absorbed",
       "707527 behaviour_metric_delta absorbed_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707527,
@@ -2430,16 +2435,19 @@
         "labels": [
           "707527 behaviour_metric_delta absorbed_stamina",
           "707527 behaviour_metric_delta absorbed_control"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $d.",
         "labels": [
           "707527 behaviour_metric_delta duration_held",
           "707527 behaviour_metric_delta duration_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707527,
@@ -2449,7 +2457,9 @@
       "707527 behaviour_hit_ratio magic_taken",
       "707527 behaviour_hit_ratio physical_after_break"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705131,
@@ -2512,16 +2522,19 @@
         "claim": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1%",
         "labels": [
           "705141 behaviour_metric_delta rush_damage_hit"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $705142d.",
         "labels": [
           "705141 behaviour_metric_delta rush_damage_held",
           "705141 behaviour_metric_delta rush_damage_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705141,
@@ -2532,16 +2545,19 @@
         "claim": "Casting Felhoof Charge increases your critical strike chance by $705143s1%",
         "labels": [
           "705141 behaviour_metric_delta charge_crit_chance"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $705143d.",
         "labels": [
           "705141 behaviour_metric_delta charge_crit_held",
           "705141 behaviour_metric_delta charge_crit_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705145,
@@ -3501,13 +3517,15 @@
         "claim": "dealing ${...} at 0 spell power (2163 to the roll's end)",
         "labels": [
           "501298 behaviour_metric_delta damage_0sp"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "the 1.32 spell power coefficient",
         "labels": [
           "501298 behaviour_metric_delta damage_sp"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "piercing all absorption effects",
@@ -3515,9 +3533,11 @@
           "501298 behaviour_metric_delta pierce_shield",
           "501298 behaviour_metric_delta pierce_damage",
           "501298 behaviour_metric_delta pierce_shield_control"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 501298,
@@ -3529,7 +3549,8 @@
         "labels": [
           "501298 behaviour_metric_delta inner_dot_share",
           "501298 behaviour_metric_delta inner_dot_control"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "over $805748d.",
@@ -3546,7 +3567,8 @@
           "report": ".agents/plans/fw-fa3/report.md"
         }
       ]
-    }
+    },
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 801899,
