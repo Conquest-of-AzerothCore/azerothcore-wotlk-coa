@@ -11,7 +11,9 @@
     "It procs on a landed melee ability (Heroic Strike 78), at the record's chance; it never procs on a landed",
     "melee auto attack, a landed direct magic spell (Frostbolt 116). Before the repair the chance and cooldown",
     "lookups fail with 'Spell has no proc entry' and every rate reads 0, so the discriminating checks fail",
-    "instead of flaking."
+    "instead of flaking.",
+    "A proc's payload, Mythical Discharge Zone 823749, is applied directly: over its 5 s it pulses Mythical",
+    "Discharge Zone 823748 once a second, so the dummy 4 yards away takes exactly five pulses of Chaos damage."
   ],
   "timeout_ms": 60000,
   "players": [
@@ -111,6 +113,36 @@
       "spell_type_mask": 1,
       "hit_mask": 1,
       "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "The 3-piece payload: Mythical Discharge Zone",
+      "actor": "caster",
+      "spell": 823749,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the 5 s zone run out",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the payload pulsed five times on the dummy",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 823748,
+      "target": "dummy",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pulses dealt damage",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 823748,
+      "target": "dummy",
+      "min": 5
     }
   ]
 }
