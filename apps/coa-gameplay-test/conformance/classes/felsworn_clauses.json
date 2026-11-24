@@ -1055,7 +1055,8 @@
       "555738 behaviour_metric_delta duration_held",
       "555738 behaviour_metric_delta duration_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
   },
   {
     "spell": 555738,
@@ -1063,7 +1064,8 @@
     "labels": [
       "555738 behaviour_metric_delta speed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
   },
   {
     "spell": 555738,
@@ -1090,7 +1092,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit.",
+    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit. The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029).",
     "tool_gap": {
       "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
       "attempts": [
@@ -1130,7 +1132,8 @@
       "555738 immunity movement 555738 cast",
       "555738 immunity movement 555738 expired"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": " The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029)."
   },
   {
     "spell": 560057,

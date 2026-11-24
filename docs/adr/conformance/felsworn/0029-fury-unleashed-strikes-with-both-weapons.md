@@ -48,3 +48,11 @@ event (one off-hand hit per main-hand hit) but not its percent or the off-hand f
 - Without an off-hand weapon (Infernal set, a two-hand weapon or an off-hand disarm) nothing changes.
 - Regressions: `555738 hit_oh` (forced critical 806097 hit at +20000 attack power, band 6994 to 7024 from the off-hand
   path) and its control `555738 hit_oh_none` (the same cast with the off hand disarmed by 47974: no 806097 hit).
+
+## Live-unconfirmed values (review fw-rf3b I-1, mentor D-96)
+
+- The 200% on the off-hand strike comes from the tooltip token $806095s1 and owner ruling O-33, not from a live
+  measurement; 806097's own data value (150%) is not used.
+- The off-hand factor 0.5 is the stock engine's off-hand weapon damage, not a live measurement. The archived live
+  logs show an off-hand/main-hand non-crit ratio of about 0.71-0.73 (124-127 against 174; coa-history pairs 120/170
+  and 327/445) with unknown gear, so neither the percent nor the factor is confirmed live.
