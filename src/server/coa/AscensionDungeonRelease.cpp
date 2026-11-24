@@ -186,7 +186,8 @@ public:
         if (!player->CustomData.Erase(PENDING_DUNGEON_RELEASE))
             return true;
 
-        if (player->IsAlive() || !player->GetMap()->IsDungeon() || !player->m_InstanceValid)
+        if (player->IsAlive() || !player->GetMap()->IsDungeon() || !player->m_InstanceValid
+            || InRaidFight(player->GetMap()))
             return true;
 
         Position start;
