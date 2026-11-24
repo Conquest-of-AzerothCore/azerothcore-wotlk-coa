@@ -1212,6 +1212,15 @@ takes no casts, warmup or target health, and has no `observe_spell` (ADR 0142).
 cast: the verdict is `unmeasured`, never ok or alert, and the contract says so. Absent by default; it changes no
 step, so a run without a refusal is judged as without the option.
 
+`avoided_grant` (ADR 1285; `hit_ratio_avoided.py`) earns the treatment aura by the real dodge route instead of
+setting it: `{"proc_aura", "striker_entry", "strikers", "striker_auras", "swing_ms", "grant_ms"}`, `grant_ms` a whole
+number of `swing_ms`. The strikers of `proc_avoided` swing at the caster in both arms with the caster's dodge at 100%
+and parry at 0; the passive (the entry's `spell`) is learned in the treatment arm only (`treatment.learn`), and no arm
+may set `proc_aura`; the observed casts go to the first striker (`target: "striker"`). Before every observed cast of
+both arms the strikers swing for `grant_ms` and `proc_aura` is read on the caster. The run is `unmeasured` when a
+treatment trial reads it absent, a control trial reads it present, or a read is missing; otherwise the unchanged
+hit_ratio judge pools the trials (`parts` allowed). Felsworn: Vengeance Is Mine 804822 `twin_slice_damage_earned`.
+
 `versus_creature_type` (ADR 0782; main-hand swings, pooled `parts` allowed) judges attack power that a creature-type aura adds to
 swings: `aura`/`effect` name an aura 102 effect (SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS) whose creature type mask is
 read from the DBC; `treatment_entry`/`treatment_type` must lie in the mask and `control_entry`/`control_type` outside

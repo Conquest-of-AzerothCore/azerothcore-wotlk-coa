@@ -18205,6 +18205,42 @@
       "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224), 10 instances per application (AscensionFelswornAuras.cpp:84-85). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) are averaged in a control arm without 807163 and a treatment arm with 807163 on the caster before every cast: ratio 1.30, within the larger of 5% of the +30% (1.5) and 2 points. 807163 is set by the harness (set_aura), a precondition fixture of the effect on the hit, the claim's subject; its grant by real dodged swings, its 10 instances and its Felfury are the subject of the avoided_proc_instances entry. The real grant's amount is not read by any existing kind (the tool gap stated in the report), so the D-67 equivalence arm is missing. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only. Sizing (2026-11-24): an exploratory run of 3 parts of 80 trials read a 99% half-width of 1.48 points against the 1 point the judge needs (528 trials per arm), so the entry runs 10 parts of 80 trials (800 per arm, half-width about 1.48 x sqrt(240/800) = 0.81 points); the judge states the interval it excludes and a flip between the two runs of a pair is not counted."
     },
     {
+      "spell": 804822,
+      "name": "Vengeance Is Mine (Twin Slice damage under the aura earned by dodged swings)",
+      "kind": "hit_ratio",
+      "variant": "twin_slice_damage_earned",
+      "label_suffix": "twin_slice_damage_earned",
+      "quote": "deal $807163s1% increased damage",
+      "expected": 1.3,
+      "observe_spell": 808303,
+      "target": "striker",
+      "cast_wait_ms": 1600,
+      "control": {},
+      "treatment": {
+        "learn": [
+          804822
+        ]
+      },
+      "trials": 53,
+      "parts": 10,
+      "critical": false,
+      "cast_spell": 801901,
+      "cast_power": 100,
+      "avoided_grant": {
+        "proc_aura": 807163,
+        "striker_entry": 36,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ],
+        "swing_ms": 500,
+        "grant_ms": 1500
+      },
+      "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224). Second real design of mentor Felsworn D-109 (2): 807163 is never set; avoided_grant (ADR 1285) makes 10 stationary strikers 36 swing at the caster in both arms with dodge 100% and parry 0, and Vengeance Is Mine 804822 is learned for the treatment arm only, so 807163 is earned by the real dodge grant before every treatment cast (read present before each treatment cast and absent before each control cast, else the run is void). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) at the first striker are pooled over 10 parts of 53 trials per arm (530 per arm; the fw-fa2 spread of the set_aura entry, 99% half-width 1.48 points at 240 trials per arm, needs about 528 per arm for a half-width of 1 point, half the unchanged 2-point band): ratio 1.30 within the larger of 5% of the +30% (1.5) and 2 points. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only."
+    },
+    {
       "spell": 561216,
       "name": "Fury of the Illidari (charges and recharge)",
       "kind": "charge_recharge",

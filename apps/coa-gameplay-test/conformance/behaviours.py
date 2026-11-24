@@ -5,6 +5,7 @@ import re
 
 from bonus import POINT_BAND, bonus_band
 import control_excluded
+import hit_ratio_avoided
 import hit_ratio_versus
 import hit_ratio_void
 from hits import (ARMOR_LABEL, DAMAGE_TAKEN, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS,
@@ -6668,6 +6669,7 @@ class HitRatioSpec:
     band_points: float | None = None
     void_on_cast_failure: bool = False
     warmup_power: int | None = None
+    avoided_grant: hit_ratio_avoided.AvoidedGrant | None = None
 
 
 ENGINE_AMOUNT_EPSILON = 1e-6
@@ -6846,6 +6848,8 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
     versus_prefix = hit_ratio_label(spec.spell, spec.label_suffix)
     if spec.versus is not None:
         steps += hit_ratio_versus.warmup_steps(spec.versus)
+    if spec.avoided_grant is not None:
+        steps += hit_ratio_avoided.engage_steps(spec.spell, spec.avoided_grant)
     for name in HIT_RATIO_ARMS:
         arm = getattr(spec, name)
         marks = hit_ratio_reads(spec, name)
@@ -6904,6 +6908,8 @@ def hit_ratio_steps(records: Records, spec: HitRatioSpec, swing_ms: int = 0) -> 
                 steps += [{'action': 'set_health', 'actor': TARGET,
                            'value': arm.target_health_pct * DUMMY_HEALTH // 100},
                           {'action': 'wait', 'ms': HIT_RATIO_HEALTH_SETTLE_MS}]
+            if spec.avoided_grant is not None:
+                steps += hit_ratio_avoided.trial_steps(spec.spell, spec.avoided_grant, versus_prefix, name, trial)
             steps += healed + hit_ratio_cast(records, spec.cast_spell or spec.observe_spell, spec.caster, spec.target,
                                              spec.cast_power, after_required=arm)
             if spec.cast_wait_ms:
@@ -6977,6 +6983,7 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                                     or spec.stated or spec.target_entry is not None):
         raise ValueError(f'{spec.spell} hit_ratio {hit_ratio_versus.NAME} judges main-hand swings, without an '
                          f'expected_token, rate, stated parts or target_entry')
+    hit_ratio_avoided.check(spec)
     if spec.force_crit is not None and spec.force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spec.spell} force_crit {spec.force_crit!r} is not one of {sorted(FORCE_CRIT_RATINGS)}')
     if spec.metric not in HIT_RATIO_METRICS:
@@ -7102,7 +7109,9 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
                         **({'entry': spec.target_entry} if spec.target_entry is not None else {})}]
                       if spec.versus is None else
                       hit_ratio_versus.creatures(creature_fixture(class_file, distance), spec.versus,
-                                                 class_file['level'])),
+                                                 class_file['level']))
+                     + ([] if spec.avoided_grant is None else
+                        hit_ratio_avoided.creatures(class_file, spec.spell, spec.avoided_grant)),
         'steps': base_steps(class_file) + steps,
         'timeout_ms': waited + TIMEOUT_MARGIN_MS}
     if distance != DUMMY_DISTANCE:
@@ -7130,6 +7139,11 @@ def hit_ratio_scenario(class_file: dict, spec: HitRatioSpec) -> tuple[dict, list
     if spec.void_on_cast_failure:
         model[hit_ratio_void.NAME] = True
         scenario['contract'] += hit_ratio_void.CONTRACT
+    if spec.avoided_grant is not None:
+        model[hit_ratio_avoided.NAME] = hit_ratio_avoided.model(spec.avoided_grant,
+                                                                hit_ratio_label(spec.spell, spec.label_suffix),
+                                                                spec.trials)
+        scenario['contract'] += hit_ratio_avoided.contract(spec.spell, spec.avoided_grant)
     if spec.versus is not None:
         mask = hit_ratio_versus.versus_mask(records, spec.versus)
         model[hit_ratio_versus.NAME] = hit_ratio_versus.model(spec.versus, mask, hit_ratio_label(spec.spell,
@@ -7271,7 +7285,7 @@ def hit_ratio_spec(entry: dict) -> HitRatioSpec:
                         tuple((int(spell), int(stacks), int(owned))
                               for spell, stacks, owned in entry.get('owned_auras', ())),
                         hit_ratio_band_points(entry), hit_ratio_void.parse(entry.get(hit_ratio_void.NAME)),
-                        entry.get('warmup_power'))
+                        entry.get('warmup_power'), hit_ratio_avoided.parse(entry.get(hit_ratio_avoided.NAME)))
 
 
 def hit_ratio_band_points(entry: dict) -> float | None:
