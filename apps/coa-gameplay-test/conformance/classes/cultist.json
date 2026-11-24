@@ -726,6 +726,19 @@
       "attempts": 1,
       "margin_ms": 50,
       "observe_source": "301241 Effect[0] aura 245 SPELL_AURA_MOD_AURA_DURATION_BY_DISPEL, EffectMiscValue[0] 2 (DISPEL_CURSE), EffectBasePoints[0] -41 + EffectDieSides[0] 1 = -40 ($s1 = 40): curse durations on the caster x0.6 via native Unit::ModSpellDuration (Unit.cpp:12243; Spell.dbc). Vehicle Curse of Impotence 51340 (stock SpellFamilyName 0, Dispel 2 DISPEL_CURSE, Mechanic 0, DmgClass 1 Magic, Effect[0] aura 79, DurationIndex 8 = 15000 ms, SpellDuration.dbc) is cast once per phase by striker entry 36 (spell_hit_bonus 100) at the caster, before (control: 301241 not learned, 15000 ms) and after a real learn of 301241 (9000 ms); duration_ratio_expiry proves actual aura expiry at both 15000 ms and 9000 ms (excluding 10% off on both sides). Reference search 2026-11-24: coa-history spell 301241: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 301241 says 'Reduces the duration of curse effects on you by -40%.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 520810,
+      "name": "Corrupt Fate (Dark Veil cooldown)",
+      "kind": "cost_gate",
+      "quote": "Reduces the cooldown of Dark Veil by $/1000;s1 sec.",
+      "gated_spell": 520345,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "ally",
+      "cast_power": 2000,
+      "margin_ms": 500,
+      "observe_source": "520810 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -60001 + EffectDieSides[0] 1 = -60000 ms ($/1000;s1 = 60 s), EffectSpellClassMask[2] 16384 = SpellFamilyFlags[2] 16384 of Dark Veil 520345 (SpellFamilyName 31, RecoveryTime 120000 ms, CategoryRecoveryTime 120000 ms, ManaCostPercentage 30, DurationIndex 28 = 5000 ms channeled; Spell.dbc). Dark Veil rejects self-cast (AscensionCultistAbilities.cpp:56), so it is cast at the friendly ally with cast_power 2000 (<= 2297 MaxMana). Arms timed from a priming cast: 60500 ms without 520810 (refused, SPELL_FAILED_NOT_READY 67, 120000 ms stock cooldown), 60500 ms with 520810 learned (goes through, 0), and 59500 ms with 520810 (refused, 67): the reduced cooldown lies in [59500, 60500] ms, excluding 54000 and 66000 ms (10% off on both sides). Reference search 2026-11-24: coa-history spell 520810: 0 events in 186 logs (passive; positive control 520345 Dark Veil: 2 casts in 2 logs); coabuildhub spells_master_index.json entry 520810 says 'Reduces the cooldown of Dark Veil by -60 sec.' matching installed Spell.dbc."
     }
   ],
   "player_observations": [],

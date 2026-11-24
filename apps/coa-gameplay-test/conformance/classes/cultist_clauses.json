@@ -1276,7 +1276,9 @@
     "spell": 520810,
     "clause": "Reduces the cooldown of Dark Veil by $/1000;s1 sec.",
     "labels": [
-      "520810 effect_value e0 #0"
+      "520810 cost_gate 520345 without",
+      "520810 cost_gate 520345 with",
+      "520810 cost_gate 520345 beyond"
     ],
     "kind": "claim"
   },
