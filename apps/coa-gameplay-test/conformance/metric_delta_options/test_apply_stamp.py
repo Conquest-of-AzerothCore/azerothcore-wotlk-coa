@@ -125,5 +125,94 @@ class ApplyStampTests(unittest.TestCase):
                 self.built(**changes)
 
 
+AFTER_WINDOW = [2710, 2990]
+
+
+def after_trigger_entry(**changes) -> dict:
+    return {**class_entry('immunity_held'), 'strike': None, 'caster_avoidance': None,
+            'game_time': {'after': [2000, 4000]},
+            'apply_stamp': {'aura': IMMUNITY, 'window': AFTER_WINDOW, 'source': 'test duration 3000 ms',
+                            'applied': 'after_trigger'}, **changes}
+
+
+@cache
+def after_stamped():
+    _, [expectation] = behaviour_scenario(load_class_file(27), after_trigger_entry())
+    return expectation
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ApplyStampAfterTriggerTests(unittest.TestCase):
+    OPEN = 20000.0
+    CLOCK = 300.0
+    FIRST = 666.0
+
+    def test_the_timeline_opening_is_bracketed_by_game_time_reads(self):
+        scenario, [expectation] = behaviour_scenario(load_class_file(27), after_trigger_entry())
+        run.validate(scenario)
+        steps = scenario['steps']
+        opened = [step['action'] for step in steps].index('encounter_start')
+        self.assertEqual([steps[opened - 1]['label'], steps[opened + 1]['label']],
+                         [f'{STALWART} apply_stamp open_lower', f'{STALWART} apply_stamp open_upper'])
+        self.assertEqual({steps[opened - 1]['metric'], steps[opened + 1]['metric']}, {'game_time_ms'})
+        self.assertEqual(steps[opened]['boss_entry'], 36)
+        self.assertEqual(expectation.model['apply_stamp']['applied'], 'after_trigger')
+        self.assertIn('Apply stamp (after the trigger)', scenario['contract'])
+
+    def test_the_default_mode_keeps_its_stamps(self):
+        _, [expectation] = self.built_default()
+        self.assertNotIn('applied', expectation.model['apply_stamp'])
+        self.assertNotIn('open_lower', expectation.model['apply_stamp']['stamps'])
+
+    def built_default(self):
+        return behaviour_scenario(load_class_file(27), class_entry('immunity_gone'))
+
+    def judged(self, age=2800.0, first=FIRST, count=1, cast_count=0, drop=None):
+        expectation = after_stamped()
+        model = expectation.model
+        stamps = model['apply_stamp']['stamps']
+        read = self.OPEN + first + age
+        found = {model['before_label']: 0.0, model['after_label']: 1.0,
+                 model['game_time']['cast_label']: self.OPEN + 50.0, model['game_time']['after_label']: read,
+                 stamps['open_lower']: self.OPEN, stamps['open_upper']: self.OPEN, stamps['cast_count']: cast_count,
+                 stamps['cast_upper']: self.OPEN + 54.0, stamps['read_upper']: read + 4.0, stamps['count']: count,
+                 stamps['clock']: self.CLOCK, stamps['first']: first}
+        if drop:
+            found.pop(stamps[drop])
+        return judge_behaviour(base_verdict(expectation), FakeRun(found), expectation)
+
+    def test_a_reading_bracketed_from_an_apply_after_the_cast_is_ok(self):
+        verdict = self.judged()
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.detail['apply_bracket'], [2800.0, 2804.0])
+
+    def test_a_duration_outside_the_window_alerts(self):
+        for age in (2600.0, 3100.0):
+            with self.subTest(age=age):
+                self.assertEqual(self.judged(age=age).status, 'alert')
+
+    def test_the_apply_is_measured_from_its_own_stamp_not_from_the_cast(self):
+        self.assertEqual(self.judged(age=2800.0, first=self.FIRST + 400.0).detail['apply_bracket'], [2800.0, 2804.0])
+
+    def test_an_apply_before_the_trigger_voids_the_trial(self):
+        for reads in ({'cast_count': 1}, {'cast_count': 1, 'count': 2}):
+            with self.subTest(reads=reads):
+                self.assertEqual(self.judged(**reads).status, 'unmeasured')
+
+    def test_a_count_jump_or_an_apply_before_the_cast_completes_voids_the_trial(self):
+        for reads in ({'count': 2}, {'count': 0}, {'first': self.CLOCK - 1.0}, {'drop': 'open_lower'},
+                      {'drop': 'open_upper'}):
+            with self.subTest(reads=reads):
+                self.assertEqual(self.judged(**reads).status, 'unmeasured')
+
+    def test_refused_modes(self):
+        good = {'aura': IMMUNITY, 'window': [2710, 2990], 'source': 'duration'}
+        self.assertEqual(parse({**good, 'applied': 'after_trigger'})['applied'], 'after_trigger')
+        self.assertNotIn('applied', parse(good))
+        for raw in ({**good, 'applied': 'before_trigger'}, {**good, 'applied': True}):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                parse(raw)
+
+
 if __name__ == '__main__':
     unittest.main()

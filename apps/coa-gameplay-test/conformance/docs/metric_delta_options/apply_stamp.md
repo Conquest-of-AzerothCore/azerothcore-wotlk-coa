@@ -22,8 +22,25 @@ The encounter timeline makes the scenario exclusive in a simulated-clock batch (
 global). Python only, opt-in: harness metrics `encounter_start`, `timeline_count`, `timeline_first_ms` and
 `game_time_ms` already exist.
 
+**After the trigger** (ADR 1284, provisional). `"applied": "after_trigger"` stamps an aura that the trigger itself
+applies after its cast completes (a cast-time spell's hit, a projectile). It needs `game_time` but no `strike`. The
+timeline stamps a cast when it goes off (`ALLSPELLHOOK_ON_CAST`), so the game-time reads around the cast command do not
+bound it; instead the game time is read just before and just after `encounter_start` (`open_lower`, `open_upper`).
+The timeline and `game_time_ms` share one clock (`GameNowMs`; timeline times are offsets from the opening), so the
+apply lies at the opening plus `first`, and the after reading is bracketed:
+
+- at least `game_time after - open_upper - first`;
+- at most `read_upper - open_lower - first`.
+
+The trial is void (`unmeasured`) when an apply precedes the trigger cast (`cast_count != 0`), when the apply count is
+not exactly one (`count != 1`), or when the apply precedes the completed cast (`first < clock`). Without `applied`
+the option is unchanged.
+
 Named points: `phase_steps` (the timeline), `after_trigger_steps` (the reads after the cast), `fixtures` (the reads
 after the reading and the contract), `model`, `verdict`.
 
 Sun Cleric: Stalwart 300355 `immunity_held` (window 3620..3990 ms) and `immunity_gone` (4010..4380 ms) on Stalwart
 301342, `$301342d` = 4000 ms: they exclude 3600 ms and 4400 ms.
+
+Felsworn: Inner Demon 501298 `inner_dot_held` / `inner_dot_gone` (after the trigger) on Ruin 805748,
+`$805748d` = 3000 ms.
