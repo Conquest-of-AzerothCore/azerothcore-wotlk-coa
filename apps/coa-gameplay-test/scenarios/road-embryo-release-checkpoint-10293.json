@@ -130,6 +130,14 @@
       "x": 304.429,
       "y": -206.081,
       "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "runner stands on the arena floor, not below it",
+      "actor": "runner",
+      "metric": "position_z",
+      "min": 339.8,
+      "max": 343.8
     }
   ]
 }
