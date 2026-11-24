@@ -41,6 +41,7 @@ from bonus import (RELATIVE_BAND, Bonus, band_excluded_text, band_status, bonus_
                    bonus_status, bonus_text, delta_of, delta_text,
                    per_event_sample, sized_trials)
 import control_excluded
+import hit_ratio_avoided
 import hit_ratio_versus
 import hit_ratio_void
 from expiry import BEHAVIOUR_EXPIRY, EXPIRY_KIND, combined_status, expiry_readings, fixture_note
@@ -4812,6 +4813,10 @@ def behaviour_hit_ratio_verdict(base: Verdict, run: Run | list[Run], model: dict
         if refused:
             return replace(base, status='unmeasured',
                            explanation=hit_ratio_void.explanation(refused, describe_failures))
+    if model.get(hit_ratio_avoided.NAME):
+        absent = hit_ratio_avoided.void(runs, model[hit_ratio_avoided.NAME])
+        if absent:
+            return replace(base, status='unmeasured', explanation=f'not judged: the run is void, {absent}')
     scale = 100.0 if model.get('rate') else 1.0
     between_parts = len(runs) >= MINIMUM_BETWEEN_PARTS and bool(model.get('rate'))
     series = {}

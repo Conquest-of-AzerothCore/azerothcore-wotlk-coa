@@ -104,7 +104,8 @@ SUITES = {
                      [CONFORMANCE + 'test_aura354.py'], [CONFORMANCE + 'test_ledger.py'],
                      [CONFORMANCE + 'test_cost.py'],
                      [CONFORMANCE + 'test_minions.py'], [CONFORMANCE + 'test_snapshots.py'],
-                     [CONFORMANCE + 'test_tally.py'], [CONFORMANCE + 'test_cycle.py']],
+                     [CONFORMANCE + 'test_tally.py'], [CONFORMANCE + 'test_cycle.py'],
+                     [CONFORMANCE + 'test_hit_ratio_avoided.py']],
     },
     'world-content': {
         'paths': [CONTENT + '*.py'],

@@ -18293,6 +18293,43 @@
       "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224), 10 instances per application (AscensionFelswornAuras.cpp:84-85). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) are averaged in a control arm without 807163 and a treatment arm with 807163 on the caster before every cast: ratio 1.30, within the larger of 5% of the +30% (1.5) and 2 points. 807163 is set by the harness (set_aura), a precondition fixture of the effect on the hit, the claim's subject; its grant by real dodged swings, its 10 instances and its Felfury are the subject of the avoided_proc_instances entry. The real grant's amount is not read by any existing kind (the tool gap stated in the report), so the D-67 equivalence arm is missing. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only. Sizing (2026-11-24): an exploratory run of 3 parts of 80 trials read a 99% half-width of 1.48 points against the 1 point the judge needs (528 trials per arm), so the entry runs 10 parts of 80 trials (800 per arm, half-width about 1.48 x sqrt(240/800) = 0.81 points); the judge states the interval it excludes and a flip between the two runs of a pair is not counted."
     },
     {
+      "spell": 804822,
+      "name": "Vengeance Is Mine (Twin Slice damage under the aura earned by dodged swings)",
+      "kind": "hit_ratio",
+      "variant": "twin_slice_damage_earned",
+      "label_suffix": "twin_slice_damage_earned",
+      "quote": "deal $807163s1% increased damage",
+      "expected": 1.3,
+      "observe_spell": 808303,
+      "target": "striker",
+      "cast_wait_ms": 1600,
+      "control": {},
+      "treatment": {
+        "learn": [
+          804822
+        ]
+      },
+      "trials": 52,
+      "parts": 13,
+      "critical": false,
+      "cast_spell": 801901,
+      "cast_power": 100,
+      "avoided_grant": {
+        "proc_aura": 807163,
+        "striker_entry": 36,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ],
+        "swing_ms": 500,
+        "grant_ms": 1500,
+        "lead_ms": 6000
+      },
+      "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224). Second real design of mentor Felsworn D-109 (2): 807163 is never set; avoided_grant (ADR 1285) makes 10 stationary strikers 36 swing at the caster in both arms with dodge 100% and parry 0, and Vengeance Is Mine 804822 is learned for the treatment arm only, so 807163 is earned by the real dodge grant before every treatment cast (read present before each treatment cast and absent before each control cast, else the run is void). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) at the first striker are pooled over 13 parts of 52 trials per arm (676 per arm; one scenario holds 52). Sizing: the first fw-bk4 pair read a 99% half-width of 1.01 points at 530 trials per arm (needs 542 for 1 point, half the unchanged 2-point band); 676 gives about 0.89. Ratio 1.30 within the larger of 5% of the +30% (1.5) and 2 points. The strikers swing 6000 ms more before the first trial of each arm (lead_ms): with 1500 ms, 1 of 20 first treatment trials of that pair read 807163 absent (void); if the chance of no proc falls geometrically with the window, 7500 ms gives about 0.05^5 = 3e-7 per part (an estimate from that one count, not a measurement), and no later trial read it absent (0 of 1040). Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only."
+    },
+    {
       "spell": 561216,
       "name": "Fury of the Illidari (charges and recharge)",
       "kind": "charge_recharge",
@@ -18413,6 +18450,91 @@
       "tolerance": 0,
       "wait_ms": 3650,
       "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), RangeIndex 3; the class contract clears Effect[2] (AscensionFelswornContracts.cpp:136-137) and the class script casts Spellbreak 804809 (SPELL_EFFECT_POWER_DRAIN) at the target on a successful interrupt (AscensionFelswornAbilities.cpp:396-400). Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and locks that spell's school for the duration (ProhibitSpellSchool, SpellEffects.cpp). The target channels Evocation 12051 (Arcane, SchoolMask 64, 8000 ms) on itself right before the trigger (target_casts_before), the same fixture as the counted moving_cast entry. The before phase casts nothing (the control). The Arcane lockout is read 3650 ms after the cast starts, 3150 ms after the 500 ms cast lands: gone (0), which excludes a lockout 10% long (3300 ms); the lockout_held arm shows it was applied. Reference search 2026-11-23: coa-history spell 800203: SPELL_CAST_START 8 events and SPELL_INTERRUPT 6 events by players in 1 log (no lockout or drain figure); the bindmysoul snapshot has no value beyond the tooltip; expected values come from the tooltip and the DBC only. Residual risk, code reading only: a missed Felbreak leaves the channel running and alerts; the counted moving_cast entry carries the same single landing."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "name": "Felbreak (the interrupt drains the target's mana)",
+      "variant": "drain",
+      "label_suffix": "drain",
+      "target_entry": 11795,
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          60235,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "dummy_power_after_trigger": {
+        "power": 0,
+        "value": 2434,
+        "after_ms": 0
+      },
+      "before_expected": 2434,
+      "expected": 2433,
+      "after_at_least": 0,
+      "after_at_most": 2433,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST; the class script casts Spellbreak 804809 at the target on a successful interrupt (OnSpellSuccessfulInterrupt, AscensionFelswornAbilities.cpp:418-422). Spellbreak 804809 (server DBC set): Effect[0] 8 SPELL_EFFECT_POWER_DRAIN, MiscValue 0 (mana), DmgClass 0 with no school-damage effect, so Unit::SpellHitResult returns SPELL_MISS_NONE (Unit.cpp:4155-4165, no miss roll); its amount is the caster's Spirit (AscensionFelswornContracts.cpp:531-532), drained by Spell::EffectPowerDrain (SpellEffects.cpp:2366-2388). The tooltip gives no figure, so the drain is judged for its direction only and the coefficient is not asserted. The target is Mylentha Riverbend 11795 (level 60, 2434 maximum mana, the Witch Doctor jinx_no_regen fixture) channelling Evocation 12051 (Effect[0] aura 21 every 2000 ms, so no tick lands before the interrupt about 800 ms after the channel starts). dummy_power_after_trigger sets the target's mana to 2434 right after the cast is submitted, 500 ms before the cast lands and Spellbreak drains (the harness cast step submits CMSG_CAST_SPELL and continues, CoAGameplayTest.cpp:8929-9013); in an uncast before phase it sets it at the point of the cast. Greatness 60235 (Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 4, EffectBasePoints 299 + 1 = +300 Spirit) is a precondition fixture on the caster. Reference search 2026-11-24: coa-history spell 804809 holds 2 SPELL_DRAIN events of 166 mana in 1 log (the caster's Spirit is not logged, so no figure decides); nothing else found. Control: the uncast before phase reads the full 2434. After one real Felbreak at the channelling target, read 1000 ms after the cast starts: below 2434, so mana was drained (with +300 Spirit an in-combat regeneration tick cannot refill it)."
+    },
+    {
+      "spell": 800203,
+      "kind": "metric_delta",
+      "quote": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
+      "trigger_spell": 800203,
+      "target": "dummy",
+      "cast_power": 100,
+      "measure_actor": "dummy",
+      "void_on_cast_failure": true,
+      "target_casts_before": [
+        12051
+      ],
+      "name": "Felbreak (a higher Spirit drains more mana)",
+      "variant": "drain_spirit",
+      "label_suffix": "drain_spirit",
+      "target_entry": 11795,
+      "cast_in_before": true,
+      "expire_ms": 3500,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "after_auras": [
+        [
+          60235,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "dummy_power_after_trigger": {
+        "power": 0,
+        "value": 2434,
+        "after_ms": 0
+      },
+      "before_expected": 1,
+      "expected": -299,
+      "expected_gain": -300,
+      "tolerance": 299,
+      "wait_ms": 1000,
+      "observe_source": "Felbreak 800203 (server DBC set): CastingTimeIndex 3 = 500 ms, Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST; the class script casts Spellbreak 804809 at the target on a successful interrupt (OnSpellSuccessfulInterrupt, AscensionFelswornAbilities.cpp:418-422). Spellbreak 804809 (server DBC set): Effect[0] 8 SPELL_EFFECT_POWER_DRAIN, MiscValue 0 (mana), DmgClass 0 with no school-damage effect, so Unit::SpellHitResult returns SPELL_MISS_NONE (Unit.cpp:4155-4165, no miss roll); its amount is the caster's Spirit (AscensionFelswornContracts.cpp:531-532), drained by Spell::EffectPowerDrain (SpellEffects.cpp:2366-2388). The tooltip gives no figure, so the drain is judged for its direction only and the coefficient is not asserted. The target is Mylentha Riverbend 11795 (level 60, 2434 maximum mana, the Witch Doctor jinx_no_regen fixture) channelling Evocation 12051 (Effect[0] aura 21 every 2000 ms, so no tick lands before the interrupt about 800 ms after the channel starts). dummy_power_after_trigger sets the target's mana to 2434 right after the cast is submitted, 500 ms before the cast lands and Spellbreak drains (the harness cast step submits CMSG_CAST_SPELL and continues, CoAGameplayTest.cpp:8929-9013); in an uncast before phase it sets it at the point of the cast. Greatness 60235 (Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 4, EffectBasePoints 299 + 1 = +300 Spirit) is a precondition fixture on the caster. Reference search 2026-11-24: coa-history spell 804809 holds 2 SPELL_DRAIN events of 166 mana in 1 log (the caster's Spirit is not logged, so no figure decides); nothing else found. Both phases cast a real Felbreak at the channelling target and read its mana 1000 ms after the cast; the after phase alone carries Greatness (+300 Spirit). The gain (after minus before) must lie in [-599, -1]: a strictly larger drain at the higher Spirit (direction only; the band only excludes no Spirit dependence and a drain that more than doubles the added Spirit). The 3500 ms between phases outlasts the 3000 ms Arcane lockout ($d) so the target channels again."
     },
     {
       "spell": 800355,

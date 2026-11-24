@@ -2985,7 +2985,7 @@
     "spell": 800203,
     "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
     "kind": "claim",
-    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands. The unmodelled readback aura_duration_ms #0 never counted and is dropped; lockout_held and lockout_free judge the lockout duration.",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands. The unmodelled readback aura_duration_ms #0 never counted and is dropped; lockout_held and lockout_free judge the lockout duration. fw-bk4 2026-11-24 (controller go, direction only, coefficient unasserted): 'and draining mana from the target based on your Spirit.' is judged by drain (Mylentha Riverbend 11795 channelling Evocation 12051, its mana set to 2434 by dummy_power_after_trigger right after the cast is submitted, 500 ms before Felbreak lands: 2434 without the cast, 2092 after it, with Greatness 60235 +300 Spirit on the caster) and drain_spirit (both phases cast Felbreak, the after phase alone with Greatness: 2401 then 2075, a gain of -326 within [-599, -1]), ok in both runs of the fw-bk4 pair. The tool gap below is superseded: dummy_power_after_trigger at 0 ms precedes the drain because Felbreak has a 500 ms cast time.",
     "claims": [
       {
         "claim": "Interrupt a spell from being cast",
@@ -3002,7 +3002,10 @@
       },
       {
         "claim": "and draining mana from the target based on your Spirit.",
-        "labels": []
+        "labels": [
+          "800203 behaviour_metric_delta drain",
+          "800203 behaviour_metric_delta drain_spirit"
+        ]
       }
     ],
     "tool_gap": {
@@ -3128,6 +3131,7 @@
       },
       {
         "claim": "you can channel while moving",
+        "state_promise": "casting",
         "labels": [
           "800206 behaviour_metric_delta moving_channel_state",
           "800206 behaviour_metric_delta moving_channel_whirlwind_moved",
@@ -3135,7 +3139,7 @@
         ]
       }
     ],
-    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too). fw-fa1 2026-11-24: parry fixed by Parry Dance 560651 as a precondition (Player::CanParry); moving read by the STATE metric casting with Whirlwind 13736 moved/still controls. The move half reads the STATE metric casting (1 for Carve after two relocations, 0 for Whirlwind 13736 moved, 1 not moved; ok in both runs of prove-a5b) but the audit classes it data: the promise words of casting (coverage.py) carry no 'channel', so the claim 'you can channel while moving' stays uncounted pending tool group B (add channel to the casting promise)."
+    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too). fw-fa1 2026-11-24: parry fixed by Parry Dance 560651 as a precondition (Player::CanParry); moving read by the STATE metric casting with Whirlwind 13736 moved/still controls. The move half reads the STATE metric casting (1 for Carve after two relocations, 0 for Whirlwind 13736 moved, 1 not moved; ok in both runs of prove-a5b) but the audit classes it data: the promise words of casting (coverage.py) carry no 'channel', so the claim 'you can channel while moving' stays uncounted pending tool group B (add channel to the casting promise). fw-bk4 2026-11-24 (mentor Felsworn D-109, ADR 1283): the claim 'you can channel while moving' carries state_promise casting, so its casting STATE reads are promised by the claim's own word 'channel'; no global promise word changed."
   },
   {
     "spell": 572617,
@@ -4198,11 +4202,11 @@
       {
         "claim": "deal $807163s1% increased damage",
         "labels": [
-          "804822 effect_value 807163e0 #1"
+          "804822 behaviour_hit_ratio twin_slice_damage_earned"
         ]
       }
     ],
-    "reason": "HELD 'deal $807163s1% increased damage' (mentor D-67): the entry 804822 behaviour_hit_ratio twin_slice_damage measures the +30% on Twin Slice hits with 807163 put by set_aura; no existing kind reads the amount of 807163 or the Twin Slice damage total after the real dodge grant (avoided_proc_instances reads hit counts and Felfury only), so the equivalence arm is missing and the entry label is not attached. Needs tool group B: avoided_proc_instances reading aura_amount of the earned aura and the damage total of its hits."
+    "reason": "HELD 'deal $807163s1% increased damage' (mentor D-67): the entry 804822 behaviour_hit_ratio twin_slice_damage measures the +30% on Twin Slice hits with 807163 put by set_aura; no existing kind reads the amount of 807163 or the Twin Slice damage total after the real dodge grant (avoided_proc_instances reads hit counts and Felfury only), so the equivalence arm is missing and the entry label is not attached. Needs tool group B: avoided_proc_instances reading aura_amount of the earned aura and the damage total of its hits. fw-bk4 2026-11-24 (mentor Felsworn D-109 (2), second real design, ADR 1285): 'deal $807163s1% increased damage' is judged by twin_slice_damage_earned: 807163 is never set; 10 strikers swing at the caster (dodge 100%) in both arms and 804822 is learned for the treatment arm only, 807163 read present before every treatment cast and absent before every control cast; plain 808303 hits over 13 parts of 52 trials per arm: +29.65% (99% +28.73 to +30.56) and +29.52% (+28.62 to +30.41) against +30% within 2 points, ok in both runs of the fw-bk4 pair. The not_measured label 804822 effect_value 807163e0 #1 is dropped (it never counted); the set_aura entry twin_slice_damage stays an unattached observation."
   },
   {
     "spell": 804822,
