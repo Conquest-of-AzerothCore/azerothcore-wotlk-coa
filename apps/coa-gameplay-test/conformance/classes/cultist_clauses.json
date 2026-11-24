@@ -519,7 +519,12 @@
   {
     "spell": 300309,
     "clause": "Reduces the cast time of Horrorbolt and Wrath of the Black Empire by 0.3 sec.",
-    "labels": [],
+    "labels": [
+      "300309 behaviour_metric_delta horrorbolt_held",
+      "300309 behaviour_metric_delta horrorbolt_done",
+      "300309 behaviour_metric_delta wrath_held",
+      "300309 behaviour_metric_delta wrath_done"
+    ],
     "kind": "claim"
   },
   {
@@ -695,12 +700,14 @@
       {
         "claim": "your spell hit rating is increased by $s2% of your Intellect.",
         "labels": [
-          "301255 effect_value e1 #0"
+          "301255 behaviour_metric_delta spell_hit_rating"
         ]
       },
       {
         "claim": "Your Darkwither can now critically strike",
-        "labels": []
+        "labels": [
+          "301255 behaviour_metric_delta darkwither_crit"
+        ]
       }
     ]
   },
@@ -757,7 +764,7 @@
     "spell": 301315,
     "clause": "Increases the damage of Darkwither by $s1%",
     "labels": [
-      "301315 effect_value e0 #0"
+      "301315 behaviour_hit_ratio darkwither_damage"
     ],
     "kind": "claim"
   },
@@ -765,7 +772,7 @@
     "spell": 301315,
     "clause": "and Eldritch Shock by $s2%.",
     "labels": [
-      "301315 effect_value e1 #1"
+      "301315 behaviour_hit_ratio eldritch_shock_damage"
     ],
     "kind": "claim"
   },
@@ -2847,7 +2854,7 @@
     "spell": 706722,
     "clause": "Increases the damage of Wrath of the Black Empire by $s1%.",
     "labels": [
-      "706722 effect_value e0 #0"
+      "706722 behaviour_hit_ratio wrath_damage"
     ],
     "kind": "claim"
   },
@@ -2900,7 +2907,7 @@
     "spell": 706917,
     "clause": "Increases your spell haste by $s2%",
     "labels": [
-      "706917 effect_value e1 #0"
+      "706917 behaviour_metric_delta spell_haste"
     ],
     "kind": "claim"
   },
@@ -2912,13 +2919,14 @@
       {
         "claim": "regenerate mana equal to $504829s1% of your missing mana",
         "labels": [
-          "706917 effect_value 504829e0 #1"
+          "706917 behaviour_metric_delta missing_mana"
         ]
       },
       {
         "claim": "every $t1 sec",
         "labels": [
-          "706917 aura_amplitude_ms #2"
+          "706917 behaviour_metric_delta period_before",
+          "706917 behaviour_metric_delta period_after"
         ]
       }
     ]
@@ -2943,7 +2951,7 @@
     "spell": 706928,
     "clause": "Increases the effectiveness of your Whispers by $s1%.",
     "labels": [
-      "706928 effect_value e0 #0"
+      "706928 behaviour_metric_delta whispers_str"
     ],
     "kind": "claim"
   },
