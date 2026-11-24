@@ -7,6 +7,7 @@ FIELDS = {'spell', 'events', 'centre', 'casts'}
 CENTRES = ('dummy', 'caster')
 DISTANCE_RESOLUTION_YD = 0.01
 EXPIRE_WAIT_LABEL = 'let the first effect fully expire'
+RUN_DEFAULT_TIMEOUT_MS = 90000
 PLAIN = {'critical': False, 'resisted': False, 'blocked': False}
 READS = (('total', 'spell_damage_total', PLAIN), ('plain', 'spell_damage_count', PLAIN),
          ('struck', 'spell_damage_count', {}))
@@ -76,6 +77,12 @@ def treatment_block(spec, steps: list[dict]) -> tuple[int, int, list[dict]]:
     return waits[-1], end, steps[waits[-1]:after]
 
 
+def cover_waits(scenario: dict):
+    from hits import TIMEOUT_MARGIN_MS
+    waited = sum(step['ms'] for step in scenario['steps'] if step.get('action') == 'wait')
+    scenario['timeout_ms'] = max(scenario.get('timeout_ms', RUN_DEFAULT_TIMEOUT_MS), waited + TIMEOUT_MARGIN_MS)
+
+
 def fixtures(class_file: dict, spec, order: dict, scenario: dict):
     from profile import CASTER
     steps = scenario['steps']
@@ -88,6 +95,7 @@ def fixtures(class_file: dict, spec, order: dict, scenario: dict):
                  + position_reads(spec, cast, read_units)
     scenario['steps'] = (steps[:start] + damage_reads(spec, order['spell'], 0, targets) + steps[start:end + 1]
                          + added + steps[end + 1:])
+    cover_waits(scenario)
     scenario['contract'] += (f' The treatment phase is cast {order["casts"]} times; after each cast the damage of '
                              f'{order["spell"]} on each of {targets} is read without critical, resisted or blocked '
                              f'hits, with its hit count and every position; per cast the targets are ordered by their '

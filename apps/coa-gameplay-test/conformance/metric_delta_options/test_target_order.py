@@ -61,6 +61,8 @@ class TargetOrderTests(unittest.TestCase):
         self.assertEqual((total['critical'], total['resisted'], total['blocked'], total['target']),
                          (False, False, False, 'area1'))
         self.assertEqual(reads[order['positions'][1]['area2'][0]]['actor'], 'area2')
+        waited = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
+        self.assertGreater(scenario.get('timeout_ms', 0), waited)
 
     def test_without_the_option_the_scenario_has_no_order_read(self):
         entry = {key: value for key, value in order_entry().items() if key != 'target_order'}

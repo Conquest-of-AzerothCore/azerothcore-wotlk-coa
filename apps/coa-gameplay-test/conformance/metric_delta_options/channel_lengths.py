@@ -65,7 +65,7 @@ def cancelled(spec, block: list[dict], cancel_ms: int) -> list[dict]:
 
 
 def fixtures(class_file: dict, spec, lengths: dict, scenario: dict):
-    from metric_delta_options.target_order import treatment_block
+    from metric_delta_options.target_order import cover_waits, treatment_block
     steps = scenario['steps']
     start, end, block = treatment_block(spec, steps)
     cancelled(spec, block, lengths['cancel_ms'][0])
@@ -77,6 +77,7 @@ def fixtures(class_file: dict, spec, lengths: dict, scenario: dict):
             added += cancelled(spec, block, cancel_ms) + reads(spec, lengths, cancel_ms, repeat)
     scenario['steps'] = (steps[:start] + reads(spec, lengths, 'base', 0) + steps[start:end + 1] + added
                          + steps[end + 1:])
+    cover_waits(scenario)
     scenario['contract'] += (f' The treatment cast of {spec.trigger_spell} is repeated {lengths["repeats"]} times '
                              f'as a full channel and {lengths["repeats"]} times per early end, the channel cancelled '
                              f'(cancel_aura) {list(lengths["cancel_ms"])} ms after the cast; after each cast the '
