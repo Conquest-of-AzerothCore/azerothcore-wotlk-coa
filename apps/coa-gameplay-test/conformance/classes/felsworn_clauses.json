@@ -918,17 +918,10 @@
   {
     "spell": 520853,
     "clause": "Generates a large amount of threat.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Measured on Fel Torpedo's hit 500761 (SPELL_EFFECT_THREAT 225 flat in the DBC, SpellLevel 34): threat 1209.75 on 303 health lost, slope 3.14 against 1 with the DBC's flat 259 (counted pair 20261123-211541 / -211612, labels removed from the class file after the run). Spell::EffectThreat passes the flat amount through LocalLevelScaling::PoolThreatFor (SpellEffects.cpp:4787, Unit.cpp:194-200), a ratio of the dummy's real to viewed maximum health; that this explains the 872.75 left after damage 303 and initial threat 34 (3.879 times 225) is a hypothesis not verified by a run. A proof needs the dummy's pool factor as an input of the judge, which threat_slope lacks. The nearest kind is threat_slope.",
-      "attempts": [
-        {
-          "agent": "fw-ea5",
-          "report": ".agents/plans/fw-ea5/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "500610 behaviour_metric_delta threat_above_control"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 520853,
@@ -1088,7 +1081,7 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "555738 aura_amplitude_ms #3"
+          "555738 behaviour_metric_delta strike_period"
         ]
       },
       {
@@ -1099,16 +1092,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit. The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029).",
-    "tool_gap": {
-      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
-      "attempts": [
-        {
-          "agent": "fw-fa1",
-          "report": ".agents/plans/fw-fa1/report.md"
-        }
-      ]
-    }
+    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok. 'with both weapons' (Felsworn ADR 0029, review fw-rf3 I-2): the server now casts the off-hand hit 806097 after each 555739 cast when a usable off-hand weapon is held, at 806095's 200%; '555738 behaviour_metric_delta hit_oh' read 7012 and 7016 (band 6994 to 7024, the off-hand path; before: no 806097 cast) and its control '555738 behaviour_metric_delta hit_oh_none' (off hand disarmed by 47974) read 0 and 0 in the fw-f3b counted pair .cache/verify-all/20261124-070350 / -070436 (build 6baa2739e5d6, server commit 684e6398ef5e); 5 focused reruns 20261124-070807 to -071129 all ok (hit_oh 7000 to 7020). Archived live: 46 events of 806097 against 48 of 555739 in the same 2 logs, one off-hand hit after each main-hand hit. The off-hand 200% (tooltip token, O-33) and the 0.5 off-hand factor (stock engine) are live-unconfirmed: archived live off-hand/main-hand non-crit ratio about 0.71-0.73, gear unknown (ADR 0029). 'every $t1 sec' (tool group B-PER, fw-bper, mentor D-103, ADR 1282): '555738 behaviour_metric_delta strike_period' (hit_period read_at_cast) reads the dummy's 555739 hits between the start stamp and the cast, so the tick at the cast (AttributesEx5 0x200 EXTRA_INITIAL_PERIOD) follows a read of none; three main-hand hits in 0 to 2500 ms judged at 1000 ms +- 50 (G-19); the off-hand 806097 is not counted; a first tick one period late reads two hits (unmeasured), or alerts when the clock overruns the window (the first hit must lie in the first poll after the cast, review fw-rbper I-1). The data label '555738 aura_amplitude_ms #3' is not emitted in either run of the fw-bper pair (missing, keeps the claim unproven) and is replaced by strike_period, as Witch Doctor misery_period and Necromancer chain_period did. Reference search 2026-11-24 (fw-fa1): coa-history spell 555738 and 555739 give no tick times; expected values come from the tooltip and the DBC only."
   },
   {
     "spell": 555738,
@@ -1589,21 +1573,13 @@
     "spell": 561216,
     "clause": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
     "labels": [
-      "561216 aura_amplitude_ms #0",
       "561216 behaviour_metric_delta assaults_sum",
       "561216 behaviour_metric_delta assaults_first",
-      "561216 behaviour_metric_delta assaults_off_hand"
+      "561216 behaviour_metric_delta assaults_off_hand",
+      "561216 behaviour_metric_delta assault_period"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
-      "attempts": [
-        {
-          "agent": "fw-fa1",
-          "report": ".agents/plans/fw-fa1/report.md"
-        }
-      ]
-    }
+    "reason": "assaults_sum (6 strikes of 808303 over two enemies), assaults_first (3 on the first enemy: moves from enemy to enemy) and assaults_off_hand (6 off-hand strikes 808304) carry the assaults and both weapons. 'every $t1 sec' (tool group B-PER, fw-bper, mentor D-103, ADR 1282): '561216 behaviour_metric_delta assault_period' (hit_period read_at_cast) reads the dummy's 808303 hits between the start stamp and the cast, so the assault at the cast (AttributesEx5 0x200 EXTRA_INITIAL_PERIOD) follows a read of none; three assaults in 0 to 1250 ms judged at 500 ms +- 25 (G-19); a first assault one period late reads two hits (unmeasured), or alerts when the clock overruns the window (the first hit must lie in the first poll after the cast, review fw-rbper I-1). The data label '561216 aura_amplitude_ms #0' is not emitted in either run of the fw-bper pair (missing, keeps the claim unproven) and is replaced by assault_period, as Witch Doctor misery_period and Necromancer chain_period did. Reference search 2026-11-24 (fw-fa1): coa-history spell 561216 and 808303: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
   },
   {
     "spell": 561216,
@@ -2419,7 +2395,8 @@
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
       "705123 behaviour_hit_ratio felrend_damage",
-      "705123 behaviour_hit_ratio fel_fireball_damage"
+      "705123 behaviour_hit_ratio fel_fireball_damage",
+      "705123 behaviour_hit_ratio twin_slice_unchanged"
     ],
     "kind": "claim"
   },
@@ -2549,18 +2526,13 @@
     "spell": 705135,
     "clause": "Casting Chaos Rush now reduces the cooldown of Felhoof Charge by $/1000;680318s1 sec.",
     "labels": [
-      "705135 effect_value 680318e0 #0"
+      "705135 effect_value 680318e0 #0",
+      "705135 cost_gate 800204 cd without",
+      "705135 cost_gate 800204 cd with",
+      "705135 cost_gate 800204 cd beyond"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "Casting Chaos Rush dashes the caster 10 yd forward (Chaos Rush Jump 802028, CHARGE_DEST on the caster's front, EffectRadiusIndex 13), past a dummy placed at DUMMY_DISTANCE, and cost_gate has no step that moves or faces the caster again before the attempt of Felhoof Charge 800204 (a charge that needs its target in front). Design 1 (cost_gate after_casts, one scenario for the three arms): the without arm read 67 (not ready) and the with and beyond arms read 134 and 97 (SPELL_FAILED_UNIT_NOT_INFRONT, SPELL_FAILED_OUT_OF_RANGE: the position the previous arm's dash left). Design 2 (cost_gate only_arm, one scenario per arm, Sun Cleric 805581 precedent, counted-pair run vb6-prove3): without 67 and beyond 67 as expected, with 134 instead of 0 (the attempt 18100 ms after the priming cast, 2000 - 100 ms of the 20000 ms category recovery, is no longer refused as not ready but fails its facing); the order of those two checks in Spell::CheckCast was not read, so the 134 is a lead, not a proof. Route: a cost_gate option that re-places the caster before the attempt (a shared behaviours.py change) or a dash-free source of the 680318 cut; not a final status.",
-      "attempts": [
-        {
-          "agent": "fw-vb6",
-          "report": ".agents/plans/fw-vb6/report.md"
-        }
-      ]
-    }
+    "reason": "cost_gate on Felhoof Charge 800204 after a real Chaos Rush 500028, one scenario per arm (only_arm), the caster moved 20 yd back along x before each judged attempt (relocate_before_attempt, ADR 1278, provisional): refused 67 at 18100 ms without the talent, through (0) at 18100 ms with it, refused 67 at 17900 ms with it, both runs; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The 2000 ms cut ($/1000;680318s1 = 2 sec) lies within the 100 ms margin; a 10% error moves the end by 200 ms. The effect_value data label comes from the class-end pair fw-pair3 (build 4444770a797e, head 97dc698223), not from this pair's worldserver; the behaviour labels come from this pair only."
   },
   {
     "spell": 705137,
@@ -2970,7 +2942,8 @@
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
       "707846 behaviour_hit_ratio felrend_damage",
-      "707846 behaviour_hit_ratio fel_fireball_damage"
+      "707846 behaviour_hit_ratio fel_fireball_damage",
+      "707846 behaviour_hit_ratio twin_slice_unchanged"
     ],
     "kind": "claim"
   },
@@ -4025,23 +3998,12 @@
     "spell": 803645,
     "clause": "In addition, reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active.",
     "labels": [
-      "803645 effect_value e1 #1"
+      "803645 effect_value e1 #1",
+      "803645 behaviour_metric_delta pushback_inner_demon",
+      "803645 behaviour_metric_delta pushback_no_inner_demon"
     ],
     "kind": "claim",
-    "reason": "Tool gap, uncounted (see tool_gap); the data label is the only label.",
-    "tool_gap": {
-      "reason": "Tool gap, uncounted (fw-vb4b, review I-3; guide G-25: a tool gap is not a final status): A route needs pushback_reduction with a caster-aura fixture (Inner Demon 804216 held on the caster during the three casts) or a metric_delta cast_pushback_ms with a control strike. Two designs were written, none was run, so G-24 is not met: Design 1: pushback_reduction (the unhit / hit / reduced casts of Dawnsear-like spells read in game time): its spec has no fixture for a condition on the caster, the reducer is learned or cast and Inner Demon 804216 cannot be held during the three casts, so the reduced arm would read the unconditional case (the talent is also not learned by the kind unless it is the reducer). Design 2: metric_delta cast_pushback_ms with after_trigger_strike and Inner Demon as a phase aura: the strike lands in the treatment phase only, so the control phase has no strike and the 50% would have to be judged against the engine base pushback of 500 ms, which no tooltip or DBC value states (the Necromancer 802988 finding). The nearest option and the extension: pushback_reduction with a caster-aura fixture, an extension. Reference search 2026-11-24: nothing found beyond the tooltip and the DBC (coa-history spell 803645: a passive leaves no event).",
-      "attempts": [
-        {
-          "agent": "fw-vb4",
-          "report": ".agents/plans/fw-vb4/report.md"
-        },
-        {
-          "agent": "fw-vb4b",
-          "report": ".agents/plans/fw-vb4b/report.md"
-        }
-      ]
-    }
+    "reason": "pushback_reduction (Lich Essence layout, ADR 0543/0546), contrast = the learn of 803645, Fel Fireball 801312 struck by Light of the Naaru 41394 about 712 ms into the hit casts, 10 casts of each kind. Condition true: Inner Demon 804216 held in every phase (caster_auras, ADR 1278, provisional: removed and set again right before each cast): mean ends unhit 1504, hit 1999, reduced unhit 1504, reduced 1749 ms, pushback falls by 50.48% (99% interval 50.41 to 50.54) and 50.32% (50.09 to 50.56), inside the G-19 band 47.5..52.5 around $s2 = 50. Condition false (arm pushback_no_inner_demon, review fw-rbk1 I-1): 803645 learned, Inner Demon never cast or set, expected 0 (band -2..2): reduced ends 1999.11 and 1998.33 ms, pushback falls by -0.02% (-0.08 to 0.04) and 0.58% (0.01 to 1.14), so an unconditional reduction (about 50%) would alert. Counted pair fw-bk1b pair1 2026-11-24 (verify_all 20261124-092223 / -092259, server 13601a0695, worldserver 7c80971e293e), both labels ok in both runs, 0 flips. The effect_value data label comes from the class-end pair fw-pair3 (build 4444770a797e, head 97dc698223), not from this pair's worldserver; the behaviour labels come from this pair only."
   },
   {
     "spell": 803840,
@@ -4141,18 +4103,11 @@
     "spell": 804219,
     "clause": "Ruin now has a $s1% chance not to consume Felfury.",
     "labels": [
-      "804219 effect_value e0 #0"
+      "804219 effect_value e0 #0",
+      "804219 behaviour_metric_delta keep_rate"
     ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "The 25% chance not to consume Felfury needs a keep-rate read on Ruin: Ruin consumes 2 Felfury and needs At Least 2 Felfury 803468, but the aura_keep_rate kind sets the consumed aura to 1 stack and applies no other fixture in the treatment arm. Design 1 (aura_keep_rate, Witch Hunter Lightbringer 680538 shape, Ruin 501298, control Twin Slice 801901, 20 treatment casts) measured 20 of 20 casts refused SPELL_FAILED_NO_POWER (85): no trial. No server mutant reaches the roll (a script constant), and flat_chance_rate reads no aura or stack event. The route is an aura_keep_rate extension (an aura_stacks option and treatment_auras); the band then needs 12443 casts and 15000 or more for a residual under 0.1% per pair (about 16 parts of 1000 casts at 2.5 s). Not a final status.",
-      "attempts": [
-        {
-          "agent": "fw-vb6",
-          "report": ".agents/plans/fw-vb6/report.md"
-        }
-      ]
-    }
+    "reason": "aura_keep_rate with aura_stacks 2 (ADR 1278, provisional): Felfury 800058 set at 2 stacks before every Ruin 501298, 804219 learned; run 1 4758 of 18750 casts kept it (25.38%, Wilson 99% [24.57, 26.20]), run 2 4726 (25.21%, [24.40, 26.03]), inside the G-19 band 23..27% of $s1 = 25; control Twin Slice 801901 kept it in 600 of 600 casts each run; 0 failed casts. Sizing: 150 parts of 125 casts (band_trials_needed 12443), residual 1.8e-4 per run; counted pair fw-bk1 pair1 2026-11-24 (verify_all 20261124-085058 / -085304, server de423e7d99, worldserver 457f9186a3e7), 0 flips. The roll is roll_chance_i(25) of the resource cost table (AscensionCompat.cpp:3474-3479), a script constant no spell modifier reaches. The effect_value data label comes from the class-end pair fw-pair3 (build 4444770a797e, head 97dc698223), not from this pair's worldserver; the behaviour labels come from this pair only. Limitation: with aura_stacks 2 the read is presence only (metric aura), so a Ruin that consumed 1 of the 2 Felfury stacks would read as kept; reading the stack count is recorded as a tool idea (controller no-go for now, review fw-rbk1 I-3); the server's preserve path consumes nothing (AscensionCompat.cpp:3474-3480, code reading)."
   },
   {
     "spell": 804609,
@@ -4577,11 +4532,12 @@
     "spell": 805245,
     "clause": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 Felfury.",
     "labels": [
-      "805245 effect_value #0"
+      "805245 effect_value #0",
+      "805245 proc_rate"
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "One leg left: damage taken. The avoided leg is the procs avoided entry 805245 proc_rate avoided: Felfury 800058 stack events (aura_stacks, tool ADR 1254, on the avoided trigger by ADR 1261, provisional) while Demonic Will 800209 is held by attempt_auras before every swing interval (the clause's condition, AscensionFelswornEvents.cpp:44-45). Damage taken needs a taken_hit trigger with the same condition and stack events, which procs does not combine (aura_stacks accepts a cast or an avoided trigger only). Hateforged Barrier 705129 as the condition is not read. The nearest kind is procs taken_hit with attempt_auras and aura_stacks events. fw-tg4 pairs (pair2, eaafe3bd73): the avoided leg entry 805245 proc_rate avoided was unmeasured in every part: 70 to 86 swings landed per part (guard landed) while Demonic Will 800209 was set before every interval; the dodge entries without attempt auras land none. Cause not established. Counting the landed swings as trials would change the avoided trial definition, a judge change outside this follow-up, so the avoided leg stays a tool gap.",
+      "reason": "One leg left: damage or attacks avoided. The damage-taken leg is the procs taken_hit entry 805245 proc_rate: Felfury 800058 stack events (aura_stacks, tool ADR 1254) on the taken_hit trigger (tool ADR 1279, provisional), Light of the Naaru 41394 from a striker while Demonic Will 800209 is held by attempt_auras before every strike (the clause's condition, AscensionFelswornEvents.cpp:44-46). The avoided leg (procs avoided entry 805245 proc_rate avoided, ADR 1261) was unmeasured in every part of the fw-tg4 pairs (pair2, eaafe3bd73): 70 to 86 swings landed per part (guard landed) while Demonic Will 800209 was set before every interval; the dodge entries without attempt auras land none. Cause not established; counting the landed swings as trials would change the avoided trial definition, a judge change, so the avoided leg stays a tool gap and its entry is not in the class file. Hateforged Barrier 705129 as the condition is not read.",
       "attempts": [
         {
           "agent": "fw-chance",
@@ -4594,6 +4550,10 @@
         {
           "agent": "fw-tg4b",
           "report": ".agents/plans/fw-tg4b/report.md"
+        },
+        {
+          "agent": "fw-bk2",
+          "report": ".agents/plans/fw-bk2/report.md"
         }
       ]
     }
@@ -4857,7 +4817,8 @@
       {
         "claim": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells",
         "labels": [
-          "806235 effect_value 572792e0 #1"
+          "806235 effect_value 572792e0 #1",
+          "806235 behaviour_hit_ratio felshock_hit_landed"
         ]
       },
       {
@@ -4867,16 +4828,7 @@
           "806235 behaviour_metric_delta mark_gone"
         ]
       }
-    ],
-    "tool_gap": {
-      "reason": "The increased chance to be hit by spells on the struck enemy has no victim-side hit read; a statistical design needs about 2000 casts per arm (fw-vb5 report) and was not run; the effect_value label is data only. Review fw-rvb5 minor: tool gap, not status 3.",
-      "attempts": [
-        {
-          "agent": "fw-vb5",
-          "report": ".agents/plans/fw-vb5/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 807430,

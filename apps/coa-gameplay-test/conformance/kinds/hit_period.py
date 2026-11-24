@@ -29,6 +29,7 @@ class HitPeriodSpec:
     label_suffix: str = 'hit_period'
     setup_casts: tuple[tuple[str, int, str, int], ...] = ()
     learn: tuple[int, ...] = ()
+    read_at_cast: bool = False
 
 
 SETUP_ACTORS = (CASTER, TARGET)
@@ -62,11 +63,30 @@ def hit_period_spec(entry: dict) -> HitPeriodSpec:
                          tuple((int(spell), str(on)) for spell, on in entry.get('fixtures', ())),
                          int(entry.get('poll_ms', 1)), entry.get('label_suffix', 'hit_period'),
                          tuple(setup_cast(raw) for raw in entry.get('setup_casts', ())),
-                         tuple(int(spell) for spell in entry.get('learn', ())))
+                         tuple(int(spell) for spell in entry.get('learn', ())),
+                         read_at_cast_of(entry))
     low, high = spec.window
     if not 0 <= low < high or high - low < 2 * spec.expected_ms:
         raise ValueError(f'{spec.spell} hit_period polls a window of at least two periods after the cast')
+    if spec.read_at_cast:
+        three_ticks_window(spec)
     return spec
+
+
+def read_at_cast_of(entry: dict) -> bool:
+    value = entry.get('read_at_cast', False)
+    if type(value) is not bool:
+        raise ValueError(f"{entry['spell']} hit_period read_at_cast is true or false, not {value!r}")
+    return value
+
+
+def three_ticks_window(spec: HitPeriodSpec):
+    low, high = spec.window
+    band = bonus_band(float(spec.expected_ms))
+    if low != 0 or not 2 * spec.expected_ms + band <= high <= 3 * spec.expected_ms - 2 * band:
+        raise ValueError(f'{spec.spell} hit_period read_at_cast polls from the cast (window low 0) to a high between '
+                         f'{2 * spec.expected_ms + band:g} and {3 * spec.expected_ms - 2 * band:g} ms: three ticks '
+                         f'when the first lands at the cast, two when it lands one period late')
 
 
 def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, list[Expectation]]:
@@ -85,12 +105,14 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
              + [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell}]
              + ([{'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost}]
                 if facts.mana_cost > 0 else [])
-             + [measurement(start, CASTER, 'game_time_ms'),
-                {'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET}])
+             + [measurement(start, CASTER, 'game_time_ms')]
+             + ([measurement(at_cast_label(spec), CASTER, PULSE_TARGETS_METRIC, spell=spec.hit_spell, target=TARGET)]
+                if spec.read_at_cast else [])
+             + [{'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET}])
     low, high = spec.window
     gap = max(1, low - AURA_WINDOW_STEP_OVERHEAD_MS)
     steps.append({'action': 'wait', 'label': 'to the window', 'ms': gap})
-    elapsed, reads = gap + AURA_WINDOW_STEP_OVERHEAD_MS, []
+    elapsed, reads = gap + AURA_WINDOW_STEP_OVERHEAD_MS, [[start, at_cast_label(spec)]] if spec.read_at_cast else []
     while elapsed <= high:
         index = len(reads)
         row = [cast_period_label(spec, f'{index} time'), cast_period_label(spec, f'{index} hits')]
@@ -106,17 +128,30 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
                      f'the game time and the '
                      f'{spec.hit_spell} hits on the dummy are read every {spec.poll_ms} ms of wait over {spec.window} '
                      f'ms of game time after the cast; (last stamped hit - first stamped hit) / (hits - 1) must lie '
-                     f'inside {spec.expected_ms} ms +- the G-19 band; no hit before the cast.'),
+                     f'inside {spec.expected_ms} ms +- the G-19 band; no hit before the cast.{at_cast_text(spec)}'),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     model = {'kind': 'cast_period', 'metric': PULSE_TARGETS_METRIC, 'quote': entry.quote,
              'expected_ms': spec.expected_ms, 'band_ms': bonus_band(float(spec.expected_ms)), 'reads': reads,
-             'control_label': control, 'start_label': start}
+             'control_label': control, 'start_label': start, **({'first_at_cast': True} if spec.read_at_cast else {})}
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.hit_spell, None, str(spec.expected_ms),
                               prose_rule(entry.quote, spec.spell), model)
     return timed(scenario, waited_ms(steps)), [expectation]
+
+
+def at_cast_label(spec: HitPeriodSpec) -> str:
+    return cast_period_label(spec, 'at cast hits')
+
+
+def at_cast_text(spec: HitPeriodSpec) -> str:
+    if not spec.read_at_cast:
+        return ''
+    return (f' The hits are also read between the start stamp and the cast, so a first tick at the cast lies in '
+            f'(start, first poll] and must lie there; the window {list(spec.window)} holds three ticks when the first '
+            f'lands at the cast and two (unmeasured) when it lands one period late; a first hit after the first poll '
+            f'alerts, whatever the game time the last poll reaches.')
 
 
 def setup_text(spec: HitPeriodSpec) -> str:

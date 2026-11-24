@@ -55,6 +55,8 @@ A `procs` entry of the class file describes one proc aura:
 | | Frost stun without interrupt flags, keeps the dummy Frozen through the damage, ADR 0491) |
 | | or, for an `avoided` trigger (ADR 1261, provisional), set on the caster before every swing interval and every |
 | | engage, for a condition the handler needs while strikers swing (Demonic Fortitude 805245: Demonic Will 800209) |
+| | or, for a `taken_hit` trigger with `aura_stacks` events only (ADR 1279, provisional), set on the caster before |
+| | every strike (Demonic Fortitude 805245 damage taken: Felfury 800058 at 0, Demonic Will 800209 held) |
 | `applied_by` | `{"spell", "source"}`: the aura is not learned but granted by a cast of `spell` (an Oath), so the |
 | | scenario sets it (`set_aura`, 1 stack) instead of learning it, and the chance is the aura's own `$<aura>s1` |
 | | percent token in the tooltip of `spell`, which `tooltip` then copies (ADR 0151) |
@@ -410,6 +412,12 @@ On an `avoided` trigger (ADR 1261, provisional) `stack_per_cast` must be 0 and `
 interval and after the drain, and the baseline swing intervals read the same way. A read at `stack_cap` makes the part
 `unmeasured` (a capped gain is not read); it never passes. Demonic Fortitude 805245 (0, 0, cap 6, 1 per proc, Demonic
 Will 800209 held as its condition).
+
+On a `taken_hit` trigger (ADR 1279, provisional) the same constraints hold (`stack_per_cast` 0, a whole `stack_cap`
+above `stack_set`): `attempt_auras` sets the aura before every strike of the striker, the stacks are read after every
+strike interval and after the drain, the baseline strikes before the passive is learned read the same way, and the
+trials stay the striker's landed hits on the caster. A read at `stack_cap` voids the part. Demonic Fortitude 805245
+damage taken leg (0, 0, cap 6, 1 per proc, Light of the Naaru 41394 from creature 36, Demonic Will 800209 held).
 
 ### Summon procs (ADR 0351)
 
