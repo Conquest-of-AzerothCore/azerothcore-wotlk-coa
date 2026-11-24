@@ -388,7 +388,7 @@
     "spell": 300483,
     "clause": "stacking $300481u times.",
     "labels": [
-      "300483 max_stacks 300481 #3"
+      "300483 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1813,7 +1813,7 @@
     "spell": 681376,
     "clause": "stacking $572782u times.",
     "labels": [
-      "681376 max_stacks 572782 #3"
+      "681376 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1976,7 +1976,7 @@
     "spell": 704370,
     "clause": "stacking $707511u times.",
     "labels": [
-      "704370 max_stacks 707511 #2"
+      "704370 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -2846,7 +2846,8 @@
     "spell": 800206,
     "clause": "Charge up a powerful attack over $d.",
     "labels": [
-      "800206 aura_duration_ms #0"
+      "800206 behaviour_metric_delta duration_held",
+      "800206 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -4424,10 +4425,22 @@
   {
     "spell": 806109,
     "clause": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
-    "labels": [
-      "806109 spell_duration 806128 #1"
+    "labels": null,
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $806128d",
+        "labels": [
+          "806109 behaviour_metric_delta dash_held",
+          "806109 behaviour_metric_delta dash_gone"
+        ]
+      },
+      {
+        "claim": "now dashes an additional 20 yds.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is not measured (uncounted)."
   },
   {
     "spell": 806111,
@@ -4542,7 +4555,7 @@
     "spell": 807431,
     "clause": "stacking up to $521234u times.",
     "labels": [
-      "807431 max_stacks 521234 #2"
+      "807431 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
