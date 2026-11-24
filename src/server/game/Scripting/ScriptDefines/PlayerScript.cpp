@@ -1034,6 +1034,11 @@ bool ScriptMgr::OnPlayerCanEnterManastorm(Player* player)
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_ENTER_MANASTORM, !script->OnPlayerCanEnterManastorm(player));
 }
 
+bool ScriptMgr::OnPlayerCanReleaseSpirit(Player* player)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_RELEASE_SPIRIT, !script->OnPlayerCanReleaseSpirit(player));
+}
+
 void ScriptMgr::OnPlayerBankWithdraw(Player* player, uint8 kind)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_BANK_WITHDRAW, script->OnPlayerBankWithdraw(player, kind));

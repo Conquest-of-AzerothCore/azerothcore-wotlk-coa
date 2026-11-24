@@ -1004,7 +1004,9 @@ Optional `race` seeds the saved character's race through `CHAR_UPD_CHAR_RACE` an
 before login, retaining saved pet data. This fixtures the post-service state; it does not submit a race/faction
 service request or perform that service's spell, quest, faction, language or appearance conversions.
 Optional `offline_seconds` moves the saved logout time that far back, so the login handler treats the character
-as offline for that long (real-time item durations, rest). `reconnect` takes `actor` and hands the character, still in the world, to a new session through the native reconnect handler (`HandlePlayerLoginToCharInWorld`), as a client restarted before its character logged out would. No login hook runs; packets recorded on the actor accumulate across both sessions.
+as offline for that long (real-time item durations, rest). Optional `logout_repop: true` first runs the repop a
+native logout gives a player who died without releasing (`BuildPlayerRepop`, `RepopAtGraveyard` and the finished
+graveyard transfer), before the save, so the saved state matches a real logout of a dead character. `reconnect` takes `actor` and hands the character, still in the world, to a new session through the native reconnect handler (`HandlePlayerLoginToCharInWorld`), as a client restarted before its character logged out would. No login hook runs; packets recorded on the actor accumulate across both sessions.
 
 `item_duration` requires `item` and reads the
 remaining duration in seconds of the first carried copy of that item.
@@ -1216,6 +1218,7 @@ teleports and expiry. It requires `mod-portablemail`; mailbox and altar client i
 `mana_regen` and `mana_regen_interrupted` read the player's owner-visible mana regeneration fields in
 mana per second, outside and inside the five-second rule. `resting` reads the native resting player flag and
 `free_for_all_pvp` the native free-for-all PvP flag the player's own client receives.
+`pvp_flagged` reads whether any unit carries the native PvP flag (`Unit::IsPvP`).
 `track_creature_type` reads whether a player's PLAYER_TRACK_CREATURES field holds the bit of creature type `id`
 (1 to 32), the field SPELL_AURA_TRACK_CREATURES sets.
 `sent_mana_regen` and `sent_mana_regen_interrupted` decode those fields from native values-update packets

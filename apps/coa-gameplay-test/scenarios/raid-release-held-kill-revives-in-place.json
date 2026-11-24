@@ -1,0 +1,279 @@
+{
+  "schema": 1,
+  "name": "Raid release: a kill resurrects the held dead in place; no combat left also ends the hold",
+  "contract": [
+    "Tester (ZG, 2026-11-24) and the user's decision: a player who dies during a raid boss fight cannot release",
+    "until the fight ends. When the boss dies, every player still dead is resurrected where they lie. If a boss",
+    "state stays in progress but no living player on the map is in combat any more, the fight is treated as over",
+    "so nobody stays dead forever. Gahz'ranka (8) and Jin'do (7) encounter states stand in for the fights; a",
+    "summoned cobra keeps the watcher in combat."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "watcher",
+      "race": 4,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "fallen",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "silent",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the players so both enter the same instance",
+      "actor": "watcher",
+      "target": "fallen"
+    },
+    {
+      "action": "group",
+      "actor": "watcher",
+      "target": "silent"
+    },
+    {
+      "action": "teleport",
+      "actor": "watcher",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true,
+      "label": "Jin'do's arena in Zul'Gurub"
+    },
+    {
+      "action": "wait",
+      "label": "Let the watcher create the instance first",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "fallen",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "silent",
+      "map": 309,
+      "x": -11524.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: both players share the instance",
+      "actor": "fallen",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_health",
+      "actor": "watcher",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "actor": "watcher",
+      "entry": 11373,
+      "as": "cobra",
+      "distance": 6
+    },
+    {
+      "action": "attack",
+      "label": "Pull a cobra to keep the watcher in combat",
+      "actor": "watcher",
+      "target": "cobra"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the watcher fights",
+      "actor": "watcher",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "label": "Keep the cobra alive so the watcher stays in combat",
+      "actor": "watcher"
+    },
+    {
+      "action": "command",
+      "actor": "watcher",
+      "command": ".instance setbossstate 8 1"
+    },
+    {
+      "action": "die",
+      "label": "Dies during the fight and never presses Release",
+      "actor": "silent"
+    },
+    {
+      "action": "die",
+      "actor": "fallen"
+    },
+    {
+      "action": "release_spirit",
+      "label": "Release during the fight is refused",
+      "actor": "fallen",
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "fallen",
+      "metric": "notification_contains",
+      "text": "You cannot release your spirit during a boss fight.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: held while the fight goes on",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the silent player is still dead",
+      "actor": "silent",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "label": "The boss dies",
+      "actor": "watcher",
+      "command": ".instance setbossstate 8 3"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the kill resurrects the held player",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: where they died",
+      "actor": "fallen",
+      "metric": "point_distance_2d",
+      "x": -11518.0,
+      "y": -1275.5,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dying during the fight alone holds the player, so the kill resurrects them too",
+      "actor": "silent",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: where they died",
+      "actor": "silent",
+      "metric": "point_distance_2d",
+      "x": -11524.0,
+      "y": -1275.5,
+      "max": 3
+    },
+    {
+      "action": "command",
+      "actor": "watcher",
+      "command": ".instance setbossstate 7 1"
+    },
+    {
+      "action": "die",
+      "actor": "fallen"
+    },
+    {
+      "action": "release_spirit",
+      "label": "Release during the fight is refused",
+      "actor": "fallen",
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "fallen",
+      "metric": "notification_contains",
+      "text": "You cannot release your spirit during a boss fight.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: held while the fight goes on",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "label": "The last fighter's combat ends while Jin'do's state stays in progress",
+      "actor": "watcher",
+      "entry": 11373,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nobody alive is in combat",
+      "actor": "watcher",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with no combat left the held player is resurrected",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 10000
+    }
+  ]
+}
