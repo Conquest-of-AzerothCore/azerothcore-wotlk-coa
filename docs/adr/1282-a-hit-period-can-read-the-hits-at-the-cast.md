@@ -1,6 +1,6 @@
-# 1276. A hit period can read the hits at the cast
+# 1282. A hit period can read the hits at the cast
 
-- Status: accepted (provisional number, renumbered at merge; mentor ruling D-103)
+- Status: accepted (number 1282 assigned by the controller; mentor ruling D-103)
 - Date: 2026-11-24
 - Builds on: ADR 0552 (`hit_period`), ADR 0535 (the `cast_period` judge), ADR 1120
 
@@ -29,12 +29,19 @@ A first tick one period late must not pass. With the option the window must star
 2 x `expected_ms` + band and 3 x `expected_ms` - 2 x band (G-19 band): it then holds three ticks when the first lands at
 the cast and two when it lands one period late, which the judge reports as unmeasured (fewer than three hits).
 
+The window bounds the nominal poll budget, not the game time the last poll reaches: a slow simulated clock can carry
+the last poll past 3 x `expected_ms`, and three late ticks would then read a correct period (review fw-rbper I-1).
+The option therefore also puts `first_at_cast: true` in the model, and the `cast_period` judge alerts unless the first
+hit lies in (start, first poll]. Models without the key are judged as before.
+
 ## Consequences
 
 - Opt-in: without the field (or with `false`) the steps, contract and model are unchanged; classes 15, 19 (with and
   without `--stack`), 23 and 27 generate byte-identical scenarios.
 - Seeded tests: a tick at the cast every 1000 ms is ok; an 800 ms period alerts; a hit read before the cast alerts;
-  a first tick one period late is not ok; a window that could hold a late third tick is refused.
+  a first tick one period late is not ok; a window that could hold a late third tick is refused; with polls every
+  25 ms (the clock overruns the window) a first tick one period late alerts, a tick at the cast stays ok, and the same
+  late run without `first_at_cast` (the mutant) reads ok.
 - The period rests on three hits; a missed or avoided tick leaves two (unmeasured), never a false ok.
 - Felsworn 555738 `strike_period` (555739 main-hand hits only; the off-hand 806097 of Felsworn ADR 0029 has its own
   spell id and is not counted) and 561216 `assault_period` use it.

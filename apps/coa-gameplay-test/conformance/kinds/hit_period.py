@@ -134,7 +134,7 @@ def hit_period_scenario(class_file: dict, spec: HitPeriodSpec) -> tuple[dict, li
         'steps': steps}
     model = {'kind': 'cast_period', 'metric': PULSE_TARGETS_METRIC, 'quote': entry.quote,
              'expected_ms': spec.expected_ms, 'band_ms': bonus_band(float(spec.expected_ms)), 'reads': reads,
-             'control_label': control, 'start_label': start}
+             'control_label': control, 'start_label': start, **({'first_at_cast': True} if spec.read_at_cast else {})}
     expectation = Expectation(f'{spec.spell} {BEHAVIOUR_METRIC_DELTA} {spec.label_suffix}', BEHAVIOUR_METRIC_DELTA,
                               spec.spell, spec.hit_spell, None, str(spec.expected_ms),
                               prose_rule(entry.quote, spec.spell), model)
@@ -149,8 +149,9 @@ def at_cast_text(spec: HitPeriodSpec) -> str:
     if not spec.read_at_cast:
         return ''
     return (f' The hits are also read between the start stamp and the cast, so a first tick at the cast lies in '
-            f'(start, first poll]; the window {list(spec.window)} holds three ticks when the first lands at the cast '
-            f'and two (unmeasured) when it lands one period late.')
+            f'(start, first poll] and must lie there; the window {list(spec.window)} holds three ticks when the first '
+            f'lands at the cast and two (unmeasured) when it lands one period late; a first hit after the first poll '
+            f'alerts, whatever the game time the last poll reaches.')
 
 
 def setup_text(spec: HitPeriodSpec) -> str:
