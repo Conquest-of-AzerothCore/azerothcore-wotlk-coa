@@ -645,7 +645,12 @@ private:
 class ChatLogConfig
 {
 public:
-    ChatLogConfig() : _original(CoAChatLog::SetEnabled(true)) { }
+    explicit ChatLogConfig(std::optional<uint32> maxPending) : _original(CoAChatLog::SetEnabled(true)),
+        _droppedAtStart(CoAChatLog::Dropped())
+    {
+        if (maxPending)
+            _originalMaxPending = CoAChatLog::SetMaxPending(*maxPending);
+    }
 
     ChatLogConfig(ChatLogConfig const&) = delete;
     ChatLogConfig& operator=(ChatLogConfig const&) = delete;
@@ -654,10 +659,16 @@ public:
     {
         CoAChatLog::Flush(true);
         CoAChatLog::SetEnabled(_original);
+        if (_originalMaxPending)
+            CoAChatLog::SetMaxPending(*_originalMaxPending);
     }
+
+    uint64 Dropped() const { return CoAChatLog::Dropped() - _droppedAtStart; }
 
 private:
     bool _original;
+    uint64 _droppedAtStart;
+    std::optional<std::size_t> _originalMaxPending;
 };
 
 class BattlegroundKillXpConfig
@@ -2193,7 +2204,10 @@ public:
         if (auto twoSide = _scenario.get_child_optional("two_side"))
             _twoSide.emplace(*twoSide);
         if (_scenario.get<bool>("chat_log", false))
-            _chatLog.emplace();
+        {
+            auto const maxPending = _scenario.get_optional<uint32>("chat_log_max_pending");
+            _chatLog.emplace(maxPending ? std::optional<uint32>(*maxPending) : std::nullopt);
+        }
         if (_scenario.get<bool>("battleground_kill_xp", false))
             _battlegroundKillXp.emplace();
         if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
@@ -6218,6 +6232,11 @@ private:
             return std::any_of(lines.begin(), lines.end(), [&needle](std::string const& line)
                 { return line.find(needle) != std::string::npos; }) ? 1.0 : 0.0;
         }
+        if (metric == "chat_log_dropped")
+        {
+            Require(_chatLog.has_value(), "chat_log_dropped needs \"chat_log\": true");
+            return double(_chatLog->Dropped());
+        }
         if (metric == "chat_log_rows")
         {
             std::optional<uint8> const type = CoAChatLog::TypeByName(step.get<std::string>("chat_type"));
@@ -8197,16 +8216,22 @@ private:
         }
         else if (action == "whisper")
         {
-            WorldPacket packet(CMSG_MESSAGECHAT, 64);
-            packet << uint32(CHAT_MSG_WHISPER) << step.get<uint32>("language", LANG_COMMON)
-                << step.get<std::string>("to") << step.get<std::string>("text");
-            player->GetSession()->HandleMessagechatOpcode(packet);
+            uint32 const repeat = step.get<uint32>("repeat", 1);
+            Require(repeat >= 1 && repeat <= 100, "whisper repeat must be 1 to 100");
+            for (uint32 i = 0; i < repeat; ++i)
+            {
+                WorldPacket packet(CMSG_MESSAGECHAT, 64);
+                packet << uint32(CHAT_MSG_WHISPER) << step.get<uint32>("language", LANG_COMMON)
+                    << step.get<std::string>("to") << step.get<std::string>("text");
+                player->GetSession()->HandleMessagechatOpcode(packet);
+            }
             record.put("result", "whisper sent; verify delivery with assertions");
         }
         else if (action == "chat_log_cleanup")
         {
             Require(CoAChatLog::Flush(true), "chat_log_cleanup could not write the pending rows");
-            CoAChatLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY, true);
+            CoAChatLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY,
+                !step.get<bool>("background", false));
         }
         else if (action == "addon_message")
         {

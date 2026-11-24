@@ -393,7 +393,7 @@ runs such a case exclusively because the setting is process-global. Optional
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
 `AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional `chat_log: true`
 turns `CoA.ChatLog.Enable` on for that case and back to the configured state when it ends, and is likewise run
-exclusively. Optional `battleground_kill_xp: true` turns `Battleground.GiveXPForKills` on for that case in the same
+exclusively; with it, `chat_log_max_pending` (1-1000000) sets `CoA.ChatLog.MaxPendingRows` for the case. Optional `battleground_kill_xp: true` turns `Battleground.GiveXPForKills` on for that case in the same
 way, and is likewise run exclusively. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
@@ -501,8 +501,8 @@ assert stable maximums and final levels when testing damage coefficients.
 | `console` | `command`: execute one console command on the test server; capture its output. Optional `restore`: one console command that undoes it, run when the case ends, whether it passed or failed (the latest step's first); use it for process-global state such as `raidphase set`. |
 | `game_event` | `event`, `active`: start or stop a game event whatever the realm date, so a holiday case passes on any day; `event start`/`event stop` refuse an event already in that state. The case restores each event's original state when it ends and runs exclusively, because events are process-global. |
 | `command` | `actor`, `command` beginning with `.`: execute with the player's normal permissions. Optional `rejected: true` instead requires the command to be refused (unknown, malformed or answered with an error). |
-| `whisper` | Player `actor`, `to`, `text`, optional `language` (Common by default): the client's whisper packet, sent as typed. |
-| `chat_log_cleanup` | `actor`, `days_ahead` (0-3650): writes the chat log's pending rows, then runs its daily cleanup as if the realm clock were `days_ahead` days later, waiting for it: every `coa_chat_log` row older than `CoA.ChatLog.KeepDays` days at that time is deleted. |
+| `whisper` | Player `actor`, `to`, `text`, optional `language` (Common by default) and `repeat` (1-100, 1 by default): the client's whisper packet, sent as typed, `repeat` times in the same update. |
+| `chat_log_cleanup` | `actor`, `days_ahead` (0-3650): writes the chat log's pending rows, then runs its daily cleanup as if the realm clock were `days_ahead` days later, waiting for it: every `coa_chat_log` row older than `CoA.ChatLog.KeepDays` days at that time is deleted. With `background: true` it only starts the cleanup the worldserver runs in the background, in batches between other character database work; assert its result with `within_ms`. |
 | `learn`, `unlearn` | `actor`, `spell`: configure learned spells/passives through player APIs. `unlearn` accepts `all_specs: true` to remove the fixture grant from every specialization before testing a lower weapon rank. |
 | `money` | `actor`, `copper`: fixture purse, so a priced trainer row can be bought on a character that starts with none. |
 | `set_player_setting` | `actor`, `source`, `index`, `value`: fixture a stored character setting, such as a value saved by an earlier build, before a `relog` reads it. |
@@ -1065,6 +1065,8 @@ banker click is answered with. `system_messages` counts the chat lines the sessi
 `chat_text`, `chat_channel`, `chat_subject`, `chat_name` (the sender's name as written on the row) and `chat_target_name` must match exactly, `chat_target` names the player the row is
 addressed to, `chat_emote` is the text emote id, and `chat_has_position`, `chat_has_group`, `chat_has_guild` and
 `chat_has_mail_id` require that value to be set (true) or zero (false).
+`chat_log_dropped` counts the chat log rows dropped since the case started because `CoA.ChatLog.MaxPendingRows`
+rows were already waiting for the database; it needs `chat_log: true`.
 `cast_failure` requires `spell` and reports the reason the client was told the last submitted cast of
 that spell was refused, or zero if it was not refused since (the record is cleared when the scenario
 submits that spell again).
