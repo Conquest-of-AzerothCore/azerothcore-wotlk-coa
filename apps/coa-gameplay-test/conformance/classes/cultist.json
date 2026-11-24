@@ -141,6 +141,60 @@
           "source": "While above 40 Insanity (574318 tooltip); 41 stacks of Insanity 500706 satisfies Count(player, Insanity) > 40 (AscensionCultistEvents.cpp:93)"
         }
       ]
+    },
+    {
+      "aura": 704871,
+      "name": "Voidforged Edge Rank 1",
+      "kind": "magnitude_ratio",
+      "tooltip": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+      "trigger": {
+        "action": "attack",
+        "spell": 0
+      },
+      "trigger_text": "Your auto attacks",
+      "trigger_metric": "melee_damage_total",
+      "observe_spell": 707750,
+      "observe_source": "EffectTriggerSpell[0] of 704871 (aura 354 scripted by aura_ascension_cultist_event, AscensionCultistEvents.cpp:109-110,282: Copy(player, target, 707750, CalculatePct(damage, Amount(704871)))); 707750 is in CultistCopies (CANT_CRIT | IGNORE_CASTER_MODIFIERS | IGNORE_DAMAGE_TAKEN_MODIFIERS | IGNORE_ARMOR, SchoolMask 32 Shadow); Godblade weapon set (item 2531 Great Axe, 2H melee, 90.86-127.3, speed 3600 ms). Reference search 2026-11-24: coa-history spell 704871 has 0 events (passive; 707750 has SPELL_DAMAGE in 14 logs); coabuildhub spells_master_index.json matches 704871 verbatim ('Your auto attacks now deal an additional 10% of the damage dealt as Shadow damage.').",
+      "observe_metric": "spell_damage_total",
+      "expected_ratio": 0.1,
+      "expected_ratio_source": "Spell.dbc 704871 EffectBasePoints[0] 9 + EffectDieSides[0] 1 = 10% ($s1). Reference search 2026-11-24: coa-history spell 704871 has 0 events (passive; 707750 has SPELL_DAMAGE in 14 logs); coabuildhub spells_master_index.json matches 704871 verbatim ('Your auto attacks now deal an additional 10% of the damage dealt as Shadow damage.').",
+      "per_trigger_text": "deal an additional $s1% of the damage dealt as Shadow damage"
+    },
+    {
+      "aura": 707749,
+      "name": "Voidforged Edge Rank 2",
+      "kind": "magnitude_ratio",
+      "tooltip": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+      "trigger": {
+        "action": "attack",
+        "spell": 0
+      },
+      "trigger_text": "Your auto attacks",
+      "trigger_metric": "melee_damage_total",
+      "observe_spell": 707750,
+      "observe_source": "EffectTriggerSpell[0] of 707749 (aura 354 scripted by aura_ascension_cultist_event, AscensionCultistEvents.cpp:109-110,282: Copy(player, target, 707750, CalculatePct(damage, Amount(707749)))); 707750 is in CultistCopies (CANT_CRIT | IGNORE_CASTER_MODIFIERS | IGNORE_DAMAGE_TAKEN_MODIFIERS | IGNORE_ARMOR, SchoolMask 32 Shadow); Godblade weapon set (item 2531 Great Axe, 2H melee, 90.86-127.3, speed 3600 ms). Reference search 2026-11-24: coa-history spell 707749 has 0 events (passive; 707750 has SPELL_DAMAGE in 14 logs); coabuildhub spells_master_index.json has no entry for 707749; installed Spell.dbc governs.",
+      "observe_metric": "spell_damage_total",
+      "expected_ratio": 0.2,
+      "expected_ratio_source": "Spell.dbc 707749 EffectBasePoints[0] 19 + EffectDieSides[0] 1 = 20% ($s1). Reference search 2026-11-24: coa-history spell 707749 has 0 events (passive; 707750 has SPELL_DAMAGE in 14 logs); coabuildhub spells_master_index.json has no entry for 707749; installed Spell.dbc governs.",
+      "per_trigger_text": "deal an additional $s1% of the damage dealt as Shadow damage"
+    },
+    {
+      "aura": 707785,
+      "name": "Voidforged Edge Rank 3",
+      "kind": "magnitude_ratio",
+      "tooltip": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+      "trigger": {
+        "action": "attack",
+        "spell": 0
+      },
+      "trigger_text": "Your auto attacks",
+      "trigger_metric": "melee_damage_total",
+      "observe_spell": 707750,
+      "observe_source": "EffectTriggerSpell[0] of 707785 (aura 354 scripted by aura_ascension_cultist_event, AscensionCultistEvents.cpp:109-110,282: Copy(player, target, 707750, CalculatePct(damage, Amount(707785)))); 707750 is in CultistCopies (CANT_CRIT | IGNORE_CASTER_MODIFIERS | IGNORE_DAMAGE_TAKEN_MODIFIERS | IGNORE_ARMOR, SchoolMask 32 Shadow); Godblade weapon set (item 2531 Great Axe, 2H melee, 90.86-127.3, speed 3600 ms). Reference search 2026-11-24: coa-history spell 707785 has 0 events (passive; 707750 has SPELL_DAMAGE in 14 logs); coabuildhub spells_master_index.json has no entry for 707785; installed Spell.dbc governs.",
+      "observe_metric": "spell_damage_total",
+      "expected_ratio": 0.3,
+      "expected_ratio_source": "Spell.dbc 707785 EffectBasePoints[0] 29 + EffectDieSides[0] 1 = 30% ($s1). Reference search 2026-11-24: coa-history spell 707785 has 0 events (passive; 707750 has SPELL_DAMAGE in 14 logs); coabuildhub spells_master_index.json has no entry for 707785; installed Spell.dbc governs.",
+      "per_trigger_text": "deal an additional $s1% of the damage dealt as Shadow damage"
     }
   ],
   "talent_modifiers": [],
@@ -3430,6 +3484,332 @@
         ]
       },
       "expected_source": "At +20000 AP (BH=0, AP=20376): 502122 damage = [5957..5996], flat = 1216. Total heal = floor([5957..5996]*0.70) + 1216 = [5385..5413], midpoint 5399 +- 15 ([5384..5414]). Fails 0 AP coef in flat ([4385..4413]) and 2x AP coef in flat ([6385..6413]). Reference search 2026-11-24: coa-history spell 525078 has 0 events (passive; 500748 has SPELL_HEAL in 29 logs); coabuildhub spells_master_index.json has no entry for 525078; installed Spell.dbc governs."
+    },
+    {
+      "spell": 807307,
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "name": "Saronite Cube (Wracked Mind still present at 11750 ms after 3 melee ability hits)",
+      "quote": "Melee ability damage now reduces the duration of Wracked Mind by $/1000;807308s1 sec on all allies within $807308a1 yds.",
+      "learn": [
+        578115,
+        502241
+      ],
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "expire_ms": 16000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502241,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502241,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "measure_actor": "ally",
+      "metric": "aura",
+      "fields": {
+        "spell": 805801
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 6580,
+      "game_time": {
+        "after": [
+          6520,
+          6680
+        ]
+      },
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          578115
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502241,
+              "target": "dummy"
+            },
+            "before_expected": 3,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "3 casts of melee ability Malevolence 502241 land on dummy in each phase (cumulative 3 before, 6 after)"
+          }
+        ]
+      },
+      "expected_source": "807308 EffectBasePoints[0] -1001+1 = -1000 ms (-1 sec per melee ability hit). Void Shield 578115 (2000 ms settle before trigger) applies Wracked Mind 805801 (15000 ms) to ally. 3 hits of Malevolence 502241 cut 3000 ms -> 12000 ms. Still present (1) at 2000 + 9750 = 11750 ms (game_time after window 9650..9950 ms), ruling out 10% over-cut (11700 ms) and 2x cut (9000 ms). Reference search 2026-11-24: coa-history spells 807307 and 807308 have 0 events in 186 logs; coabuildhub spells_master_index.json matches 807307 verbatim ('Melee ability damage now reduces the duration of Wracked Mind by 1 sec on all allies within 30 yds.')."
+    },
+    {
+      "spell": 807307,
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "name": "Saronite Cube (Wracked Mind gone at 12250 ms after 3 melee ability hits while control holds it)",
+      "quote": "Melee ability damage now reduces the duration of Wracked Mind by $/1000;807308s1 sec on all allies within $807308a1 yds.",
+      "learn": [
+        578115,
+        502241
+      ],
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "expire_ms": 16000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502241,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502241,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "measure_actor": "ally",
+      "metric": "aura",
+      "fields": {
+        "spell": 805801
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 7000,
+      "game_time": {
+        "after": [
+          6940,
+          7090
+        ]
+      },
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          578115
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502241,
+              "target": "dummy"
+            },
+            "before_expected": 3,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "3 casts of melee ability Malevolence 502241 land on dummy in each phase (cumulative 3 before, 6 after)"
+          }
+        ]
+      },
+      "expected_source": "807308 EffectBasePoints[0] -1001+1 = -1000 ms (-1 sec per melee ability hit). 3 hits of Malevolence 502241 cut 15000 ms Wracked Mind to 12000 ms. At 2000 + 10250 = 12250 ms (game_time after window 10150..10450 ms), unlearned control still holds 805801 (1) while learned treatment has expired (0), ruling out 10% under-cut (12300 ms) and 0-cut (15000 ms). Reference search 2026-11-24: coa-history spells 807307 and 807308 have 0 events in 186 logs; coabuildhub spells_master_index.json matches 807307 verbatim ('Melee ability damage now reduces the duration of Wracked Mind by 1 sec on all allies within 30 yds.')."
+    },
+    {
+      "spell": 807307,
+      "kind": "metric_delta",
+      "variant": "radius_in",
+      "label_suffix": "radius_in",
+      "name": "Saronite Cube (reaches ally 28 yd away inside 30 yd radius)",
+      "quote": "Melee ability damage now reduces the duration of Wracked Mind by $/1000;807308s1 sec on all allies within $807308a1 yds.",
+      "learn": [
+        578115,
+        805115,
+        502122
+      ],
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "ally_offsets": {
+        "ally": 18
+      },
+      "relocate_before_trigger": {
+        "dx": -10
+      },
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 2,
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "expire_ms": 16000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "measure_actor": "ally",
+      "metric": "aura",
+      "fields": {
+        "spell": 805801
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 10900,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          578115
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 18,
+            "expected": 28,
+            "tolerance": 0.5,
+            "source": "ally stands at x=+18 (inside 20 yd Void Shield range); caster relocates dx=-10 once to x=-10 before casting 502122 at dummy (x=+2, 12 yd away under End Times 30 yd range), putting ally 28 yd away"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502122,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Blade of the Empire 502122 (melee ability) lands on dummy at 12 yd under End Times 805115"
+          }
+        ]
+      },
+      "expected_source": "807308 EffectRadiusIndex[0]=10 (30 yd, $807308a1). At 28 yd (inside 30 yd radius), 1 Blade of the Empire hit cuts 15000 ms Wracked Mind to 14000 ms so ally reads 1 in control (no 502122 cast) and 0 at ~14500 ms in treatment. Reference search 2026-11-24: coa-history spells 807307 and 807308 have 0 events in 186 logs; coabuildhub spells_master_index.json matches 807307 verbatim ('Melee ability damage now reduces the duration of Wracked Mind by 1 sec on all allies within 30 yds.')."
+    },
+    {
+      "spell": 807307,
+      "kind": "metric_delta",
+      "variant": "radius_out",
+      "label_suffix": "radius_out",
+      "name": "Saronite Cube (does not reach ally 35 yd away outside 30 yd radius + bounding edge)",
+      "quote": "Melee ability damage now reduces the duration of Wracked Mind by $/1000;807308s1 sec on all allies within $807308a1 yds.",
+      "learn": [
+        578115,
+        805115,
+        502122
+      ],
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "ally_offsets": {
+        "ally": 18
+      },
+      "relocate_before_trigger": {
+        "dx": -17
+      },
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 2,
+      "cast_power": 2000,
+      "cast_in_before": false,
+      "expire_ms": 16000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "measure_actor": "ally",
+      "metric": "aura",
+      "fields": {
+        "spell": 805801
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 10900,
+      "tolerance": 0,
+      "ally_arm": {
+        "allies": 1,
+        "ally_casts": [
+          578115
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 18,
+            "expected": 35,
+            "tolerance": 0.5,
+            "source": "ally stands at x=+18; caster relocates dx=-17 once to x=-17 before casting 502122 at dummy (x=+2, 19 yd away under End Times 30 yd range), putting ally 35 yd away (> 33 yd IsWithinDistInMap edge)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502122,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Blade of the Empire 502122 (melee ability) lands on dummy at 19 yd under End Times 805115"
+          }
+        ]
+      },
+      "expected_source": "807308 EffectRadiusIndex[0]=10 (30 yd; IsWithinDistInMap adds ~3 yd combined reach -> ~33 yd edge). At 35 yd, ally still holds Wracked Mind (1) at ~14500 ms even though Blade of the Empire landed on dummy, ruling out unbounded or 2x (60 yd) radius. Reference search 2026-11-24: coa-history spells 807307 and 807308 have 0 events in 186 logs; coabuildhub spells_master_index.json matches 807307 verbatim ('Melee ability damage now reduces the duration of Wracked Mind by 1 sec on all allies within 30 yds.')."
     }
   ],
   "player_observations": [],

@@ -2613,7 +2613,7 @@
     "spell": 704871,
     "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
     "labels": [
-      "704871 effect_value e0 #0"
+      "704871 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -3036,7 +3036,7 @@
     "spell": 707749,
     "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
     "labels": [
-      "707749 effect_value e0 #0"
+      "707749 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -3100,7 +3100,7 @@
     "spell": 707785,
     "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
     "labels": [
-      "707785 effect_value e0 #0"
+      "707785 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -3944,13 +3944,15 @@
       {
         "claim": "reduces the duration of Wracked Mind by $/1000;807308s1 sec",
         "labels": [
-          "807307 effect_value 807308e0 #0"
+          "807307 behaviour_metric_delta duration_held",
+          "807307 behaviour_metric_delta duration_gone"
         ]
       },
       {
         "claim": "within $807308a1 yds",
         "labels": [
-          "807307 effect_radius 807308e0 #1"
+          "807307 behaviour_metric_delta radius_in",
+          "807307 behaviour_metric_delta radius_out"
         ]
       }
     ]
