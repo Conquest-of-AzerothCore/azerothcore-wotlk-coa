@@ -1504,11 +1504,18 @@
       "cast_spell": 805248,
       "target_rank": 805248,
       "repeats": 3,
+      "settle_ms": 1100,
+      "auras": [
+        [
+          823764,
+          1
+        ]
+      ],
       "learn": [
         520592
       ],
       "count_primary": false,
-      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read with 520592 learned: the primary and exactly 4 additional ones (the control entry manaburn_targets_control casts the same Manaburn with 520592 never learned and expects no additional dummy struck) (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip.",
+      "observe_source": "520592 Effect[0] SPELLMOD_JUMP_TARGETS +5 on the class mask of Manaburn; the number of dummies struck by Manaburn 805248 (spell_damage_count per dummy) is read with 520592 learned: the primary and exactly 4 additional ones (the control entry manaburn_targets_control casts the same Manaburn with 520592 never learned and expects no additional dummy struck) (more candidates are offered inside the radius, so a fifth strike would show), on Scarlet Magi 1832 (a level 56-57 mana-using mage, unit_class 8: Manaburn damage equals the mana drained, so a creature with no mana would never be struck), with one dummy outside the jump radius never struck. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs (positive control 801904: 21 casts); the bindmysoul snapshot repeats the tooltip. Casts are 1600 ms apart (settle_ms 1100 after the 500 ms wait), past the 1000 ms global cooldown of 805248, and the dummies' magic resistance is removed (823764) before each cast, so every struck dummy shows its damage event.",
       "dummy_entry": 1832
     },
     {
@@ -1526,9 +1533,16 @@
       "cast_spell": 805248,
       "target_rank": 805248,
       "repeats": 3,
+      "settle_ms": 1100,
+      "auras": [
+        [
+          823764,
+          1
+        ]
+      ],
       "learn": [],
       "count_primary": false,
-      "observe_source": "Control arm of manaburn_targets on the same build: Manaburn 805248 cast at the primary with 520592 not learned, on Scarlet Magi 1832 (mana-using, so a strike would land), counts the additional dummies struck: 0, so the 4 additional strikes of the treatment entry come from 520592 (Effect[0] SPELLMOD_JUMP_TARGETS) and not from the spell or a script. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs; nothing else found.",
+      "observe_source": "Control arm of manaburn_targets on the same build: Manaburn 805248 cast at the primary with 520592 not learned, on Scarlet Magi 1832 (mana-using, so a strike would land), counts the additional dummies struck: 0, so the 4 additional strikes of the treatment entry come from 520592 (Effect[0] SPELLMOD_JUMP_TARGETS) and not from the spell or a script. Reference search 2026-11-23: coa-history spell 520592: 0 events in 186 logs (a passive); spell 805248: 25 casts and 22 damage events in 4 logs; nothing else found. Casts are 1600 ms apart (settle_ms 1100 after the 500 ms wait), past the 1000 ms global cooldown of 805248, and the dummies' magic resistance is removed (823764) before each cast, so every struck dummy shows its damage event.",
       "dummy_entry": 1832
     },
     {
@@ -2211,6 +2225,12 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "metric": "spell_damage_total",
@@ -2230,7 +2250,7 @@
         "amount": 10000,
         "hit_arm": true
       },
-      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), criticals are made impossible by 64481, the cast at the dummy lands the area at its position. Contrast arm of the spell power term: +10000 spell power: 190 + int(1.05 x 10000 = 10500) = 10690 against 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), spell criticals are made impossible by Reg's Test Aura 984954 (64481 is a weapon crit aura, aura 52, and left 2 of 100 casts critical: 16035 = 10690 x 1.5), the cast at the dummy lands the area at its position. Contrast arm of the spell power term: +10000 spell power: 190 + int(1.05 x 10000 = 10500) = 10690 against 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 560284,
@@ -16285,6 +16305,14 @@
           "stacks": 5
         }
       ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "after_auras": [
         [
           804216,
@@ -16293,7 +16321,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+      "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23). The dummy's magic resistance is removed (823764) in both phases: without it Bane of Fire 707901 missed the dummy in about one phase in five (cast counted, Energy not spent, no aura on the dummy, no Felfury gained), leaving 4 Felfury."
     },
     {
       "spell": 704612,
