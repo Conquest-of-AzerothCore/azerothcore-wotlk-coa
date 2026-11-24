@@ -177,20 +177,22 @@ namespace
         uint32_t Account(uint64_t character) const override { return players.at(character).account; }
         void MarkOrigin(uint64_t) override { }
         bool Away(uint64_t character) const override { return players.at(character).away; }
-        std::optional<uint32_t> Spawn(uint64_t, Side side, uint32_t species, uint32_t display) override
+        std::optional<Spawned> Spawn(uint64_t, Side, uint32_t species, uint32_t display) override
         {
-            _spawned[side == Side::P ? 0 : 1] = species;
+            _spawned[++_handles] = species;
             produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " spawn " + std::to_string(species));
             if (display)
-                return display;
+                return Spawned { _handles, display };
             auto const found = WorldData().displays.find(species);
-            return found == WorldData().displays.end() || found->second.empty() ? 0u : found->second.front();
+            return Spawned { _handles, found == WorldData().displays.end() || found->second.empty() ? 0u :
+                found->second.front() };
         }
-        void Scale(uint64_t, Side, double) override { }
-        void Despawn(uint64_t, Side side) override
+        void Scale(uint64_t, double) override { }
+        void Despawn(uint64_t handle) override
         {
             produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " despawn " +
-                std::to_string(_spawned[side == Side::P ? 0 : 1]));
+                std::to_string(_spawned.at(handle)));
+            _spawned.erase(handle);
         }
         std::vector<uint32_t> Displays(uint32_t species) const override
         {
@@ -208,7 +210,8 @@ namespace
 
     private:
         Scheduler& _scheduler;
-        std::array<uint32_t, 2> _spawned {};
+        std::map<uint64_t, uint32_t> _spawned;
+        uint64_t _handles = 0;
     };
 
     std::string Expected(Record const& record)

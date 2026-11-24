@@ -1,7 +1,12 @@
 #include "PetBattles.h"
+#include "CellImpl.h"
 #include "Creature.h"
 #include "GameTime.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
 #include "Log.h"
+#include "Map.h"
+#include "MapMgr.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "PetBattleDataStore.h"
@@ -9,6 +14,7 @@
 #include "Protocol/AddonChannel.h"
 #include "Store/PetJournalStore.h"
 #include "TemporarySummon.h"
+#include "World.h"
 #include "WorldSession.h"
 #include <cmath>
 #include <random>
@@ -24,6 +30,18 @@ namespace CoAPetBattles::Battle
         constexpr uint32_t PeacefulFaction = 35;
         constexpr uint32_t StandInHealth = 1000;
         constexpr uint64_t WatchdogMs = 5000;
+
+        struct StandInOf
+        {
+            Player const* player;
+
+            bool operator()(Creature* creature) const
+            {
+                return creature->IsSummon() && creature->ToTempSummon()->GetSummonerGUID() == player->GetGUID() &&
+                    creature->GetFaction() == PeacefulFaction && creature->GetMaxHealth() == StandInHealth &&
+                    creature->IsInWorld();
+            }
+        };
 
         Player* Find(uint64_t character)
         {
@@ -133,7 +151,7 @@ namespace CoAPetBattles::Battle
                 player->GetDistance(place->second.x, place->second.y, place->second.z) > MaxRange;
         }
 
-        std::optional<uint32_t> Spawn(uint64_t character, Side side, uint32_t species, uint32_t display) override
+        std::optional<Spawned> Spawn(uint64_t character, Side side, uint32_t species, uint32_t display) override
         {
             Player* player = Find(character);
             auto const place = _places.find(character);
@@ -152,23 +170,21 @@ namespace CoAPetBattles::Battle
                 summon->SetDisplayId(display);
             summon->SetMaxHealth(StandInHealth);
             summon->SetHealth(StandInHealth);
-            _summons[character][Index(side)] = summon->GetGUID();
-            return summon->GetDisplayId();
+            _summons[++_lastHandle] = { character, summon->GetGUID(), summon->GetMapId(), summon->GetInstanceId() };
+            return Spawned { _lastHandle, summon->GetDisplayId() };
         }
 
-        void Scale(uint64_t character, Side side, double scale) override
+        void Scale(uint64_t handle, double scale) override
         {
-            if (Creature* creature = StandIn(character, side))
+            if (Creature* creature = StandIn(handle))
                 creature->SetObjectScale(static_cast<float>(scale));
         }
 
-        void Despawn(uint64_t character, Side side) override
+        void Despawn(uint64_t handle) override
         {
-            if (Creature* creature = StandIn(character, side))
+            if (Creature* creature = StandIn(handle))
                 creature->DespawnOrUnsummon();
-            auto const found = _summons.find(character);
-            if (found != _summons.end())
-                found->second[Index(side)].Clear();
+            _summons.erase(handle);
         }
 
         std::vector<uint32_t> Displays(uint32_t species) const override
@@ -202,26 +218,42 @@ namespace CoAPetBattles::Battle
 
         size_t StandIns(uint64_t character) const
         {
-            size_t count = 0;
-            for (Side side : { Side::P, Side::E })
-                if (Creature* creature = StandIn(character, side))
-                    if (creature->IsInWorld())
-                        ++count;
-            return count;
+            Player* player = Find(character);
+            if (!player)
+                return 0;
+            std::list<Creature*> standIns;
+            StandInOf check { player };
+            Acore::CreatureListSearcher<StandInOf> searcher(player, standIns, check);
+            Cell::VisitObjects(player, searcher, MaxRange * 2);
+            return standIns.size();
+        }
+
+        void Forget(uint64_t character)
+        {
+            _places.erase(character);
         }
 
     private:
-        Creature* StandIn(uint64_t character, Side side) const
+        struct Summon
         {
-            auto const found = _summons.find(character);
-            Player* player = Find(character);
-            if (found == _summons.end() || !player || found->second[Index(side)].IsEmpty())
+            uint64_t character = 0;
+            ObjectGuid guid;
+            uint32_t map = 0;
+            uint32_t instance = 0;
+        };
+
+        Creature* StandIn(uint64_t handle) const
+        {
+            auto const found = _summons.find(handle);
+            if (found == _summons.end())
                 return nullptr;
-            return ObjectAccessor::GetCreature(*player, found->second[Index(side)]);
+            Map* map = sMapMgr->FindMap(found->second.map, found->second.instance);
+            return map ? map->GetCreature(found->second.guid) : nullptr;
         }
 
         std::map<uint64_t, Place> _places;
-        std::map<uint64_t, std::array<ObjectGuid, 2>> _summons;
+        std::map<uint64_t, Summon> _summons;
+        uint64_t _lastHandle = 0;
     };
 
     PetBattles* PetBattles::instance()
@@ -246,10 +278,13 @@ namespace CoAPetBattles::Battle
         std::shared_ptr<Engine::Catalog const> catalog = sPetBattleData->Catalog();
         if (!sPetBattleData->IsLoaded() || !catalog)
             return nullptr;
-        if (catalog != _catalog)
+        if (catalog != _catalog && _battles)
         {
-            if (_battles)
-                _battles->EndAll();
+            _catalog = catalog;
+            _battles->UseCatalog(_catalog);
+        }
+        else if (catalog != _catalog)
+        {
             _catalog = catalog;
             _battles = std::make_unique<Battles>(_catalog, sPetBattleData->Data(),
                 [](uint32_t species) -> std::optional<std::pair<double, double>>
@@ -287,8 +322,13 @@ namespace CoAPetBattles::Battle
 
     void PetBattles::Logout(Player* player)
     {
-        if (player && _battles)
+        if (!player)
+            return;
+        if (_battles && ::World::IsStopped())
+            _battles->Abandon(Character(player));
+        else if (_battles)
             _battles->Logout(Character(player));
+        _world->Forget(Character(player));
     }
 
     void PetBattles::Shutdown()

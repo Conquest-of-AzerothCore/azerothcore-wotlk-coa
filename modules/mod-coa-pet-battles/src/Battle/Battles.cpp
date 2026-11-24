@@ -57,8 +57,10 @@ namespace CoAPetBattles::Battle
     public:
         Session(Battles& battles, uint64_t character, std::vector<Engine::Pet> mine, std::vector<Engine::Pet> theirs,
             double enemyLevel)
-            : _battles(battles), _world(battles.GetWorld()), _catalog(battles.GetCatalog()), _character(character),
-              _eng(battles.GetCatalog(), std::move(mine), std::move(theirs), battles.GetRng()), _enemyLevel(enemyLevel)
+            : _battles(battles), _world(battles.GetWorld()), _catalogHold(battles.GetCatalog()),
+              _catalog(*_catalogHold),
+              _character(character), _eng(*_catalogHold, std::move(mine), std::move(theirs), battles.GetRng()),
+              _enemyLevel(enemyLevel)
         {
         }
 
@@ -81,17 +83,27 @@ namespace CoAPetBattles::Battle
 
         bool Present(Side side) const
         {
-            return _present[Index(side)] && _world.Online(_character);
+            return _handles[Index(side)] != 0 && _world.Online(_character);
+        }
+
+        bool HoldsStandIns() const
+        {
+            return _handles[0] != 0 || _handles[1] != 0;
         }
 
         void SpawnPet(Side side, int32_t index)
         {
-            Engine::Pet& pet = _eng.At(side, index);
-            std::optional<uint32_t> const worn = _world.Spawn(_character, side, pet.species, pet.display);
-            if (!worn)
+            if (_over)
                 return;
-            _present[Index(side)] = true;
+            Engine::Pet& pet = _eng.At(side, index);
+            std::optional<Spawned> const spawned = _world.Spawn(_character, side, pet.species, pet.display);
+            if (!spawned)
+                return;
+            if (_handles[Index(side)])
+                _world.Despawn(_handles[Index(side)]);
+            _handles[Index(side)] = spawned->handle;
             _spawnOrder[Index(side)] = ++_spawns;
+            std::optional<uint32_t> const worn = spawned->display;
             uint32_t display = pet.display;
             if (!display && *worn)
             {
@@ -106,14 +118,14 @@ namespace CoAPetBattles::Battle
             }
             else if (!display)
                 display = *worn;
-            _world.Scale(_character, side, _battles.GetScale().ScaleOf(pet.species, display));
+            _world.Scale(spawned->handle, _battles.GetScale().ScaleOf(pet.species, display));
         }
 
         void Despawn(Side side)
         {
-            if (Present(side))
-                _world.Despawn(_character, side);
-            _present[Index(side)] = false;
+            if (_handles[Index(side)])
+                _world.Despawn(_handles[Index(side)]);
+            _handles[Index(side)] = 0;
         }
 
         void DespawnInOrder()
@@ -582,8 +594,10 @@ namespace CoAPetBattles::Battle
             });
         }
 
-        void Abandon()
+        void Abandon(bool notify)
         {
+            if (notify && !_over)
+                Send("end", "interrupted");
             _over = true;
             Despawn(Side::P);
             Despawn(Side::E);
@@ -594,6 +608,7 @@ namespace CoAPetBattles::Battle
 
         Battles& _battles;
         World& _world;
+        std::shared_ptr<Engine::Catalog const> _catalogHold;
         Engine::Catalog const& _catalog;
         uint64_t _character;
         Engine::Battle _eng;
@@ -601,7 +616,7 @@ namespace CoAPetBattles::Battle
         bool _over = false;
         bool _waiting = false;
         uint32_t _lastAct = 0;
-        std::array<bool, 2> _present { false, false };
+        std::array<uint64_t, 2> _handles { 0, 0 };
         std::array<uint64_t, 2> _spawnOrder { 0, 0 };
         uint64_t _spawns = 0;
         std::array<bool, 8> _acted {};
@@ -626,8 +641,37 @@ namespace CoAPetBattles::Battle
     void Battles::Unregister(uint64_t character, Session const* session)
     {
         auto const found = _sessions.find(character);
-        if (found != _sessions.end() && found->second.get() == session)
+        if (found == _sessions.end() || found->second.get() != session)
+            return;
+        if (found->second->HoldsStandIns())
+            _lingering.emplace(character, found->second);
+        _sessions.erase(found);
+    }
+
+    void Battles::ClearLingering(uint64_t character)
+    {
+        auto [first, last] = _lingering.equal_range(character);
+        for (auto it = first; it != last; ++it)
+            if (std::shared_ptr<Session> session = it->second.lock())
+                session->DespawnInOrder();
+        _lingering.erase(character);
+    }
+
+    void Battles::UseCatalog(std::shared_ptr<Engine::Catalog const> catalog)
+    {
+        _catalog = std::move(catalog);
+    }
+
+    void Battles::Abandon(uint64_t character)
+    {
+        auto const found = _sessions.find(character);
+        if (found != _sessions.end())
+        {
+            std::shared_ptr<Session> const session = found->second;
             _sessions.erase(found);
+            session->Abandon(true);
+        }
+        ClearLingering(character);
     }
 
     bool Battles::OtherCharacterFighting(uint64_t character) const
@@ -646,7 +690,7 @@ namespace CoAPetBattles::Battle
         {
             std::shared_ptr<Session> const previous = old->second;
             _sessions.erase(old);
-            previous->Abandon();
+            previous->Abandon(false);
         }
         if (_world.InCombat(character) || !_world.Alive(character))
         {
@@ -753,16 +797,23 @@ namespace CoAPetBattles::Battle
     void Battles::Logout(uint64_t character)
     {
         auto const found = _sessions.find(character);
-        if (found == _sessions.end())
-            return;
-        std::shared_ptr<Session> const session = found->second;
-        Quit(character);
-        session->DespawnInOrder();
-        Unregister(character, session.get());
+        if (found != _sessions.end())
+        {
+            std::shared_ptr<Session> const session = found->second;
+            Quit(character);
+            session->DespawnInOrder();
+            Unregister(character, session.get());
+        }
+        ClearLingering(character);
     }
 
     void Battles::Watchdog()
     {
+        for (auto it = _lingering.begin(); it != _lingering.end();)
+        {
+            std::shared_ptr<Session> const session = it->second.lock();
+            it = (!session || !session->HoldsStandIns()) ? _lingering.erase(it) : std::next(it);
+        }
         uint32_t const now = _world.UnixNow();
         std::vector<std::shared_ptr<Session>> sessions;
         for (auto const& [character, session] : _sessions)
@@ -793,7 +844,12 @@ namespace CoAPetBattles::Battle
         std::map<uint64_t, std::shared_ptr<Session>> sessions;
         sessions.swap(_sessions);
         for (auto const& [character, session] : sessions)
-            session->Abandon();
+            session->Abandon(true);
+        std::vector<uint64_t> characters;
+        for (auto const& [character, session] : _lingering)
+            characters.push_back(character);
+        for (uint64_t character : characters)
+            ClearLingering(character);
     }
 
     void Battles::Message(uint64_t character, std::string const& module, std::string const& action,

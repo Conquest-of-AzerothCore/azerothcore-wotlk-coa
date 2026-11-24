@@ -17,6 +17,12 @@ namespace CoAPetBattles::Battle
 {
     using Side = Engine::Side;
 
+    struct Spawned
+    {
+        uint64_t handle = 0;
+        uint32_t display = 0;
+    };
+
     class World
     {
     public:
@@ -30,9 +36,9 @@ namespace CoAPetBattles::Battle
         virtual uint32_t Account(uint64_t character) const = 0;
         virtual void MarkOrigin(uint64_t character) = 0;
         virtual bool Away(uint64_t character) const = 0;
-        virtual std::optional<uint32_t> Spawn(uint64_t character, Side side, uint32_t species, uint32_t display) = 0;
-        virtual void Scale(uint64_t character, Side side, double scale) = 0;
-        virtual void Despawn(uint64_t character, Side side) = 0;
+        virtual std::optional<Spawned> Spawn(uint64_t character, Side side, uint32_t species, uint32_t display) = 0;
+        virtual void Scale(uint64_t handle, double scale) = 0;
+        virtual void Despawn(uint64_t handle) = 0;
         virtual std::vector<uint32_t> Displays(uint32_t species) const = 0;
         virtual uint32_t UnixNow() const = 0;
         virtual Store::Journal* JournalOf(uint64_t character) = 0;
@@ -61,14 +67,16 @@ namespace CoAPetBattles::Battle
         bool Start(uint64_t character, std::optional<std::vector<EnemySpec>> enemies);
         bool Challenge(uint64_t character, std::string const& payload);
         void Logout(uint64_t character);
+        void Abandon(uint64_t character);
         void Watchdog();
         bool InBattle(uint64_t character) const;
         void EndAll();
+        void UseCatalog(std::shared_ptr<Engine::Catalog const> catalog);
 
         World& GetWorld() { return _world; }
         Scheduler& GetScheduler() { return _scheduler; }
         Engine::Rng& GetRng() { return _rng; }
-        Engine::Catalog const& GetCatalog() const { return *_catalog; }
+        std::shared_ptr<Engine::Catalog const> GetCatalog() const { return _catalog; }
         PetScale const& GetScale() const { return _scale; }
         void Unregister(uint64_t character, Session const* session);
 
@@ -76,6 +84,7 @@ namespace CoAPetBattles::Battle
         void Command(uint64_t character, std::string const& payload);
         void Quit(uint64_t character);
         bool OtherCharacterFighting(uint64_t character) const;
+        void ClearLingering(uint64_t character);
 
         std::shared_ptr<Engine::Catalog const> _catalog;
         PetScale _scale;
@@ -83,6 +92,7 @@ namespace CoAPetBattles::Battle
         Scheduler& _scheduler;
         Engine::Rng& _rng;
         std::map<uint64_t, std::shared_ptr<Session>> _sessions;
+        std::multimap<uint64_t, std::weak_ptr<Session>> _lingering;
     };
 }
 
