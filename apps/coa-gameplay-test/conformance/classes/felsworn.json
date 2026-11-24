@@ -17591,54 +17591,18 @@
     },
     {
       "spell": 707527,
-      "name": "Hateforged Barrier (Physical damage taken)",
-      "kind": "taken_hit",
-      "variant": "physical_taken",
+      "name": "Hateforged Barrier (Physical damage taken while it holds)",
+      "kind": "taken_total_ratio",
       "label_suffix": "physical_taken",
-      "judge": "damage_ratio",
-      "expected": 0.8792,
       "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
       "strike_spell": 92559,
-      "caster_health_pct": 100,
+      "magic_spell": 41394,
+      "reduction_effect": 1,
+      "absorb_effect": 0,
+      "stamina_coefficient": 1,
+      "trials": 10,
       "caster_max_health": 100000,
-      "trials": 4,
-      "strikes": 40,
-      "settle_ms": 50,
-      "arms": [
-        {
-          "name": "control",
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 707527,
-              "equals": 0
-            }
-          ]
-        },
-        {
-          "name": "treatment",
-          "opening_casts": [
-            [
-              707527,
-              "caster"
-            ]
-          ],
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 707527,
-              "equals": 1
-            }
-          ],
-          "casts": [
-            [
-              707527,
-              "caster"
-            ]
-          ]
-        }
-      ],
-      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2); Effect[0] is the absorb aura 69 (752 + Stamina x 1, Stamina 79 of the reference stats = 831). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster 40 times per trial in each arm, 4 trials, the barrier recast before each treatment trial. The logged damage is taken after the absorb, so the expected mean per strike is (40 x 1000 x 0.90 - 831) / (40 x 1000) = 0.8792, against 0.9792 if the 10% were not applied: the 831 of the first strike is the same absorb in either case, and 40 strikes make its weight 2 points of the ratio, small beside the 10 points of the claim. Control arm: no barrier, 1000 per strike. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; ~/CoaServer/reference bindmysoul talents snapshot: Hateforged Barrier 705129 text differs (a regeneration clause, an older state); expected values come from the tooltip and the DBC only. The control for this entry is the rank 1 entry 705129 below, whose Effect[1] carries MiscValue 1. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
+      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2), DBC MiscValue 0 (no school; rank 1 705129 carries 1) set to 1 (Physical) by the Felsworn contract (mentor decision D-81, Felsworn ADR 0019); Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, $m1 = 751 + 1..32 plus Stamina x 1 ($m1+0+$STA*1), stated separately. Kind taken_total_ratio (ADR 1266, provisional): each strike is read as damage plus resisted plus absorbed from the spell logs the caster receives, so the reduction is judged before the absorb: Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) without the barrier (control) and with it cast before each strike (treatment, the total must be 90% of the control total within the integer rounding, part of it absorbed); Light of the Naaru 41394 (1100 Holy, larger than the barrier) without and with it (equal totals, the absorbed amount within 752..783 plus the Stamina read at the arm start); and Void Zone after the barrier is broken by Light of the Naaru (the aura read absent, equal to the control: the reduction ends with the barrier). Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705129,
