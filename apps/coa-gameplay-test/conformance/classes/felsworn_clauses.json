@@ -497,12 +497,7 @@
       },
       {
         "claim": "Your next 3 Fel Fireballs",
-        "labels": [
-          "300490 behaviour_metric_delta fourth_cast",
-          "300490 behaviour_metric_delta third_cast",
-          "300490 behaviour_metric_delta other_spell",
-          "300490 behaviour_metric_delta duration_left"
-        ]
+        "labels": []
       },
       {
         "claim": "have a $s1% reduced cast time",
@@ -515,7 +510,7 @@
         ]
       }
     ],
-    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed."
+    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed. HELD 'Your next 3 Fel Fireballs' (review fw-rf300490 I-2, mentor D-67): the charge entries put 806104 by set_aura; no tool feeds 806104 by its real proc and then counts Fel Fireballs (tool note fw-fix300490b report); the server fix (ADR 0021) is verified on the set_aura arms only."
   },
   {
     "spell": 301287,
