@@ -25541,6 +25541,26 @@
       "label_suffix": "max_health_barrier",
       "variant": "max_health_barrier",
       "observe_source": "The server adds 10% of maximum health to effect 0 of the Hateforged Barrier chain (705129 ranks, here rank 6 707527 of spell_ranks) while 803478 is known (AscensionFelswornContracts.cpp:535-536), a value with no tooltip source, not judged. Sample (controller choice (c), mentor D-94): one strike of Ray of Pain 54416 (Effect[0] 2 school damage, EffectBasePoints 1999 = 2000 Shadow, no die, no per-level term) by a passive striker after each barrier; the absorbed amount of that strike (spell_absorb_total, an event read) is one sample when the barrier was up after the cast, gone after the strike and the strike logged once. Margin: the largest learned barrier is 707527 EffectBasePoints 751 + 32 + 2.45 x 60 (per level, an upper bound) + Stamina 79 (reference_stats) + 10% of the maximum health with 805256, (3440 level-60 BaseHP of class 14, rev_20261105_95, + 610 Stamina health) x 1.1 = 4455, so at most about 1455 < 2000 (margin at least 545); the remaining read voids any barrier the strike did not break. Exploratory run 2026-11-24 (fw-bptd, not counted): maximum health 2173 / 2390 without / with 805256, mean learned barrier 1088 at most, so the strike margin is about 900. Partial resists of the Shadow strike (50% or 75% of Ray of Pain 54416, about 1000 or 500) can leave a learned barrier (1048-1101 in the counted pair) standing: the remaining read voids those samples (3 or fewer per arm in the counted pair, 37-40 kept), so they are expected voids, not a fault; a control barrier (831-862) is below 1000 and still breaks. Sizing: the term is about 10% of the 217 maximum health gained (about 22) against a 1..32 die (sd about 9.2), so 40 casts per arm put the expected interaction z near 7.3 against the 3.2 quantile (the 15-cast exploratory run read 4.81). Full Heal 17683 (Effect 67, self) refills the caster before each cast; set_aura 0 only clears the previous barrier (D-94 condition 2). The sample proves the direction of the term only (a larger maximum health gives a larger barrier); that the barrier absorbs damage stays proven by the D-81 entry (taken_total_ratio 707527) (D-94 condition 3). Reference search 2026-11-24: coa-history 803478 0 events in 186 logs (passive), 707527 SPELL_CAST_SUCCESS 303 / SPELL_AURA_REFRESH 652 events in 7 logs, no amounts."
+    },
+    {
+      "spell": 300490,
+      "name": "Felforged (earned: 3 reduced Fel Fireballs, the 4th full)",
+      "kind": "fed_charge_casts",
+      "label_suffix": "felforged_fed",
+      "quote": "Your next 3 Fel Fireballs have a $s1% reduced cast time",
+      "quote_spell": 806104,
+      "feed_spell": 704368,
+      "aura": 806104,
+      "effect_spell": 801312,
+      "charges": 3,
+      "every_ms": 3200,
+      "residual_target": 0.001,
+      "feed_power": 100,
+      "effect_power": 100,
+      "trials": 3,
+      "min_judged": 2,
+      "poll_ms": 15,
+      "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), all inside 0.9 of the 8000 ms aura (DurationIndex 31). A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
     }
   ],
   "player_observations": [],

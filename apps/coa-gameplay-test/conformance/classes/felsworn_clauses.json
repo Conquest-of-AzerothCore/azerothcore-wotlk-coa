@@ -510,11 +510,15 @@
       },
       {
         "claim": "Your next 3 Fel Fireballs",
-        "labels": []
+        "labels": [
+          "300490 behaviour_metric_delta felforged_fed charges"
+        ]
       },
       {
         "claim": "have a $s1% reduced cast time",
-        "labels": []
+        "labels": [
+          "300490 behaviour_metric_delta felforged_fed cut"
+        ]
       },
       {
         "claim": "for $d",
@@ -523,7 +527,7 @@
         ]
       }
     ],
-    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed. HELD 'Your next 3 Fel Fireballs' (review fw-rf300490 I-2, mentor D-67): the charge entries put 806104 by set_aura; no tool feeds 806104 by its real proc and then counts Fel Fireballs (tool note fw-fix300490b report); the server fix (ADR 0021) is verified on the set_aura arms only. fw-fa2 2026-11-24: no existing kind reads 806104's amount or a partial cast-time reduction after the real feed (aura_fed_effect has instant/damage/heal/cooldown/window only; last_application_expiry feed reads the remaining duration only), and a fixed-count feed in metric_delta cannot read at a known moment because every later periodic tick re-grants the aura. Needs tool group B-AF: a cast_time variant of aura_fed_effect that feeds for real, reads aura_amount of 806104 against the DBC, and casts Fel Fireball at the reduced time. fw-fa4 2026-11-24 (review fw-rfa2 I-1): the metric_delta aura_amount route was tried on a real feed (Bane of Chaos 704368 cast 47 times 3200 ms apart through setup_casts, 806104 Effect[0] read on the caster 100 ms after the last cast, control phase the same feed with 300490 unlearned): the read was 0 in 4 of 4 runs, while a second design reading the application count (aura_apply_count of 806104, same feed) read 3 applications: the feed grants for real, but 806104 lasts 8000 ms (DurationIndex 31) and a periodic feed of 3000 ms ticks leaves it on at the read only when one of the last two or three ticks rolled the 15% ProcChance (at best 1 - 0.85^3 = 39%), so no feed size reaches the 0.1% residual: an expiry between the last grant and the read, not a re-grant, hides the amount (the review reasoning that a longer feed sizes the residual does not hold). Felsworn Chance() rolls the raw ProcChance (AscensionFelsworn.cpp:231-239), so forced_chance cannot force it. The tool gap stands, narrower: a read of the amount at the moment of the grant, which is the stop of cast_until_aura (last_application_expiry feed reads the remaining duration there), or a polled assert (assert min within_ms) after the feed. Entries removed after the attempt (builds 64b17c781882)."
+    "reason": "'Your next 3 Fel Fireballs' and 'have a $s1% reduced cast time' are judged on a real feed by fed_charge_casts (ADR 1272, mentor D-97, which lifts the D-67 hold of reviews fw-rf300490 I-2 and fw-rvb7b I-3a): Felforged 806104 earned through Bane of Chaos 704368 with 300490 unlearned at the grant, 806104 present after the unlearn with amount -30 (tooltip $s1 = 30: BasePoints -31 + 1 die side; earlier set_aura reasons that cite 31 are superseded), three Fel Fireballs in 1005 to 1095 ms and the fourth in 1350 to 1650 ms, no haste (fw-baf pair prove1). The set_aura arms (fourth_cast, third_cast, other_spell, duration_left, cast_*) remain supporting data for Felsworn ADR 0021."
   },
   {
     "spell": 301287,
