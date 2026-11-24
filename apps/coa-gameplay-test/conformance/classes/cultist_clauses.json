@@ -736,14 +736,17 @@
   {
     "spell": 301262,
     "clause": "Melee critical strikes now apply Saronite Blessing to you.",
-    "labels": [],
+    "labels": [
+      "301262 trigger_count",
+      "301262 behaviour_metric_delta noncrit_control"
+    ],
     "kind": "claim"
   },
   {
     "spell": 301262,
     "clause": "Your melee attack speed is increased by $s2%",
     "labels": [
-      "301262 effect_value 600327e1 #0"
+      "301262 behaviour_metric_delta attack_speed"
     ],
     "kind": "claim"
   },
@@ -751,7 +754,8 @@
     "spell": 301262,
     "clause": "and your melee auto attacks heal the lowest health ally for an additional $s1% of the damage dealt.",
     "labels": [
-      "301262 effect_value 600327e0 #1"
+      "301262 behaviour_metric_delta ally_lowest",
+      "301262 trigger_magnitude_ratio"
     ],
     "kind": "claim"
   },
@@ -763,7 +767,8 @@
       {
         "claim": "Lasts for $d",
         "labels": [
-          "301262 spell_duration 600327 #2"
+          "301262 behaviour_metric_delta duration",
+          "301262 behaviour_metric_delta duration_contrast"
         ]
       },
       {
@@ -1442,7 +1447,9 @@
   {
     "spell": 525049,
     "clause": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.",
-    "labels": [],
+    "labels": [
+      "525049 behaviour_metric_delta applies_nearby"
+    ],
     "kind": "claim"
   },
   {
@@ -1459,7 +1466,8 @@
       {
         "claim": "for $560943d",
         "labels": [
-          "525049 spell_duration 560943 #1"
+          "525049 behaviour_metric_delta mind_rot_duration",
+          "525049 behaviour_metric_delta mind_rot_duration_contrast"
         ]
       }
     ]
@@ -3571,13 +3579,14 @@
       {
         "claim": "$h% chance",
         "labels": [
-          "805110 effect_value #0"
+          "805110 proc_rate"
         ]
       },
       {
         "claim": "for $806039d",
         "labels": [
-          "805110 spell_duration 806039 #1"
+          "805110 behaviour_metric_delta aoe_nearby",
+          "805110 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -3590,13 +3599,15 @@
       {
         "claim": "Deals ${$m1*$<scalingbp>+$sps*.12+$AP*.005} Shadow Damage",
         "labels": [
-          "805110 effect_value 806039e0 #2"
+          "805110 behaviour_metric_delta damage_base",
+          "805110 behaviour_metric_delta damage_sp",
+          "805110 behaviour_metric_delta damage_ap"
         ]
       },
       {
         "claim": "every $t1 sec",
         "labels": [
-          "805110 aura_amplitude_ms #3"
+          "805110 behaviour_metric_delta period"
         ]
       }
     ]
@@ -3605,7 +3616,7 @@
     "spell": 805110,
     "clause": "and reduces attack speed by $520418s1%.",
     "labels": [
-      "805110 effect_value 520418e0 #4"
+      "805110 behaviour_metric_delta attack_speed"
     ],
     "kind": "claim"
   },

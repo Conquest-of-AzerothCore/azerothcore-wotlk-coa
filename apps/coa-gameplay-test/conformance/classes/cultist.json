@@ -116,6 +116,43 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 805110,
+      "name": "Black Prayer",
+      "tooltip": "All direct damage dealt now has a $h% chance to unleash a |cffffffffBlack Prayer|r on all enemies near the target for $806039d.@s:806039:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 806830
+      },
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "sized_attempts": 8633,
+      "trigger_text": "All direct damage dealt",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 806039,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 805110; AscensionCultistEvents.cpp:105,250 casts 806039 on direct damage when Chance(player, 805110) succeeds.",
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture, not the subject: Insanity 500706 is set to 40 stacks before every Hammer of Twilight 806830 cast (drains 40 Insanity at AscensionCultistAbilities.cpp:88-89); the subject is the 5% Black Prayer 806039 proc rate"
+        }
+      ],
+      "handler": "aura_ascension_cultist_event: Check case 805110 (AscensionCultistEvents.cpp:105) returns dealt && !periodic && Chance(player, id) (ProcChance 5 in Spell.dbc, rolled via roll_chance_f ignoring spell mods so forced_roll cannot force it); Proc (AscensionCultistEvents.cpp:250) calls Cast(player, target, 806039). Trigger: Hammer of Twilight 806830 (level 60 rank, 0 mana, instant, 1500 ms GCD, direct melee damage, CasterAuraSpell 680602 set by required_aura_steps, 40 Insanity supplied via attempt_auras). Baseline arm before 805110 is learned must read 0 casts of 806039. Sized at 8633 attempts (residual_target 0.001 per pair, min_detectable 4 pts, >= 5755 trials, confidence 99.95%). Reference search 2026-11-24: coa-history 805110: 0 events (passive), 806039: 1269 applies / 2733 periodic damage events in 22 logs; coabuildhub spells_master_index.json 805110 matches verbatim ('5% chance').",
+      "dbc": {
+        "805110": {
+          "ProcChance": 5,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
@@ -141,6 +178,52 @@
           "source": "While above 40 Insanity (574318 tooltip); 41 stacks of Insanity 500706 satisfies Count(player, Insanity) > 40 (AscensionCultistEvents.cpp:93)"
         }
       ]
+    },
+    {
+      "aura": 301262,
+      "name": "Saronite Blessing (melee crits apply 600327)",
+      "tooltip": "Melee critical strikes now apply |cffffffffSaronite Blessing|r to you.@s:600327:0@",
+      "trigger": {
+        "action": "cast",
+        "spell": 806830,
+        "target": "dummy"
+      },
+      "trigger_text": "Melee critical strikes",
+      "trigger_spell_text": "Hammer of Twilight 806830 (DmgClass 2 melee ability, 0 mana, instant, forced melee crit)",
+      "trial_metric": "spell_damage_count",
+      "observe_spell": 600327,
+      "observe_source": "EffectTriggerSpell[1] of 301262",
+      "observe_metric": "spell_cast_count",
+      "force_crit": "melee",
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 drains 40 Insanity on cast (AscensionCultistAbilities.cpp:88-89) and requires >= 40 Insanity"
+        }
+      ],
+      "per_trigger": 1,
+      "per_trigger_text": "Melee critical strikes now apply Saronite Blessing to you"
+    },
+    {
+      "aura": 301262,
+      "effect": 1,
+      "kind": "magnitude_ratio",
+      "name": "Saronite Blessing (melee auto attacks heal for 100% of damage dealt)",
+      "tooltip": "Melee critical strikes now apply |cffffffffSaronite Blessing|r to you.@s:600327:0@",
+      "trigger": {
+        "action": "attack",
+        "spell": 0
+      },
+      "trigger_text": "your melee auto attacks heal the lowest health ally for an additional $s1% of the damage dealt",
+      "per_trigger_text": "your melee auto attacks heal the lowest health ally for an additional $s1% of the damage dealt",
+      "trigger_metric": "melee_damage_total",
+      "observe_spell": 302897,
+      "observe_source": "EffectTriggerSpell[0] of 600327 (embedded via @s:600327:0@ in 301262)",
+      "observe_note": "600327 is embedded via @s:600327:0@; AscensionCultistEvents.cpp:277-280 copies 100% of auto-attack damage into 302897 heal",
+      "observe_metric": "spell_heal_total",
+      "expected_ratio": 1.0,
+      "force_crit": "melee"
     }
   ],
   "talent_modifiers": [],
@@ -5016,6 +5099,750 @@
         ]
       },
       "observe_source": "Learned contrast for Abyssal Destruction 300605 duration (15000 ms): Psychic Suppression 800432 channel before (unlearned control: 0) and after learning 300308 (1 at 19200 ms). Paired with duration. Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Corrupt Mind applies Mind Rot 560943 to nearby enemies)",
+      "kind": "metric_delta",
+      "variant": "applies_nearby",
+      "label_suffix": "applies_nearby",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "area_dummies": [
+        5
+      ],
+      "measure_actor": "area1",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560943
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:301-304: Corrupt Mind 560109 applies Mind Rot 560943 to target dummy as well as nearby enemies within 10 yd"
+          }
+        ]
+      },
+      "observe_source": "Eldritch Screams 525049 (AscensionCultistAbilities.cpp:301-304): on Corrupt Mind 560109 hit (1500 ms cast, 23 yd/s at 3 yd -> ~1630 ms hit, wait 2200 ms; target_entry 6 Kobold Vermin Humanoid because Harvest Golem 36 is Fear-immune Mechanical), casts Mind Rot 560943 on all valid enemies within Radius(560943) = 10 yd. area1 stands at 5 yd (2 yd from dummy): Mind Rot 560943 reads 0 before learn (control) and 1 after learn on both area1 and dummy. Reference search 2026-11-24: coa-history 525049/560943: 0 events (560109: 24 applies in 5 logs); coabuildhub spells_master_index.json 525049 matches verbatim."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 lasts 10000 ms)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_duration",
+      "label_suffix": "mind_rot_duration",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560943
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 11000,
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10800,
+          11350
+        ],
+        "expired": [
+          12000,
+          12550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration proof for Mind Rot 560943 (DurationIndex 1 = 10000 ms, $560943d, SpellDuration.dbc) applied by Corrupt Mind 560109 on Humanoid Kobold Vermin 6 (1500 ms cast + ~130 ms flight -> lands ~1630 ms, expires ~11630 ms). Reads 0 before cast, 1 at 11000 ms (~9370 ms after apply, > 0.9 * 10000) and 0 at 12200 ms (~10570 ms after apply, < 1.1 * 10000). Paired with mind_rot_duration_contrast. Reference search 2026-11-24: coa-history 560943: 0 events; coabuildhub spells_master_index.json 525049 matches ('for 10 seconds')."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 unlearned vs learned at 11000 ms)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_duration_contrast",
+      "label_suffix": "mind_rot_duration_contrast",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560943
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 11000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10800,
+          11350
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Learned contrast for Mind Rot 560943 duration (10000 ms) on Kobold Vermin 6: Corrupt Mind 560109 before (unlearned control: 0) and after learning 525049 (1 at 11000 ms). Paired with mind_rot_duration. Reference search 2026-11-24: coa-history 560943: 0 events; coabuildhub spells_master_index.json 525049 matches."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (dispelling Mind Rot 560943 grants 560947 crit buff)",
+      "kind": "metric_delta",
+      "variant": "dispel_crit",
+      "label_suffix": "dispel_crit",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "target_casts": [
+        527,
+        527
+      ],
+      "enemy_cast_wait_ms": 500,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560947
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Kobold Vermin 6 dummy's two Dispel Magic 527 casts dispelled Mind Rot 560943 (Dispel 1 Magic) from the dummy"
+          }
+        ]
+      },
+      "observe_source": "Eldritch Screams 525049 / Mind Rot tooltip (@s:560714:0@): 'If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.' (560947 Effect[0] aura 290 MOD_CRIT_PCT +30%, DurationIndex 28 = 5000 ms). Corrupt Mind 560109 applies 560943 to Kobold Vermin 6 (wait 2200 ms), then dummy casts Dispel Magic 527 twice on itself (removing 560109 and 560943, confirmed 0 by ally_arm). Reads 560947 on caster: expected 0 before learn, 1 after learn. Reference search 2026-11-24: coa-history 560947: 0 events; coabuildhub spells_master_index.json 525049 matches verbatim."
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (non-critical melee hit does not apply 600327)",
+      "kind": "metric_delta",
+      "variant": "noncrit_control",
+      "label_suffix": "noncrit_control",
+      "quote": "Melee critical strikes now apply Saronite Blessing to you.",
+      "trigger_spell": 502122,
+      "gate_spell": 301262,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          600327,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 600327
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Crit-gate control for Saronite Blessing 301262 (AscensionCultistEvents.cpp:79: dealt && melee && critical): with Reduce Critical Strike Chance -100% 64481 (precondition fixture), a non-critical Blade of the Empire 502122 hit must NOT apply 600327 (0 before and 0 after learning 301262). Paired with 301262 trigger_count. Reference search 2026-11-24: coa-history 600327: 172 applies in 3 logs; coabuildhub spells_master_index.json 301262 matches verbatim."
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (increases melee attack speed by 25%)",
+      "kind": "metric_delta",
+      "variant": "attack_speed",
+      "label_suffix": "attack_speed",
+      "quote": "Melee critical strikes now apply Saronite Blessing to you.@s:600327:0@",
+      "trigger_spell": 502122,
+      "gate_spell": 301262,
+      "target": "dummy",
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          600327,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 3000,
+      "expected": 2400,
+      "expected_ratio": 0.8,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Saronite Blessing 600327 Effect[1] aura 138 SPELL_AURA_MOD_MELEE_HASTE BasePoints 24 + DieSides 1 = +25% ($s2; Spell.dbc). Forced-crit Blade of the Empire 502122 applies 600327 after learning 301262; main-hand attack_time_ms ratio after/before = 1 / 1.25 = 0.8000 +- 0.001 (Heretic staff 2535 3300 ms -> 2640 ms; excludes 0% = 1.00 and double +50% = 0.667). Reference search 2026-11-24: coa-history 600327: 172 applies in 3 logs; coabuildhub spells_master_index.json 301262 matches ('by 25%')."
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (melee auto attacks heal lowest health ally, not full-health caster)",
+      "kind": "metric_delta",
+      "variant": "ally_lowest",
+      "label_suffix": "ally_lowest",
+      "quote": "Melee critical strikes now apply Saronite Blessing to you.@s:600327:0@",
+      "trigger_spell": 600327,
+      "gate_spell": 600327,
+      "gate_cast": true,
+      "setup_casts": [
+        48162,
+        633
+      ],
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true,
+      "target": "dummy",
+      "attack_swings": 1,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 302897,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "after_at_least": 1,
+      "after_at_most": 3,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 302897,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultistEvents.cpp:277-280 Allies(player, player, 40, 1): full-health caster (100% after Lay on Hands 633) must NOT receive 302897 heals when grouped ally has lower health pct (Prayer of Fortitude 48162 +115 Stamina without heal, regeneration off, 64481 prevents crits so 1-2 swings never top off the +1150 HP deficit)"
+          }
+        ]
+      },
+      "observe_source": "Lowest-health-ally reach proof for Saronite Blessing 301262/600327 (AscensionCultistEvents.cpp:277-280): Allies(player, player, 40, 1) picks the lowest-health-pct grouped ally within 40 yd and copies 100% of auto-attack damage into 302897 heal. Setup casts Prayer of Fortitude 48162 (raid-wide +115 Stamina -> +1150 max HP without healing current HP, dropping both caster and ally below 100%) then Lay on Hands 633 on caster (restoring caster to 100% while ally stays below 100% with disable_regeneration: true); phase aura 64481 (-100% crit, precondition fixture) ensures non-crit auto-attacks (~250-350 dmg) never top off ally's +1150 HP deficit over 1 swing interval (3300 ms / 2640 ms hasted = 1-2 swings). Before phase runs 1 swing interval without 600327 (0 heals to ally and caster); gate_cast casts real 600327 (crit->600327 trigger proved separately by 301262 trigger_count + noncrit_control); after phase runs 1 swing interval with 600327 (1..3 302897 heals to ally, 0 to full-health caster confirmed by ally_arm). Paired with 301262 trigger_magnitude_ratio (100% of melee damage dealt). Reference search 2026-11-24: coa-history 302897: 1006 SPELL_HEAL events in 3 logs; coabuildhub spells_master_index.json 301262 matches verbatim."
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (600327 lasts 15000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Melee critical strikes now apply Saronite Blessing to you.@s:600327:0@",
+      "trigger_spell": 502122,
+      "gate_spell": 301262,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          600327,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 600327
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14000,
+          14550
+        ],
+        "expired": [
+          15600,
+          16200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration proof for Saronite Blessing 600327 (DurationIndex 8 = 15000 ms, $d, SpellDuration.dbc). Forced-crit Blade of the Empire 502122 applies 600327 immediately; reads 0 before cast, 1 at 14200 ms (game_time [14000, 14550], > 0.9 * 15000 = 13500) and 0 at 15800 ms (game_time [15600, 16200], < 1.1 * 15000 = 16500). Paired with duration_contrast. Reference search 2026-11-24: coa-history 600327: 172 applies / 172 removes in 3 logs; coabuildhub spells_master_index.json 301262 matches ('Lasts for 15 sec')."
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (600327 unlearned vs learned at 14200 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_contrast",
+      "label_suffix": "duration_contrast",
+      "quote": "Melee critical strikes now apply Saronite Blessing to you.@s:600327:0@",
+      "trigger_spell": 502122,
+      "gate_spell": 301262,
+      "target": "dummy",
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          600327,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 600327
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14000,
+          14550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Learned contrast for Saronite Blessing 600327 duration (15000 ms): forced-crit Blade of the Empire 502122 before (unlearned control: 0) and after learning 301262 (1 at 14200 ms). Paired with duration. Reference search 2026-11-24: coa-history 600327: 172 applies / 172 removes; coabuildhub spells_master_index.json 301262 matches."
+    },
+    {
+      "spell": 805110,
+      "name": "Black Prayer (806039 hits nearby enemies in 8 yd area)",
+      "kind": "metric_delta",
+      "variant": "aoe_nearby",
+      "label_suffix": "aoe_nearby",
+      "quote": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.",
+      "trigger_spell": 806039,
+      "cast_in_before": false,
+      "target": "dummy",
+      "area_dummies": [
+        5
+      ],
+      "measure_actor": "area1",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 806039
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806039
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "806039 TargetA 53 (TARGET_DEST_TARGET_ENEMY) + TargetB 16 (TARGET_UNIT_DEST_AREA_ENEMY) RadiusIndex 14 (8 yd) applies 806039 to both dummy and nearby area1"
+          }
+        ]
+      },
+      "observe_source": "Black Prayer 806039 (EffectTriggerSpell[0] of 805110, cast directly at dummy in treatment since 805110's 5% Chance() ignores forced_roll and is proved separately by 805110 proc_rate): TargetA 53 + TargetB 16 + EffectRadiusIndex 14 (8 yd) applies 806039 to dummy (3 yd) and nearby area1 (5 yd, 2 yd from dummy): 0 in uncast control -> 1 on both after cast. Reference search 2026-11-24: coa-history 806039: 1269 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches verbatim."
+    },
+    {
+      "spell": 805110,
+      "name": "Black Prayer (806039 lasts 9000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.",
+      "trigger_spell": 806039,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 806039
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 8400,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          8200,
+          8700
+        ],
+        "expired": [
+          9300,
+          9800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration proof for Black Prayer 806039 (DurationIndex 105 = 9000 ms, $806039d, SpellDuration.dbc). Cast directly at dummy (805110 proc rate proved separately by 805110 proc_rate): reads 0 before cast, 1 at 8400 ms (game_time [8200, 8700], > 0.9 * 9000 = 8100) and 0 at 9500 ms (game_time [9300, 9800], < 1.1 * 9000 = 9900), excluding 10% off on both sides. Reference search 2026-11-24: coa-history 806039: 1269 applies / 1265 removes in 22 logs; coabuildhub spells_master_index.json 805110 matches ('for 9 sec')."
+    },
+    {
+      "spell": 805110,
+      "name": "Black Prayer (806039 Shadow DoT damage at base stats)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.@s:806039:0@",
+      "trigger_spell": 806039,
+      "cast_in_before": false,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806039,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 467,
+      "after_at_least": 450,
+      "after_at_most": 485,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Base-stat damage arm for Black Prayer 806039 (${$m1*$<scalingbp>+$sps*.12+$AP*.005}, EffectBasePoints 135 + DieSides 7 -> raw [136..142], ScalingBase(60) = 0.987431 -> [134.29..140.22], +376*0.005 AP = [136.17..142.10], Cultist tuning 887013 +12% -> [152..159] per tick, 3 ticks over 9000 ms -> [456..477]; band [450..485] excludes 0 and double ~934). Precondition fixtures: 823764 (no resist) and 16255 -100 (no crit). Paired with damage_sp (+20000 SP) and damage_ap (+20000 AP). Reference search 2026-11-24: coa-history 806039: 2733 periodic ticks (mean 282 with live gear); coabuildhub spells_master_index.json 805110 matches formula."
+    },
+    {
+      "spell": 805110,
+      "name": "Black Prayer (806039 Shadow DoT damage at +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.@s:806039:0@",
+      "trigger_spell": 806039,
+      "cast_in_before": false,
+      "target": "dummy",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806039,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 8531,
+      "after_at_least": 8500,
+      "after_at_most": 8565,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell power contrast arm for Black Prayer 806039 ($sps*.12, AscensionCultistData.h:115): player_spell_power 20000 (hit_arm: true) adds +2400 per tick -> [2536..2542] * 1.12 (887013) = [2840..2847] per tick -> 3 ticks [8520..8541] (band [8500..8565] excludes base ~467 and double SP ~16600). Paired with damage_base and damage_ap. Reference search 2026-11-24: coa-history 806039: 2733 ticks; coabuildhub spells_master_index.json 805110 matches."
+    },
+    {
+      "spell": 805110,
+      "name": "Black Prayer (806039 Shadow DoT damage at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.@s:806039:0@",
+      "trigger_spell": 806039,
+      "cast_in_before": false,
+      "target": "dummy",
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806039,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 795,
+      "after_at_least": 775,
+      "after_at_most": 825,
+      "wait_ms": 9500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Attack power contrast arm for Black Prayer 806039 ($AP*.005, AscensionCultistData.h:115): player_attack_power 20000 adds +100 per tick (+336 over 3 ticks with 887013 +12%) -> [786..810] (band [775..825] excludes base ~467 and double AP ~1130). Paired with damage_base and damage_sp. Reference search 2026-11-24: coa-history 806039: 2733 ticks; coabuildhub spells_master_index.json 805110 matches."
+    },
+    {
+      "spell": 805110,
+      "name": "Black Prayer (806039 ticks every 3000 ms)",
+      "kind": "hit_period",
+      "variant": "period",
+      "label_suffix": "period",
+      "quote": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.@s:806039:0@",
+      "trigger_spell": 806039,
+      "hit_spell": 806039,
+      "expected_ms": 3000,
+      "window": [
+        500,
+        9500
+      ],
+      "fixtures": [
+        [
+          823764,
+          "caster"
+        ]
+      ],
+      "poll_ms": 10,
+      "observe_source": "Tick period proof for Black Prayer 806039 (Effect[0] SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000 ms = $t1, DurationIndex 105 = 9000 ms -> 3 ticks at 3000, 6000, 9000 ms; Spell.dbc). Polls spell_damage_count of 806039 every 10 ms over [500, 9500] ms with game-time stamps (823764 prevents full resist); judges (last - first) / (n - 1) inside G-19 band [2850, 3150] ms (excludes 10% off 2700 and 3300 ms). Reference search 2026-11-24: coa-history 806039: 2733 ticks; coabuildhub spells_master_index.json 805110 matches ('every 3 sec')."
+    },
+    {
+      "spell": 805110,
+      "name": "Black Prayer (520418 reduces enemy attack speed by 20%)",
+      "kind": "metric_delta",
+      "variant": "attack_speed",
+      "label_suffix": "attack_speed",
+      "quote": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.@s:806039:0@",
+      "trigger_spell": 806039,
+      "cast_in_before": false,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2000,
+      "expected": 2400,
+      "expected_ratio": 1.2,
+      "tolerance": 0.005,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%')."
     }
   ],
   "player_observations": [],
