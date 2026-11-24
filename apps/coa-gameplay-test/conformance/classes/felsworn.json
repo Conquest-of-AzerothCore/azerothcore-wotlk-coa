@@ -24607,15 +24607,22 @@
       "wait_ms": 1500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "after_auras": [
-        [
-          806128,
-          1,
-          "caster",
-          "caster"
-        ]
+      "setup_casts": [
+        806109
       ],
-      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Chaos Rush cast rank 500423 (the level 60 rank, as Legion March chaos_range): without 806128 (before phase) 10 yd, with 806128 applied at the start of the after phase by harness set_aura (a precondition fixture, the grant at the end of Illidan's Guile being proven by dash_held and dash_gone) 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
+      "setup_only_after": true,
+      "setup_wait_ms": 8500,
+      "after_setup_reads": [
+        {
+          "spell": 806109,
+          "expected": 0
+        },
+        {
+          "spell": 806128,
+          "expected": 1
+        }
+      ],
+      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Chaos Rush cast rank 500423 (the level 60 rank, as Legion March chaos_range): without 806128 (before phase) 10 yd, with 806128 earned for real (no set_aura, G-21 point 6: 806128 is the claim): the after phase casts Illidan's Guile 806109 for real, waits 8500 ms (806109 lasts 8000 ms, DurationIndex 31, so it has expired and 806128, 5000 ms, DurationIndex 28, is on the caster at an age of about 500 ms), reads both auras as preconditions (after_setup_reads: 806109 absent, 806128 present; a mismatch voids the trial) and then casts the dash within the 5000 ms of 806128; the before phase makes no Illidan's Guile cast. 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 806109,
@@ -24636,15 +24643,22 @@
       "wait_ms": 1500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "after_auras": [
-        [
-          806128,
-          1,
-          "caster",
-          "caster"
-        ]
+      "setup_casts": [
+        806109
       ],
-      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Fel Torpedo cast 500610 (as Legion March torpedo_range): without 806128 (before phase) 10 yd, with 806128 applied at the start of the after phase by harness set_aura (a precondition fixture, the grant at the end of Illidan's Guile being proven by dash_held and dash_gone) 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
+      "setup_only_after": true,
+      "setup_wait_ms": 8500,
+      "after_setup_reads": [
+        {
+          "spell": 806109,
+          "expected": 0
+        },
+        {
+          "spell": 806128,
+          "expected": 1
+        }
+      ],
+      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Fel Torpedo cast 500610 (as Legion March torpedo_range): without 806128 (before phase) 10 yd, with 806128 earned for real (no set_aura, G-21 point 6: 806128 is the claim): the after phase casts Illidan's Guile 806109 for real, waits 8500 ms (806109 lasts 8000 ms, DurationIndex 31, so it has expired and 806128, 5000 ms, DurationIndex 28, is on the caster at an age of about 500 ms), reads both auras as preconditions (after_setup_reads: 806109 absent, 806128 present; a mismatch voids the trial) and then casts the dash within the 5000 ms of 806128; the before phase makes no Illidan's Guile cast. 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 800206,
