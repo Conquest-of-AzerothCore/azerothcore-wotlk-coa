@@ -12,8 +12,9 @@ removes it, and removes `clear_auras` before every strike (precondition fixtures
   low-health trials at `low_health_pct`. Expected shares: p, 1 - (1 - p)^2 and p. Each arm, pooled over `parts`, is
   judged by its Wilson 99% interval inside the G-20 band; `residual` (default 1e-3) is the probability per counted
   pair of 2 runs that a conformant server fails the claim, so each arm is sized to leave its band with probability
-  at most `residual` / 6 per run. Labels `<suffix>` (control and
-  treatment) and `<suffix>_low_health` (control and low health).
+  at most `residual` / 6 per run: the smallest trials per part whose exact binomial false-fail through the judge
+  (every resisted count the judge does not pass) meets it, stated per arm in the contract. Labels `<suffix>`
+  (control and treatment) and `<suffix>_low_health` (control and low health).
 - `mode: "lockout"`: a real learn first; per trial a priming strike, primed when `lockout_aura` is on the caster
   300 ms later. `locked_trials` per part strike again `locked_gap_ms` after the primed read: primed trials resist at
   p, the others at 1 - (1 - p)^2: each group's Wilson interval at the z of `residual` / 12 holds its chance and its

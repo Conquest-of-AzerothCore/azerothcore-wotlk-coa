@@ -1,4 +1,5 @@
 from dataclasses import dataclass, replace
+from functools import cache
 import math
 from pathlib import Path
 from statistics import NormalDist
@@ -21,6 +22,7 @@ STRIKER_ENTRY = 36
 CASTER_HEALTH = 1_000_000
 STRIKE_WAIT_MS = 300
 DEFAULT_RESIDUAL = 1e-3
+TAIL_SDS = 14
 PAIR_RUNS = 2
 RATE_ARMS = (CONTROL, TREATMENT, LOW_HEALTH)
 HOLD_GROUPS = ('primed', 'unprimed', 'share')
@@ -60,8 +62,25 @@ def band_trials(chance: float, residual: float) -> int:
     return math.ceil(chance * (1 - chance) * ((Z_99 + residual_z(residual)) / rate_band(chance)) ** 2)
 
 
+def binomial_pmf(events: int, trials: int, chance: float) -> float:
+    return math.exp(math.lgamma(trials + 1) - math.lgamma(events + 1) - math.lgamma(trials - events + 1)
+                    + events * math.log(chance) + (trials - events) * math.log(1 - chance))
+
+
+@cache
+def exact_false_fail(trials: int, chance: float) -> float:
+    spread = TAIL_SDS * math.sqrt(trials * chance * (1 - chance))
+    low, high = max(0, int(trials * chance - spread)), min(trials, int(trials * chance + spread))
+    return sum(binomial_pmf(resisted, trials, chance) for resisted in range(low, high + 1)
+               if judged_rate(resisted, trials, trials, chance)[0] != 'ok')
+
+
+@cache
 def split_trials(chance: float, residual: float, parts: int) -> int:
-    return math.ceil(band_trials(chance, residual) / parts)
+    per_part = math.ceil(band_trials(chance, residual) / parts)
+    while exact_false_fail(per_part * parts, chance) > residual:
+        per_part += 1
+    return per_part
 
 
 def exclusion_trials(expected: float, other: float, residual: float) -> int:
@@ -154,6 +173,17 @@ def rate_trials(spec: DebuffResistRateSpec) -> dict:
             LOW_HEALTH: control}
 
 
+def rate_chances(spec: DebuffResistRateSpec) -> dict:
+    base = spec.base_chance_pct / 100
+    return {CONTROL: base, TREATMENT: boosted(base), LOW_HEALTH: base}
+
+
+def rate_risk(spec: DebuffResistRateSpec) -> dict:
+    trials, chances = rate_trials(spec), rate_chances(spec)
+    arms = {arm: exact_false_fail(trials[arm] * spec.parts, chances[arm]) for arm in RATE_ARMS}
+    return {**arms, 'total': PAIR_RUNS * sum(arms.values())}
+
+
 def lockout_trial_steps(spec: DebuffResistRateSpec, arm: str, trial: int) -> list[dict]:
     prefix = check_label(spec)
     steps = clear_steps(spec) + [health_step(100)]
@@ -192,7 +222,7 @@ def residual_text(residual: float) -> str:
 
 def rate_contract(spec: DebuffResistRateSpec) -> str:
     base = spec.base_chance_pct / 100
-    trials = rate_trials(spec)
+    trials, risk = rate_trials(spec), rate_risk(spec)
     return (f'A stationary striker (creature {STRIKER_ENTRY}, no spell hit bonus) casts {spec.strike_spell} at the '
             f'caster once per trial; the trial reads whether it took hold {STRIKE_WAIT_MS} ms later and removes it, '
             f'and removes {list(spec.clear_auras)} before every strike. Control: {trials[CONTROL]} trials before '
@@ -200,10 +230,12 @@ def rate_contract(spec: DebuffResistRateSpec) -> str:
             f'learn). Treatment: {trials[TREATMENT]} trials at full health, resisted at {boosted(base):.4f} '
             f'(1 - (1 - p)^2, the second stock roll). Low health: {trials[LOW_HEALTH]} trials at '
             f'{spec.low_health_pct}% health, resisted at the stock chance. Each arm is pooled over {spec.parts} '
-            f'part(s) and judged by its Wilson 99% interval inside the G-20 band; the trials are sized so that a '
-            f'conformant server leaves an arm\'s band with probability at most '
-            f'{residual_text(arm_residual(spec.residual))} per run, {residual_text(spec.residual)} for the '
-            f'{len(RATE_ARMS)} arms over a pair of {PAIR_RUNS} runs (normal approximation)')
+            f'part(s) and judged by its Wilson 99% interval inside the G-20 band; each arm is sized so that a '
+            f'conformant server leaves its band with probability at most '
+            f'{residual_text(arm_residual(spec.residual))} per run, exact binomial through the judge: control '
+            f'{residual_text(risk[CONTROL])}, treatment {residual_text(risk[TREATMENT])}, low health '
+            f'{residual_text(risk[LOW_HEALTH])} per run, {residual_text(risk["total"])} for the {len(RATE_ARMS)} arms '
+            f'over a pair of {PAIR_RUNS} runs')
 
 
 def lockout_minimum(spec: DebuffResistRateSpec) -> dict:
@@ -252,6 +284,9 @@ def debuff_resist_rate_scenario(class_file: dict, spec: DebuffResistRateSpec) ->
     steps = scenario_steps(class_file, spec)
     if len(steps) > MAX_SCENARIO_STEPS:
         raise ValueError(f'{spec.spell} {KIND} takes {len(steps)} steps, above {MAX_SCENARIO_STEPS}: add parts')
+    if spec.mode == RATE and rate_risk(spec)['total'] > spec.residual:
+        raise ValueError(f'{spec.spell} {KIND} fails a conformant pair with probability '
+                         f'{residual_text(rate_risk(spec)["total"])}, above {residual_text(spec.residual)}')
     if spec.mode == LOCKOUT and lockout_risk(spec)['total'] > spec.residual:
         raise ValueError(f'{spec.spell} {KIND} fails a conformant pair with probability '
                          f'{residual_text(lockout_risk(spec)["total"])}, above {residual_text(spec.residual)}: '

@@ -1,8 +1,9 @@
 import unittest
 
 from behaviours import STRIKER, behaviour_scenario
-from kinds.debuff_resist_rate import (CASTER_HEALTH, boosted, debuff_resist_rate_spec, debuff_resist_rate_verdict,
-                                      primed_share, read_label)
+from kinds.debuff_resist_rate import (CASTER_HEALTH, PAIR_RUNS, RATE_ARMS, boosted, debuff_resist_rate_spec,
+                                      debuff_resist_rate_verdict, exact_false_fail, primed_share, rate_chances,
+                                      rate_trials, read_label)
 from profile import CASTER, DBC_DIR, load_class_file
 import run
 from test_behaviours import FakeRun, base_verdict
@@ -11,7 +12,7 @@ QUOTE = 'While at full health, your chance to resist the next Curse or Magic eff
 RATE_ENTRY = {
     'spell': 804613, 'kind': 'debuff_resist_rate', 'variant': 'curse', 'label_suffix': 'resist_curse',
     'name': 'Doomstride', 'quote': QUOTE, 'strike_spell': 702, 'base_chance_pct': 4, 'clear_auras': [706818],
-    'low_health_pct': 90, 'parts': 10}
+    'low_health_pct': 90, 'parts': 11}
 LOCKOUT_ENTRY = {
     'spell': 804613, 'kind': 'debuff_resist_rate', 'variant': 'lockout', 'label_suffix': 'resist_lockout',
     'name': 'Doomstride', 'quote': 'Can only occur once every 10 sec.', 'mode': 'lockout', 'strike_spell': 702,
@@ -31,7 +32,7 @@ def applied_reads(prefix: str, arm: str, trials: int, resisted: int) -> dict:
 
 def rate_runs(model: dict, rates: dict) -> list[FakeRun]:
     runs = []
-    for _ in range(10):
+    for _ in range(RATE_ENTRY['parts']):
         values = {}
         for arm, rate in rates.items():
             trials = model['trials'][arm]
@@ -96,11 +97,30 @@ class DebuffResistRateTests(unittest.TestCase):
         self.assertEqual({expectation.model['metric'] for expectation in expectations}, {'aura'})
 
     def test_the_trials_are_sized_for_the_stated_residual(self):
-        _, expectations = scenario_of(RATE_ENTRY)
+        scenario, expectations = scenario_of(RATE_ENTRY)
         model = expectations[0].model
-        self.assertEqual(model['minimum'], {'control': 3860, 'treatment': 7270, 'low_health': 3860})
-        self.assertIn('1.7e-04 per run, 1.0e-03 for the 3 arms over a pair of 2 runs',
-                      scenario_of(RATE_ENTRY)[0]['contract'])
+        self.assertEqual(model['trials'], {'control': 406, 'treatment': 696, 'low_health': 406})
+        self.assertEqual(model['minimum'], {'control': 4466, 'treatment': 7656, 'low_health': 4466})
+        self.assertIn('exact binomial through the judge', scenario['contract'])
+        self.assertIn('9.8e-04 for the 3 arms over a pair of 2 runs', scenario['contract'])
+
+    def test_the_class_rate_entries_meet_the_residual_by_the_exact_false_fail_of_the_judge(self):
+        entries = [entry for entry in load_class_file(14)['behaviours']
+                   if entry['kind'] == 'debuff_resist_rate' and entry.get('mode', 'rate') == 'rate']
+        self.assertEqual({entry['label_suffix'] for entry in entries}, {'resist_curse', 'resist_magic'})
+        for entry in entries:
+            spec = debuff_resist_rate_spec(entry)
+            trials, chances = rate_trials(spec), rate_chances(spec)
+            arms = {arm: exact_false_fail(trials[arm] * spec.parts, chances[arm]) for arm in RATE_ARMS}
+            for arm, risk in arms.items():
+                self.assertLessEqual(risk, spec.residual / (PAIR_RUNS * len(RATE_ARMS)), (entry['label_suffix'], arm))
+            self.assertLessEqual(PAIR_RUNS * sum(arms.values()), 1e-3, entry['label_suffix'])
+
+    def test_the_normal_approximation_sizing_misses_the_residual(self):
+        arm_run = 1e-3 / (PAIR_RUNS * len(RATE_ARMS))
+        control, treatment = exact_false_fail(3860, 0.04), exact_false_fail(7270, boosted(0.04))
+        self.assertGreater(control, arm_run)
+        self.assertGreater(PAIR_RUNS * (2 * control + treatment), 1e-3)
 
     def test_the_lockout_states_its_pair_residual(self):
         scenario, expectations = scenario_of(LOCKOUT_ENTRY)
