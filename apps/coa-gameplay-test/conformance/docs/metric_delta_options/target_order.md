@@ -1,4 +1,4 @@
-# Target order (`metric_delta` `target_order`, ADR 1275)
+# Target order (`metric_delta` `target_order`, ADR 1276)
 
 `target_order` is `{"spell": hit spell, "events": hits per target and cast, "centre": "dummy"|"caster", "casts": N}`
 on an entry with a plain `area_dummies` list and the dummy as its target. After the after reading, the treatment phase
