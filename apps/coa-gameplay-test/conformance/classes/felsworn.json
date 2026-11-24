@@ -2187,6 +2187,12 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "metric": "spell_damage_total",
@@ -2202,7 +2208,7 @@
       "expected": 190.0,
       "after_at_least": 189,
       "after_at_most": 191,
-      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), criticals are made impossible by 64481, the cast at the dummy lands the area at its position. Expected 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
+      "observe_source": "560284 Effect[1] SPELL_EFFECT_SCHOOL_DAMAGE, Fire (SchoolMask 4), BasePoints 101 + 1 (DieSides 1 adds 1) = 102, RealPointsPerLevel 2.85 x (60 - BaseLevel 29) = 88.35 truncated to 88, so m2 = 190 at level 60 (tooltip 190.35); the tooltip adds fire spell power x 1.05 ($spfi*1.05). The dummy's magic resistance is removed (823764), spell criticals are made impossible by Reg's Test Aura 984954 (64481 is a weapon crit aura, aura 52, and does not stop a spell critical), the cast at the dummy lands the area at its position. Expected 190. Reference search 2026-11-23: coa-history spell 560284: 156 casts, 777 damage events in 6 logs (min 58, max 8551, mean 564, 331 crits), 387 aura applied and 383 removed; 572183: 156 summons; 572163 (Fel Doom): 424 summons; the players' gear differs, so no figure decides and the log lifetimes were not read; nothing else found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 560284,
@@ -16421,10 +16427,10 @@
       },
       "rate": "critical",
       "expected_points": 10,
-      "trials": 60,
+      "trials": 80,
       "parts": 140,
       "cast_power": 100,
-      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). With 100 Energy at the time of casting the stated bonus is 10 x 1 = 10 critical strike points on Ruin 801895, a Felfury spender (it consumes 2 Felfury). Behaviour read: critical over all hits of the observed Ruin, control arm (300489 not learned) against treatment arm (300489 learned), the difference of the two rates judged in percent points inside the G-19 band of the stated 10 (2 points), pooled over parts of 300 casts per arm (ADR 0195); Energy is set to 100 before every cast; Felfury x2 and spell penetration 823764 are named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc. "
+      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). With 100 Energy at the time of casting the stated bonus is 10 x 1 = 10 critical strike points on Ruin 801895, a Felfury spender (it consumes 2 Felfury). Behaviour read: critical over all hits of the observed Ruin, control arm (300489 not learned) against treatment arm (300489 learned), the difference of the two rates judged in percent points inside the G-19 band of the stated 10 (2 points), pooled over parts of 300 casts per arm (ADR 0195); Energy is set to 100 before every cast; Felfury x2 and spell penetration 823764 are named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc. Sizing 2026-11-24: the 99% half-width of the difference must stay under 1 point (half of the 2-point band); over 6 runs at 60 casts per part it read 0.856, 0.884, 0.853, 0.961, 0.875 and 1.01 (mean 0.906, sd 0.06), so one run in six was not judged; at 80 casts per part the between-part variance falls by 60/80, the expected half-width is about 0.785 and the limit lies 4.2 standard deviations away: residual failure probability about 1.3e-5 per run, 2.6e-5 per pair, below the 0.1% per pair target."
     },
     {
       "spell": 300489,
