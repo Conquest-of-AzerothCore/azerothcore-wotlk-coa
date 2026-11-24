@@ -226,6 +226,14 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].SpellClassMask = flag96(0, 524288, 2);
     if (id == 801902)
         info->Effects[0].MiscValue = SPELLMOD_COST;
+    if (id == 555739 || id == 806097)
+        if (SpellEntry const* stated = sSpellStore.LookupEntry(806095))
+            info->Effects[EFFECT_0].BasePoints = stated->EffectBasePoints[EFFECT_0];
+    if (id == 560578)
+    {
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+        info->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
+    }
     if (id == 807424)
     {
         info->Effects[2].MiscValue = SPELLMOD_CASTING_TIME;
@@ -278,7 +286,7 @@ void ApplyContracts(SpellInfo* info)
     if (Named(info, 704368))
         for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
             if (info->Effects[i].TriggerSpell == 803717)
-                periodic(i, 2000);
+                periodic(i, info->Effects[i].Amplitude);
     if (id >= 552210 && id <= 552213)
     {
         periodic(0, 2000);
@@ -506,6 +514,8 @@ class felsworn_scaling : public UnitScript
                 value += row.ap * player->GetTotalAttackPowerValue(BASE_ATTACK) + row.sp * std::max(0.0f, sp) +
                          row.stamina * player->GetStat(STAT_STAMINA) + row.agility * player->GetStat(STAT_AGILITY);
             }
+        if (info->Id == 520832 && index == 0 && info->Effects[EFFECT_0].Amplitude > 0)
+            value /= float(std::max(1, info->GetMaxDuration() / int32(info->Effects[EFFECT_0].Amplitude)));
         if (Named(info, 801895) && index == 0)
         {
             float fire = float(std::max(0, player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE)));
@@ -526,6 +536,8 @@ class felsworn_scaling : public UnitScript
             value += player->GetMaxHealth() * .10f;
         if ((info->Id == 520252 || info->Id == 520253) && !Inner(player))
             value = 0;
+        if (info->Id == 804825 && index == EFFECT_0)
+            AddPct(value, State(player).resolvePct);
         value = std::clamp(value, float(INT32_MIN / 2), float(INT32_MAX / 2));
     }
     static float DamageFactor(Unit* target, Unit* attacker, uint32 school, SpellInfo const* info)

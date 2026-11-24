@@ -50,7 +50,8 @@ and `label_suffix` (`spell_hit_taken`). Four stationary hostile attackers at the
 `cast`); their fixture `spell_hit_bonus` places the hit chance on the 100% clamp or one point under it: control
 (the spell not learned) 4 and 3, treatment (learned, its aura read on the caster) 4 + expected and 3 + expected.
 Misses are `spell_go_count` less `spell_log_count`. N is the smallest count with four edge arms missless on a
-correct server at most 0.1% per pair (826). A control arm off its expectation, an arm short of N casts or an aura
+correct server at most 0.1% per pair (826), or the optional `casts` (ADR 1271, provisional): a whole count of at
+least 826 for every arm, when the edge miss share read in a pair leaves more than 0.1% at the default. A control arm off its expectation, an arm short of N casts or an aura
 read off is unmeasured; a treatment clamp miss or a missless treatment edge alerts (the reduction is more or less
 than stated). The verdict stamps `spell_log_count`, an event read.
 
@@ -59,3 +60,7 @@ Calibration read rb7 (2026-11-22, a throwaway probe, never counted): a level 50 
 
 Sun Cleric: Sun Shield 300348 "Reduces your chance to be hit by spells by $s1%" (3), label
 `300348 behaviour_metric_delta spell_hit_taken`.
+
+Felsworn: Armaments of the Legion 706266 and 707844 "Reduces your chance to be hit by spells by $s1%" (2 and 4),
+`casts` 1100, labels `706266 behaviour_metric_delta spell_hit_taken` and `707844 behaviour_metric_delta
+spell_hit_taken`.

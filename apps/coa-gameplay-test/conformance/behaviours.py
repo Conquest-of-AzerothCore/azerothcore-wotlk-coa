@@ -7488,6 +7488,7 @@ class TakenArm:
     cap_pct: int = 0
     counts: tuple[tuple[str, int], ...] = ()
     require: tuple[tuple[str, int], ...] = ()
+    bands: tuple[tuple[str, float, float], ...] = ()
 
 
 TAKEN_HIT_AURA_CASTERS = (TARGET,)
@@ -7580,6 +7581,10 @@ def taken_hit_cast(records: Records, spec: TakenHitSpec, spell: int, target: str
 def taken_hit_label(spec: TakenHitSpec) -> str:
     check = BEHAVIOUR_HIT_RATIO if spec.judge == 'damage_ratio' else BEHAVIOUR_TAKEN_HIT
     return f'{spec.spell} {check}' + (f' {spec.label_suffix}' if spec.label_suffix else '')
+
+
+def taken_arm_strikes(spec: TakenHitSpec, arm: TakenArm) -> int:
+    return spec.strikes if arm.strikes is None else arm.strikes
 
 
 def taken_hit_mark(spec: TakenHitSpec, arm: str, mark, key: str) -> str:
@@ -7715,7 +7720,7 @@ def taken_hit_arm_steps(records: Records, spec: TakenHitSpec, arm: TakenArm) -> 
         steps += (removals if arm.refresh else []) + auras + health
         for spell, target in arm.casts:
             steps += taken_hit_cast(records, spec, spell, target, spec.cast_power)
-        for _ in range(arm.strikes or spec.strikes):
+        for _ in range(taken_arm_strikes(spec, arm)):
             steps += [taken_strike_step(spec, spec.struck),
                       {'action': 'wait', 'label': f'{arm.name} strike {trial}', 'ms': TAKEN_HIT_STRIKE_WAIT_MS}]
         after = []
@@ -7780,7 +7785,7 @@ def taken_hit_validate(spec: TakenHitSpec):
     if spec.trials < 1 or spec.strikes < 1:
         raise ValueError(f'{spec.spell} taken_hit needs at least one trial and one strike')
     if spec.health_loss and (spec.judge != 'damage_ratio' or spec.caster_health_pct is None
-                             or any((arm.strikes or spec.strikes) != 1 or arm.casts or arm.after_casts
+                             or any(taken_arm_strikes(spec, arm) != 1 or arm.casts or arm.after_casts
                                     for arm in spec.arms)):
         raise ValueError(f'{spec.spell} reads the health lost to one strike per trial of a damage_ratio entry, '
                          f'from the caster health it sets before every trial, with no cast inside a trial')
@@ -7811,9 +7816,10 @@ def taken_hit_validate(spec: TakenHitSpec):
         if arm.absorb not in TAKEN_HIT_ABSORBS:
             raise ValueError(f'{spec.spell} taken_hit arm {arm.name} absorb {arm.absorb!r} is not one of '
                              f'{TAKEN_HIT_ABSORBS}')
-        if arm.strikes is not None and arm.strikes < 1:
-            raise ValueError(f'{spec.spell} taken_hit arm {arm.name} needs at least one strike')
-        if arm.absorb == 'share' and ((arm.strikes or spec.strikes) != 1 or not 0 < arm.share_pct <= 100):
+        if arm.strikes is not None and arm.strikes < (0 if spec.judge == 'counts' else 1):
+            raise ValueError(f'{spec.spell} taken_hit arm {arm.name} needs at least one strike, or none for the '
+                             f'counts judge')
+        if arm.absorb == 'share' and (taken_arm_strikes(spec, arm) != 1 or not 0 < arm.share_pct <= 100):
             raise ValueError(f'{spec.spell} taken_hit arm {arm.name} judges a share of one strike per trial')
         if arm.absorb == 'formula' and not spec.absorb_terms:
             raise ValueError(f'{spec.spell} taken_hit arm {arm.name} judges a formula without absorb_terms')
@@ -7870,7 +7876,7 @@ def taken_extension_validate(spec: TakenHitSpec):
             raise ValueError(f'{spec.spell} taken_hit arm {arm.name} primes its strike only for a resist_rate judge, '
                              f'with a positive gap')
         if (arm.absorb == 'capped_share') != (arm.cap_pct != 0) or arm.absorb == 'capped_share' and (
-                spec.judge != 'absorb' or (arm.strikes or spec.strikes) != 1 or not 0 < arm.share_pct <= 100
+                spec.judge != 'absorb' or taken_arm_strikes(spec, arm) != 1 or not 0 < arm.share_pct <= 100
                 or not 0 < arm.cap_pct or spec.caster_health_pct != 100 or spec.caster_max_health is None):
             raise ValueError(f'{spec.spell} taken_hit arm {arm.name} capped_share and cap_pct go together, for the '
                              f'absorb judge of one strike per trial, a share of 1 to 100 and a caster held at 100% of '
@@ -7887,6 +7893,11 @@ def taken_extension_validate(spec: TakenHitSpec):
             raise ValueError(f'{spec.spell} taken_hit count read {name!r} needs a new name and a metric')
     stated = set(spec.count_total) | set(spec.rising) | {name for pair in spec.equal for name in pair}
     stated |= {name for arm in spec.arms for name, _ in (*arm.counts, *arm.require)}
+    stated |= {name for arm in spec.arms for name, _, _ in arm.bands}
+    if any(not counting or low > high or name in dict(arm.counts) or name in dict(arm.require)
+           for arm in spec.arms for name, low, high in arm.bands):
+        raise ValueError(f'{spec.spell} taken_hit arm bands go with the counts judge, as a low edge not above its '
+                         f'high edge, on a read the arm does not count exactly')
     states = {name for name, fields in spec.count_reads if dict(fields).get('state')}
     if any(name not in states for arm in spec.arms for name, _ in arm.require) or states & set(spec.count_total):
         raise ValueError(f'{spec.spell} taken_hit arm requirements name state reads, which count_total leaves out')
@@ -8029,7 +8040,7 @@ def taken_hit_scenario(class_file: dict, spec: TakenHitSpec) -> tuple[dict, list
                   for term_index, term in enumerate(spec.absorb_terms)]
                  if 'formula' in (arm.absorb, arm.reduction) else [])
         arms.append({'name': arm.name, 'absorb': arm.absorb, 'share_pct': arm.share_pct,
-                     'debt_removed_pct': arm.debt_removed_pct, 'strikes': arm.strikes or spec.strikes,
+                     'debt_removed_pct': arm.debt_removed_pct, 'strikes': taken_arm_strikes(spec, arm),
                      'marks': marks, 'terms': terms,
                      **({'reduction': arm.reduction} if arm.reduction != 'none' else {}),
                      **({'returned_pct': arm.returned_pct} if arm.returned_pct is not None else {}),
@@ -8075,8 +8086,9 @@ def taken_striker_contract(spec: TakenHitSpec) -> str:
 
 def taken_counts_expectation(spec: TakenHitSpec, entry, label: str) -> Expectation:
     names = [name for name, _ in spec.count_reads]
-    arms = [{'name': arm.name, 'strikes': arm.strikes or spec.strikes, 'counts': dict(arm.counts),
+    arms = [{'name': arm.name, 'strikes': taken_arm_strikes(spec, arm), 'counts': dict(arm.counts),
              **({'require': dict(arm.require)} if arm.require else {}),
+             **({'bands': {name: [low, high] for name, low, high in arm.bands}} if arm.bands else {}),
              'marks': {str(mark): {name: taken_hit_mark(spec, arm.name, mark, name) for name in names}
                        for mark in ('start', *range(1, spec.trials + 1))}} for arm in spec.arms]
     model = {'kind': 'taken_counts', 'arms': arms, 'trials': spec.trials,
@@ -8100,6 +8112,10 @@ def taken_counts_contract(spec: TakenHitSpec) -> str:
                  f'differs from its arm\'s requirement ' + '; '.join(f'{arm.name} {dict(arm.require)}'
                                                                      for arm in spec.arms if arm.require)
                  + ' is void')
+    if any(arm.bands for arm in spec.arms):
+        text += '; each judged trial must also read ' + '; '.join(
+            f'{arm.name} ' + ', '.join(f'{name} {low:g} to {high:g}' for name, low, high in arm.bands)
+            for arm in spec.arms if arm.bands)
     if spec.rising:
         text += f'; every judged {", ".join(spec.rising)} rises strictly from arm to arm in the listed order'
     if spec.equal:
@@ -8118,7 +8134,7 @@ def taken_arm(raw: dict) -> TakenArm:
     unknown = set(raw) - {'name', 'auras', 'casts', 'after_casts', 'absorb', 'share_pct', 'debt_removed_pct',
                           'strikes', 'opening_casts', 'select', 'select_settle_ms', 'checks', 'reduction',
                           'returned_pct', 'refresh', 'learn', 'unlearn', 'transfer_pct', 'striker_casts',
-                          'opening_settle_ms', 'prime_gap_ms', 'cap_pct', 'counts', 'require'}
+                          'opening_settle_ms', 'prime_gap_ms', 'cap_pct', 'counts', 'require', 'bands'}
     if unknown:
         raise ValueError(f'taken_hit arm fields {sorted(unknown)} are not known')
     return TakenArm(raw['name'], tuple((int(aura[0]), int(aura[1]), *(str(by) for by in aura[2:]))
@@ -8137,7 +8153,8 @@ def taken_arm(raw: dict) -> TakenArm:
                     None if raw.get('opening_settle_ms') is None else int(raw['opening_settle_ms']),
                     None if raw.get('prime_gap_ms') is None else int(raw['prime_gap_ms']), int(raw.get('cap_pct', 0)),
                     tuple((str(name), int(count)) for name, count in raw.get('counts', {}).items()),
-                    tuple((str(name), int(value)) for name, value in raw.get('require', {}).items()))
+                    tuple((str(name), int(value)) for name, value in raw.get('require', {}).items()),
+                    tuple((str(name), float(low), float(high)) for name, (low, high) in raw.get('bands', {}).items()))
 
 
 def absorb_term(raw: dict) -> AbsorbTerm:
