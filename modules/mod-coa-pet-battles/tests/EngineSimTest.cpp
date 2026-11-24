@@ -1,5 +1,5 @@
 #include "Engine/Battle.h"
-#include "Engine/Pet.h"
+#include "Engine/PetFactory.h"
 #include "Engine/Sim.h"
 #include "FixtureReader.h"
 #include <gtest/gtest.h>

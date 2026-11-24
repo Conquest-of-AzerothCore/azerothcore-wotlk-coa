@@ -1,5 +1,5 @@
-#ifndef COA_PET_BATTLE_ENGINE_TYPES_H
-#define COA_PET_BATTLE_ENGINE_TYPES_H
+#ifndef COA_PET_BATTLE_ENGINE_BATTLE_TYPES_H
+#define COA_PET_BATTLE_ENGINE_BATTLE_TYPES_H
 
 #include "Catalog.h"
 #include "Rng.h"

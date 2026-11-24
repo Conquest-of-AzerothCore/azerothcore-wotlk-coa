@@ -1,5 +1,5 @@
 #include "Engine/LuaNumber.h"
-#include "Engine/Pet.h"
+#include "Engine/PetFactory.h"
 #include "Engine/Round.h"
 #include "FixtureReader.h"
 #include <gtest/gtest.h>

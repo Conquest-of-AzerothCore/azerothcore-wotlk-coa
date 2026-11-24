@@ -1,7 +1,7 @@
-#ifndef COA_PET_BATTLE_ENGINE_PET_H
-#define COA_PET_BATTLE_ENGINE_PET_H
+#ifndef COA_PET_BATTLE_ENGINE_PET_FACTORY_H
+#define COA_PET_BATTLE_ENGINE_PET_FACTORY_H
 
-#include "Types.h"
+#include "BattleTypes.h"
 #include <optional>
 #include <string>
 #include <vector>

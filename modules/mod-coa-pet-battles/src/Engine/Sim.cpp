@@ -1,6 +1,6 @@
 #include "Sim.h"
 #include "LuaNumber.h"
-#include "Pet.h"
+#include "PetFactory.h"
 #include "Round.h"
 #include <map>
 
