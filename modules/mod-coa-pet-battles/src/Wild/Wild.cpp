@@ -368,6 +368,11 @@ namespace CoAPetBattles::Wild
         std::optional<Spot> const where = _world.Where(key);
         if (!where)
             return;
+        if (_world.InBattle(character))
+        {
+            _world.Say(character, "You are already in a pet battle.");
+            return;
+        }
         double const range = _settings.talkRange;
         if (Squared(x - where->x, y - where->y) > range * range)
         {

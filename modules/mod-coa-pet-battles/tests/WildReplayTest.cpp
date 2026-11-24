@@ -286,6 +286,12 @@ namespace
         }
 
         uint32_t UnixNow() const override { return BaseTime + static_cast<uint32_t>(clock / 1000); }
+
+        bool InBattle(uint64_t character) const override
+        {
+            auto const found = people.find(character);
+            return found != people.end() && found->second.battle;
+        }
     };
 
     std::vector<std::string> Words(std::string const& text)
@@ -430,4 +436,39 @@ TEST(CoAPetBattlesWild, EveryRecordedSituationReplays)
         EXPECT_TRUE(rng.Exhausted()) << situation.name << " used " << rng.Used() << " of " << situation.rolls.size();
         EXPECT_EQ(registry.Count(), 0u) << situation.name;
     }
+}
+
+TEST(CoAPetBattlesWild, ChallengeIsRefusedDuringABattle)
+{
+    FakeWorld world;
+    world.ground[0] = 0;
+    Person gm;
+    gm.zone = 3483;
+    world.people[1] = gm;
+    Thing mob;
+    mob.mob = true;
+    mob.order = 1;
+    mob.entry = 16907;
+    mob.x = 8;
+    mob.level = 60;
+    world.things[100] = mob;
+    Engine::SeededRng rng(5);
+    Registry registry(WildCatalog(), Fixture().data, WildSettings(), Scale(), world, rng);
+    world.clock = 5000;
+    registry.Tick();
+    ASSERT_EQ(registry.Count(), 1u);
+    uint64_t const pet = world.lastSpawn;
+    world.things[pet].x = 1;
+    world.things[pet].y = 0;
+    world.people[1].battle = true;
+    world.produced.clear();
+    registry.Select(1, pet, 1, 0, 0);
+    EXPECT_TRUE(registry.IsWild(pet));
+    ASSERT_EQ(world.produced.size(), 1u);
+    EXPECT_EQ(world.produced[0], "5000 say 1 You are already in a pet battle.");
+    world.people[1].battle = false;
+    world.produced.clear();
+    registry.Select(1, pet, 1, 0, 0);
+    EXPECT_FALSE(registry.IsWild(pet));
+    registry.EndAll();
 }

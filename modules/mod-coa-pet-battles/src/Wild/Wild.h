@@ -71,6 +71,7 @@ namespace CoAPetBattles::Wild
         virtual void Say(uint64_t character, std::string const& text) = 0;
         virtual bool StartBattle(uint64_t character, std::vector<Battle::EnemySpec> enemies) = 0;
         virtual uint32_t UnixNow() const = 0;
+        virtual bool InBattle(uint64_t character) const = 0;
     };
 
     class Registry

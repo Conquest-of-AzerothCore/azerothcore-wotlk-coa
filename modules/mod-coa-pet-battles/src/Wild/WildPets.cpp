@@ -187,7 +187,15 @@ namespace CoAPetBattles::Wild
         void Despawn(uint64_t key) override
         {
             if (Creature* creature = Resolve(key))
+            {
+                if (creature->GetSpawnId())
+                {
+                    CreatureTemplate const* creatureTemplate = creature->GetCreatureTemplate();
+                    creature->ReplaceAllNpcFlags(NPCFlags(creatureTemplate->npcflag));
+                    creature->SetFaction(creatureTemplate->faction);
+                }
                 creature->DespawnOrUnsummon();
+            }
             Forget(key);
         }
 
@@ -213,6 +221,12 @@ namespace CoAPetBattles::Wild
         uint32_t UnixNow() const override
         {
             return static_cast<uint32_t>(GameTime::GetGameTime().count());
+        }
+
+        bool InBattle(uint64_t character) const override
+        {
+            Player* player = Find(character);
+            return player && sPetBattles->InBattle(player);
         }
 
         std::optional<uint64_t> Known(Creature const* creature) const
@@ -363,7 +377,7 @@ namespace CoAPetBattles::Wild
 
     bool WildPets::Hello(Player* player, Creature* creature)
     {
-        Registry* registry = Current();
+        Registry const* registry = _registry.get();
         std::optional<uint64_t> const key = registry ? _world->Known(creature) : std::nullopt;
         std::optional<std::string> const text = key ? registry->Hello(*key) : std::nullopt;
         if (!text)
