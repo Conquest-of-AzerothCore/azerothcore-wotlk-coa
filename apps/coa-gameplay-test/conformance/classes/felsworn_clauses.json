@@ -509,7 +509,7 @@
       {
         "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
         "labels": [],
-        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which fourth_cast, third_cast, other_spell and duration_left judge (Felsworn ADR 0021); the clause is judged by the three exact-word claims below (D-22, review I-1)."
+        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which felforged_fed charges judges on a real feed (ADR 1272); the clause is judged by the three exact-word claims below (D-22, review I-1; review fw-rbaf M-1)."
       },
       {
         "claim": "Your next 3 Fel Fireballs",
@@ -530,7 +530,7 @@
         ]
       }
     ],
-    "reason": "'Your next 3 Fel Fireballs' and 'have a $s1% reduced cast time' are judged on a real feed by fed_charge_casts (ADR 1272, mentor D-97, which lifts the D-67 hold of reviews fw-rf300490 I-2 and fw-rvb7b I-3a): Felforged 806104 earned through Bane of Chaos 704368 with 300490 unlearned at the grant, 806104 present after the unlearn with amount -30 (tooltip $s1 = 30: BasePoints -31 + 1 die side; earlier set_aura reasons that cite 31 are superseded), three Fel Fireballs in 1005 to 1095 ms and the fourth in 1350 to 1650 ms, no haste (fw-baf pair prove1). The set_aura arms (fourth_cast, third_cast, other_spell, duration_left, cast_*) remain supporting data for Felsworn ADR 0021."
+    "reason": "'Your next 3 Fel Fireballs' and 'have a $s1% reduced cast time' are judged on a real feed by fed_charge_casts (ADR 1272, mentor D-97, which lifts the D-67 hold of reviews fw-rf300490 I-2 and fw-rvb7b I-3a): Felforged 806104 earned through Bane of Chaos 704368 with 300490 unlearned at the grant, 806104 present after the unlearn with amount -30 (tooltip $s1 = 30: BasePoints -31 + 1 die side; the set_aura cast_landed and cast_early entries that cited 31 are removed), three Fel Fireballs in 1005 to 1095 ms and the fourth in 1350 to 1650 ms, no haste. Counted on the fw-baf pair prove1 and again on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, server 52749f63f814, no flip), where each trial also checks that the fourth cast starts before 0.9 of the 8000 ms aura after the feed stop (ADR 1277, review fw-rbaf I-1; read 5932 to 5934 ms, below 7200), so the full fourth cast is not the natural expiry. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc. The set_aura arms (fourth_cast, third_cast, other_spell, duration_left, cast_control) remain supporting data for Felsworn ADR 0021."
   },
   {
     "spell": 301287,
@@ -3868,7 +3868,7 @@
       "802076 behaviour_metric_delta consumed"
     ],
     "kind": "claim",
-    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802076 learned the count reads 6 at the cast and 5 after 1 landed auto attack, 6 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
+    "reason": "Counted on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, build ff59e55c, server 52749f63f814, no flip), after the Annihilation charges fix (Felsworn ADR 0030): with 802076 learned the count reads 6 at the cast and 2 after 4 landed auto attacks, 6 in all, and the control arm without the talent reads 5 then 1 after 4, in both runs (script_count swings 2 with main_hand (ADR 1277): one main-hand Poniard 2208 (1300 ms) for 4600 ms, bound 4 landed attacks, below 5; the class file's hit and expertise ratings remove misses, dodges and parries). The consumption part counts on mentor D-95 condition 1, and each window landed 4 attacks in both runs, so a server that kept the 1 native charge Felsworn ADR 0030 removed (the aura gone after 1 landed attack) would read 0 and alert (review fw-rbswb I-1). Expiry edge untested (the window stops before the last count); the off hand's share of consumption untested (one main hand). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802076,
@@ -3906,9 +3906,13 @@
   {
     "spell": 802110,
     "clause": "Your Annihilation now affects $s1 additional attack",
-    "labels": [],
+    "labels": [
+      "802110 effect_value e0 #0",
+      "802110 behaviour_metric_delta charges",
+      "802110 behaviour_metric_delta consumed"
+    ],
     "kind": "claim",
-    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802110 learned the count reads 7 at the cast and 6 after 1 landed auto attack, 7 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set. HELD (review fw-rbswb I-1): with swings 1 every window lands one attack, and the pre-fix server (2 native charges, ADR 0030) also reads 6+1=7, so this entry cannot fail on the fixed defect; needs >= 3 landed attacks per window within the bound."
+    "reason": "Counted on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, build ff59e55c, server 52749f63f814, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802110 learned the count reads 7 at the cast and 3 after 4 landed auto attacks, 7 in all, and the control arm without the talent reads 5 then 1 after 4, in both runs (script_count swings 2 with main_hand (ADR 1277): one main-hand Poniard 2208 (1300 ms) for 4600 ms, bound 4 landed attacks, below 5; the class file's hit and expertise ratings remove misses, dodges and parries). The consumption part counts on mentor D-95 condition 1, and each window landed 4 attacks in both runs, so a server that kept the 2 native charges Felsworn ADR 0030 removed (the aura gone after 2 landed attacks) would read 0 and alert (review fw-rbswb I-1). Expiry edge untested (the window stops before the last count); the off hand's share of consumption untested (one main hand). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802110,
@@ -4087,7 +4091,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at its 5th landed attack is reachable within the 12000 ms duration with both hands, up to 12 landed attacks, but the 1-interval window stops at 4 at most). Counted on the fw-bswb pair (prove1, no flip): 5 at the cast, 4 after 1 landed attack. Missed or avoided swings untested (the rule counts landed swings only)."
+    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Counted on the fw-fa6 pair (W=coa-wt-felsworn-fa6 .agents/plans/fw-fa6/prove1, verify-all 20261124-081448 / -081539, build ff59e55c, server 52749f63f814, no flip): 5 at the cast, 1 after 4 landed attacks, in both runs (script_count swings 2 with main_hand (ADR 1277): one main-hand Poniard 2208 (1300 ms) for 4600 ms, bound 4 landed attacks, below 5; the class file's hit and expertise ratings remove misses, dodges and parries). Expiry edge untested (the aura ending at its 5th landed attack: the window stops at 4)."
   },
   {
     "spell": 803905,

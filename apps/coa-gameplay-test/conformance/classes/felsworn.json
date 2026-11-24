@@ -8529,9 +8529,15 @@
       "expire_ms": 12500,
       "script_count": {
         "noun": "attack",
-        "swings": 1
+        "swings": 2,
+        "main_hand": {
+          "item": 2208,
+          "speed_ms": 1300,
+          "skill_line": 173,
+          "proficiency": 1180
+        }
       },
-      "observe_source": "802076 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + 1 = 1 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 6 after a real learn of 802076. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 6th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
+      "observe_source": "802076 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + 1 = 1 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 6 after a real learn of 802076. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 2 swing intervals (4600 ms) with one main-hand Poniard 2208 (script_count main_hand, ADR 1277: item_template delay 1300 ms, Daggers 1180, skill 173; the Slayer pair of item 2027 is replaced, and melee_damage_count sums both hands, CoAGameplayTest.cpp:5314-5319), so at most 4600 // 1300 + 1 = 4 landed attacks, below every counted reading of 5 or more; the class file's hit and expertise ratings (10000) remove misses, dodges and parries, so about 4 and at least 3 attacks land, more than the 2 native charges Pit Lord's Strength 802110 gave the aura before Felsworn ADR 0030 (review fw-rbswb I-1: one landed attack per window passed with or without that fix), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 6th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
     },
     {
       "spell": 802110,
@@ -8555,9 +8561,15 @@
       "expire_ms": 12500,
       "script_count": {
         "noun": "attack",
-        "swings": 1
+        "swings": 2,
+        "main_hand": {
+          "item": 2208,
+          "speed_ms": 1300,
+          "skill_line": 173,
+          "proficiency": 1180
+        }
       },
-      "observe_source": "802110 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 7 after a real learn of 802110. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 7th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
+      "observe_source": "802110 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 7 after a real learn of 802110. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 2 swing intervals (4600 ms) with one main-hand Poniard 2208 (script_count main_hand, ADR 1277: item_template delay 1300 ms, Daggers 1180, skill 173; the Slayer pair of item 2027 is replaced, and melee_damage_count sums both hands, CoAGameplayTest.cpp:5314-5319), so at most 4600 // 1300 + 1 = 4 landed attacks, below every counted reading of 5 or more; the class file's hit and expertise ratings (10000) remove misses, dodges and parries, so about 4 and at least 3 attacks land, more than the 2 native charges Pit Lord's Strength 802110 gave the aura before Felsworn ADR 0030 (review fw-rbswb I-1: one landed attack per window passed with or without that fix), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 7th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
     },
     {
       "spell": 803904,
@@ -8582,9 +8594,15 @@
       "expire_ms": 12500,
       "script_count": {
         "noun": "attack",
-        "swings": 1
+        "swings": 2,
+        "main_hand": {
+          "item": 2208,
+          "speed_ms": 1300,
+          "skill_line": 173,
+          "proficiency": 1180
+        }
       },
-      "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks): 0 without a cast (the control arm reads the absent aura, no swings) and 5 attacks after a real cast. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 5th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
+      "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks): 0 without a cast (the control arm reads the absent aura, no swings) and 5 attacks after a real cast. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 2 swing intervals (4600 ms) with one main-hand Poniard 2208 (script_count main_hand, ADR 1277: item_template delay 1300 ms, Daggers 1180, skill 173; the Slayer pair of item 2027 is replaced, and melee_damage_count sums both hands, CoAGameplayTest.cpp:5314-5319), so at most 4600 // 1300 + 1 = 4 landed attacks, below every counted reading of 5 or more; the class file's hit and expertise ratings (10000) remove misses, dodges and parries, so about 4 and at least 3 attacks land, more than the 2 native charges Pit Lord's Strength 802110 gave the aura before Felsworn ADR 0030 (review fw-rbswb I-1: one landed attack per window passed with or without that fix), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 5th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
     },
     {
       "spell": 806109,
@@ -21949,78 +21967,6 @@
       ],
       "quote": "grant you Felforged",
       "spell": 300490,
-      "name": "Felforged (a Fel Fireball completes at the reduced cast time)",
-      "variant": "cast_landed",
-      "label_suffix": "cast_landed",
-      "expected": 1,
-      "wait_ms": 1060,
-      "game_time": {
-        "after": [
-          1040,
-          1080
-        ]
-      },
-      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Completed casts of 801312 (spell_cast_count) read at most 1080 ms after the cast start: 1 with Felforged (a cast time of at most 1080 ms is a reduction of at least 28%, which excludes the 27.9% of a -31% off by 10%), 0 without it (the control read before the fixture, a 1500 ms cast not yet completed). Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc.",
-      "cast_in_before": false
-    },
-    {
-      "kind": "metric_delta",
-      "trigger_spell": 801312,
-      "target": "dummy",
-      "cast_power": 100,
-      "metric": "spell_cast_count",
-      "fields": {
-        "spell": 801312
-      },
-      "before_expected": 0,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "after_auras": [
-        [
-          806104,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "quote": "grant you Felforged",
-      "spell": 300490,
-      "name": "Felforged (not faster than the stated reduction)",
-      "variant": "cast_early",
-      "label_suffix": "cast_early",
-      "cast_in_before": false,
-      "expected": 0,
-      "wait_ms": 990,
-      "game_time": {
-        "after": [
-          990,
-          1030
-        ]
-      },
-      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The same cast read between 990 and 1030 ms after its start must not be completed (a cast time above 990 ms is a reduction below 34%): that excludes a reduction of 34.1% (-31% off by 10%); with cast_landed this brackets the stated 31% inside 28%..34%. Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc."
-    },
-    {
-      "kind": "metric_delta",
-      "trigger_spell": 801312,
-      "target": "dummy",
-      "cast_power": 100,
-      "metric": "spell_cast_count",
-      "fields": {
-        "spell": 801312
-      },
-      "before_expected": 0,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "after_auras": [
-        [
-          806104,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "quote": "grant you Felforged",
-      "spell": 300490,
       "name": "Felforged (only the next 3 Fel Fireballs)",
       "variant": "fourth_cast",
       "label_suffix": "fourth_cast",
@@ -25944,7 +25890,7 @@
       "trials": 3,
       "min_judged": 2,
       "poll_ms": 15,
-      "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), all inside 0.9 of the 8000 ms aura (DurationIndex 31). A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
+      "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), the game time is read when the feed stops and cast 4 must start before 0.9 of the 8000 ms aura (DurationIndex 31) has passed since that stamp, else the trial is void (review fw-rbaf I-1: the slots drift, cast 4 started 5901 ms after cast 1 in the prove1 pair, planned 5400), so a full cast 4 is not the natural expiry. A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
     }
   ],
   "player_observations": [],
