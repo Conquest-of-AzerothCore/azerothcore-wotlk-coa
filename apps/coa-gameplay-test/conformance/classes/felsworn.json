@@ -16469,8 +16469,8 @@
       "expected_points": 5,
       "trials": 60,
       "parts": 140,
-      "cast_power": 50,
-      "observe_source": "The 'for every 10 points of Energy' scaling arm of the crit_energy entry: Energy is set to 50 before every cast, so the stated bonus is 5 x 1 = 5 critical strike points ($s2 = 1, Effect[1] BasePoints 0 + 1), judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give. Same Ruin 801895 reads, control arm (300489 not learned) against treatment arm (300489 learned), Felfury x2 and spell penetration 823764 as named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc."
+      "cast_power": 30,
+      "observe_source": "The 'for every 10 points of Energy' scaling arm of the crit_energy entry: Ruin has a 2.5 s cast and Energy regenerates 10 per second during it (probe 20261124-034318: from 50, Energy read 62 at 1.2 s and 47 after the cast and its 30 cost, i.e. 77 at completion, against 50, 50 and 20 with regeneration off), so Energy is set to 30 (the cost, the least that can start the cast) before every cast and reaches about 57 at the time of casting; the stated bonus is 5 x 1 = 5 critical strike points ($s2 = 1, Effect[1] BasePoints 0 + 1), judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give. Same Ruin 801895 reads, control arm (300489 not learned) against treatment arm (300489 learned), Felfury x2 and spell penetration 823764 as named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 802058,
