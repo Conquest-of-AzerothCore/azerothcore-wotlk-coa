@@ -102,8 +102,8 @@ def derived_shift(class_file: dict, shifted: ShiftedControl) -> int:
     spell, effect = shifted.shift_spell, shifted.shift_effect
     if records.field('Spell', spell, f'EffectApplyAuraName[{effect}]') != MOD_TARGET_RESISTANCE \
             or not records.field('Spell', spell, f'EffectMiscValue[{effect}]') & (1 << shifted.school):
-        raise ValueError(f'shifted_control shift spell {spell} effect {effect} is not a SPELL_AURA_MOD_TARGET_RESISTANCE '
-                         f'of school {shifted.school}')
+        raise ValueError(f'shifted_control shift spell {spell} effect {effect} is not a '
+                         f'SPELL_AURA_MOD_TARGET_RESISTANCE of school {shifted.school}')
     return -level_points(records, spell, effect, shifted.caster_level or class_file['level'])
 
 
@@ -153,12 +153,12 @@ def fixtures(class_file: dict, spec, shifted: ShiftedControl, scenario: dict):
              if shifted.caster_level is not None else '')
     scenario['contract'] += (
         f' Shifted control (ADR 1281): {METRIC} of school {shifted.school} against the dummy is read in three arms: '
-        f'the control (dummy resistance {shifted.amount}), the shifted control right after it (the fixture {shifted.aura} '
-        f'lowered by the shift {shifted.shift} to {shifted.amount - shifted.shift}, then restored) and the treatment '
-        f'(resistance {shifted.amount}, the gate learned). The shift is {shifted.shift_spell} effect '
-        f'{shifted.shift_effect} at the caster level, from the DBC.{level} The treatment must equal the shifted control '
-        f'within {shifted.tolerance_share:g} of the control span and stand at least {shifted.discrimination_share:g} '
-        f'of it below the control ({shifted.source}).')
+        f'the control (dummy resistance {shifted.amount}), the shifted control right after it (the fixture '
+        f'{shifted.aura} lowered by the shift {shifted.shift} to {shifted.amount - shifted.shift}, then restored) and '
+        f'the treatment (resistance {shifted.amount}, the gate learned). The shift is {shifted.shift_spell} effect '
+        f'{shifted.shift_effect} at the caster level, from the DBC.{level} The treatment must equal the shifted '
+        f'control within {shifted.tolerance_share:g} of the control span and stand at least '
+        f'{shifted.discrimination_share:g} of it below the control ({shifted.source}).')
 
 
 def model(spec, shifted: ShiftedControl) -> dict:

@@ -991,7 +991,8 @@ def script_flat_then_percent_model(class_file: dict, records: Records, facts: Ra
     factor = OFF_HAND_DAMAGE_FACTOR if off_hand else 1.0
     bonus = weapon_attacker(records, hit_spell, caster).ap / ATTACK_POWER_PER_DPS * weapon.normalized_speed
     passed = int(float32(flat * factor))
-    roll = uniform(int(float32((weapon.min_damage + bonus) * factor)), int(float32((weapon.max_damage + bonus) * factor)))
+    roll = uniform(int(float32((weapon.min_damage + bonus) * factor)),
+                   int(float32((weapon.max_damage + bonus) * factor)))
     used = applicable(for_school(aura_modifiers(records, auras, class_file['level']), school_mask), 'weapon')
     hit = done(mapped(roll, lambda damage: int(float32((damage + passed) * percent / 100.0))), used)
     landed = mitigated(hit, spell_mitigation(records, hit_spell, percent_effect, 'weapon', target, caster.level))
