@@ -48,6 +48,7 @@ namespace
     std::optional<uint32> s_cleanupCutoff;
     std::optional<bool> s_cleanupRowsLeft;
     std::optional<QueryCallback> s_cleanupProbe;
+    std::optional<TransactionFuture> s_cleanupDelete;
     std::mutex s_ignoreMutex;
     std::vector<std::string> s_ignoredChannels;
     std::vector<std::string> s_ignoredChannelMessageStarts;
@@ -188,6 +189,14 @@ namespace
                 return;
             s_cleanupProbe.reset();
         }
+        if (s_cleanupDelete)
+        {
+            if (s_cleanupDelete->wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                return;
+            if (!s_cleanupDelete->get())
+                LOG_ERROR("coa", "CoA chat log: a cleanup batch of up to {} coa_chat_log rows failed", CleanupBatch);
+            s_cleanupDelete.reset();
+        }
         if (!s_cleanupCutoff)
             return;
         if (s_cleanupRowsLeft == false)
@@ -198,7 +207,13 @@ namespace
         }
         uint32 const cutoff = *s_cleanupCutoff;
         if (s_cleanupRowsLeft == true)
-            CharacterDatabase.Execute("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+        {
+            s_cleanupRowsLeft.reset();
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            trans->Append("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+            s_cleanupDelete.emplace(std::move(CharacterDatabase.AsyncCommitTransaction(trans).m_future));
+            return;
+        }
         s_cleanupProbe.emplace(CharacterDatabase.AsyncQuery(
             Acore::StringFormat("SELECT 1 FROM coa_chat_log WHERE time < {} LIMIT 1", cutoff))
             .WithCallback([cutoff](QueryResult result)
