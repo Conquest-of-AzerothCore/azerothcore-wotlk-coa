@@ -226,6 +226,14 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].SpellClassMask = flag96(0, 524288, 2);
     if (id == 801902)
         info->Effects[0].MiscValue = SPELLMOD_COST;
+    if (id == 555739)
+        if (SpellEntry const* stated = sSpellStore.LookupEntry(806095))
+            info->Effects[EFFECT_0].BasePoints = stated->EffectBasePoints[EFFECT_0];
+    if (id == 560578)
+    {
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_ADD_PCT_MODIFIER;
+        info->Effects[EFFECT_0].MiscValue = SPELLMOD_DAMAGE;
+    }
     if (id == 807424)
     {
         info->Effects[2].MiscValue = SPELLMOD_CASTING_TIME;
