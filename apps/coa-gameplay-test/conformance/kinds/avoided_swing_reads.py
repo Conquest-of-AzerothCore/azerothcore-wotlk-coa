@@ -270,7 +270,10 @@ def avoided_swing_reads_scenario(class_file: dict, spec: AvoidedSwingReadsSpec) 
                      + f'Judge: {rule_text(spec, expected)}. The run is void on a missing read, a refused cast, an '
                        f'ally more than {DISTANCE_TOLERANCE_YD:g} yd from its place, a caster within '
                        f'{quiet_minimum_yd():g} yd of a striker after the {QUIET_SHIFT_YD} yd relocation that quiets '
-                       f'the strikers before the reads, or a landed or blocked swing or own swing since the engage.'),
+                       f'the strikers before the reads, '
+                       + ('no dodge in the last window before the relocation, a dodge after it, '
+                          if spec.read == EXPIRY_EDGE else '')
+                       + 'or a landed or blocked swing or own swing since the engage.'),
         'players': [player_fixture(class_file)] + [{**player_fixture(class_file), 'id': ally} for ally in offsets],
         'creatures': proc_avoided.striker_fixtures(class_file, avoided),
         'steps': steps}
