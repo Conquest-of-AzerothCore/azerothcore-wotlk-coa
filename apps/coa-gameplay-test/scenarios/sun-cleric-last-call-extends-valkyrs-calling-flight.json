@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Last Call keeps Valkyr's Calling's flight 1 second longer, landing at 3 s instead of 2 s",
+  "contract": [
+    "Last Call 681448 reads 'Increases the duration of Valkyr's Calling by $/1000;s1 sec.' Its effect 0 is",
+    "SPELL_AURA_ADD_FLAT_MODIFIER, SPELLMOD_DURATION, BasePoints 999 (+1000 ms), on class mask word 2 2097152, the",
+    "SpellFamilyFlags[2] of Valkyr's Calling 520024 and of its flight aura 520025 (DurationIndex 39, 2000 ms); no other",
+    "family 33 spell modifier reaches that bit. A 520024 cast applies 520025 to the caster and schedules the landing and",
+    "the removal of 520025; they followed the unmodified 2000 ms of 520024, so the flight ended at 2 s with the passive",
+    "(batch 5a, aura absent at 2730-2790 ms). They now follow the flight aura's own maximum duration. Two level-60 Sun",
+    "Clerics cast 520024 at a stationary dummy; game time read before each aura read bounds it from below, and the read",
+    "after a 'still up' check bounds it from above. Without Last Call the flight is up before 1950 ms and gone after",
+    "2050 ms; with it, it is still up after 2800 ms and gone after 3050 ms (Sun Cleric ADR 0010)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "control", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "lastcall", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "control_dummy", "owner": "control", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true },
+    { "id": "lastcall_dummy", "owner": "lastcall", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login hooks and spawn AI settle", "ms": 5000 },
+    { "action": "learn", "actor": "control", "spell": 707072 },
+    { "action": "learn", "actor": "lastcall", "spell": 707072 },
+    { "action": "learn", "actor": "control", "spell": 520024 },
+    { "action": "learn", "actor": "lastcall", "spell": 520024 },
+    { "action": "learn", "actor": "lastcall", "spell": 681448 },
+    { "action": "assert", "label": "SETUP: Last Call is active", "actor": "lastcall", "metric": "aura", "spell": 681448, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: the control caster has no Last Call", "actor": "control", "metric": "aura", "spell": 681448, "equals": 0 },
+    { "action": "reset_cooldown", "actor": "control", "spell": 520024 },
+    { "action": "snapshot", "actor": "control", "metric": "game_time_ms", "save_as": "control_cast" },
+    { "action": "cast", "actor": "control", "spell": 520024, "target": "control_dummy" },
+    { "action": "wait", "ms": 1700 },
+    { "action": "assert", "label": "CONTROL: the flight aura is up during the flight", "actor": "control", "metric": "aura", "spell": 520025, "equals": 1 },
+    { "action": "assert", "label": "CONTROL: that read came before 1950 ms", "actor": "control", "metric": "game_time_ms", "relative_to": "control_cast", "max": 1950 },
+    { "action": "wait", "ms": 600 },
+    { "action": "assert", "label": "CONTROL: this read comes after 2050 ms", "actor": "control", "metric": "game_time_ms", "relative_to": "control_cast", "min": 2050 },
+    { "action": "assert", "label": "CONTROL: without Last Call the flight ends at 2 s", "actor": "control", "metric": "aura", "spell": 520025, "equals": 0 },
+    { "action": "reset_cooldown", "actor": "lastcall", "spell": 520024 },
+    { "action": "snapshot", "actor": "lastcall", "metric": "game_time_ms", "save_as": "lastcall_cast" },
+    { "action": "cast", "actor": "lastcall", "spell": 520024, "target": "lastcall_dummy" },
+    { "action": "wait", "ms": 2850 },
+    { "action": "assert", "label": "DISCRIMINATING: this read comes after 2800 ms", "actor": "lastcall", "metric": "game_time_ms", "relative_to": "lastcall_cast", "min": 2800 },
+    { "action": "assert", "label": "DISCRIMINATING: with Last Call the flight is still up past 2.8 s", "actor": "lastcall", "metric": "aura", "spell": 520025, "equals": 1 },
+    { "action": "wait", "ms": 450 },
+    { "action": "assert", "label": "LAST CALL: this read comes after 3050 ms", "actor": "lastcall", "metric": "game_time_ms", "relative_to": "lastcall_cast", "min": 3050 },
+    { "action": "assert", "label": "LAST CALL: the flight ends at 3 s", "actor": "lastcall", "metric": "aura", "spell": 520025, "equals": 0 }
+  ]
+}

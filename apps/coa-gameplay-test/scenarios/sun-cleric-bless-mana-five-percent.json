@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Bless restores 5% of maximum mana per tick, 10% with Lead Me Not Astray (owner ruling O-4)",
+  "contract": [
+    "Owner ruling O-4 (2026-11-21): Bless 804247 restores 5% of maximum mana per tick. The tooltip reads \"restoring",
+    "5% of their maximum health and 5% of your maximum mana every 10 sec\"; Lead Me Not Astray 300357 \"Doubles the",
+    "healing done and mana restored by Bless\". The caster's own Bless tick energizes CalculatePct(max mana,",
+    "805360 E1) as 805360 (Sun Cleric ADR 0020), doubled while 300357 is known. Three Sun Clerics: the control",
+    "learns Bless and does not",
+    "cast it, so no 805360 energize happens; the plain caster blesses its ally and its first tick restores 5% of",
+    "maximum mana; the taught caster knows 300357 and its first tick restores 10%. Mana is emptied before the tick",
+    "and only the energize events are read, so ordinary regeneration does not count."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "control", "race": 1, "class": 27, "level": 60},
+    {"id": "plain", "race": 1, "class": 27, "level": 60},
+    {"id": "taught", "race": 1, "class": 27, "level": 60},
+    {"id": "plain_ally", "race": 1, "class": 27, "level": 60},
+    {"id": "taught_ally", "race": 1, "class": 27, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "learn", "actor": "control", "spell": 804247},
+    {"action": "learn", "actor": "plain", "spell": 804247},
+    {"action": "learn", "actor": "taught", "spell": 804247},
+    {"action": "learn", "actor": "taught", "spell": 300357},
+    {"action": "cast", "actor": "plain", "spell": 804247, "target": "plain_ally"},
+    {"action": "cast", "actor": "taught", "spell": 804247, "target": "taught_ally"},
+    {
+      "action": "assert", "actor": "plain", "metric": "aura", "spell": 804247, "caster": "plain", "equals": 1,
+      "within_ms": 1000, "label": "The plain caster holds its own Bless"
+    },
+    {
+      "action": "assert", "actor": "taught", "metric": "aura", "spell": 804247, "caster": "taught", "equals": 1,
+      "within_ms": 1000, "label": "The taught caster holds its own Bless"
+    },
+    {
+      "action": "assert", "actor": "control", "metric": "aura", "spell": 804247, "caster": "control", "equals": 0,
+      "label": "The control holds no Bless"
+    },
+    {"action": "set_power", "actor": "control", "power": 0, "value": 0},
+    {"action": "set_power", "actor": "plain", "power": 0, "value": 0},
+    {"action": "set_power", "actor": "taught", "power": 0, "value": 0},
+    {"action": "snapshot", "actor": "plain", "metric": "max_power", "power": 0, "save_as": "plain_max_mana"},
+    {"action": "snapshot", "actor": "taught", "metric": "max_power", "power": 0, "save_as": "taught_max_mana"},
+    {"action": "wait", "ms": 10500},
+    {
+      "action": "assert", "actor": "control", "metric": "spell_energize_count", "spell": 805360, "target": "control",
+      "equals": 0, "label": "Without Bless no Bless mana is restored"
+    },
+    {
+      "action": "assert", "actor": "plain", "metric": "spell_energize_count", "spell": 805360, "target": "plain",
+      "equals": 1, "label": "The plain caster's first tick restores mana once"
+    },
+    {
+      "action": "assert", "actor": "plain", "metric": "spell_energize_total", "spell": 805360, "target": "plain",
+      "ratio_to": "plain_max_mana", "min": 0.049, "max": 0.051,
+      "label": "The tick restores 5% of maximum mana"
+    },
+    {
+      "action": "assert", "actor": "taught", "metric": "spell_energize_count", "spell": 805360, "target": "taught",
+      "equals": 1, "label": "The taught caster's first tick restores mana once"
+    },
+    {
+      "action": "assert", "actor": "taught", "metric": "spell_energize_total", "spell": 805360, "target": "taught",
+      "ratio_to": "taught_max_mana", "min": 0.099, "max": 0.101,
+      "label": "Lead Me Not Astray doubles the tick to 10% of maximum mana"
+    }
+  ]
+}

@@ -59,6 +59,15 @@ Black Knight 2529 Zweihander (two-hand sword, 73.62-103.34, 2800 ms), Inquisitio
 39 Boltslinger, 40 Darkness (Houndmaster), 41 Inquisition and 94 WitchKnight (Black Knight); the tab 87 Class spells
 take the default set.
 
+`weapon_set_spells` {set name: [spell ids]} names the spells a set needs before it can be equipped (Valkyr's Grip
+707072 for two two-handers, `Player::CanTitanGrip`, `PlayerStorage.cpp:2090-2091`; ADR
+[1012](../../../../docs/adr/1182-a-weapon-set-can-learn-the-spells-it-needs-to-be-equipped.md)). `base_steps` learns
+them with real `learn` steps after the settle wait and before the set's equip steps, only in the scenarios that wear
+that set. `check_weapon_set_spells` refuses a key that is not a set name or a value that is not a non-empty list of
+distinct positive ids; `procs.control_weapon` refuses a control set whose spells the scenario's own set does not learn;
+`ManifestWriter.add` refuses a scenario that learns a set spell again while it is learned (map that spell in
+`spell_weapon_sets` to a set without it). Without the field no step is added.
+
 `server_inventory_masks` {rank id: {`mask`, `source`}} states a rank's `EquippedItemInventoryTypeMask` as the server
 loads it, when the server repairs the DBC mask (`source` names the server code; ADR
 [0890](../../../../docs/adr/0890-a-class-file-can-state-the-server-repaired-equip-mask.md)). Every weapon requirement

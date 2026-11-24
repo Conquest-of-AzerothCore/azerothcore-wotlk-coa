@@ -194,5 +194,132 @@ class AvoidedProcJudgeTest(unittest.TestCase):
         self.assertIn('baseline trials without the passive', verdict.explanation)
 
 
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcMissesTest(unittest.TestCase):
+    ENGAGE = (40, 35, 5)
+
+    def setUp(self):
+        from profile import for_entry
+        self.workspace = Workspace()
+        self.class_file = copy.deepcopy(for_entry(class_file(), VENGEFUL_INTENT))
+        self.entry = next(entry for entry in self.class_file['procs']
+                          if entry['aura'] == VENGEFUL_INTENT and entry['trigger']['action'] == 'avoided')
+        for sizing in AvoidedProcJudgeTest.FIXTURE_SIZING:
+            self.entry.pop(sizing, None)
+        self.entry['trigger']['count_misses'] = True
+
+    def tearDown(self):
+        self.workspace.close()
+
+    def test_misses_are_read_and_held_beside_the_dodged_and_parried_swings(self):
+        scenario, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        run.validate(scenario)
+        model, trials = expectation.model, f'{VENGEFUL_INTENT} proc trials'
+        self.assertEqual(model['readings'][0]['name'], 'avoided swings (dodged + parried + missed)')
+        self.assertEqual(model['readings'][0]['labels'], [trials, f'{trials} parried', f'{trials} missed'])
+        self.assertEqual(model['baseline']['added_trials'][f'{trials} missed'],
+                         f'{VENGEFUL_INTENT} proc baseline trials missed')
+        self.assertEqual(model['attack_balance'], {'total': f'{VENGEFUL_INTENT} proc attempts',
+                                                   'parts': [trials, f'{trials} parried', f'{trials} missed']})
+        missed = [step for step in scenario['steps'] if step.get('label', '').endswith('trials missed')]
+        self.assertEqual([step['metric'] for step in missed], ['melee_missed_taken', 'melee_missed_taken'])
+        self.assertIn('missed it (melee_missed_taken', expectation.rule)
+
+    def test_the_option_is_off_by_default_and_refuses_a_non_boolean(self):
+        self.entry['trigger'].pop('count_misses')
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        self.assertNotIn('attack_balance', expectation.model)
+        self.assertEqual(len(expectation.model['readings'][0]['labels']), 2)
+        with self.assertRaises(ValueError):
+            proc_plan(self.class_file, {**self.entry, 'trigger': {**self.entry['trigger'], 'count_misses': 1}})
+
+    def verdict(self, dodged: int, parried: int, missed: int, procs: int, extra_attacks: int = 0):
+        from compare import compare
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        labels, baseline = expectation.model['measurements'], expectation.model['baseline']
+        engage_dodged, engage_parried, engage_missed = self.ENGAGE
+        steps = [assert_step(baseline['trials'], str(engage_dodged)),
+                 assert_step(f'{baseline["trials"]} parried', str(engage_parried)),
+                 assert_step(f'{baseline["trials"]} missed', str(engage_missed)),
+                 assert_step(baseline['events'], '0'), assert_step(labels['aura'], '1'),
+                 assert_step(labels['trials'], str(engage_dodged + dodged)),
+                 assert_step(f'{labels["trials"]} parried', str(engage_parried + parried)),
+                 assert_step(f'{labels["trials"]} missed', str(engage_missed + missed)),
+                 assert_step(labels['attempts'], str(sum(self.ENGAGE) + dodged + parried + missed + extra_attacks)),
+                 assert_step(labels['events'], str(procs))]
+        self.workspace.scenario(f'conformance-witch-hunter-proc-{VENGEFUL_INTENT}-avoided-part-1', 'proc',
+                                [expectation], steps=steps, spell=VENGEFUL_INTENT, rank=VENGEFUL_INTENT)
+        manifest, results = self.workspace.manifest()
+        [verdict] = [verdict for verdict in compare(manifest, results, tooltips=chance_reader(10.0, '$h'))
+                     if verdict.check == PROC_CHECK]
+        return verdict
+
+    def test_procs_on_misses_too_pass_at_the_stated_chance(self):
+        self.assertEqual(proc_plan(self.class_file, self.entry).parts, 1)
+        verdict = self.verdict(3800, 3800, 400, 800)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.measured, 0.10)
+        self.assertIn('8000 trials', verdict.explanation)
+
+    def test_a_mutant_that_never_procs_on_a_miss_alerts(self):
+        from random import Random
+        rng = Random(680663)
+        dodged, parried, missed = 2000, 2000, 4000
+        procs = sum(rng.random() < 0.10 for _ in range(dodged + parried))
+        verdict = self.verdict(dodged, parried, missed, procs)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertLess(verdict.measured, 0.06)
+
+    def test_the_miss_exclusion_is_off_by_default_and_validated(self):
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        self.assertNotIn('miss_exclusion', expectation.model)
+        trigger = self.entry['trigger']
+        for bad in ({'min_share': 0}, {'min_share': 0.5}, {'min_share': True}, {'share': 0.04}, 0.04):
+            with self.assertRaises(ValueError):
+                proc_plan(self.class_file, {**self.entry, 'trigger': {**trigger, 'miss_exclusion': bad}})
+        with self.assertRaises(ValueError):
+            proc_plan(self.class_file, {**self.entry, 'trigger': {k: v for k, v in
+                                                                 {**trigger, 'miss_exclusion': {'min_share': 0.04}}.items()
+                                                                 if k != 'count_misses'}})
+        self.entry['trigger']['miss_exclusion'] = {'min_share': 0.04}
+        _, [expectation] = proc_scenario(self.class_file, self.entry, 0)
+        self.assertEqual(expectation.model['miss_exclusion'],
+                         {'min_share': 0.04, 'missed': f'{VENGEFUL_INTENT} proc trials missed'})
+
+    def test_a_miss_share_that_separates_the_alternative_stays_ok(self):
+        self.entry['trigger']['miss_exclusion'] = {'min_share': 0.04}
+        verdict = self.verdict(2400, 2400, 3200, 800)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('miss share 0.4000', verdict.explanation)
+        self.assertIn('lies below the interval', verdict.explanation)
+
+    def test_a_miss_share_under_the_threshold_is_unmeasured(self):
+        self.entry['trigger']['miss_exclusion'] = {'min_share': 0.08}
+        verdict = self.verdict(3800, 3800, 400, 800)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('under the 0.08', verdict.explanation)
+
+    def test_a_server_that_ignores_misses_alerts_even_inside_the_band(self):
+        from compare import miss_exclusion_judgement
+        exclusion = {'min_share': 0.04, 'missed': 'missed'}
+        trials, missed = 87829.0, 4507.0
+        rate = 0.25 * (1 - missed / trials)
+        half = 0.005
+        status, low, high, why = miss_exclusion_judgement(exclusion, {'missed': missed}, trials,
+                                                          ('ok', rate - half, rate + half, 'inside the band'), 0.25)
+        self.assertEqual(status, 'alert')
+        self.assertIn('is not excluded by the interval', why)
+        status, *_ = miss_exclusion_judgement(exclusion, {'missed': missed}, trials,
+                                              ('ok', 0.2449, 0.2550, 'inside the band'), 0.25)
+        self.assertEqual(status, 'ok')
+
+    def test_an_attack_outside_the_three_outcomes_voids_the_part(self):
+        verdict = self.verdict(3800, 3800, 400, 800, extra_attacks=1)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('void', verdict.explanation)
+        self.assertIn('8081 attacks taken against 8080', verdict.explanation)
+
+
 if __name__ == '__main__':
     unittest.main()

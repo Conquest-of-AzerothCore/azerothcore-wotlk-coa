@@ -247,6 +247,43 @@
       "gaps": [
         "Item-to-spell acquisition needs a separate capture; fixture item grants do not test purchases."
       ]
+    },
+    {
+      "key": "ability:680645",
+      "title": "Gavel critical damage and Undead guarantee (Sun Cleric)",
+      "implementation": "source-present",
+      "summary": "The class script raises the critical chance of Gavel spells to 100 against Undead targets while the passive is known.",
+      "entities": {
+        "spell": [
+          680645
+        ]
+      },
+      "execution": [
+        {
+          "stage": "critical chance hook",
+          "interpretation": "Sun Cleric spell critical chance is adjusted in OnSpellCritChance for the class's own spell family.",
+          "source": {
+            "path": "src/server/coa/AscensionSunClericAbilities.cpp",
+            "anchor": "void OnSpellCritChance(Spell* spell, Unit* target, float& chance) override",
+            "reviewed_sha256": "f3986e2b4185b255b4e5a2cf1914fd9222639cc58bb5f7f85949e73a4c2b5154"
+          }
+        },
+        {
+          "stage": "Undead guarantee",
+          "interpretation": "A Gavel cast by a player holding 680645 at a target of creature type Undead gets chance = 100.",
+          "source": {
+            "path": "src/server/coa/AscensionSunClericAbilities.cpp",
+            "anchor": "(Gavel(info) && player->HasAura(680645) && type == CREATURE_TYPE_UNDEAD) ||",
+            "reviewed_sha256": "f3986e2b4185b255b4e5a2cf1914fd9222639cc58bb5f7f85949e73a4c2b5154"
+          }
+        }
+      ],
+      "related": [],
+      "scenarios": [],
+      "gaps": [
+        "The critical damage part has no script stage mapped here; read its effect from the DBC.",
+        "The guarantee is read from the source only; no scenario is linked here."
+      ]
     }
   ]
 }

@@ -1,0 +1,762 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Arbiter of Light adds its Gavel of Light heal share only while Vow of Light is active",
+  "contract": "Arbiter of Light 302914: 'While Vow of Light is active, your Gavel of Light now restores an additional $807549s3% health equal to the damage dealt.' ($807549s3 = 100, Vow of Light 807549 Effect[2] BasePoints 99). Gavel of Light 800611 copies a share of its damage to the caster as 707522: 707521 effect 0 (50), plus 807549 effect 2 (100) while the caster has Arbiter of Light 302914 and the live Vow of Light aura 807547 (Sun Cleric ADR 0014). Each arm casts one Gavel of Light, learns its spell, casts again, and reads the second heal as a ratio of the first: every hit is a critical strike (fixture 984954) with +20000 attack power, so one hit matches the next to within about 1%, and 707522 cannot crit. Control arm: Vow of Light cast before both Gavels, Arbiter of Light not learned, ratio 1. No Vow arm: Arbiter of Light learned without Vow of Light, ratio 1. Vow arm: Arbiter of Light learned and Vow of Light cast before both Gavels, ratio 3 (150% against 50%). Bands of 0.15 around each ratio.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    },
+    {
+      "id": "no_vow",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    },
+    {
+      "id": "vow",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "no_vow_dummy",
+      "owner": "no_vow",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "vow_dummy",
+      "owner": "vow",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 477
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 477,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 228,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 800611
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 807547
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807547
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807547,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800611,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "control: the first Gavel of Light heals its caster",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "control",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "control: Vow of Light is active at the first Gavel of Light",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 807547,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "control",
+      "save_as": "control_first_heal"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 807547
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 807547,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "control",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 800611,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "control: the second Gavel of Light heals its caster",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "control",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "control: Vow of Light is active at the second Gavel of Light",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 807547,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING control: Vow of Light up, Arbiter of Light not learned, the second heal equals the first",
+      "actor": "control",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "control",
+      "relative_to": "control_first_heal",
+      "ratio_to": "control_first_heal",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "add_item",
+      "actor": "no_vow",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "no_vow",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "no_vow",
+      "item": 477
+    },
+    {
+      "action": "equip",
+      "actor": "no_vow",
+      "item": 477,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 228,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "no_vow",
+      "spell": 800611
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "no_vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "no_vow",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "no_vow",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "no_vow",
+      "spell": 800611,
+      "target": "no_vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "no_vow: the first Gavel of Light heals its caster",
+      "actor": "no_vow",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "no_vow",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "no_vow",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "no_vow",
+      "save_as": "no_vow_first_heal"
+    },
+    {
+      "action": "learn",
+      "actor": "no_vow",
+      "spell": 302914
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "no_vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "no_vow",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "no_vow",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "no_vow",
+      "spell": 800611,
+      "target": "no_vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "no_vow: the second Gavel of Light heals its caster",
+      "actor": "no_vow",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "no_vow",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "no Vow of Light: Arbiter of Light learned adds nothing to the heal",
+      "actor": "no_vow",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "no_vow",
+      "relative_to": "no_vow_first_heal",
+      "ratio_to": "no_vow_first_heal",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "add_item",
+      "actor": "vow",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "vow",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "vow",
+      "item": 477
+    },
+    {
+      "action": "equip",
+      "actor": "vow",
+      "item": 477,
+      "slot": 17
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 228,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "vow",
+      "spell": 800611
+    },
+    {
+      "action": "learn",
+      "actor": "vow",
+      "spell": 807547
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 807547
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 807547,
+      "target": "vow"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "vow",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 800611,
+      "target": "vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "vow: the first Gavel of Light heals its caster",
+      "actor": "vow",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "vow",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "vow: Vow of Light is active at the first Gavel of Light",
+      "actor": "vow",
+      "metric": "aura",
+      "spell": 807547,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "vow",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "vow",
+      "save_as": "vow_first_heal"
+    },
+    {
+      "action": "learn",
+      "actor": "vow",
+      "spell": 302914
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 807547
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 807547,
+      "target": "vow"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 800611
+    },
+    {
+      "action": "set_health",
+      "actor": "vow",
+      "value": 5000,
+      "maximum": 10000
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 800611,
+      "target": "vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "vow: the second Gavel of Light heals its caster",
+      "actor": "vow",
+      "metric": "spell_heal_count",
+      "spell": 707522,
+      "target": "vow",
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "vow: Vow of Light is active at the second Gavel of Light",
+      "actor": "vow",
+      "metric": "aura",
+      "spell": 807547,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING Vow of Light up: Arbiter of Light adds its 100% share, the second heal is three times the first (150% against 50%)",
+      "actor": "vow",
+      "metric": "spell_heal_total",
+      "spell": 707522,
+      "target": "vow",
+      "relative_to": "vow_first_heal",
+      "ratio_to": "vow_first_heal",
+      "min": 2.85,
+      "max": 3.15
+    }
+  ]
+}

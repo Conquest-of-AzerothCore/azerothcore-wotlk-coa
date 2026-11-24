@@ -24,6 +24,7 @@ from expiry import BEHAVIOUR_EXPIRY
 from hits import NEVER_CAST, NO_HIT_EFFECT, UNMODELLED
 from kinds import kind_modules, kind_rows
 from metric_delta_options import option_rows
+from metric_delta_options.use_time_contrast import METRICS as USE_TIME_METRICS, NAME as USE_TIME_CONTRAST
 from passives import PASSIVE_DELTA, POWER_NAMES, RATING_NAMES
 from procs import DELTA_CHECK, PROC_CHECK, PROC_ENERGIZE_CHECK
 from profile import DbcSetMismatch, require_server_sha
@@ -410,7 +411,8 @@ METRIC_EVIDENCE = {
                      'cast_failure', 'timeline_count', 'timeline_first_ms', 'timeline_interval_min_ms',
                      'timeline_interval_max_ms', 'timeline_interval_median_ms', 'event_first_ms',
                      'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk',
-                     'spell_absorb_total', 'spell_log_count', 'nearby_creature_at_client', 'spell_go_count',
+                     'spell_absorb_total', 'spell_damage_with_resist_total', 'spell_log_count',
+                     'nearby_creature_at_client', 'spell_go_count',
                      'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits',
                      'pet_melee_blocked', 'health', 'owned_creature_avoided_count', 'owned_creature_attack_count',
                      'owned_creature_health', 'server_packets', 'server_packet_u32',
@@ -424,9 +426,12 @@ METRIC_EVIDENCE = {
                      'spell_done_crit_chance', 'spell_taken_crit_chance', 'melee_damage_done', 'aoe_damage_taken',
                      'script_spell_damage_taken', 'spell_damage_taken', 'melee_damage_taken',
                      'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune',
-                     'owned_aura', 'owned_creature_aura_max_duration_ms'),
+                     'owned_aura', 'owned_creature_aura_max_duration_ms', 'armor_reduced_damage',
+                     'script_melee_damage_dealt', 'spell_done_crit_chance_scripted', 'critical_block_chance',
+                     'dynamic_object_radius', 'dynamic_object_size'),
                     READBACK),
     **dict.fromkeys(('stat', 'stat_exact', 'armor', 'combat_rating', 'melee_hit_chance', 'spell_hit_chance',
+                     'unit_flag_set',
                      'expertise', 'spell_power', 'attack_power', 'ranged_attack_power', 'max_health', 'max_power',
                      'power', 'run_speed_rate', 'attack_time_ms', 'parry_chance', 'dodge_chance', 'block_chance',
                      'melee_crit_chance', 'melee_crit_chance_refreshed', 'ranged_taken_crit_chance', 'spell_crit_chance',
@@ -442,8 +447,8 @@ METRIC_EVIDENCE = {
                      'owned_creature_react_state', 'nearest_creature_distance', 'casting',
                      'item_count', 'track_creature_type', 'owned_creature_stat', 'owned_creature_display',
                      'distance_2d', 'point_distance_2d', 'can_detect', 'temporary_spell_replacement',
-                     'owned_creature_remaining_ms', 'rooted', 'carried_aura_count', 'unit_scale',
-                     'melee_crit_taken_chance', 'display_of_creature'), STATE),
+                     'owned_creature_remaining_ms', 'block_value', 'school_prohibited', 'rooted', 'carried_aura_count',
+                     'unit_scale', 'melee_crit_taken_chance', 'display_of_creature'), STATE),
     'enemy_player_aura_duration_ms': READBACK,
     **dict.fromkeys(('healing_power', 'swim_speed_rate', 'skill_bonus', 'mana_regen_interrupted'), STATE),
     'combat_rating_bonus': STATE,
@@ -458,9 +463,11 @@ STATE_PROMISES = {
     'spell_power': r'spell power|spell damage',
     'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
     'max_health': r'maximum health', 'owned_creature_max_health': r'maximum health', 'max_power': POWER_WORDS,
-    'power': rf'{POWER_WORDS}|\bcosts?', 'run_speed_rate': r'movement speed|run speed|slow\w*',
+    'power': rf'{POWER_WORDS}|\bcosts?', 'unit_flag_set': r'disarm\w*',
+    'run_speed_rate': r'movement speed|run speed|slow\w*',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
-    'block_chance': r'block', 'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
+    'block_chance': r'block', 'block_value': r'block value',
+    'melee_crit_chance': CRIT_WORDS, 'melee_crit_chance_refreshed': CRIT_WORDS,
     'ranged_taken_crit_chance': CRIT_WORDS, 'spell_crit_chance': CRIT_WORDS, 'weapon_damage_min': r'weapon damage', 'resistance': r'resistances?',
     'mana_regen': r'mana regenerat\w*', 'moving': r'flee\w*|moving', 'threat': r'threat',
     'owned_creature_attack_time_ms': r'haste|attack speed', 'owned_creature_crit_chance': CRIT_WORDS,
@@ -481,17 +488,20 @@ STATE_PROMISES = {
     'owned_creature_spell_crit_chance': CRIT_WORDS,
     'owned_creature_school_spell_crit_chance': CRIT_WORDS,
     'spell_done_crit_chance': CRIT_WORDS,
+    'spell_done_crit_chance_scripted': CRIT_WORDS,
     'spell_taken_crit_chance': CRIT_WORDS,
+    'critical_block_chance': r'critical block',
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
     'owned_creature_react_state': r'aggres+ive|defensive|passive',
-    'casting': r'\bcast\w*|haste|all actions',
+    'casting': r'\bcast\w*|haste|all actions|interrupt\w*',
     'item_count': r'creat\w*|brew\w*|conjur\w*',
     'distance_2d': r'location|hook\w*|pull\w*',
     'point_distance_2d': r'leap\w*|range|yds?',
     'can_detect': r'seen|detect\w*|stealth\w*',
     'temporary_spell_replacement': r'transform\w*|replac\w*|last \w+ consumed',
     'owned_creature_remaining_ms': r'lasts?|duration',
+    'school_prohibited': r'interrupt\w*|lock(?:s|ed|ing)? out|lockout|for \$\d*d',
     'healing_power': r'healing power|healing done', 'swim_speed_rate': r'swim\w*',
     'skill_bonus': r'skill', 'mana_regen_interrupted': r'mana regenerat\w*',
     'combat_rating_bonus': RATING_WORDS,
@@ -519,9 +529,17 @@ CONTRAST_PROOF = {
     'owned_creature_school_spell_crit_chance': LEARNED_CONTRAST,
     'enemy_player_aura_duration_ms': LEARNED_CONTRAST,
     'spell_done_crit_chance': LEARNED_CONTRAST,
+    'spell_done_crit_chance_scripted': LEARNED_CONTRAST,
     'spell_taken_crit_chance': LEARNED_CONTRAST,
     'ranged_taken_crit_chance': LEARNED_CONTRAST,
+    'critical_block_chance': LEARNED_CONTRAST,
 }
+PARTNERED_CONTRASTS = frozenset({'spell_done_crit_chance_scripted', 'critical_block_chance'})
+PLAIN_CRIT_NAME = r"[A-Z][\w'’]*(?: [A-Z][\w'’]*)*"
+PLAIN_CRIT_SENTENCE = re.compile(rf'Increases (?:your critical strike chance|the critical strike chance of '
+                                 rf'{PLAIN_CRIT_NAME}(?:(?:, | and ){PLAIN_CRIT_NAME})*) by \$\d*s\d+%\.?')
+PLAIN_USE_TIME_SENTENCE = re.compile(rf'Reduces the cast time of {PLAIN_CRIT_NAME}(?:(?:, | and ){PLAIN_CRIT_NAME})* by '
+                                     rf'\$\d*s\d+%\.?')
 KIND_ROW_TABLES = {'EVIDENCE': EVIDENCE, 'METRIC_EVIDENCE': METRIC_EVIDENCE, 'STATE_PROMISES': STATE_PROMISES,
                    'CONTRAST_PROOF': CONTRAST_PROOF}
 KIND_ROW_OVERRIDES = frozenset()
@@ -695,9 +713,62 @@ def promised_state(verdict: Verdict, clause: str, promise: str = '') -> bool:
     return words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None
 
 
+def conditional_text(text: str) -> bool:
+    return PLAIN_CRIT_SENTENCE.fullmatch(text.strip()) is None
+
+
+def spell_sentence(clause: dict, clauses: list[dict]) -> str:
+    return ' '.join(other.get('clause', '') for other in clauses if other.get('spell') == clause.get('spell'))
+
+
+def partners_hold(verdict: Verdict, text: str, partners: tuple[Verdict, ...]) -> bool:
+    metric = (verdict.detail or {}).get(PASSIVE_METRIC)
+    if metric not in PARTNERED_CONTRASTS:
+        return True
+    gains = [other.expected for other in partners
+             if other.status in CONFORMANT and other.status != 'closed' and other.check == verdict.check
+             and (other.detail or {}).get(PASSIVE_METRIC) == metric
+             and (other.detail or {}).get(CONTRAST) == LEARNED_CONTRAST and other.expected is not None]
+    return any(gain != 0 for gain in gains) and (not conditional_text(text) or any(gain == 0 for gain in gains))
+
+
+def opted_use_time(verdict: Verdict) -> bool:
+    detail = verdict.detail or {}
+    return detail.get(PASSIVE_METRIC) in USE_TIME_METRICS and isinstance(detail.get(USE_TIME_CONTRAST), dict)
+
+
+def required_contrast(verdict: Verdict) -> str | None:
+    return LEARNED_CONTRAST if opted_use_time(verdict) else contrast_proof().get(verdict.detail[PASSIVE_METRIC])
+
+
+def use_time_partners_hold(verdict: Verdict, text: str, partners: tuple[Verdict, ...]) -> bool:
+    metric = verdict.detail[PASSIVE_METRIC]
+    arms = verdict.detail[USE_TIME_CONTRAST].get('arms') or []
+    held = {other.label: other for other in partners
+            if other.label in arms and other.status in CONFORMANT and other.status != 'closed'
+            and other.check == verdict.check and opted_use_time(other)
+            and other.detail[PASSIVE_METRIC] == metric and other.detail.get(CONTRAST) == LEARNED_CONTRAST
+            and None not in (other.measured, other.expected, other.low, other.high)
+            and other.detail[USE_TIME_CONTRAST].get('gain') == other.expected}
+    if set(held) != set(arms):
+        return False
+    gains = [other.expected for other in held.values()]
+    moved = [abs(gain) for gain in gains if gain != 0]
+    if not moved or any(abs(other.measured - other.expected) > (other.high - other.low) / 2
+                        or (other.high - other.low) / 2 >= min(moved) / 2 for other in held.values()):
+        return False
+    conditional = PLAIN_USE_TIME_SENTENCE.fullmatch(text.strip()) is None
+    return not conditional or any(gain == 0 for gain in gains)
+
+
+def judged_sentence(clause: str, sentence: str) -> str:
+    return sentence if clause.strip() in sentence else f'{clause} {sentence}'
+
+
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
                      seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset(),
-                     row: str = '', promise: str = '') -> str:
+                     row: str = '', promise: str = '', partners: tuple[Verdict, ...] = (),
+                     sentence: str | None = None) -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = evidence_classes()[verdict.check]
@@ -714,8 +785,10 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
         return BEHAVIOUR
     observed = metric_class(verdict)
     detail = verdict.detail or {}
-    required = contrast_proof().get(detail[PASSIVE_METRIC])
-    if required is not None and detail.get(CONTRAST) == required:
+    required = required_contrast(verdict)
+    judged = judged_sentence(clause, row if sentence is None else sentence)
+    gate = use_time_partners_hold if opted_use_time(verdict) else partners_hold
+    if required is not None and detail.get(CONTRAST) == required and gate(verdict, judged, partners):
         words = state_promises().get(detail[PASSIVE_METRIC])
         if words is None or re.search(rf'\b(?:{words})\b', f'{clause} {row} {promise}', re.IGNORECASE) is not None:
             return BEHAVIOUR
@@ -751,15 +824,22 @@ def bonus_terms_unproven(matched: list[Verdict]) -> bool:
     return not hits
 
 
+def row_verdicts(labels: list[str], by_label: dict[str, Verdict], statuses: dict[str, str]) -> tuple[Verdict, ...]:
+    return tuple(by_label[match] for label in labels for match in resolved_labels(label, statuses))
+
+
 def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
-                   promoted: frozenset[str] = frozenset(), row: str = '', promise: str = '') -> str:
+                   promoted: frozenset[str] = frozenset(), row: str = '', promise: str = '',
+                   row_labels: list[str] | None = None, sentence: str | None = None) -> str:
     labels = claim['labels']
     if not clause_proven(labels, statuses):
         return UNPROVEN
     matched = [by_label[match] for label in labels for match in resolved_labels(label, statuses)]
     if bonus_terms_unproven(matched):
         return UNPROVEN
-    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise)
+    partners = tuple(matched) if row_labels is None else row_verdicts(row_labels, by_label, statuses)
+    found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise,
+                              partners=partners, sentence=sentence)
              for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 
@@ -773,7 +853,7 @@ def claims_evidence(found: list[str]) -> str:
 def clause_evidence(clause: dict, by_label: dict[str, Verdict], statuses: dict[str, str],
                     promoted: frozenset[str] = frozenset()) -> str:
     return claims_evidence([claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''),
-                                           promise_words(clause))
+                                           promise_words(clause), clause_labels(clause))
                             for claim in clause_claims(clause)])
 
 
@@ -819,7 +899,7 @@ def clause_coverage(clauses: list[dict], verdicts: list[Verdict], build: str | N
     not_consumed = frozenset(label for label, result in results.items() if result == NOT_CONSUMED)
     claims = [clause for clause in clauses if clause.get('kind') == 'claim']
     per_claim = [[claim_evidence(claim, by_label, statuses, promoted, clause.get('clause', ''),
-                                 promise_words(clause))
+                                 promise_words(clause), clause_labels(clause), spell_sentence(clause, clauses))
                   for claim in subject_claims(clause, clauses)]
                  for clause in claims]
     project_text = [clause for clause in claims if not independent_text(clause)]

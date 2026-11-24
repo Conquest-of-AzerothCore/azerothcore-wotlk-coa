@@ -14,6 +14,30 @@ enum BattleClericSpells : uint32
     SPELL_PARAGON = 680639
 };
 
+class spell_ascension_battle_cleric_paragon : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_battle_cleric_paragon);
+
+    bool Load() override
+    {
+        return GetSpellInfo()->Id == SPELL_PARAGON && GetCaster()->IsPlayer() &&
+            GetCaster()->getClass() == CLASS_SUN_CLERIC;
+    }
+
+    void ShortenCooldown()
+    {
+        Player* player = GetCaster()->ToPlayer();
+        if (!GetSpell()->HasTriggeredCastFlag(TRIGGERED_IGNORE_SPELL_AND_CATEGORY_CD) &&
+            player->HasAura(SPELL_BATTLE_CLERIC, player->GetGUID()))
+            player->ModifySpellCooldown(SPELL_PARAGON, -240000);
+    }
+
+    void Register() override
+    {
+        AfterCast += SpellCastFn(spell_ascension_battle_cleric_paragon::ShortenCooldown);
+    }
+};
+
 class aura_ascension_battle_cleric : public AuraScript
 {
     PrepareAuraScript(aura_ascension_battle_cleric);
@@ -26,11 +50,9 @@ class aura_ascension_battle_cleric : public AuraScript
             GetCaster()->getClass() == CLASS_SUN_CLERIC;
     }
 
-    void Apply(AuraEffect const*, AuraEffectHandleModes mode)
+    void Apply(AuraEffect const*, AuraEffectHandleModes)
     {
         Unit* player = GetTarget();
-        if (GetId() == SPELL_PARAGON && (mode & AURA_EFFECT_HANDLE_REAL) && player->HasAura(SPELL_BATTLE_CLERIC, player->GetGUID()))
-            player->ToPlayer()->ModifySpellCooldown(SPELL_PARAGON, -240000);
         uint32 required = GetId() == SPELL_PARAGON ? SPELL_BATTLE_CLERIC : SPELL_PARAGON;
         if (!player->HasAura(required, player->GetGUID()))
             return;
@@ -90,5 +112,6 @@ public:
 void AddSC_AscensionSunClericBattleCleric()
 {
     new sun_cleric_battle_cleric_metadata();
-    RegisterSpellScript(aura_ascension_battle_cleric);
+    RegisterSpellAndAuraScriptPairWithArgs(spell_ascension_battle_cleric_paragon, aura_ascension_battle_cleric,
+        "aura_ascension_battle_cleric");
 }
