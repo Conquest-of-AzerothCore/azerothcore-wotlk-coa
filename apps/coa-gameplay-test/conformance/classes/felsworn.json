@@ -18509,6 +18509,504 @@
       "setup_target": "caster",
       "setup_wait_ms": 1700,
       "setup_only_after": true
+    },
+    {
+      "spell": 800188,
+      "name": "Spite (dodge chance, Agility held)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "and dodge chance by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 800188,
+      "target": "caster",
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 4,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          804802,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          8116,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8116,
+          0,
+          -9
+        ]
+      ],
+      "observe_source": "800188 Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT, EffectBasePoints 2 + 1 = 3 ($s2). The caster's live dodge percentage (dodge_chance) is read before and after a real learn of 800188 (the reading before is the control). Effect[0] (aura 137 MOD_TOTAL_STAT_PERCENTAGE, Agility x1.08) also raises Agility and Agility gives dodge, so its share is held out of the contrast as in Dark Penance 807907 (witch_hunter dodge entry): in the learned phase only, Agility 8116 (Effect[0] aura 29 MOD_STAT, MiscValue 1) is set on the caster with its amount changed to -9 (phase_aura_amounts, a precondition fixture, not the claim's subject): (130 - 9) x 1.08 = 130.68, truncated to 130, the unlearned phase's Agility (reference stat 1), so the gain is the direct term alone, 3 within 0.01 (G-19, a deterministic read judged to its rounding); the agility_held entry reads the Agility in both phases. Stoicism 804802 (Effect[0] aura 49 MOD_DODGE_PERCENT) is set on the caster in both phases as a precondition fixture to lift the dodge sum clear of the floor of Player::UpdateDodgePercentage (before_expected 1: a before reading of at least 1 shows the sum is not clamped at 0). Bless 804247 is the harmless self cast of both phases. Reference search 2026-11-24: coa-history spell 800188: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference bindmysoul talents snapshot: Spite 800188 'Increases your Agility by 8% and dodge chance by 3%.', same figures; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800188,
+      "name": "Spite (Agility held for the dodge contrast)",
+      "kind": "metric_delta",
+      "variant": "agility_held",
+      "label_suffix": "agility_held",
+      "quote": "and dodge chance by $s2%.",
+      "trigger_spell": 804247,
+      "gate_spell": 800188,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 130,
+      "expected": 130,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "after_auras": [
+        [
+          8116,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8116,
+          0,
+          -9
+        ]
+      ],
+      "observe_source": "The dodge entry's configuration read on Agility (metric stat 1): before 800188 is learned 130 (reference stat 1), after it is learned with Agility 8116 set at -9 (the dodge entry's fixture) still 130: (130 - 9) x 1.08 = 130.68, truncated. It shows that the Agility share of dodge cancels in the dodge entry's gain. The Agility entry of 800188 reads 140.4 without the fixture."
+    },
+    {
+      "spell": 802108,
+      "name": "Hidden Power (Inner Demon adds spell power from Spirit)",
+      "kind": "metric_delta",
+      "variant": "inner_spell_power",
+      "label_suffix": "inner_spell_power",
+      "quote": "In addition, Inner Demon now increases your spell damage and critical strike rating by an additional $801208s2% of your Spirit.",
+      "trigger_spell": 804247,
+      "gate_spell": 802108,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 22.6,
+      "expected_gain": 22.6,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "AscensionFelsworn.cpp:272 (Refresh) casts Demon Form (Felblood) 801208 on the caster while Inner Demon 804216 is on the caster and 802108 is known. 801208 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT, MiscValue 127, MiscValueB 4 (Spirit), BasePoints 19 + 1 = 20 ($801208s2). The caster's Shadow spell power is read before (control: Inner Demon set, 802108 unknown) and after a real learn of 802108: the 15% of Intellect 34 and 15% of Spirit 50 of the first clause (5.1 + 7.5 = 12.6, the spell_power entry) plus 20% of Spirit 50 = 10, a gain of 22.6, tolerance 1.0 for the integer parts so that the 12.6 of the same learn without Inner Demon is excluded. Inner Demon 804216 (DurationIndex 0, infinite) is set on the caster in both phases by harness set_aura as a precondition fixture (it is not the claim's subject; the 574140 True Self entry does the same). Bless 804247 is the harmless self cast. Reference search 2026-11-24: coa-history spell 802108: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference bindmysoul talents snapshot: Hidden Power 802108 text says 'critical strike chance' where our DBC says 'critical strike rating' (an older state, the tooltip and DBC prevail, G-9); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 802108,
+      "name": "Hidden Power (Inner Demon adds spell critical strike rating from Spirit)",
+      "kind": "metric_delta",
+      "variant": "inner_crit_rating",
+      "label_suffix": "inner_crit_rating",
+      "quote": "In addition, Inner Demon now increases your spell damage and critical strike rating by an additional $801208s2% of your Spirit.",
+      "trigger_spell": 804247,
+      "gate_spell": 802108,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "801208 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 1024 (bit 10, CR_CRIT_SPELL), MiscValueB 4 (Spirit), BasePoints 19 + 1 = 20 ($801208s2 is the same 20 of Effect[1]). The caster's spell critical strike rating (PLAYER_FIELD_COMBAT_RATING_1 + 10) is read before (control: Inner Demon set, 802108 unknown) and after a real learn of 802108: 20% of Spirit 50 = 10 within 1.0 for the integer part. Same fixtures as the inner_spell_power entry. Reference search as inner_spell_power."
+    },
+    {
+      "spell": 800239,
+      "name": "Malice of Gul'dan (Fragment of Malice restores Energy)",
+      "kind": "metric_delta",
+      "variant": "fragment_energy",
+      "label_suffix": "fragment_energy",
+      "quote": "Restores $s2 Energy",
+      "trigger_spell": 800239,
+      "gate_spell": 800214,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 800239,
+        "power": 3
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "800239 Effect[1] SPELL_EFFECT_ENERGIZE (30), MiscValue 3 (Energy), BasePoints 4 + 1 = 5 ($s2). The handler casts Fragment of Malice on the caster (AscensionFelswornEvents.cpp:227-229, Cast(player, player, 800239)); the entry casts the same spell on the caster for real and sums the energize events of 800239 on the caster: 0 before (control: no cast) and 5 after, a hit actually applied, so the read does not depend on the Energy regeneration. How the passive grants the Fragment is the proc_rate part of the clause, not this one. Reference search 2026-11-24: coa-history spell 800239: SPELL_ENERGIZE 4744 events by players in 6 logs, min 5 max 5 mean 5.0 (the figure of the tooltip); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800239,
+      "name": "Malice of Gul'dan (Fragment of Malice raises the critical strike chance, spell_crit_chance)",
+      "kind": "metric_delta",
+      "variant": "fragment_crit_spell",
+      "label_suffix": "fragment_crit_spell",
+      "quote": "and increases your critical strike chance by $s1% for $d.",
+      "trigger_spell": 800239,
+      "gate_spell": 800214,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "800239 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 9 + 1 = 10 ($s1). The caster's live spell_crit_chance percentage is read before (control: no cast) and after one real cast of Fragment of Malice 800239 on the caster, the spell the handler casts (AscensionFelswornEvents.cpp:227-229): a gain of 10 points within 0.01 (G-19, a deterministic read judged to its rounding). The duration part of the clause is the fragment_duration entry. Reference search 2026-11-24: coa-history spell 800239: SPELL_AURA_APPLIED 678 and SPELL_AURA_REMOVED 678 events by players in 6 logs, no value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800239,
+      "name": "Malice of Gul'dan (Fragment of Malice raises the critical strike chance, melee_crit_chance_refreshed)",
+      "kind": "metric_delta",
+      "variant": "fragment_crit_melee",
+      "label_suffix": "fragment_crit_melee",
+      "quote": "and increases your critical strike chance by $s1% for $d.",
+      "trigger_spell": 800239,
+      "gate_spell": 800214,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "melee_crit_chance_refreshed",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "800239 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 9 + 1 = 10 ($s1). The caster's live melee_crit_chance_refreshed percentage (the crit field read after a harness-forced UpdateCritPercentage, G-21 point 5: the first pair read the unrefreshed field 0 before and 14.32 after) is read before (control: no cast) and after one real cast of Fragment of Malice 800239 on the caster, the spell the handler casts (AscensionFelswornEvents.cpp:227-229): a gain of 10 points within 0.01 (G-19, a deterministic read judged to its rounding). The duration part of the clause is the fragment_duration entry. Reference search 2026-11-24: coa-history spell 800239: SPELL_AURA_APPLIED 678 and SPELL_AURA_REMOVED 678 events by players in 6 logs, no value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (Inner Demon slows affected enemies melee haste)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 1000,
+      "expected": 1200,
+      "expected_ratio": 1.2,
+      "tolerance": 0.01,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "578317 Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints -21 + 1 = -20 ($578317s1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 578317 on every enemy it strikes when Inner Demon is active (AscensionFelswornAuras.cpp:246-247). The dummy's base attack time (UNIT_FIELD_BASEATTACKTIME, hand 0) is read before (control: no cast) and 1000 ms after the channel end of a real Carve. Convention of the stock engine, as ruled for Sacred Swing 572769 (templar attack_slow entry, 301061 aura 192 -20): Unit::ApplyAttackTimePercentMod multiplies the attack time by 1.2 for a negative amount, so haste reduced by 20% reads as attack time x1.2; a literal 20% fewer attacks per second would be x1.25, which the judge excludes (ratio 1.2 within 0.01). The before reading must reach 1000. Felfury 800058 x6, 803468 and Inner Demon 804216 are set on the caster by harness set_aura in both phases as precondition fixtures (the claim's subject is Carve's effect on the enemy), as in the consumes entry. Reference search 2026-11-24: coa-history spell 578317: SPELL_AURA_APPLIED 480, SPELL_AURA_REMOVED 480, SPELL_AURA_REFRESH 181 events by players in 3 logs, no value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (Inner Demon slows affected enemies ranged haste)",
+      "kind": "metric_delta",
+      "variant": "ranged_haste",
+      "label_suffix": "ranged_haste",
+      "quote": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 2
+      },
+      "before_expected": 1000,
+      "expected": 1200,
+      "expected_ratio": 1.2,
+      "tolerance": 0.01,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "578317 Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints -21 + 1 = -20 ($578317s1). The same aura slows the ranged timer: Unit::ApplyAttackTimePercentMod runs for the ranged attack too. The dummy's ranged attack time (UNIT_FIELD_BASEATTACKTIME, hand 2, read as in Sun Cleric 300327 ranged_haste, attack_time_ms hand 2 on the dummy) is read before (control: no cast) and after a real Carve with Inner Demon: x1.2 within 0.01, the convention of Templar 572769 attack_slow (classes/templar.json, 301061 aura 192 -20, 2000 -> 2400); a literal x1.25 is excluded. Fixtures and convention as the melee haste entry. Reference search 2026-11-24: coa-history spell 578317: events by players in 3 logs, no value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (slowed haste held around its duration)",
+      "kind": "metric_delta",
+      "variant": "haste_held",
+      "label_suffix": "haste_held",
+      "quote": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 578317
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 10000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "game_time": {
+        "after": [
+          9950,
+          10150
+        ]
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "578317 DurationIndex 31 gives 8000 ms ($578317d, SpellDuration.dbc); the channel of 800206 lasts 2500 ms (DurationIndex 66) and the aura is cast when it ends. The aura is still on the dummy 10000 ms after the cast, 7500 ms after the channel end (0.94 of 8000, excludes a duration 10% short, 7200 ms); the before read, absent, is the control. Fixtures as the haste entry. Reference search as the haste entry."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (slowed haste gone around its duration)",
+      "kind": "metric_delta",
+      "variant": "haste_gone",
+      "label_suffix": "haste_gone",
+      "quote": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 578317
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 11100,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "game_time": {
+        "after": [
+          11050,
+          11250
+        ]
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "578317 DurationIndex 31 gives 8000 ms ($578317d, SpellDuration.dbc); the channel of 800206 lasts 2500 ms (DurationIndex 66) and the aura is cast when it ends. The aura is gone 11100 ms after the cast, 8600 ms after the channel end (1.075 of 8000, excludes a duration 10% long, 8800 ms); the before read, absent, is the control. Fixtures as the haste entry. Reference search as the haste entry."
+    },
+    {
+      "spell": 707527,
+      "name": "Hateforged Barrier (Physical damage taken)",
+      "kind": "taken_hit",
+      "variant": "physical_taken",
+      "label_suffix": "physical_taken",
+      "judge": "damage_ratio",
+      "expected": 0.8792,
+      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 4,
+      "strikes": 40,
+      "settle_ms": 50,
+      "arms": [
+        {
+          "name": "control",
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 707527,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              707527,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 707527,
+              "equals": 1
+            }
+          ],
+          "casts": [
+            [
+              707527,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2); Effect[0] is the absorb aura 69 (752 + Stamina x 1, Stamina 79 of the reference stats = 831). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster 40 times per trial in each arm, 4 trials, the barrier recast before each treatment trial. The logged damage is taken after the absorb, so the expected mean per strike is (40 x 1000 x 0.90 - 831) / (40 x 1000) = 0.8792, against 0.9792 if the 10% were not applied: the 831 of the first strike is the same absorb in either case, and 40 strikes make its weight 2 points of the ratio, small beside the 10 points of the claim. Control arm: no barrier, 1000 per strike. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; ~/CoaServer/reference bindmysoul talents snapshot: Hateforged Barrier 705129 text differs (a regeneration clause, an older state); expected values come from the tooltip and the DBC only. The control for this entry is the rank 1 entry 705129 below, whose Effect[1] carries MiscValue 1. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
+    },
+    {
+      "spell": 705129,
+      "name": "Hateforged Barrier rank 1 (Physical damage taken, control of rank 707527)",
+      "kind": "taken_hit",
+      "variant": "physical_taken",
+      "label_suffix": "physical_taken",
+      "judge": "damage_ratio",
+      "expected": 0.8902,
+      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 4,
+      "strikes": 40,
+      "settle_ms": 50,
+      "arms": [
+        {
+          "name": "control",
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 705129,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              705129,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 705129,
+              "equals": 1
+            }
+          ],
+          "casts": [
+            [
+              705129,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "705129 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 1 (Physical), BasePoints -11 + 1 = -10 ($s2); Effect[0] aura 69 absorbs 176 + 1..32 + 2.45 per level (60 x 2.45 = 147) + Stamina 79 x 1, about 419. Same design as the 707527 entry (Void Zone 92559, 40 strikes, 4 trials, barrier recast per trial): expected mean (40 x 0.90 x 954 - 419) / (40 x 954) = 0.8902, 0.9803 if the 10% were not applied; the 2-point band holds any absorb of this rank. Control entry: rank 1 carries MiscValue 1 in the DBC where ranks 2 to 6 (707523 to 707527) carry MiscValue 0. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
     }
   ],
   "player_observations": [],
