@@ -510,7 +510,7 @@ STATE_PROMISES = {
     'unit_scale': r'size|scale',
     'melee_crit_taken_chance': rf'{CRIT_WORDS}|critically strike',
     'display_of_creature': r'transform\w*',
-    'carried_aura_count': r'empower\w*',
+    'carried_aura_count': r'empower\w*|steal(?:s|ing)?|stolen',
 }
 EVENT_PROMISES = {'spell_go_count': r'unleash\w*|cast\w*'}
 CONTRAST_CHECKS = frozenset({PASSIVE_DELTA, BEHAVIOUR_METRIC_DELTA, BEHAVIOUR_PARTY_STAT_RATIO})

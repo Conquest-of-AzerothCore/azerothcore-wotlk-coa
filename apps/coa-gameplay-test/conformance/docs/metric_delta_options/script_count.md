@@ -22,3 +22,15 @@ The generator refuses the opted entry unless:
 
 Felsworn: Annihilation 803904 (0 without the cast, 5 after it, "Lasts for $n attacks"), Pit Lord's Strength 802076 and
 802110 (5 without the talent, 6 and 7 with it, "affects $s1 additional attack").
+
+`swings` (ADR 1270, optional, noun `attack` only) is a positive count of reference swing intervals. After each real
+cast of `trigger_spell` the scenario reads the count (`<reading> cast count`) and the caster's `melee_damage_count`
+(`<reading> cast landed`), auto-attacks the dummy for `swings` intervals, stops, and after the reading reads
+`melee_damage_count` again (`<reading> landed`). Each reading of a cast arm becomes the count plus the attacks landed
+since the cast, and is missing (the plain judge alerts) unless at least one attack landed, the count is strictly
+below the cast count, and the count plus the landed attacks equals the cast count (one count per landed attack,
+mentor D-95). An uncast before arm (driver `absent`) keeps its plain count and has no swings. Refused: a window whose
+landed-attack bound is not below the least expected count of a cast arm (the aura could end inside the window); the
+bound sums `window // speed + 1` over every melee hand the scenario equips, since `melee_damage_count` counts both
+hands. Untested by the rule: missed or avoided swings (only landed attacks count) and the aura's end at the last
+count. Felsworn: Annihilation 803904, Pit Lord's Strength 802076 and 802110 (`consumed`, 1 swing, both hands).
