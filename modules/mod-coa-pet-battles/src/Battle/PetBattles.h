@@ -23,6 +23,7 @@ namespace CoAPetBattles::Battle
         void Logout(Player* player);
         void Shutdown();
         bool InBattle(Player* player) const;
+        size_t StandIns(Player* player) const;
 
     private:
         PetBattles();

@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Pet battles: forfeiting knocks out the whole team and ends the battle",
+  "contract": [
+    "Phase 4a. pbt|quit forfeits: every pet of the team is saved at 1 health, the battle ends and both",
+    "stand-ins are removed."
+  ],
+  "timeout_ms": 150000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 69 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 299 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 7380 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle fight 7380@1"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle state"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the battle runs with both stand-ins beside the player",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Pet battle: active, stand-ins 2",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|quit"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle state"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the battle is over and both stand-ins are gone",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Pet battle: none, stand-ins 0",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle journal"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "69 Timber Wolf ends at 1 health",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "69 Timber Wolf L5 q1 xp 0/280 picks 111 hp 1/",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "299 Young Wolf ends at 1 health",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "299 Young Wolf L5 q1 xp 0/280 picks 111 hp 1/",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "7380 Siamese Cat ends at 1 health",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "7380 Siamese Cat L5 q1 xp 0/280 picks 111 hp 1/",
+      "equals": 1
+    }
+  ]
+}

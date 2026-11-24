@@ -80,6 +80,7 @@ namespace
                 { "reload", HandleReload, SEC_GAMEMASTER, Console::No },
                 { "fight", HandleFight, SEC_GAMEMASTER, Console::No },
                 { "send", HandleSend, SEC_GAMEMASTER, Console::No },
+                { "state", HandleState, SEC_GAMEMASTER, Console::No },
             };
             static ChatCommandTable commands =
             {
@@ -285,6 +286,16 @@ namespace
                 return false;
             }
             sPetBattles->Message(player, message->module, message->action, message->payload);
+            return true;
+        }
+
+        static bool HandleState(ChatHandler* handler)
+        {
+            Player* player = handler->getSelectedPlayerOrSelf();
+            if (!player)
+                return false;
+            handler->SendSysMessage(std::string("Pet battle: ") + (sPetBattles->InBattle(player) ? "active" : "none") +
+                ", stand-ins " + std::to_string(sPetBattles->StandIns(player)));
             return true;
         }
 

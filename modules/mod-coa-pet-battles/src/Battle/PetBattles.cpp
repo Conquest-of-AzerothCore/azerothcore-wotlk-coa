@@ -200,6 +200,16 @@ namespace CoAPetBattles::Battle
             sPetJournals->SyncCompanions(Find(character));
         }
 
+        size_t StandIns(uint64_t character) const
+        {
+            size_t count = 0;
+            for (Side side : { Side::P, Side::E })
+                if (Creature* creature = StandIn(character, side))
+                    if (creature->IsInWorld())
+                        ++count;
+            return count;
+        }
+
     private:
         Creature* StandIn(uint64_t character, Side side) const
         {
@@ -290,5 +300,10 @@ namespace CoAPetBattles::Battle
     bool PetBattles::InBattle(Player* player) const
     {
         return player && _battles && _battles->InBattle(Character(player));
+    }
+
+    size_t PetBattles::StandIns(Player* player) const
+    {
+        return player ? _world->StandIns(Character(player)) : 0;
     }
 }
