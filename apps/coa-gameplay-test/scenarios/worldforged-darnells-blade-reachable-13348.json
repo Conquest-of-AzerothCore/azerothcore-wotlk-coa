@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Darnell's Blade pickup is reachable (#13348)",
+  "contract": "#13348 reported the Worldforged Darnell's Blade pickup (entry 638836, guid 6941613). At -7291.4, 1157.8, 4.458 on map 1 it floated 0.71 yd above the ground. Expected: the pickup stands at -7291.4, 1157.8, 3.745, rests on the ground, is not under water and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7290.4,
+    "y": 1157.8,
+    "z": 4.245,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 638836,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its corrected spot",
+      "metric": "spawn_distance",
+      "x": -7291.4,
+      "y": 1157.8,
+      "z": 3.745,
+      "max": 0.3,
+      "guid": 6941613,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup rests on the ground (-0.35 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 6941613,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941613,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 638836
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

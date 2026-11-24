@@ -7,33 +7,51 @@
 #include "GameTime.h"
 #include "Group.h"
 #include "Guild.h"
+#include "Log.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "QueryCallback.h"
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
 #include "Tokenize.h"
 #include "Util.h"
 #include "WorldSession.h"
 
+#include <algorithm>
 #include <array>
 #include <atomic>
+#include <chrono>
+#include <deque>
+#include <future>
+#include <iterator>
 #include <mutex>
 #include <utility>
 #include <vector>
 
 namespace
 {
+    constexpr uint32 FlushIntervalMs = 1000;
+    constexpr uint32 DropReportIntervalMs = MINUTE * IN_MILLISECONDS;
+    constexpr std::size_t RowsPerWrite = 500;
+    constexpr std::size_t DefaultMaxPendingRows = 20000;
+    constexpr uint32 CleanupBatch = 2000;
+
     std::atomic<bool> s_enabled{false};
     std::atomic<uint32> s_keepDays{30};
+    std::atomic<std::size_t> s_maxPendingRows{DefaultMaxPendingRows};
+    std::atomic<uint64> s_droppedRows{0};
     std::mutex s_mutex;
-    std::vector<CoAChatRow> s_rows;
+    std::deque<CoAChatRow> s_rows;
+    std::mutex s_writeMutex;
+    std::optional<TransactionFuture> s_write;
+    std::optional<uint32> s_cleanupCutoff;
+    std::optional<bool> s_cleanupRowsLeft;
+    std::optional<QueryCallback> s_cleanupProbe;
+    std::optional<TransactionFuture> s_cleanupDelete;
     std::mutex s_ignoreMutex;
     std::vector<std::string> s_ignoredChannels;
     std::vector<std::string> s_ignoredChannelMessageStarts;
-
-    constexpr uint32 FlushIntervalMs = 1000;
-    constexpr uint32 CleanupBatch = 10000;
     constexpr std::size_t NameLength = MAX_PLAYER_NAME;
     constexpr std::size_t ChannelLength = 64;
     constexpr std::size_t SubjectLength = 255;
@@ -90,6 +108,119 @@ namespace
                 return true;
         return false;
     }
+
+    CharacterDatabaseTransaction TakeWrite()
+    {
+        std::vector<CoAChatRow> rows;
+        {
+            std::lock_guard lock(s_mutex);
+            std::size_t const count = std::min(s_rows.size(), RowsPerWrite);
+            rows.reserve(count);
+            std::move(s_rows.begin(), s_rows.begin() + count, std::back_inserter(rows));
+            s_rows.erase(s_rows.begin(), s_rows.begin() + count);
+        }
+        if (rows.empty())
+            return nullptr;
+
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        for (CoAChatRow const& row : rows)
+        {
+            CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_CHAT_LOG);
+            stmt->SetData(0, row.time);
+            stmt->SetData(1, row.account);
+            stmt->SetData(2, row.guid);
+            stmt->SetData(3, row.name);
+            stmt->SetData(4, row.type);
+            stmt->SetData(5, row.lang);
+            stmt->SetData(6, row.team);
+            stmt->SetData(7, row.channel);
+            stmt->SetData(8, row.targetGuid);
+            stmt->SetData(9, row.targetAccount);
+            stmt->SetData(10, row.targetName);
+            stmt->SetData(11, row.groupId);
+            stmt->SetData(12, row.guildId);
+            stmt->SetData(13, row.map);
+            stmt->SetData(14, row.zone);
+            stmt->SetData(15, row.x);
+            stmt->SetData(16, row.y);
+            stmt->SetData(17, row.z);
+            stmt->SetData(18, row.emote);
+            stmt->SetData(19, row.mailId);
+            stmt->SetData(20, row.subject);
+            stmt->SetData(21, row.message);
+            trans->Append(stmt);
+        }
+        return trans;
+    }
+
+    bool Written(TransactionFuture& write)
+    {
+        if (write.get())
+            return true;
+        LOG_ERROR("coa", "CoA chat log: a write of up to {} coa_chat_log rows failed", RowsPerWrite);
+        return false;
+    }
+
+    bool WriteInFlight()
+    {
+        if (!s_write)
+            return false;
+        if (s_write->wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+            return true;
+        Written(*s_write);
+        s_write.reset();
+        return false;
+    }
+
+    bool FinishWrite()
+    {
+        if (!s_write)
+            return true;
+        bool const written = Written(*s_write);
+        s_write.reset();
+        return written;
+    }
+
+    void ContinueCleanup()
+    {
+        if (s_cleanupProbe)
+        {
+            if (!s_cleanupProbe->InvokeIfReady())
+                return;
+            s_cleanupProbe.reset();
+        }
+        if (s_cleanupDelete)
+        {
+            if (s_cleanupDelete->wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                return;
+            if (!s_cleanupDelete->get())
+                LOG_ERROR("coa", "CoA chat log: a cleanup batch of up to {} coa_chat_log rows failed", CleanupBatch);
+            s_cleanupDelete.reset();
+        }
+        if (!s_cleanupCutoff)
+            return;
+        if (s_cleanupRowsLeft == false)
+        {
+            s_cleanupCutoff.reset();
+            s_cleanupRowsLeft.reset();
+            return;
+        }
+        uint32 const cutoff = *s_cleanupCutoff;
+        if (s_cleanupRowsLeft == true)
+        {
+            s_cleanupRowsLeft.reset();
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            trans->Append("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+            s_cleanupDelete.emplace(std::move(CharacterDatabase.AsyncCommitTransaction(trans).m_future));
+            return;
+        }
+        s_cleanupProbe.emplace(CharacterDatabase.AsyncQuery(
+            Acore::StringFormat("SELECT 1 FROM coa_chat_log WHERE time < {} LIMIT 1", cutoff))
+            .WithCallback([cutoff](QueryResult result)
+            {
+                s_cleanupRowsLeft = s_cleanupCutoff == cutoff ? std::optional<bool>(bool(result)) : std::nullopt;
+            }));
+    }
 }
 
 bool CoAChatLog::Enabled()
@@ -144,55 +275,29 @@ void CoAChatLog::Record(CoAChatRow row)
     row.channel = Cut(row.channel, ChannelLength);
     row.subject = Cut(row.subject, SubjectLength);
     std::lock_guard lock(s_mutex);
+    if (s_rows.size() >= s_maxPendingRows.load(std::memory_order_relaxed))
+    {
+        s_droppedRows.fetch_add(1, std::memory_order_relaxed);
+        return;
+    }
     s_rows.push_back(std::move(row));
 }
 
 bool CoAChatLog::Flush(bool wait)
 {
-    std::vector<CoAChatRow> rows;
-    {
-        std::lock_guard lock(s_mutex);
-        rows.swap(s_rows);
-    }
-    if (rows.empty())
-        return true;
-
-    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
-    for (CoAChatRow const& row : rows)
-    {
-        CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_INS_COA_CHAT_LOG);
-        stmt->SetData(0, row.time);
-        stmt->SetData(1, row.account);
-        stmt->SetData(2, row.guid);
-        stmt->SetData(3, row.name);
-        stmt->SetData(4, row.type);
-        stmt->SetData(5, row.lang);
-        stmt->SetData(6, row.team);
-        stmt->SetData(7, row.channel);
-        stmt->SetData(8, row.targetGuid);
-        stmt->SetData(9, row.targetAccount);
-        stmt->SetData(10, row.targetName);
-        stmt->SetData(11, row.groupId);
-        stmt->SetData(12, row.guildId);
-        stmt->SetData(13, row.map);
-        stmt->SetData(14, row.zone);
-        stmt->SetData(15, row.x);
-        stmt->SetData(16, row.y);
-        stmt->SetData(17, row.z);
-        stmt->SetData(18, row.emote);
-        stmt->SetData(19, row.mailId);
-        stmt->SetData(20, row.subject);
-        stmt->SetData(21, row.message);
-        trans->Append(stmt);
-    }
-
+    std::lock_guard lock(s_writeMutex);
     if (!wait)
     {
-        CharacterDatabase.CommitTransaction(trans);
+        if (!WriteInFlight())
+            if (CharacterDatabaseTransaction trans = TakeWrite())
+                s_write.emplace(std::move(CharacterDatabase.AsyncCommitTransaction(trans).m_future));
         return true;
     }
-    TransactionCallback committed = CharacterDatabase.AsyncCommitTransaction(trans);
-    return committed.m_future.get();
+
+    bool written = FinishWrite();
+    while (CharacterDatabaseTransaction trans = TakeWrite())
+        written = CharacterDatabase.AsyncCommitTransaction(trans).m_future.get() && written;
+    return written;
 }
 
 std::size_t CoAChatLog::Pending()
@@ -201,21 +306,35 @@ std::size_t CoAChatLog::Pending()
     return s_rows.size();
 }
 
+uint64 CoAChatLog::Dropped()
+{
+    return s_droppedRows.load(std::memory_order_relaxed);
+}
+
+std::size_t CoAChatLog::SetMaxPending(std::size_t rows)
+{
+    return s_maxPendingRows.exchange(rows);
+}
+
 void CoAChatLog::Cleanup(uint32 now, bool wait)
 {
     uint64 const keep = uint64(s_keepDays.load()) * DAY;
     if (!keep || now <= keep)
         return;
     uint32 const cutoff = uint32(now - keep);
+    if (!wait)
+    {
+        if (!s_cleanupCutoff || *s_cleanupCutoff < cutoff)
+        {
+            s_cleanupCutoff = cutoff;
+            s_cleanupRowsLeft.reset();
+        }
+        return;
+    }
     QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_chat_log WHERE time < {}", cutoff);
     uint64 const old = result ? result->Fetch()[0].Get<uint64>() : 0;
     for (uint64 deleted = 0; deleted < old; deleted += CleanupBatch)
-    {
-        if (wait)
-            CharacterDatabase.DirectExecute("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
-        else
-            CharacterDatabase.Execute("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
-    }
+        CharacterDatabase.DirectExecute("DELETE FROM coa_chat_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
 }
 
 std::optional<uint8> CoAChatLog::TypeByName(std::string_view name)
@@ -319,6 +438,8 @@ namespace
         {
             s_enabled = sConfigMgr->GetOption<bool>("CoA.ChatLog.Enable", false);
             s_keepDays = sConfigMgr->GetOption<uint32>("CoA.ChatLog.KeepDays", 30);
+            s_maxPendingRows = std::max<uint32>(1, sConfigMgr->GetOption<uint32>("CoA.ChatLog.MaxPendingRows",
+                DefaultMaxPendingRows));
             std::vector<std::string> channels = Words(sConfigMgr->GetOption<std::string>("CoA.ChatLog.IgnoreChannels",
                 "BBLC25C KLCE25C questiecomm FSK FSK-EVT xtensionxtooltip2 ConquestFinder JohnnysAddons "
                 "CoARUru ALCSync K_LFGForwarder2IIll"));
@@ -339,12 +460,19 @@ namespace
         {
             _sinceFlush += diff;
             _sinceCleanup += diff;
+            _sinceDropReport += diff;
             if (_sinceCleanup >= DAY * IN_MILLISECONDS)
             {
                 _sinceCleanup = 0;
                 CoAChatLog::Cleanup(uint32(GameTime::GetGameTime().count()), false);
             }
-            if (_sinceFlush < FlushIntervalMs)
+            ContinueCleanup();
+            if (_sinceDropReport >= DropReportIntervalMs)
+            {
+                _sinceDropReport = 0;
+                ReportDrops();
+            }
+            if (_sinceFlush < FlushIntervalMs && CoAChatLog::Pending() < RowsPerWrite)
                 return;
             _sinceFlush = 0;
             CoAChatLog::Flush(false);
@@ -353,11 +481,24 @@ namespace
         void OnShutdown() override
         {
             CoAChatLog::Flush(true);
+            ReportDrops();
         }
 
     private:
+        void ReportDrops()
+        {
+            uint64 const dropped = CoAChatLog::Dropped();
+            if (dropped == _reportedDrops)
+                return;
+            LOG_WARN("coa", "CoA chat log: {} rows were not logged because {} rows were already waiting for the database "
+                "(CoA.ChatLog.MaxPendingRows)", dropped - _reportedDrops, s_maxPendingRows.load());
+            _reportedDrops = dropped;
+        }
+
         uint32 _sinceFlush = 0;
         uint32 _sinceCleanup = 0;
+        uint32 _sinceDropReport = 0;
+        uint64 _reportedDrops = 0;
     };
 }
 

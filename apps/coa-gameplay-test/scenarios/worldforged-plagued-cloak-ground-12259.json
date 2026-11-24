@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Plagued Cloak pickup rests on the ground (#12259)",
+  "contract": "#12259 reported the Worldforged Plagued Cloak pickup (entry 96247, guid 6940892) under the ground. The map-pass point 1101.9, -1303.6, 62.004 was 1.76 yd under the ground. Expected: the pickup stands at its first-pass realm point 1101.53, -1291.74, 62.004, rests on the ground, is not under water and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 1102.53,
+    "y": -1291.74,
+    "z": 62.504,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 96247,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its restored spot",
+      "metric": "spawn_distance",
+      "x": 1101.53,
+      "y": -1291.74,
+      "z": 62.004,
+      "max": 0.3,
+      "guid": 6940892,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup rests on the ground (-0.35 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 6940892,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940892,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 96247
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

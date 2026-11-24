@@ -1187,6 +1187,9 @@ XPHotspots.Brand = ""
 
 CoA.ChatLog.Enable = 0
 CoA.ChatLog.KeepDays = 30
+# Most rows held in memory while the character database writes earlier ones. Rows beyond it are not logged,
+# and the worldserver log reports how many once a minute; chat itself is never held back.
+CoA.ChatLog.MaxPendingRows = 20000
 # Channel names, and starts of channel messages in any channel, the chat log skips (separated by spaces).
 # The defaults are the data channels and messages of addons such as LootCollector, Questie and pfQuest.
 CoA.ChatLog.IgnoreChannels = "BBLC25C KLCE25C questiecomm FSK FSK-EVT xtensionxtooltip2 ConquestFinder JohnnysAddons CoARUru ALCSync K_LFGForwarder2IIll"

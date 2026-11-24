@@ -696,6 +696,26 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run.validate(scenario)
 
+    def test_chat_log_flood_fields(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['chat_log'] = True
+        scenario['chat_log_max_pending'] = 3
+        scenario['steps'][:0] = [
+            {'action': 'whisper', 'actor': 'caster', 'to': 'Caster', 'text': 'x', 'repeat': 5},
+            {'action': 'chat_log_cleanup', 'actor': 'caster', 'days_ahead': 31, 'background': True},
+            {'action': 'assert', 'actor': 'caster', 'metric': 'chat_log_dropped', 'equals': 2}]
+        self.assertIs(run.validate(scenario), scenario)
+        for change, error in ((lambda s: s.update(chat_log_max_pending=0), 'chat_log_max_pending'),
+                              (lambda s: s.pop('chat_log'), 'chat_log_max_pending needs chat_log'),
+                              (lambda s: s['steps'][0].update(repeat=101), 'repeat'),
+                              (lambda s: s['steps'][1].update(background=1), 'background must be boolean'),
+                              (lambda s: (s.pop('chat_log'), s.pop('chat_log_max_pending')),
+                               'chat_log_dropped needs chat_log')):
+            bad = copy.deepcopy(scenario)
+            change(bad)
+            with self.subTest(error=error), self.assertRaisesRegex(ValueError, error):
+                run.validate(bad)
+
     def test_chat_log_rows_takes_a_type_and_filters(self):
         rows = {'action': 'assert', 'actor': 'caster', 'metric': 'chat_log_rows', 'chat_type': 'whisper',
                 'chat_text': "it's me", 'chat_target': 'caster', 'chat_channel': 'World', 'chat_subject': 'Hello',

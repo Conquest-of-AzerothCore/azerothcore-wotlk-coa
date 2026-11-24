@@ -618,7 +618,7 @@ public:
     ascension_callboard_contracts_player()
         : PlayerScript("ascension_callboard_contracts_player",
               { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_UPDATE, PLAYERHOOK_CAN_TAKE_QUEST,
-                PLAYERHOOK_CAN_REWARD_QUEST, PLAYERHOOK_ON_QUEST_GIVER_CHOOSE_REWARD,
+                PLAYERHOOK_CAN_REWARD_QUEST, PLAYERHOOK_CAN_REPEAT_DAILY_QUEST, PLAYERHOOK_ON_QUEST_GIVER_CHOOSE_REWARD,
                 PLAYERHOOK_ON_PLAYER_COMPLETE_QUEST, PLAYERHOOK_ON_DELETE_FROM_DB }) { }
 
     void OnPlayerLogin(Player* player) override
@@ -652,6 +652,16 @@ public:
     [[nodiscard]] bool OnPlayerCanRewardQuest(Player const* player, Quest const* quest) override
     {
         return !ExhaustedContractName(player, quest);
+    }
+
+    [[nodiscard]] bool OnPlayerCanRepeatDailyQuest(Player const* player, Quest const* quest) override
+    {
+        if (!enabled.load(std::memory_order_relaxed) || IsBot(player))
+            return false;
+
+        std::shared_ptr<Catalogue const> const contracts = CurrentCatalogue();
+        ContractType const* contract = contracts->ForQuest(quest->GetQuestId());
+        return contract && SpareFor(player, *contracts, *contract, CurrentSettings()) > 0;
     }
 
     [[nodiscard]] bool OnPlayerQuestGiverChooseReward(Player* player, Object*, Quest const* quest, uint32) override

@@ -110,7 +110,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'client_cooldown_blocked_casts', 'initial_spells_at', 'learned_spell_at',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
-    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows',
+    'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows', 'chat_log_dropped',
     'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
     'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
@@ -308,9 +308,9 @@ ACTIONS = {
     'game_event': ({'event', 'active'}, {'event', 'active'}),
     'placement_audit': ({'map'}, {'map', 'zone', 'tolerance', 'gameobject_types'}),
     'command': ({'actor', 'command'}, {'actor', 'command', 'rejected'}),
-    'whisper': ({'actor', 'to', 'text'}, {'actor', 'to', 'text', 'language'}),
+    'whisper': ({'actor', 'to', 'text'}, {'actor', 'to', 'text', 'language', 'repeat'}),
     'addon_message': ({'actor', 'prefix', 'text'}, {'actor', 'prefix', 'text'}),
-    'chat_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead'}),
+    'chat_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead', 'background'}),
     'wait': ({'ms'}, {'ms'}),
     'snapshot': ({'actor', 'metric', 'save_as'}, METRIC_FIELDS | {'save_as'}),
     'assert': ({'actor', 'metric'}, METRIC_FIELDS | {'equals', 'min', 'max', 'within_ms'}),
@@ -613,7 +613,7 @@ def validate(scenario, clock=REAL_CLOCK):
     keys(scenario, {'schema', 'name', 'players', 'steps'},
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
-          'two_side', 'quest_log_size', 'chat_log', 'battleground_kill_xp'},
+          'two_side', 'quest_log_size', 'chat_log', 'chat_log_max_pending', 'battleground_kill_xp'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -623,6 +623,9 @@ def validate(scenario, clock=REAL_CLOCK):
         number(scenario['hour'], 'hour', 0, HOURS_PER_DAY - 1, True)
     require(type(scenario.get('creature_scaling', False)) is bool, 'creature_scaling must be boolean')
     require(type(scenario.get('chat_log', False)) is bool, 'chat_log must be boolean')
+    if 'chat_log_max_pending' in scenario:
+        require(scenario.get('chat_log') is True, 'chat_log_max_pending needs chat_log')
+        number(scenario['chat_log_max_pending'], 'chat_log_max_pending', 1, 1000000, True)
     require(type(scenario.get('battleground_kill_xp', False)) is bool, 'battleground_kill_xp must be boolean')
     require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'ptr_character_copy_interruption' in scenario:
@@ -754,8 +757,11 @@ def validate(scenario, clock=REAL_CLOCK):
                     f'{where}: whisper needs a target and text')
             if 'language' in step:
                 number(step['language'], f'{where}.language', 0, 2**32 - 1, True)
+            if 'repeat' in step:
+                number(step['repeat'], f'{where}.repeat', 1, 100, True)
         if action == 'chat_log_cleanup':
             number(step['days_ahead'], f'{where}.days_ahead', 0, 3650, True)
+            require(type(step.get('background', False)) is bool, f'{where}: background must be boolean')
         if action == 'group' and 'raid' in step:
             require(type(step['raid']) is bool, f'{where}: raid must be boolean')
         if action == 'guild':
@@ -1171,6 +1177,8 @@ def validate(scenario, clock=REAL_CLOCK):
                         require(type(step[field]) is bool, f'{where}: {field} must be boolean')
                 if 'chat_emote' in step:
                     number(step['chat_emote'], f'{where}.chat_emote', 0, 65535, True)
+            if metric == 'chat_log_dropped':
+                require(scenario.get('chat_log') is True, f'{where}: chat_log_dropped needs chat_log')
             if metric in EVENT_TIME_METRICS:
                 validate_event_time_step(step, where, actor_ids, player_ids)
             else:

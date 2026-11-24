@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Tauren Crate (Muck Trudgers) has a single pickup (#13340)",
+  "contract": "#13340 reported the Worldforged Tauren Crate (Muck Trudgers) pickup (entry 515947) had two spawns; the reporter confirmed the one inside the tent (6942290), the one by the tree goes. Expected: guid 6941973 at -2373.4, -3761.2, 9.338 on map 1 is not spawned and guid 6942290 still is.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -2372.4,
+    "y": -3761.2,
+    "z": 9.838,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the stray copy is not spawned",
+      "metric": "spawn_active",
+      "spawn": 6941973,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the kept pickup is still spawned",
+      "metric": "spawn_active",
+      "spawn": 6942290,
+      "equals": 1
+    }
+  ]
+}

@@ -1,0 +1,139 @@
+{
+  "schema": 1,
+  "name": "Blackrock Depths: the Ring of Law starts only after High Interrogator Gerstahn and Lord Roccor (#8886)",
+  "contract": "#8886: the Ring of Law area trigger (1526, at_ring_of_law) started the arena event whenever a player walked in. On CoA and per the Ascension logs the prison boss and the patrolling elemental come first. The trigger now starts the event only once the instance has the encounters of High Interrogator Gerstahn (9018) and Lord Roccor (9025) completed (instance_encounters 227/228, 1227/1228, 2227/2228), on every difficulty (tester decision).",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 230,
+      "x": 596.43,
+      "y": -188.5,
+      "z": -50.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "area_trigger",
+      "actor": "p",
+      "id": 1526
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Ring of Law does not start while Gerstahn and Roccor live (no High Justice Grimstone)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 10096,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 9018,
+      "as": "gerstahn",
+      "distance": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 9018,
+      "kill": true,
+      "radius": 30
+    },
+    {
+      "action": "area_trigger",
+      "actor": "p",
+      "id": 1526
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "still closed with only Gerstahn dead",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 10096,
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 9025,
+      "as": "roccor",
+      "distance": 10
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 9025,
+      "kill": true,
+      "radius": 30
+    },
+    {
+      "action": "area_trigger",
+      "actor": "p",
+      "id": 1526
+    },
+    {
+      "action": "assert",
+      "label": "with the prison boss and Lord Roccor dead the Ring of Law starts: High Justice Grimstone appears",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 10096,
+      "min": 1,
+      "within_ms": 5000
+    }
+  ]
+}

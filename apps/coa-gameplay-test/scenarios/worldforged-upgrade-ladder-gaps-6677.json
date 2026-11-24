@@ -4,10 +4,10 @@
   "contract": [
     "The Worldforged upgrade ladder is base -> item level 60 (always open) -> 64 (Hakkar) -> 70 -> 73 -> 77 -> 81 -> 88.",
     "Highlands Kitchen Knife 650038 (item level 30) had no recipe at all: its variants carry no base item in ItemAddon.dbc.",
-    "It now upgrades into its item level 60 variant 1389941 (store key 4389941, always open, 14650 Runes of Ascension) and",
+    "It now upgrades into its item level 60 variant 1389941 (store key 4389941, always open, 5850 Runes of Ascension) and",
     "that variant into the Zul'Gurub variant 1379941 (key 1379941, 21700 runes, open once the account has defeated Hakkar).",
     "Ancient Wavepiercer 415029 (epic, item level 43) went straight to item level 64 1378621 through recipe 524. It now",
-    "upgrades into its item level 60 variant 1388349 (key 4388349, 29300 runes) and that variant into 1378621 (key 1378621,",
+    "upgrades into its item level 60 variant 1388349 (key 4388349, 11700 runes) and that variant into 1378621 (key 1378621,",
     "43400 runes, Hakkar). Recipe 524 no longer exists."
   ],
   "timeout_ms": 90000,
@@ -26,7 +26,7 @@
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "DISCRIMINATING: the knife has a recipe and the item level 60 variant is sold", "actor": "hero", "metric": "item_count", "item": 1389941, "equals": 1 },
     { "action": "assert", "label": "in place of the base", "actor": "hero", "metric": "item_count", "item": 650038, "equals": 0 },
-    { "action": "assert", "label": "for 14650 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 45350 },
+    { "action": "assert", "label": "for 5850 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 54150 },
     { "action": "client_packet", "label": "Try the Zul'Gurub tier before Hakkar", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1379941}, {"u32": 1}] },
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "The Zul'Gurub tier stays closed before Hakkar", "actor": "hero", "metric": "item_count", "item": 1379941, "equals": 0 },
@@ -39,7 +39,7 @@
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "The knife's Zul'Gurub tier is sold", "actor": "hero", "metric": "item_count", "item": 1379941, "equals": 1 },
     { "action": "assert", "label": "in place of the item level 60 variant", "actor": "hero", "metric": "item_count", "item": 1389941, "equals": 0 },
-    { "action": "assert", "label": "for 21700 runes, on top of Hakkar's 2500", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 26150 },
+    { "action": "assert", "label": "for 21700 runes, on top of Hakkar's 2500", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 34950 },
     { "action": "add_item", "actor": "hero", "item": 415029 },
     { "action": "add_item", "actor": "hero", "item": 375250, "count": 60000 },
     { "action": "client_packet", "label": "Try the old direct upgrade of Ancient Wavepiercer to item level 64", "actor": "hero", "opcode": 1723, "fields": [{"u32": 524}, {"u32": 1}] },
@@ -50,11 +50,11 @@
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "The item level 60 variant is sold", "actor": "hero", "metric": "item_count", "item": 1388349, "equals": 1 },
     { "action": "assert", "label": "in place of the epic base", "actor": "hero", "metric": "item_count", "item": 415029, "equals": 0 },
-    { "action": "assert", "label": "for 29300 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 56850 },
+    { "action": "assert", "label": "for 11700 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 83250 },
     { "action": "client_packet", "label": "Upgrade the item level 60 variant to the Zul'Gurub tier", "actor": "hero", "opcode": 1723, "fields": [{"u32": 1378621}, {"u32": 1}] },
     { "action": "wait", "ms": 500 },
     { "action": "assert", "label": "The Zul'Gurub tier is sold", "actor": "hero", "metric": "item_count", "item": 1378621, "equals": 1 },
     { "action": "assert", "label": "in place of the item level 60 variant", "actor": "hero", "metric": "item_count", "item": 1388349, "equals": 0 },
-    { "action": "assert", "label": "for another 43400 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 13450 }
+    { "action": "assert", "label": "for another 43400 runes", "actor": "hero", "metric": "item_count", "item": 375250, "equals": 39850 }
   ]
 }
