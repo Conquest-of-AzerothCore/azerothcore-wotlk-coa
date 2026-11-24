@@ -2823,7 +2823,7 @@
         }
       ]
     },
-    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). 'dealing less damage with each target struck.' stays unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218.",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-1): 'up to a maximum of 10 enemies' is judged by extras_cap (primary + 10 additional enemies struck of 11 offered, ok in both runs of prove3 20261123-230759 / -230830). 'dealing less damage with each target struck.' stays unlabelled: no judge compares the damage of one cast across its targets (ratio_to_metric refuses a summed reading); the code factor is max(0.2, 1 - 0.1 x index), AscensionFelswornAbilities.cpp:208-218. fw-bdir (mentor D-100 (5), D-101): the 9-target proof is '707444 behaviour_metric_delta target_order' (Fel Fireball on the primary and 8 dummies, 16 casts, mean plain damage strictly falling along the measured distance from the primary, ADR 1275); the claim stays unlabelled, status 5 on owner question N-12: the server floors the per-target factor at 0.2 from the 9th target struck (AscensionFelswornAbilities.cpp:238), which the tooltip does not state, and 'up to a maximum of 10 enemies' allows 11 targets.",
     "claims": [
       {
         "claim": "up to a maximum of 10 enemies",
@@ -3087,7 +3087,10 @@
   {
     "spell": 800206,
     "clause": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel, dealing less damage with each target struck.",
-    "labels": [],
+    "labels": [
+      "800206 behaviour_metric_delta target_order",
+      "800206 behaviour_metric_delta channel_lengths"
+    ],
     "kind": "claim",
     "tool_gap": {
       "reason": "The tooltip gives no figure for the end slash: it states a direction only (more Weapon Damage with a longer channel, less with each target struck). The check needs the damage of the end slash 803715 at two channel lengths (a channel ended at a set time, see the 707444 gap) and a direction judge across them; power_term_direction judges attack power only and no existing kind compares a spell's damage across channel lengths. The nearest is hit_ratio with a stated bonus, which the tooltip does not give.",
@@ -3097,7 +3100,8 @@
           "report": ".agents/plans/fw-ea5/report.md"
         }
       ]
-    }
+    },
+    "reason": "fw-bdir (mentor D-100, D-101, ADR 1275): 'Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel' is judged by channel_lengths (the end slash 803715 lands twice, one per weapon, after a full channel and after the channel is ended at 650 and 1400 ms; the mean plain damage over 5 casts per length rises strictly with the length); 'dealing less damage with each target struck' by target_order (9 targets in front, 8 full channels, mean plain damage strictly falling along the measured distance from the caster). The server's 0.2 floor from the 9th target (AscensionFelswornAuras.cpp:237) lies outside the 9 judged targets and is an observation for owner question N-12."
   },
   {
     "spell": 800206,

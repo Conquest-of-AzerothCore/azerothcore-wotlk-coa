@@ -1,0 +1,93 @@
+import unittest
+
+from behaviours import behaviour_scenario
+from compare import judge_behaviour
+from profile import DBC_DIR, load_fixture_class_file
+import run
+from test_behaviours import FakeRun, base_verdict
+
+
+def lengths_entry(**changes) -> dict:
+    return {'spell': 300235, 'name': 'Death Commander (end damage by channel length)', 'kind': 'metric_delta',
+            'label_suffix': 'lengths', 'quote': 'dealing increased damage based on how long you channel',
+            'expected': 2, 'before_expected': 0, 'trigger_spell': 500237, 'target': 'dummy',
+            'metric': 'spell_damage_count', 'fields': {'spell': 500237, 'target': 'dummy'}, 'wait_ms': 3000,
+            'channel_lengths': {'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': 2}, **changes}
+
+
+def expectation_of(entry: dict):
+    return behaviour_scenario(load_fixture_class_file(23), entry)[1][0]
+
+
+def run_values(expectation, damages: dict, plain: dict | None = None, struck: dict | None = None) -> dict:
+    lengths = expectation.model['channel_lengths']
+    values = {expectation.model['before_label']: 0, expectation.model['after_label']: 2,
+              **dict.fromkeys(lengths['base'].values(), 0)}
+    totals = {'total': 0, 'plain': 0, 'struck': 0}
+    for arm in [lengths['arms'][-1], *lengths['arms'][:-1]]:
+        for repeat, row in enumerate(lengths['reads'][str(arm)]):
+            totals['total'] += damages[arm][repeat]
+            totals['plain'] += (plain or {}).get(arm, [2] * len(damages[arm]))[repeat]
+            totals['struck'] += (struck or {}).get(arm, [2] * len(damages[arm]))[repeat]
+            values.update({row[read]: totals[read] for read in totals})
+    return values
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class ChannelLengthsTests(unittest.TestCase):
+    def judged(self, values: dict, expectation) -> str:
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation).status
+
+    def test_each_length_is_cast_with_its_cancel_and_read(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), lengths_entry())
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 500237]
+        self.assertEqual(len(casts), 1 + 2 + 2 * 2)
+        cancels = [index for index, step in enumerate(steps) if step['action'] == 'cancel_aura']
+        self.assertEqual(len(cancels), 4)
+        self.assertEqual([steps[index - 1]['ms'] for index in cancels], [600, 600, 1500, 1500])
+        self.assertEqual([steps[index + 1]['ms'] for index in cancels], [2400, 2400, 1500, 1500])
+        self.assertTrue(all(steps[index]['spell'] == 500237 for index in cancels))
+        self.assertEqual(expectation.model['channel_lengths']['arms'], [600, 1500, 'full'])
+
+    def test_without_the_option_the_scenario_has_no_cancel(self):
+        entry = {key: value for key, value in lengths_entry().items() if key != 'channel_lengths'}
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        self.assertNotIn('channel_lengths', expectation.model)
+        self.assertFalse(any(step['action'] == 'cancel_aura' for step in scenario['steps']))
+
+    def test_malformed_options_are_refused(self):
+        for lengths in ({'spell': 500237, 'events': 2, 'cancel_ms': [1500, 600], 'repeats': 2},
+                        {'spell': 500237, 'events': 2, 'cancel_ms': [600], 'repeats': 2},
+                        {'spell': 500237, 'events': 2, 'cancel_ms': [600, 3000], 'repeats': 2},
+                        {'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': 0},
+                        {'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500]}):
+            with self.subTest(lengths=lengths), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), lengths_entry(channel_lengths=lengths))
+
+    def test_damage_rising_with_the_channel_length_is_ok(self):
+        expectation = expectation_of(lengths_entry())
+        damages = {600: [80, 84], 1500: [170, 175], 'full': [330, 320]}
+        self.assertEqual(self.judged(run_values(expectation, damages), expectation), 'ok')
+
+    def test_flat_or_falling_damage_alerts(self):
+        expectation = expectation_of(lengths_entry())
+        for damages in ({600: [330, 320], 1500: [170, 175], 'full': [80, 84]},
+                        {600: [200, 200], 1500: [200, 200], 'full': [200, 200]},
+                        {600: [80, 84], 1500: [340, 340], 'full': [330, 320]}):
+            with self.subTest(damages=damages):
+                self.assertEqual(self.judged(run_values(expectation, damages), expectation), 'alert')
+
+    def test_critical_repeats_leave_the_mean_and_a_wholly_critical_length_is_unmeasured(self):
+        expectation = expectation_of(lengths_entry())
+        damages = {600: [80, 400], 1500: [170, 175], 'full': [330, 320]}
+        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [2, 1]}), expectation), 'ok')
+        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [1, 1]}), expectation),
+                         'unmeasured')
+
+    def test_a_missing_end_strike_alerts(self):
+        expectation = expectation_of(lengths_entry())
+        damages = {600: [80, 84], 1500: [170, 175], 'full': [330, 320]}
+        values = run_values(expectation, damages, struck={1500: [2, 1]}, plain={1500: [2, 1]})
+        self.assertEqual(self.judged(values, expectation), 'alert')
