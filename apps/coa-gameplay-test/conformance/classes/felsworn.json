@@ -17130,6 +17130,35 @@
       "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact (800031, 803488, 803718, 804764, 803343, 803885). Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, area aura on the party (SPELL_EFFECT_APPLY_AREA_AURA_RAID, radius index 23). Behaviour read: a real Vengeful Pact cast by the caster; the Shadow resistance of the grouped ally (resistance, school 5, a live stat read) is read before the cast (no Pact, 0) and after it. The control entry (pact_resist) has no Pact Hunter; the treatment entry (pact_resist_hunter) has Pact Hunter learned in both phases: 65 + 50% = 97.5, read as the integer 97 (the engine's integer percent modifier, tolerance 0.5 judges to the rounding, G-19). Evidence class: a stat read whose promise words ('resistance') the claim does not carry, so the audit counts it as data (163.0 stays uncounted): a second design, the damage shield hit of Vengeful Pact's Effect[1] read after a real Damage 100 (TEST) 2653 cast by the dummy at the Pact holder (the caster, and a grouped ally), read no shield hit and no health loss on the dummy. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (3 x 1.5 = 4.5 truncated). Reference search 2026-11-23: coa-history spells 704612 and 803885: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. "
     },
     {
+      "spell": 704612,
+      "kind": "effectiveness_delta",
+      "quote": "Increases the effectiveness of your Pacts by $s1%.",
+      "name": "Pact Hunter (Vengeful Pact cast without and with the talent: ally Shadow resistance 65 -> 97)",
+      "variant": "pact_effectiveness",
+      "label_suffix": "pact_effectiveness",
+      "trigger_spell": 803885,
+      "gate_spell": 704612,
+      "learn": [
+        803885
+      ],
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "before_expected": 65,
+      "expected": 97,
+      "tolerance": 0.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact. Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, DurationIndex 21, StartRecoveryTime 1500 (server DBC). effectiveness_delta (ADR 1275 provisional): a real Vengeful Pact cast in both phases, Pact Hunter learned between them (passive treatment learned, D-67); the Shadow resistance of one party ally is read 1500 ms after each cast: 65 without the talent (control), floor(65 x 1.5) = 97 with it (mentor D-99: the integer truncation of 97.5 is the known engine rounding), tolerance 0.5; an unmodified Pact reads 65 and a doubled one 130. The second cast refreshes the area aura of the first (the effect amount is recalculated on refresh, Unit::_TryStackingOrRefreshingExistingAura, code reading only). Player reports: none."
+    },
+    {
       "spell": 300489,
       "name": "Archimonde's Wrath (Ruin critical strike share rises by 10 points at 100 Energy)",
       "kind": "hit_ratio",
@@ -19335,7 +19364,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Three stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243, Mark of the Wild 1126 and Arcane Intellect 1459, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later carried_aura_count of the three auras on the caster is read: 1 before the learn (control), 2 after; a third stolen aura (an over-steal) reads 3. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Three stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243, Mark of the Wild 1126 and Arcane Intellect 1459, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later carried_aura_count of the three auras on the caster is read: 1 before the learn (control), 2 after; a third stolen aura (an over-steal) reads 3. The only caster aura is fixture 823764 (spell penetration and a family-33 SPELLMOD_EFFECT1), which cannot reach Consume Magic (family 20); the control arm reading 1 confirms it. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705145,
