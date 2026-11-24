@@ -435,7 +435,7 @@
     "spell": 300305,
     "clause": "Increases the critical strike chance of Wrath of the Black Empire by $s1%.",
     "labels": [
-      "300305 effect_value e0 #0"
+      "300305 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -531,14 +531,16 @@
     "spell": 300313,
     "clause": "Grants all periodic damage and damage dealt a $h% chance to reset the cooldown of Gaze of C'Thun",
     "labels": [
-      "300313 effect_value #0"
+      "300313 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim"
   },
   {
     "spell": 300313,
     "clause": "and generate 5 Insanity.",
-    "labels": [],
+    "labels": [
+      "300313 proc_rate"
+    ],
     "kind": "claim"
   },
   {
@@ -1372,10 +1374,24 @@
   {
     "spell": 524879,
     "clause": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
-    "labels": [
-      "524879 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Satiate now also regenerates an additional $s1% mana per tick",
+        "labels": [
+          "524879 behaviour_metric_delta mana_per_tick",
+          "524879 behaviour_metric_delta mana_ticks",
+          "524879 behaviour_metric_delta max_mana"
+        ]
+      },
+      {
+        "claim": "and no longer increases damage taken during the channel.",
+        "labels": [
+          "524879 behaviour_hit_ratio taken_removed",
+          "524879 behaviour_hit_ratio taken_baseline"
+        ]
+      }
+    ]
   },
   {
     "spell": 524887,
@@ -1981,7 +1997,7 @@
     "spell": 582836,
     "clause": "Increases the critical strike chance of Blade of the Empire by $s1%",
     "labels": [
-      "582836 effect_value e0 #0"
+      "582836 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -1989,7 +2005,7 @@
     "spell": 582836,
     "clause": "and reduces its mana cost by $s2%.",
     "labels": [
-      "582836 effect_value e1 #1"
+      "582836 behaviour_metric_delta mana_cost"
     ],
     "kind": "claim"
   },
@@ -2427,7 +2443,10 @@
   {
     "spell": 681389,
     "clause": "Doubles the duration of Shadow of the Void.",
-    "labels": [],
+    "labels": [
+      "681389 behaviour_metric_delta contrast",
+      "681389 behaviour_metric_delta duration"
+    ],
     "kind": "claim"
   },
   {

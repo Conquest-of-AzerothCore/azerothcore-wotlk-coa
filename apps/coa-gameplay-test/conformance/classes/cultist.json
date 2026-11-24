@@ -76,7 +76,48 @@
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
-  "procs": [],
+  "procs": [
+    {
+      "aura": 300313,
+      "name": "Dark Revelation",
+      "tooltip": "|cFF66DDFFLevel 40 Passive|r\r\nGrants all periodic damage and damage dealt a $h% chance to reset the cooldown of |cffffffffGaze of C'Thun|r and generate 5 |cffcfa6ffInsanity|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 806830
+      },
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "sized_attempts": 10251,
+      "trigger_text": "damage dealt",
+      "event_metric": "aura_stacks",
+      "stack_aura": 500706,
+      "stack_set": 40,
+      "stack_per_cast": -40,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture, not the subject: Insanity 500706 is set to 40 stacks before every Hammer of Twilight 806830 cast (which drains 40 Insanity at AscensionCultistAbilities.cpp:88-89); the subject is the +5 Insanity Dark Revelation 300313 adds on proc"
+        }
+      ],
+      "proc_spell": 500706,
+      "events_per_proc": 5,
+      "proc_spell_source": "Proc of 300313 calls Resource(player, Insanity, 5) (AscensionCultistEvents.cpp:170-173, AscensionCultist.cpp:201-222), adding 5 stacks of Insanity aura 500706 directly without casting 804209.",
+      "handler": "aura_ascension_cultist_event: Check case 300313 (AscensionCultistEvents.cpp:84) returns dealt && Chance(player, id) (ProcChance 6 in Spell.dbc, rolled via roll_chance_f ignoring spell mods so forced_roll cannot force it); Proc (AscensionCultistEvents.cpp:170-173) resets Gaze of C'Thun 500110 and calls Resource(player, Insanity, 5). Trigger: Hammer of Twilight 806830 (level 60 rank, 0 mana, instant, 1500 ms GCD, CasterAuraSpell 680602 set by required_aura_steps, drains 40 Insanity on cast, DmgClass 2 melee hit); each cast starts at 40 Insanity (stack_set 40, stack_per_cast -40) and reads 0 without proc or 5 with proc (events_per_proc 5, aura_stacks event metric, tool ADR 1254). Baseline arm before 300313 is learned must read no event. Sized at 10251 attempts (residual_target 0.001 per pair, min_detectable 4 pts, >= 6834 trials). Reference search 2026-11-24: coa-history spell 300313: 0 events in 186 logs (passive; positive control 500110 Gaze of C'Thun: 4 casts in 2 logs); coabuildhub spells_master_index.json entry 300313 matches verbatim ('6% chance to reset the cooldown of Gaze of C'Thun and generate 5 Insanity.').",
+      "dbc": {
+        "300313": {
+          "ProcChance": 6,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    }
+  ],
   "triggers": [
     {
       "aura": 574318,
@@ -849,6 +890,367 @@
       "cast_spell": 805114,
       "channel_spell": 12051,
       "observe_source": "805114 carries SPELL_ATTR7_CAN_CAUSE_INTERRUPT (AttributesEx7 33556480) and spell_ascension_cultist_ability::EffectHitTarget (AscensionCultistAbilities.cpp:435-436) casts Interrupt 32747 at non-player targets before EffectApplyAura (Spell.cpp:5802-5809). 32747 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($32747d, SpellDuration.dbc); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, locking that school for 3000 ms (Creature::ProhibitSpellSchool). CasterAuraSpell 680601 is set by required_aura_steps. The dummy channels Evocation 12051 (Arcane, PreventionType 1, ChannelInterruptFlags 31756, 8 s) on itself: Arcane is unlocked before the cast (control = 0), locked before 3000 ms and free after 3000 ms. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('interrupting non-player spellcasting for 3 sec')."
+    },
+    {
+      "spell": 300305,
+      "name": "Occultism (Wrath of the Black Empire critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Wrath of the Black Empire by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 300305,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 504904,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 10 (300305 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 SPELLMOD_CRITICAL_CHANCE, EffectBasePoints 9 + EffectDieSides 1, EffectSpellClassMask[1] 256, SpellFamilyName 31; Spell.dbc). Wrath of the Black Empire 504904 (level 60 rank, AscensionSpellProgressionData.h:1707) carries SpellFamilyFlags[1] 288 (0x120, matching 0x100). Reads live Player::SpellDoneCritChance for 504904 before (control: 300305 not learned) and after a real learn of 300305: expected gain +10.0 points. Reference search 2026-11-24: coa-history spell 300305: 0 events in 186 logs (passive; positive control 502122 Blade of the Empire: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 300305 matches verbatim ('Increases the critical strike chance of Wrath of the Black Empire by 10%.')."
+    },
+    {
+      "spell": 582836,
+      "name": "Abyssal Edge (Blade of the Empire critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Blade of the Empire by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 582836,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 502122,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 2 (582836 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 SPELLMOD_CRITICAL_CHANCE, EffectBasePoints 1 + EffectDieSides 1, EffectSpellClassMask[1] 1048576, SpellFamilyName 31; Spell.dbc). Blade of the Empire 502122 (level 60 rank, AscensionSpellProgressionData.h:1669, DmgClass 2 melee, EquippedItemClass 2 sub 173555 satisfied by default Godblade 2531 2H Axe) carries SpellFamilyFlags[1] 1048576 (0x100000). Unit::SpellDoneCritChance (Unit.cpp:10410) applies SPELLMOD_CRITICAL_CHANCE to DmgClass 2 spells. Reads live Player::SpellDoneCritChance for 502122 before (control: 582836 not learned) and after a real learn of 582836: expected gain +2.0 points. Reference search 2026-11-24: coa-history spell 582836: 0 events in 186 logs (passive; positive control 502122 Blade of the Empire: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 582836 matches ('by 2%')."
+    },
+    {
+      "spell": 582836,
+      "name": "Abyssal Edge (Blade of the Empire mana cost)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "and reduces its mana cost by $s2%.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1000,
+      "expected": 1045.25,
+      "expected_gain": 45.25,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 25 (582836 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 SPELLMOD_COST, EffectBasePoints -26 + EffectDieSides 1 = -25%, EffectSpellClassMask[4] 1048576, SpellFamilyName 31; Spell.dbc). Blade of the Empire 502122 (level 60 rank, ManaCostPercentage 12, GCD 1500 ms, 3 charges) costs CalculatePct(1512 BaseMana, 12) = 181 mana (SpellInfo.cpp:3216); -25% via ApplySpellMod SPELLMOD_COST saves 45.25 mana (181 -> 135 or 136, saving 45 or 46). Sets caster mana to 2000 (<= 2297 MaxMana) with regeneration off before each cast of 502122 (1600 ms expire_ms clears GCD between phases) and reads remaining mana after the cast before (control: 582836 not learned) and after a real learn of 582836: expected gain 45.25 +- 1.0 mana. Reference search 2026-11-24: coa-history spell 582836: 0 events in 186 logs (passive; positive control 502122: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 582836 matches ('reduces its mana cost by -25%')."
+    },
+    {
+      "spell": 681389,
+      "name": "Residual Energy (Shadow of the Void 300277 unlearned vs learned at 15200 ms)",
+      "kind": "metric_delta",
+      "variant": "contrast",
+      "label_suffix": "contrast",
+      "quote": "Doubles the duration of Shadow of the Void.",
+      "trigger_spell": 502122,
+      "learn": [
+        574318
+      ],
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15200,
+      "expire_ms": 1600,
+      "game_time": {
+        "after": [
+          15100,
+          15500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Residual Energy 681389 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 1 SPELLMOD_DURATION, EffectBasePoints 7999 + EffectDieSides 1 = +8000 ms on EffectSpellClassMask[0] 256 (SpellFamilyName 31; Spell.dbc). Shadow of the Void buff 300277 has SpellFamilyFlags[0] 256 and DurationIndex 31 = 8000 ms (SpellDuration.dbc), so doubled duration = 16000 ms. With 574318 learned and Insanity 500706 at 41 stacks (precondition fixture), casts Blade of the Empire 502122 (Attributes 0x40010, no auto-attack follow-up) before and after a real learn of 681389 and reads aura 300277 on the caster at 15200 ms (game_time [15100, 15500], > 0.9 * 16000 = 14400 ms): control without 681389 has expired (0), treatment with 681389 is present (1). Paired with 681389 duration (present at 15200 ms, expired at 16800 ms) and 574318 duration (8000 ms base). Reference search 2026-11-24: coa-history spell 681389: 0 events in 186 logs (passive; positive control 502122: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 681389 matches verbatim ('Doubles the duration of Shadow of the Void.')."
+    },
+    {
+      "spell": 681389,
+      "name": "Residual Energy (Shadow of the Void 300277 lasts 16000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Doubles the duration of Shadow of the Void.",
+      "trigger_spell": 502122,
+      "learn": [
+        574318
+      ],
+      "target": "dummy",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 15200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          15100,
+          15500
+        ],
+        "expired": [
+          16700,
+          17150
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Expected 16000 ms: 300277 DurationIndex 31 = 8000 ms + 681389 Effect[0] SPELLMOD_DURATION +8000 ms = 16000 ms (Spell.dbc, SpellDuration.dbc). With 574318 and 681389 learned (gate_timing start) and Insanity 500706 at 41 stacks (precondition fixture), reads 300277 absent before any cast (0), then casts Blade of the Empire 502122 once and reads aura 300277 on the caster present (1) at 15200 ms (game_time [15100, 15500], above 14400 = 0.9 * 16000) and gone (0) at 16800 ms (game_time [16700, 17150], below 17600 = 1.1 * 16000), excluding durations 10% off on both sides. Paired with 681389 contrast (unlearned control 0 vs learned 1 at 15200 ms). Reference search 2026-11-24: coa-history spell 681389: 0 events in 186 logs (passive; positive control 502122: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 681389 matches verbatim."
+    },
+    {
+      "spell": 524879,
+      "name": "Void Hunger (Satiate energizes +1% mana per tick)",
+      "kind": "metric_delta",
+      "variant": "mana_per_tick",
+      "label_suffix": "mana_per_tick",
+      "quote": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
+      "trigger_spell": 804275,
+      "target": "caster",
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 804277
+      },
+      "before_expected": 1368,
+      "expected": 3012,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 1 (524879 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 3 SPELLMOD_EFFECT1, EffectBasePoints 0 + EffectDieSides 1 = +1 on EffectSpellClassMask[1] 2, matching Satiate tick 804277 SpellFamilyFlags[1] 2; Spell.dbc). Satiate 804275 channels for DurationIndex 32 = 6000 ms triggering 804277 every EffectAmplitude 500 ms (12 ticks). 804277 Effect[0] SPELL_EFFECT_ENERGIZE_PCT has BasePoints 4 + DieSides 1 = 5% max mana base (6% with 524879). At level 60 Cultist MaxMana = 2297 (grounded by 524879 max_mana): CalculatePct(2297, 5) = 114 -> 12 * 114 = 1368 in before phase (control without 524879); CalculatePct(2297, 6) = 137 -> 12 * 137 = 1644 in after phase (cumulative 1368 + 1644 = 3012). Insanity 500706 is cleared to 0 before each phase (precondition fixture so 12 * 5 = 60 Insanity stays below 100). Paired with 524879 mana_ticks (12 -> 24 ticks) and max_mana (2297). Reference search 2026-11-24: coa-history spell 524879: 0 events in 186 logs (passive; positive control 804275 Satiate: 59 casts in 17 logs); coabuildhub spells_master_index.json entry 524879 matches verbatim."
+    },
+    {
+      "spell": 524879,
+      "name": "Void Hunger (Satiate tick count unchanged at 12 per channel)",
+      "kind": "metric_delta",
+      "variant": "mana_ticks",
+      "label_suffix": "mana_ticks",
+      "quote": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
+      "trigger_spell": 804275,
+      "target": "caster",
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_count",
+      "fields": {
+        "spell": 804277
+      },
+      "before_expected": 12,
+      "expected": 24,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Confirms Satiate 804275 (DurationIndex 32 = 6000 ms, EffectAmplitude 500 ms) delivers exactly 12 ticks of 804277 without 524879 (before = 12) and 12 ticks with 524879 (cumulative after = 24), so the 1368 -> +1644 mana_per_tick jump is +23 mana per tick (5% -> 6% of 2297 MaxMana). Reference search 2026-11-24: coa-history spell 524879: 0 events in 186 logs (positive control 804275: 59 casts); coabuildhub entry 524879 matches verbatim."
+    },
+    {
+      "spell": 524879,
+      "name": "Void Hunger (maximum mana of the caster)",
+      "kind": "metric_delta",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "quote": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
+      "trigger_spell": 60235,
+      "gate_spell": 524879,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 2297,
+      "expected": 2297,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Confirms level 60 Cultist MaxMana = 2297 (BaseMana 1512 + Intellect 71 mana bonus 785 = 2297), grounding 5% = 114 and 6% = 137 per tick in 524879 mana_per_tick. Reference search 2026-11-24: coa-history spell 524879: 0 events; coabuildhub entry 524879 matches verbatim."
+    },
+    {
+      "spell": 524879,
+      "name": "Void Hunger (removes +20% damage taken during Satiate channel)",
+      "kind": "taken_hit",
+      "variant": "taken_removed",
+      "label_suffix": "taken_removed",
+      "judge": "damage_ratio",
+      "expected": 0.833333,
+      "quote": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "strikes": 1,
+      "settle_ms": 4500,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            524879
+          ],
+          "auras": [
+            [
+              500706,
+              0
+            ]
+          ],
+          "casts": [
+            [
+              804275,
+              "caster"
+            ]
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            524879
+          ],
+          "auras": [
+            [
+              500706,
+              0
+            ]
+          ],
+          "casts": [
+            [
+              804275,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Satiate 804275 Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (MiscValue 127 all schools) is set to +20% by AscensionCultistContracts.cpp:208-209 and zeroed when 524879 is known by AscensionCultistAuras.cpp:133-134 (matching tooltip 'no longer increases damage taken during the channel'). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster 1600 ms into each 6000 ms Satiate channel (settle_ms 4500 lets each channel finish before the next trial; Insanity 500706 cleared to 0 each trial as precondition fixture). Control (without 524879): 1200 damage; treatment (with 524879): 1000 damage; expected ratio 1000/1200 = 0.833333. Paired with 524879 taken_baseline (un-channeled vs channeled with 524879 = 1.0). Reference search 2026-11-24: coa-history spell 524879: 0 events (positive control 804275: 59 casts); coabuildhub entry 524879 matches verbatim."
+    },
+    {
+      "spell": 524879,
+      "name": "Void Hunger (Satiate channel matches un-channeled damage taken)",
+      "kind": "taken_hit",
+      "variant": "taken_baseline",
+      "label_suffix": "taken_baseline",
+      "judge": "damage_ratio",
+      "expected": 1.0,
+      "quote": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "strikes": 1,
+      "settle_ms": 4500,
+      "learn": [
+        524879
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              500706,
+              0
+            ]
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              500706,
+              0
+            ]
+          ],
+          "casts": [
+            [
+              804275,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "Baseline verification for 524879: with 524879 learned, Void Zone 92559 (1000 Physical, DmgClass 0) deals the same damage during a Satiate 804275 channel (treatment) as without Satiate (control): expected ratio 1.0. Paired with 524879 taken_removed (0.833333 against unlearned Satiate's +20% taken). Reference search 2026-11-24: coa-history spell 524879: 0 events (positive control 804275: 59 casts); coabuildhub entry 524879 matches verbatim."
+    },
+    {
+      "spell": 300313,
+      "name": "Dark Revelation (Gaze of C'Thun cooldown reset at 6%)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "Grants all periodic damage and damage dealt a $h% chance to reset the cooldown of Gaze of C'Thun",
+      "talent": 300313,
+      "trigger_spell": 806830,
+      "reset_spell": 502141,
+      "chance_pct": 6,
+      "control_casts": 50,
+      "casts": 1800,
+      "parts": 4,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89)"
+        },
+        {
+          "spell": 680602,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680602 (40 Insanity helper marker) required by Hammer of Twilight 806830 (Spell.dbc)"
+        }
+      ],
+      "observe_source": "$h = 6 (300313 Spell.dbc ProcChance 6; AscensionCultistEvents.cpp:84 returns dealt && Chance(player, id), rolling ProcChance via roll_chance_f ignoring spell mods so forced_roll cannot force it; :170-173 calls Reduce(player, 500110, INT32_MAX) -> Player::RemoveSpellCooldown(502141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (level 60 rank, 0 mana, instant, 1500 ms GCD, DmgClass 2 melee hit with default Godblade 2531 2H Axe). Control: 50 casts per part (200 total) before 300313 is learned (0 resets). Treatment: 4 pooled parts x 1800 casts = 7200 damaging hits (>= 6834 trials needed for residual_target 0.001 per pair and min_detectable 4 pts, G-20 +-2 pt band around 6%). Reference search 2026-11-24: coa-history spell 300313: 0 events in 186 logs (passive; positive control 500110 Gaze of C'Thun: 4 casts in 2 logs); coabuildhub spells_master_index.json entry 300313 matches verbatim."
     }
   ],
   "player_observations": [],
