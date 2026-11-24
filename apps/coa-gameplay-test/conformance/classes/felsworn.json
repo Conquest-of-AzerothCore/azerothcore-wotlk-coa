@@ -16290,7 +16290,7 @@
       "learn": [
         801312
       ],
-      "cast_wait_ms": 2500,
+      "cast_wait_ms": 3400,
       "control": {
         "auras": [
           [

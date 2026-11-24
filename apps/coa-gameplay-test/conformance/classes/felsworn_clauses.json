@@ -401,7 +401,7 @@
         ]
       }
     ],
-    "reason": "fw-vb2b (2026-11-24): magnitude proven by a real hit: 3 stacks of 300481 on forced spell critical hits of Fel Fireball 801312 read +1.54 / +1.55 / +1.55% (99% interval about +0.79 to +2.30, 31 trials per arm) in three runs, inside the 2-point band of the stated 3% and excluding the control 0. Observation for the mentor: the reading is half of the stated 3%, which is what an AddPct on the extra half of the critical hit (a 2x total) would give; the band's width hides it. Duration half: crit_damage_duration, unchanged."
+    "reason": "fw-vb2c (2026-11-24): magnitude proven by a real hit: 3 stacks of 300481 on forced spell critical hits of Fel Fireball 801312 read +2.997 / +2.999% against the stated 3% (99% intervals +2.984 to +3.009 and +2.984 to +3.013, 20 trials per arm), excluding the control 0. The earlier reading of +1.55% (fw-vb2b) came from the fixture, not the server: 300481 lasts 6000 ms, the trial lasted 5600 ms and set_aura only sets the stack amount of an aura already present, so every second hit was unbuffed; cast_wait_ms 3400 makes a trial last 6500 ms, so each treatment hit follows a fresh application. Duration half: crit_damage_duration, unchanged."
   },
   {
     "spell": 300483,
@@ -450,12 +450,21 @@
   {
     "spell": 300489,
     "clause": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
-    "labels": [
-      "300489 behaviour_hit_ratio crit_energy",
-      "300489 behaviour_hit_ratio crit_energy_half"
-    ],
     "kind": "claim",
-    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) reads +9.67 / +9.85 / +9.82 points against the stated +10 in three runs (all ok). The 50 Energy arm (crit_energy_half, stated +5, band 3 to 7, which excludes a flat +10) reads +7.25 (alert), +6.93 (ok, interval 6.16 to 7.71), +7.37 (alert): the dependence on Energy is real (0 without the passive, about +7 at 50, about +10 at 100) but the value at 50 Energy is not the stated 5 and the arm flips between runs, so the clause is held uncounted, a lead and not a fix case. Unverified hypothesis: the server counts the Energy plus the spell cost (AscensionFelswornAbilities.cpp:158, energy = GetPower + max(0, GetPowerCost)), and Ruin 801895 costs 30 Energy (ManaCost 30), which would read 8 at a set power of 50 if the cost were not yet deducted; the measured 7 to 7.4 does not settle it. No server change on this check: needs a mentor reading of 'Energy you have at the time of casting' (before or after the cost)."
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of your Felfury spenders by $s2%",
+        "labels": [
+          "300489 behaviour_hit_ratio crit_energy"
+        ]
+      },
+      {
+        "claim": "for every 10 points of Energy you have at the time of casting.",
+        "labels": [],
+        "reason": "Withheld (fw-vb2c, review I-4b): the label '300489 behaviour_hit_ratio crit_energy_half' (50 Energy, stated +5, band 3 to 7) reads +7.25 alert, +6.93 ok, +7.37 alert, every 99% interval excluding 5; the clause must not count in a pair where it lands inside the band. Lead kept for a mentor reading of 'Energy you have at the time of casting'; the arm stays in the class file."
+      }
+    ],
+    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) reads +9.67 / +9.85 / +9.82 points against the stated +10 in three runs (all ok). The 50 Energy arm (crit_energy_half, stated +5, band 3 to 7, which excludes a flat +10) reads +7.25 (alert), +6.93 (ok, interval 6.16 to 7.71), +7.37 (alert): the dependence on Energy is real (0 without the passive, about +7 at 50, about +10 at 100) but the value at 50 Energy is not the stated 5 and the arm flips between runs, so the half arm's label is withheld from every claim (its claim has no labels), a lead and not a fix case. The Energy plus spell cost hypothesis (AscensionFelswornAbilities.cpp:158, energy = GetPower + max(0, GetPowerCost), Ruin 801895 ManaCost 30) does not fit both arms: a read before the cost deduction would give 13 at 100 Energy, not 9.7 to 9.8, and a read after it would give 5 at 50 Energy, not 7; it is dropped as an explanation. No server change on this check: needs a mentor reading of 'Energy you have at the time of casting' (before or after the cost)."
   },
   {
     "spell": 300490,
@@ -1477,15 +1486,11 @@
     "kind": "claim",
     "reason": "fw-vb2b (2026-11-24): the absorb is Ruin 801895 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
     "tool_gap": {
-      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2 (this agent): the recording extension above, identified and not built, because the harness is outside this author's scope.",
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
       "attempts": [
         {
           "agent": "fw-vb2",
           "report": ".agents/plans/fw-vb2/report.md"
-        },
-        {
-          "agent": "fw-vb2b",
-          "report": ".agents/plans/fw-vb2b/report.md"
         }
       ]
     }
@@ -1499,15 +1504,11 @@
     "kind": "claim",
     "reason": "fw-vb2b (2026-11-24): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
     "tool_gap": {
-      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2 (this agent): the recording extension above, identified and not built, because the harness is outside this author's scope.",
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
       "attempts": [
         {
           "agent": "fw-vb2",
           "report": ".agents/plans/fw-vb2/report.md"
-        },
-        {
-          "agent": "fw-vb2b",
-          "report": ".agents/plans/fw-vb2b/report.md"
         }
       ]
     }
@@ -2229,15 +2230,11 @@
     "kind": "claim",
     "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), a live stat read after a real cast with its control entry, but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). fw-vb2b (2026-11-24): not status 3. The effectiveness_of route (ADR 0268, coverage.py subject_claims) was examined as the second design: it extends the claim only when the named spell's ledger clauses state exactly one value, and Vengeful Pact 803885 (Description: 'increases nearby allies' Shadow Resistance by ${$m1+0} and causes them to deal $s2 Shadow damage') states two values (resistance 65, shield damage 50) and has no Felsworn ledger row, while the claim says 'your Pacts' in the plural. The route does not apply to this clause; the resistance read stays data.",
     "tool_gap": {
-      "reason": "The clause 'effectiveness of your Pacts' has no counting route: the resistance read (65 to 97) is a stat read the audit counts as data, the damage shield read of the same Pact observed no hit (design 1), and the effectiveness_of route (design 2) needs one stated value on a single named spell, which Vengeful Pact 803885 (two values) and the plural 'Pacts' do not give. A route needs either a mentor reading of effectiveness_of for a two-value Pact or a harness read that makes the Pact's damage shield strike a real attacker (the shield hit read no event after a real 2653 cast by the dummy at the holder).",
+      "reason": "The clause 'effectiveness of your Pacts' has no counting route: the resistance read (65 to 97) is a stat read the audit counts as data, the damage shield read of the same Pact observed no hit (design 1), and the effectiveness_of route, checked by fw-vb2b and not a second built design, needs one stated value on a single named spell, which Vengeful Pact 803885 (two values) and the plural 'Pacts' do not give. A route needs either a mentor reading of effectiveness_of for a two-value Pact or a harness read that makes the Pact's damage shield strike a real attacker (the shield hit read no event after a real 2653 cast by the dummy at the holder). The gap stays pending until a second design is built (guide 9.7).",
       "attempts": [
         {
           "agent": "fw-vb2",
           "report": ".agents/plans/fw-vb2/report.md"
-        },
-        {
-          "agent": "fw-vb2b",
-          "report": ".agents/plans/fw-vb2b/report.md"
         }
       ]
     }
