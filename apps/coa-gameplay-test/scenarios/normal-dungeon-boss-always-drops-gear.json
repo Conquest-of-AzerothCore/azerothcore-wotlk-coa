@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Normal dungeon bosses always drop at least one piece of gear, as Heroic and Mythic bosses do",
+  "contract": "Project owner report (Uldaman on Normal at low level): not every boss dropped something. Heroic and Mythic bosses in the CoA dungeon list always drop exactly one weapon or armor piece; on Normal the loot script returned before that guarantee, so a boss only rolled its own table (Revelosh: 88% combined gear chance). Expected: on Normal a boss that rolled no gear gets one piece from its own loot pool; one that rolled several keeps all of them. Checked on two bosses whose pools hold a single quality, so the count is exact: Ferra in Dire Maul (14308, only uncommon gear, about 5% gear chance) and Marduk Blackpool in Scholomance (10433, only rare gear, about 13%).",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "hero", "value": 5000000, "maximum": 5000000 },
+    { "action": "ascension_dungeon_difficulty_packet", "actor": "hero", "value": 0 },
+    { "action": "wait", "ms": 500 },
+    { "action": "teleport", "actor": "hero", "map": 429, "x": -87.3, "y": 543.8, "z": 28.6, "ignore_access": true },
+    { "action": "assert", "label": "SETUP: the hero is in Dire Maul on Normal", "actor": "hero", "metric": "map_difficulty", "equals": 0, "within_ms": 15000 },
+    { "action": "assert", "label": "SETUP: the hero is in Dire Maul", "actor": "hero", "metric": "map_id", "equals": 429 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "summon", "actor": "hero", "entry": 14308, "as": "ferra", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 14308, "kill": true },
+    { "action": "assert", "actor": "ferra", "metric": "alive", "equals": 0, "within_ms": 10000 },
+    { "action": "loot_creature", "actor": "hero", "target": "ferra" },
+    { "action": "assert", "label": "DISCRIMINATING: Ferra drops a piece of uncommon gear although her gear chance is about 5%", "actor": "hero", "metric": "loot_count", "quality": 2, "min": 1 },
+    { "action": "close_loot", "actor": "hero" },
+    { "action": "teleport", "actor": "hero", "map": 289, "x": 150.4, "y": 116.2, "z": 104.7, "ignore_access": true },
+    { "action": "assert", "label": "SETUP: the hero is in Scholomance", "actor": "hero", "metric": "map_id", "equals": 289, "within_ms": 15000 },
+    { "action": "assert", "label": "SETUP: Scholomance on Normal", "actor": "hero", "metric": "map_difficulty", "equals": 0 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "summon", "actor": "hero", "entry": 10433, "as": "marduk", "distance": 4 },
+    { "action": "wait", "ms": 300 },
+    { "action": "attack_nearby", "actor": "hero", "entry": 10433, "kill": true },
+    { "action": "assert", "actor": "marduk", "metric": "alive", "equals": 0, "within_ms": 10000 },
+    { "action": "loot_creature", "actor": "hero", "target": "marduk" },
+    { "action": "assert", "label": "DISCRIMINATING: Marduk Blackpool drops a piece of rare gear although his gear chance is about 13%", "actor": "hero", "metric": "loot_count", "quality": 3, "min": 1 },
+    { "action": "close_loot", "actor": "hero" }
+  ]
+}
