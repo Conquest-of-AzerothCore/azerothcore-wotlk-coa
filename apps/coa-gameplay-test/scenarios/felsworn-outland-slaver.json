@@ -117,6 +117,26 @@
       "op": 8,
       "base": 100,
       "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Twin Slice 547211 all-effects modifier without Outland Slaver stays 100 (Felsworn O-39 (2026-11-24): Effect[2] is a dummy, Twin Slice takes no bonus)",
+      "actor": "control",
+      "metric": "spell_modifier",
+      "spell": 547211,
+      "op": 8,
+      "base": 100,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "Twin Slice 547211 all-effects modifier with Outland Slaver stays 100 (Felsworn O-39 (2026-11-24): Effect[2] is a dummy, Twin Slice takes no bonus)",
+      "actor": "slaver",
+      "metric": "spell_modifier",
+      "spell": 547211,
+      "op": 8,
+      "base": 100,
+      "equals": 100
     }
   ]
 }
