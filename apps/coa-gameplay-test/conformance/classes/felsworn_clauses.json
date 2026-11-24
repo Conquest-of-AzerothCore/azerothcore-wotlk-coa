@@ -2686,9 +2686,12 @@
     "spell": 706266,
     "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
     "labels": [
-      "706266 behaviour_metric_delta barrier_absorb"
+      "706266 behaviour_metric_delta barrier_absorbed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 706266 known, the tooltip +10% against the DBC amount 831 to 862 (owner ruling O-27, ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 706267,
@@ -2907,9 +2910,12 @@
     "spell": 707844,
     "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
     "labels": [
-      "707844 behaviour_metric_delta barrier_absorb"
+      "707844 behaviour_metric_delta barrier_absorbed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 707844 known, the tooltip +20% against the DBC amount 831 to 862 (owner ruling O-27, ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707845,
@@ -3730,7 +3736,10 @@
       "803475 behaviour_metric_delta hit_off",
       "803475 behaviour_metric_delta hit_ap_off"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Owner ruling O-36 (2026-11-24, N-9): keep the data's 132 for the off-hand strike; the tooltip states the flat only as $m1 = 158 for the main hand. 803475 Effect[1] TRIGGER_SPELL_WITH_VALUE of 572585 has BasePoints 131 + DieSides 1 = 132 (Effect[0] of 520262 is 157 + 1 = 158), passed as the base points by SpellEffects.cpp:1847-1852, so the hit_off entry expects 0.5 x 2 x (23 + 53.49 + 132 + 45.24) = 253.73 at attack power 312 (hit_ap_off 6582.30 at 20312), band 5%, the 158 model (279.72) excluded.",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803475,
