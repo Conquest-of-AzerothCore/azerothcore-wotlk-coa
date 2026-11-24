@@ -8,7 +8,7 @@ from test_behaviours import DARKSLAYER_DAMAGE, FakeRun, base_verdict, control_hi
 from values import Expectation
 
 GRANT = {'proc_aura': 807163, 'striker_entry': 36, 'strikers': 2, 'striker_auras': [42716], 'swing_ms': 500,
-         'grant_ms': 1500}
+         'grant_ms': 1500, 'lead_ms': 3000}
 EARNED = {**DARKSLAYER_DAMAGE, 'target': 'striker', hit_ratio_avoided.NAME: GRANT}
 PREFIX = 'grant'
 
@@ -78,7 +78,8 @@ class HitRatioAvoidedJudgeTests(unittest.TestCase):
 class HitRatioAvoidedGenerationTests(unittest.TestCase):
     def test_malformed_options_are_refused(self):
         self.assertIsNone(hit_ratio_avoided.parse(None))
-        for raw in ({**GRANT, 'grant_ms': 1200}, {**GRANT, 'strikers': True}, {**GRANT, 'striker_auras': 42716},
+        for raw in ({**GRANT, 'grant_ms': 1200}, {**GRANT, 'lead_ms': 700}, {**GRANT, 'strikers': True},
+                    {**GRANT, 'striker_auras': 42716},
                     {key: value for key, value in GRANT.items() if key != 'swing_ms'}, {**GRANT, 'dodge': 100}):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 hit_ratio_avoided.parse(raw)
@@ -115,6 +116,20 @@ class HitRatioAvoidedGenerationTests(unittest.TestCase):
         self.assertTrue(all(step['target'] == 'striker' for step in (steps[index] for index in casts)))
         self.assertFalse(any(step['action'] == 'set_aura' and step.get('spell') == 807163 for step in steps))
         self.assertIn(hit_ratio_avoided.NAME, earned['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_the_first_trial_of_each_arm_swings_for_the_lead_more(self):
+        earned, _ = behaviour_scenario(witch_hunter_file(503681), EARNED)
+        steps = earned['steps']
+        reads = [index for index, step in enumerate(steps) if step.get('metric') == 'aura'
+                 and step.get('spell') == 807163]
+        windows = []
+        for read in reads:
+            start = read
+            while steps[start - 1]['action'] in ('wait', 'set_health', 'set_combat_avoidance'):
+                start -= 1
+            windows.append(sum(step['ms'] for step in steps[start:read] if step['action'] == 'wait'))
+        self.assertEqual(windows, [4500, 1500, 1500, 1500, 4500, 1500, 1500, 1500])
 
 
 if __name__ == '__main__':

@@ -18221,8 +18221,8 @@
           804822
         ]
       },
-      "trials": 53,
-      "parts": 10,
+      "trials": 52,
+      "parts": 13,
       "critical": false,
       "cast_spell": 801901,
       "cast_power": 100,
@@ -18236,9 +18236,10 @@
           2116852
         ],
         "swing_ms": 500,
-        "grant_ms": 1500
+        "grant_ms": 1500,
+        "lead_ms": 6000
       },
-      "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224). Second real design of mentor Felsworn D-109 (2): 807163 is never set; avoided_grant (ADR 1285) makes 10 stationary strikers 36 swing at the caster in both arms with dodge 100% and parry 0, and Vengeance Is Mine 804822 is learned for the treatment arm only, so 807163 is earned by the real dodge grant before every treatment cast (read present before each treatment cast and absent before each control cast, else the run is void). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) at the first striker are pooled over 10 parts of 53 trials per arm (530 per arm; the fw-fa2 spread of the set_aura entry, 99% half-width 1.48 points at 240 trials per arm, needs about 528 per arm for a half-width of 1 point, half the unchanged 2-point band): ratio 1.30 within the larger of 5% of the +30% (1.5) and 2 points. Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only."
+      "expected_source": "807163 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 29 + 1 = 30 ($807163s1), the Twin Slice class mask patched on the server (AscensionFelswornContracts.cpp:223-224). Second real design of mentor Felsworn D-109 (2): 807163 is never set; avoided_grant (ADR 1285) makes 10 stationary strikers 36 swing at the caster in both arms with dodge 100% and parry 0, and Vengeance Is Mine 804822 is learned for the treatment arm only, so 807163 is earned by the real dodge grant before every treatment cast (read present before each treatment cast and absent before each control cast, else the run is void). The non-critical hits of the 808303 main-hand strike of Twin Slice 801901 (cast_power 100) at the first striker are pooled over 13 parts of 52 trials per arm (676 per arm; one scenario holds 52). Sizing: the first fw-bk4 pair read a 99% half-width of 1.01 points at 530 trials per arm (needs 542 for 1 point, half the unchanged 2-point band); 676 gives about 0.89. Ratio 1.30 within the larger of 5% of the +30% (1.5) and 2 points. The strikers swing 6000 ms more before the first trial of each arm (lead_ms): with 1500 ms, 1 of 20 first treatment trials of that pair read 807163 absent (void); if the chance of no proc falls geometrically with the window, 7500 ms gives about 0.05^5 = 3e-7 per part (an estimate from that one count, not a measurement), and no later trial read it absent (0 of 1040). Reference search 2026-11-24: coa-history spell 804822 and 807163: 0 events in 186 logs; nothing found that decides the 30%; expected values come from the DBC only."
     },
     {
       "spell": 561216,

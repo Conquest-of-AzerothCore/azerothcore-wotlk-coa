@@ -4,7 +4,7 @@ import proc_avoided
 from profile import CASTER, measurement
 
 NAME = 'avoided_grant'
-FIELDS = frozenset({'proc_aura', 'striker_entry', 'strikers', 'striker_auras', 'swing_ms', 'grant_ms'})
+FIELDS = frozenset({'proc_aura', 'striker_entry', 'strikers', 'striker_auras', 'swing_ms', 'grant_ms', 'lead_ms'})
 DODGE, PARRY = 100, 0
 ARMS = ('control', 'treatment')
 
@@ -17,6 +17,7 @@ class AvoidedGrant:
     striker_auras: tuple[int, ...]
     swing_ms: int
     grant_ms: int
+    lead_ms: int
 
 
 def parse(raw: dict | None) -> AvoidedGrant | None:
@@ -25,13 +26,13 @@ def parse(raw: dict | None) -> AvoidedGrant | None:
     if not isinstance(raw, dict) or set(raw) != FIELDS or not isinstance(raw['striker_auras'], list) or any(
             isinstance(value, bool) or not isinstance(value, int) or value <= 0
             for value in (*(raw[key] for key in FIELDS - {'striker_auras'}), *raw['striker_auras'])):
-        raise ValueError(f'hit_ratio {NAME} is {{{", ".join(sorted(FIELDS))}}} of positive whole numbers (striker_auras '
-                         f'a list of them), not {raw!r}')
-    if raw['grant_ms'] % raw['swing_ms']:
-        raise ValueError(f'hit_ratio {NAME} grant_ms {raw["grant_ms"]} is a whole number of swing_ms '
-                         f'{raw["swing_ms"]}')
+        raise ValueError(f'hit_ratio {NAME} is {{{", ".join(sorted(FIELDS))}}} of positive whole numbers '
+                         f'(striker_auras a list of them), not {raw!r}')
+    if raw['grant_ms'] % raw['swing_ms'] or raw['lead_ms'] % raw['swing_ms']:
+        raise ValueError(f'hit_ratio {NAME} grant_ms {raw["grant_ms"]} and lead_ms {raw["lead_ms"]} are whole '
+                         f'numbers of swing_ms {raw["swing_ms"]}')
     return AvoidedGrant(raw['proc_aura'], raw['striker_entry'], raw['strikers'], tuple(raw['striker_auras']),
-                        raw['swing_ms'], raw['grant_ms'])
+                        raw['swing_ms'], raw['grant_ms'], raw['lead_ms'])
 
 
 def avoided_entry(spell: int, grant: AvoidedGrant) -> dict:
@@ -70,7 +71,8 @@ def engage_steps(spell: int, grant: AvoidedGrant) -> list[dict]:
 
 def trial_steps(spell: int, grant: AvoidedGrant, prefix: str, arm: str, trial: int) -> list[dict]:
     entry = avoided_entry(spell, grant)
-    return (proc_avoided.attempt_steps(entry, grant.grant_ms // grant.swing_ms, grant.swing_ms)
+    window = grant.grant_ms + (grant.lead_ms if trial == 1 else 0)
+    return (proc_avoided.attempt_steps(entry, window // grant.swing_ms, grant.swing_ms)
             + [measurement(presence_label(prefix, arm, trial), CASTER, 'aura', spell=grant.proc_aura)])
 
 
@@ -88,8 +90,9 @@ def contract(spell: int, grant: AvoidedGrant) -> str:
     return (f'; {NAME}: {grant.strikers} stationary strikers {grant.striker_entry} swing at the caster in both arms '
             f'with the caster\'s dodge at {DODGE}% and parry at {PARRY}%; {spell} is learned for the treatment arm '
             f'only, so {grant.proc_aura} is earned by the real dodge route, never set; before every observed cast '
-            f'the strikers swing for {grant.grant_ms} ms and {grant.proc_aura} is read on the caster: the run is '
-            f'void (unmeasured) when a treatment trial reads it absent or a control trial reads it present')
+            f'the strikers swing for {grant.grant_ms} ms ({grant.lead_ms} ms more before the first trial of each '
+            f'arm) and {grant.proc_aura} is read on the caster: the run is void (unmeasured) when a treatment trial '
+            f'reads it absent or a control trial reads it present')
 
 
 def void(runs, grant_model: dict) -> str | None:

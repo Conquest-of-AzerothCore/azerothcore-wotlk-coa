@@ -1213,11 +1213,12 @@ cast: the verdict is `unmeasured`, never ok or alert, and the contract says so. 
 step, so a run without a refusal is judged as without the option.
 
 `avoided_grant` (ADR 1285; `hit_ratio_avoided.py`) earns the treatment aura by the real dodge route instead of
-setting it: `{"proc_aura", "striker_entry", "strikers", "striker_auras", "swing_ms", "grant_ms"}`, `grant_ms` a whole
-number of `swing_ms`. The strikers of `proc_avoided` swing at the caster in both arms with the caster's dodge at 100%
+setting it: `{"proc_aura", "striker_entry", "strikers", "striker_auras", "swing_ms", "grant_ms", "lead_ms"}`, `grant_ms` and
+`lead_ms` whole numbers of `swing_ms`. The strikers of `proc_avoided` swing at the caster in both arms with the caster's dodge at 100%
 and parry at 0; the passive (the entry's `spell`) is learned in the treatment arm only (`treatment.learn`), and no arm
 may set `proc_aura`; the observed casts go to the first striker (`target: "striker"`). Before every observed cast of
-both arms the strikers swing for `grant_ms` and `proc_aura` is read on the caster. The run is `unmeasured` when a
+both arms the strikers swing for `grant_ms` (`lead_ms` more before the first trial of each arm) and `proc_aura`
+is read on the caster. The run is `unmeasured` when a
 treatment trial reads it absent, a control trial reads it present, or a read is missing; otherwise the unchanged
 hit_ratio judge pools the trials (`parts` allowed). Felsworn: Vengeance Is Mine 804822 `twin_slice_damage_earned`.
 

@@ -3020,7 +3020,7 @@
     "spell": 800203,
     "clause": "Interrupt a spell from being cast, preventing the target from casting spells of that school for $d and draining mana from the target based on your Spirit.",
     "kind": "claim",
-    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands. The unmodelled readback aura_duration_ms #0 never counted and is dropped; lockout_held and lockout_free judge the lockout duration.",
+    "reason": "Split by claim (fw-l2b, review fw-rl2 I-2): 'Interrupt a spell from being cast' is judged by interrupt and 'preventing the target from casting spells of that school for $d' by lockout_held / lockout_free (3000 ms window, DurationIndex 27) and aura_duration_ms #0, ok in both runs of prove2 20261123-225953 / -230029. 'and draining mana from the target based on your Spirit.' stays unlabelled: an entry on Scarlet Magi 1832 channelling Evocation read an unset control mana (5206 / 5340), so it was removed (e2ff868f34); a drain read needs the target's mana set right before the cast lands. The unmodelled readback aura_duration_ms #0 never counted and is dropped; lockout_held and lockout_free judge the lockout duration. fw-bk4 2026-11-24 (controller go, direction only, coefficient unasserted): 'and draining mana from the target based on your Spirit.' is judged by drain (Mylentha Riverbend 11795 channelling Evocation 12051, its mana set to 2434 by dummy_power_after_trigger right after the cast is submitted, 500 ms before Felbreak lands: 2434 without the cast, 2092 after it, with Greatness 60235 +300 Spirit on the caster) and drain_spirit (both phases cast Felbreak, the after phase alone with Greatness: 2401 then 2075, a gain of -326 within [-599, -1]), ok in both runs of the fw-bk4 pair. The tool gap below is superseded: dummy_power_after_trigger at 0 ms precedes the drain because Felbreak has a 500 ms cast time.",
     "claims": [
       {
         "claim": "Interrupt a spell from being cast",
@@ -3037,7 +3037,10 @@
       },
       {
         "claim": "and draining mana from the target based on your Spirit.",
-        "labels": []
+        "labels": [
+          "800203 behaviour_metric_delta drain",
+          "800203 behaviour_metric_delta drain_spirit"
+        ]
       }
     ],
     "tool_gap": {

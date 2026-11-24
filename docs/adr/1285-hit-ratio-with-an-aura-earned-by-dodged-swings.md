@@ -24,8 +24,9 @@ judged by the existing band (controller, 2026-11-24: no tolerance change).
 ## Decision
 
 `avoided_grant` (`hit_ratio_avoided.py`): `{"proc_aura", "striker_entry", "strikers", "striker_auras", "swing_ms",
-"grant_ms"}`. The `proc_avoided` strikers engage the caster before the arms; in both arms, before every observed cast,
-they swing for `grant_ms` with the caster's dodge at 100% and parry at 0 and `proc_aura` is read on the caster. The
+"grant_ms", "lead_ms"}`. The `proc_avoided` strikers engage the caster before the arms; in both arms, before every
+observed cast, they swing for `grant_ms` (plus `lead_ms` before the first trial of each arm, so the learn stays the only
+difference between the arms) with the caster's dodge at 100% and parry at 0, and `proc_aura` is read on the caster. The
 passive is learned in the treatment arm only; an arm that sets `proc_aura`, a shared learn, swings, versus, a target
 health, a rate or a target other than the first striker are refused at generation. The judge voids the run
 (`unmeasured`) when a treatment trial reads `proc_aura` absent, a control trial reads it present, or a read is
@@ -40,6 +41,9 @@ key changes.
   option; an absent treatment read, a present control read and a missing read void it; a +14% mutant still alerts;
   malformed options and a set, shared or misdirected grant are refused; the scenario reads the aura before every cast
   and never sets it.
-- Felsworn: `804822 behaviour_hit_ratio twin_slice_damage_earned`, 10 parts of 53 trials per arm (530; one scenario
-  holds 53). The fw-fa2 spread of the set_aura entry (99% half-width 1.48 points at 240 trials per arm) needs about 528
-  trials per arm for a half-width of 1 point, half the 2-point band.
+- Felsworn: `804822 behaviour_hit_ratio twin_slice_damage_earned`, 13 parts of 52 trials per arm (676; one scenario
+  holds 52). A first pair at 10 parts of 53 read a 99% half-width of 1.01 points (542 trials per arm needed for 1
+  point, half the 2-point band) and, with a 1500 ms window only, one void: 1 of 20 first treatment trials read the aura
+  absent, 0 of 1040 later trials. `lead_ms` 6000 was added (controller, 2026-11-24: fixture and sizing, not a judge
+  change); the residual void chance per part, about 3e-7 if the no-proc chance falls geometrically with the window, is
+  an estimate from that one count.
