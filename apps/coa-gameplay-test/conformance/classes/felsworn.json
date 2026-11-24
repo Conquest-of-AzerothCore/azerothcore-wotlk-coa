@@ -23823,6 +23823,437 @@
       "expected": 1,
       "after_at_least": 300,
       "observe_source": "Carve 800206 is a channel (DurationIndex 66 = 2500 ms) whose ChannelInterruptFlags 4733956 (0x483C04) carry no movement bit in Spell.dbc, and the server adds none. The caster is moved by the harness relocate step (the native position update of a client movement packet, which interrupts a channel carrying AURA_INTERRUPT_FLAG_MOVE) 1.5 yd along y and back at 500 and 1000 ms; cast_remaining_ms of the caster's own cast is read 800 ms after the last move (about 1800 ms after the cast), the channel must still run (at least 300 of the 2500 ms). Before (control): no cast, 0. Felfury x6 and 803468 are set as precondition fixtures. Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel (the precedent shape); nothing else found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Holy resistance gain at +3000 attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_holy_ap3000",
+      "label_suffix": "resist_holy_ap3000",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amplitude 3000 ms trigger 500531 (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick and AscensionFelswornContracts.cpp:519-520 sets its two values from attack power. Direction only (mentor D-90): the coefficient is not asserted. The metric is read on the caster before the learn (control: 0, no source) and 3600 ms after learning 92089 (the first tick falls 3000 ms after the learn), the caster holding 3000 more attack power as a harness fixture (player_attack_power). The after reading must be above 1. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Fire resistance gain at +3000 attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_fire_ap3000",
+      "label_suffix": "resist_fire_ap3000",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amplitude 3000 ms trigger 500531 (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick and AscensionFelswornContracts.cpp:519-520 sets its two values from attack power. Direction only (mentor D-90): the coefficient is not asserted. The metric is read on the caster before the learn (control: 0, no source) and 3600 ms after learning 92089 (the first tick falls 3000 ms after the learn), the caster holding 3000 more attack power as a harness fixture (player_attack_power). The after reading must be above 1. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Nature resistance gain at +3000 attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_nature_ap3000",
+      "label_suffix": "resist_nature_ap3000",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 3
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amplitude 3000 ms trigger 500531 (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick and AscensionFelswornContracts.cpp:519-520 sets its two values from attack power. Direction only (mentor D-90): the coefficient is not asserted. The metric is read on the caster before the learn (control: 0, no source) and 3600 ms after learning 92089 (the first tick falls 3000 ms after the learn), the caster holding 3000 more attack power as a harness fixture (player_attack_power). The after reading must be above 1. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Frost resistance gain at +3000 attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_frost_ap3000",
+      "label_suffix": "resist_frost_ap3000",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amplitude 3000 ms trigger 500531 (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick and AscensionFelswornContracts.cpp:519-520 sets its two values from attack power. Direction only (mentor D-90): the coefficient is not asserted. The metric is read on the caster before the learn (control: 0, no source) and 3600 ms after learning 92089 (the first tick falls 3000 ms after the learn), the caster holding 3000 more attack power as a harness fixture (player_attack_power). The after reading must be above 1. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Shadow resistance gain at +3000 attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_shadow_ap3000",
+      "label_suffix": "resist_shadow_ap3000",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amplitude 3000 ms trigger 500531 (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick and AscensionFelswornContracts.cpp:519-520 sets its two values from attack power. Direction only (mentor D-90): the coefficient is not asserted. The metric is read on the caster before the learn (control: 0, no source) and 3600 ms after learning 92089 (the first tick falls 3000 ms after the learn), the caster holding 3000 more attack power as a harness fixture (player_attack_power). The after reading must be above 1. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Arcane resistance gain at +3000 attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_arcane_ap3000",
+      "label_suffix": "resist_arcane_ap3000",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 6
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amplitude 3000 ms trigger 500531 (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick and AscensionFelswornContracts.cpp:519-520 sets its two values from attack power. Direction only (mentor D-90): the coefficient is not asserted. The metric is read on the caster before the learn (control: 0, no source) and 3600 ms after learning 92089 (the first tick falls 3000 ms after the learn), the caster holding 3000 more attack power as a harness fixture (player_attack_power). The after reading must be above 1. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 705141,
+      "name": "Pit Lord's Rage (critical strike chance after Felhoof Charge)",
+      "kind": "metric_delta",
+      "variant": "charge_crit_chance",
+      "label_suffix": "charge_crit_chance",
+      "quote": "Casting Felhoof Charge increases your critical strike chance by $705143s1%",
+      "trigger_spell": 800204,
+      "gate_spell": 705141,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "melee_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 15,
+      "expected_gain": 15,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "crit_field_refresh": true,
+      "observe_source": "705143 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 14 + 1 = 15 ($705143s1), DurationIndex 8, granted on a cast of Felhoof Charge 800204 with 705141 learned. The caster's live melee critical strike chance is read before the learn (the same real cast of 800204 without the talent: the control) and 500 ms after the cast with it learned; the gain is 15 points. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (Inner Demon DoT carries 30% of the damage dealt)",
+      "kind": "metric_delta",
+      "variant": "inner_dot_share",
+      "label_suffix": "inner_dot_share",
+      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805748,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0.3,
+      "tolerance": 0.02,
+      "wait_ms": 6300,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 501298,
+          "target": "dummy",
+          "critical": false
+        },
+        "ratio": 0.3,
+        "tolerance": 0.02,
+        "least": 2000,
+        "source": "Ruin 501298 tooltip: Inner Demon deals an additional 30% of the damage dealt; the DoT total over the Ruin hit"
+      },
+      "observe_source": "Ruin 501298 Inner Demon: AscensionFelswornAbilities.cpp:375 copies 30% of the damage dealt as the DoT 805748 (Effect[0] aura 3 PERIODIC_DAMAGE, amplitude 1000 ms, DurationIndex 27 = 3000 ms). One real Ruin cast at the dummy with Inner Demon 804216 held as a precondition fixture (Felfury x6 and At Least 2 Felfury 803468 precondition fixtures, 823764 no partial resists, Blessed Resilience 33143 on the dummy so no hit crits): the damage of 805748 on the dummy over 6300 ms (Ruin lands about 2670 ms, the DoT about 2870 ms, its last tick about 5870 ms) is divided by the damage of Ruin over the same window: 0.30 within 0.02 (2 points). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (control: no Inner Demon, no DoT)",
+      "kind": "metric_delta",
+      "variant": "inner_dot_control",
+      "label_suffix": "inner_dot_control",
+      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805748,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6300,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm of inner_dot_share: the same Ruin cast and fixtures without Inner Demon 804216: the DoT 805748 deals nothing (AscensionFelswornAbilities.cpp:375 is gated on Inner Demon). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 707527,
+      "name": "Hateforged Barrier (damage absorbed by a real strike)",
+      "kind": "metric_delta",
+      "variant": "absorbed",
+      "label_suffix": "absorbed",
+      "quote": "absorbing ${$m1+0+$STA*1} damage,",
+      "trigger_spell": 707527,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 846.5,
+      "after_at_least": 831,
+      "after_at_most": 862,
+      "tolerance": 0.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "707527 Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, BasePoints 751 + 1 = 752, EffectDieSides 32 (a roll adding 0 to 31), plus Stamina x 1 ($m1+0+$STA*1), the reference Stamina being 79: 831 to 862 (no contrast). A real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100, above the barrier) cast at the caster by the striker creature 500 ms later: the damage absorbed by the barrier is read in the spell logs of that strike (spell_absorb_total). The before phase casts nothing and no strike: 0 absorbed. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 707527,
+      "name": "Hateforged Barrier (damage absorbed, +63 Stamina contrast)",
+      "kind": "metric_delta",
+      "variant": "absorbed_stamina",
+      "label_suffix": "absorbed_stamina",
+      "quote": "scaling with your Stamina,",
+      "trigger_spell": 707527,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 909.5,
+      "after_at_least": 894,
+      "after_at_most": 925,
+      "tolerance": 0.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "707527 Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, BasePoints 751 + 1 = 752, EffectDieSides 32 (a roll adding 0 to 31), plus Stamina x 1 ($m1+0+$STA*1), the reference Stamina being 79: 831 to 862 (Stamina 48101 (BasePoints 62 + 1 = +63) held in both phases as a named precondition fixture: 894 to 925). A real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100, above the barrier) cast at the caster by the striker creature 500 ms later: the damage absorbed by the barrier is read in the spell logs of that strike (spell_absorb_total). The before phase casts nothing and no strike: 0 absorbed. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). ",
+      "phase_auras": [
+        [
+          48101,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 707527,
+      "name": "Hateforged Barrier (control: the same strike without the barrier)",
+      "kind": "metric_delta",
+      "variant": "absorbed_control",
+      "label_suffix": "absorbed_control",
+      "quote": "absorbing ${$m1+0+$STA*1} damage,",
+      "trigger_spell": 804247,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm of absorbed: the same strike of Light of the Naaru 41394 at the caster 500 ms after a cast of 804247 (Inner Demon, no barrier): nothing is absorbed. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 705141,
+      "name": "Pit Lord's Rage (a fixed Physical hit after Chaos Rush)",
+      "kind": "metric_delta",
+      "variant": "rush_damage_hit",
+      "label_suffix": "rush_damage_hit",
+      "quote": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1%",
+      "trigger_spell": 500028,
+      "gate_spell": 705141,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "after_trigger_casts": [
+        {
+          "spell": 92559,
+          "delay_ms": 300,
+          "target": "dummy",
+          "in_before": true
+        }
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 92559,
+        "target": "dummy"
+      },
+      "before_expected": 100,
+      "expected": 225.0,
+      "expected_ratio": 2.25,
+      "tolerance": 0.02,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "705142 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 1 (Physical), BasePoints 24 + 1 = 25 ($705142s1), granted by a cast of Chaos Rush 500028 with 705141 learned. Void Zone 92559 (Effect[0] SCHOOL_DAMAGE, SchoolMask 1 Physical, BasePoints 999 + 1 = 1000, DieSides 1, DmgClass 0: no roll, no attack power term) is cast at the dummy 300 ms after the Chaos Rush cast in both phases: before the learn (the control: the same cast of 500028 without the talent) and after it. 92559 is learned by the caster as a precondition fixture. spell_damage_total is a running total: the after reading is the hit of the control phase plus the hit of the treatment phase, so the expected ratio after over before is 1 + 1.25 = 2.25 within 0.02 (the treated hit is 1.25 times the control hit within 2 points). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 705141 in earlier felsworn batches without an amount). ",
+      "learn": [
+        92559
+      ]
     }
   ],
   "player_observations": [],

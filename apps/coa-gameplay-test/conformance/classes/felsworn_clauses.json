@@ -102,8 +102,28 @@
       {
         "claim": "grants you additional Armor and magic resistance based on your attack power",
         "labels": []
+      },
+      {
+        "claim": "magic resistance (Holy to Arcane) rises with learning the passive at +3000 attack power",
+        "labels": [
+          "92089 behaviour_metric_delta resist_holy_ap3000",
+          "92089 behaviour_metric_delta resist_fire_ap3000",
+          "92089 behaviour_metric_delta resist_nature_ap3000",
+          "92089 behaviour_metric_delta resist_frost_ap3000",
+          "92089 behaviour_metric_delta resist_shadow_ap3000",
+          "92089 behaviour_metric_delta resist_arcane_ap3000"
+        ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "Armor part and the larger-delta-at-higher-attack-power part need a tool extension (batch A3, mentor D-90 method). Armor: the reference character's Armor reads 270 before the learn (a stat-derived base, not 0), the metric_delta judge asserts the before reading exactly (before_expected, tolerance) or a stated gain (expected_gain, which would assert the coefficient D-90 leaves unasserted), and has no direction-only gain option (after minus before above a floor). Ordering: judging 'strictly larger delta at a higher attack power' needs one scenario holding two attack power levels (monotone covers phase_power only), because separate entries cannot compare their readings. Design 1 (armor, entry armor_ap3000, run 20261124-054659): alert, before 270 expected 0, after 1926. Design 2 (an after_at_least bound above the read baseline) was rejected: the bound would come from a reading. The six resistance entries (resist_<school>_ap3000, baseline 0 exact) measure the direction for each magic school and are listed as an extra claim. Route: a tool group adding a gain-above-floor direction option and an attack power monotone option to metric_delta.",
+      "attempts": [
+        {
+          "agent": "fw-fa3",
+          "report": ".agents/plans/fw-fa3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 300465,
@@ -2395,8 +2415,8 @@
     "spell": 707527,
     "clause": "Manifest a barrier of pure hatred, absorbing ${$m1+0+$STA*1} damage,",
     "labels": [
-      "707527 behaviour_metric_delta absorb",
-      "707527 behaviour_metric_delta absorb_stamina"
+      "707527 behaviour_metric_delta absorbed",
+      "707527 behaviour_metric_delta absorbed_control"
     ],
     "kind": "claim"
   },
@@ -2408,7 +2428,8 @@
       {
         "claim": "scaling with your Stamina,",
         "labels": [
-          "707527 behaviour_metric_delta absorb_stamina"
+          "707527 behaviour_metric_delta absorbed_stamina",
+          "707527 behaviour_metric_delta absorbed_control"
         ]
       },
       {
@@ -2490,7 +2511,7 @@
       {
         "claim": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1%",
         "labels": [
-          "705141 behaviour_metric_delta rush_damage_amount"
+          "705141 behaviour_metric_delta rush_damage_hit"
         ]
       },
       {
@@ -2510,7 +2531,7 @@
       {
         "claim": "Casting Felhoof Charge increases your critical strike chance by $705143s1%",
         "labels": [
-          "705141 behaviour_metric_delta charge_crit_amount"
+          "705141 behaviour_metric_delta charge_crit_chance"
         ]
       },
       {
@@ -3501,10 +3522,31 @@
   {
     "spell": 501298,
     "clause": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
-    "labels": [
-      "501298 spell_duration 805748 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Inner Demon: Deals an additional 30% of the damage dealt",
+        "labels": [
+          "501298 behaviour_metric_delta inner_dot_share",
+          "501298 behaviour_metric_delta inner_dot_control"
+        ]
+      },
+      {
+        "claim": "over $805748d.",
+        "labels": [
+          "501298 spell_duration 805748 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The duration part ($805748d = 3000 ms, DurationIndex 27 of the DoT 805748) has no behaviour route yet. Design 1 (apply_stamp on 805748 with held read 5750 ms and gone read 6250 ms, windows 2710..2990 and 3010..3290 ms, run 20261124-055254): both verdicts unmeasured, 'apply stamp: 1 apply after the trigger cast, so the last apply is not bounded': the option brackets an aura applied before the trigger cast (a proc or strike), while the DoT is applied by the Ruin hit 2500 ms after the cast plus two projectile flights (2866 ms by the data, fix-805748 note). Design 2 (plain game_time reads without a stamp) cannot exclude a duration 10% long (3300 ms): from an apply at 2866 ms a gone read at 6250 ms leaves 84 ms of margin, and the apply time is not measured. Route: an apply_stamp mode that stamps the apply of an aura applied after the trigger cast (tool group). The 30% share is proven by inner_dot_share with its control.",
+      "attempts": [
+        {
+          "agent": "fw-fa3",
+          "report": ".agents/plans/fw-fa3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 801899,
