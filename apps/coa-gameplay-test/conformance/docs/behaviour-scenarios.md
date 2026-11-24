@@ -2291,6 +2291,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   parts (ADR 0544, ADR 0546)
 - [`swing_reset_rate`](kinds/swing_reset_rate.md): a talent's chance to reset a cooldown, from the clear-cooldown
   packets per landed auto-attack hit, pooled over parts (ADR 1187, provisional)
+- [`threat_above_control`](kinds/threat_above_control.md): threat per damage of one hit strictly above a control
+  hit's, every sample, a direction with no amount (ADR 1280, provisional)
 - [`timer_spacing_arms`](kinds/timer_spacing_arms.md): an internal timer bracketed by two real hits cast
   `ignore_gcd` on either side of it, judged on the measured spacing (ADR 1195, provisional)
 
