@@ -475,7 +475,10 @@
       {
         "claim": "Your next 3 Fel Fireballs",
         "labels": [
-          "300490 behaviour_metric_delta fourth_cast"
+          "300490 behaviour_metric_delta fourth_cast",
+          "300490 behaviour_metric_delta third_cast",
+          "300490 behaviour_metric_delta other_spell",
+          "300490 behaviour_metric_delta duration_left"
         ]
       }
     ]

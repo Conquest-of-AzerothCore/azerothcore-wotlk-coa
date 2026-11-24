@@ -204,6 +204,8 @@ class aura_ascension_felsworn_event : public AuraScript
             break;
         case 300490:
             Cast(player, player, 806104);
+            if (Aura* felforged = player->GetAura(806104))
+                felforged->SetScriptValue(806104, 0);
             break;
         case 805249:
             Cast(player, player, 521210);

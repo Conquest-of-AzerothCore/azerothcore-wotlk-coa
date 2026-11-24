@@ -18903,6 +18903,132 @@
       "before_expected": 0,
       "expire_ms": 500,
       "void_on_cast_failure": true,
+      "after_auras": [
+        [
+          806104,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "grant you Felforged",
+      "spell": 300490,
+      "name": "Felforged (the 3rd Fel Fireball is still reduced)",
+      "variant": "third_cast",
+      "label_suffix": "third_cast",
+      "setup_casts": [
+        801312,
+        801312
+      ],
+      "setup_wait_ms": 1800,
+      "expected": 4,
+      "wait_ms": 1090,
+      "game_time": {
+        "after": [
+          1040,
+          1190
+        ]
+      },
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), DurationIndex 31 = 8000 ms (SpellDuration.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster in the after phase only). The cast count is cumulative over both phases: the before phase's one control cast (no aura) completes during the expire wait (1). Two Fel Fireballs are cast with the aura (1800 ms apart, so they complete) for 2 more, then the 3rd, read 1090 ms after its start: 4 in total when the 3rd is still reduced (completed), 3 when a charge was lost before it (Felsworn ADR 0021).",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "after_auras": [
+        [
+          806104,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "grant you Felforged",
+      "spell": 300490,
+      "name": "Felforged (another Felsworn cast between Fel Fireballs uses no charge)",
+      "variant": "other_spell",
+      "label_suffix": "other_spell",
+      "setup_casts": [
+        801312,
+        801901,
+        801312
+      ],
+      "setup_wait_ms": 1800,
+      "expected": 4,
+      "wait_ms": 1090,
+      "game_time": {
+        "after": [
+          1040,
+          1190
+        ]
+      },
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), DurationIndex 31 = 8000 ms (SpellDuration.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster in the after phase only). The cast count is cumulative over both phases: the before phase's one control cast (no aura) completes during the expire wait (1). Fel Fireball, Twin Slice 801901, Fel Fireball are cast with the aura (1800 ms apart) for 2 more Fel Fireballs, then the 3rd Fel Fireball, read 1090 ms after its start: 4 when Twin Slice used no charge (the 3rd Fel Fireball still reduced), 3 when Twin Slice used one (the aura gone after Fel Fireball, Twin Slice, Fel Fireball) (Felsworn ADR 0021).",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "after_auras": [
+        [
+          806104,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "quote": "grant you Felforged",
+      "spell": 300490,
+      "name": "Felforged (the duration ends it with charges left)",
+      "variant": "duration_left",
+      "label_suffix": "duration_left",
+      "setup_casts": [
+        801312
+      ],
+      "setup_wait_ms": 8600,
+      "expected": 2,
+      "wait_ms": 1090,
+      "game_time": {
+        "after": [
+          1040,
+          1190
+        ]
+      },
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), DurationIndex 31 = 8000 ms (SpellDuration.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster in the after phase only). The cast count is cumulative over both phases: the before phase's one control cast (no aura) completes during the expire wait (1). One Fel Fireball is cast with the aura for 1 more, then 8600 ms pass (past the 8000 ms duration, 2 charges left), then a Fel Fireball read 1090 ms after its start: 2 when it keeps its 1500 ms cast time (Felforged expired), 3 when it is still reduced (Felsworn ADR 0021).",
+      "cast_in_before": false,
+      "setup_only_after": true
+    },
+    {
+      "kind": "metric_delta",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801312
+      },
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
       "quote": "grant you Felforged",
       "spell": 300490,
       "name": "Felforged (control: the same cast without Felforged is not completed)",

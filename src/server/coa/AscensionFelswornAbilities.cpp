@@ -16,7 +16,8 @@
 namespace
 {
 using namespace AscensionFelsworn;
-constexpr uint32 selected[] = {706269, 705146, 300486, 525027, 555277, 807424, 806128, 801902};
+constexpr uint32 selected[] = {706269, 705146, 300486, 525027, 555277, 807424, 806128, 801902, 806104};
+constexpr uint64 FelforgedCharges = 3;
 bool Select(SpellInfo const* info, uint32 aura)
 {
     switch (aura)
@@ -26,6 +27,7 @@ bool Select(SpellInfo const* info, uint32 aura)
         return Named(info, 802060);
     case 300486:
     case 807424:
+    case 806104:
         return Named(info, 801312);
     case 525027:
         return Direct(info) || Named(info, 801904) || Twin(info);
@@ -38,6 +40,15 @@ bool Select(SpellInfo const* info, uint32 aura)
     default:
         return false;
     }
+}
+void UseSelected(Aura* aura)
+{
+    uint32 id = aura->GetId();
+    uint64 used = aura->GetScriptValue(id) + 1;
+    if (id == 806104 && used < FelforgedCharges)
+        aura->SetScriptValue(id, used);
+    else
+        aura->Remove();
 }
 void StackInnerDemonRecast(Aura* aura, int32 remaining, int32 fury)
 {
@@ -173,7 +184,11 @@ class felsworn_casts : public AllSpellScript
         for (uint32 sid : selected)
             if (Select(info, sid))
                 if (Aura* aura = player->GetAura(sid))
+                {
+                    if (sid == 806104 && !aura->GetScriptValue(800058))
+                        aura->SetScriptValue(800058, ++State(player).sequence);
                     spell->SetScriptValue(sid, aura->GetScriptValue(800058));
+                }
         if (player->CanCastDuringChannel(info))
             spell->SetScriptValue(800355, std::max(0, spell->GetPowerCost()));
     }
@@ -243,7 +258,7 @@ class felsworn_casts : public AllSpellScript
         for (uint32 sid : selected)
             if (uint64 sequence = spell->GetScriptValue(sid))
                 if (Aura* aura = player->GetAura(sid); aura && aura->GetScriptValue(800058) == sequence)
-                    aura->Remove();
+                    UseSelected(aura);
         if (uint64 previous = spell->GetScriptValue(300489))
             State(player).spenderCrit = uint32(previous - 1);
         if (uint32 refund = spell->GetScriptValue(800355))
