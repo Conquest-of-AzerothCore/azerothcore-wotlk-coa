@@ -12544,7 +12544,7 @@
       "tolerance": 16.5,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 948.2 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 706266 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 706266, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 10% ($s2 = BasePoints 9 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.10 = [914.1, 948.2]; a doubled bonus (1.21x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC.",
+      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 948.2 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 706266 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 706266, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 10% ($s2 = BasePoints 9 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.10 = [914.1, 948.2]; a doubled bonus (1.21x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC. The spell_absorb_total read is a running total of the logs of the strike spell, so the entry uses phase_since: the before reading counts the control phase alone and the after reading the treatment phase alone (a first pair without it read the treatment total on top of the control one, 856 + 922 = 1778 and 853 + 1018 = 1871, whose second parts are inside the ranges above).",
       "after_at_least": 914.1,
       "after_at_most": 948.2,
       "strike": {
@@ -12555,7 +12555,8 @@
         "wait_ms": 300,
         "after_trigger_ms": 500
       },
-      "void_on_cast_failure": true
+      "void_on_cast_failure": true,
+      "phase_since": true
     },
     {
       "spell": 707844,
@@ -12604,7 +12605,7 @@
       "tolerance": 16.5,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 1034.4 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 707844 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 707844, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 20% ($s2 = BasePoints 19 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.20 = [997.2, 1034.4]; a doubled bonus (1.44x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC.",
+      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 1034.4 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 707844 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 707844, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 20% ($s2 = BasePoints 19 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.20 = [997.2, 1034.4]; a doubled bonus (1.44x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC. The spell_absorb_total read is a running total of the logs of the strike spell, so the entry uses phase_since: the before reading counts the control phase alone and the after reading the treatment phase alone (a first pair without it read the treatment total on top of the control one, 856 + 922 = 1778 and 853 + 1018 = 1871, whose second parts are inside the ranges above).",
       "after_at_least": 997.2,
       "after_at_most": 1034.4,
       "strike": {
@@ -12615,7 +12616,8 @@
         "wait_ms": 300,
         "after_trigger_ms": 500
       },
-      "void_on_cast_failure": true
+      "void_on_cast_failure": true,
+      "phase_since": true
     },
     {
       "spell": 707845,
