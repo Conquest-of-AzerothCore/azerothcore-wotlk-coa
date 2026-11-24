@@ -112,6 +112,8 @@ class felsworn_casts : public AllSpellScript
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
+        if (Player* player = Owner(caster); player && Named(info, 801904))
+            State(player).assaultRoll = true;
         if (!Triggered(spell) && !info->IsPositive() && info->DmgClass == SPELL_DAMAGE_CLASS_MAGIC &&
             !info->HasAttribute(SPELL_ATTR1_NO_REFLECTION))
             if (Aura* bane = caster->GetAura(525001); bane && Owner(bane->GetCaster()))
