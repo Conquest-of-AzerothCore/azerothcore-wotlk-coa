@@ -7305,6 +7305,209 @@
       "observe_source": "Contrast arm of crit_inner for the condition 'While Inner Demon is active' (owner ruling O-23: it covers the Carve sentence): the same arms with no Inner Demon 804216 on the caster, so the critical Carve strike at 10 steps is unchanged by 805236: 1.0. The previous code ignored Inner Demon and read 1.3. 807427 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints 4 + EffectDieSides 1 = 5 ($807427s1); Carve 800206 channels 2500 ms (DurationIndex 66) with Effect[0] made periodic every 250 ms by the Felsworn contract (AscensionFelswornContracts.cpp:161-163), so a full channel counts 10 steps (AscensionFelswornAuras.cpp:112-118, an expired channel is forced to 10 at :210-216) and releases one Carve strike 803715 per enemy in front. AscensionFelswornAbilities.cpp:192-193 multiplies a critical 803715 hit by 1 + $807427s1 / 100 x min(10, steps) when 805236 is known and Inner Demon 804216 was on the caster when the strike was cast (owner rulings O-21 and O-23, Felsworn ADR 0011: +5% of the whole critical hit per step, +50% at 10 steps; the tooltip's 60% is unreachable). Both arms channel Carve to its end at the one dummy with Felfury 800058 set to 4 before every trial, melee crits forced and attack power +20000 (fixtures, the same in both arms), so the weapon dice (17.25-28.75 of about 3450 normalized points) move a hit under 0.2%; the treatment learns 805236 for real. The one-step arm (1.05) needs a channel cancelled after one step, which hit_ratio cannot schedule; the scenario felsworn-grommash-folly-carve-crit.json covers it. Reference search 2026-11-23: coa-history spell 807427: 3 logs, 3-4 stacks per channel that expire 0.5 s after the first step, crit/non-crit median ratio 1.94-1.98 against 1.94 without the talent (no measurable bonus on live); the bindmysoul and coabuildhub snapshots repeat the tooltip with 5%; nothing found that states another value."
     },
     {
+      "spell": 805236,
+      "name": "Grommash's Folly (critical auto attacks heal 50% with Inner Demon)",
+      "variant": "crit_swing_heal",
+      "label_suffix": "crit_swing_heal",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560839,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "critical": true
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0.5,
+      "observe_source": "807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, the Felsworn contract gives Inner Demon DurationIndex 1, AscensionFelswornContracts.cpp:81-85, and the script sets its duration) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition, removed and set again as phase auras after Felfury 800058 set to 4 stacks, 500 ms before each phase's attack. Inner Demon lasts 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:81-85): without Felfury it ended inside the window (the first pair read 0.379 and 0.373; a diagnostic run read Inner Demon present at the attack and gone at the stop, 4 heals for 14 critical swings, each heal about half its swing), so 4 stacks give it 20000 ms, past the 500 + 8400 ms phase; 807426 was read present at the attack after the 500 ms wait (the harness set_aura keeps the running duration of an aura already present, as the crit_inner entry notes). The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 805236,
+      "name": "Grommash's Folly (control: no critical auto attack heal without Inner Demon)",
+      "variant": "crit_swing_heal_no_inner_demon",
+      "label_suffix": "crit_swing_heal_no_inner_demon",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "force_crit": "melee",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560839,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "critical": true
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "expected": 0,
+      "observe_source": "Contrast arm of crit_swing_heal for the condition 'While Inner Demon is active': the same layout with no Inner Demon 804216 on the caster in either phase (Felfury 800058 set to 4 stacks in both, as in the treatment); the after ratio must stay 0. 807426 Effect[0] aura 354, BasePoints 49 + 1 = 50 ($807426s1); the Felsworn refresh applies 807426 while Inner Demon 804216 and 805236 are both on the caster (AscensionFelsworn.cpp:274). The event script (AscensionFelswornEvents.cpp: Check case 807426 returns Inner(player) && autoAttack && crit, :111-112; Proc case 807426 calls Copy(player, player, 560839, damage / 2), :262-263) heals the caster with 560839 (SPELL_EFFECT_HEAL). The caster auto-attacks the dummy for 3 swing intervals (8400 ms of the generated 2800 ms reference interval, the Felsworn contract gives Inner Demon DurationIndex 1, AscensionFelswornContracts.cpp:81-85, and the script sets its duration) in each phase, every swing forced critical (force_crit melee); Inner Demon is the clause's condition; this arm never sets it, and Felfury 800058 is set to 4 stacks 500 ms before each phase's attack. The ratio divides the increase of the caster's 560839 heal total over the after phase by the increase of its critical swing damage (melee_damage_total critical) over it; the before phase (805236 not learned) reads 0 heal. 805236 is learned for real between the phases (mentor D-67). Reference search 2026-11-24: bindmysoul talents 805236 text 'you now heal equal to 50% of all damage dealt by critical strikes with auto attacks' (same value); coa-history spells 807426 and 560839: 0 events in 186 logs (positive control 801904 Azzinoth's Assault: 21 casts); expected values come from the tooltip and the server DBC set.",
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 805236,
+      "name": "Grommash's Folly (control: no auto attack heal on non-critical swings with Inner Demon)",
+      "variant": "crit_swing_heal_non_crit",
+      "label_suffix": "crit_swing_heal_non_crit",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560839,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {
+          "critical": false
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "observe_source": "Contrast arm of crit_swing_heal for the qualifier 'critical strikes': the same layout with Inner Demon held, but no swing can crit, so the after ratio (the increase of the caster's 560839 heal total over the increase of its non-critical swing damage, melee_damage_total critical false) must stay 0; a server that healed on every auto attack reads 0.5. Reduce Critical Strike Chance -100% 64481 (Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints -1000, EquippedItemClass -1, server DBC set) is set on the caster in both phases as a precondition fixture (guide 3.4), with Felfury 800058 at 4 stacks and Inner Demon 804216 held as in crit_swing_heal; no force_crit. 805236 is learned for real between the phases (mentor D-67); each phase auto-attacks the dummy for 3 swing intervals. Its sibling crit_suppressed reads the critical swing damage share at 0, so the arm is not void. Code: Check case 807426 returns Inner(player) && autoAttack && crit (AscensionFelswornEvents.cpp:112-113); Proc case 807426 calls Copy(player, player, 560839, damage / 2) (:263-264). Reference search: as crit_swing_heal (bindmysoul talents 805236 text 'critical strikes with auto attacks'; coa-history 807426 and 560839: 0 events in 186 logs); expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 805236,
+      "name": "Grommash's Folly (fixture check: no critical swing under 64481 with Inner Demon)",
+      "variant": "crit_suppressed",
+      "label_suffix": "crit_suppressed",
+      "kind": "metric_delta",
+      "quote": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
+      "trigger_spell": 805236,
+      "gate_spell": 805236,
+      "target": "dummy",
+      "attack_swings": 3,
+      "measure_actor": "caster",
+      "metric": "melee_damage_total",
+      "fields": {
+        "critical": true
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          4,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "expected": 0,
+      "observe_source": "Fixture check of crit_swing_heal_non_crit: in the same layout the caster's critical swing damage (melee_damage_total critical true) over its whole swing damage stays 0 in both phases, so every counted swing of the non-critical arm is non-critical. Reduce Critical Strike Chance -100% 64481 (Effect[0] aura 52 SPELL_AURA_MOD_WEAPON_CRIT_PERCENT, BasePoints -1000, EquippedItemClass -1, server DBC set) is set on the caster in both phases as a precondition fixture (guide 3.4), with Felfury 800058 at 4 stacks and Inner Demon 804216 held as in crit_swing_heal; no force_crit. 805236 is learned for real between the phases (mentor D-67); each phase auto-attacks the dummy for 3 swing intervals. Code reading only: Unit::RollMeleeOutcomeAgainst rolls a crit only for a positive chance (Unit.cpp:3539); the reading, not that line, is the proof."
+    },
+    {
       "spell": 805235,
       "kind": "metric_delta",
       "trigger_spell": 805235,
@@ -8303,6 +8506,85 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks). The charges of the aura on the caster (script value 803904, set to 5 plus the SPELLMOD_CHARGES mods, AscensionFelswornAuras.cpp:68-72) are read 500 ms after a real cast: 0 before the cast (control) and 5 after. Reference search 2026-11-23: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS, 281 SPELL_AURA_APPLIED and 280 SPELL_AURA_REMOVED by players in 15 of 186 logs. Applied-to-removed intervals of the 280 pairs: longest 12.07 to 12.44 s (the $d = 12000 ms expiry), the others 1.37 s and up (the aura also ends after $n attacks, so a shorter interval is not an expiry); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Read without the script_count opt-in: the stored count right after the cast is data, not consumption (the attacks the aura lasts are not read)."
+    },
+    {
+      "spell": 802076,
+      "name": "Pit Lord's Strength 802076 (Annihilation attacks consumed)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802076,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 6,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 12500,
+      "script_count": {
+        "noun": "attack",
+        "swings": 1
+      },
+      "observe_source": "802076 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 0 + 1 = 1 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 6 after a real learn of 802076. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 6th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 802110,
+      "name": "Pit Lord's Strength 802110 (Annihilation attacks consumed)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Your Annihilation now affects $s1 additional attack",
+      "trigger_spell": 803904,
+      "gate_spell": 802110,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "before_expected": 5,
+      "expected": 7,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 12500,
+      "script_count": {
+        "noun": "attack",
+        "swings": 1
+      },
+      "observe_source": "802110 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 4 (SPELLMOD_CHARGES), BasePoints 1 + 1 = 2 ($s1), on Annihilation 803904 (ProcCharges 5): 5 attacks without the talent (the control arm, Annihilation cast in both arms) and 7 after a real learn of 802110. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 7th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
+    },
+    {
+      "spell": 803904,
+      "name": "Annihilation (attacks consumed)",
+      "kind": "metric_delta",
+      "variant": "consumed",
+      "label_suffix": "consumed",
+      "quote": "Lasts for $n attacks or $d.",
+      "trigger_spell": 803904,
+      "gate_spell": 803904,
+      "target": "caster",
+      "metric": "aura_script_value",
+      "fields": {
+        "spell": 803904,
+        "key": 803904
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 12500,
+      "script_count": {
+        "noun": "attack",
+        "swings": 1
+      },
+      "observe_source": "803904 ProcCharges 5 (Spell.dbc; $n attacks): 0 without a cast (the control arm reads the absent aura, no swings) and 5 attacks after a real cast. Consumption read (script_count swings, mentor D-95): after each real cast of Annihilation 803904 the caster reads the script count 803904 and its landed auto attacks (melee_damage_count), auto-attacks the dummy for 1 swing interval (2300 ms; the Slayer set dual-wields item 2027, 2300 ms in both hands, and melee_damage_count sums both hands (CoAGameplayTest.cpp:5314-5319), so at most 2 landed attacks per hand, 4 in all, below every counted reading; the tool refuses a window whose per-hand bound reaches the least cast-arm reading), stops and reads both again; the judged reading is the count plus the attacks landed since the cast, valid only with at least one landed attack and a count strictly below the cast count that the landed attacks make up exactly. Code: Proc case 803904 decrements the script value on every damaging non-periodic auto attack and removes the aura at 0 (AscensionFelswornEvents.cpp:114-115, :266-275); the count is 5 plus the SPELLMOD_CHARGES mods and the native charges are cleared (AscensionFelswornAuras.cpp:77-83). The phases are 12500 ms apart, past the 12000 ms $d, so the second cast applies a fresh aura. Untested: missed or avoided swings (the rule counts landed swings only; hit and expertise ratings 10000 keep them out) and the expiry edge (the aura ending at its 5th landed attack: both hands can land up to 12 attacks in the 12000 ms $d, so the edge is reachable, but the 1-interval window stops before it, at 4 landed attacks at most; mentor D-95 accepts it untested). Reference search 2026-11-24: coa-history spell 803904 finds 281 SPELL_CAST_SUCCESS by players in 15 of 186 logs (cast and aura events only, no charge count); bindmysoul and advancement.tsv give the tooltip text only; expected values come from the tooltip and the server DBC set."
     },
     {
       "spell": 806109,
@@ -12523,6 +12805,42 @@
       "after_at_most": 948.2
     },
     {
+      "spell": 706266,
+      "name": "Armaments of the Legion (damage Hateforged Barrier absorbs from one strike, +10%)",
+      "kind": "metric_delta",
+      "variant": "barrier_absorbed",
+      "label_suffix": "barrier_absorbed",
+      "quote": "and increases the absorption value of Hateforged Barrier by $s2%.",
+      "trigger_spell": 707527,
+      "gate_spell": 706266,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 846.5,
+      "expected": 931.1500000000001,
+      "tolerance": 16.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 948.2 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 706266 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 706266, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 10% ($s2 = BasePoints 9 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.10 = [914.1, 948.2]; a doubled bonus (1.21x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC. The spell_absorb_total read is a running total of the logs of the strike spell, so the entry uses phase_since: the before reading counts the control phase alone and the after reading the treatment phase alone (a first pair without it read the treatment total on top of the control one, 856 + 922 = 1778 and 853 + 1018 = 1871, whose second parts are inside the ranges above). The lower edge is the integer part of the product (914): the absorb amount is an integer, so the percent bonus on the smallest roll 831 truncates (831 x 1.10 = 914.1); the bound comes from the tooltip and the DBC, not from a reading (a first pair read 997 for 707844 against the untruncated 997.2).",
+      "after_at_least": 914,
+      "after_at_most": 948.2,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true
+    },
+    {
       "spell": 707844,
       "name": "Armaments of the Legion (Hateforged Barrier absorption)",
       "kind": "metric_delta",
@@ -12546,6 +12864,42 @@
       "observe_source": "707844 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 19 + 1 = 20 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 19 + 1 = 20, both aimed at Hateforged Barrier. O-27 (owner): one bonus only; the Felsworn contract turns Effect[2] into a dummy (AscensionFelswornContracts.cpp, Felsworn ADR 0025) and keeps aura 317, which scales the completed absorb (SpellAuraEffects.cpp); before the fix the reads were 1016 / 1029 (rank 1) and 1233 / 1207 (rank 2), 1.21x and 1.44x (merged/fw-b3g3/proveF2). The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.20 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.44) is excluded. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [997.2, 1034.4] (831..862 times 1.20); a doubled bonus would read 1197..1241.",
       "after_at_least": 997.2,
       "after_at_most": 1034.4
+    },
+    {
+      "spell": 707844,
+      "name": "Armaments of the Legion (damage Hateforged Barrier absorbs from one strike, +20%)",
+      "kind": "metric_delta",
+      "variant": "barrier_absorbed",
+      "label_suffix": "barrier_absorbed",
+      "quote": "and increases the absorption value of Hateforged Barrier by $s2%.",
+      "trigger_spell": 707527,
+      "gate_spell": 707844,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 846.5,
+      "expected": 1015.8,
+      "tolerance": 16.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 1034.4 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 707844 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 707844, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 20% ($s2 = BasePoints 19 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.20 = [997.2, 1034.4]; a doubled bonus (1.44x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC. The spell_absorb_total read is a running total of the logs of the strike spell, so the entry uses phase_since: the before reading counts the control phase alone and the after reading the treatment phase alone (a first pair without it read the treatment total on top of the control one, 856 + 922 = 1778 and 853 + 1018 = 1871, whose second parts are inside the ranges above). The lower edge is the integer part of the product (997): the absorb amount is an integer, so the percent bonus on the smallest roll 831 truncates (831 x 1.20 = 997.2); the bound comes from the tooltip and the DBC, not from a reading (a first pair read 997 for 707844 against the untruncated 997.2).",
+      "after_at_least": 997,
+      "after_at_most": 1034.4,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true
     },
     {
       "spell": 707845,
@@ -23805,13 +24159,13 @@
         "critical": true
       },
       "before_expected": 0,
-      "expected": 279.72,
-      "after_at_least": 265.73,
-      "after_at_most": 293.71,
+      "expected": 253.73,
+      "after_at_least": 241.04,
+      "after_at_most": 266.42,
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. At attack power 312: 2 x (17.25 + 53.49 + 158 + 45.24) to 2 x (28.75 + 53.49 + 158 + 45.24) = 547.9 to 571.0, so a flat of 0 (about 130 to 153) or a missing attack power term (about 457 to 480) is excluded. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 carries its own 0.145 attack power row (AscensionFelswornData.h:53, beside 520262 at :38); with the factor applied to the whole hit (weapon roll, the 158 flat and the attack power term) the expected critical is 0.5 x 559.45 = 279.72, range 0.5 x (547.9 to 571.0) less truncation. The coa-history means 148 (520262) and 100 (572585) differ by about 0.68 with unknown gear: no figure decides. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (559.45 / 13216.59), the weapon part alone halved (about 483 / 9712) and a missing flat or attack power term."
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. At attack power 312: 2 x (17.25 + 53.49 + 158 + 45.24) to 2 x (28.75 + 53.49 + 158 + 45.24) = 547.9 to 571.0, so a flat of 0 (about 130 to 153) or a missing attack power term (about 457 to 480) is excluded. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the weapon roll is half of the main-hand roll. The flat is not the main hand's 158: owner ruling O-36 (N-9, 2026-11-24) keeps the data's 132. 803475 Effect[1] is TRIGGER_SPELL_WITH_VALUE of 572585 with BasePoints 131 + DieSides 1 = 132 (Effect[0], the main-hand trigger of 520262, is 157 + 1 = 158 = $m1); Spell::EffectTriggerSpell passes that value as SPELLVALUE_BASE_POINT0 (SpellEffects.cpp:1847-1852) and SpellEffectInfo::CalcBaseValue (SpellInfo.cpp:595) gives 132 for the off-hand effect of 572585 (DieSides 1). Off-hand strike 572585 carries its own 0.145 attack power row (AscensionFelswornData.h:53, beside 520262 at :38); with the factor applied to the whole hit (weapon roll, the 132 flat and the attack power term) at attack power 312: 0.5 x 2 x (23 + 53.49 + 132 + 45.24) = 253.73. The coa-history means 148 (520262) and 100 (572585) differ by about 0.68 with unknown gear: no figure decides. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the 158 flat (279.72), the unhalved strike (about 559), the weapon part alone halved (about 483) and a missing flat or attack power term."
     },
     {
       "kind": "metric_delta",
@@ -23858,13 +24212,13 @@
         "critical": true
       },
       "before_expected": 0,
-      "expected": 6608.3,
-      "after_at_least": 6277.89,
-      "after_at_most": 6938.72,
+      "expected": 6582.3,
+      "after_at_least": 6253.19,
+      "after_at_most": 6911.42,
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. Contrast arm of the attack power term: +20000 attack power (player_attack_power), attack power 20312: 2 x (17.25 + 3482.29 + 158 + 2945.24) to 2 x (28.75 + 3482.29 + 158 + 2945.24) = 13205.6 to 13228.6; without the 0.145 term the same hit is 7.4 to 7.5 thousand lower. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 at attack power 20312: expected 0.5 x 13216.59 = 6608.30. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (559.45 / 13216.59), the weapon part alone halved (about 483 / 9712) and a missing flat or attack power term.",
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. Contrast arm of the attack power term: +20000 attack power (player_attack_power), attack power 20312: 2 x (17.25 + 3482.29 + 158 + 2945.24) to 2 x (28.75 + 3482.29 + 158 + 2945.24) = 13205.6 to 13228.6; without the 0.145 term the same hit is 7.4 to 7.5 thousand lower. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 at attack power 20312 with the 132 flat of the off-hand effect (803475 Effect[1] BasePoints 131 + DieSides 1, owner ruling O-36): expected 0.5 x 2 x (23 + 3482.06 + 132 + 2945.24) = 6582.30. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (about 13165), the weapon part alone halved (about 9700) and a missing attack power term; the flat itself is proved by the hit_off entry at the reference attack power.",
       "player_attack_power": 20000
     },
     {
@@ -25342,6 +25696,226 @@
       "fields": {},
       "expected": 1,
       "observe_source": "Carve 800206 ChannelInterruptFlags 0x483c04 in Spell.dbc carry no AURA_INTERRUPT_FLAG_MOVE (0x8) while Whirlwind 13736 (a self channel, 3000 ms, no cost, ChannelInterruptFlags 0x3c3c) carries it. The caster is moved by the harness relocate step (the native position update, Unit::UpdatePosition then RemoveAurasWithInterruptFlags, Unit.cpp:6238-6283), 1.5 yd along y and back, at 500 and 1000 ms; the STATE metric casting is read 1200 ms after the cast: Carve (2500 ms) must still be cast (1). Controls: Whirlwind 13736 moved the same way reads 0 (moving_channel_whirlwind_moved) and not moved reads 1 (moving_channel_whirlwind_still). Felfury x6 and 803468 are set for Carve (precondition fixtures). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel with the same moved/still controls is the precedent; coa-history spell 800206: 200 casts in 5 logs; nothing else found."
+    },
+    {
+      "spell": 574145,
+      "name": "Felcaked Blades (Sargeron Smite Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
+      "talent": 574145,
+      "cast_spell": 802060,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 (aura 123, -9999 target resistance): no partial resist on the dummy, a precondition fixture in every arm, as in sun_cleric.json"
+        },
+        {
+          "spell": 800058,
+          "stacks": 2,
+          "source": "Felfury 800058 at 2 stacks before each Smite: Sargeron Smite 802060 consumes 2 Felfury and is refused without them (as in the cooldown_cut entries of this file); a precondition fixture in every arm"
+        }
+      ],
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_smite",
+      "variant": "agility_smite",
+      "observe_source": "The server adds Agility x 0.15 to effect 0 of Sargeron Smite 802060 while 574145 is known (AscensionFelswornContracts.cpp:531-534, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility and the attack power are read before and after each arm, and a fixture that moves inside an arm voids the run (unmeasured, never an alert; mentor D-94 condition 4). Sargeron Smite 802060: instant, Shadowflame school, no power cost, GCD 1000 ms; 30 casts per arm keep at least 10 non-critical hits with the extra Agility crit. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574145,
+      "name": "Felcaked Blades (Twin Slice Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
+      "talent": 574145,
+      "cast_spell": 801901,
+      "hit_spell": 808303,
+      "cast_power": 100,
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_twin_slice",
+      "variant": "agility_twin_slice",
+      "observe_source": "The server adds Agility x 0.15 to effect 0 of Twin Slice (808303/808304) while 574145 is known (AscensionFelswornContracts.cpp:531-534, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility and the attack power are read before and after each arm, and a fixture that moves inside an arm voids the run (unmeasured, never an alert; mentor D-94 condition 4). Twin Slice 801901 costs 45 power type 3 (cast_power 100 sets it before each cast) and strikes through 808303 and 808304 (Effect 64 triggers; normalized weapon damage effect 0 is where the Agility term is added); the main-hand strike 808303 is read. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574146,
+      "name": "Felblade (Fel Fireball Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
+      "talent": 574146,
+      "cast_spell": 801312,
+      "cast_power": 100,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 (aura 123, -9999 target resistance): no partial resist on the dummy, a precondition fixture in every arm, as in sun_cleric.json"
+        }
+      ],
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1800,
+      "label_suffix": "agility_fel_fireball",
+      "variant": "agility_fel_fireball",
+      "observe_source": "The server adds Agility x 0.20 to effect 0 of Fel Fireball 801312 while 574146 is known (AscensionFelswornContracts.cpp:531-534, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility and the attack power are read before and after each arm, and a fixture that moves inside an arm voids the run (unmeasured, never an alert; mentor D-94 condition 4). Fel Fireball 801312: 1500 ms cast, missile speed 35, costs 35 power type 3 (cast_power 100), Shadowflame school, spell power 0.5 only (AscensionFelswornData.h:67). Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574146,
+      "name": "Felblade (Sargeron Smite Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
+      "talent": 574146,
+      "cast_spell": 802060,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 (aura 123, -9999 target resistance): no partial resist on the dummy, a precondition fixture in every arm, as in sun_cleric.json"
+        },
+        {
+          "spell": 800058,
+          "stacks": 2,
+          "source": "Felfury 800058 at 2 stacks before each Smite: Sargeron Smite 802060 consumes 2 Felfury and is refused without them (as in the cooldown_cut entries of this file); a precondition fixture in every arm"
+        }
+      ],
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_smite",
+      "variant": "agility_smite",
+      "observe_source": "The server adds Agility x 0.20 to effect 0 of Sargeron Smite 802060 while 574146 is known (AscensionFelswornContracts.cpp:531-534, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility and the attack power are read before and after each arm, and a fixture that moves inside an arm voids the run (unmeasured, never an alert; mentor D-94 condition 4). Sargeron Smite 802060: instant, Shadowflame school, no power cost, GCD 1000 ms; 30 casts per arm keep at least 10 non-critical hits with the extra Agility crit. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 574146,
+      "name": "Felblade (Twin Slice Agility term direction)",
+      "kind": "power_term_direction",
+      "quote": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
+      "talent": 574146,
+      "cast_spell": 801901,
+      "hit_spell": 808303,
+      "cast_power": 100,
+      "power_metric": "agility",
+      "power_aura": 300111,
+      "power_stacks": 3,
+      "power_aura_source": "QA Test +100 Agility 300111: Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 (Agility), EffectBasePoints[0] 99 (+100 per stack), StackAmount 500; 3 stacks = +300 Agility",
+      "power_companions": [
+        {
+          "spell": 530003,
+          "stacks": 1,
+          "source": "Raid Debuff 3 (70) 530003: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints[0] -313 (-312); with 9141 it cancels the +300 attack power that +300 Agility gives a Felsworn (melee attack power 2 x level + Strength + Agility - 20, the reference_stats 312 = 120 + 82 + 130 - 20), so the attack power read stays equal in every arm"
+        },
+        {
+          "spell": 9141,
+          "stacks": 1,
+          "source": "Attack Power 12 9141: Effect[0] aura 99, Effect[1] aura 124, EffectBasePoints 11 (+12): -312 + 12 = -300 attack power"
+        }
+      ],
+      "casts": 30,
+      "cast_wait_ms": 1100,
+      "label_suffix": "agility_twin_slice",
+      "variant": "agility_twin_slice",
+      "observe_source": "The server adds Agility x 0.20 to effect 0 of Twin Slice (808303/808304) while 574146 is known (AscensionFelswornContracts.cpp:531-534, Named/Twin chains), a value with no tooltip source, not judged. Agility fixture: +300 Agility with the attack power held equal (power_companions), so the control arms do not grow through the 0.19 attack power coefficient of Sargeron Smite (AscensionFelswornData.h:68) or the attack power term of the Twin Slice weapon strike; the Agility and the attack power are read before and after each arm, and a fixture that moves inside an arm voids the run (unmeasured, never an alert; mentor D-94 condition 4). Twin Slice 801901 costs 45 power type 3 (cast_power 100 sets it before each cast) and strikes through 808303 and 808304 (Effect 64 triggers; normalized weapon damage effect 0 is where the Agility term is added); the main-hand strike 808303 is read. Reference search 2026-11-24: coa-history spells 574145, 574146: 0 events in 186 logs (passives); no coefficient anywhere, the tooltip states none. Direction only (no figure judged), same shape as Sun Cleric Sun's Gift (mentor D-106); judge input per mentor D-94 / controller go 2026-11-24 (B-PTD)."
+    },
+    {
+      "spell": 803478,
+      "name": "Pure Hatred (Hateforged Barrier maximum health term direction)",
+      "kind": "power_term_direction",
+      "quote": "Your Hateforged Barrier now also scales with your maximum health.",
+      "talent": 803478,
+      "cast_spell": 707527,
+      "power_metric": "max_health",
+      "power_aura": 805256,
+      "power_aura_source": "Infernal Constitution 805256: Effect[0] aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT, EffectBasePoints[0] 9 (+10% maximum health); Effect[1] aura 122 (off-hand damage) does not reach the barrier",
+      "sample": "absorb",
+      "strike_spell": 54416,
+      "refill_spell": 17683,
+      "casts": 40,
+      "cast_wait_ms": 1000,
+      "label_suffix": "max_health_barrier",
+      "variant": "max_health_barrier",
+      "observe_source": "The server adds 10% of maximum health to effect 0 of the Hateforged Barrier chain (705129 ranks, here rank 6 707527 of spell_ranks) while 803478 is known (AscensionFelswornContracts.cpp:535-536), a value with no tooltip source, not judged. Sample (controller choice (c), mentor D-94): one strike of Ray of Pain 54416 (Effect[0] 2 school damage, EffectBasePoints 1999 = 2000 Shadow, no die, no per-level term) by a passive striker after each barrier; the absorbed amount of that strike (spell_absorb_total, an event read) is one sample when the barrier was up after the cast, gone after the strike and the strike logged once. Margin: the largest learned barrier is 707527 EffectBasePoints 751 + 32 + 2.45 x 60 (per level, an upper bound) + Stamina 79 (reference_stats) + 10% of the maximum health with 805256, (3440 level-60 BaseHP of class 14, rev_20261105_95, + 610 Stamina health) x 1.1 = 4455, so at most about 1455 < 2000 (margin at least 545); the remaining read voids any barrier the strike did not break. Exploratory run 2026-11-24 (fw-bptd, not counted): maximum health 2173 / 2390 without / with 805256, mean learned barrier 1088 at most, so the strike margin is about 900. Partial resists of the Shadow strike (50% or 75% of Ray of Pain 54416, about 1000 or 500) can leave a learned barrier (1048-1101 in the counted pair) standing: the remaining read voids those samples (3 or fewer per arm in the counted pair, 37-40 kept), so they are expected voids, not a fault; a control barrier (831-862) is below 1000 and still breaks. Sizing: the term is about 10% of the 217 maximum health gained (about 22) against a 1..32 die (sd about 9.2), so 40 casts per arm put the expected interaction z near 7.3 against the 3.2 quantile (the 15-cast exploratory run read 4.81). Full Heal 17683 (Effect 67, self) refills the caster before each cast; set_aura 0 only clears the previous barrier (D-94 condition 2). The sample proves the direction of the term only (a larger maximum health gives a larger barrier); that the barrier absorbs damage stays proven by the D-81 entry (taken_total_ratio 707527) (D-94 condition 3). Reference search 2026-11-24: coa-history 803478 0 events in 186 logs (passive), 707527 SPELL_CAST_SUCCESS 303 / SPELL_AURA_REFRESH 652 events in 7 logs, no amounts."
+    },
+    {
+      "spell": 300490,
+      "name": "Felforged (earned: 3 reduced Fel Fireballs, the 4th full)",
+      "kind": "fed_charge_casts",
+      "label_suffix": "felforged_fed",
+      "quote": "Your next 3 Fel Fireballs have a $s1% reduced cast time",
+      "quote_spell": 806104,
+      "feed_spell": 704368,
+      "aura": 806104,
+      "effect_spell": 801312,
+      "charges": 3,
+      "every_ms": 3200,
+      "residual_target": 0.001,
+      "feed_power": 100,
+      "effect_power": 100,
+      "trials": 3,
+      "min_judged": 2,
+      "poll_ms": 15,
+      "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), all inside 0.9 of the 8000 ms aura (DurationIndex 31). A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
     }
   ],
   "player_observations": [],

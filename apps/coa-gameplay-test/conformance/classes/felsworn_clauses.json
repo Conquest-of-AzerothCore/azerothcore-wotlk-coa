@@ -511,11 +511,15 @@
       },
       {
         "claim": "Your next 3 Fel Fireballs",
-        "labels": []
+        "labels": [
+          "300490 behaviour_metric_delta felforged_fed charges"
+        ]
       },
       {
         "claim": "have a $s1% reduced cast time",
-        "labels": []
+        "labels": [
+          "300490 behaviour_metric_delta felforged_fed cut"
+        ]
       },
       {
         "claim": "for $d",
@@ -524,7 +528,7 @@
         ]
       }
     ],
-    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed. HELD 'Your next 3 Fel Fireballs' (review fw-rf300490 I-2, mentor D-67): the charge entries put 806104 by set_aura; no tool feeds 806104 by its real proc and then counts Fel Fireballs (tool note fw-fix300490b report); the server fix (ADR 0021) is verified on the set_aura arms only. fw-fa2 2026-11-24: no existing kind reads 806104's amount or a partial cast-time reduction after the real feed (aura_fed_effect has instant/damage/heal/cooldown/window only; last_application_expiry feed reads the remaining duration only), and a fixed-count feed in metric_delta cannot read at a known moment because every later periodic tick re-grants the aura. Needs tool group B-AF: a cast_time variant of aura_fed_effect that feeds for real, reads aura_amount of 806104 against the DBC, and casts Fel Fireball at the reduced time. fw-fa4 2026-11-24 (review fw-rfa2 I-1): the metric_delta aura_amount route was tried on a real feed (Bane of Chaos 704368 cast 47 times 3200 ms apart through setup_casts, 806104 Effect[0] read on the caster 100 ms after the last cast, control phase the same feed with 300490 unlearned): the read was 0 in 4 of 4 runs, while a second design reading the application count (aura_apply_count of 806104, same feed) read 3 applications: the feed grants for real, but 806104 lasts 8000 ms (DurationIndex 31) and a periodic feed of 3000 ms ticks leaves it on at the read only when one of the last two or three ticks rolled the 15% ProcChance (at best 1 - 0.85^3 = 39%), so no feed size reaches the 0.1% residual: an expiry between the last grant and the read, not a re-grant, hides the amount (the review reasoning that a longer feed sizes the residual does not hold). Felsworn Chance() rolls the raw ProcChance (AscensionFelsworn.cpp:231-239), so forced_chance cannot force it. The tool gap stands, narrower: a read of the amount at the moment of the grant, which is the stop of cast_until_aura (last_application_expiry feed reads the remaining duration there), or a polled assert (assert min within_ms) after the feed. Entries removed after the attempt (builds 64b17c781882)."
+    "reason": "'Your next 3 Fel Fireballs' and 'have a $s1% reduced cast time' are judged on a real feed by fed_charge_casts (ADR 1272, mentor D-97, which lifts the D-67 hold of reviews fw-rf300490 I-2 and fw-rvb7b I-3a): Felforged 806104 earned through Bane of Chaos 704368 with 300490 unlearned at the grant, 806104 present after the unlearn with amount -30 (tooltip $s1 = 30: BasePoints -31 + 1 die side; earlier set_aura reasons that cite 31 are superseded), three Fel Fireballs in 1005 to 1095 ms and the fourth in 1350 to 1650 ms, no haste (fw-baf pair prove1). The set_aura arms (fourth_cast, third_cast, other_spell, duration_left, cast_*) remain supporting data for Felsworn ADR 0021."
   },
   {
     "spell": 301287,
@@ -1857,10 +1861,13 @@
   {
     "spell": 574145,
     "clause": "Twin Slice and Sargeron Smite now additionally scale with your Agility.",
-    "labels": [],
+    "labels": [
+      "574145 behaviour_metric_delta agility_smite",
+      "574145 behaviour_metric_delta agility_twin_slice"
+    ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The tooltip states no coefficient, so the claim is a direction only (damage grows with Agility, and belongs to the passive): the same shape as power_term_direction (Sun Cleric Sun's Gift 680656, mentor D-106), which requires a power aura with SPELL_AURA_MOD_ATTACK_POWER (kinds/power_term_direction.py:23,83) and reads the caster's attack power. An Agility variant (an aura raising Agility, a read of Agility, Twin Slice 802060 as the cast spell) is a new option of that kind. hit_ratio needs a stated bonus and stat_gain judges a stat added by a cast, neither fits. The nearest kind is power_term_direction.",
+      "reason": "Closed by B-PTD (ADR 1269): the tooltip states no coefficient, so the claim is a direction only (damage grows with Agility, and belongs to the passive), judged by power_term_direction with power_metric agility (QA Test +100 Agility 300111 x3, attack power held equal by power_companions 530003 and 9141). hit_ratio needs a stated bonus and stat_gain judges a stat added by a cast, neither fits.",
       "attempts": [
         {
           "agent": "fw-ea5",
@@ -1887,10 +1894,14 @@
   {
     "spell": 574146,
     "clause": "Damage dealt by Fel Fireball, Sargeron Smite, and Twin Slice now additionally scales with your Agility.",
-    "labels": [],
+    "labels": [
+      "574146 behaviour_metric_delta agility_fel_fireball",
+      "574146 behaviour_metric_delta agility_smite",
+      "574146 behaviour_metric_delta agility_twin_slice"
+    ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "Same as 129.0 with Fel Fireball 801312, Sargeron Smite and Twin Slice 802060 as cast spells: no coefficient in the tooltip, a direction-only claim, power_term_direction needs an Agility variant (an aura raising Agility, a read of Agility). The nearest kind is power_term_direction.",
+      "reason": "Closed by B-PTD (ADR 1269), as 129.0 with Fel Fireball 801312, Sargeron Smite 802060 and Twin Slice as cast spells: no coefficient in the tooltip, a direction-only claim judged by power_term_direction with power_metric agility.",
       "attempts": [
         {
           "agent": "fw-ea5",
@@ -2676,9 +2687,12 @@
     "spell": 706266,
     "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
     "labels": [
-      "706266 behaviour_metric_delta barrier_absorb"
+      "706266 behaviour_metric_delta barrier_absorbed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 706266 known, the tooltip +10% against the DBC amount 831 to 862 (owner ruling O-27, ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 706267,
@@ -2897,9 +2911,12 @@
     "spell": 707844,
     "clause": "and increases the absorption value of Hateforged Barrier by $s2%.",
     "labels": [
-      "707844 behaviour_metric_delta barrier_absorb"
+      "707844 behaviour_metric_delta barrier_absorbed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Mentor D-98: a behaviour entry, the damage Hateforged Barrier 707527 absorbs from one strike of Light of the Naaru 41394 (1100, above the barrier) with and without 707844 known, the tooltip +20% against the DBC amount 831 to 862 (owner ruling O-27, ADR 0025: one bonus only). The earlier barrier_absorb entry (stored aura amount) stays in the class file as evidence.",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707845,
@@ -3720,7 +3737,10 @@
       "803475 behaviour_metric_delta hit_off",
       "803475 behaviour_metric_delta hit_ap_off"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Owner ruling O-36 (2026-11-24, N-9): keep the data's 132 for the off-hand strike; the tooltip states the flat only as $m1 = 158 for the main hand. 803475 Effect[1] TRIGGER_SPELL_WITH_VALUE of 572585 has BasePoints 131 + DieSides 1 = 132 (Effect[0] of 520262 is 157 + 1 = 158), passed as the base points by SpellEffects.cpp:1847-1852, so the hit_off entry expects 0.5 x 2 x (23 + 53.49 + 132 + 45.24) = 253.73 at attack power 312 (hit_ap_off 6582.30 at 20312), band 5%, the 158 model (279.72) excluded.",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 803475,
@@ -3841,18 +3861,11 @@
     "clause": "Your Annihilation now affects $s1 additional attack",
     "labels": [
       "802076 effect_value e0 #0",
-      "802076 behaviour_metric_delta charges"
+      "802076 behaviour_metric_delta charges",
+      "802076 behaviour_metric_delta consumed"
     ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802076 learned the count reads 6 at the cast and 5 after 1 landed auto attack, 6 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802076,
@@ -3890,20 +3903,9 @@
   {
     "spell": 802110,
     "clause": "Your Annihilation now affects $s1 additional attack",
-    "labels": [
-      "802110 effect_value e0 #0",
-      "802110 behaviour_metric_delta charges"
-    ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802110 learned the count reads 7 at the cast and 6 after 1 landed auto attack, 7 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set. HELD (review fw-rbswb I-1): with swings 1 every window lands one attack, and the pre-fix server (2 native charges, ADR 0030) also reads 6+1=7, so this entry cannot fail on the fixed defect; needs >= 3 landed attacks per window within the bound."
   },
   {
     "spell": 802110,
@@ -3937,10 +3939,12 @@
   {
     "spell": 803478,
     "clause": "Your Hateforged Barrier now also scales with your maximum health.",
-    "labels": [],
+    "labels": [
+      "803478 behaviour_metric_delta max_health_barrier"
+    ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "'also scales with your maximum health': Hateforged Barrier 705129 absorb (Effect[0] 176 + 1..32, plus STA x 1) gains 10% of maximum health with 803478 (AscensionFelswornContracts.cpp:356-357), a term no tooltip number states, so only the direction can be judged. power_term_direction is built on attack power (aura 99) and has no maximum-health variant; 805256 Infernal Constitution (+10% maximum health) gives the contrast arm. Needs tool group B: a max-health analogue of power_term_direction with arms control low/high and learned low/high.",
+      "reason": "Closed by B-PTD (ADR 1269): 'also scales with your maximum health': Hateforged Barrier 705129 absorb (Effect[0] 176 + 1..32, plus STA x 1) gains 10% of maximum health with 803478 (AscensionFelswornContracts.cpp:535-536), a term no tooltip number states, so only the direction is judged, by power_term_direction with power_metric max_health and sample absorb; 805256 Infernal Constitution (+10% maximum health) gives the contrast arm.",
       "attempts": [
         {
           "agent": "fw-ea3",
@@ -4067,7 +4071,8 @@
       {
         "claim": "Lasts for $n attacks",
         "labels": [
-          "803904 behaviour_metric_delta charges"
+          "803904 behaviour_metric_delta charges",
+          "803904 behaviour_metric_delta consumed"
         ]
       },
       {
@@ -4078,17 +4083,8 @@
         ]
       }
     ],
-    "tool_gap": {
-      "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
-      "attempts": [
-        {
-          "agent": "fw-tg3b",
-          "report": ".agents/plans/fw-tg3b/report.md"
-        }
-      ]
-    },
     "kind": "claim",
-    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges claim and the $d part the held and gone claims. The $n part stays unproven (tool gap): the charges read is the stored count, not the attacks the aura lasts."
+    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at its 5th landed attack is reachable within the 12000 ms duration with both hands, up to 12 landed attacks, but the 1-interval window stops at 4 at most). Counted on the fw-bswb pair (prove1, no flip): 5 at the cast, 4 after 1 landed attack. Missed or avoided swings untested (the rule counts landed swings only)."
   },
   {
     "spell": 803905,
@@ -4374,9 +4370,13 @@
     "spell": 805236,
     "clause": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
     "labels": [
-      "805236 effect_value 807426e0 #1"
+      "805236 behaviour_metric_delta crit_swing_heal",
+      "805236 behaviour_metric_delta crit_swing_heal_no_inner_demon",
+      "805236 behaviour_metric_delta crit_swing_heal_non_crit",
+      "805236 behaviour_metric_delta crit_suppressed"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The value label 805236 effect_value 807426e0 #1 (not_measured in the pair of record) is replaced by the crit_swing_heal ratio: the caster's 560839 heal over its critical auto attack damage with Inner Demon 804216 held (condition fixture, phase auras) and 805236 learned for real (0.5 expected, 0 before the learn), and the contrast arm without Inner Demon (0). The qualifier 'critical strikes' is contrasted by crit_swing_heal_non_crit: Inner Demon held, every swing kept non-critical by the 64481 fixture (aura 52, -1000% weapon crit), the 560839 heal over the non-critical swing damage reads 0 (heal 0 over a non-critical swing damage increase of 917 and 903 after the learn) in both runs of the fw-bswb pair (prove1, no flip), and crit_suppressed reads 0 critical swing damage under the same fixture, so a heal on every auto attack would read 0.5 and alert. 'auto attacks' (against special attacks) has no arm. Reference search: see the entries' observe_source (bindmysoul talents 805236 text; coa-history 807426 and 560839: 0 events in 186 logs)."
   },
   {
     "spell": 805236,
