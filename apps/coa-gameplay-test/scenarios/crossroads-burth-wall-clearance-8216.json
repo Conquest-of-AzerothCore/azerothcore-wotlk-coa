@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Crossroads: Burth no longer stands inside the hut wall (#8216)",
-  "contract": "#8216 reported Burth (creature guid 9950044, entry 342828, Wildcard season event 194) partly inside a wall beside the Crossroads wyvern roost. #7212 had moved him to (-446.847, -2583.061, 96.055), 0.6-1.1 yd from the leaning east wall of the patch-WB1 Orchut.wmo hut. He now stands just outside that wall at (-443.847, -2580.061, 96.915), on the ground and at least 1 yd clear of every vmap model. The scenario starts event 194 to spawn Burth and stops it afterwards.",
+  "contract": "#8216 reported Burth (creature guid 9950044, entry 342828, Wildcard season event 194) partly inside a wall beside the Crossroads wyvern roost. #7212 had moved him to (-446.847, -2583.061, 96.055), 0.6-1.1 yd from the leaning east wall of the patch-WB1 Orchut.wmo hut. He now stands just outside that wall at (-443.847, -2580.061, 96.915), on the ground and at least 1 yd clear of every vmap model. The scenario activates event 194 to spawn Burth and restores its original state during teardown, including after a failed assertion.",
   "timeout_ms": 60000,
   "location": {
     "map": 1,
@@ -26,9 +26,10 @@
       "value": 1
     },
     {
-      "action": "console",
-      "label": "Start the Wildcard season event that spawns Burth",
-      "command": "event start 194"
+      "action": "game_event",
+      "label": "Activate the Wildcard season event that spawns Burth",
+      "event": 194,
+      "active": true
     },
     {
       "action": "assert",
@@ -66,11 +67,6 @@
       "min": 2.5,
       "guid": 9950044,
       "spawn_type": "creature"
-    },
-    {
-      "action": "console",
-      "label": "Stop the season event again",
-      "command": "event stop 194"
     }
   ]
 }
