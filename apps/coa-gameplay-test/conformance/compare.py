@@ -234,6 +234,7 @@ class Run:
     server_commit: str | None = None
     build: str | None = None
     run_id: str | None = None
+    timeline: tuple[dict, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -434,7 +435,7 @@ def load_run(results_dir: Path, entry: dict, by_hash: Mapping[str, Path]) -> Run
     return Run(entry['key'], result.get('status', ''), result.get('message') or '', measured_values(result),
                result.get('steps', []), None if max_step is None else number(max_step, 'max_step_ms'),
                cast_failures(result), recorded_clock(directory), server_commit(result.get('server_version')),
-               recorded_build(directory), result.get('run_id'))
+               recorded_build(directory), result.get('run_id'), tuple(result.get('timeline') or ()))
 
 
 def cast_failures(result: dict) -> dict[int, list[int]]:

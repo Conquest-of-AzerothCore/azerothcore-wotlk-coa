@@ -45,6 +45,7 @@ class LastApplicationSpec:
     quote_spell: int | None = None
     trigger_target: str = TARGET
     poll_before_cast: bool = False
+    same_stamp_applies: bool = False
 
 
 AURA_HOLDERS = {False: TARGET, True: CASTER}
@@ -62,12 +63,16 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
                                *feed_of(entry),
                                entry.get('force_crit'),
                                int(entry['quote_spell']) if 'quote_spell' in entry else None,
-                               entry.get('trigger_target', TARGET), entry.get('poll_before_cast', False))
+                               entry.get('trigger_target', TARGET), entry.get('poll_before_cast', False),
+                               entry.get('same_stamp_applies', False))
     if spec.trigger_target not in (TARGET, CASTER):
         raise ValueError(f'{spec.spell} last_application_expiry casts its trigger at {TARGET} or {CASTER}')
-    if not all(isinstance(flag, bool) for flag in (spec.caster, spec.no_refresh, spec.poll_before_cast)):
-        raise ValueError(f'{spec.spell} last_application_expiry caster, no_refresh and poll_before_cast are true or '
-                         f'false')
+    if not all(isinstance(flag, bool) for flag in (spec.caster, spec.no_refresh, spec.poll_before_cast,
+                                                   spec.same_stamp_applies)):
+        raise ValueError(f'{spec.spell} last_application_expiry caster, no_refresh, poll_before_cast and '
+                         f'same_stamp_applies are true or false')
+    if spec.same_stamp_applies and spec.feed_every_ms is None:
+        raise ValueError(f'{spec.spell} last_application_expiry accepts same-stamp applies only on a stamped feed')
     if spec.no_refresh and spec.repeat is None:
         raise ValueError(f'{spec.spell} last_application_expiry judges no refresh only over repeated trigger casts')
     if spec.forced_roll is not None and spec.repeat is None:
@@ -247,6 +252,12 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
             f'first apply stamp; above {FEED_STAMP_MS} ms, without a stamp, or with any count of stamped applies '
             f'but one (a refresh or a second apply leaves the last application unstamped), the arm is unmeasured. '
             f'The timeline is process global, so the scenario runs exclusive in a batch.')
+    if spec.same_stamp_applies:
+        scenario['contract'] += (
+            f' Two or more stamped applies are accepted only when the run\'s recorded timeline holds exactly that '
+            f'many aura_applied events of {spec.aura} on the holder, all at one game time; the age is then taken '
+            f'from that shared stamp. Applies at different game times, a count that differs from the stamped one or '
+            f'no recorded timeline leave the arm unmeasured.')
     if spec.trigger_target == CASTER:
         scenario['contract'] += f' {spec.trigger_spell} is cast at the caster, not the dummy.'
     if spec.repeat is not None:
@@ -266,6 +277,8 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
     if feeding:
         model['feed'] = {'reads': feed_reads, 'max_casts': max_casts, 'stop_aura': stop_aura,
                          'stamp_ms': FEED_STAMP_MS}
+        if spec.same_stamp_applies:
+            model['feed']['same_stamp'] = {'aura': spec.aura, 'holder': AURA_HOLDERS[spec.caster]}
     if spec.forced_roll is not None:
         from metric_delta_options import forced_roll
         model['forced_roll'] = {'talent': spec.forced_roll, 'released_label': forced_roll.released_label(spec)}
@@ -314,15 +327,32 @@ def last_application_verdict(base, run, model: dict):
     return replace(verdict, explanation=f'{verdict.explanation}; {fixture}, released at the end')
 
 
-def fed_age_void(run, stamps: dict, first_read: float, remaining: float, stamp_ms: float) -> str:
+def same_stamp_applies(run, same: dict | None, applies: float) -> tuple[bool, str]:
+    if same is None or applies < 2:
+        return False, ''
+    stamps = [event.get('at_ms') for event in getattr(run, 'timeline', ())
+              if event.get('event') == 'aura_applied' and str(event.get('spell')) == str(same['aura'])
+              and event.get('target') == same['holder']]
+    if not stamps:
+        return False, ' (no recorded timeline)'
+    if len(stamps) != applies:
+        return False, f' ({len(stamps)} recorded applies of the aura on the {same["holder"]})'
+    if len(set(stamps)) != 1:
+        return False, f' (recorded at {", ".join(dict.fromkeys(str(stamp) for stamp in stamps))} ms)'
+    return True, f'; {applies:g} stamped applies at one game time ({stamps[0]} ms), judged from that stamp'
+
+
+def fed_age_void(run, stamps: dict, first_read: float, remaining: float, stamp_ms: float,
+                 same: dict | None = None) -> str:
     read = {name: run.values.get(label) for name, label in stamps.items()}
     unreadable = [name for name, value in read.items() if value is None or not math.isfinite(float(value))]
     if unreadable or remaining <= 0:
         return (f'treatment: the aura\'s age at the first read is unreadable ({", ".join(unreadable) or "no aura"} at '
                 f'the stop), so the stamped bracket is not proven')
-    if read['applies'] != 1:
-        return (f'treatment: {read["applies"]:g} stamped applies, not one, so the last application is not the '
-                f'stamped one and the stamped bracket is not proven')
+    accepted, note = same_stamp_applies(run, same, read['applies'])
+    if read['applies'] != 1 and not accepted:
+        return (f'treatment: {read["applies"]:g} stamped applies, not one{" at one game time" if same else ""}'
+                f'{note}, so the last application is not the stamped one and the stamped bracket is not proven')
     age = first_read - read['start'] - read['first']
     if age > stamp_ms:
         return (f'treatment: the aura is up to {age:g} ms old at the first read, above {stamp_ms:g} ms, so the '
@@ -357,7 +387,10 @@ def last_application_reading(base, run, model: dict):
                                        f'{feed["stop_aura"]} (a void trial, neither a pass nor a fail)')
         treatment = [(treatment[1][0] - feed['stamp_ms'], *treatment[0][1:])] + treatment[1:]
         fed = f'; fed until {feed["stop_aura"]} at the stop, {remaining:g} ms left on the aura then'
-        age_void = fed_age_void(run, reads['stamps'], treatment[1][0], remaining, feed['stamp_ms'])
+        age_void = fed_age_void(run, reads['stamps'], treatment[1][0], remaining, feed['stamp_ms'],
+                                feed.get('same_stamp'))
+        if not age_void:
+            fed += same_stamp_applies(run, feed.get('same_stamp'), run.values[reads['stamps']['applies']])[1]
     refresh = no_refresh_reading(rows['treatment']) if model.get('no_refresh') else ''
     if refresh.startswith('alert'):
         return replace(base, status='alert', explanation=f'treatment: {refresh[len("alert: "):]}')

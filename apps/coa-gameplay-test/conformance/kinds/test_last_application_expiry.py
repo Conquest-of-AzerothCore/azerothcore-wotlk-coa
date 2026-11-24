@@ -198,7 +198,7 @@ MALICE = {'spell': 800214, 'name': "Malice of Gul'dan (Felstrike lasts $802678d)
 class FeedTests(unittest.TestCase):
     def judged(self, lasts_ms: float, stop: float = 1.0, control_applied: bool = False, before: float = 0.0,
                entry: dict = FED, remaining: float | None = None, age: float = 20.0, applies: float = 1.0,
-               unstamped: tuple[str, ...] = ()) -> Verdict:
+               unstamped: tuple[str, ...] = (), timeline: tuple[dict, ...] | None = None) -> Verdict:
         _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
         values = {}
         stamps = expectation.model['feed']['reads']['treatment']['stamps']
@@ -224,7 +224,10 @@ class FeedTests(unittest.TestCase):
                 values[aura] = before if index == 0 else (1.0 if now < 61000.0 - 20.0 + lasts_ms else 0.0)
         base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
                        expectation.rank_id, expectation.check)
-        return judge_behaviour(base, FakeRun(values), expectation)
+        found = FakeRun(values)
+        if timeline is not None:
+            found.timeline = timeline
+        return judge_behaviour(base, found, expectation)
 
     def test_the_loop_is_capped_by_the_proc_chance_and_both_arms_are_fed(self):
         scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), FED)
@@ -329,6 +332,74 @@ class FeedTests(unittest.TestCase):
         self.assertNotIn('cast_until_aura', [step['action'] for step in scenario['steps']])
         self.assertNotIn('melee_crit_rating', scenario['players'][0])
         self.assertNotEqual(scenario['players'][0].get('melee_hit_rating'), 100000)
+
+SAME_STAMP = {**FED, 'same_stamp_applies': True}
+
+
+def applied(aura: int, at_ms: int, target: str = 'caster') -> dict:
+    return {'at_ms': str(at_ms), 'event': 'aura_applied', 'source_entry': '0', 'spell': str(aura), 'target': target,
+            'value': '1'}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class SameStampAppliesTests(unittest.TestCase):
+    judged = FeedTests.judged
+
+    def aura(self) -> int:
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), SAME_STAMP)
+        return expectation.model['feed']['same_stamp']['aura']
+
+    def test_the_option_reads_no_new_step_and_names_the_holder(self):
+        plain, [bare] = behaviour_scenario(load_fixture_class_file(23), FED)
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), SAME_STAMP)
+        run.validate(scenario)
+        self.assertEqual(scenario['steps'], plain['steps'])
+        self.assertNotIn('same_stamp', bare.model['feed'])
+        self.assertEqual(expectation.model['feed']['same_stamp'], {'aura': FED['aura'], 'holder': 'caster'})
+
+    def test_a_single_apply_is_judged_as_without_the_option(self):
+        aura = self.aura()
+        for timeline in ((), (applied(aura, 12),)):
+            verdict = self.judged(3000.0, entry=SAME_STAMP, timeline=timeline)
+            self.assertEqual(verdict.status, 'ok')
+            self.assertEqual(verdict.measured, self.judged(3000.0).measured)
+
+    def test_applies_at_one_recorded_game_time_are_judged_from_that_stamp(self):
+        aura = self.aura()
+        timeline = (applied(aura, 12), {**applied(aura, 12), 'event': 'cast', 'target': ''}, applied(aura, 12))
+        verdict = self.judged(3000.0, entry=SAME_STAMP, applies=2.0, timeline=timeline)
+        self.assertEqual(verdict.status, 'ok', verdict.explanation)
+        self.assertIn('2 stamped applies at one game time (12 ms)', verdict.explanation)
+        self.assertEqual(self.judged(3900.0, entry=SAME_STAMP, applies=2.0, timeline=timeline).status, 'alert')
+
+    def test_applies_at_different_game_times_are_unmeasured(self):
+        aura = self.aura()
+        verdict = self.judged(3000.0, entry=SAME_STAMP, applies=2.0, timeline=(applied(aura, 12), applied(aura, 40)))
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('recorded at 12, 40 ms', verdict.explanation)
+
+    def test_a_recorded_count_that_differs_from_the_stamped_one_is_unmeasured(self):
+        aura = self.aura()
+        for timeline in ((applied(aura, 12),), (applied(aura, 12), applied(aura, 12), applied(aura, 12)),
+                         (applied(aura, 12), applied(aura, 12, 'dummy')), (applied(aura, 12), applied(aura + 1, 12))):
+            with self.subTest(timeline=timeline):
+                self.assertEqual(self.judged(3000.0, entry=SAME_STAMP, applies=2.0, timeline=timeline).status,
+                                 'unmeasured')
+
+    def test_an_empty_or_missing_timeline_is_unmeasured(self):
+        self.assertEqual(self.judged(3000.0, entry=SAME_STAMP, applies=2.0, timeline=()).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, entry=SAME_STAMP, applies=2.0).status, 'unmeasured')
+
+    def test_without_the_option_a_same_stamp_double_stays_unmeasured(self):
+        aura = self.aura()
+        verdict = self.judged(3000.0, applies=2.0, timeline=(applied(aura, 12), applied(aura, 12)))
+        self.assertEqual(verdict.status, 'unmeasured')
+
+    def test_the_option_needs_a_feed_and_a_boolean(self):
+        for entry in ({**ENTRY, 'same_stamp_applies': True}, {**SAME_STAMP, 'same_stamp_applies': 1}):
+            with self.subTest(entry=entry), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), entry)
+
 
 PRE_POLL = {**ENTRY, 'label_suffix': 'pre_poll', 'caster': True, 'trigger_target': 'caster', 'poll_before_cast': True}
 
