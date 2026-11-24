@@ -25203,6 +25203,200 @@
       "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL amplitude 3000 ms trigger 500531 (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick and AscensionFelswornContracts.cpp:519-520 sets its two values from attack power. Direction only (mentor D-90): the coefficient is not asserted. The metric is read on the caster before the learn (control: 0, no source) and 3600 ms after learning 92089 (the first tick falls 3000 ms after the learn), the caster holding 3000 more attack power as a harness fixture (player_attack_power). The after reading must be above 1. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
     },
     {
+      "spell": 92089,
+      "name": "Burning Commander (Armor gain rises with attack power)",
+      "kind": "metric_delta",
+      "variant": "armor_ap_arms",
+      "label_suffix": "armor_ap_arms",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 3600,
+        "source": "Attack Power 980 35785: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979, its gain read in each arm"
+      },
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL trigger 500531, made periodic every 3000 ms by AscensionFelswornContracts.cpp:142-145; AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), whose values AscensionFelswornContracts.cpp sets from attack power. Direction only (mentor D-90, D-111): the coefficient and the before value are not asserted. The caster holds 3000 more attack power (player_attack_power). Attack power arms (ADR 1284): right after the before reading (no 92089) the caster takes Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979; Effect[1] aura 124 ranged attack power; passive, DurationIndex 21), waits 3600 ms and reads again, then loses it; after learning 92089 and the after reading (3600 ms after the learn's trigger, past the first 3000 ms tick) the learned arm takes it again, waits 3600 ms (past the next tick) and reads. The attack power is read in every arm: the fixture's gain is read, not assumed. The gain after the learn at the low attack power must be positive and the gain at the higher attack power (with minus without 92089) strictly larger. The metric is the caster's Armor (Unit::GetArmor); its stat-derived base before the learn is not asserted. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Holy resistance gain rises with attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_holy_ap_arms",
+      "label_suffix": "resist_holy_ap_arms",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 3600,
+        "source": "Attack Power 980 35785: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979, its gain read in each arm"
+      },
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL trigger 500531, made periodic every 3000 ms by AscensionFelswornContracts.cpp:142-145; AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), whose values AscensionFelswornContracts.cpp sets from attack power. Direction only (mentor D-90, D-111): the coefficient and the before value are not asserted. The caster holds 3000 more attack power (player_attack_power). Attack power arms (ADR 1284): right after the before reading (no 92089) the caster takes Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979; Effect[1] aura 124 ranged attack power; passive, DurationIndex 21), waits 3600 ms and reads again, then loses it; after learning 92089 and the after reading (3600 ms after the learn's trigger, past the first 3000 ms tick) the learned arm takes it again, waits 3600 ms (past the next tick) and reads. The attack power is read in every arm: the fixture's gain is read, not assumed. The gain after the learn at the low attack power must be positive and the gain at the higher attack power (with minus without 92089) strictly larger. The metric is the caster's Holy resistance (school 1). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Fire resistance gain rises with attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_fire_ap_arms",
+      "label_suffix": "resist_fire_ap_arms",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 3600,
+        "source": "Attack Power 980 35785: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979, its gain read in each arm"
+      },
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL trigger 500531, made periodic every 3000 ms by AscensionFelswornContracts.cpp:142-145; AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), whose values AscensionFelswornContracts.cpp sets from attack power. Direction only (mentor D-90, D-111): the coefficient and the before value are not asserted. The caster holds 3000 more attack power (player_attack_power). Attack power arms (ADR 1284): right after the before reading (no 92089) the caster takes Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979; Effect[1] aura 124 ranged attack power; passive, DurationIndex 21), waits 3600 ms and reads again, then loses it; after learning 92089 and the after reading (3600 ms after the learn's trigger, past the first 3000 ms tick) the learned arm takes it again, waits 3600 ms (past the next tick) and reads. The attack power is read in every arm: the fixture's gain is read, not assumed. The gain after the learn at the low attack power must be positive and the gain at the higher attack power (with minus without 92089) strictly larger. The metric is the caster's Fire resistance (school 2). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Nature resistance gain rises with attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_nature_ap_arms",
+      "label_suffix": "resist_nature_ap_arms",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 3
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 3600,
+        "source": "Attack Power 980 35785: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979, its gain read in each arm"
+      },
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL trigger 500531, made periodic every 3000 ms by AscensionFelswornContracts.cpp:142-145; AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), whose values AscensionFelswornContracts.cpp sets from attack power. Direction only (mentor D-90, D-111): the coefficient and the before value are not asserted. The caster holds 3000 more attack power (player_attack_power). Attack power arms (ADR 1284): right after the before reading (no 92089) the caster takes Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979; Effect[1] aura 124 ranged attack power; passive, DurationIndex 21), waits 3600 ms and reads again, then loses it; after learning 92089 and the after reading (3600 ms after the learn's trigger, past the first 3000 ms tick) the learned arm takes it again, waits 3600 ms (past the next tick) and reads. The attack power is read in every arm: the fixture's gain is read, not assumed. The gain after the learn at the low attack power must be positive and the gain at the higher attack power (with minus without 92089) strictly larger. The metric is the caster's Nature resistance (school 3). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Frost resistance gain rises with attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_frost_ap_arms",
+      "label_suffix": "resist_frost_ap_arms",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 3600,
+        "source": "Attack Power 980 35785: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979, its gain read in each arm"
+      },
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL trigger 500531, made periodic every 3000 ms by AscensionFelswornContracts.cpp:142-145; AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), whose values AscensionFelswornContracts.cpp sets from attack power. Direction only (mentor D-90, D-111): the coefficient and the before value are not asserted. The caster holds 3000 more attack power (player_attack_power). Attack power arms (ADR 1284): right after the before reading (no 92089) the caster takes Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979; Effect[1] aura 124 ranged attack power; passive, DurationIndex 21), waits 3600 ms and reads again, then loses it; after learning 92089 and the after reading (3600 ms after the learn's trigger, past the first 3000 ms tick) the learned arm takes it again, waits 3600 ms (past the next tick) and reads. The attack power is read in every arm: the fixture's gain is read, not assumed. The gain after the learn at the low attack power must be positive and the gain at the higher attack power (with minus without 92089) strictly larger. The metric is the caster's Frost resistance (school 4). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Shadow resistance gain rises with attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_shadow_ap_arms",
+      "label_suffix": "resist_shadow_ap_arms",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 3600,
+        "source": "Attack Power 980 35785: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979, its gain read in each arm"
+      },
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL trigger 500531, made periodic every 3000 ms by AscensionFelswornContracts.cpp:142-145; AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), whose values AscensionFelswornContracts.cpp sets from attack power. Direction only (mentor D-90, D-111): the coefficient and the before value are not asserted. The caster holds 3000 more attack power (player_attack_power). Attack power arms (ADR 1284): right after the before reading (no 92089) the caster takes Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979; Effect[1] aura 124 ranged attack power; passive, DurationIndex 21), waits 3600 ms and reads again, then loses it; after learning 92089 and the after reading (3600 ms after the learn's trigger, past the first 3000 ms tick) the learned arm takes it again, waits 3600 ms (past the next tick) and reads. The attack power is read in every arm: the fixture's gain is read, not assumed. The gain after the learn at the low attack power must be positive and the gain at the higher attack power (with minus without 92089) strictly larger. The metric is the caster's Shadow resistance (school 5). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
+      "spell": 92089,
+      "name": "Burning Commander (Arcane resistance gain rises with attack power)",
+      "kind": "metric_delta",
+      "variant": "resist_arcane_ap_arms",
+      "label_suffix": "resist_arcane_ap_arms",
+      "quote": "grants you additional Armor and magic resistance based on your attack power",
+      "trigger_spell": 804247,
+      "gate_spell": 92089,
+      "target": "caster",
+      "metric": "resistance",
+      "fields": {
+        "school": 6
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.01,
+      "wait_ms": 3600,
+      "expire_ms": 500,
+      "player_attack_power": 3000,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 3600,
+        "source": "Attack Power 980 35785: Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979, its gain read in each arm"
+      },
+      "observe_source": "92089 Burning Commander Effect[1] aura 23 PERIODIC_TRIGGER_SPELL trigger 500531, made periodic every 3000 ms by AscensionFelswornContracts.cpp:142-145; AscensionFelswornAuras.cpp:117-121 casts 500531 on each tick (Fel Scales (Tyrant): Effect[0] aura 22 MOD_RESISTANCE MiscValue 1 (Physical = Armor), Effect[1] aura 22 MiscValue 126 (Holy to Arcane)), whose values AscensionFelswornContracts.cpp sets from attack power. Direction only (mentor D-90, D-111): the coefficient and the before value are not asserted. The caster holds 3000 more attack power (player_attack_power). Attack power arms (ADR 1284): right after the before reading (no 92089) the caster takes Attack Power 980 35785 (Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER, EffectBasePoints 979; Effect[1] aura 124 ranged attack power; passive, DurationIndex 21), waits 3600 ms and reads again, then loses it; after learning 92089 and the after reading (3600 ms after the learn's trigger, past the first 3000 ms tick) the learned arm takes it again, waits 3600 ms (past the next tick) and reads. The attack power is read in every arm: the fixture's gain is read, not assumed. The gain after the learn at the low attack power must be positive and the gain at the higher attack power (with minus without 92089) strictly larger. The metric is the caster's Arcane resistance (school 6). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
       "spell": 705141,
       "name": "Pit Lord's Rage (critical strike chance after Felhoof Charge)",
       "kind": "metric_delta",
@@ -25341,6 +25535,150 @@
       ],
       "void_on_cast_failure": true,
       "observe_source": "Control arm of inner_dot_share: the same Ruin cast and fixtures without Inner Demon 804216: the DoT 805748 deals nothing (AscensionFelswornAbilities.cpp:375 is gated on Inner Demon). Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount). "
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (Inner Demon DoT still on the dummy short of $805748d)",
+      "variant": "inner_dot_held",
+      "label_suffix": "inner_dot_held",
+      "kind": "metric_delta",
+      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805748
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "tolerance": 0,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expected": 1,
+      "wait_ms": 5700,
+      "game_time": {
+        "after": [
+          5500,
+          5950
+        ]
+      },
+      "apply_stamp": {
+        "aura": 805748,
+        "window": [
+          2710,
+          2990
+        ],
+        "applied": "after_trigger",
+        "anchor": 33143,
+        "source": "805748 DurationIndex 27 = 3000 ms (SpellDuration.dbc); the aura is still on the dummy; a bracket between 2710 and 2990 ms after the apply proves it outlives 2700 ms (excludes a duration 10% short) and stays below 3000 ms"
+      },
+      "observe_source": "Ruin 501298 Inner Demon: AscensionFelswornAbilities.cpp:375 applies the DoT 805748 (Effect[0] aura 3 PERIODIC_DAMAGE, amplitude 1000 ms, DurationIndex 27 = 3000 ms, $805748d) on the Ruin hit. One real Ruin cast (CastingTimeIndex 19 = 2500 ms, then the missile; the DoT lands about 2870 ms after the cast command, inner_dot_share) at the dummy with Inner Demon 804216 held as a precondition fixture (Felfury x6 and At Least 2 Felfury 803468 precondition fixtures, 823764 no partial resists, Blessed Resilience 33143 on the dummy so no hit crits). An encounter timeline opened in the after phase (apply_stamp after the trigger, ADR 1284) stamps the one apply of 805748 on the dummy after the completed cast. Its stamps are offsets from the boss engage time (CoAGameplayTimeline.cpp:104), so the apply is placed in game time through an anchor: Blessed Resilience 33143 (aura 197, -1001 attacker crit chance), already a dummy precondition fixture unrelated to 805748, is removed and set again right after the opening, between two game-time reads, and its apply stamp is compared with the DoT's; the re-set leaves the fixture in place before the cast, so the claim is unchanged. The reading's age is bracketed from the DoT apply itself. The aura is read on the dummy about 5700 ms after the cast command (about 2830 ms after the apply): present (1); 0 in the control phase that casts nothing. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
+    },
+    {
+      "spell": 501298,
+      "name": "Ruin (Inner Demon DoT gone after $805748d)",
+      "variant": "inner_dot_gone",
+      "label_suffix": "inner_dot_gone",
+      "kind": "metric_delta",
+      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
+      "trigger_spell": 501298,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 805748
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "tolerance": 0,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expected": 0,
+      "wait_ms": 6000,
+      "game_time": {
+        "after": [
+          5800,
+          6250
+        ]
+      },
+      "apply_stamp": {
+        "aura": 805748,
+        "window": [
+          3010,
+          3290
+        ],
+        "applied": "after_trigger",
+        "anchor": 33143,
+        "source": "805748 DurationIndex 27 = 3000 ms (SpellDuration.dbc); the aura is gone from the dummy; a bracket between 3010 and 3290 ms after the apply proves it ends by 3290 ms (excludes a duration 10% long, 3300 ms) and lies past 3000 ms"
+      },
+      "observe_source": "Ruin 501298 Inner Demon: AscensionFelswornAbilities.cpp:375 applies the DoT 805748 (Effect[0] aura 3 PERIODIC_DAMAGE, amplitude 1000 ms, DurationIndex 27 = 3000 ms, $805748d) on the Ruin hit. One real Ruin cast (CastingTimeIndex 19 = 2500 ms, then the missile; the DoT lands about 2870 ms after the cast command, inner_dot_share) at the dummy with Inner Demon 804216 held as a precondition fixture (Felfury x6 and At Least 2 Felfury 803468 precondition fixtures, 823764 no partial resists, Blessed Resilience 33143 on the dummy so no hit crits). An encounter timeline opened in the after phase (apply_stamp after the trigger, ADR 1284) stamps the one apply of 805748 on the dummy after the completed cast. Its stamps are offsets from the boss engage time (CoAGameplayTimeline.cpp:104), so the apply is placed in game time through an anchor: Blessed Resilience 33143 (aura 197, -1001 attacker crit chance), already a dummy precondition fixture unrelated to 805748, is removed and set again right after the opening, between two game-time reads, and its apply stamp is compared with the DoT's; the re-set leaves the fixture in place before the cast, so the claim is unchanged. The reading's age is bracketed from the DoT apply itself. The aura is read on the dummy about 6000 ms after the cast command (about 3130 ms after the apply): absent (0); 0 in the control phase that casts nothing. Reference search 2026-11-24: nothing found beyond the tooltip and the server DBC for this value (coa-history and the bindmysoul snapshot were read for 92089, 707527, 705141 and 501298 in earlier felsworn batches without an amount)."
     },
     {
       "spell": 707527,

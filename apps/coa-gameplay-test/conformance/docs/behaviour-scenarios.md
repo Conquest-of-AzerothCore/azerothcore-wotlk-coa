@@ -2344,7 +2344,11 @@ Options with a module:
 - [`same_arm_ratio`](metric_delta_options/same_arm_ratio.md): a second metric read right after each reading, the
   gain of the reading per gain of that metric over the after arm judged against a stated ratio (ADR 1237)
 - [`apply_stamp`](metric_delta_options/apply_stamp.md): an encounter timeline stamps the aura apply and the trigger
-  cast in one time base, and the after reading's bracket from the apply is judged against a window (ADR 1236)
+  cast in one time base, and the after reading's bracket from the apply is judged against a window (ADR 1236); `applied`
+  `after_trigger` stamps an aura the trigger applies after its cast completes (ADR 1284, provisional)
+- [`attack_power_arms`](metric_delta_options/attack_power_arms.md): a control and a learned arm read again at a
+  higher attack power (a fixture aura, its gain read), the learned gain positive and strictly larger at the higher
+  attack power, no coefficient (ADR 1284, provisional)
 - [`stack_feed`](metric_delta_options/stack_feed.md): a stack cap fed by chance, judged over repeated trials polled
   after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1249, provisional)
 - [`after_gate_cast`](metric_delta_options/after_gate_cast.md): a real cast of the gate at the caster at the start of

@@ -1711,11 +1711,11 @@ def require_scripted_crit_probe(records: Records, spec) -> None:
 
 
 def metric_delta_contrast(spec) -> str:
-    from coverage import METRIC_EVIDENCE, STATE
+    from coverage import STATE, metric_evidence
     if not spec.setup_only_after:
         return LEARNED_CONTRAST
     own = bool(spec.setup_casts) and all(spell == spec.spell for spell in spec.setup_casts)
-    return OWN_CAST_CONTRAST if own and METRIC_EVIDENCE.get(spec.metric) == STATE else CONDITION_CONTRAST
+    return OWN_CAST_CONTRAST if own and metric_evidence().get(spec.metric) == STATE else CONDITION_CONTRAST
 
 
 def reagent_steps(records: Records, spell: int) -> list[dict]:

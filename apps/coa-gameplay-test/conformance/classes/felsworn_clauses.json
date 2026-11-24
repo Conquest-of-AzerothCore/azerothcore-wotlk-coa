@@ -101,20 +101,20 @@
       },
       {
         "claim": "grants you additional Armor and magic resistance based on your attack power",
-        "labels": []
+        "labels": [
+          "92089 behaviour_metric_delta armor_ap_arms",
+          "92089 behaviour_metric_delta resist_holy_ap_arms",
+          "92089 behaviour_metric_delta resist_fire_ap_arms",
+          "92089 behaviour_metric_delta resist_nature_ap_arms",
+          "92089 behaviour_metric_delta resist_frost_ap_arms",
+          "92089 behaviour_metric_delta resist_shadow_ap_arms",
+          "92089 behaviour_metric_delta resist_arcane_ap_arms"
+        ],
+        "evidence": "behaviour"
       }
     ],
-    "tool_gap": {
-      "reason": "Armor part and the larger-delta-at-higher-attack-power part need a tool extension (batch A3, mentor D-90 method). Armor: the reference character's Armor reads 270 before the learn (a stat-derived base, not 0), the metric_delta judge asserts the before reading exactly (before_expected, tolerance) or a stated gain (expected_gain, which would assert the coefficient D-90 leaves unasserted), and has no direction-only gain option (after minus before above a floor). Ordering: judging 'strictly larger delta at a higher attack power' needs one scenario holding two attack power levels (monotone covers phase_power only), because separate entries cannot compare their readings. Design 1 (armor, entry armor_ap3000, run 20261124-054659): alert, before 270 expected 0, after 1926. Design 2 (an after_at_least bound above the read baseline) was rejected: the bound would come from a reading. The six resistance entries (resist_<school>_ap3000, baseline 0 exact) measure the direction for each magic school and are listed as an extra claim. Route: a tool group adding a gain-above-floor direction option and an attack power monotone option to metric_delta.",
-      "attempts": [
-        {
-          "agent": "fw-fa3",
-          "report": ".agents/plans/fw-fa3/report.md"
-        }
-      ]
-    },
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
-    "reason": "Claim 4.1 not final (review fw-rfa3 I-1, mentor D-90 method): the six magic-resistance directions are proven (entries resist_holy..arcane_ap3000, learned passive at +3000 attack power, ok in both runs of the fw-fa3 pair) but the Armor direction (Armor reads 270 with an unasserted baseline) and the strictly larger delta at a higher attack power are tool gaps (metric_delta direction-only gain above a floor + attack power ordering, group B). The coefficient is unasserted."
+    "reason": "Claim 4.1 (mentor D-90, D-111): attack_power_arms (ADR 1284) judges Armor and each magic resistance in its own entry: off/on gain positive at the low attack power and strictly larger at the higher attack power, the fixture Attack Power 980 35785's gain read (3312 then 4292 attack power), coefficient and before value unasserted. Pair fw-bk5 prove run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): all seven ok in both runs; Armor 270 -> 1926 (gain 1656) at 3312 and 270 -> 2416 (gain 2146) at 4292; each resistance 0 -> 165 at 3312 and 0 -> 214 at 4292. The earlier six resist_<school>_ap3000 entries (fw-fa3) stay as single-level direction reads. Tool gap of fw-fa3 (armor baseline, attack power ordering) closed by the option."
   },
   {
     "spell": 300465,
@@ -3621,20 +3621,15 @@
       {
         "claim": "over $805748d.",
         "labels": [
-          "501298 spell_duration 805748 #1"
-        ]
+          "501298 spell_duration 805748 #1",
+          "501298 behaviour_metric_delta inner_dot_held",
+          "501298 behaviour_metric_delta inner_dot_gone"
+        ],
+        "evidence": "behaviour"
       }
     ],
-    "tool_gap": {
-      "reason": "The duration part ($805748d = 3000 ms, DurationIndex 27 of the DoT 805748) has no behaviour route yet. Design 1 (apply_stamp on 805748 with held read 5750 ms and gone read 6250 ms, windows 2710..2990 and 3010..3290 ms, run 20261124-055254): both verdicts unmeasured, 'apply stamp: 1 apply after the trigger cast, so the last apply is not bounded': the option brackets an aura applied before the trigger cast (a proc or strike), while the DoT is applied by the Ruin hit 2500 ms after the cast plus two projectile flights (2866 ms by the data, fix-805748 note). Design 2 (plain game_time reads without a stamp) cannot exclude a duration 10% long (3300 ms): from an apply at 2866 ms a gone read at 6250 ms leaves 84 ms of margin, and the apply time is not measured. Route: an apply_stamp mode that stamps the apply of an aura applied after the trigger cast (tool group). The 30% share is proven by inner_dot_share with its control.",
-      "attempts": [
-        {
-          "agent": "fw-fa3",
-          "report": ".agents/plans/fw-fa3/report.md"
-        }
-      ]
-    },
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Claim 231.1 (mentor D-111): apply_stamp after_trigger with the anchor Blessed Resilience 33143 (ADR 1284) brackets the DoT 805748's age from its own apply, which lands 400 ms after Ruin's cast completes. Pair fw-bk5 prove2 run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): inner_dot_held ok both runs (present, bracket 2800..2818 ms in window 2710..2990, excludes 2700 ms) and inner_dot_gone ok both runs (absent, bracket 3100..3118 ms in window 3010..3290, excludes 3300 ms); $805748d = 3000 ms (DurationIndex 27). A first pair (prove) alerted both entries with a bracket near 5500 ms: timeline_first_ms is an offset from the boss engage time (CoAGameplayTimeline.cpp:104), fixed by the anchor. Tool gap of fw-fa3 closed. The 30% share is proven by inner_dot_share with its control."
   },
   {
     "spell": 801899,
@@ -4718,10 +4713,11 @@
         "labels": [
           "806109 behaviour_metric_delta dash_range",
           "806109 behaviour_metric_delta dash_range_torpedo"
-        ]
+        ],
+        "evidence": "behaviour"
       }
     ],
-    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'. fw-fa4 2026-11-24 (review fw-rfa1 I1, G-21.6): the 20 yd extra dash is read by dash_range (Chaos Rush 500423) and dash_range_torpedo (Fel Torpedo 500610) after a real 806109 expiry, no set_aura: 806109 is cast for real, 8500 ms later 806109 reads absent and 806128 present (preconditions, a mismatch voids the trial), then the dash is cast; the before phase makes no 806109 cast. Pair run1/run2 on build 22150ab2469f server commit 64b17c781882: dash_range and dash_range_torpedo ok both runs (10 before, 30 after, gain 20 within 1). The audit classes the claim as data, not behaviour: behaviours.metric_delta_contrast looks up spec.metric in the static coverage.METRIC_EVIDENCE, which has no position_x row (displacement.py adds it only through option_rows), so a setup_only_after read whose setup is the entry's own cast is stamped condition, not own_cast (ADR 0553); needs tool group B: metric_delta_contrast reading coverage.metric_evidence()."
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'. fw-fa4 2026-11-24 (review fw-rfa1 I1, G-21.6): the 20 yd extra dash is read by dash_range (Chaos Rush 500423) and dash_range_torpedo (Fel Torpedo 500610) after a real 806109 expiry, no set_aura: 806109 is cast for real, 8500 ms later 806109 reads absent and 806128 present (preconditions, a mismatch voids the trial), then the dash is cast; the before phase makes no 806109 cast. Pair run1/run2 on build 22150ab2469f server commit 64b17c781882: dash_range and dash_range_torpedo ok both runs (10 before, 30 after, gain 20 within 1). The audit classes the claim as data, not behaviour: behaviours.metric_delta_contrast looks up spec.metric in the static coverage.METRIC_EVIDENCE, which has no position_x row (displacement.py adds it only through option_rows), so a setup_only_after read whose setup is the entry's own cast is stamped condition, not own_cast (ADR 0553); needs tool group B: metric_delta_contrast reading coverage.metric_evidence(). fw-bk5 2026-11-24: metric_delta_contrast now reads coverage.metric_evidence() (ADR 1284, mentor D-111); dash_range and dash_range_torpedo are stamped own_cast. Pair fw-bk5 prove run1/run2 (build 5bcee2e29a7a, server commit fddaf7cb91d0, no flip): both ok in both runs (10 before, 30 after, gain 20 within 1)."
   },
   {
     "spell": 806111,
