@@ -8,10 +8,12 @@
 #include "InstanceScript.h"
 #include "LFGMgr.h"
 #include "Map.h"
+#include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 
+#include <algorithm>
 #include <mutex>
 #include <unordered_map>
 #include <vector>
@@ -208,10 +210,59 @@ public:
     }
 };
 
+bool AnyoneFighting(Map* map)
+{
+    bool fighting = false;
+    map->DoForAllPlayers([&fighting](Player* player)
+    {
+        if (player->IsAlive() && !player->IsGameMaster() && player->IsInCombat())
+            fighting = true;
+    });
+    return fighting;
+}
+
+void ResolveHeld(Player* player, std::vector<uint32> const& fighting)
+{
+    InstanceScript* instance = player->GetInstanceScript();
+    bool const killed = instance && std::any_of(fighting.begin(), fighting.end(),
+        [instance](uint32 bossId) { return instance->GetBossState(bossId) == DONE; });
+
+    Position start;
+    bool const moved = !killed && InstanceStart(player, start);
+
+    player->ResurrectPlayer(RELEASE_RESTORE_PERCENT);
+    if (!player->IsAlive())
+        return;
+
+    player->SpawnCorpseBones();
+    if (moved)
+        player->NearTeleportTo(start.GetPositionX(), start.GetPositionY(), start.GetPositionZ(), start.GetOrientation());
+}
+
 class ascension_dungeon_release_map : public AllMapScript
 {
 public:
-    ascension_dungeon_release_map() : AllMapScript("ascension_dungeon_release_map", {ALLMAPHOOK_ON_CREATE_MAP}) { }
+    ascension_dungeon_release_map()
+        : AllMapScript("ascension_dungeon_release_map", {ALLMAPHOOK_ON_CREATE_MAP, ALLMAPHOOK_ON_MAP_UPDATE}) { }
+
+    void OnMapUpdate(Map* map, uint32) override
+    {
+        if (!map->IsRaid())
+            return;
+
+        RaidReleaseHold* hold = map->CustomData.Get<RaidReleaseHold>(RAID_RELEASE_HOLD);
+        if (!hold || (InRaidFight(map) && AnyoneFighting(map)))
+            return;
+
+        std::unordered_map<ObjectGuid, std::vector<uint32>> held = std::move(hold->held);
+        map->CustomData.Erase(RAID_RELEASE_HOLD);
+        for (auto const& [guid, fighting] : held)
+        {
+            Player* player = ObjectAccessor::GetPlayer(map, guid);
+            if (player && !player->IsAlive() && !player->HasPlayerFlag(PLAYER_FLAGS_GHOST))
+                ResolveHeld(player, fighting);
+        }
+    }
 
     void OnCreateMap(Map* map) override
     {
