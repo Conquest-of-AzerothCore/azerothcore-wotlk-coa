@@ -3366,7 +3366,9 @@
     "claims": [
       {
         "claim": "and it now affects all allies",
-        "labels": [],
+        "labels": [
+          "800220 behaviour_metric_delta whipcrack_all"
+        ],
         "evidence": "behaviour"
       },
       {
@@ -3378,7 +3380,7 @@
       }
     ],
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
-    "reason": " whipcrack_all HELD (review fw-rbk3 I-1): with 800220 the +15 SPELLMOD_RADIUS also widens Effect[2] to 30 yd, so a script-less server reads 10 as the union of two cap-8 picks (about 0.39 per pair); needs a redesign (allies beyond the widened Effect[2] edge after the learn, or enough after-casts) before it counts."
+    "reason": "whipcrack_all redesigned after review fw-rbk3 I-1 (fw-bk6): the nine allies stand 34.6 yd from the caster, beyond Effect[2]'s 34.16 yd edge widened by 800220 (0.44 yd margin) and inside the script's 35 yd cell visit (0.4 yd margin), so a server without AscensionFelswornAbilities.cpp:162-167 reads 8 or 9 after the learn, never 10 (code reading; no server mutant run); before the learn the allies are beyond the 20 yd edge and the count is 1. Counted pair fw-bk6 prove1 (build d05bf1d2daaa, server commit ab5dbd85dd): 1 then 10 in both runs, distances 34.5996."
   },
   {
     "spell": 800225,
