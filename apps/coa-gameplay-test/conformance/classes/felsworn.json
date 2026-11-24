@@ -14957,6 +14957,290 @@
       "observe_source": "Felwrath 520693 (rank chain 520236-520693, Inner Demon rank 520832: Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, StackAmount 3, DurationIndex 32). Tooltip: 'Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ... Shadowflame Damage over $520832d, stacking $520832u times.' Felwrath's area is Effect[0] TargetA 53 TARGET_DEST_TARGET_ENEMY and TargetB 16 TARGET_UNIT_DEST_AREA_ENEMY with radius index 14 = 8 yd (SpellRadius.dbc), so dummies standing 3 to 7 yd from the caster are within 4 yd of the primary at 3 yd and are all struck. Inner Demon 804216 is on the caster as a precondition fixture set by harness set_aura (the clause's own condition; its cast needs Felfury the arm also needs for Felwrath), 6 Felfury and Demonic 803468 cover the cast, 823764 keeps resists off. The 520832 stacks are read on the primary dummy 3500 ms after one real Felwrath cast (CastingTimeIndex 5 = 2000 ms): four enemies are struck (the primary and three more, one fewer than the 5 the tooltip names): the primary carries no 520832 (0), as in the control phase that casts nothing. Reference search 2026-11-23: coa-history spell 520832: SPELL_AURA_APPLIED 1558 events, SPELL_PERIODIC_DAMAGE 11712 events in 10 logs (the Inner Demon damage exists in play; the logs do not tell how many enemies each cast struck, so no figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
     },
     {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon: two casts stack 520832 to 2)",
+      "variant": "inner_stack_two",
+      "label_suffix": "inner_stack_two",
+      "setup_casts": [
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. One setup Felwrath cast, then the trigger cast: two applications on the dummy, read 3000 ms after the trigger (1000 ms after it lands, well inside the 6000 ms aura): 2 stacks. Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon: three casts stack 520832 to 3)",
+      "variant": "inner_stack_three",
+      "label_suffix": "inner_stack_three",
+      "setup_casts": [
+        520693,
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "after_setup_stacks": [
+        {
+          "spell": 520832,
+          "actor": "dummy",
+          "stacks": 2
+        }
+      ],
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Two setup Felwrath casts (the dummy reads 2 stacks after them, a precondition read), then the trigger cast: three applications, read 3000 ms after the trigger: 3 stacks. Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon stacks cap at 3)",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "setup_casts": [
+        520693,
+        520693,
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "stack_feed": {
+        "aura": 520832,
+        "cap": 3,
+        "window_ms": 6000,
+        "trials": 2,
+        "refeed_auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            804216,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "source": "520832 StackAmount 3, DurationIndex 32 = 6000 ms"
+      },
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Four real Felwrath casts (three setup casts and the trigger, 2100 ms apart; each 2000 ms cast lands before the next starts) apply 520832 four times on the dummy; stack_feed counts the applications (aura_apply_count) and reads the stacks after every cast: a trial is valid with at least 4 counted applications and no poll span of 6000 ms or more, and passes at exactly 3 stacks, never 4 (the fourth application stays at 3). The end read comes 2500 ms after the trigger cast, after the fourth application lands. The feed is deterministic (one application per cast, no roll). Felfury x6, 803468, 804216 and 823764 are set again after every feed cast (refeed), as Felwrath costs 2 Felfury and Felfury caps at 6. Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520832,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2851.2,
+      "tolerance": 0,
+      "wait_ms": 9000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon: damage of three stacks, uncounted, N-7)",
+      "variant": "inner_total_three",
+      "label_suffix": "inner_total_three",
+      "setup_casts": [
+        520693,
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "after_at_least": 2708,
+      "after_at_most": 2994,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Damage of the stacks as applied damage (uncounted while owner question N-7 is open). Effect[0] ticks every 1000 ms for 8 + 2.0 x 50 = 108 per stack (the periodic amount is multiplied by the stacks, SpellAuraEffects.cpp:659), x 1.1 under 804216; Effect[1] is SPELL_EFFECT_DUMMY and deals nothing. A reapplied periodic damage aura keeps its tick timer (SpellAuraEffects.cpp:748-751) and restarts its 6000 ms. Applications at 0, 2100 and 4200 ms: ticks at 1000 and 2000 ms at 1 stack, 3000 and 4000 at 2, 5000 to 10000 at 3 (the aura ends at 10200): 2 + 4 + 18 = 24 stack-ticks, 4 times the 6 of one stack (the inner_total entry). Reading (a) per tick, the server as is: 24 x 118.8 = 2851.2, band 5% (2708 to 2994). Reading (b) total over $d: 24 x 18 x 1.1 = 475.2. Spell crit removed (984954). Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
       "spell": 800206,
       "name": "Carve (consumes 2 Felfury)",
       "kind": "metric_delta",
