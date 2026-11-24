@@ -4638,13 +4638,10 @@
       },
       {
         "claim": "now dashes an additional 20 yds.",
-        "labels": [
-          "806109 behaviour_metric_delta dash_range",
-          "806109 behaviour_metric_delta dash_range_torpedo"
-        ]
+        "labels": []
       }
     ],
-    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is read by dash_range (Chaos Rush 500423) and dash_range_torpedo (Fel Torpedo 500610) with 806128 applied by harness set_aura as a named precondition."
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is read by dash_range (Chaos Rush 500423) and dash_range_torpedo (Fel Torpedo 500610) with 806128 applied by harness set_aura as a named precondition. HELD 'now dashes an additional 20 yds.' (review fw-rfa1 I1, G-21.6): dash_range and dash_range_torpedo put 806128 by set_aura, and 806128 (SPELLMOD_RADIUS +20) is the claimed effect; the real route is Chaos Rush after a real 806109 expiry (dash_held already casts it)."
   },
   {
     "spell": 806111,
