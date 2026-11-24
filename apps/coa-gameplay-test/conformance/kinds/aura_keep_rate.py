@@ -36,7 +36,6 @@ class AuraKeepRateSpec:
     parts: int = 1
     label_suffix: str = 'keep_rate'
     aura_stacks: int = 1
-    treatment_auras: tuple[tuple[int, int], ...] = ()
 
 
 def aura_keep_rate_spec(entry: dict) -> AuraKeepRateSpec:
@@ -47,10 +46,9 @@ def aura_keep_rate_spec(entry: dict) -> AuraKeepRateSpec:
                             tuple(int(spell) for spell in entry.get('learn', ())),
                             None if entry.get('off_hand_item') is None else int(entry['off_hand_item']),
                             int(entry.get('parts', 1)), entry.get('label_suffix', 'keep_rate'),
-                            int(entry.get('aura_stacks', 1)),
-                            tuple((int(spell), int(stacks)) for spell, stacks in entry.get('treatment_auras', ())))
-    if spec.aura_stacks < 1 or any(stacks < 1 for _, stacks in spec.treatment_auras):
-        raise ValueError(f'{spec.spell} {KIND} sets aura_stacks and treatment_auras stacks of at least 1')
+                            int(entry.get('aura_stacks', 1)))
+    if spec.aura_stacks < 1:
+        raise ValueError(f'{spec.spell} {KIND} sets aura_stacks of at least 1')
     if not 0 < spec.chance_pct < 100 or spec.trials < 1 or spec.control_trials < 1:
         raise ValueError(f'{spec.spell} {KIND} needs a keep chance below 100%, trials and control trials')
     if spec.control_spell == spec.consumer:
@@ -76,12 +74,7 @@ def sizing_sentence(spec: AuraKeepRateSpec) -> str:
 
 
 def fixture_sentence(spec: AuraKeepRateSpec) -> str:
-    sentence = (f' {spec.aura} is set at {spec.aura_stacks} stacks, the consumer\'s cost.'
-                if spec.aura_stacks != 1 else '')
-    if spec.treatment_auras:
-        held = ', '.join(f'{aura} at {stacks}' for aura, stacks in spec.treatment_auras)
-        sentence += f' Before every treatment cast the consumer\'s caster auras are set too (harness set_aura): {held}.'
-    return sentence
+    return f' {spec.aura} is set at {spec.aura_stacks} stacks, the consumer\'s cost.' if spec.aura_stacks != 1 else ''
 
 
 def label_prefix(spell: int, suffix: str) -> str:
@@ -94,8 +87,8 @@ def keep_label(prefix: str, arm: str, trial: int, read: str) -> str:
 
 def trial_steps(records: Records, spec: AuraKeepRateSpec, arm: str, trial: int) -> list[dict]:
     spell = spec.consumer if arm == TREATMENT else spec.control_spell
-    fixtures = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
-                for aura, stacks in (spec.treatment_auras if arm == TREATMENT else spec.control_auras)]
+    fixtures = [] if arm == TREATMENT else [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                                            for aura, stacks in spec.control_auras]
     prefix = label_prefix(spec.spell, spec.label_suffix)
     return (fixtures + [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura, 'stacks': spec.aura_stacks}]
              + hit_ratio_cast(records, spell)

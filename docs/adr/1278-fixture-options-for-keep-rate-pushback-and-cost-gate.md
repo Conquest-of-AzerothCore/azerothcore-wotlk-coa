@@ -9,8 +9,8 @@ Three Felsworn claims could not be expressed by their nearest kind, though each 
 
 - Infernal Doom 804219, "Ruin now has a $s1% chance not to consume Felfury": `aura_keep_rate` sets the consumed aura
   at one stack and sets nothing before a treatment cast. Ruin 501298 costs 2 Felfury 800058 (the resource cost table
-  of `AscensionCustomResourceData.h`) and needs At Least 2 Felfury 803468 (`CasterAuraSpell`), so every treatment cast
-  of the first design was refused `SPELL_FAILED_NO_POWER`.
+  of `AscensionCustomResourceData.h`), checked against the stacks of 800058 before the cast, so every treatment cast
+  of the first design, at one stack, was refused `SPELL_FAILED_NO_POWER`.
 - Unphased 803645, "reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active":
   `pushback_reduction` has no condition on the caster. The server sets the REDUCE_PUSHBACK amount only while Inner
   Demon 804216 is up (`AscensionFelsworn::RefreshUnphased`).
@@ -29,8 +29,9 @@ Three Felsworn claims could not be expressed by their nearest kind, though each 
 The third option, approved by the controller on 2026-11-24 within the mentor's delegation O-12:
 
 - `aura_keep_rate` `aura_stacks` (whole, at least 1, default 1): the stacks of `aura` set before every cast of both
-  arms. `treatment_auras` (`[[spell, stacks]]`, stacks at least 1): set on the caster before every treatment cast, the
-  mirror of `control_auras`. The judge still counts a cast as kept when the `aura` read is not 0.
+  arms. The judge still counts a cast as kept when the `aura` read is not 0. A `treatment_auras` fixture was approved
+  with it and left out: Ruin's `CasterAuraSpell` 803468 is already set by the kind's cast step (`required_aura_steps`),
+  and the pilot's 125 casts were all accepted with `aura_stacks` alone.
 - `pushback_reduction` `caster_auras` (`[[spell, stacks]]`, stacks at least 1): before every cast of every phase each
   aura is removed and set again on the caster (two `set_aura` steps), so every cast starts under a fresh application
   and the contrast stays the reducer's cast or learn. The model is unchanged.
@@ -45,8 +46,8 @@ The third option, approved by the controller on 2026-11-24 within the mentor's d
 - No harness change: `set_aura` and `relocate` are existing actions; `relocate` is relative and keeps the facing, so
   the shift must be sized from the dash and the charge range, and a wrong shift reads as a range or facing refusal
   in the judged cast failure, not as a pass.
-- Seeded tests: `kinds/test_aura_keep_rate.py` (stacks and treatment fixtures before every cast, defaults equal no
-  option, a talent that never keeps the stacked aura alerts, stacks under 1 refused),
+- Seeded tests: `kinds/test_aura_keep_rate.py` (the stacks set before every cast, the default equal to no option, a
+  talent that never keeps the stacked aura alerts, stacks under 1 refused),
   `kinds/test_pushback_reduction.py` (the condition set afresh before every cast of every phase, the model equal to the
   plain one, no condition by default, stacks under 1 refused), `test_cost_gate_relocate.py` (one relocate before each
   judged attempt only, the plain scenario plus relocates equals the option's, bounds refused).
