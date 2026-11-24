@@ -7,6 +7,7 @@
 #include "PetBattleDataStore.h"
 #include "Player.h"
 #include "Store/PetJournalStore.h"
+#include "Wild/WildPets.h"
 #include "WorldSession.h"
 #include <random>
 
@@ -81,6 +82,8 @@ namespace
                 { "fight", HandleFight, SEC_GAMEMASTER, Console::No },
                 { "send", HandleSend, SEC_GAMEMASTER, Console::No },
                 { "state", HandleState, SEC_GAMEMASTER, Console::No },
+                { "wild", HandleWild, SEC_GAMEMASTER, Console::No },
+                { "challenge", HandleChallenge, SEC_GAMEMASTER, Console::No },
             };
             static ChatCommandTable commands =
             {
@@ -296,6 +299,31 @@ namespace
                 return false;
             handler->SendSysMessage(std::string("Pet battle: ") + (sPetBattles->InBattle(player) ? "active" : "none") +
                 ", stand-ins " + std::to_string(sPetBattles->StandIns(player)));
+            return true;
+        }
+
+        static bool HandleWild(ChatHandler* handler)
+        {
+            Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
+            if (!player)
+                return false;
+            std::vector<std::string> const lines = sWildPets->Describe(player);
+            handler->SendSysMessage("Wild pets near you: " + std::to_string(lines.size()));
+            for (std::string const& line : lines)
+                handler->SendSysMessage(line);
+            return true;
+        }
+
+        static bool HandleChallenge(ChatHandler* handler)
+        {
+            Player* player = handler->GetSession() ? handler->GetSession()->GetPlayer() : nullptr;
+            if (!player)
+                return false;
+            if (!sWildPets->ChallengeNearest(player))
+            {
+                handler->SendErrorMessage("no wild pet within reach", false);
+                return false;
+            }
             return true;
         }
 

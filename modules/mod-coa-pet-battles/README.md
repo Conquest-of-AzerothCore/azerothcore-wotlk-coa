@@ -90,6 +90,31 @@ messages and the `pbj` journal messages.
 - **GM commands**: `.petbattle fight <species>[@level] ...` (up to three enemies, level 5 by default) starts a battle for
   the selected player or yourself; `.petbattle send <module|action|payload>` acts as that player's addon.
 
+## Wild pets (phase 4b)
+
+Small wild pets appear around players in the 61 zones of `coa_pet_zone`, by upstream's `pb_wild.lua` rules; the
+numbers are `CoAPetBattles.Wild.*` settings with upstream's values as defaults.
+
+- **Where**: every 5 seconds the real creatures (with a database spawn, alive, out of combat) within 60 yards of each
+  eligible player seed up to 3 wild pets of different species within 90 yards, one per species within 90 yards. A pet
+  appears at a random spot 5-50 yards from its creature on ground within 2.5 yards of its height (3 yards away after 8
+  misses), at pet size, friendly and passive, and wanders 3 yards. Critters (`critter = 1`) are adopted instead: the
+  real critter becomes the wild pet and gets its faction and flags back afterwards.
+- **Who**: every player except bots; scanning skips players who are dead, in combat, in a pet battle or outside the
+  normal phase. A player who found nothing is searched again after moving 25 yards or after 45 seconds.
+- **Retiring**: after 10 minutes, after a minute with nobody within 90 yards, when its creature is gone, or at shutdown.
+- **Challenge**: right-click within 12 yards; the pet's level follows the zone's mob-to-pet level range from the seeding
+  creature's level. Above pet level 2, two more pets of the zone's species join. A started battle consumes the pet (an
+  adopted critter despawns and respawns normally) and keeps that species away from the spot for 90 seconds.
+- **Minimap**: the addon receives `pbw|pets|<dx>,<dy>,<species>,<level>,<name>;...` once a second and `none` once
+  when the last pet nearby is gone.
+- **Differences from upstream, by decision**: critters are adopted (upstream's adoption code exists but no species uses
+  it); a shutdown releases adopted critters; upstream's GM size tools and its rescale workaround are not ported.
+- **Proof**: `tools/pet_data/trace_wild.py` runs upstream's `pb_wild.lua` in a scripted world and records 24 situations
+  (`tests/fixtures/wild.txt`); the unit tests replay each one spawn for spawn, roll for roll.
+- **GM commands**: `.petbattle wild` lists the wild pets near you; `.petbattle challenge` challenges the nearest one
+  within reach, the same path as the menu.
+
 ## Trying it: `.petbattle sim`
 
 GMs can run a whole battle between two pet species and read it in chat:
@@ -195,4 +220,11 @@ The battle sessions are recorded the same way; `--mysql-defaults` (read-only) re
 ```sh
 PYTHONPATH=/tmp/lupa-lib python3 -B modules/mod-coa-pet-battles/tools/pet_data/trace_battles.py \
   --upstream <azerothcore-linux-server checkout> --seed 20261124 --battles 24
+```
+
+The wild pet situations use the same test pool and `battle_world.txt`:
+
+```sh
+PYTHONPATH=/tmp/lupa-lib python3 -B modules/mod-coa-pet-battles/tools/pet_data/trace_wild.py \
+  --upstream <azerothcore-linux-server checkout> --seed 4242
 ```

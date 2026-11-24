@@ -20,6 +20,7 @@ namespace CoAPetBattles::Battle
         void Update(uint32_t diff);
         void Message(Player* player, std::string const& module, std::string const& action, std::string const& payload);
         bool Challenge(Player* player, std::string const& enemies);
+        bool StartWild(Player* player, std::vector<EnemySpec> enemies);
         void Logout(Player* player);
         void Shutdown();
         bool InBattle(Player* player) const;

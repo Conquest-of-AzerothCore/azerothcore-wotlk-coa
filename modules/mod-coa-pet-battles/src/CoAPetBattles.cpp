@@ -1,4 +1,5 @@
 #include "AccountScript.h"
+#include "AllCreatureScript.h"
 #include "Battle/PetBattles.h"
 #include "PetBattleDataStore.h"
 #include "Player.h"
@@ -6,6 +7,7 @@
 #include "Protocol/AddonChannel.h"
 #include "SharedDefines.h"
 #include "Store/PetJournalStore.h"
+#include "Wild/WildPets.h"
 #include "WorldScript.h"
 
 namespace
@@ -42,11 +44,13 @@ namespace
         {
             sAddonChannel->Update(diff);
             sPetBattles->Update(diff);
+            sWildPets->Update(diff);
             sPetJournals->Update();
         }
 
         void OnShutdown() override
         {
+            sWildPets->Shutdown();
             sPetBattles->Shutdown();
         }
     };
@@ -84,6 +88,22 @@ namespace
         }
     };
 
+    class PetBattlesWildCreatures : public AllCreatureScript
+    {
+    public:
+        PetBattlesWildCreatures() : AllCreatureScript("coa_pet_battles_wild_creatures") { }
+
+        bool CanCreatureGossipHello(Player* player, Creature* creature) override
+        {
+            return sWildPets->Hello(player, creature);
+        }
+
+        bool CanCreatureGossipSelect(Player* player, Creature* creature, uint32 /*sender*/, uint32 action) override
+        {
+            return sWildPets->Select(player, creature, action);
+        }
+    };
+
     class PetBattlesAccount : public AccountScript
     {
     public:
@@ -103,5 +123,6 @@ void AddSC_coa_pet_battles()
     new PetBattlesWorld();
     new PetBattlesPlayer();
     new PetBattlesAccount();
+    new PetBattlesWildCreatures();
     AddSC_coa_pet_battles_commands();
 }

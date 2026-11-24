@@ -320,6 +320,12 @@ namespace CoAPetBattles::Battle
         return battles && battles->Challenge(Character(player), enemies);
     }
 
+    bool PetBattles::StartWild(Player* player, std::vector<EnemySpec> enemies)
+    {
+        Battles* battles = player ? Current() : nullptr;
+        return battles && battles->Start(Character(player), std::move(enemies));
+    }
+
     void PetBattles::Logout(Player* player)
     {
         if (!player)
