@@ -25915,6 +25915,29 @@
       "min_judged": 2,
       "poll_ms": 15,
       "observe_source": "Tooltip 806104 (embedded in 300490 by @s:806104:0@): 'Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.' Expected from the tooltip and Spell.dbc: 806104 Effect[0] aura 108 ADD_PCT_MODIFIER, MiscValue 10 (SPELLMOD_CASTING_TIME), BasePoints -31 + 1 (DieSides 1) = -30, so $s1 = 30 and the cut Fel Fireball 801312 (CastingTimes.dbc 16, 1500 ms) takes 1050 ms; the 3 charges come from the tooltip (806104 ProcCharges 0; the server counts them in AscensionFelswornAbilities.cpp UseSelected, FelforgedCharges 3). The aura is earned for real (mentor D-67, no set_aura): Bane of Chaos 704368 (periodic damage every 3000 ms) is cast at the dummy every 3200 ms until 806104 is on the caster; 300490 rolls Chance() on its raw ProcChance 15 only while the caster holds 300490 (AscensionFelsworn.cpp:233), so 300490 is unlearned at the stop: no later tick grants 806104 again or resets its used-charge count (AscensionFelswornEvents.cpp:206-209). 806104 must still be on after the unlearn, with amount -30. Each Fel Fireball is cast with ignore_gcd and bracketed by game_time stamps and spell_cast_count polls; casts 1-3 must lie in 1005-1095 ms (30% cut, 10% of the figure), cast 4 in 1350-1650 ms (no cut), all inside 0.9 of the 8000 ms aura (DurationIndex 31). A control Fel Fireball without the talent or the aura opens every trial and must lie in the full band. Reference search 2026-11-24 (fw-fa4, fw-baf): coa-history spell 300490/806104 and ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 500610,
+      "name": "Fel Torpedo (threat: spell_threat multiplier and the flat threat effect)",
+      "kind": "threat_slope",
+      "variant": "threat_pct",
+      "label_suffix": "threat_pct",
+      "quote": "Generates a large amount of threat.",
+      "hit_spell": 500761,
+      "expected_slope": 3.25,
+      "observe_source": "The tooltip gives no figure. Server data: spell_threat row (500761, flatMod 0, pctMod 3.25, apPctMod 0) (data/sql/updates/pending_db_world/rev_20261026_20_coa_tank_ability_threat.sql:57, 1 + the DBC effect 63 value 225 / 100); Spell.dbc 500761 Effect[1] 63 SPELL_EFFECT_THREAT BasePoints 224 + 1 = 225, SpellLevel 34. Server path: ThreatManager::CalculateModifiedThreat multiplies the damage threat by pctMod (ThreatManager.cpp:709-710); Spell::EffectThreat adds the 225 through LocalLevelScaling::PoolThreatFor (SpellEffects.cpp:4787), factor 1 on the fixture dummy; with a spell_threat row Spell::HandleThreatSpells adds flatMod 0 and no SpellLevel initial threat (Spell.cpp:5740-5748). The judge subtracts the DBC flat 225 and divides by the health lost: slope 3.25. fw-ea5 read threat 1209.75 on 303 health lost (counted pair 20261123-211541 / -211612), which is 303 x 3.25 + 225; its slope 3.14 used a wrong initial threat of 34 and no multiplier. Reference search 2026-11-23 (fw-ea5): coa-history spell 500761 and 500610: 0 events in 186 logs under those ids; the bindmysoul snapshot has no value beyond the tooltip."
+    },
+    {
+      "spell": 500610,
+      "name": "Fel Torpedo (threat control: a hit without spell_threat row or threat effect)",
+      "kind": "threat_slope",
+      "variant": "threat_pct_control",
+      "label_suffix": "threat_pct_control",
+      "quote": "Generates a large amount of threat.",
+      "hit_spell": 803715,
+      "expected_slope": 1.0,
+      "flat": 11,
+      "observe_source": "Control of the Fel Torpedo threat entry on the same character and dummy: Carve's strike 803715 has no SPELL_EFFECT_THREAT, no spell_threat row and SpellLevel 11 (Spell.dbc), so Spell::HandleThreatSpells adds 11 initial threat (Spell.cpp:5747-5748) and its threat is its damage plus 11: (threat - 11) / damage = 1. It shows that the dummy's pool factor is 1 (the initial threat also passes PoolThreatFor, Spell.cpp:5777) and that the 3.25 slope is not a property of every hit. Reference search 2026-11-23 (fw-ea5): coa-history spell 500761 and 500610: 0 events in 186 logs under those ids; the bindmysoul snapshot has no value beyond the tooltip."
     }
   ],
   "player_observations": [],
