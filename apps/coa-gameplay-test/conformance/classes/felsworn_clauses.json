@@ -2481,17 +2481,14 @@
       },
       {
         "claim": "gains $706269s1% increased critical strike chance",
-        "labels": [
-          "706425 behaviour_hit_ratio crit_share"
-        ]
+        "labels": []
       },
       {
         "claim": "and damage.",
-        "labels": [
-          "706425 behaviour_hit_ratio damage_hit"
-        ]
+        "labels": []
       }
-    ]
+    ],
+    "reason": "HELD claims 'gains ... critical strike chance' and 'and damage.' (review fw-rvb3 I-1, mentor D-67): the crit_share / damage_hit entries put 706269 (the mechanic buff) by set_aura and never learn 706425; the real grant works (ten_felfury ok); needs the learned route or a documented failure plus an equivalence arm."
   },
   {
     "spell": 707416,
