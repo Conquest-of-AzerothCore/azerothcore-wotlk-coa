@@ -28,7 +28,7 @@ note), and the gate reported a change that no commit made.
 `data/sql/custom`, `data/coa-world` and `modules`. `data/sql/base` is listed from code reading
 (`bonus_data.base_world`): the generator reads it only when `data/coa-world/baseline.json` is absent.
 
-`test_gate_paths.py` runs `conformance.py generate --class 19 --spell 570233` under a Python audit hook, keeps the
+`test_cycle.py` runs `conformance.py generate --class 19 --spell 570233` under a Python audit hook, keeps the
 `open`, `os.listdir` and `os.scandir` targets inside the repository that Git tracks (an archive cannot carry
 untracked files), and fails on any read outside `DEFAULT_GATE_PATHS`. That generation reaches the same read roots as
 the full generations of classes 15, 19, 19 `--stack`, 23 and 27 (audited when this ADR was written) in about
