@@ -1944,9 +1944,12 @@
     "spell": 706420,
     "clause": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
     "labels": [
-      "706420 effect_value #4"
+      "706420 behaviour_hit_ratio periodic_crit_forced",
+      "706420 behaviour_hit_ratio periodic_crit_normal",
+      "706420 behaviour_hit_ratio periodic_crit_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour"
   },
   {
     "spell": 704370,
@@ -2992,7 +2995,11 @@
     "claims": [
       {
         "claim": "Direct critical strikes",
-        "labels": []
+        "labels": [
+          "800214 proc_rate 802678",
+          "800214 behaviour_hit_ratio periodic_crit_no_felstrike"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "now have a $h% chance",
@@ -3017,7 +3024,7 @@
         "evidence": "behaviour"
       }
     ],
-    "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura). D-76 data check (fw-vb4, 2026-11-24), claim 0 \"Direct critical strikes\": Spell.dbc 800214 ProcFlags 0, Effect[0] aura 42 PROC_TRIGGER_SPELL 800239, Effect[2] aura 42 PROC_TRIGGER_SPELL 802678; spell_proc (rev_20260909_05_felsworn_completion.sql:31) ProcFlags 1048575 (bits 0 to 19, including PROC_FLAG_DONE_PERIODIC 0x40000), SpellTypeMask 7, SpellPhaseMask 2, HitMask 63 then 9331 (rev_20260909_08), Chance 100 (rev_20261003_10). The proc flags do not exclude periodic damage: the exclusion is the script condition crit && !periodic (AscensionFelswornEvents.cpp:97-98), code and not data. The data check does not verify the claim, so status 3 does not apply; status 4 stays (D-35): a periodic critical strike needs aura 286 and class 14 has none, so the exclusion cannot be exercised in play.",
+    "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura). D-82 (fw-fix706420, 2026-11-24), claim 0 \"Direct critical strikes\": since Felsworn ADR 0019 Bane of Chaos 706420 ticks can crit and the exclusion is exercised in play. '800214 behaviour_hit_ratio periodic_crit_no_felstrike': Malice learned, every Bane tick critical (Fel Infusion 560533 fixture amount 100) against none (-100): 0 Felstrike 802678 events over 146 critical ticks in each run of the pair; '800214 proc_rate 802678' in the same pair: critical Fel Fireball 801312 hits trigger Felstrike at 0.6006 and 0.6016 (ProcChance 60). The D-35 status 4 and the D-76 data check no longer apply.",
     "tool_gap": {
       "reason": "Claim 'Direct critical strikes': the critical part is in the critical_trials control of both proc_rate verdicts, the direct (non-periodic, the !periodic term of AscensionFelswornEvents.cpp:97-98) part needs a control in which a periodic critical tick procs 0, and class 14 has no periodic crit: CalcPeriodicCritChance grants one only through aura 286 or Rogue Rupture (SpellAuraEffects.cpp:1180-1206), so the control would need foreign-class spells; no Rogue fixtures (controller t5, 2026-11-23). Not observable in play; sent to the mentor as a possible status-4 candidate.",
       "attempts": [
