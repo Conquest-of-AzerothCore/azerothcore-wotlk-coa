@@ -5256,6 +5256,774 @@
       "expire_ms": 10500,
       "void_on_cast_failure": true,
       "observe_source": "805126 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 31 (SPELLMOD_MAX_AURA_STACKS), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3 ($s1 = 3), EffectSpellClassMask[1] 2147483648 matching Abyssal Ward 804670 SpellFamilyFlags[1] 2147483648 (Spell.dbc); AscensionCultistAbilities.cpp:193 sets ward->SetStackAmount(5 + Amount(805126)) = 8 on cast. Reads aura_stacks of 804670 after real cast: 5 without 805126 (control) and 8 after real learn of 805126. Reference search 2026-11-24: coa-history spell 805126: 0 events in 186 logs (passive; positive control 804670 Abyssal Ward: 53 casts in 19 logs); coabuildhub spells_master_index.json entry 805126 matches installed Spell.dbc ('Your Abyssal Ward now stacks 3 additional times.')."
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (control: lethal hit kills without Embrace the Void)",
+      "kind": "metric_delta",
+      "variant": "survive_control",
+      "label_suffix": "survive_control",
+      "quote": "Become one with the void, preventing you from dying for $d,",
+      "trigger_spell": 804056,
+      "gate_spell": 804056,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "caster_health": [
+        100,
+        10000
+      ],
+      "cast_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 100,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 100,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "alive",
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Control arm without Embrace the Void 582591: lethal Void Zone 92559 (977 Physical at 100/10000 health) kills caster (alive 1 -> 0)."
+          }
+        ]
+      },
+      "observe_source": "582591 Embrace the Void Absorb handler (AscensionCultistAuras.cpp:261-275): covers damage up to max health leaving caster at 1 HP instead of dying. Control arm without 582591: caster at 100/10000 health (regeneration off) takes one Void Zone 92559 (1000 Physical, DmgClass 0, 977 after armor) and dies (health 100 -> 0, alive 1 -> 0). Neutral Crushing Dissonance 804056 closes the after phase (refused once dead). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc ('preventing you from dying for 6 seconds, or until you take damage equal to a maximum of 100% of your total health. When the effect ends you instantly regenerate health equal to 50% of the damage taken while active.')."
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Become one with the void, preventing you from dying for $d,",
+      "trigger_spell": 582591,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 582591,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5450,
+          5750
+        ],
+        "expired": [
+          6250,
+          6550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "582591 DurationIndex 32 = 6000 ms ($d = 6 sec, SpellDuration.dbc). Reads aura 582591 absent before cast (control = 0), present (1) at 5500 ms (game_time [5450, 5750] > 5400 ms = 0.9*6000), and gone (0) at 6500 ms (game_time [6250, 6550] < 6600 ms = 1.1*6000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc ('preventing you from dying for 6 seconds, or until you take damage equal to a maximum of 100% of your total health. When the effect ends you instantly regenerate health equal to 50% of the damage taken while active.')."
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (heals 50% of damage taken on expiry)",
+      "kind": "metric_delta",
+      "variant": "end_heal",
+      "label_suffix": "end_heal",
+      "quote": "When the effect ends you instantly regenerate health equal to $s1% of the damage taken while active.",
+      "trigger_spell": 582591,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 92559,
+          "caster": "striker",
+          "target": "caster"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.005,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "582591 Effect[0] BasePoints 49 + DieSides 1 = 50% ($s1 = 50, Spell.dbc); Remove handler (AscensionCultistAuras.cpp:173-178) casts 680769 (CultistCopies, cannot crit, ignores mods) for CalculatePct(recorded, 50). One Void Zone 92559 (1000 Physical, DmgClass 0, 977 after armor) hits in each phase: before (no 582591) ratio 680769 heal / 92559 damage = 0; after (582591 expires at 6000 ms, read at 6500 ms) ratio = floor(977*50/100)/977 = 488/977 = 0.4995 within 0.5 +- 0.005. Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc ('preventing you from dying for 6 seconds, or until you take damage equal to a maximum of 100% of your total health. When the effect ends you instantly regenerate health equal to 50% of the damage taken while active.').",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 704881,
+      "name": "Lost in the Void (Embrace the Void duration +4 sec contrast)",
+      "kind": "metric_delta",
+      "variant": "duration_contrast",
+      "label_suffix": "duration_contrast",
+      "quote": "Increases the duration of Embrace the Void by $/1000;s3 sec",
+      "trigger_spell": 582591,
+      "gate_spell": 704881,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 582591,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expire_ms": 15000,
+      "void_on_cast_failure": true,
+      "observe_source": "704881 Effect[2] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 1 (SPELLMOD_DURATION) BasePoints 3999 + 1 = +4000 ms ($/1000;s3 = 4 sec, Spell.dbc) on 582591 (6000 ms base -> 10000 ms). Reads aura 582591 at 9200 ms: 0 without 704881 (expired at 6000 ms) and 1 after real learn of 704881. Reference search 2026-11-24: coa-history spell 704881: 0 events in 186 logs (passive; positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 704881 matches installed Spell.dbc ('Increases the duration of Embrace the Void by 4 sec and it now heals you for an additional 50% of the damage taken while active and its cooldown is reduced by 60 sec.')."
+    },
+    {
+      "spell": 704881,
+      "name": "Lost in the Void (Embrace the Void ends at 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration_expiry",
+      "label_suffix": "duration_expiry",
+      "quote": "Increases the duration of Embrace the Void by $/1000;s3 sec",
+      "trigger_spell": 582591,
+      "gate_spell": 704881,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 582591,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10400,
+          10900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "704881 Effect[2] +4000 ms on Embrace the Void 582591 (6000 ms base -> 10000 ms stated). Reads aura 582591 absent before cast (0), present at 9200 ms (game_time [9100, 9600] > 9000 ms = 0.9*10000), and gone at 10800 ms (game_time [10400, 10900] < 11000 ms = 1.1*10000), excluding 10% off on both sides. Note: AscensionCultistAbilities.cpp:114-115 also adds Amount(704881, 2) in OnCalcMaxDuration alongside DBC SPELLMOD_DURATION; if double-dipped to 14000 ms, expired read at 10800 ms will alert. Reference search 2026-11-24: coa-history spell 704881: 0 events in 186 logs (passive; positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 704881 matches installed Spell.dbc ('Increases the duration of Embrace the Void by 4 sec and it now heals you for an additional 50% of the damage taken while active and its cooldown is reduced by 60 sec.')."
+    },
+    {
+      "spell": 704881,
+      "name": "Lost in the Void (Embrace the Void +50% heal: 50% to 100%)",
+      "kind": "metric_delta",
+      "variant": "heal_bonus",
+      "label_suffix": "heal_bonus",
+      "quote": "and it now heals you for an additional $s1% of the damage taken while active",
+      "trigger_spell": 582591,
+      "gate_spell": 704881,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 92559,
+          "caster": "striker",
+          "target": "caster"
+        }
+      },
+      "phase_since": true,
+      "before_expected": 0.5,
+      "expected": 1.0,
+      "tolerance": 0.005,
+      "wait_ms": 15000,
+      "expire_ms": 15000,
+      "void_on_cast_failure": true,
+      "observe_source": "704881 Effect[0] BasePoints 49 + 1 = +50% ($s1 = 50, Spell.dbc); AscensionCultistAuras.cpp:176 sums Amount(582591) + Amount(704881) = 50 + 50 = 100%. Ratio 680769 heal / 92559 damage (phase_since): 0.50 (488/977) before learn and 1.00 (977/977) after real learn of 704881, tol +-0.005. Reference search 2026-11-24: coa-history spell 704881: 0 events in 186 logs (passive; positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 704881 matches installed Spell.dbc ('Increases the duration of Embrace the Void by 4 sec and it now heals you for an additional 50% of the damage taken while active and its cooldown is reduced by 60 sec.')."
+    },
+    {
+      "spell": 704881,
+      "name": "Lost in the Void (Embrace the Void cooldown -60 sec)",
+      "kind": "cost_gate",
+      "quote": "and its cooldown is reduced by $/1000;s2 sec.",
+      "gated_spell": 582591,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "cast_power": 2000,
+      "margin_ms": 500,
+      "observe_source": "704881 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 (SPELLMOD_COOLDOWN) BasePoints -60001 + 1 = -60000 ms ($/1000;s2 = 60 sec, Spell.dbc) on 582591 (RecoveryTime 300000 ms -> 240000 ms). Arms timed from priming cast: 240500 ms without 704881 (refused, 67), 240500 ms with 704881 (allowed, 0), 239500 ms with 704881 (refused, 67), excluding 10% off 60s cut and 240s CD. Reference search 2026-11-24: coa-history spell 704881: 0 events in 186 logs (passive; positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 704881 matches installed Spell.dbc ('Increases the duration of Embrace the Void by 4 sec and it now heals you for an additional 50% of the damage taken while active and its cooldown is reduced by 60 sec.')."
+    },
+    {
+      "spell": 525060,
+      "name": "Crystalline Reflection (Void Shield reflects 50% of damage absorbed)",
+      "kind": "metric_delta",
+      "variant": "reflect_absorbed",
+      "label_suffix": "reflect_absorbed",
+      "quote": "and it now also reflects $s1% of the damage absorbed.",
+      "trigger_spell": 578115,
+      "gate_spell": 525060,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      },
+      "metric": "spell_damage_with_resist_total",
+      "fields": {
+        "spell": 525062,
+        "caster": "caster",
+        "target": "striker"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_absorb_total",
+        "fields": {
+          "spell": 92559,
+          "caster": "striker",
+          "target": "caster"
+        }
+      },
+      "phase_since": true,
+      "before_expected": 0,
+      "expected": 0.5,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "525060 Effect[0] BasePoints 49 + 1 = 50% ($s1 = 50, Spell.dbc); AfterAbsorb (AscensionCultistAuras.cpp:285-287) copies CalculatePct(amount, 50) via 525062 (CultistCopies, Shadow, cannot crit, ignores mods & armor) onto the attacker when Void Shield 578115 absorbs damage. At player_spell_power 2000, Void Shield 578115 absorbs ~4800 >> Void Zone 92559 (977 Physical, DmgClass 0, 100% absorbed). Ratio 525062 spell_damage_with_resist_total / 92559 spell_absorb_total (phase_since): 0 without 525060, 488/977 = 0.4995 after real learn of 525060 (within 0.5 +- 0.005). Reference search 2026-11-24: coa-history spell 525060: 0 events in 186 logs (passive; positive control 525062 Crystalline Reflection Proc: 60,149 SPELL_DAMAGE events in 10 logs); coabuildhub spells_master_index.json entry 525060 says 'reflects 50% of the damage absorbed' matching installed Spell.dbc. Precondition fixture beeg spellpen 823764 removes the level-60 striker's 12% Shadow resistance. Striker uses reaction 0 (passive) so it does not auto-attack after taking reflected 525062 damage.",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (deflects magic spells from front, 20 strikes)",
+      "kind": "metric_delta",
+      "variant": "deflect_magic",
+      "label_suffix": "deflect_magic",
+      "quote": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+      "trigger_spell": 525065,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "strike": {
+        "spell": 16067,
+        "health": 20000,
+        "max_health": 20000,
+        "count": 20,
+        "wait_ms": 150,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 16067,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 20,
+      "expected": 20,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "525065 Effect[0] aura 287 SPELL_AURA_DEFLECT_SPELLS BasePoints 99 + 1 = 100% (Spell.dbc; Unit.cpp:4096 irand(1, 10000) < 10000 leaves 1e-4 leak per strike). 20 strikes of Arcane Blast 16067 (120 Arcane, DmgClass 1 magic, striker spell_hit_bonus 100): before (no 525065) 20 land; after (under 525065) gain is 0 within 1. Sizing: false alert P(>=2 of 20 land) = 1.9e-6/run (3.8e-6/pair << 0.1%); false pass against 50% deflect = 21/2^20 = 2.0e-5/run (4e-10/pair). Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (lasts 5 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+      "trigger_spell": 525065,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 525065,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4600,
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4800
+        ],
+        "expired": [
+          5200,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "525065 DurationIndex 28 = 5000 ms ($d = 5 sec, SpellDuration.dbc). Reads aura 525065 absent before cast (0), present at 4600 ms (game_time [4550, 4800] > 4500 ms = 0.9*5000), and gone at 5400 ms (game_time [5200, 5450] < 5500 ms = 1.1*5000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (treatment: prevents death under lethal hit)",
+      "kind": "metric_delta",
+      "variant": "survive_treatment",
+      "label_suffix": "survive_treatment",
+      "quote": "Become one with the void, preventing you from dying for $d,",
+      "trigger_spell": 582591,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "caster_health": [
+        100,
+        10000
+      ],
+      "cast_power": 2000,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 100,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "alive",
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Treatment arm with Embrace the Void 582591: same lethal 92559 strike leaves caster alive (1 -> 1) at 1 health."
+          }
+        ]
+      },
+      "observe_source": "582591 Embrace the Void Absorb handler (AscensionCultistAuras.cpp:261-275): sets absorb amount = covered - health + 1 when covered >= health so caster survives at 1 HP. Before phase (cast_in_before false, no strike) reads 100/10000 health, alive 1; after phase casts 582591 (setup_only_after, after_setup_stacks confirms 1 stack), then takes lethal Void Zone 92559 (977 Physical at 100/10000 health) and survives at 1 HP (alive 1 vs control 0). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc.",
+      "after_trigger_strike": {
+        "spell": 92559,
+        "delay_ms": 500,
+        "count": 1,
+        "wait_ms": 300
+      }
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (holds below 100% of 1500 max health)",
+      "kind": "metric_delta",
+      "variant": "cap_1500_holds",
+      "label_suffix": "cap_1500_holds",
+      "quote": "or until you take damage equal to a maximum of 100% of your total health.",
+      "trigger_spell": 804056,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "caster_health": [
+        1500,
+        1500
+      ],
+      "setup_casts": [
+        582591
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "after_setup_stacks": [
+        {
+          "spell": 582591,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "cast_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 1500,
+        "max_health": 1500,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 582591,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [1500, 1500] set before setup_casts 582591 (stat arm 1), 1x Void Zone 92559 (977 < 1500) keeps aura 582591 present (0 before -> 1 after). Paired with cap_1500_breaks, cap_2500_holds, cap_2500_breaks. Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (ends above 100% of 1500 max health)",
+      "kind": "metric_delta",
+      "variant": "cap_1500_breaks",
+      "label_suffix": "cap_1500_breaks",
+      "quote": "or until you take damage equal to a maximum of 100% of your total health.",
+      "trigger_spell": 804056,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "caster_health": [
+        1500,
+        1500
+      ],
+      "setup_casts": [
+        582591
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 500,
+      "after_setup_stacks": [
+        {
+          "spell": 582591,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "cast_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 1500,
+        "max_health": 1500,
+        "count": 2,
+        "wait_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 582591,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [1500, 1500] set before setup_casts 582591 in both phases (after_setup_stacks confirms 1 stack), before phase takes 0 strikes (aura 1); after phase takes 2x Void Zone 92559 (1954 > 1500), exhausting the 100% max-health cap and ending 582591 immediately (aura 0). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (holds below 100% of 2500 max health)",
+      "kind": "metric_delta",
+      "variant": "cap_2500_holds",
+      "label_suffix": "cap_2500_holds",
+      "quote": "or until you take damage equal to a maximum of 100% of your total health.",
+      "trigger_spell": 804056,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "caster_health": [
+        2500,
+        2500
+      ],
+      "setup_casts": [
+        582591
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "after_setup_stacks": [
+        {
+          "spell": 582591,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "cast_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 2500,
+        "max_health": 2500,
+        "count": 2,
+        "wait_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 582591,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [2500, 2500] (stat arm 2), the same 2x Void Zone 92559 (1954 < 2500) that broke max_health 1500 now holds (aura 0 before -> 1 after), proving the cap scales with total health. Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+    },
+    {
+      "spell": 582591,
+      "name": "Embrace the Void (ends above 100% of 2500 max health)",
+      "kind": "metric_delta",
+      "variant": "cap_2500_breaks",
+      "label_suffix": "cap_2500_breaks",
+      "quote": "or until you take damage equal to a maximum of 100% of your total health.",
+      "trigger_spell": 804056,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "caster_health": [
+        2500,
+        2500
+      ],
+      "setup_casts": [
+        582591
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 500,
+      "after_setup_stacks": [
+        {
+          "spell": 582591,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "cast_power": 2000,
+      "strike": {
+        "spell": 92559,
+        "health": 2500,
+        "max_health": 2500,
+        "count": 3,
+        "wait_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 582591,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [2500, 2500] (stat arm 2), 3x Void Zone 92559 (2931 > 2500) exhausts the 100% max-health cap and ends 582591 immediately (aura 1 -> 0). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (unable to cast spells)",
+      "kind": "metric_delta",
+      "variant": "no_cast",
+      "label_suffix": "no_cast",
+      "quote": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+      "trigger_spell": 502220,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        525065
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "cast_power": 2000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502220
+      },
+      "before_expected": 0,
+      "expected": 104,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "525065 Effect[2] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE (Spell.dbc). Attempts Darkwither 502220 at dummy: succeeds (0) without 525065 and is refused with SPELL_FAILED_SILENCED (104, SharedDefines.h:1154) while 525065 is active (setup_only_after). Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (unable to attack: no melee swings under the aura)",
+      "kind": "metric_delta",
+      "variant": "no_attack",
+      "label_suffix": "no_attack",
+      "quote": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+      "trigger_spell": 525065,
+      "gate_spell": 525065,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 1,
+      "cast_power": 2000,
+      "metric": "melee_attack_count",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "525065 Effect[2] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE (Spell.dbc). Auto-attacks dummy for 2 swing intervals before (control, >=1 swing) and after casting 525065 (gate_cast: true): gain is 0 swings under 525065. Paired with no_attack_applied confirming 525065 is held during the no-swing phase. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (aura held during no-attack phase)",
+      "kind": "metric_delta",
+      "variant": "no_attack_applied",
+      "label_suffix": "no_attack_applied",
+      "quote": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+      "trigger_spell": 525065,
+      "gate_spell": 525065,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 1,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 525065
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Witness for no_attack: confirms aura 525065 is absent in control (0) and present (1) during the pacified attack phase (1 swing interval = 3600 ms < 5000 ms duration of 525065). Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (deflects melee abilities)",
+      "kind": "metric_delta",
+      "variant": "deflect_melee_ability",
+      "label_suffix": "deflect_melee_ability",
+      "quote": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+      "trigger_spell": 525065,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 23583,
+        "health": 20000,
+        "max_health": 20000,
+        "count": 10,
+        "wait_ms": 200,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 23583,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 5,
+      "expected": 5,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "525065 tooltip states 'deflecting all spells and abilities for $d'. 10 triggered strikes of Night Slaughter 23583 (DmgClass 2 melee ability, Physical, 67 damage) in before (control, >=5 land) and under 525065 (expected gain 0 within 1 if abilities are deflected). Because 525065 only carries aura 287 SPELL_AURA_DEFLECT_SPELLS, which Unit::MeleeSpellHitResult (Unit.cpp:3810) checks only for RANGED_ATTACK, melee abilities are expected to land and alert honestly. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (silences deflected caster for 3 sec)",
+      "kind": "metric_delta",
+      "variant": "silence_on_deflect",
+      "label_suffix": "silence_on_deflect",
+      "quote": "Casters whose magic is deflected are silenced for $525066d.",
+      "trigger_spell": 525065,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "select_dummy": true,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "dummy_casts_at_caster": {
+        "spell": 2653,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 525066,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1750,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3150,
+          3450
+        ],
+        "expired": [
+          3650,
+          3950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:67, 199) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) at the deflected attacker. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t=500 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected cast applies 525066 present at t=3250 ms (~2750 ms after cast > 2700 ms = 0.9*3000) and gone at t=3750 ms (~3250 ms after cast < 3300 ms = 1.1*3000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
     }
   ],
   "player_observations": [],

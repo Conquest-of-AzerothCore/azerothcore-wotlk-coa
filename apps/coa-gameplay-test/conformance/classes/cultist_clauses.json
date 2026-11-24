@@ -1492,23 +1492,40 @@
     "spell": 525060,
     "clause": "and it now also reflects $s1% of the damage absorbed.",
     "labels": [
-      "525060 effect_value e0 #1"
+      "525060 behaviour_metric_delta reflect_absorbed"
     ],
     "kind": "claim"
   },
   {
     "spell": 525065,
     "clause": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
-    "labels": [
-      "525065 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deflecting all spells and abilities",
+        "labels": []
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "525065 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "making you unable to attack or cast spells.",
+        "labels": [
+          "525065 behaviour_metric_delta no_cast",
+          "525065 behaviour_metric_delta no_attack",
+          "525065 behaviour_metric_delta no_attack_applied"
+        ]
+      }
+    ]
   },
   {
     "spell": 525065,
     "clause": "Casters whose magic is deflected are silenced for $525066d.",
     "labels": [
-      "525065 spell_duration 525066 #1"
+      "525065 behaviour_metric_delta silence_on_deflect"
     ],
     "kind": "claim"
   },
@@ -2002,23 +2019,39 @@
   {
     "spell": 582591,
     "clause": "Become one with the void, preventing you from dying for $d,",
-    "labels": [
-      "582591 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "preventing you from dying",
+        "labels": [
+          "582591 behaviour_metric_delta survive_control",
+          "582591 behaviour_metric_delta survive_treatment"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "582591 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 582591,
     "clause": "or until you take damage equal to a maximum of 100% of your total health.",
-    "labels": [],
+    "labels": [
+      "582591 behaviour_metric_delta cap_1500_holds",
+      "582591 behaviour_metric_delta cap_1500_breaks",
+      "582591 behaviour_metric_delta cap_2500_holds",
+      "582591 behaviour_metric_delta cap_2500_breaks"
+    ],
     "kind": "claim"
   },
   {
     "spell": 582591,
     "clause": "When the effect ends you instantly regenerate health equal to $s1% of the damage taken while active.",
     "labels": [
-      "582591 effect_value e0 #1",
-      "582591 aura_amount e0 #1"
+      "582591 behaviour_metric_delta end_heal"
     ],
     "kind": "claim"
   },
@@ -2661,7 +2694,7 @@
     "spell": 704881,
     "clause": "and it now heals you for an additional $s1% of the damage taken while active",
     "labels": [
-      "704881 effect_value e0 #1"
+      "704881 behaviour_metric_delta heal_bonus"
     ],
     "kind": "claim"
   },
@@ -2669,7 +2702,9 @@
     "spell": 704881,
     "clause": "and its cooldown is reduced by $/1000;s2 sec.",
     "labels": [
-      "704881 effect_value e1 #2"
+      "704881 cost_gate 582591 without",
+      "704881 cost_gate 582591 with",
+      "704881 cost_gate 582591 beyond"
     ],
     "kind": "claim"
   },
