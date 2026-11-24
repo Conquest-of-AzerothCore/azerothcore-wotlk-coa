@@ -230,7 +230,7 @@ class AllyArmScenarioTests(unittest.TestCase):
 
     def test_a_malformed_option_or_an_arm_without_its_stated_expectation_is_refused(self):
         readback = next(metric for metric, kind in metric_evidence().items() if kind == READBACK)
-        options = [True, {}, {'allies': 0}, {'allies': 8}, {'control_wait': False}, {'ally_health': [0, 10]},
+        options = [True, {}, {'allies': 0}, {'allies': 10}, {'control_wait': False}, {'ally_health': [0, 10]},
                    {'ally_health': [11, 10]}, {'ally_casts': ['x']}, {'surplus': 1}]
         options += [{'arms': [{key: value for key, value in HEALTH_ARM.items() if key != missing}]}
                     for missing in ('actors', 'metric', 'before_expected', 'expected', 'tolerance', 'source')]
@@ -289,6 +289,38 @@ class AllyArmScenarioTests(unittest.TestCase):
         self.assertEqual([player['id'] for player in scenario['players']], ['caster', *allies])
         self.assertEqual([step['target'] for step in scenario['steps'] if step['action'] == 'group'], allies)
         self.assertEqual(expectation.model['ally_arm']['allies'], allies)
+
+    def test_seven_allies_keep_scenario_schema_one(self):
+        scenario, _ = self.scenario(steed_entry(ally_arm={'allies': 7}))
+        self.assertEqual(scenario['schema'], 1)
+        self.assertNotIn('schema 2', scenario['contract'])
+
+    def test_nine_allies_are_grouped_players_on_scenario_schema_two(self):
+        aura = {'actors': ['caster', 'ally', 'ally9'], 'metric': 'aura', 'fields': {'spell': SPELL},
+                'before_expected': 0, 'expected': 0, 'tolerance': 0, 'source': 'a seeded raid aura',
+                'reach_source': REACH}
+        scenario, [expectation] = self.scenario(steed_entry(ally_arm={'allies': 9, 'arms': [aura]}))
+        run.validate(scenario)
+        allies = ['ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7', 'ally8', 'ally9']
+        self.assertEqual(scenario['schema'], 2)
+        self.assertEqual([player['id'] for player in scenario['players']], ['caster', *allies])
+        self.assertEqual([step['target'] for step in scenario['steps'] if step['action'] == 'group'], allies)
+        self.assertEqual(expectation.model['ally_arm']['allies'], allies)
+        self.assertIn('With 10 players the scenario takes schema 2', scenario['contract'])
+        reads = [step['actor'] for step in scenario['steps']
+                 if step.get('label') in expectation.model['ally_arm']['arms'][0]['after']]
+        self.assertEqual(reads, ['caster', 'ally', 'ally9'])
+
+    def test_mutant_nine_allies_left_on_scenario_schema_one_is_refused_at_validation(self):
+        scenario, _ = self.scenario(steed_entry(ally_arm={'allies': 9}))
+        with self.assertRaisesRegex(Exception, 'Expected 1..8 players'):
+            run.validate({**scenario, 'schema': 1})
+
+    def test_allies_eight_and_nine_stand_in_raid_subgroup_two(self):
+        for unit in ('ally8', 'ally9'):
+            arm = {**HEALTH_ARM, 'actors': [unit]}
+            with self.subTest(unit=unit), self.assertRaisesRegex(ValueError, 'raid subgroup 2, outside'):
+                self.scenario(steed_entry(ally_arm={'allies': 9, 'arms': [arm]}))
 
     def test_a_read_in_raid_subgroup_two_without_its_reach_source_is_refused(self):
         heal = {'actors': ['caster'], 'metric': 'spell_heal_total', 'fields': {'spell': SPELL, 'target': 'ally5'},

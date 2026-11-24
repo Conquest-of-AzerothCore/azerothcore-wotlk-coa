@@ -5,7 +5,9 @@ NAME = 'ally_arm'
 ORDER = 24
 METRIC_EVIDENCE = {'combat_reach': 'state', 'active_power': 'state'}
 PRECONDITION_ONLY_METRICS = frozenset(METRIC_EVIDENCE)
-ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7')
+ALLY_IDS = ('ally', 'ally2', 'ally3', 'ally4', 'ally5', 'ally6', 'ally7', 'ally8', 'ally9')
+SCHEMA_ONE_PLAYERS = 8
+RAID_SCHEMA = 2
 RAID_SUBGROUP_TWO = ALLY_IDS[4:]
 ALLY_CAST_SETTLE_MS = 2000
 ALLY_CAST_PROOF_METRIC = 'spell_go_count'
@@ -519,6 +521,8 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
         players.append({**player_fixture(class_file), 'id': unit,
                         **({'class': ally.ally_class} if ally.ally_class is not None else {}),
                         **({'allow_regeneration': False} if spec.disable_regeneration else {})})
+    if len(players) > SCHEMA_ONE_PLAYERS:
+        scenario['schema'] = RAID_SCHEMA
     steps = scenario['steps']
     settled = len(base_steps(class_file))
     steps[settled:settled] = [{'action': 'group', 'actor': CASTER, 'target': unit} for unit in ally.ally_ids] + \
@@ -533,6 +537,9 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
     contract = (f' {ally.allies} grouped ally player(s) {list(ally.ally_ids)} stand with the caster'
                 + (', regeneration off' if spec.disable_regeneration else '')
                 + (f', of CoA class {ally.ally_class}' if ally.ally_class is not None else '') + '.')
+    if scenario['schema'] == RAID_SCHEMA:
+        contract += (f' With {len(players)} players the scenario takes schema {RAID_SCHEMA} (more than '
+                     f'{SCHEMA_ONE_PLAYERS} players, run.py MAX_PLAYERS).')
     if ally.ally_casts:
         contract += (f' Each phase first casts {list(ally.ally_casts)} at {ALLY_IDS[0]} (learned, its flat power '
                      f'cost, required caster aura and reagents set first), waiting {ALLY_CAST_SETTLE_MS} ms after '
