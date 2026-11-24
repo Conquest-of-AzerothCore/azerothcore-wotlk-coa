@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "CoA item stream: reserve the largest item row before lower rows",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 and the leveling legendary catalog.",
+    "The client indexes Item.dbc by ID and reallocates the index when its maximum increases.",
+    "Login must reserve the largest authored patch row (9706360) before later item queries.",
+    "A query before the world-entry notice must already have its item metadata and native response.",
+    "Login remains bounded, and normal single queries return both metadata and the native item response once.",
+    "Socketless packet construction does not establish live client timing or rendering."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    }
+  ],
+  "steps": [
+    {
+      "action": "add_item",
+      "actor": "viewer",
+      "item": 9700001
+    },
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 86,
+      "fields": [
+        {
+          "u32": 9700029
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 9700029,
+      "equals": 9700029
+    },
+    {
+      "action": "assert",
+      "label": "The request reaches its native item-query handler",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 9700029,
+      "equals": 9700029
+    },
+    {
+      "action": "assert",
+      "label": "Reserve the full item index before lower item rows",
+      "actor": "viewer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "equals": 9706360,
+      "within_ms": 10000,
+      "row": 9706360
+    },
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 1377
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "max": 8
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "save_as": "before_repeat"
+    },
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 86,
+      "fields": [
+        {
+          "u32": 9700029
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "relative_to": "before_repeat",
+      "equals": 0
+    }
+  ]
+}

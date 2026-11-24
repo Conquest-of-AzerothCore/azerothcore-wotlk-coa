@@ -1,0 +1,36 @@
+{
+  "schema": 1,
+  "name": "Guardian formations page the client to their own action bar again",
+  "contract": [
+    "Assault, Line and Tower Formation are shapeshift forms 37, 35 and 36, and the client's SpellShapeshiftForm.dbc gives",
+    "them BonusActionBar 1, 2 and 3 - the same paging rows 17 to 19 give the warrior stances - so entering a formation",
+    "pages the main bar and its hotkeys to that formation's own bar. An earlier change wrote 0 for all three into the",
+    "coa_client_shapeshift_form override table, which left the client on the main bar and is what 'Guardian",
+    "stances/formations no longer change to their respective bar' and 'Changing Guardian formation no longer switches to",
+    "that formation's configured skill bar' describe. The login patch stream sends each row of that table as",
+    "SMSG_PATCH_SPELL_SHAPESHIFT_FORM (0x0949): form id, bonus action bar, then the remaining 16 numeric fields and the",
+    "name. Expected: the client receives a row for each formation and its bonus action bar is the formation's own 2, 3",
+    "and 1. Socketless packet construction does not establish how the client pages its bar."
+  ],
+  "timeout_ms": 30000,
+  "players": [
+    {"id": "guardian", "race": 1, "class": 18, "level": 20}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let the login patch stream finish", "ms": 6000},
+    {"action": "assert", "label": "Line Formation's row reaches the client", "actor": "guardian",
+     "metric": "server_packets", "opcode": 2377, "row": 35, "equals": 1},
+    {"action": "assert", "label": "Line Formation pages to bonus action bar 2", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 35, "index": 1, "equals": 2},
+    {"action": "assert", "label": "Tower Formation's row reaches the client", "actor": "guardian",
+     "metric": "server_packets", "opcode": 2377, "row": 36, "equals": 1},
+    {"action": "assert", "label": "Tower Formation pages to bonus action bar 3", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 36, "index": 1, "equals": 3},
+    {"action": "assert", "label": "Assault Formation's row reaches the client", "actor": "guardian",
+     "metric": "server_packets", "opcode": 2377, "row": 37, "equals": 1},
+    {"action": "assert", "label": "Assault Formation pages to bonus action bar 1", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 37, "index": 1, "equals": 1},
+    {"action": "assert", "label": "Assault Formation keeps its stance flags", "actor": "guardian",
+     "metric": "server_packet_u32", "opcode": 2377, "row": 37, "index": 2, "equals": 13}
+  ]
+}

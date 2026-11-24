@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "A second character login on one connection gets no spell visual or sound rows again",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1. The display patch stream is sent at every character login, and the client",
+    "keeps its spell visual and sound rows until it exits. The Extensions DLL restarts the game sound for every",
+    "SMSG_PATCH_SOUND_ENTRIES (0x098B) row and for every SMSG_PATCH_SPELL_VISUAL_KIT (0x092D) row that overwrites",
+    "one it holds, so resending the kits at a second character login froze the client for about 1.2 s per row.",
+    "Those rows are the same for every character, so one connection gets them once: after a relog on the same",
+    "session the stream (SMSG_PATCH_LOADING_SCREENS 0x05F8) is sent again, but kit 99025 and sound entry 10045 are not."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "client",
+      "race": 1,
+      "class": 1,
+      "level": 32
+    }
+  ],
+  "steps": [
+    { "action": "client_packet", "actor": "client", "opcode": 1377, "label": "The client's first world-entry notice" },
+    { "action": "assert", "label": "SETUP: the first login receives the stream", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "SETUP: the first login receives the spell visual kit row", "actor": "client", "metric": "server_packets", "opcode": 2349, "row": 99025, "equals": 1 },
+    { "action": "assert", "label": "SETUP: the first login receives the sound entry row", "actor": "client", "metric": "server_packets", "opcode": 2443, "row": 10045, "equals": 1 },
+    { "action": "relog", "actor": "client" },
+    { "action": "client_packet", "actor": "client", "opcode": 1377, "label": "The world-entry notice after the second login" },
+    { "action": "assert", "label": "The second login on the connection streams again", "actor": "client", "metric": "server_packets", "opcode": 1528, "equals": 2, "within_ms": 5000 },
+    { "action": "assert", "label": "DISCRIMINATING: the spell visual kit row is not sent again", "actor": "client", "metric": "server_packets", "opcode": 2349, "row": 99025, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the sound entry row is not sent again", "actor": "client", "metric": "server_packets", "opcode": 2443, "row": 10045, "equals": 1 }
+  ]
+}
