@@ -3844,7 +3844,7 @@
       "802076 behaviour_metric_delta consumed"
     ],
     "kind": "claim",
-    "reason": "Not counted: the consumed entry alerts in both runs of the fw-bsw pair (.agents/plans/fw-bsw/prove1): with 802076 learned the count reads 6 at the cast and 0 after 3 landed auto attacks, while the control arm without the talent reads 5 then 2 (one count per landed attack). Hypothesis from code reading only, cause unproven: the contract sets Annihilation 803904 ProcCharges to 0 (AscensionFelswornContracts.cpp:52-62), Aura::CalcMaxCharges then applies the talent's SPELLMOD_CHARGES (SpellAuras.cpp:926-936), so the aura holds 1 native charges and the native charge drop removes it after 1 proc. Queued by the controller as a server-fix task (cause first). Expiry edge untested; missed or avoided swings untested (the rule counts landed swings only)."
+    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802076 learned the count reads 6 at the cast and 5 after 1 landed auto attack, 6 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802076,
@@ -3888,7 +3888,7 @@
       "802110 behaviour_metric_delta consumed"
     ],
     "kind": "claim",
-    "reason": "Not counted: the consumed entry alerts in both runs of the fw-bsw pair (.agents/plans/fw-bsw/prove1): with 802110 learned the count reads 7 at the cast and 0 after 3 landed auto attacks, while the control arm without the talent reads 5 then 2 (one count per landed attack). Hypothesis from code reading only, cause unproven: the contract sets Annihilation 803904 ProcCharges to 0 (AscensionFelswornContracts.cpp:52-62), Aura::CalcMaxCharges then applies the talent's SPELLMOD_CHARGES (SpellAuras.cpp:926-936), so the aura holds 2 native charges and the native charge drop removes it after 2 procs. Queued by the controller as a server-fix task (cause first). Expiry edge untested; missed or avoided swings untested (the rule counts landed swings only)."
+    "reason": "Counted on the fw-bswb pair (.agents/plans/fw-bswb/prove1, verify-all 20261124-074150 / -074228, server 5d047864a6, no flip), after the Annihilation charges fix (Felsworn ADR 0030: the apply hook clears the native charges): with 802110 learned the count reads 7 at the cast and 6 after 1 landed auto attack, 7 in all, and the control arm without the talent reads 5 then 4 (one count per landed attack), in both runs. The consumption part counts on mentor D-95 condition 1 (script_count swings, 1 interval: the dual-wield bound is 4 landed attacks, below 5). Expiry edge untested (reachable within the 12000 ms $d with both hands, but the window stops at 4 landed attacks at most); missed or avoided swings untested (the rule counts landed swings only). Reference search: see the entry's observe_source (coa-history 803904: cast and aura events only, no charge count; bindmysoul tooltip text only); expected values come from the tooltip and the server DBC set."
   },
   {
     "spell": 802110,
@@ -4065,7 +4065,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at the last count: seven attacks of the 2300 ms main hand do not fit in the 12000 ms duration). Missed or avoided swings untested (the rule counts landed swings only)."
+    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at its 5th landed attack is reachable within the 12000 ms duration with both hands, up to 12 landed attacks, but the 1-interval window stops at 4 at most). Counted on the fw-bswb pair (prove1, no flip): 5 at the cast, 4 after 1 landed attack. Missed or avoided swings untested (the rule counts landed swings only)."
   },
   {
     "spell": 803905,
@@ -4342,7 +4342,7 @@
       "805236 behaviour_metric_delta crit_suppressed"
     ],
     "kind": "claim",
-    "reason": "The value label 805236 effect_value 807426e0 #1 (not_measured in the pair of record) is replaced by the crit_swing_heal ratio: the caster's 560839 heal over its critical auto attack damage with Inner Demon 804216 held (condition fixture, phase auras) and 805236 learned for real (0.5 expected, 0 before the learn), and the contrast arm without Inner Demon (0)."
+    "reason": "The value label 805236 effect_value 807426e0 #1 (not_measured in the pair of record) is replaced by the crit_swing_heal ratio: the caster's 560839 heal over its critical auto attack damage with Inner Demon 804216 held (condition fixture, phase auras) and 805236 learned for real (0.5 expected, 0 before the learn), and the contrast arm without Inner Demon (0). The qualifier 'critical strikes' is contrasted by crit_swing_heal_non_crit: Inner Demon held, every swing kept non-critical by the 64481 fixture (aura 52, -1000% weapon crit), the 560839 heal over the non-critical swing damage reads 0 (heal 0 over a non-critical swing damage increase of 917 and 903 after the learn) in both runs of the fw-bswb pair (prove1, no flip), and crit_suppressed reads 0 critical swing damage under the same fixture, so a heal on every auto attack would read 0.5 and alert. 'auto attacks' (against special attacks) has no arm. Reference search: see the entries' observe_source (bindmysoul talents 805236 text; coa-history 807426 and 560839: 0 events in 186 logs)."
   },
   {
     "spell": 805236,
