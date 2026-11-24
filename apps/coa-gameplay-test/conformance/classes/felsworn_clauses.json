@@ -3377,9 +3377,7 @@
     "claims": [
       {
         "claim": "and it now affects all allies",
-        "labels": [
-          "800220 behaviour_metric_delta whipcrack_all"
-        ],
+        "labels": [],
         "evidence": "behaviour"
       },
       {
@@ -3390,7 +3388,8 @@
         "evidence": "behaviour"
       }
     ],
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": " whipcrack_all HELD (review fw-rbk3 I-1): with 800220 the +15 SPELLMOD_RADIUS also widens Effect[2] to 30 yd, so a script-less server reads 10 as the union of two cap-8 picks (about 0.39 per pair); needs a redesign (allies beyond the widened Effect[2] edge after the learn, or enough after-casts) before it counts."
   },
   {
     "spell": 800225,
@@ -3969,12 +3968,11 @@
     "spell": 803645,
     "clause": "Increases your spell penetration by ${-($m1+0)}, scaling with your level.",
     "labels": [
-      "803645 effect_value e0 #0",
       "803645 behaviour_metric_delta spell_pen",
       "803645 behaviour_metric_delta spell_pen_level40"
     ],
     "kind": "claim",
-    "reason": "The penetration is read by the shifted-control judge (ADR 1281, Felsworn D-108 (2026-11-24)) at caster levels 60 and 40: the resist chance with 803645 learned equals the unlearned chance at a resistance lowered by -(803645 Effect[0]) at that level (60, 40). spell_resist_chance is a readback, behaviour in the learned contrast with the penetration words (Felsworn D-110 (2026-11-24)): it proves the caster's penetration as the engine applies it to the resist chance (Unit::GetEffectiveResistChance), not observed resists. The effect_value label stays the data label."
+    "reason": "The penetration is read by the shifted-control judge (ADR 1281, Felsworn D-108 (2026-11-24)) at caster levels 60 and 40: the resist chance with 803645 learned equals the unlearned chance at a resistance lowered by -(803645 Effect[0]) at that level (60, 40). spell_resist_chance is a readback, behaviour in the learned contrast with the penetration words (Felsworn D-110 (2026-11-24)): it proves the caster's penetration as the engine applies it to the resist chance (Unit::GetEffectiveResistChance), not observed resists. The effect_value label stays the data label. Data label '803645 effect_value e0 #0' dropped (mentor D-112): its audit read is ambiguous_tooltip because the tooltip value has two readings at level 60: the client shows 60 ($m1 = -21 + (60-20) x (-1) + 1 = -60, shown negated; a base-only reading would show 20), and the server's CalcValue gives -60 on MOD_TARGET_RESISTANCE, i.e. 60 penetration (sign only differs). The shifted-control entries settle the value at level 60: the learned arm equals the control shifted by 60 in both runs (excludes 20 and 0); review fw-rbk3."
   },
   {
     "spell": 803645,
