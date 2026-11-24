@@ -25541,6 +25541,174 @@
       "label_suffix": "max_health_barrier",
       "variant": "max_health_barrier",
       "observe_source": "The server adds 10% of maximum health to effect 0 of the Hateforged Barrier chain (705129 ranks, here rank 6 707527 of spell_ranks) while 803478 is known (AscensionFelswornContracts.cpp:535-536), a value with no tooltip source, not judged. Sample (controller choice (c), mentor D-94): one strike of Ray of Pain 54416 (Effect[0] 2 school damage, EffectBasePoints 1999 = 2000 Shadow, no die, no per-level term) by a passive striker after each barrier; the absorbed amount of that strike (spell_absorb_total, an event read) is one sample when the barrier was up after the cast, gone after the strike and the strike logged once. Margin: the largest learned barrier is 707527 EffectBasePoints 751 + 32 + 2.45 x 60 (per level, an upper bound) + Stamina 79 (reference_stats) + 10% of the maximum health with 805256, (3440 level-60 BaseHP of class 14, rev_20261105_95, + 610 Stamina health) x 1.1 = 4455, so at most about 1455 < 2000 (margin at least 545); the remaining read voids any barrier the strike did not break. Exploratory run 2026-11-24 (fw-bptd, not counted): maximum health 2173 / 2390 without / with 805256, mean learned barrier 1088 at most, so the strike margin is about 900. Partial resists of the Shadow strike (50% or 75% of Ray of Pain 54416, about 1000 or 500) can leave a learned barrier (1048-1101 in the counted pair) standing: the remaining read voids those samples (3 or fewer per arm in the counted pair, 37-40 kept), so they are expected voids, not a fault; a control barrier (831-862) is below 1000 and still breaks. Sizing: the term is about 10% of the 217 maximum health gained (about 22) against a 1..32 die (sd about 9.2), so 40 casts per arm put the expected interaction z near 7.3 against the 3.2 quantile (the 15-cast exploratory run read 4.81). Full Heal 17683 (Effect 67, self) refills the caster before each cast; set_aura 0 only clears the previous barrier (D-94 condition 2). The sample proves the direction of the term only (a larger maximum health gives a larger barrier); that the barrier absorbs damage stays proven by the D-81 entry (taken_total_ratio 707527) (D-94 condition 3). Reference search 2026-11-24: coa-history 803478 0 events in 186 logs (passive), 707527 SPELL_CAST_SUCCESS 303 / SPELL_AURA_REFRESH 652 events in 7 logs, no amounts."
+    },
+    {
+      "spell": 707444,
+      "name": "Hellfire Carver (a full Carve channel: each further Fel Fireball target struck takes less damage, 9 targets)",
+      "kind": "metric_delta",
+      "variant": "target_order",
+      "label_suffix": "target_order",
+      "quote": "dealing less damage with each target struck.",
+      "trigger_spell": 801312,
+      "gate_spell": 707444,
+      "target": "dummy",
+      "cast_power": 100,
+      "setup_casts": [
+        800206
+      ],
+      "setup_wait_ms": 3000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy"
+      },
+      "area_dummies": [
+        3.2,
+        3.4,
+        3.6,
+        3.8,
+        4.0,
+        4.2,
+        4.4,
+        4.6
+      ],
+      "area_sum": true,
+      "before_expected": 1,
+      "expected": 10,
+      "tolerance": 0,
+      "expected_gain": 9,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "target_order": {
+        "spell": 801312,
+        "events": 1,
+        "centre": "dummy",
+        "casts": 4
+      },
+      "observe_source": "Hellfire Carver 707444 Description (server DBC set): 'Casting Carve now makes your next Fel Fireball instant cast and causes it to strike 1 additional enemy near the primary target based on how long you channeled, up to a maximum of 10 enemies, dealing less damage with each target struck.' The tooltip states a direction only (no figure). A real full Carve 800206 (setup cast, channel ended after 3000 ms) precedes one real Fel Fireball 801312 at the primary dummy (3 yd); eight more dummies stand at 3.2 to 4.6 yd from the caster, so 9 targets, all inside the cap (mentor D-100 (4): 9 targets judged strictly). The plain judge sums the hits (before, Hellfire Carver not learned: 1, the primary; after: 1 + 9). target_order (mentor D-101) repeats the treatment 4 times and reads per cast each target's 801312 damage without critical, resisted or blocked hits and every position: the targets are ranked by their measured distance from the primary (the order key; it is chosen because the server adds the extra targets nearest the primary first and scales by target rank, AscensionFelswornAbilities.cpp:228-238), and the mean damage per rank must fall strictly over the 9 ranks. A cast with two distances within 0.01 yd is void. Sizing: the rank is unmeasured only when the target took a critical hit in all 4 casts. The 0.2 floor of the server factor from the 9th target struck is an observation for owner question N-12, not judged here. Reference search 2026-11-24: coa-history spell 803715 (Carve end slash): 1086 SPELL_DAMAGE events by players in 5 logs (188 crits, 37 to 1630), no channel length or target rank in the log lines; spell 801312: 0 events (live Fel Fireball logs under 501286-501288 carry no Hellfire Carver marker); bindmysoul snapshot and earlier searches (fw-ea5) found nothing beyond the tooltips."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (end slash: each further target struck takes less damage, 9 targets)",
+      "kind": "metric_delta",
+      "variant": "target_order",
+      "label_suffix": "target_order",
+      "quote": "dealing less damage with each target struck.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803715,
+        "target": "dummy"
+      },
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5,
+        6.0,
+        6.5,
+        7.0
+      ],
+      "area_sum": true,
+      "before_expected": 0,
+      "expected": 18,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "target_order": {
+        "spell": 803715,
+        "events": 2,
+        "centre": "caster",
+        "casts": 8
+      },
+      "observe_source": "Carve 800206 Description (server DBC set): 'Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel, dealing less damage with each target struck.' Direction only (no figure). One real Carve at the dummy (3 yd) with eight more dummies at 3.5 to 7.0 yd in front of the caster; the channel runs out (3000 ms wait against DurationIndex 66, 2500 ms). The plain judge counts the end slash 803715 on the 9 targets, both weapons each (before: no cast, 0; after: 18). target_order (mentor D-101) repeats the full channel 8 times and reads per cast each target's 803715 damage without critical, resisted or blocked hits (both hands) and every position: targets are ranked by measured distance from the caster (the order key; chosen because the server strikes the enemies in front nearest first, AscensionFelswornAuras.cpp:228-246), and the mean per rank must fall strictly over the 9 ranks. The weapon roll makes one cast too noisy for adjacent ranks, hence the 8 casts and the mean. The 0.2 floor from the 9th target is an observation for owner question N-12. Felfury 800058 x6 and 803468 are precondition fixtures. Reference search 2026-11-24: coa-history spell 803715 (Carve end slash): 1086 SPELL_DAMAGE events by players in 5 logs (188 crits, 37 to 1630), no channel length or target rank in the log lines; spell 801312: 0 events (live Fel Fireball logs under 501286-501288 carry no Hellfire Carver marker); bindmysoul snapshot and earlier searches (fw-ea5) found nothing beyond the tooltips."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (end slash with both weapons, damage rising with the channel length)",
+      "kind": "metric_delta",
+      "variant": "channel_lengths",
+      "label_suffix": "channel_lengths",
+      "quote": "Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803715,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "channel_lengths": {
+        "spell": 803715,
+        "events": 2,
+        "cancel_ms": [
+          650,
+          1400
+        ],
+        "repeats": 5
+      },
+      "observe_source": "Carve 800206 Description (server DBC set): 'Upon ending the channel, slash in front of you, dealing increased Weapon Damage with both weapons based on how long you channel'. Direction only (no figure). The plain judge counts the end slash 803715 on the dummy after a full channel (DurationIndex 66, 2500 ms; 3000 ms wait): 2 events, one per weapon (before: no cast, 0). channel_lengths (mentor D-100 (3)) ends the channel by the native cancel (cancel_aura, CMSG_CANCEL_AURA, which interrupts the running channel) 650 ms and 1400 ms after the cast, between the 250 ms channel ticks, and keeps the full channel: three lengths, 5 casts each; each cast must land the slash twice, and the mean damage without critical, resisted or blocked hits must rise strictly with the length. Felfury 800058 x6 and 803468 are precondition fixtures. Reference search 2026-11-24: coa-history spell 803715 (Carve end slash): 1086 SPELL_DAMAGE events by players in 5 logs (188 crits, 37 to 1630), no channel length or target rank in the log lines; spell 801312: 0 events (live Fel Fireball logs under 501286-501288 carry no Hellfire Carver marker); bindmysoul snapshot and earlier searches (fw-ea5) found nothing beyond the tooltips."
     }
   ],
   "player_observations": [],
