@@ -138,7 +138,7 @@
     "spell": 300265,
     "clause": "Your Devour Magic now affects $s1 nearby allies.",
     "labels": [
-      "300265 effect_value e0 #0"
+      "300265 behaviour_metric_delta chain_targets"
     ],
     "kind": "claim"
   },
@@ -227,7 +227,8 @@
     "spell": 300284,
     "clause": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
     "labels": [
-      "300284 effect_value e0 #0"
+      "300284 behaviour_hit_ratio mending_sp",
+      "300284 behaviour_hit_ratio shock_sp"
     ],
     "kind": "claim"
   },
@@ -2441,7 +2442,7 @@
     "spell": 681326,
     "clause": "While Shadow of the Void is active, you now take $s1% reduced damage.",
     "labels": [
-      "681326 effect_value e0 #0"
+      "681326 behaviour_hit_ratio damage_taken"
     ],
     "kind": "claim"
   },
@@ -2603,13 +2604,17 @@
   {
     "spell": 704880,
     "clause": "Damage dealt by Eldritch Shock now increases the amount healed by your next Eldritch Shock by 100%.",
-    "labels": [],
+    "labels": [
+      "704880 behaviour_hit_ratio dmg_to_heal"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704880,
     "clause": "Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.",
-    "labels": [],
+    "labels": [
+      "704880 behaviour_metric_delta heal_to_dmg"
+    ],
     "kind": "claim"
   },
   {
@@ -3131,13 +3136,15 @@
       {
         "claim": "dispelling $m1 curse effects",
         "labels": [
-          "800402 effect_value e0 #0"
+          "800402 behaviour_dispel_count curse_dispel no_cast curse",
+          "800402 behaviour_dispel_count curse_dispel cast curse"
         ]
       },
       {
         "claim": "healing you for ${$m2+0+$SP*.65}",
         "labels": [
-          "800402 effect_value e1 #1"
+          "800402 behaviour_metric_delta heal_base",
+          "800402 behaviour_metric_delta heal_sp"
         ]
       }
     ]
@@ -3352,17 +3359,30 @@
     "spell": 802049,
     "clause": "Invoke the Old Gods for $d,",
     "labels": [
-      "802049 aura_duration_ms #0"
+      "802049 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 802049,
     "clause": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
-    "labels": [
-      "802049 effect_value #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "removing the cast time of your next $n Eldritch Mendings or Malevolences",
+        "labels": [
+          "802049 behaviour_metric_delta mending_3rd_instant",
+          "802049 behaviour_metric_delta mending_4th_held",
+          "802049 behaviour_metric_delta malevolence_instant"
+        ]
+      },
+      {
+        "claim": "and causing them to critically strike",
+        "labels": [
+          "802049 behaviour_crit_rate malevolence_crit"
+        ]
+      }
+    ]
   },
   {
     "spell": 803398,
@@ -3708,7 +3728,7 @@
     "spell": 805607,
     "clause": "Increases the healing done by Eldritch Mending by $s3%",
     "labels": [
-      "805607 effect_value e2 #0"
+      "805607 behaviour_hit_ratio mending_heal"
     ],
     "kind": "claim"
   },
@@ -3716,14 +3736,16 @@
     "spell": 805607,
     "clause": "and Gaze of C'Thun by $807701s1%.",
     "labels": [
-      "805607 effect_value 807701e0 #1"
+      "805607 behaviour_hit_ratio gaze_heal"
     ],
     "kind": "claim"
   },
   {
     "spell": 805607,
     "clause": "In addition, you are now unable to miss your attacks and you cannot be parried or dodged.",
-    "labels": [],
+    "labels": [
+      "805607 behaviour_metric_delta melee_landed"
+    ],
     "kind": "claim"
   },
   {
@@ -3833,7 +3855,10 @@
   {
     "spell": 806266,
     "clause": "Your Eldritch Eye now affects 1 additional cast.",
-    "labels": [],
+    "labels": [
+      "806266 behaviour_metric_delta 4th_instant",
+      "806266 behaviour_metric_delta 5th_held"
+    ],
     "kind": "claim"
   },
   {
@@ -3954,7 +3979,10 @@
   {
     "spell": 807879,
     "clause": "Your Eldritch Eye now affects 2 additional casts.",
-    "labels": [],
+    "labels": [
+      "807879 behaviour_metric_delta 5th_instant",
+      "807879 behaviour_metric_delta 6th_held"
+    ],
     "kind": "claim"
   }
 ]
