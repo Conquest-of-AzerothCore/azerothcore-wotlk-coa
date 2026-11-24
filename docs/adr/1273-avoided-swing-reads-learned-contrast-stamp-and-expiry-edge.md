@@ -63,10 +63,12 @@ last dodge with game time reads around each aura read (chosen).
 - For a 10 s aura every non-void `ok` places the duration strictly between 9 s and 11 s of the last dodge, so a
   duration 10% shorter (9 s, not held) or 10% longer (11 s, still held at the gone read) fails in every run; seeded
   tests simulate 200 runs per duration with the dodge 0 to 600 ms before the relocation and a 0 to 100 ms packet lag.
-- The 100 ms lag allowance rests on a measurement: the kind reads the ally's remaining duration right after the
-  stamp read, and the stamp read's game time less (D - remaining) is the server's last application of the aura. In
-  both runs of the counted pair on Betrayer 300476 (2026-11-24) the dodge stamp minus that application time was -3 ms,
-  far below one 100 ms server tick (where the 3 ms come from is not established). The allowance is one 100 ms tick (the tick the kind already allows for a window's read), above every
-  measured lag; the estimate is printed in each verdict's explanation so a later run that exceeds it is visible.
+- Lag basis: the kind reads the ally's remaining duration right after the stamp read; the stamp read's game time
+  less (D - remaining) is the server's last application of the aura. In both runs of the counted pair on Betrayer
+  300476 (2026-11-24) the dodge stamp was 3 ms after that application (+3 ms; where the 3 ms come from is not
+  established). The 100 ms allowance is not a measured figure: it is one server update tick, the step the kind
+  already allows for a window's read, chosen as a bound above the measured +3 ms. The estimate is printed in each
+  verdict's explanation so a later run that exceeds it is visible (review fw-rbab2 I-1; mentor D-102 asked for a
+  measured basis, so the choice is reported to the mentor).
 - Felsworn Betrayer 300476 `party_crit` opts in to `baseline_read`; `party_crit_duration` moves from `duration_max`
   to `expiry_edge` with the same label.
