@@ -2441,3 +2441,7 @@ Options with a module:
   treatment phase only, for a spell that casts from the action bar (ADR 1113, provisional)
 - [`step_out`](metric_delta_options/step_out.md): the caster stepped to one side of a range edge for a hold after the
   trigger, the layout read back, off its side unmeasured (ADR 1119, provisional)
+- [`target_order`](metric_delta_options/target_order.md): each target's plain damage and position read per cast,
+  the mean damage per distance rank judged strictly falling (ADR 1276)
+- [`channel_lengths`](metric_delta_options/channel_lengths.md): the channel ended by `cancel_aura` at set times and
+  its aura read at once (void if still up), the end damage judged rising without overlap across lengths (ADR 1276)

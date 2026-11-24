@@ -637,6 +637,20 @@ class EvidenceStatusTest(unittest.TestCase):
                                      [read])[0], [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Heals the target ally.', label)], [read])[0], [DATA])
 
+    def test_a_carried_aura_count_is_promised_by_a_steal(self):
+        label = '1 behaviour_metric_delta stolen_effects'
+        read = judged(label, BEHAVIOUR_METRIC_DELTA, 'carried_aura_count', contrast=LEARNED_CONTRAST)
+        stolen = 'Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.'
+        self.assertEqual(evidence_of([claim(stolen, label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Steal $s1 beneficial magic effect.', label)], [read])[0], [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('Enter stealth for 10 sec.', label)], [read])[0], [DATA])
+        unlearned = judged(label, BEHAVIOUR_METRIC_DELTA, 'carried_aura_count')
+        self.assertEqual(evidence_of([claim(stolen, label)], [unlearned])[0], [DATA])
+        with mock.patch.dict(STATE_PROMISES, {'carried_aura_count': r'empower\w*'}):
+            self.assertEqual(evidence_of([claim(stolen, label)], [read])[0], [DATA])
+        stealing = judged(label, BEHAVIOUR_METRIC_DELTA, 'item_count', contrast=LEARNED_CONTRAST)
+        self.assertEqual(evidence_of([claim(stolen, label)], [stealing])[0], [DATA])
+
     def test_a_cast_state_is_a_state_read_where_the_clause_promises_a_cast(self):
         label = '1 behaviour_metric_delta instant'
         read = judged(label, BEHAVIOUR_METRIC_DELTA, 'casting', contrast=LEARNED_CONTRAST)
