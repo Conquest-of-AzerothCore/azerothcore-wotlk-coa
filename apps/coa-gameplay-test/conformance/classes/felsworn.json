@@ -16776,6 +16776,35 @@
       "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact (800031, 803488, 803718, 804764, 803343, 803885). Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, area aura on the party (SPELL_EFFECT_APPLY_AREA_AURA_RAID, radius index 23). Behaviour read: a real Vengeful Pact cast by the caster; the Shadow resistance of the grouped ally (resistance, school 5, a live stat read) is read before the cast (no Pact, 0) and after it. The control entry (pact_resist) has no Pact Hunter; the treatment entry (pact_resist_hunter) has Pact Hunter learned in both phases: 65 + 50% = 97.5, read as the integer 97 (the engine's integer percent modifier, tolerance 0.5 judges to the rounding, G-19). Evidence class: a stat read whose promise words ('resistance') the claim does not carry, so the audit counts it as data (163.0 stays uncounted): a second design, the damage shield hit of Vengeful Pact's Effect[1] read after a real Damage 100 (TEST) 2653 cast by the dummy at the Pact holder (the caster, and a grouped ally), read no shield hit and no health loss on the dummy. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (3 x 1.5 = 4.5 truncated). Reference search 2026-11-23: coa-history spells 704612 and 803885: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. "
     },
     {
+      "spell": 704612,
+      "kind": "effectiveness_delta",
+      "quote": "Increases the effectiveness of your Pacts by $s1%.",
+      "name": "Pact Hunter (Vengeful Pact cast without and with the talent: ally Shadow resistance 65 -> 97)",
+      "variant": "pact_effectiveness",
+      "label_suffix": "pact_effectiveness",
+      "trigger_spell": 803885,
+      "gate_spell": 704612,
+      "learn": [
+        803885
+      ],
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "before_expected": 65,
+      "expected": 97,
+      "tolerance": 0.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact. Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, DurationIndex 21, StartRecoveryTime 1500 (server DBC). effectiveness_delta (ADR 1275 provisional): a real Vengeful Pact cast in both phases, Pact Hunter learned between them (passive treatment learned, D-67); the Shadow resistance of one party ally is read 1500 ms after each cast: 65 without the talent (control), floor(65 x 1.5) = 97 with it (mentor D-99: the integer truncation of 97.5 is the known engine rounding), tolerance 0.5; an unmodified Pact reads 65 and a doubled one 130. The second cast refreshes the area aura of the first (the effect amount is recalculated on refresh, Unit::_TryStackingOrRefreshingExistingAura, code reading only). Player reports: none."
+    },
+    {
       "spell": 300489,
       "name": "Archimonde's Wrath (Ruin critical strike share rises by 10 points at 100 Energy)",
       "kind": "hit_ratio",
