@@ -535,8 +535,8 @@
       ],
       "proc_spell": 520262,
       "events_per_proc": 1,
-      "proc_spell_source": "Casts of 520262 beyond the completed Azzinoth's Assault casts: EffectTriggerSpell[0] of 704610; each Assault itself casts 520262 once (EffectTriggerSpell[0] of 801904), the handler casts the additional one (AscensionFelswornEvents.cpp:176-177). Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs. Nothing found that states a rate per hit or per cast.",
-      "handler": "aura_ascension_felsworn_event: Check case 704610 (AscensionFelswornEvents.cpp:69-71) passes a damage event of 801904, 520262 or 572585 and rolls Chance(player, 704610); Proc (AscensionFelswornEvents.cpp:176-177) casts 520262 at the target. Baseline arm: the same casts before 704610 is learned must read no extra hit. Reference search 2026-11-23: see trigger_spells_source.",
+      "proc_spell_source": "Casts of 520262 beyond the completed Azzinoth's Assault casts: EffectTriggerSpell[0] of 704610; each Assault itself casts 520262 once (EffectTriggerSpell[0] of 801904), the handler casts the additional one (AscensionFelswornEvents.cpp:176-177). Owner ruling O-31 (2026-11-24): one 30% roll per Assault, not per hit. Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike, not the talent's extra hit; no evidence of the 30% proc in the logs.",
+      "handler": "aura_ascension_felsworn_event (Felsworn ADR 0024, owner ruling O-31): OnSpellBeforeEffects arms one roll for each cast of Azzinoth's Assault 801904 (AscensionFelswornAbilities.cpp, State(player).assaultRoll); Check case 704610 (AscensionFelswornEvents.cpp:69-71) takes it on the first landed damage event of 520262 or 572585 of that Assault and rolls Chance(player, 704610) once; Proc (AscensionFelswornEvents.cpp:176-177) casts 520262 at the target, and that extra hit does not roll (event guard, :40). Trial: one completed Assault cast (trial_casts). Baseline arm: the same casts before 704610 is learned must read no extra hit.",
       "dbc": {
         "704610": {
           "ProcChance": 30,
@@ -549,13 +549,7 @@
       "residual_target": 0.001,
       "min_detectable": 6,
       "events_exclude_trigger_casts": true,
-      "trigger_spells": [
-        801904,
-        520262,
-        572585
-      ],
-      "trigger_lands_no_hit": "AscensionFelswornEvents.cpp:69-71: case 704610: return info && (Named(info, 801904) || info->Id == 520262 || info->Id == 572585) && !periodic && Chance(player, id): the handler rolls once per landed non-periodic damage event of the strikes 520262 (main hand) and 572585 (off hand), never per cast of 801904. The extra 520262 hit it casts (:176-177) does not roll again: the Proc sets State(player).event (:126-127, reset at :278) and Check returns false while it is set (:40).",
-      "trigger_spells_source": "Azzinoth's Assault 801904 (Effect[0] and Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, EffectTriggerSpell 520262 main hand and 572585 off hand) has no damage of its own; the two strikes are the landed hits and each rolls the chance once; the additional 520262 hit does not roll (event guard, see trigger_lands_no_hit). A trial is one landed hit of 520262 or 572585 on the dummy, additional hits included, so the measured rate per landed hit is 0.3/1.3 = 0.231 for 0.3 per base strike. Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs."
+      "trial_casts": true
     }
   ],
   "triggers": [
@@ -12047,7 +12041,8 @@
       "quote": "Reduces your chance to be hit by spells by $s1%",
       "attacker_spell": 585,
       "expected": 2,
-      "observe_source": "706266 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -3 + EffectDieSides 1 = -2: 2 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 2 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'by -2%' (same magnitude); expected values come from the tooltip and the DBC only. Residual failure probability (fw-b3g3b, from the 826 casts per arm and the edge misses read in the pair proveF2, 4 to 11 per edge arm, mean 7.75, 0.94% of casts): P(no miss in one edge arm) = e^-7.8 = 4.1e-4, four edge arms per pair = 0.16% per pair, above the 0.1% limit: the claim is not counted in this pair; the cast count is fixed by the tool from an assumed 1% edge miss chance (kinds/attacker_miss_share.py spell_clamp_casts), about 1100 casts per edge arm would give under 0.1%."
+      "casts": 1100,
+      "observe_source": "706266 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -3 + EffectDieSides 1 = -2: 2 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 2 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: text 'by -2%' (same magnitude); expected values come from the tooltip and the DBC only. Residual failure probability: 1100 casts per arm (casts option, fw-bsc; the 826 default left 0.16% per pair with the 0.94% edge miss share read in the pair proveF2 of fw-b3g3b, 4 to 11 misses per edge arm, mean 7.75): P(no miss in one edge arm) = 0.9906^1100 = 3.1e-5, four edge arms per pair = 0.012% per pair (0.0063% at the 1% edge chance of the 99% hit clamp edge), under the 0.1% limit."
     },
     {
       "spell": 707844,
@@ -12058,7 +12053,8 @@
       "quote": "Reduces your chance to be hit by spells by $s1%",
       "attacker_spell": 585,
       "expected": 4,
-      "observe_source": "707844 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -5 + EffectDieSides 1 = -4: 4 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 4 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. Residual failure probability (fw-b3g3b, from the 826 casts per arm and the edge misses read in the pair proveF2, 4 to 11 per edge arm, mean 7.75, 0.94% of casts): P(no miss in one edge arm) = e^-7.8 = 4.1e-4, four edge arms per pair = 0.16% per pair, above the 0.1% limit: the claim is not counted in this pair; the cast count is fixed by the tool from an assumed 1% edge miss chance (kinds/attacker_miss_share.py spell_clamp_casts), about 1100 casts per edge arm would give under 0.1%."
+      "casts": 1100,
+      "observe_source": "707844 Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, EffectBasePoints -5 + EffectDieSides 1 = -4: 4 points ($s1), EffectMiscValue 126 (every magic school, Holy included). Path and arms as the Sun Shield 300348 entry (Unit::MagicSpellHitResult clamp [100, 10000]): four stationary hostile attackers cast Smite 585 at the caster at the 100% clamp and one point under it, without the passive (control) and with it learned; the expected 4 is the DBC amount, never a run. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. Residual failure probability: 1100 casts per arm (casts option, fw-bsc; the 826 default left 0.16% per pair with the 0.94% edge miss share read in the pair proveF2 of fw-b3g3b, 4 to 11 misses per edge arm, mean 7.75): P(no miss in one edge arm) = 0.9906^1100 = 3.1e-5, four edge arms per pair = 0.012% per pair (0.0063% at the 1% edge chance of the 99% hit clamp edge), under the 0.1% limit."
     },
     {
       "spell": 705125,
@@ -13482,6 +13478,243 @@
       "expected": 1,
       "tolerance": 0,
       "observe_source": "Diagnostic companion of extend on the same cast: the casts of the extension spell 803089 (Double Trigger, Effect[0] ASCENSION_MODIFY_AURA_DURATION +3000 ms) by the caster, read 500 ms after one real Assault at the dummy with Inner Demon active (fixture as extend): 0 before (no cast) and 1 after, one 3 s extension per cast of Assault. The first pair read a duration gain of 28009 ms for the extend entry (alert); this entry counts the extensions. Reference search 2026-11-23: coa-history spell 803475: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "name": "Azzinoth's Assault (Inner Demon extension at the reference attack power)",
+      "variant": "extend",
+      "label_suffix": "extend",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 9000,
+      "expected": 11900,
+      "expected_gain": 2900,
+      "tolerance": 250,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term (the 803089 coefficient row 0.4 x AP was removed from AscensionFelswornData.h). 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73) whatever the Felfury left by an earlier phase (fw-f2 diagnostic: 9991 then 9979 ms right after the fixtures). The before reading is the remaining duration right after the fixtures, before the cast (cast_in_before false: the cast is the contrast, as Crusader's Presence 562302 mounted_speed); the after reading is the remaining duration 100 ms after one real Assault at the dummy. Expected gain 3000 - the 100 ms wait = 2900, tolerance 250 (excludes a value 10% off 3000 and the step latency of about 12 ms per harness step, fw-f2 diagnostic: 9979 before, 12867 read 112 ms after the cast). Control arms: extend_absent (no Inner Demon, nothing extended) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "name": "Azzinoth's Assault (Inner Demon extension at +20000 attack power: no attack power term)",
+      "variant": "extend_ap",
+      "label_suffix": "extend_ap",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_duration_ms",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 9000,
+      "expected": 11900,
+      "expected_gain": 2900,
+      "tolerance": 250,
+      "wait_ms": 100,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term (the 803089 coefficient row 0.4 x AP was removed from AscensionFelswornData.h). 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73) whatever the Felfury left by an earlier phase (fw-f2 diagnostic: 9991 then 9979 ms right after the fixtures). The before reading is the remaining duration right after the fixtures, before the cast (cast_in_before false: the cast is the contrast, as Crusader's Presence 562302 mounted_speed); the after reading is the remaining duration 100 ms after one real Assault at the dummy. Expected gain 3000 - the 100 ms wait = 2900, tolerance 250 (excludes a value 10% off 3000 and the step latency of about 12 ms per harness step, fw-f2 diagnostic: 9979 before, 12867 read 112 ms after the cast). Control arms: extend_absent (no Inner Demon, nothing extended) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24. Contrast arm at +20000 attack power (player_attack_power): the removed row would give 3000 + int(0.4 x 20312) = 11124 ms, a gain near 11024.",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 1,
+      "tolerance": 0,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "name": "Azzinoth's Assault (Inner Demon present 12835 ms after one Assault: 10000 + 3000 ms)",
+      "variant": "extend_held",
+      "label_suffix": "extend_held",
+      "expected": 1,
+      "wait_ms": 12835,
+      "game_time": {
+        "after": [
+          12825,
+          12860
+        ]
+      },
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term. 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73; fw-f2 diagnostic and pair prove-4: 9994 ms read right after the fixtures), so it ends 13000 ms after the fixtures with one extension and 10000 ms without. The before reading is the presence right after the fixtures, before the cast (cast_in_before false: the cast is the contrast). The after reading, in game time after the cast: present at 12835 ms (window 12825 to 12860) and absent at 13145 ms (window 13135 to 13165), so the extension lies between about 2835 and 3165 ms against the stated 3000 ms, excluding a value 10% off and the 10000 ms end without extension. Companion arms on the same fixtures: extend and extend_ap (the remaining duration, gain 2885 against 2900), extend_absent (no Inner Demon) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 1,
+      "tolerance": 0,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "name": "Azzinoth's Assault (Inner Demon absent 13145 ms after one Assault: 10000 + 3000 ms)",
+      "variant": "extend_gone",
+      "label_suffix": "extend_gone",
+      "expected": 0,
+      "wait_ms": 13145,
+      "game_time": {
+        "after": [
+          13135,
+          13165
+        ]
+      },
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term. 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73; fw-f2 diagnostic and pair prove-4: 9994 ms read right after the fixtures), so it ends 13000 ms after the fixtures with one extension and 10000 ms without. The before reading is the presence right after the fixtures, before the cast (cast_in_before false: the cast is the contrast). The after reading, in game time after the cast: present at 12835 ms (window 12825 to 12860) and absent at 13145 ms (window 13135 to 13165), so the extension lies between about 2835 and 3165 ms against the stated 3000 ms, excluding a value 10% off and the 10000 ms end without extension. Companion arms on the same fixtures: extend and extend_ap (the remaining duration, gain 2885 against 2900), extend_absent (no Inner Demon) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24."
+    },
+    {
+      "spell": 803475,
+      "kind": "metric_delta",
+      "quote": "$?s804216[ Inner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
+      "trigger_spell": 803475,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 1,
+      "tolerance": 0,
+      "expire_ms": 14000,
+      "void_on_cast_failure": true,
+      "name": "Azzinoth's Assault (Inner Demon absent 13145 ms after one Assault at +20000 attack power)",
+      "variant": "extend_ap_gone",
+      "label_suffix": "extend_ap_gone",
+      "expected": 0,
+      "wait_ms": 13145,
+      "game_time": {
+        "after": [
+          13135,
+          13165
+        ]
+      },
+      "observe_source": "Felsworn ADR 0023 (owner ruling O-30): every Azzinoth's Assault under Inner Demon extends Inner Demon 804216 by $/1000;803089s1 = 3 sec flat (803089 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 2999 + 1 = 3000 ms), with no attack power term. 803475 casts 803089 on the caster for its hit while Inner Demon is active (AscensionFelswornAbilities.cpp:356-357). Fixtures in each phase, in this order: Felfury 800058 x2 (the Assault's cost), then Inner Demon 804216 by harness set_aura, then 803468: Inner Demon starts at 5000 ms x max(1, Felfury) = 10000 ms (AscensionFelswornAbilities.cpp:72-73; fw-f2 diagnostic and pair prove-4: 9994 ms read right after the fixtures), so it ends 13000 ms after the fixtures with one extension and 10000 ms without. The before reading is the presence right after the fixtures, before the cast (cast_in_before false: the cast is the contrast). The after reading, in game time after the cast: present at 12835 ms (window 12825 to 12860) and absent at 13145 ms (window 13135 to 13165), so the extension lies between about 2835 and 3165 ms against the stated 3000 ms, excluding a value 10% off and the 10000 ms end without extension. Companion arms on the same fixtures: extend and extend_ap (the remaining duration, gain 2885 against 2900), extend_absent (no Inner Demon) and extend_casts (one 803089 per Assault). Reference search 2026-11-23 (fix-250/note.md section 5): nothing decides the value beyond the tooltip and Spell.dbc; the owner ruled O-30 on 2026-11-24. At +20000 attack power (player_attack_power) the removed row would end Inner Demon near 21124 ms, present at this read.",
+      "player_attack_power": 20000
     },
     {
       "spell": 524947,
@@ -15305,7 +15538,7 @@
         "target": "dummy"
       },
       "before_expected": 0,
-      "expected": 2851.2,
+      "expected": 475.2,
       "tolerance": 0,
       "wait_ms": 9000,
       "expire_ms": 500,
@@ -15348,7 +15581,7 @@
           "caster"
         ]
       ],
-      "name": "Felwrath (Inner Demon: damage of three stacks, uncounted, N-7)",
+      "name": "Felwrath (Inner Demon: damage of three stacks)",
       "variant": "inner_total_three",
       "label_suffix": "inner_total_three",
       "setup_casts": [
@@ -15356,9 +15589,9 @@
         520693
       ],
       "setup_wait_ms": 2100,
-      "after_at_least": 2708,
-      "after_at_most": 2994,
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Damage of the stacks as applied damage (uncounted while owner question N-7 is open). Effect[0] ticks every 1000 ms for 8 + 2.0 x 50 = 108 per stack (the periodic amount is multiplied by the stacks, SpellAuraEffects.cpp:659), x 1.1 under 804216; Effect[1] is SPELL_EFFECT_DUMMY and deals nothing. A reapplied periodic damage aura keeps its tick timer (SpellAuraEffects.cpp:748-751) and restarts its 6000 ms. Applications at 0, 2100 and 4200 ms: ticks at 1000 and 2000 ms at 1 stack, 3000 and 4000 at 2, 5000 to 10000 at 3 (the aura ends at 10200): 2 + 4 + 18 = 24 stack-ticks, 4 times the 6 of one stack (the inner_total entry). Reading (a) per tick, the server as is: 24 x 118.8 = 2851.2, band 5% (2708 to 2994). Reading (b) total over $d: 24 x 18 x 1.1 = 475.2. Spell crit removed (984954). Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+      "after_at_least": 451,
+      "after_at_most": 499,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Damage of the stacks as applied damage. Felsworn ADR 0020, amendment O-34: the 108 (8 + 2.0 x 50) per stack is the total over 6000 ms, spread over the 6 ticks of Effect[0] (1000 ms): 18 per tick per stack (the periodic amount is multiplied by the stacks, SpellAuraEffects.cpp:659), x 1.1 under 804216; Effect[1] is SPELL_EFFECT_DUMMY and deals nothing. A reapplied periodic damage aura keeps its tick timer (SpellAuraEffects.cpp:748-751) and restarts its 6000 ms. Applications at 0, 2100 and 4200 ms: ticks at 1000 and 2000 ms at 1 stack, 3000 and 4000 at 2, 5000 to 10000 at 3 (the aura ends at 10200): 2 + 4 + 18 = 24 stack-ticks, 4 times the 6 of one stack (the inner_total entry). Expected 24 x 18 x 1.1 = 475.2, band 5% (451 to 499); the per-tick reading the owner ruled out (O-34) would give 24 x 118.8 = 2851.2. Spell crit removed (984954). Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
     },
     {
       "spell": 800206,
@@ -15756,7 +15989,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12 stun, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Stun 56 (Mechanic 12 stun, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -15773,7 +16006,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Fear 12096 (Mechanic 5 fear, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Fear 12096 (Mechanic 5 fear, aura 7). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -15790,7 +16023,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Net 47021 (Mechanic 7 root, aura 26). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 806109,
@@ -16262,7 +16495,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Sleep 9159 (Mechanic 10 sleep, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Sleep 9159 (Mechanic 10 sleep, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -16279,7 +16512,7 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Psychic Horror 64044 (EffectMechanic 24 horror, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Psychic Horror 64044 (EffectMechanic 24 horror, aura 12). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
@@ -16296,13 +16529,13 @@
           "words": "crowd control"
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Blind 2094 (Mechanic 2 disoriented, auras 33 and 5). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Blind 2094 (Mechanic 2 disoriented, auras 33 and 5). The control arm of the kind casts each fixture again after the aura expired and reads it landed, so an immune read is not a cast that never lands; immune casts add no diminishing return to that control. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 561216,
-      "name": "Fury of the Illidari (snare outside the clause lands)",
+      "name": "Fury of the Illidari (immune, snare)",
       "kind": "immunity",
-      "variant": "snare_lands",
+      "variant": "snare",
       "quote": "While active you are immune to crowd control effects.",
       "caster_auras": [
         804216
@@ -16310,11 +16543,64 @@
       "effects": [
         {
           "spell": 12323,
-          "words": "snare",
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Piercing Howl 12323 (Mechanic 11 snare, aura 33, DurationIndex 32 = 6000 ms). Before O-29 this entry was the landing control snare_lands (the snare landed under the aura in the pair .cache/verify-all/20261123-213410 / -213446); since the ruling the snare is refused. The control arm of the kind casts the fixture again after the aura expired and reads it landed. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (immune, daze)",
+      "kind": "immunity",
+      "variant": "daze",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 1604,
+          "words": "crowd control"
+        }
+      ],
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Dazed 1604 (Mechanic 27 daze, Effect[0] aura 33 with EffectMechanic 27, Effect[1] SPELL_EFFECT_DISPEL_MECHANIC MiscValue 21, RangeIndex 1, which Spell::CheckRange accepts at any distance, DurationIndex 35 = 4000 ms). The control arm of the kind casts the fixture again after the aura expired and reads it landed. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (silence outside the ruling lands)",
+      "kind": "immunity",
+      "variant": "silence_lands",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 15487,
+          "words": "silence",
           "lands": true
         }
       ],
-      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK without snare and daze (SharedDefines.h:1469), the list of the CoA spell with the same tooltip wording, Vial of Moonwell Water 804652 'Immune to crowd control effects.' (SpellInfo.cpp:2788-2790, ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Piercing Howl 12323 (Mechanic 11 snare, aura 33), outside the list: snare and daze are not in the same-wording source, so the snare must land while the aura is on. Whether 'crowd control' covers snare is an open owner question; this entry reads the list as built, not that answer. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Silence 15487 (Mechanic 9 silence, aura 27 SPELL_AURA_MOD_SILENCE, DurationIndex 28 = 5000 ms), outside the list: owner ruling O-29 leaves silence, disarm and interrupt out of 'crowd control', so the silence must land while the aura is on. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 561216,
+      "name": "Fury of the Illidari (disarm outside the ruling lands)",
+      "kind": "immunity",
+      "variant": "disarm_lands",
+      "quote": "While active you are immune to crowd control effects.",
+      "caster_auras": [
+        804216
+      ],
+      "effects": [
+        {
+          "spell": 676,
+          "words": "disarm",
+          "lands": true
+        }
+      ],
+      "dummy_distance": 3,
+      "observe_source": "561216 Effect[2] is aura 263 with MiscValue 0 in Spell.dbc and names no mechanic; the class contract turns it into SPELL_AURA_DUMMY and the class aura script gives the caster, while the aura is on, mechanic immunity to the whole IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK (SharedDefines.h:1469), snare and daze included and silence, disarm and interrupt left out (owner ruling O-29, amending ADR conformance/felsworn/0016). The aura lasts 3000 ms (DurationIndex 27 in the class contract), so one fixture per entry fits the window (3 casts x 500 ms). Fixture, landed by a real creature cast at the caster inside the window: Disarm 676 (Mechanic 3 disarm, aura 67 SPELL_AURA_MOD_DISARM, RangeIndex 2 melee, DurationIndex 32 = 6000 ms; the dummy stands 3 yd away as in the Sun Cleric Sunstorm 760379 disarm entry), outside the list: owner ruling O-29 leaves silence, disarm and interrupt out of 'crowd control', so the disarm must land while the aura is on. Interrupt is not an aura and has no fixture of this kind. Reference search 2026-11-23: coa-history spell 561216 and 'Fury of the Illidari': 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 520853,
@@ -18144,7 +18430,7 @@
     },
     {
       "spell": 804823,
-      "name": "Tyrannical Resolve (the closing Felfire Blast leeches more after more hits)",
+      "name": "Tyrannical Resolve (the closing Felfire Blast deals more after more hits)",
       "kind": "taken_hit",
       "variant": "end_leech",
       "label_suffix": "end_leech",
@@ -18164,33 +18450,30 @@
         },
         "blast": {
           "metric": "spell_damage_total",
-          "spell": 807347,
+          "spell": 804825,
           "caster": "caster",
           "target": "striker"
         },
         "blasts": {
           "metric": "spell_damage_count",
-          "spell": 807347,
+          "spell": 804825,
           "caster": "caster",
           "target": "striker"
         },
         "leech": {
           "metric": "spell_heal_total",
-          "spell": 807347,
+          "spell": 804825,
           "target": "caster"
         },
-        "named_blasts": {
+        "hatred": {
           "metric": "spell_damage_count",
-          "spell": 804825,
+          "spell": 807347,
           "caster": "caster",
           "target": "striker"
         }
       },
       "count_total": [
         "hits"
-      ],
-      "rising": [
-        "blast"
       ],
       "equal": [
         [
@@ -18200,7 +18483,55 @@
       ],
       "arms": [
         {
+          "name": "zero",
+          "auras": [
+            [
+              64481,
+              1
+            ],
+            [
+              984948,
+              1
+            ],
+            [
+              823764,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "strikes": 0,
+          "counts": {
+            "blasts": 1,
+            "hatred": 0
+          },
+          "bands": {
+            "blast": [
+              61,
+              62
+            ]
+          }
+        },
+        {
           "name": "one",
+          "auras": [
+            [
+              64481,
+              1
+            ],
+            [
+              984948,
+              1
+            ],
+            [
+              823764,
+              1
+            ]
+          ],
           "casts": [
             [
               804823,
@@ -18210,11 +18541,31 @@
           "strikes": 1,
           "counts": {
             "blasts": 1,
-            "named_blasts": 1
+            "hatred": 0
+          },
+          "bands": {
+            "blast": [
+              62,
+              63
+            ]
           }
         },
         {
           "name": "three",
+          "auras": [
+            [
+              64481,
+              1
+            ],
+            [
+              984948,
+              1
+            ],
+            [
+              823764,
+              1
+            ]
+          ],
           "casts": [
             [
               804823,
@@ -18224,11 +18575,51 @@
           "strikes": 3,
           "counts": {
             "blasts": 1,
-            "named_blasts": 1
+            "hatred": 0
+          },
+          "bands": {
+            "blast": [
+              64,
+              65
+            ]
+          }
+        },
+        {
+          "name": "five",
+          "auras": [
+            [
+              64481,
+              1
+            ],
+            [
+              984948,
+              1
+            ],
+            [
+              823764,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              804823,
+              "caster"
+            ]
+          ],
+          "strikes": 5,
+          "counts": {
+            "blasts": 1,
+            "hatred": 0
+          },
+          "bands": {
+            "blast": [
+              67,
+              68
+            ]
           }
         }
       ],
-      "observe_source": "804823 Tyrannical Resolve: on its removal while the caster lives (not by death) the server counts the strikes absorbed during the effect (script value 804823, one per absorbed damage event, AscensionFelswornAuras.cpp:333) and casts 807347 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier[0] 1.0, so the caster heals by the damage dealt) with an amount that grows with that count on every valid enemy within 10 yd in line of sight (AscensionFelswornAuras.cpp:263-269). Each trial: the caster is set to 20000 of 20000 health, casts 804823, a passive striker 3 yd away casts Light of the Naaru 41394 (1100) at it 1 or 3 times, then the trial waits 31000 ms past the 30000 ms duration (DurationIndex 9) for the natural end. Judged: exactly one 807347 hit on the striker per trial; its damage rises strictly from 1 to 3 hits (the tooltip states 'based on how many times you took damage', not a figure, so no per-hit value is judged); the caster's 807347 heal equals that damage (multiplier 1.0). The tooltip names the blast Felfire Blast: server DBC 804825 'Felfire Blast' (Effect[0] SPELL_EFFECT_HEALTH_LEECH, SchoolMask 36, RadiusIndex 13, Description 'Deals $s1 Felfire Damage to nearby enemies.') while 807347 is 'Burning Hatred' (SchoolMask 127); no server code casts 804825 and no DBC record links to it, so the named read expects exactly one 804825 hit on the striker per trial and alerts when the server unleashes only 807347. Reference search 2026-11-24: coa-history spell 804823, 804825, 807347, 'Felfire Blast', 'Burning Hatred': 0 events in 186 logs each; ~/CoaServer/reference snapshots (sidekick data.js, bindmysoul talents.normalized.json, coabuildhub spells_missing.json and spells_master_index.json) carry only the 804823 tooltip text, no record of 804825 or 807347; expected values come from the tooltip and the DBC only."
+      "observe_source": "804823 Tyrannical Resolve: on its removal while the caster lives (not by death) the server counts the strikes absorbed during the effect (script value 804823, one per absorbed damage event, aura_ascension_felsworn_resolve in AscensionFelswornAuras.cpp) and, since owner ruling O-32 (Felsworn ADR 0028), casts Felfire Blast 804825 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, RadiusIndex 13, MaxAffectedTargets 20, SchoolMask 36, DmgClass 2 melee) with its own points raised by 804823 Effect[0] (aura 108 SPELLMOD_DAMAGE, BasePoints 1 + DieSides 1 = 2%) per hit, capped at 804823 StackAmount 100. Its own points at the level-60 reference character: BasePoints 59 + RealPointsPerLevel 1.44 x (60 - SpellLevel 59) = 60, + DieSides 2 roll = 61 to 62; with the hits: 62 to 63 at one hit, 64 to 65 at three, 67 to 68 at five. Before O-32 the server cast Burning Hatred 807347 for 1% of maximum health per hit (measured 200 at one hit and 600 at three, L1 pair, night question N-6). Each trial: the caster is set to 20000 of 20000 health, casts 804823, a passive striker 3 yd away casts Light of the Naaru 41394 (1100) at it 1, 3 or 5 times, then the trial waits 31000 ms past the 30000 ms duration (DurationIndex 9) for the natural end. Fixtures on the caster in every arm: 64481 (Reduce Critical Strike Chance -100%, aura 52, EffectBasePoints -1000: 804825 is DmgClass melee, whose crit is the weapon crit, so a critical blast cannot double one arm's read) Reg's Hit rating 984948 (aura 54, no miss) and beeg spellpen 823764 (Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, MiscValue 126, BasePoints -9999: the striker's Fire and Shadow resistance cannot partially resist the blast; a first fw-f3 pair without it read 10% steps below the expected figures, 45 to 68). A zero arm takes no strike (M-3 of review fw-rf3): the blast still fires at the natural end with its own points, 61 to 62 (the tooltip's 'When this ends, you unleash a Felfire Blast' has no hit condition; ADR 0028). Judged per trial: exactly one 804825 hit on the striker and no 807347 hit; the 804825 damage inside the arm's band read from the data above (zero 61 to 62, one 62 to 63, three 64 to 65, five 67 to 68: 61 or 62 times 1 + 0.02 n, truncated); the caster's 804825 heal equals that damage (multiplier 1.0). The bands replace the strict rise of the first design (review fw-rf3 I-1: a rise alone also passed N-6 option A, 1% of maximum health per hit, 200 / 600 / 1000); bands one, three and five are disjoint and ordered, so the rise still holds. Reference search 2026-11-24: coa-history spell 804823, 804825, 807347, 'Felfire Blast', 'Burning Hatred': 0 events in 186 logs each; ~/CoaServer/reference snapshots carry only the 804823 tooltip text; expected values come from the tooltip, the DBC and the owner ruling."
     },
     {
       "spell": 560641,
@@ -22479,7 +22870,7 @@
       "after_at_least": 113,
       "after_at_most": 125,
       "wait_ms": 9000,
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. Total 108 x 1.1 = 118.8, band 5% (113 to 125)."
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); one periodic damage effect. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108, spread over its 6 ticks (Felsworn ADR 0020, amendment O-34: 18 per tick). Effect[1] is SPELL_EFFECT_DUMMY (3) and deals nothing. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. Total 108 x 1.1 = 118.8, band 5% (113 to 125)."
     },
     {
       "kind": "metric_delta",
@@ -22546,7 +22937,7 @@
         "amount": 10000,
         "hit_arm": true
       },
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. The tooltip's SP term is $SP*.1 inside the one total: (108 + 0.1 x 10000) x 1.1 = 1218.8, band 5% (1158 to 1280). Contrast arm of inner_total (+10000 spell power)."
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); one periodic damage effect. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108, spread over its 6 ticks (Felsworn ADR 0020, amendment O-34: 18 per tick). Effect[1] is SPELL_EFFECT_DUMMY (3) and deals nothing. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Inner Demon 804216 by harness set_aura as the clause's own condition, named: its Effect[1] aura 79 MOD_DAMAGE_PERCENT_DONE, MiscValue 127, BasePoints 9 + 1 = 10 ($s2 of 804216) multiplies the damage by 1.1, so the expected total is the tooltip total x 1.1. The tooltip's SP term is $SP*.1 inside the one total: (108 + 0.1 x 10000) x 1.1 = 1218.8, band 5% (1158 to 1280). Contrast arm of inner_total (+10000 spell power)."
     },
     {
       "kind": "metric_delta",
@@ -22603,7 +22994,7 @@
       "after_at_least": 0,
       "after_at_most": 0,
       "wait_ms": 9000,
-      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); two periodic damage effects. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108 per tick, 6 ticks. Effect[1] aura 3, EffectAmplitude 2000, 6 + 1.2 x 50 = 66 per tick, 3 ticks. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Data sum for the reader (not an expected value): 6 x 108 + 3 x 66 = 846 at spell power 0. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Control arm: the same cast without the Inner Demon aura 804216 on the caster, five enemies struck: the clause's own condition is absent, so no 520832 damage is expected (0); a 0 here with the aura present in inner_total shows the damage read is the clause's effect, not the cast's.",
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): DurationIndex 32 = 6000 ms ($520832d); one periodic damage effect. Effect[0] aura 3, EffectAmplitude 1000, BasePoints 7 + DieSides 1 = 8, RealPointsPerLevel 2.0 x (60 - BaseLevel 10) = 100: 108, spread over its 6 ticks (Felsworn ADR 0020, amendment O-34: 18 per tick). Effect[1] is SPELL_EFFECT_DUMMY (3) and deals nothing. The tooltip states ONE total for the whole duration: ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage over $520832d = 8 + 100 = 108 (+ 0.1 x spell power). The entry reads the summed applied damage of both effects (every event of spell 520832 on the dummy, 1 stack from one cast of five struck enemies) from the cast to 1000 ms after the last tick: 2000 ms cast + 6000 ms + margin = 9000 ms. Expected is the tooltip total, never a per-tick figure. Setup as the inner_five entry: 4 extra dummies at 4 to 7 yd (five enemies struck), spell crit and resist removed (984954, 823764). Reference search 2026-11-24: coa-history spell 520832: 11712 SPELL_PERIODIC_DAMAGE events in 10 logs (min 4, max 3295, mean 524), no crit; the loggers' spell power, level and stacks are unknown, so no figure decides; nothing else found beyond the tooltip and Spell.dbc. Control arm: the same cast without the Inner Demon aura 804216 on the caster, five enemies struck: the clause's own condition is absent, so no 520832 damage is expected (0); a 0 here with the aura present in inner_total shows the damage read is the clause's effect, not the cast's.",
       "tolerance": 0
     },
     {
@@ -22629,7 +23020,8 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "560578 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_DAMAGE), BasePoints 49 + DieSides 1 = 50 ($s1), EffectSpellClassMask[0..2] = 0/0/0x400000 of family 20 (the Fury Unleashed hit flag). The weapon hits 555739 (Effect[0] aura 23 trigger spell of 555738, EffectAmplitude 1000, 5000 ms) of a real Fury Unleashed 555738 cast are averaged non-critical in a control arm without 560578 and a treatment arm with it learned: ratio 1.50 within the band (5% of 50 = 2.5 points). Energy cost is the cost_gate claim of the same clause. Reference search 2026-11-24: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; 555738 Fury Unleashed: 2 casts); the hit 806095 has no logged event either; nothing else found beyond the tooltip and Spell.dbc."
+      "expected_source": "560578 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1, SpellDefines.h:79) in Spell.dbc, BasePoints 49 + DieSides 1 = 50 ($s1); owner ruling O-33 (Felsworn ADR 0027): the class contract turns it into aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 (SPELLMOD_DAMAGE), so the hit deals 50% more instead of 50 more weapon percent points (measured before: +26.13% and +26.15%, counted pair 20261123-232654 / -232744); EffectSpellClassMask[0..2] = 0/0/0x400000 of family 20 (the Fury Unleashed hit flag). The weapon hits 555739 (Effect[0] aura 23 trigger spell of 555738, EffectAmplitude 1000, 5000 ms) of a real Fury Unleashed 555738 cast are averaged non-critical in a control arm without 560578 and a treatment arm with it learned: ratio 1.50 within the band (5% of 50 = 2.5 points). Energy cost is the cost_gate claim of the same clause. Reference search 2026-11-24: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; 555738 Fury Unleashed: 2 casts); the hit 806095 has no logged event either; the off-hand hit 806097 has 46 events in the same 2 logs as 555739 (see 555738 hit_oh; the first search of this entry missed it, review fw-rf3 I-2); this entry reads only non-critical 555739 hits; nothing else found beyond the tooltip and Spell.dbc. Two parts pooled (fw-f3 pair, 2026-11-24): one part held 37 trials per arm, the judge asked for 68 (ratios 1.4895 and 1.5003, insufficient trials).",
+      "parts": 2
     },
     {
       "kind": "metric_delta",
@@ -23184,8 +23576,95 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "The tooltip states $806095s1% Weapon Damage = 200 (806095 Effect[0] BasePoints 199 + DieSides 1). The aura 555738 Effect[0] (aura 23, EffectAmplitude 1000) triggers 555739 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 149 + 1 = 150, Effect[1] SPELL_EFFECT_NORMALIZED_WEAPON_DMG), so the hit that lands is 555739; the expectation is the tooltip's 200% on the normalized weapon damage with the reference Slayer set (spell_weapon_sets lists no set for 555739, the default Slayer applies; item 2027, damage 17.25 to 28.75, normalized speed 2.4): 2 x 2.0 x (weapon roll + attack power / 14 x 2.4), the small flat of Effect[1] left out of the band's upper edge (+62). Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (the 2 x below). One real Fury Unleashed cast (self, instant), the periodic trigger fires its first tick at the apply (an exploratory read at 1500 ms held two ticks), so the read is taken 500 ms after the cast, one tick. Attack power 20312 (+20000, player_attack_power): 4 x (17.25 + 3482.29) to 4 x (28.75 + 3482.29) + 62 = 13997.2 to 14105.2; a 150% hit reads about 10.5 thousand and is excluded. Reference search 2026-11-24: coa-history spell 555739 (the Fury Unleashed hit): SPELL_DAMAGE events by players in the logs, gear and attack power unknown so no figure decides (the class map lists 48 events); spell 806095: 0 events; 555738: 2 casts; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 4 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (4).",
+      "observe_source": "The tooltip states $806095s1% Weapon Damage = 200 (806095 Effect[0] BasePoints 199 + DieSides 1). The aura 555738 Effect[0] (aura 23, EffectAmplitude 1000) triggers 555739 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE BasePoints 149 + 1 = 150 in Spell.dbc, Effect[1] SPELL_EFFECT_NORMALIZED_WEAPON_DMG), so the hit that lands is 555739; since owner ruling O-33 (Felsworn ADR 0027) the class contract gives 555739 Effect[0] the BasePoints of 806095 (199, so 200%), and the pair before it read 10580 and 10570 (150%, counted pair 20261123-232654 / -232744); the expectation is the tooltip's 200% on the normalized weapon damage with the reference Slayer set (spell_weapon_sets lists no set for 555739, the default Slayer applies; item 2027, damage 17.25 to 28.75, normalized speed 2.4): 2 x 2.0 x (weapon roll + attack power / 14 x 2.4), the small flat of Effect[1] left out of the band's upper edge (+62). Fixtures by harness set_aura, named preconditions in both phases: Reg's Armor Pen 985345 (Effect[0] aura 280, 100% armor penetration: the dummy's armor does not reduce the hit) and Reg's Hit rating 984948 (no miss); forced melee crit (force_crit melee, rating fixture) so the hit is a critical and read as such: the physical critical hit is twice the hit (the 2 x below). One real Fury Unleashed cast (self, instant), the periodic trigger fires its first tick at the apply (an exploratory read at 1500 ms held two ticks), so the read is taken 500 ms after the cast, one tick. Attack power 20312 (+20000, player_attack_power): 4 x (17.25 + 3482.29) to 4 x (28.75 + 3482.29) + 62 = 13997.2 to 14105.2; a 150% hit reads about 10.5 thousand and is excluded. Reference search 2026-11-24: coa-history spell 555739 (the Fury Unleashed hit): SPELL_DAMAGE events by players in the logs, gear and attack power unknown so no figure decides (the class map lists 48 events); spell 806095: 0 events; 555738: 2 casts; spell 806097 (the off-hand Fury Unleashed hit): 46 events in the same 2 logs, one after each 555739 hit of a tick (see the hit_oh entry; the first search of this entry missed it, review fw-rf3 I-2); nothing else found beyond the tooltip and Spell.dbc. The lower edge is 4 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (4).",
       "player_attack_power": 20000
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 555738,
+      "name": "Fury Unleashed (off-hand hit at +20000 attack power)",
+      "variant": "hit_oh",
+      "label_suffix": "hit_oh",
+      "quote": "dealing $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies.",
+      "trigger_spell": 555738,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806097,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 7009.0,
+      "after_at_least": 6994,
+      "after_at_most": 7024,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "'with both weapons': the server casts the off-hand hit 806097 (Effect[0] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, Effect[1] SPELL_EFFECT_NORMALIZED_WEAPON_DMG, AttributesEx3 SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, DmgClass melee, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY radius index 14, MaxAffectedTargets 8) after each 555739 tick when the caster holds a usable off-hand weapon (Felsworn ADR 0029, AscensionFelswornAbilities.cpp felsworn_casts::OnSpellCast); its Effect[0] takes the BasePoints of 806095 (199, so the tooltip's $806095s1% = 200), as 555739 does since owner ruling O-33 (ADR 0027). REQUIRES_OFF_HAND_WEAPON makes it an OFF_ATTACK spell (Spell.cpp:600), so its weapon damage is the off-hand weapon's: Player::CalculateMinMaxDamage of OFF_ATTACK with the off-hand TOTAL_PCT 0.5 (Unit.cpp:519), the flat of Effect[1] (BasePoints 0 + DieSides 1, no points per level) times 0.5 truncated to 0 (SpellEffects.cpp EffectWeaponDmg). Reference Slayer set (off-hand item 2027, 17.25 to 28.75, normalized speed 2.4), attack power +20000 as the hit_ap entry: 2 x 2.0 x 0.5 x (weapon roll + attack power / 14 x 2.4) = 2 x (17.25 + 3482.29) to 2 x (28.75 + 3482.29) = 6999.1 to 7022.1, the lower edge 5 points under for the truncations before the factors and the attack power read (the main-hand entry reads 3482.06 to 3482.29), the upper edge 2 over. Excluded: no off-hand hit (0), a 150% hit (about 5250), the main-hand weapon path without the off-hand factor (about 14000). Same fixtures, forced critical and single tick as the hit_ap entry (read 500 ms after the cast); the control is the hit_oh_none entry. Reference search 2026-11-24: coa-history spell 806097 (the off-hand Fury Unleashed hit): 46 SPELL_DAMAGE events by one player in 2 logs (2026-06-06 03:51 and 03:53), the same 2 logs as the 48 hits of 555739; each 555739 hit of a tick is followed 1 to 7 ms later by one 806097 hit on the same target (8 targets at 03:52:12.405-.416, one target every tick at 03:56:46-51); non-critical hits on the same target in the same tick read 174 (555739) and 124 to 127 (806097), gear unknown, so no figure decides the percent or the off-hand factor; spell 806095: 0 events; 555738: 2 casts.",
+      "player_attack_power": 20000
+    },
+    {
+      "kind": "metric_delta",
+      "spell": 555738,
+      "name": "Fury Unleashed (no off-hand hit with the off hand disarmed, control)",
+      "variant": "hit_oh_none",
+      "label_suffix": "hit_oh_none",
+      "quote": "dealing $806095s1% Weapon Damage every $t1 sec with both weapons to all nearby enemies.",
+      "trigger_spell": 555738,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          47974,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806097,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm of the hit_oh entry: the same cast, fixtures and read time, with Disarm Shield Test 47974 set on the caster (Effect[0] aura 254 SPELL_AURA_MOD_DISARM_OFFHAND, TARGET_UNIT_CASTER, DurationIndex 21, nothing else): the off-hand weapon stays equipped but Player::GetWeaponForAttack(OFF_ATTACK, true) returns none (Unit::CanUseAttackType, UNIT_FLAG2_DISARM_OFFHAND), so the server casts no 806097 and the count of 806097 hits on the dummy stays 0. The main-hand 555739 hit is unaffected by the off-hand disarm (it reads BASE_ATTACK); its landing is proved by the hit_ap entry. Reference search 2026-11-24: coa-history spell 806097 (the off-hand Fury Unleashed hit): 46 SPELL_DAMAGE events by one player in 2 logs (2026-06-06 03:51 and 03:53), the same 2 logs as the 48 hits of 555739; each 555739 hit of a tick is followed 1 to 7 ms later by one 806097 hit on the same target (8 targets at 03:52:12.405-.416, one target every tick at 03:56:46-51); non-critical hits on the same target in the same tick read 174 (555739) and 124 to 127 (806097), gear unknown, so no figure decides the percent or the off-hand factor; spell 806095: 0 events; 555738: 2 casts.",
+      "player_attack_power": 20000,
+      "expected": 0,
+      "tolerance": 0
     },
     {
       "kind": "metric_delta",
@@ -24607,15 +25086,22 @@
       "wait_ms": 1500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "after_auras": [
-        [
-          806128,
-          1,
-          "caster",
-          "caster"
-        ]
+      "setup_casts": [
+        806109
       ],
-      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Chaos Rush cast rank 500423 (the level 60 rank, as Legion March chaos_range): without 806128 (before phase) 10 yd, with 806128 applied at the start of the after phase by harness set_aura (a precondition fixture, the grant at the end of Illidan's Guile being proven by dash_held and dash_gone) 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
+      "setup_only_after": true,
+      "setup_wait_ms": 8500,
+      "after_setup_reads": [
+        {
+          "spell": 806109,
+          "expected": 0
+        },
+        {
+          "spell": 806128,
+          "expected": 1
+        }
+      ],
+      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Chaos Rush cast rank 500423 (the level 60 rank, as Legion March chaos_range): without 806128 (before phase) 10 yd, with 806128 earned for real (no set_aura, G-21 point 6: 806128 is the claim): the after phase casts Illidan's Guile 806109 for real, waits 8500 ms (806109 lasts 8000 ms, DurationIndex 31, so it has expired and 806128, 5000 ms, DurationIndex 28, is on the caster at an age of about 500 ms), reads both auras as preconditions (after_setup_reads: 806109 absent, 806128 present; a mismatch voids the trial) and then casts the dash within the 5000 ms of 806128; the before phase makes no Illidan's Guile cast. 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 806109,
@@ -24636,15 +25122,22 @@
       "wait_ms": 1500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "after_auras": [
-        [
-          806128,
-          1,
-          "caster",
-          "caster"
-        ]
+      "setup_casts": [
+        806109
       ],
-      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Fel Torpedo cast 500610 (as Legion March torpedo_range): without 806128 (before phase) 10 yd, with 806128 applied at the start of the after phase by harness set_aura (a precondition fixture, the grant at the end of Illidan's Guile being proven by dash_held and dash_gone) 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
+      "setup_only_after": true,
+      "setup_wait_ms": 8500,
+      "after_setup_reads": [
+        {
+          "spell": 806109,
+          "expected": 0
+        },
+        {
+          "spell": 806128,
+          "expected": 1
+        }
+      ],
+      "observe_source": "The removal of 806109 casts 806128 on the caster (AscensionFelswornAuras.cpp:216-217; the held/gone reads dash_held and dash_gone prove the window); 806128 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 6 (SPELLMOD_RADIUS), BasePoints 19 (+20 yd, the tooltip's 'an additional 20 yds'), DurationIndex 28 (5000 ms), its class mask moved by the contract to the Chaos Rush jump family flag (AscensionFelswornContracts.cpp:225-226). The caster's 2D displacement from right before the cast to 1500 ms after it is read for a real Fel Torpedo cast 500610 (as Legion March torpedo_range): without 806128 (before phase) 10 yd, with 806128 earned for real (no set_aura, G-21 point 6: 806128 is the claim): the after phase casts Illidan's Guile 806109 for real, waits 8500 ms (806109 lasts 8000 ms, DurationIndex 31, so it has expired and 806128, 5000 ms, DurationIndex 28, is on the caster at an age of about 500 ms), reads both auras as preconditions (after_setup_reads: 806109 absent, 806128 present; a mismatch voids the trial) and then casts the dash within the 5000 ms of 806128; the before phase makes no Illidan's Guile cast. 30 yd, gain 20 yd within 1 yd (a twentieth of the stated 20 yd). A read of 10 with the aura is a lead (stop and report), not a fix. Reference search 2026-11-24: coa-history spell 806109: 6 casts, 6 aura applications in 1 log (806128 and the dash itself are not logged); the tooltip and Spell.dbc give the value; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 800206,

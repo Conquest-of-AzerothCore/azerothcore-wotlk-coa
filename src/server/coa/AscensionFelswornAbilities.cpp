@@ -112,6 +112,8 @@ class felsworn_casts : public AllSpellScript
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
+        if (Player* player = Owner(caster); player && Named(info, 801904))
+            State(player).assaultRoll = true;
         if (!Triggered(spell) && !info->IsPositive() && info->DmgClass == SPELL_DAMAGE_CLASS_MAGIC &&
             !info->HasAttribute(SPELL_ATTR1_NO_REFLECTION))
             if (Aura* bane = caster->GetAura(525001); bane && Owner(bane->GetCaster()))
@@ -249,6 +251,8 @@ class felsworn_casts : public AllSpellScript
                     aura->SetStackAmount(std::max<uint64>(1, count));
                 }
         Player* player = Owner(caster);
+        if (player && info->Id == 555739 && player->GetWeaponForAttack(OFF_ATTACK, true))
+            Cast(player, player, 806097);
         if (!player || info->SpellFamilyName != 20 || Triggered(spell))
             return;
         auto talent = [player](uint32 passive, uint32 child) {

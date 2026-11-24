@@ -22,8 +22,7 @@ bool First(AuraEffect const* effect)
             return false;
     return true;
 }
-constexpr uint64 CrowdControlMechanics =
-    IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK & ~((1ULL << MECHANIC_SNARE) | (1ULL << MECHANIC_DAZE));
+constexpr uint64 CrowdControlMechanics = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 void CrowdControlImmunity(Unit* target, uint32 source, bool apply)
 {
     for (uint32 mechanic = 0; mechanic < MAX_MECHANIC; ++mechanic)
@@ -262,11 +261,10 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
         }
         if (id == 804823 && alive)
         {
-            uint32 hits = std::min<uint64>(100, GetAura()->GetScriptValue(id));
-            uint32 amount = player->CountPctFromMaxHealth(std::min(50u, hits));
-            for (Unit* enemy : Nearby(player, 10.0f))
-                if (player->IsValidAttackTarget(enemy) && player->IsWithinLOSInMap(enemy))
-                    Copy(player, enemy, 807347, amount);
+            uint32 hits = std::min<uint64>(GetSpellInfo()->StackAmount, GetAura()->GetScriptValue(id));
+            State(player).resolvePct = hits * uint32(std::max(0, GetSpellInfo()->Effects[EFFECT_0].CalcValue()));
+            Cast(player, player, 804825);
+            State(player).resolvePct = 0;
         }
     }
     void Register() override

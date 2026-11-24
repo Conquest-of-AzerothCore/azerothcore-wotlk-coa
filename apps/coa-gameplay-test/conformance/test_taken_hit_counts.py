@@ -235,6 +235,34 @@ class CountsJudgeTests(unittest.TestCase):
         self.assertTrue(pains and all(step['actor'] == 'striker' and 'state' not in step for step in pains))
 
     @NEEDS_DBC
+    def test_a_band_holds_each_judged_trial_and_a_strikeless_arm_is_judged(self):
+        arms = [{'name': 'zero', 'casts': [[804823, 'caster']], 'strikes': 0, 'counts': {'pain': 0},
+                 'bands': {'blast': [61, 62]}},
+                {'name': 'one', 'casts': [[804823, 'caster']], 'strikes': 1, 'counts': {'pain': 0},
+                 'bands': {'blast': [62, 63]}}]
+        scenario, [expectation] = behaviour_scenario(CLASS_FILE, leech_entry(arms=arms, rising=[]))
+        self.assertEqual(expectation.model['arms'][0]['bands'], {'blast': [61.0, 62.0]})
+        self.assertEqual(expectation.model['arms'][0]['strikes'], 0)
+        strikes = [step for step in scenario['steps'] if step.get('label', '').startswith('zero strike')]
+        self.assertEqual(strikes, [])
+        good = {'zero': [{'blast': 62, 'leech': 62}] * 2, 'one': [{'hits': 1, 'blast': 62, 'leech': 62}] * 2}
+        self.assertEqual(counts_verdict(expectation, good).status, 'ok')
+        outside = {'zero': good['zero'], 'one': [{'hits': 1, 'blast': 200, 'leech': 200}] * 2}
+        verdict = counts_verdict(expectation, outside)
+        self.assertEqual(verdict.status, 'alert')
+        self.assertIn('must be 62 to 63', verdict.explanation)
+
+    @NEEDS_DBC
+    def test_a_band_without_the_counts_judge_reversed_or_on_an_exact_count_is_refused(self):
+        for bands in ({'blast': [63, 62]}, {'pain': [0, 1]}, {'missing': [0, 1]}):
+            arms = [{'name': 'one', 'casts': [[804823, 'caster']], 'strikes': 1, 'counts': {'pain': 0},
+                     'bands': bands}]
+            with self.subTest(bands=bands), self.assertRaises(ValueError):
+                behaviour_scenario(CLASS_FILE, leech_entry(arms=arms, rising=[]))
+        with self.assertRaises(ValueError):
+            behaviour_scenario(CLASS_FILE, capped_entry(arms=[{'name': 'control', 'absorb': 'none', 'strikes': 0}]))
+
+    @NEEDS_DBC
     def test_counts_without_reads_or_naming_an_unknown_read_is_refused(self):
         for broken in (reflect_entry(count_reads={}), reflect_entry(count_total=['missing']),
                        reflect_entry(rising=['missing']), reflect_entry(judge='absorb'),
