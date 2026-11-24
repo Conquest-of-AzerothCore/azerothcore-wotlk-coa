@@ -2190,7 +2190,6 @@
     "spell": 704610,
     "clause": "Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.",
     "labels": [
-      "704610 effect_value #0",
       "704610 proc_rate"
     ],
     "kind": "claim",
