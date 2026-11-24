@@ -7475,6 +7475,14 @@ private:
                 if (race)
                     Require(*race > 0 && *race <= 255 && sObjectMgr->GetPlayerInfo(uint8(*race), player->getClass()),
                         "Relog race needs an available race/class combination");
+                if (step.get<bool>("logout_repop", false) && player->GetDeathTimer())
+                {
+                    player->GetThreatMgr().RemoveMeFromThreatLists();
+                    player->BuildPlayerRepop();
+                    player->RepopAtGraveyard();
+                    while (player->IsBeingTeleportedFar())
+                        actor.session->HandleMoveWorldportAck();
+                }
                 CharacterDatabaseTransaction transaction = CharacterDatabase.BeginTransaction();
                 player->SaveToDB(transaction, false, true);
                 if (race)
@@ -8248,8 +8256,11 @@ private:
             WorldPacket packet(CMSG_REPOP_REQUEST, 1);
             packet << uint8(0);
             player->GetSession()->HandleRepopRequestOpcode(packet);
-            Require(player->IsAlive() || player->HasPlayerFlag(PLAYER_FLAGS_GHOST),
-                "Native release request left the body unreleased");
+            if (step.get<bool>("refused", false))
+                Require(!player->IsAlive() && !player->HasPlayerFlag(PLAYER_FLAGS_GHOST), "Release was not refused");
+            else
+                Require(player->IsAlive() || player->HasPlayerFlag(PLAYER_FLAGS_GHOST),
+                    "Native release request left the body unreleased");
         }
         else if (action == "command")
         {

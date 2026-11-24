@@ -520,6 +520,7 @@ public: /* PlayerScript */
     void OnPlayerSetSkill(Player* player, uint32 skillId, uint32 value, uint32 max, uint32 step, uint32 newValue);
     bool OnPlayerCanResurrect(Player* player);
     bool OnPlayerCanEnterManastorm(Player* player);
+    bool OnPlayerCanReleaseSpirit(Player* player);
     void OnPlayerBankWithdraw(Player* player, uint8 kind);
     bool OnPlayerEnvironmentalDamage(Player* player, uint32 type, uint32 damage);
     bool OnPlayerBreathInverted(Player* player);

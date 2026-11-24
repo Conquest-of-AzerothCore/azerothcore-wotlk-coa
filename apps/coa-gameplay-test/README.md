@@ -997,7 +997,9 @@ Optional `race` seeds the saved character's race through `CHAR_UPD_CHAR_RACE` an
 before login, retaining saved pet data. This fixtures the post-service state; it does not submit a race/faction
 service request or perform that service's spell, quest, faction, language or appearance conversions.
 Optional `offline_seconds` moves the saved logout time that far back, so the login handler treats the character
-as offline for that long (real-time item durations, rest). `reconnect` takes `actor` and hands the character, still in the world, to a new session through the native reconnect handler (`HandlePlayerLoginToCharInWorld`), as a client restarted before its character logged out would. No login hook runs; packets recorded on the actor accumulate across both sessions.
+as offline for that long (real-time item durations, rest). Optional `logout_repop: true` first runs the repop a
+native logout gives a player who died without releasing (`BuildPlayerRepop`, `RepopAtGraveyard` and the finished
+graveyard transfer), before the save, so the saved state matches a real logout of a dead character. `reconnect` takes `actor` and hands the character, still in the world, to a new session through the native reconnect handler (`HandlePlayerLoginToCharInWorld`), as a client restarted before its character logged out would. No login hook runs; packets recorded on the actor accumulate across both sessions.
 
 `item_duration` requires `item` and reads the
 remaining duration in seconds of the first carried copy of that item.

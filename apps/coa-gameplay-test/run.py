@@ -349,7 +349,7 @@ ACTIONS = {
     'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
     'die': ({'actor'}, {'actor', 'revived', 'pet'}),
-    'release_spirit': ({'actor'}, {'actor'}),
+    'release_spirit': ({'actor'}, {'actor', 'refused'}),
     'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination', 'destination_unit'}),
     'gossip_hello': ({'actor'}, {'actor', 'target', 'entry'}),
     'banker_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
@@ -396,7 +396,7 @@ ACTIONS = {
     'reward_quest': ({'actor', 'quest'}, {'actor', 'quest', 'choice'}),
     'restore_quest_spells': ({'actor'}, {'actor'}),
     'login_hooks': ({'actor'}, {'actor'}),
-    'relog': ({'actor'}, {'actor', 'race', 'offline_seconds'}),
+    'relog': ({'actor'}, {'actor', 'race', 'offline_seconds', 'logout_repop'}),
     'reconnect': ({'actor'}, {'actor'}),
     'talent': ({'actor', 'talent', 'rank'}, {'actor', 'talent', 'rank', 'command'}),
     'reset_talents': ({'actor'}, {'actor'}),
@@ -1058,6 +1058,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step['race'], f'{where}.race', 1, 255, True)
             if 'offline_seconds' in step:
                 number(step['offline_seconds'], f'{where}.offline_seconds', 1, 2**31 - 1, True)
+            require(type(step.get('logout_repop', False)) is bool, f'{where}: logout_repop must be boolean')
         if action == 'specialization':
             require(step['actor'] in player_ids, f'{where}: specialization needs a player')
             number(step['id'], f'{where}.id', 1, 0xFFFF, True)

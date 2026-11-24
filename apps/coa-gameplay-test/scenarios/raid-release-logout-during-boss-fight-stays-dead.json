@@ -1,0 +1,158 @@
+{
+  "schema": 1,
+  "name": "Raid release: logging out while dead in a raid boss fight does not resurrect the player",
+  "contract": [
+    "Review of the raid release lock: logout repops a dead player, and the dungeon release path used to resurrect",
+    "them at the checkpoint at once, so they came back alive in the middle of the fight. During a raid boss fight",
+    "logout keeps the stock repop instead: the player stays dead (a ghost) after logging back in. The relog runs the",
+    "native logout repop before its save. Gahz'ranka's (8) encounter state stands in for the fight; a summoned cobra",
+    "keeps the watcher in combat."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "watcher",
+      "race": 4,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "leaver",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "actor": "watcher",
+      "target": "leaver"
+    },
+    {
+      "action": "teleport",
+      "actor": "watcher",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true,
+      "label": "Jin'do's arena in Zul'Gurub"
+    },
+    {
+      "action": "wait",
+      "label": "Let the watcher create the instance first",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "leaver",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfer finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: both players share the instance",
+      "actor": "leaver",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_health",
+      "actor": "watcher",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "summon",
+      "actor": "watcher",
+      "entry": 11373,
+      "as": "cobra",
+      "distance": 6
+    },
+    {
+      "action": "attack",
+      "label": "Pull a cobra to keep the watcher in combat",
+      "actor": "watcher",
+      "target": "cobra"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the watcher fights",
+      "actor": "watcher",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "label": "Keep the cobra alive so the watcher stays in combat",
+      "actor": "watcher"
+    },
+    {
+      "action": "command",
+      "actor": "watcher",
+      "command": ".instance setbossstate 8 1"
+    },
+    {
+      "action": "die",
+      "actor": "leaver"
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: dead during the fight",
+      "actor": "leaver",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "label": "Log out while dead in the fight and log back in",
+      "actor": "leaver",
+      "logout_repop": true
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the fight is still going",
+      "actor": "watcher",
+      "metric": "combat",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: logout did not resurrect the player mid-fight",
+      "actor": "leaver",
+      "metric": "alive",
+      "equals": 0
+    }
+  ]
+}

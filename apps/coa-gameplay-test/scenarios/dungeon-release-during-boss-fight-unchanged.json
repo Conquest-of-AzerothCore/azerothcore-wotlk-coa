@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Five-player dungeon release stays instant during a boss fight",
+  "contract": [
+    "User's decision (ZG report, 2026-11-24): only raid maps hold the dead during a boss fight; five-player",
+    "dungeons and Mythic+ keep the instant release. In Magisters' Terrace (map 585, a five-player dungeon whose",
+    "instance script registers boss states) Selin Fireheart's encounter (0) is set in progress and a player dies",
+    "in Selin's room. Release is not refused: the player is revived at once, away from the body, at half health."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 70,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "teleport",
+      "label": "Selin Fireheart's room",
+      "actor": "hero",
+      "map": 585,
+      "x": 230.0,
+      "y": 0.3,
+      "z": 1.84,
+      "o": 3.14,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the player is in Magisters' Terrace",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 585,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "label": "Selin's fight is in progress",
+      "actor": "hero",
+      "command": ".instance setbossstate 0 1"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "die",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "The player dies during the fight",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "release_spirit",
+      "label": "DISCRIMINATING: release is not refused in a five-player dungeon",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player is revived at once",
+      "actor": "hero",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The player stays in Magisters' Terrace",
+      "actor": "hero",
+      "metric": "map_id",
+      "equals": 585
+    },
+    {
+      "action": "assert",
+      "label": "At the dungeon's start, away from the body",
+      "actor": "hero",
+      "metric": "point_distance_2d",
+      "x": 230.0,
+      "y": 0.3,
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "At half health, as a release gives",
+      "actor": "hero",
+      "metric": "health_pct",
+      "min": 49,
+      "max": 51
+    }
+  ]
+}
