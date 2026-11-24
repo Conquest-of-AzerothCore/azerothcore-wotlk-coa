@@ -849,6 +849,261 @@
       "cast_spell": 805114,
       "channel_spell": 12051,
       "observe_source": "805114 carries SPELL_ATTR7_CAN_CAUSE_INTERRUPT (AttributesEx7 33556480) and spell_ascension_cultist_ability::EffectHitTarget (AscensionCultistAbilities.cpp:435-436) casts Interrupt 32747 at non-player targets before EffectApplyAura (Spell.cpp:5802-5809). 32747 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($32747d, SpellDuration.dbc); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, locking that school for 3000 ms (Creature::ProhibitSpellSchool). CasterAuraSpell 680601 is set by required_aura_steps. The dummy channels Evocation 12051 (Arcane, PreventionType 1, ChannelInterruptFlags 31756, 8 s) on itself: Arcane is unlocked before the cast (control = 0), locked before 3000 ms and free after 3000 ms. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('interrupting non-player spellcasting for 3 sec')."
+    },
+    {
+      "spell": 704895,
+      "name": "Empire's Blessing (Void Shield mana cost)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "Reduces the mana cost of Void Shield by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 704895,
+      "target": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "before_expected": 1607,
+      "expected": 1686,
+      "expected_gain": 79,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "704895 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 14 (SPELLMOD_COST), EffectBasePoints[0] -21 + EffectDieSides[0] 1 = -20% ($s1 = 20), EffectSpellClassMask[1] 536870912 = SpellFamilyFlags[1] 536870912 of Void Shield 578115 (SpellFamilyName 31, ManaCostPercentage 26, ExcludeTargetAuraSpell 805801 Wracked Mind 15000 ms; Spell.dbc). Level 60 Cultist BaseMana = 1512 (MaxMana = 2297): base cost int32(CalculatePct(1512, 26)) = 393 mana; with -20% -> int32(393 * 0.8f) = 314 mana (saving 79 mana). Both phases set mana to cast_power 2000 with regeneration disabled and self-cast Void Shield 578115 (expire_ms 16000 clears 15000 ms Wracked Mind 805801 between phases): 2000 - 393 = 1607 before learning 704895 (control) and 2000 - 314 = 1686 after (gain +79, tol 0). Reference search 2026-11-24: coa-history spell 704895: 0 events in 186 logs (passive; positive control 578115 Void Shield: 5660 casts in 24 logs); coabuildhub spells_master_index.json entry 704895 matches installed Spell.dbc."
+    },
+    {
+      "spell": 300302,
+      "name": "Feeding Darkness (Darkwither range extended to 35 yd)",
+      "kind": "metric_delta",
+      "variant": "range_extended",
+      "label_suffix": "range_extended",
+      "quote": "Increases the range of your Corruption spells by $s1 yds",
+      "trigger_spell": 502220,
+      "gate_spell": 300302,
+      "target": "dummy",
+      "dummy_distance": 35,
+      "cast_power": 2000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502220
+      },
+      "before_expected": 97,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "observe_source": "300302 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 5 (SPELLMOD_RANGE), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3 yd ($s1 = 3), EffectSpellClassMask[0..2] [131148, 10747952, 0] matching Darkwither 502220 (SpellFamilyName 31, SpellFamilyFlags [0, 2097152, 0], RangeIndex 4 = 30 yd, instant; Spell.dbc). Spell::CheckRange adds caster + dummy combat reaches (1.5 + 1.5 = 3 yd): 33 yd base, 36 yd with 300302. At dummy_distance 35 yd, Darkwither is refused out of range (97 SPELL_FAILED_OUT_OF_RANGE) without 300302 (control) and accepted (0) after a real learn of 300302. Paired with range_capped at 37 yd. Reference search 2026-11-24: coa-history spell 300302: 0 events in 186 logs (passive; positive control 502220 Darkwither: 109 casts in 2 logs); coabuildhub spells_master_index.json entry 300302 matches verbatim."
+    },
+    {
+      "spell": 300302,
+      "name": "Feeding Darkness (Darkwither refused beyond extended range at 37 yd)",
+      "kind": "metric_delta",
+      "variant": "range_capped",
+      "label_suffix": "range_capped",
+      "quote": "Increases the range of your Corruption spells by $s1 yds",
+      "trigger_spell": 502220,
+      "gate_spell": 300302,
+      "target": "dummy",
+      "dummy_distance": 37,
+      "cast_power": 2000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502220
+      },
+      "before_expected": 97,
+      "expected": 97,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "observe_source": "Upper bracket for 300302 (+3 yd range on Darkwither 502220, 30 + 3 + 3 combat reach = 36 yd): at dummy_distance 37 yd, Darkwither is refused out of range (97 SPELL_FAILED_OUT_OF_RANGE) both without and with 300302 learned, bracketing the range extension to +3 yd. Reference search 2026-11-24: coa-history spell 300302: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300302 matches verbatim."
+    },
+    {
+      "spell": 300302,
+      "name": "Feeding Darkness (Horrorbolt critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "and their chance to critically strike by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 300302,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 502182,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "expected_gain": 2,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300302 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints[1] 1 + EffectDieSides[1] 1 = +2% ($s2 = 2), EffectSpellClassMask[3..5] [64, 2097200, 1073741824] matching Horrorbolt 502182 (SpellFamilyName 31, SpellFamilyFlags [0, 16, 256]; Spell.dbc). Reads Player::SpellDoneCritChance for Horrorbolt 502182 before (control) and after a real learn of 300302: expected gain +2.0 points (tol 0.0001). Reference search 2026-11-24: coa-history spell 300302: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 300302 matches verbatim."
+    },
+    {
+      "spell": 301347,
+      "name": "Feeding Darkness r2 (Darkwither range extended to 38 yd)",
+      "kind": "metric_delta",
+      "variant": "range_extended",
+      "label_suffix": "range_extended",
+      "quote": "Increases the range of your Corruption spells by $s1 yds",
+      "trigger_spell": 502220,
+      "gate_spell": 301347,
+      "target": "dummy",
+      "dummy_distance": 38,
+      "cast_power": 2000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502220
+      },
+      "before_expected": 97,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "observe_source": "301347 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 5 (SPELLMOD_RANGE), EffectBasePoints[0] 5 + EffectDieSides[0] 1 = +6 yd ($s1 = 6), EffectSpellClassMask[0..2] [131148, 10747952, 0] matching Darkwither 502220 (RangeIndex 4 = 30 yd; Spell.dbc). With 3 yd combat reach: 33 yd base, 39 yd with 301347. At dummy_distance 38 yd, Darkwither is refused out of range (97) without 301347 (control) and accepted (0) after a real learn of 301347. Paired with range_capped at 40 yd. Reference search 2026-11-24: coa-history spell 301347: 0 events in 186 logs (passive); coabuildhub spells_master_index.json has no entry for 301347; installed Spell.dbc governs."
+    },
+    {
+      "spell": 301347,
+      "name": "Feeding Darkness r2 (Darkwither refused beyond extended range at 40 yd)",
+      "kind": "metric_delta",
+      "variant": "range_capped",
+      "label_suffix": "range_capped",
+      "quote": "Increases the range of your Corruption spells by $s1 yds",
+      "trigger_spell": 502220,
+      "gate_spell": 301347,
+      "target": "dummy",
+      "dummy_distance": 40,
+      "cast_power": 2000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502220
+      },
+      "before_expected": 97,
+      "expected": 97,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "observe_source": "Upper bracket for 301347 (+6 yd range on Darkwither 502220, 30 + 6 + 3 combat reach = 39 yd): at dummy_distance 40 yd, Darkwither is refused out of range (97) both without and with 301347 learned, bracketing the range extension to +6 yd. Reference search 2026-11-24: coa-history spell 301347: 0 events in 186 logs; coabuildhub spells_master_index.json has no entry for 301347; installed Spell.dbc governs."
+    },
+    {
+      "spell": 301347,
+      "name": "Feeding Darkness r2 (Horrorbolt critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "and their chance to critically strike by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 301347,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 502182,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301347 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 7 (SPELLMOD_CRITICAL_CHANCE), EffectBasePoints[1] 3 + EffectDieSides[1] 1 = +4% ($s2 = 4), EffectSpellClassMask[3..5] [64, 2097200, 1073741824] matching Horrorbolt 502182 (SpellFamilyName 31, SpellFamilyFlags [0, 16, 256]; Spell.dbc). Reads Player::SpellDoneCritChance for Horrorbolt 502182 before (control) and after a real learn of 301347: expected gain +4.0 points (tol 0.0001). Reference search 2026-11-24: coa-history spell 301347: 0 events in 186 logs; coabuildhub spells_master_index.json has no entry for 301347; installed Spell.dbc governs."
+    },
+    {
+      "spell": 525019,
+      "name": "Stare Into The Abyss (Corrupt Mind instant cast)",
+      "kind": "metric_delta",
+      "variant": "instant_cast",
+      "label_suffix": "instant_cast",
+      "quote": "Removes the cast time of your Corrupt Mind.",
+      "trigger_spell": 560109,
+      "gate_spell": 525019,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 62000,
+      "void_on_cast_failure": true,
+      "observe_source": "525019 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 10 (SPELLMOD_CASTING_TIME), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%, EffectSpellClassMask[0] 536870912 = SpellFamilyFlags[0] 536870912 of Corrupt Mind 560109 (CastTime 1500 ms, RecoveryTime 60000 ms, ManaCostPercentage 20; Spell.dbc). Casts Corrupt Mind 560109 at Kobold Vermin (target_entry 6, humanoid) with cast_power 2000: reads caster casting state 300 ms after cast start: 1 (still casting 1500 ms cast) before learning 525019 (control) and 0 (instant cast completed) after a real learn of 525019 (expire_ms 62000 clears the 60000 ms cooldown between phases). Reference search 2026-11-24: coa-history spell 525019: 0 events in 186 logs (passive; positive control 560109 Corrupt Mind: 19 casts in 8 logs); coabuildhub spells_master_index.json entry 525019 matches verbatim."
+    },
+    {
+      "spell": 300306,
+      "name": "Call of N'Zoth (Darkwither aura held at 23300 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Increases the duration of Darkwither by $/1000;s1 sec.",
+      "trigger_spell": 502220,
+      "gate_spell": 300306,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 502220
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 23300,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          23250,
+          23600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "300306 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 1 (SPELLMOD_DURATION), EffectBasePoints[0] 8999 + EffectDieSides[0] 1 = +9000 ms ($/1000;s1 = 9 s), EffectSpellClassMask[1] 2097152 = SpellFamilyFlags[1] 2097152 of Darkwither 502220 (DurationIndex 8 = 15000 ms, instant; Spell.dbc). With 300306 learned, Darkwither lasts 24000 ms. Both phases set 823764 (spellpen precondition fixture) and cast Darkwither 502220 at the dummy: without 300306 (control, 15000 ms), aura 502220 on the dummy is gone (0) at 23300 ms; after a real learn of 300306, aura 502220 is present (1) at 23300 ms (game_time [23250, 23600], above 23100 = 15000 + 0.9*9000). Paired with duration_gone at 24500 ms. Reference search 2026-11-24: coa-history spell 300306: 0 events in 186 logs (passive; positive control 502220 Darkwither: 109 casts in 2 logs); coabuildhub spells_master_index.json entry 300306 matches verbatim."
+    },
+    {
+      "spell": 300306,
+      "name": "Call of N'Zoth (Darkwither aura gone at 24500 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Increases the duration of Darkwither by $/1000;s1 sec.",
+      "trigger_spell": 502220,
+      "gate_spell": 300306,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 502220
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 24500,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          24450,
+          24800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket for 300306 (+9000 ms duration on Darkwither 502220, 15000 ms -> 24000 ms): at 24500 ms (game_time [24450, 24800], below 24900 = 15000 + 1.1*9000), aura 502220 on the dummy is gone (0) both without and with 300306 learned. With duration_held, brackets the extended duration inside [23250, 24800] ms, excluding 10% off on both sides of both the 9 s increase and the 24 s total. Reference search 2026-11-24: coa-history spell 300306: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300306 matches verbatim."
     }
   ],
   "player_observations": [],

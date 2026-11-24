@@ -403,7 +403,8 @@
     "spell": 300302,
     "clause": "Increases the range of your Corruption spells by $s1 yds",
     "labels": [
-      "300302 effect_value e0 #0"
+      "300302 behaviour_metric_delta range_extended",
+      "300302 behaviour_metric_delta range_capped"
     ],
     "kind": "claim"
   },
@@ -411,7 +412,7 @@
     "spell": 300302,
     "clause": "and their chance to critically strike by $s2%.",
     "labels": [
-      "300302 effect_value e1 #1"
+      "300302 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -443,7 +444,8 @@
     "spell": 300306,
     "clause": "Increases the duration of Darkwither by $/1000;s1 sec.",
     "labels": [
-      "300306 effect_value e0 #0"
+      "300306 behaviour_metric_delta duration_held",
+      "300306 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -787,7 +789,8 @@
     "spell": 301347,
     "clause": "Increases the range of your Corruption spells by $s1 yds",
     "labels": [
-      "301347 effect_value e0 #0"
+      "301347 behaviour_metric_delta range_extended",
+      "301347 behaviour_metric_delta range_capped"
     ],
     "kind": "claim"
   },
@@ -795,7 +798,7 @@
     "spell": 301347,
     "clause": "and their chance to critically strike by $s2%.",
     "labels": [
-      "301347 effect_value e1 #1"
+      "301347 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -1399,7 +1402,9 @@
   {
     "spell": 525019,
     "clause": "Removes the cast time of your Corrupt Mind.",
-    "labels": [],
+    "labels": [
+      "525019 behaviour_metric_delta instant_cast"
+    ],
     "kind": "claim"
   },
   {
@@ -2668,7 +2673,7 @@
     "spell": 704895,
     "clause": "Reduces the mana cost of Void Shield by $s1%.",
     "labels": [
-      "704895 effect_value e0 #0"
+      "704895 behaviour_metric_delta mana_cost"
     ],
     "kind": "claim"
   },
