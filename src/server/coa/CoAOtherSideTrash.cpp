@@ -147,6 +147,8 @@ constexpr uint32 BreathChannelMs = 5000;
 constexpr uint32 BreathFacingStepMs = 100;
 std::atomic<uint32> TrapActiveMs = 1500;
 std::atomic<uint32> TrapPauseMs = 6000;
+std::atomic<uint32> TrapFadeMs = 1500;
+constexpr uint32 TrapGapMs = 1000;
 constexpr uint32 TrapTickMs = 500;
 constexpr uint32 TrapMaxActiveMs = 60000;
 constexpr uint32 TrapMaxPauseMs = 600000;
@@ -201,10 +203,12 @@ constexpr uint32 SpawnMaskAllDifficulties = 7;
 constexpr float TrapCommandReach = 10.0f;
 constexpr float TrapListReach = 600.0f;
 constexpr float ToxicExpulsionReach = 100.0f;
-constexpr float TrapReach = 14.0f;
-constexpr float TrapMouthOffset = 1.5f;
-constexpr float TrapChestHeight = 1.0f;
-constexpr float TrapHalfAngle = float(M_PI) / 9.0f;
+constexpr float TrapReach = 11.0f;
+constexpr float TrapHalfWidth = 3.0f;
+constexpr float TrapMaxDrop = 8.0f;
+constexpr float TrapMaxRise = 3.0f;
+constexpr float TrapSightOffset = 5.5f;
+constexpr float TrapDamagePct = 15.0f;
 
 uint8 DifficultyBit(Map const* map)
 {
@@ -360,8 +364,9 @@ private:
 
 struct BreathCheck
 {
-    float distance;
-    float offDegrees;
+    float ahead;
+    float side;
+    float drop;
     bool sight;
     bool inside;
 };
@@ -370,20 +375,18 @@ BreathCheck CheckTrapBreath(Creature const* trap, Player const* player)
 {
     Position const mouth = trap->GetHomePosition();
     float const yaw = mouth.GetOrientation();
-    float const pitch = TrapTilts[TrapTiltIndex.load()].pitch;
-    float const dirX = std::cos(pitch) * std::cos(yaw);
-    float const dirY = std::cos(pitch) * std::sin(yaw);
-    float const dirZ = std::sin(pitch);
+    float const dirX = std::cos(yaw);
+    float const dirY = std::sin(yaw);
     float const dx = player->GetPositionX() - mouth.GetPositionX();
     float const dy = player->GetPositionY() - mouth.GetPositionY();
-    float const dz = player->GetPositionZ() + TrapChestHeight - mouth.GetPositionZ();
-    float const distance = std::sqrt(dx * dx + dy * dy + dz * dz);
-    float const cosine = distance > 0.01f ? (dx * dirX + dy * dirY + dz * dirZ) / distance : 1.0f;
-    float const off = std::acos(std::clamp(cosine, -1.0f, 1.0f));
-    bool const sight = player->IsWithinLOS(mouth.GetPositionX() + TrapMouthOffset * dirX,
-        mouth.GetPositionY() + TrapMouthOffset * dirY,
-        mouth.GetPositionZ() + TrapMouthOffset * dirZ, VMAP::ModelIgnoreFlags::M2);
-    return { distance, off * 180.0f / float(M_PI), sight, distance <= TrapReach && off <= TrapHalfAngle && sight };
+    float const ahead = dx * dirX + dy * dirY;
+    float const side = std::fabs(dy * dirX - dx * dirY);
+    float const drop = mouth.GetPositionZ() - player->GetPositionZ();
+    bool const sight = player->IsWithinLOS(mouth.GetPositionX() + TrapSightOffset * dirX,
+        mouth.GetPositionY() + TrapSightOffset * dirY, mouth.GetPositionZ(), VMAP::ModelIgnoreFlags::M2);
+    bool const inside = ahead >= 0.0f && ahead <= TrapReach && side <= TrapHalfWidth
+        && drop <= TrapMaxDrop && drop >= -TrapMaxRise && sight;
+    return { ahead, side, drop, sight, inside };
 }
 
 bool InTrapBreath(Creature const* trap, Player const* player)
@@ -407,11 +410,10 @@ void TrapBreathDamage(Creature* trap, Player* player)
     SpellInfo const* venom = sSpellMgr->GetSpellInfo(SPELL_VENOM_TRAP);
     if (!venom || player->IsImmunedToDamage(trap, venom))
         return;
-    int32 const base = std::max(0, venom->Effects[EFFECT_0].CalcValue(trap));
-    uint32 const done = trap->SpellDamageBonusDone(player, venom, uint32(base), SPELL_DIRECT_DAMAGE, EFFECT_0);
-    uint32 const taken = player->SpellDamageBonusTaken(trap, venom, done, SPELL_DIRECT_DAMAGE);
+    int32 const amount = int32(CoAOtherSide::Unscaled(trap, player,
+        float(player->CountPctFromMaxHealth(TrapDamagePct)), venom));
     SpellNonMeleeDamage damage(trap, player, venom, venom->GetSchoolMask());
-    trap->CalculateSpellDamageTaken(&damage, int32(taken), venom);
+    trap->CalculateSpellDamageTaken(&damage, amount, venom);
     Unit::DealDamageMods(player, damage.damage, &damage.absorb);
     trap->DealSpellDamage(&damage, true);
     trap->SendSpellNonMeleeDamageLog(&damage);
@@ -454,9 +456,12 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
             _rankIn -= diff;
 
         uint32 const active = TrapActiveMs.load();
-        uint32 const cycle = _levels * active + TrapPauseMs.load();
+        uint32 const burning = active + TrapFadeMs.load();
+        uint32 const slot = burning + TrapGapMs;
+        uint32 const cycle = _levels * slot + TrapPauseMs.load();
         uint32 const now = uint32(GameTime::GetGameTimeMS().count() % cycle);
-        bool const breathing = now >= _level * active && now < (_level + 1) * active;
+        uint32 const start = _level * slot;
+        bool const breathing = now >= start && now < start + burning;
         if (breathing && !_breathing)
         {
             if (!me->GetVehicle())
@@ -473,7 +478,8 @@ struct npc_coa_other_side_venom_trap : public ScriptedAI
             return;
         }
         _tickIn = TrapTickMs;
-        me->SendPlaySpellVisual(BreathKits[BreathKitIndex.load()].kit);
+        if (now - start < active)
+            me->SendPlaySpellVisual(BreathKits[BreathKitIndex.load()].kit);
         for (auto const& ref : me->GetMap()->GetPlayers())
             if (Player* player = ref.GetSource())
                 if (InTrapBreath(me, player))
@@ -750,27 +756,31 @@ public:
         BreathCheck const check = CheckTrapBreath(trap, player);
         if (check.inside && !player->IsGameMaster())
             TrapBreathDamage(trap, player);
-        handler->PSendSysMessage("Trap {}: {:.1f} yd from the mouth (max {:.0f}), "
-            "{:.0f} degrees off the breath (max {:.0f}), sight {}; you are {}{}.",
-            trap->GetSpawnId(), check.distance, TrapReach, check.offDegrees, TrapHalfAngle * 180.0f / float(M_PI),
+        handler->PSendSysMessage("Trap {}: {:.1f} yd ahead of the mouth (max {:.0f}), {:.1f} yd to the side (max {:.0f}), "
+            "{:.1f} yd below it ({:.0f} to {:.0f}), sight {}; you are {}{}.",
+            trap->GetSpawnId(), check.ahead, TrapReach, check.side, TrapHalfWidth, check.drop, -TrapMaxRise, TrapMaxDrop,
             check.sight ? "yes" : "no",
             check.inside ? "inside" : "outside", player->IsGameMaster() ? " (GM mode: no damage)" : "");
         return true;
     }
 
-    static bool HandleTiming(ChatHandler* handler, uint32 activeMs, Optional<uint32> pauseMs)
+    static bool HandleTiming(ChatHandler* handler, uint32 activeMs, Optional<uint32> pauseMs, Optional<uint32> fadeMs)
     {
-        if (activeMs < TrapTickMs || activeMs > TrapMaxActiveMs || (pauseMs && *pauseMs > TrapMaxPauseMs))
+        if (activeMs < TrapTickMs || activeMs > TrapMaxActiveMs || (pauseMs && *pauseMs > TrapMaxPauseMs)
+            || (fadeMs && *fadeMs > TrapMaxActiveMs))
         {
-            handler->SendErrorMessage("Breaths last {} to {} ms; pauses at most {} ms.", TrapTickMs, TrapMaxActiveMs,
-                TrapMaxPauseMs);
+            handler->SendErrorMessage("Breaths last {} to {} ms; pauses at most {} ms; fades at most {} ms.", TrapTickMs,
+                TrapMaxActiveMs, TrapMaxPauseMs, TrapMaxActiveMs);
             return false;
         }
         TrapActiveMs = activeMs;
         if (pauseMs)
             TrapPauseMs = *pauseMs;
-        handler->PSendSysMessage("Each statue breathes {} ms, then the next one up; {} ms pause after the top. "
-            "Until the next restart.", TrapActiveMs.load(), TrapPauseMs.load());
+        if (fadeMs)
+            TrapFadeMs = *fadeMs;
+        handler->PSendSysMessage("Each statue breathes {} ms and keeps burning {} ms after its last breath, the next one up "
+            "{} ms later; {} ms pause after the top. Until the next restart.", TrapActiveMs.load(), TrapFadeMs.load(),
+            TrapGapMs, TrapPauseMs.load());
         return true;
     }
 
@@ -911,8 +921,8 @@ public:
             handler->PSendSysMessage("Trap {}: {:.2f} {:.2f} {:.2f}, facing {:.3f}", trap->GetSpawnId(),
                 trap->GetPositionX(), trap->GetPositionY(), trap->GetPositionZ(),
                 trap->GetHomePosition().GetOrientation());
-        handler->PSendSysMessage("{} traps; each breathes {} ms, {} ms pause after the top.", traps.size(),
-            TrapActiveMs.load(), TrapPauseMs.load());
+        handler->PSendSysMessage("{} traps; each breathes {} ms and burns {} ms longer, {} ms gap to the next, {} ms pause "
+            "after the top.", traps.size(), TrapActiveMs.load(), TrapFadeMs.load(), TrapGapMs, TrapPauseMs.load());
         return true;
     }
 };
