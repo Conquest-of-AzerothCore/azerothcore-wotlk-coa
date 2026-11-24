@@ -1837,6 +1837,761 @@
       "expire_ms": 1000,
       "void_on_cast_failure": true,
       "observe_source": "Bouncing Thoughts 680607 at 100 Insanity with Dreadnought form passive 680750 learned (suppresses Total Madness 803060 at 100 Insanity, AscensionCultist.cpp:218-220; precondition fixture 500706 x100; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 100 / 20 = 5): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 5 = 8 enemies out of 9 dummies within 7.5 yd jump radius, leaving the 9th dummy untouched (0 in uncast before). Reference search 2026-11-24: coabuildhub 680607 and 680750 match verbatim; coa-history has 0 events for 680607/680750."
+    },
+    {
+      "spell": 502122,
+      "name": "Blade of the Empire (3 charges spent, 4th refused before 6 sec recharge)",
+      "kind": "metric_delta",
+      "variant": "charges_before_recharge",
+      "label_suffix": "charges_before_recharge",
+      "quote": "3 Charge, 6 sec recharge",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 2300,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 502122
+            },
+            "before_expected": 0,
+            "expected": 67,
+            "tolerance": 0,
+            "source": "4th cast of 502122 at ~5500 ms (after 3 charges spent at 0/1600/3200 ms, inside 6000 ms recharge) fails SPELL_FAILED_NOT_READY (67)"
+          }
+        ]
+      },
+      "observe_source": "502122 Blade of the Empire tooltip states '3 Charge, 6 sec recharge' (Spell.dbc Category 38, StartRecoveryTime 1500 ms, ManaCostPercentage 12 -> 181 mana; Godblade 2531 Great Axe satisfies EquippedItemClass 2 sub 173555; charge_recharge refuses because 4 x 2000 ms exceeds 6000 * 0.95). Casts 502122 at t=0, 1600, 3200 ms and attempts a 4th cast at 5500 ms (> 5400 ms = 0.9 * 6000, < 6000 ms) with reset_cooldown false: exactly 3 hits land (uncast control = 0) and the 4th attempt fails SPELL_FAILED_NOT_READY (67). Paired with charges_after_recharge (4th cast at 6300 ms succeeds). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 502122,
+      "name": "Blade of the Empire (4th cast succeeds after 6 sec recharge)",
+      "kind": "metric_delta",
+      "variant": "charges_after_recharge",
+      "label_suffix": "charges_after_recharge",
+      "quote": "3 Charge, 6 sec recharge",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 3100,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 502122
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "4th cast of 502122 at ~6300 ms (> 6000 ms recharge, < 6600 ms = 1.1 * 6000) succeeds with NO_CAST_FAILURE (0)"
+          }
+        ]
+      },
+      "observe_source": "502122 Blade of the Empire tooltip states '3 Charge, 6 sec recharge'. Casts 502122 at t=0, 1600, 3200 ms and casts a 4th time at 6300 ms (> 6000 ms, < 6600 ms = 1.1 * 6000) with reset_cooldown false: all 4 hits land (uncast control = 0) and cast_failure reads 0. Together with charges_before_recharge (refused at 5500 ms), brackets recharge in [5500, 6300] ms, excluding 5400 and 6600 ms (10% off on both sides). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 502122,
+      "name": "Blade of the Empire (Generates 20 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "quote": "Generates 20 Insanity",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "502122 Blade of the Empire tooltip states 'Generates 20 Insanity'; AscensionClassContracts19To25Data.h:65 grants 20 stacks of Insanity 500706 on cast of 500720 chain. Reads aura_stacks of 500706 on the caster before (0, uncast control) and 500 ms after one real cast of 502122 at the dummy (20). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 502122,
+      "name": "Blade of the Empire (Shadow damage at reference stats)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Strike an enemy, dealing $?a803339[${$m1+0+$sps*.3+$AP*.25}][${$m1+0+$sps*.15+$AP*.25}] Shadow damage.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 376,
+      "after_at_least": 357,
+      "after_at_most": 396,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 502122 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (SchoolMask 32 Shadow, DmgClass 2 melee, SpellLevel 60, BaseLevel 60, MaxLevel 66, SkillLineAbility line 88): EffectBasePoints 224 + EffectDieSides 36 -> [225..260], no per-level points at level 60; AscensionCultistData.h:21 adds 0.15*SP + 0.25*AP. At reference stats (SP 0, AP 376.0): 0.25*376 = 94 -> raw [319..354]; Cultist class tuning 887013 (+12%, floor(hit*112/100)) gives [357..396] (excludes 0, missing AP [252..291], and 2x [714..792]). Precondition fixtures: 823764 (no partial resist) and 16255 amount -100 (no crit). Paired with damage_ap, damage_sp and damage_sp_cthun. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 502122,
+      "name": "Blade of the Empire (Shadow damage at +20000 attack power)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Strike an enemy, dealing $?a803339[${$m1+0+$sps*.3+$AP*.25}][${$m1+0+$sps*.15+$AP*.25}] Shadow damage.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5976,
+      "after_at_least": 5957,
+      "after_at_most": 5996,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Attack power contrast arm for 502122 ($AP*.25): player_attack_power 20000 lifts total AP from 376 to 20376, adding 20000 * 0.25 = +5000 to raw [319..354] -> [5319..5354] (AscensionCultistData.h:21), times Cultist tuning 887013 (+12%) -> [5957..5996] (excludes damage_base [357..396] and 2x AP). Precondition fixtures: 823764 and 16255 amount -100. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 502122,
+      "name": "Blade of the Empire (Shadow damage at +20000 spell power without Presence of C'Thun)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Strike an enemy, dealing $?a803339[${$m1+0+$sps*.3+$AP*.25}][${$m1+0+$sps*.15+$AP*.25}] Shadow damage.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3736,
+      "after_at_least": 3717,
+      "after_at_most": 3756,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell power contrast arm for 502122 without Presence of C'Thun 803339 ($sps*.15): player_spell_power 20000 (hit_arm: true) adds 20000 * 0.15 = +3000 to raw [319..354] -> [3319..3354] (AscensionCultistData.h:21), times Cultist tuning 887013 (+12%) -> [3717..3756] (excludes damage_base [357..396] and 0.30 branch [7077..7116]). Precondition fixtures: 823764 and 16255 amount -100. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 502122,
+      "name": "Blade of the Empire (Shadow damage at +20000 spell power with Presence of C'Thun)",
+      "kind": "metric_delta",
+      "variant": "damage_sp_cthun",
+      "label_suffix": "damage_sp_cthun",
+      "quote": "Strike an enemy, dealing $?a803339[${$m1+0+$sps*.3+$AP*.25}][${$m1+0+$sps*.15+$AP*.25}] Shadow damage.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "setup_casts": [
+        803339
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 7096,
+      "after_at_least": 7077,
+      "after_at_most": 7116,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Conditional Presence of C'Thun branch for 502122 ($?a803339[...$sps*.3...]): real cast of Presence of C'Thun 803339 (setup_casts) before 502122 activates AscensionCultistContracts.cpp:286-287 (sp = 0.30). At +20000 SP (hit_arm: true): 20000 * 0.30 = +6000 -> raw [6319..6354], times Cultist tuning 887013 (+12%) -> [7077..7116] (contrasts against damage_sp [3717..3756] without 803339). Precondition fixtures: 823764 and 16255 amount -100. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 582856,
+      "name": "Abyssal Edge (Blade of the Empire critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Blade of the Empire by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 582856,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 502122,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 4 (582856 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 SPELLMOD_CRITICAL_CHANCE, EffectBasePoints 3 + EffectDieSides 1, SpellFamilyName 31; Spell.dbc). Blade of the Empire 502122 (level 60 rank, DmgClass 2 melee, SpellFamilyFlags[1] 1048576). Reads live Player::SpellDoneCritChance for 502122 before (control: 582856 not learned) and after a real learn of 582856: expected gain +4.0 points +- 0.0001 (matches proven rank-1 582836 pattern). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 582856,
+      "name": "Abyssal Edge (Blade of the Empire mana cost)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "and reduces its mana cost by $s2%.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1000,
+      "expected": 1090.5,
+      "expected_gain": 90.5,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 50 (582856 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 SPELLMOD_COST, EffectBasePoints -51 + EffectDieSides 1 = -50%, SpellFamilyName 31; Spell.dbc). Blade of the Empire 502122 (ManaCostPercentage 12) costs CalculatePct(1512 BaseMana, 12) = 181 mana; -50% saves 90.5 mana (181 -> 90 or 91, saving 91 or 90). Sets caster mana to 2000 (regeneration off) before each cast of 502122 (1600 ms expire_ms clears GCD) and reads remaining mana before (control: 582856 not learned, 1819) and after a real learn of 582856 (1910): expected gain 90.5 +- 1.0 mana (excludes 0 and 181). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 300275,
+      "name": "Hysterical Momentum (3% melee haste on Blade of the Empire damage)",
+      "kind": "metric_delta",
+      "variant": "haste",
+      "label_suffix": "haste",
+      "quote": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1% for $300274d,",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 3600,
+      "expected": 3495.1456,
+      "expected_ratio": 0.970874,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$300274s1 = 3 (300274 Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, EffectBasePoints 2 + EffectDieSides 1 = +3%; Spell.dbc); AscensionCultistAbilities.cpp:236-239 casts 300274 on Blade of the Empire 502122 damage when 300275 is known. Godblade reference weapon 2531 Great Axe has speed_ms 3600: reads attack_time_ms (hand 0) after 502122 before (control: 3600 ms) and after a real learn of 300275 (3600 / 1.03 = 3495.15 ms, ratio 0.970874 +- 0.001, excluding 1.0 and 2x haste 0.9434). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 300275,
+      "name": "Hysterical Momentum (300274 lasts 8000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1% for $300274d,",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 300274
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7500,
+      "expiry_wait_ms": 900,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7450,
+          7700
+        ],
+        "expired": [
+          8300,
+          8600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$300274d = 8000 ms (300274 DurationIndex 31 = 8000 ms, SpellDuration.dbc). With 300275 learned (gate_timing start), reads 300274 absent before any cast (control = 0), casts 502122 once (no auto-attack follow-up) and reads 300274 present (1) at 7500 ms (game_time [7450, 7700], > 7200 = 0.9 * 8000) and gone (0) at 8400 ms (game_time [8300, 8600], < 8800 = 1.1 * 8000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 300275,
+      "name": "Hysterical Momentum (300274 caps at 3 stacks on 4th cast)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "stacking $300274u times.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300274
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 300,
+      "expire_ms": 18500,
+      "void_on_cast_failure": true,
+      "observe_source": "$300274u = 3 (300274 StackAmount 3, Spell.dbc). Casts 502122 four times at t=0, 2100, 4200, 6300 ms (3 initial charges + 1 recharged at 6000 ms, all within 8000 ms refresh window; expire_ms 18500 lets all 3 charges recharge between phases): reads aura_stacks of 300274 = 0 before learning 300275 (control) and exactly 3 (capped, not 4) after a real learn of 300275. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 801539,
+      "name": "Netherborne (Netherstrike critical damage +25% bonus -> x1.125)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Increases the critical damage of Netherstrike by $s1%.",
+      "expected": 1.125,
+      "observe_spell": 578263,
+      "cast_power": 2000,
+      "target_health_pct": 30,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          801539
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 40,
+      "void_on_cast_failure": true,
+      "expected_source": "$s1 = 25 (801539 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 24 + EffectDieSides 1 = +25%; AttributesEx2 includes ALLOW_WHILE_NOT_SHAPESHIFTED 0x80000; Spell.dbc). Netherstrike 578263 (DmgClass 2 melee, SchoolMask 32 Shadow, TargetAuraState 13 <35% HP, Godblade 2531 Great Axe 90.86-127.3 normalized 3.3): Unit.cpp:1755-1761 applies SPELLMOD_CRIT_DAMAGE_BONUS to the crit bonus above base (100% -> 125%, total crit 2.0x -> 2.25x, ratio 2.25 / 2.0 = 1.125 = +12.5%; G-19 band +10.5% to +14.5% excludes 0% and 2x +25%). Both arms hold dummy at 30% HP with 823764 (no partial resist) and force melee crits; treatment learns 801539 for real. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 805115,
+      "name": "End Times (Blade of the Empire range extended to 28 yd)",
+      "kind": "metric_delta",
+      "variant": "range_blade",
+      "label_suffix": "range_blade",
+      "quote": "Increases the range of Blade of the Empire, Netherstrike, and Hammer of Twilight by $s1 yds",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 28,
+      "cast_power": 2000,
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502122
+      },
+      "before_expected": 97,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 25 (805115 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 5 SPELLMOD_RANGE, EffectBasePoints 24 + EffectDieSides 1 = +25 yd; SpellInfo.cpp:1622 routes 805115 to 500720/806222/805116). Blade of the Empire 502122 base range is 5 yd (RangeIndex 192 -> 30 yd with 805115). At dummy_distance 28 yd: refused SPELL_FAILED_OUT_OF_RANGE (97) before casting 805115 (control), succeeds (0) after real cast of 805115. Paired with range_capped (refused at 35 yd), range_netherstrike and range_hammer. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 805115,
+      "name": "End Times (Blade of the Empire refused beyond 30 yd + reach at 35 yd)",
+      "kind": "metric_delta",
+      "variant": "range_capped",
+      "label_suffix": "range_capped",
+      "quote": "Increases the range of Blade of the Empire, Netherstrike, and Hammer of Twilight by $s1 yds",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 35,
+      "cast_power": 2000,
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502122
+      },
+      "before_expected": 97,
+      "expected": 97,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Upper-range bracket for 805115 (+25 yd on 5 yd base = 30 yd; Spell::CheckRange adds both combat reaches, ~3.0 yd -> effective max ~33 yd). At dummy_distance 35 yd, Blade of the Empire 502122 is refused SPELL_FAILED_OUT_OF_RANGE (97) both without and with 805115, excluding a range increase larger than +25 yd. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 805115,
+      "name": "End Times (Netherstrike range extended to 28 yd)",
+      "kind": "metric_delta",
+      "variant": "range_netherstrike",
+      "label_suffix": "range_netherstrike",
+      "quote": "Increases the range of Blade of the Empire, Netherstrike, and Hammer of Twilight by $s1 yds",
+      "trigger_spell": 578263,
+      "target": "dummy",
+      "dummy_distance": 28,
+      "cast_power": 2000,
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 578263
+      },
+      "before_expected": 97,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805115 Effect[0] +25 yd range on Netherstrike 578263 (base RangeIndex 2 = 5 yd -> 30 yd; SpellInfo.cpp:1622; dummy held at 30% HP to satisfy TargetAuraState 13). At dummy_distance 28 yd: refused (97) without 805115 (control), succeeds (0) after real cast of 805115. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs.",
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "caster_health_from": 100,
+      "caster_health_pct": 99,
+      "disable_regeneration": true
+    },
+    {
+      "spell": 805115,
+      "name": "End Times (Hammer of Twilight range extended to 28 yd)",
+      "kind": "metric_delta",
+      "variant": "range_hammer",
+      "label_suffix": "range_hammer",
+      "quote": "Increases the range of Blade of the Empire, Netherstrike, and Hammer of Twilight by $s1 yds",
+      "trigger_spell": 806830,
+      "target": "dummy",
+      "dummy_distance": 28,
+      "cast_power": 2000,
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 806830
+      },
+      "before_expected": 97,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "805115 Effect[0] +25 yd range on Hammer of Twilight 806830 (base RangeIndex 2 = 5 yd -> 30 yd; SpellInfo.cpp:1622; precondition fixtures 500706 x40 and 680602 satisfy CasterAuraSpell). At dummy_distance 28 yd: refused (97) without 805115 (control), succeeds (0) after real cast of 805115. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 805115,
+      "name": "End Times (Blade of the Empire mana cost reduced by 50%)",
+      "kind": "metric_delta",
+      "variant": "mana_blade",
+      "label_suffix": "mana_blade",
+      "quote": "and reduces their mana costs by $s2% for $d.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1819,
+      "expected": 1532,
+      "expected_gain": -287,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 50 (805115 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 SPELLMOD_COST, EffectBasePoints -51 + EffectDieSides 1 = -50%; SpellInfo.cpp:1622). Blade of the Empire 502122 costs CalculatePct(1512, 12) = 181 mana (-50% -> 90 mana); End Times 805115 itself costs CalculatePct(1512, 25) = 378 mana (grounded by mana_end_times_cost). With cast_power 2000 (regen off): before phase casts 502122 alone (2000 - 181 = 1819); after phase casts 805115 (-378) then 502122 (-90) = 1532, delta -287 +- 1.0 (excludes -378 for no cost reduction and -197 for 2x/-100% reduction by 90 mana on both sides). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
+    },
+    {
+      "spell": 805115,
+      "name": "End Times (Netherstrike mana cost reduced by 50%)",
+      "kind": "metric_delta",
+      "variant": "mana_netherstrike",
+      "label_suffix": "mana_netherstrike",
+      "quote": "and reduces their mana costs by $s2% for $d.",
+      "trigger_spell": 578263,
+      "target": "dummy",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "setup_casts": [
+        805115
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1814,
+      "expected": 1529,
+      "expected_gain": -285,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 50 (805115 Effect[1] SPELLMOD_COST -50% on Netherstrike 578263; SpellInfo.cpp:1622). Netherstrike 578263 costs 35 + CalculatePct(1512, 10) = 186 mana (-50% -> 93 mana); End Times 805115 costs 378 mana (grounded by mana_end_times_cost). phase_target_health_pct [30, 25] + caster_health_from 99 settle AURA_STATE_HEALTHLESS_35_PERCENT before both phases. With cast_power 2000 (regen off): before casts 578263 alone (2000 - 186 = 1814); after casts 805115 (-378) then 578263 (-93) = 1529, delta -285 +- 1.0 (excludes -378 for no reduction and -192 for 2x/-100% reduction by 93 mana on both sides). Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs.",
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "caster_health_from": 100,
+      "caster_health_pct": 99
+    },
+    {
+      "spell": 805115,
+      "name": "End Times (lasts 15000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and reduces their mana costs by $s2% for $d.",
+      "trigger_spell": 805115,
+      "target": "caster",
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 805115
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14100,
+          14500
+        ],
+        "expired": [
+          15700,
+          16100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 15000 ms (805115 DurationIndex 8 = 15000 ms, SpellDuration.dbc). Reads 805115 absent before cast (control = 0), casts 805115 on caster, reads aura 805115 present (1) at 14200 ms (game_time [14100, 14500], > 13500 = 0.9 * 15000) and gone (0) at 15800 ms (game_time [15700, 16100], < 16500 = 1.1 * 15000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
     }
   ],
   "player_observations": [],

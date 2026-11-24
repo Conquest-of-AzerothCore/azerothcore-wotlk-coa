@@ -188,13 +188,13 @@
       {
         "claim": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1%",
         "labels": [
-          "300275 effect_value 300274e0 #0"
+          "300275 behaviour_metric_delta haste"
         ]
       },
       {
         "claim": "for $300274d",
         "labels": [
-          "300275 spell_duration 300274 #1"
+          "300275 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -203,7 +203,7 @@
     "spell": 300275,
     "clause": "stacking $300274u times.",
     "labels": [
-      "300275 max_stacks 300274 #2"
+      "300275 behaviour_metric_delta stacks"
     ],
     "kind": "claim"
   },
@@ -1031,26 +1031,36 @@
   {
     "spell": 502122,
     "clause": "3 Charge,",
-    "labels": [],
+    "labels": [
+      "502122 behaviour_metric_delta charges_before_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 502122,
     "clause": "6 sec recharge",
-    "labels": [],
+    "labels": [
+      "502122 behaviour_metric_delta charges_before_recharge",
+      "502122 behaviour_metric_delta charges_after_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 502122,
     "clause": "Generates 20 Insanity",
-    "labels": [],
+    "labels": [
+      "502122 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
     "spell": 502122,
     "clause": "Strike an enemy, dealing $?a803339[${$m1+0+$sps*.3+$AP*.25}][${$m1+0+$sps*.15+$AP*.25}] Shadow damage.",
     "labels": [
-      "502122 effect_value #0"
+      "502122 behaviour_metric_delta damage_base",
+      "502122 behaviour_metric_delta damage_ap",
+      "502122 behaviour_metric_delta damage_sp",
+      "502122 behaviour_metric_delta damage_sp_cthun"
     ],
     "kind": "claim"
   },
@@ -2017,7 +2027,7 @@
     "spell": 582856,
     "clause": "Increases the critical strike chance of Blade of the Empire by $s1%",
     "labels": [
-      "582856 effect_value e0 #0"
+      "582856 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -2025,7 +2035,7 @@
     "spell": 582856,
     "clause": "and reduces its mana cost by $s2%.",
     "labels": [
-      "582856 effect_value e1 #1"
+      "582856 behaviour_metric_delta mana_cost"
     ],
     "kind": "claim"
   },
@@ -3251,7 +3261,7 @@
     "spell": 801539,
     "clause": "Increases the critical damage of Netherstrike by $s1%.",
     "labels": [
-      "801539 effect_value e0 #0"
+      "801539 behaviour_hit_ratio crit_damage"
     ],
     "kind": "claim"
   },
@@ -3581,8 +3591,10 @@
     "spell": 805115,
     "clause": "Increases the range of Blade of the Empire, Netherstrike, and Hammer of Twilight by $s1 yds",
     "labels": [
-      "805115 effect_value e0 #0",
-      "805115 aura_amount e0 #0"
+      "805115 behaviour_metric_delta range_blade",
+      "805115 behaviour_metric_delta range_capped",
+      "805115 behaviour_metric_delta range_netherstrike",
+      "805115 behaviour_metric_delta range_hammer"
     ],
     "kind": "claim"
   },
@@ -3594,14 +3606,14 @@
       {
         "claim": "and reduces their mana costs by $s2%",
         "labels": [
-          "805115 effect_value e1 #1",
-          "805115 aura_amount e1 #1"
+          "805115 behaviour_metric_delta mana_blade",
+          "805115 behaviour_metric_delta mana_netherstrike"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "805115 aura_duration_ms #2"
+          "805115 behaviour_metric_delta duration"
         ]
       }
     ]
