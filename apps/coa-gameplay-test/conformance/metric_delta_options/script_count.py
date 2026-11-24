@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import NamedTuple
 import re
 
 NAME = 'script_count'
@@ -12,12 +13,21 @@ ABSENT = 'absent'
 DIFFERENT = 'different'
 METRIC_EVIDENCE = {READ_METRIC: 'readback', EVIDENCE_METRIC: 'state'}
 STATE_PROMISES = {EVIDENCE_METRIC: r'attacks?|charges?|stacks?'}
+LANDED_METRIC = 'melee_damage_count'
+SWING_NOUN = 'attack'
 
 
-def parse(raw) -> str:
-    if not isinstance(raw, dict) or set(raw) != {'noun'} or raw['noun'] not in NOUNS:
-        raise ValueError(f'script_count is {{"noun": one of {list(NOUNS)}}}, not {raw!r}')
-    return raw['noun']
+class Counted(NamedTuple):
+    noun: str
+    swings: int = 0
+
+
+def parse(raw) -> Counted:
+    if not isinstance(raw, dict) or not {'noun'} <= set(raw) <= {'noun', 'swings'} or raw['noun'] not in NOUNS \
+            or ('swings' in raw and (type(raw['swings']) is not int or raw['swings'] < 1)):
+        raise ValueError(f'script_count is {{"noun": one of {list(NOUNS)}, "swings": a positive swing interval '
+                         f'count (optional)}}, not {raw!r}')
+    return Counted(raw['noun'], raw.get('swings', 0))
 
 
 def read_aura(spec) -> int:
@@ -66,16 +76,30 @@ def contrast_arm(spec, noun: str) -> str | None:
     return None
 
 
-def spec_refusal(spec, noun: str) -> str | None:
-    return stated_count(spec, noun) or counted_read(spec, noun) or plain_layout(spec, noun) or contrast_arm(spec, noun)
+def swing_window(spec, counted: Counted) -> str | None:
+    if not counted.swings:
+        return None
+    if counted.noun != SWING_NOUN:
+        return f'counts swings only for the noun {SWING_NOUN!r}, not {counted.noun!r}'
+    cast_arms = [spec.expected] + ([spec.before_expected] if driver(spec) != ABSENT else [])
+    if counted.swings + 1 >= min(cast_arms):
+        return (f'swings {counted.swings} intervals, up to {counted.swings + 1} landed attacks, which is not below '
+                f'the least counted reading {min(cast_arms):g} of a cast arm, so the aura may end inside the window')
+    return None
 
 
-def check(spec, noun):
-    if noun is None:
+def spec_refusal(spec, counted: Counted) -> str | None:
+    noun = counted.noun
+    return (stated_count(spec, noun) or counted_read(spec, noun) or plain_layout(spec, noun)
+            or contrast_arm(spec, noun) or swing_window(spec, counted))
+
+
+def check(spec, counted):
+    if counted is None:
         if spec.evidence_metric == EVIDENCE_METRIC:
             raise ValueError(f'{spec.spell} names evidence_metric {EVIDENCE_METRIC} without the {NAME} opt-in')
         return
-    refusal = spec_refusal(spec, noun)
+    refusal = spec_refusal(spec, counted)
     if refusal is not None:
         raise ValueError(f'{spec.spell} {NAME} {refusal}')
 
@@ -118,18 +142,107 @@ def scenario_refusal(spec, steps: list[dict], records) -> str | None:
     return named_aura(spec, records) or no_setter(spec, steps) or real_cast(spec, steps)
 
 
-def fixtures(class_file: dict, spec, noun: str, scenario: dict):
+def moment(after: bool) -> str:
+    return 'after' if after else 'before'
+
+
+def cast_count_label(label: str) -> str:
+    return f'{label} cast count'
+
+
+def cast_landed_label(label: str) -> str:
+    return f'{label} cast landed'
+
+
+def landed_label(label: str) -> str:
+    return f'{label} landed'
+
+
+def after_trigger_steps(spec, counted: Counted, after: bool) -> list[dict]:
+    from behaviours import metric_delta_label
+    from profile import measurement
+    from values import TARGET
+    if not counted.swings:
+        return []
+    label = metric_delta_label(spec, moment(after))
+    return [measurement(cast_count_label(label), spec.measure_actor, spec.metric, **spec.fields),
+            measurement(cast_landed_label(label), spec.measure_actor, LANDED_METRIC),
+            {'action': 'attack', 'actor': spec.measure_actor, 'target': TARGET},
+            {'action': 'wait', 'label': SWING_WAIT_LABEL, 'ms': 0},
+            {'action': 'stop_attack', 'actor': spec.measure_actor}]
+
+
+SWING_WAIT_LABEL = 'counted swings'
+
+
+def counted_moments(spec) -> tuple[str, ...]:
+    return ('after',) if driver(spec) == ABSENT else ('before', 'after')
+
+
+def swing_fixtures(class_file: dict, spec, counted: Counted, scenario: dict):
+    from behaviours import metric_delta_label
+    from hits import creature_fixture
+    from procs import swing_interval
+    from profile import measurement
+    judged = {metric_delta_label(spec, name) for name in counted_moments(spec)}
+    window = counted.swings * swing_interval(class_file)
+    steps = []
+    for step in scenario['steps']:
+        if step.get('action') == 'wait' and step.get('label') == SWING_WAIT_LABEL:
+            step = {**step, 'ms': window}
+        steps.append(step)
+        if step.get('action') == 'assert' and step.get('label') in judged:
+            steps.append(measurement(landed_label(step['label']), step['actor'], LANDED_METRIC))
+    scenario['steps'] = steps
+    scenario.setdefault('creatures', [creature_fixture(class_file)])
+    scenario['contract'] += (f' After each real cast of {spec.trigger_spell} the caster reads the count and its '
+                             f'{LANDED_METRIC}, auto-attacks the dummy for {counted.swings} swing intervals '
+                             f'({window} ms), stops, '
+                             f'and reads both again: each counted reading is the count plus the attacks landed since '
+                             f'the cast, valid only with at least one landed attack and a count strictly below the '
+                             f'one read at the cast, and equal to it (one count per landed attack).')
+
+
+def fixtures(class_file: dict, spec, counted: Counted, scenario: dict):
     from behaviours import dataset
     from profile import DBC_DIR
     from tooltip import Records
     refusal = scenario_refusal(spec, scenario['steps'], Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR)))))
     if refusal is not None:
         raise ValueError(f'{spec.spell} {NAME} {refusal}')
-    scenario['contract'] += (f' The {READ_METRIC} of aura {read_aura(spec)} is the {noun} count the quote states, '
-                             f'driven by real casts only; the before arm reads it with the driving cast '
+    scenario['contract'] += (f' The {READ_METRIC} of aura {read_aura(spec)} is the {counted.noun} count the quote '
+                             f'states, driven by real casts only; the before arm reads it with the driving cast '
                              f'{driver(spec)}, so it is judged as {EVIDENCE_METRIC}.')
+    if counted.swings:
+        swing_fixtures(class_file, spec, counted, scenario)
 
 
-def model(spec, noun: str) -> dict:
-    return {'evidence_metric': EVIDENCE_METRIC,
-            NAME: {'noun': noun, 'aura': read_aura(spec), 'driver': driver(spec)}}
+def model(spec, counted: Counted) -> dict:
+    found = {'noun': counted.noun, 'aura': read_aura(spec), 'driver': driver(spec)}
+    if counted.swings:
+        from behaviours import metric_delta_label
+        found['swings'] = {'count': counted.swings,
+                           'readings': [metric_delta_label(spec, name) for name in counted_moments(spec)]}
+    return {'evidence_metric': EVIDENCE_METRIC, NAME: found}
+
+
+def counted_reading(values: dict, label: str) -> float | None:
+    reads = [values.get(name) for name in (label, cast_count_label(label), cast_landed_label(label),
+                                           landed_label(label))]
+    if None in reads:
+        return None
+    count, cast_count, cast_landed, landed = reads
+    gained = landed - cast_landed
+    if gained < 1 or count >= cast_count or count + gained != cast_count:
+        return None
+    return count + gained
+
+
+def run_values(values: dict, found: dict) -> dict:
+    swings = found.get('swings')
+    if swings is None:
+        return values
+    out = dict(values)
+    for label in swings['readings']:
+        out[label] = counted_reading(values, label)
+    return {label: value for label, value in out.items() if value is not None}

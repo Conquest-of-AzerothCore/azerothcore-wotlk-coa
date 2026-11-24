@@ -1894,7 +1894,7 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     if spec.attack_swings and (spec.gate_timing != 'between' or (spec.setup_casts and not spec.gate_cast)
                                or spec.target != TARGET
                                or spec.setup_actor_aura is not None or spec.trigger_only_after
-                               or spec.phase_auras or spec.after_auras):
+                               or spec.after_auras):
         raise ValueError(f'{spec.spell} attacks the dummy as its trigger, so it learns the gate between the two '
                          f'attack phases and takes no setup casts, setup aura or after-only trigger')
     if spec.gate_cast and not spec.attack_swings:
@@ -2117,6 +2117,10 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             setup_steps = [gate_learn_step] + [step for setup_spell in spec.setup_casts
                                                for step in attack_setup_cast_steps(records, setup_spell,
                                                                                    spec.setup_wait_ms)]
+        swings = [phase_aura_step(aura) for aura in spec.phase_auras] + swings
+        if spec.phase_auras:
+            contract += (f' Each phase sets the auras {[list(aura) for aura in spec.phase_auras]} (spell, stacks, on, '
+                         f'by) right before it starts attacking.')
         steps = (base_steps(class_file) + setup_steps + swings
                  + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] + gate_steps
                  + [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}]

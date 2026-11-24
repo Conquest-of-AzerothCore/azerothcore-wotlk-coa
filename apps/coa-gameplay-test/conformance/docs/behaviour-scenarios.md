@@ -285,7 +285,9 @@ the cast with auto attacks at the dummy, for a passive whose trigger is a swing:
 `trigger_spell` names the observed spell without being cast. It requires `target: "dummy"` and the default
 `gate_timing`, and refuses `setup_casts`, `setup_actor_aura` and `trigger_only_after`. `force_crit` (`melee`,
 `spell` or `ranged`, ADR 0692) sets the forced crit rating on the caster, as the trigger entries do; auto-attack
-swings refuse `ranged`. The scenario's `timeout_ms` is its
+swings refuse `ranged`. `phase_auras` (ADR 1270) are set right before each phase's attack, a condition aura held in
+both phases (`after_auras` stay refused): Grommash's Folly 805236 sets Inner Demon 804216 before each phase's forced
+crits. The scenario's `timeout_ms` is its
 summed waits plus the 60 s margin. Parry Dance 804912 uses it to read the `aura_stacks` of 560651 after ten
 forced-crit swings: 0 without the passive, the cap of 5 with it.
 `gate_cast: true` (ADR 0380) casts the gate at the caster between the attack phases instead of learning it, after

@@ -3800,7 +3800,8 @@
     "clause": "Your Annihilation now affects $s1 additional attack",
     "labels": [
       "802076 effect_value e0 #0",
-      "802076 behaviour_metric_delta charges"
+      "802076 behaviour_metric_delta charges",
+      "802076 behaviour_metric_delta consumed"
     ],
     "tool_gap": {
       "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
@@ -3811,7 +3812,8 @@
         }
       ]
     },
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at the last count: seven attacks of the 2300 ms main hand do not fit in the 12000 ms duration). Missed or avoided swings untested (the rule counts landed swings only)."
   },
   {
     "spell": 802076,
@@ -3851,7 +3853,8 @@
     "clause": "Your Annihilation now affects $s1 additional attack",
     "labels": [
       "802110 effect_value e0 #0",
-      "802110 behaviour_metric_delta charges"
+      "802110 behaviour_metric_delta charges",
+      "802110 behaviour_metric_delta consumed"
     ],
     "tool_gap": {
       "reason": "The charges read gives the count the aura stores right after the cast (data: a stored modifier read back), not the attacks it affects or lasts: consumption per auto-attack and per direct hit (AscensionFelswornEvents.cpp case 803904, AscensionFelswornAbilities.cpp OnSpellCalculatedTarget) is not read. A consumption arm needs the script_count option to allow swings and a count of the swings that landed (plain_layout refuses attack_swings today); a shared option change that waits for the controller's go.",
@@ -3862,7 +3865,8 @@
         }
       ]
     },
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at the last count: seven attacks of the 2300 ms main hand do not fit in the 12000 ms duration). Missed or avoided swings untested (the rule counts landed swings only)."
   },
   {
     "spell": 802110,
@@ -4026,7 +4030,8 @@
       {
         "claim": "Lasts for $n attacks",
         "labels": [
-          "803904 behaviour_metric_delta charges"
+          "803904 behaviour_metric_delta charges",
+          "803904 behaviour_metric_delta consumed"
         ]
       },
       {
@@ -4047,7 +4052,7 @@
       ]
     },
     "kind": "claim",
-    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges claim and the $d part the held and gone claims. The $n part stays unproven (tool gap): the charges read is the stored count, not the attacks the aura lasts."
+    "reason": "The value label 803904 effect_value #1 is unreadable ($n) and is dropped: the $n part is the charges and consumed claim and the $d part the held and gone claims. The consumption part counts on mentor D-95 condition 1 (script_count swings, the consumed entry): after a real cast, the stored count plus the auto attacks landed since the cast equals the stated count, with at least one landed attack and the count strictly lower than at the cast. Expiry edge untested (the aura ending at the last count: seven attacks of the 2300 ms main hand do not fit in the 12000 ms duration). Missed or avoided swings untested (the rule counts landed swings only)."
   },
   {
     "spell": 803905,
@@ -4317,9 +4322,11 @@
     "spell": 805236,
     "clause": "and you now heal equal to $807426s1% of all damage dealt by critical strikes with auto attacks.",
     "labels": [
-      "805236 effect_value 807426e0 #1"
+      "805236 behaviour_metric_delta crit_swing_heal",
+      "805236 behaviour_metric_delta crit_swing_heal_no_inner_demon"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "The value label 805236 effect_value 807426e0 #1 (not_measured in the pair of record) is replaced by the crit_swing_heal ratio: the caster's 560839 heal over its critical auto attack damage with Inner Demon 804216 held (condition fixture, phase auras) and 805236 learned for real (0.5 expected, 0 before the learn), and the contrast arm without Inner Demon (0)."
   },
   {
     "spell": 805236,
