@@ -79,6 +79,7 @@ class aura_ascension_felsworn_lifecycle : public AuraScript
             uint32 charges = 5;
             player->ApplySpellMod(id, SPELLMOD_CHARGES, charges);
             GetAura()->SetScriptValue(id, charges);
+            GetAura()->SetCharges(0);
         }
         if (id == 807163)
             GetAura()->SetScriptValue(id, 10);
