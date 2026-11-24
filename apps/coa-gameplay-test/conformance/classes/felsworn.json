@@ -18907,108 +18907,6 @@
       "observe_source": "578317 DurationIndex 31 gives 8000 ms ($578317d, SpellDuration.dbc); the channel of 800206 lasts 2500 ms (DurationIndex 66) and the aura is cast when it ends. The aura is gone 11100 ms after the cast, 8600 ms after the channel end (1.075 of 8000, excludes a duration 10% long, 8800 ms); the before read, absent, is the control. Fixtures as the haste entry. Reference search as the haste entry."
     },
     {
-      "spell": 707527,
-      "name": "Hateforged Barrier (Physical damage taken)",
-      "kind": "taken_hit",
-      "variant": "physical_taken",
-      "label_suffix": "physical_taken",
-      "judge": "damage_ratio",
-      "expected": 0.8792,
-      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
-      "strike_spell": 92559,
-      "caster_health_pct": 100,
-      "caster_max_health": 100000,
-      "trials": 4,
-      "strikes": 40,
-      "settle_ms": 50,
-      "arms": [
-        {
-          "name": "control",
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 707527,
-              "equals": 0
-            }
-          ]
-        },
-        {
-          "name": "treatment",
-          "opening_casts": [
-            [
-              707527,
-              "caster"
-            ]
-          ],
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 707527,
-              "equals": 1
-            }
-          ],
-          "casts": [
-            [
-              707527,
-              "caster"
-            ]
-          ]
-        }
-      ],
-      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2); Effect[0] is the absorb aura 69 (752 + Stamina x 1, Stamina 79 of the reference stats = 831). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster 40 times per trial in each arm, 4 trials, the barrier recast before each treatment trial. The logged damage is taken after the absorb, so the expected mean per strike is (40 x 1000 x 0.90 - 831) / (40 x 1000) = 0.8792, against 0.9792 if the 10% were not applied: the 831 of the first strike is the same absorb in either case, and 40 strikes make its weight 2 points of the ratio, small beside the 10 points of the claim. Control arm: no barrier, 1000 per strike. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; ~/CoaServer/reference bindmysoul talents snapshot: Hateforged Barrier 705129 text differs (a regeneration clause, an older state); expected values come from the tooltip and the DBC only. The control for this entry is the rank 1 entry 705129 below, whose Effect[1] carries MiscValue 1. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
-    },
-    {
-      "spell": 705129,
-      "name": "Hateforged Barrier rank 1 (Physical damage taken, control of rank 707527)",
-      "kind": "taken_hit",
-      "variant": "physical_taken",
-      "label_suffix": "physical_taken",
-      "judge": "damage_ratio",
-      "expected": 0.8902,
-      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
-      "strike_spell": 92559,
-      "caster_health_pct": 100,
-      "caster_max_health": 100000,
-      "trials": 4,
-      "strikes": 40,
-      "settle_ms": 50,
-      "arms": [
-        {
-          "name": "control",
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 705129,
-              "equals": 0
-            }
-          ]
-        },
-        {
-          "name": "treatment",
-          "opening_casts": [
-            [
-              705129,
-              "caster"
-            ]
-          ],
-          "checks": [
-            {
-              "metric": "aura",
-              "spell": 705129,
-              "equals": 1
-            }
-          ],
-          "casts": [
-            [
-              705129,
-              "caster"
-            ]
-          ]
-        }
-      ],
-      "observe_source": "705129 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 1 (Physical), BasePoints -11 + 1 = -10 ($s2); Effect[0] aura 69 absorbs 176 + 1..32 + 2.45 per level (60 x 2.45 = 147) + Stamina 79 x 1, about 419. Same design as the 707527 entry (Void Zone 92559, 40 strikes, 4 trials, barrier recast per trial): expected mean (40 x 0.90 x 954 - 419) / (40 x 954) = 0.8902, 0.9803 if the 10% were not applied; the 2-point band holds any absorb of this rank. Control entry: rank 1 carries MiscValue 1 in the DBC where ranks 2 to 6 (707523 to 707527) carry MiscValue 0. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
-    },
-    {
       "kind": "metric_delta",
       "trigger_spell": 520693,
       "target": "dummy",
@@ -20378,6 +20276,21 @@
       "void_on_cast_failure": true,
       "observe_source": "521234 StackAmount 4 ($u), DurationIndex 1 = 10000 ms. Each Felfury spender cast (Azzinoth's Assault 803475) casts 521234 on the caster while 807431 is known (AscensionFelswornAbilities.cpp:236,253). 3 stacks are a precondition fixture (harness set_aura); two real casts 1100 ms apart would make 5 without a cap and read 4. Felfury x6 (two casts cost 4) and 803468 are fixtures. Control: the same casts with the passive unknown, the fixture reads 3. Reference search 2026-11-24: nothing found beyond the tooltip.",
       "label_suffix": "stack_cap"
+    },
+    {
+      "spell": 707527,
+      "name": "Hateforged Barrier (Physical damage taken while it holds)",
+      "kind": "taken_total_ratio",
+      "label_suffix": "physical_taken",
+      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
+      "strike_spell": 92559,
+      "magic_spell": 41394,
+      "reduction_effect": 1,
+      "absorb_effect": 0,
+      "stamina_coefficient": 1,
+      "trials": 10,
+      "caster_max_health": 100000,
+      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2), DBC MiscValue 0 (no school; rank 1 705129 carries 1) set to 1 (Physical) by the Felsworn contract (mentor decision D-81, Felsworn ADR 0019); Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, $m1 = 751 + 1..32 plus Stamina x 1 ($m1+0+$STA*1), stated separately. Kind taken_total_ratio (ADR 1266, provisional): each strike is read as damage plus resisted plus absorbed from the spell logs the caster receives, so the reduction is judged before the absorb: Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) without the barrier (control) and with it cast before each strike (treatment, the total must be 90% of the control total within the integer rounding, part of it absorbed); Light of the Naaru 41394 (1100 Holy, larger than the barrier) without and with it (equal totals, the absorbed amount within 752..783 plus the Stamina read at the arm start); and Void Zone after the barrier is broken by Light of the Naaru (the aura read absent, equal to the control: the reduction ends with the barrier). Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],
