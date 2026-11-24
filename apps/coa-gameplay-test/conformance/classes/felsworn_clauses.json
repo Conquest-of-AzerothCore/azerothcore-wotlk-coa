@@ -464,6 +464,7 @@
     "labels": [
       "300490 behaviour_metric_delta cast_landed",
       "300490 behaviour_metric_delta cast_early",
+      "300490 behaviour_metric_delta cast_control",
       "300490 behaviour_metric_delta fourth_cast",
       "300490 behaviour_metric_delta felforged_duration"
     ],
