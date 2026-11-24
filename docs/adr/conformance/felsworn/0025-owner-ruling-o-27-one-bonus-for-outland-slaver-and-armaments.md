@@ -50,3 +50,40 @@ text changes.
   no tooltip or ruling states its bonus: review fw-rf1 I-4) and
   `felsworn-armaments-of-the-legion.json` (no `SPELLMOD_EFFECT1` modifier on Hateforged Barrier). No other class
   lists these spells (class map `shared_with` empty).
+
+## Amendment: Felsworn O-39 (2026-11-24), Twin Slice takes no Outland Slaver bonus
+
+- Status: accepted (owner ruling Felsworn O-39 (2026-11-24) on night question N-11)
+
+### Context
+
+After the decision above, Outland Slaver Effect[2] (aura 108 `SPELLMOD_ALL_EFFECTS`, +10% / +20%) named only Twin Slice
+(dword1 bit 24). The tooltip names Felrend and Fel Fireball only. The bonus reached real damage through the level 60
+rank: Twin Slice 547211 Effect[0] and Effect[1] are `SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE` (BasePoints 264 + 1 = 265),
+`Unit::CalculateSpellDamage` applies `SPELLMOD_ALL_EFFECTS` to that value (`Unit.cpp:12986`) and `Spell::EffectTriggerSpell`
+passes it as the base points of the strikes 803462 and 520243 (`SpellEffects.cpp:1847-1852`). The ruling removes it.
+
+### Options
+
+- Clear dword1 bit 24 of Effect[2]. Rejected: the mask becomes empty, and `SpellInfo::IsAffected` treats an empty family
+  mask as every spell of the family (`SpellInfo.cpp:1467`), so the +10% / +20% would reach every Felsworn spell, Felrend
+  and Fel Fireball included.
+- Make Effect[2] `SPELL_AURA_DUMMY`, the option rejected above under O-27 because the ruling did not address Twin Slice.
+  Taken: after O-27 Effect[2] names only Twin Slice, so this removes exactly that bonus.
+
+### Decision
+
+`ApplyContracts` (`AscensionFelswornContracts.cpp`), keyed to 705123 and 707846: Effect[2] becomes `SPELL_AURA_DUMMY`
+(the same contract line as Armaments 706266 and 707844). Effect[0] (cost) and Effect[1] (`SPELLMOD_DAMAGE` on Felrend
+and Fel Fireball) are unchanged. No shared file, DBC, SQL or client text changes.
+
+### Consequences
+
+- Twin Slice (every rank and the strikes it feeds) takes no Outland Slaver bonus; Felrend and Fel Fireball keep one
+  +10% / +20% from Effect[1].
+- Readers of Outland Slaver Effect[2]: only the player's spell modifier list (no Felsworn code reads 705123 or 707846
+  besides this contract; class map `shared_with` empty). Other family 20 modifiers on bit 24 (520885, 704361, 705111,
+  707845, 804082, 807163) are separate spells and unchanged.
+- Regression: conformance entries 705123 / 707846 `twin_slice_unchanged` (real damage of the 803462 strike of 547211,
+  with and without the talent, ratio 1.0) and two `spell_modifier` op 8 reads of 547211 in
+  `felsworn-outland-slaver.json`.

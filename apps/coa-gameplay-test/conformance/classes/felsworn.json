@@ -11687,7 +11687,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "observe_source": "$s2 = 10 (705123 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 9 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract drops the Fel Fireball bit of Effect[2] (AscensionFelswornContracts.cpp, Felsworn ADR 0025), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 705123: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says +15% where the DBC tooltip and Effect[1] say 10% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only.",
+      "observe_source": "$s2 = 10 (705123 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 9 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract made Effect[2] SPELL_AURA_DUMMY (AscensionFelswornContracts.cpp, Felsworn ADR 0025 and its Felsworn O-39 (2026-11-24) amendment, which also removes the Twin Slice bonus), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 705123: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says +15% where the DBC tooltip and Effect[1] say 10% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only.",
       "cast_wait_ms": 2500
     },
     {
@@ -11714,6 +11714,31 @@
         "attack_power": 20000
       },
       "observe_source": "$s2 = 10 (705123 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 9 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). Felrend 800210 (a weapon strike with both weapons) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture attack_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 10 percent (band 8..12, G-19). Reference search 2026-11-23: coa-history spell 705123: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: text says +15% where the DBC tooltip and Effect[1] say 10% (an older state, the tooltip prevails, G-9); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 705123,
+      "name": "Outland Slaver (Twin Slice damage unchanged)",
+      "kind": "hit_ratio",
+      "variant": "twin_slice_unchanged",
+      "label_suffix": "twin_slice_unchanged",
+      "quote": "Reduces the cost of your Felrend and Fel Fireball by $s1 and increases their damage dealt by $s2%.",
+      "expected": 1.0,
+      "observe_spell": 803462,
+      "cast_spell": 547211,
+      "cast_power": 100,
+      "cast_wait_ms": 1600,
+      "learn": [
+        547211
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          705123
+        ]
+      },
+      "critical": false,
+      "trials": 80,
+      "observe_source": "Felsworn O-39 (2026-11-24): the tooltip names Felrend and Fel Fireball only, so Twin Slice takes no Outland Slaver bonus. 705123 Effect[2] (aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 SPELLMOD_ALL_EFFECTS, BasePoints 9 + 1 = 10%) kept only the Twin Slice bit (word 1 bit 24) after Felsworn ADR 0025; the Felsworn contract now makes it SPELL_AURA_DUMMY (AscensionFelswornContracts.cpp, Felsworn ADR 0025 amendment). Twin Slice 547211 (the level 60 rank) Effect[0] is SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, BasePoints 264 + 1 = 265, passed as the base points of its main-hand strike 803462 (Effect[0] NORMALIZED_WEAPON_DMG), so a SPELLMOD_ALL_EFFECTS bonus on Twin Slice raises that strike by 10% of 265. 547211 is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits of 803462 only, no power fixture so the 265 term stays a large share of each hit: the mean damage per hit must not change (ratio 1.0, 2-point band). The Felrend and Fel Fireball entries of 705123 keep their +10% (Effect[1]). Reference search 2026-11-23 (the other 705123 entries): coa-history spell 705123: 0 events in 186 logs; expected values come from the tooltip, the DBC and the owner ruling only."
     },
     {
       "spell": 707846,
@@ -11751,7 +11776,7 @@
       "fixture": {
         "spell_power": 20000
       },
-      "observe_source": "$s2 = 20 (707846 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract drops the Fel Fireball bit of Effect[2] (AscensionFelswornContracts.cpp, Felsworn ADR 0025), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707846: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: not listed (the snapshot lists 705123 only); expected values come from the tooltip and the DBC only.",
+      "observe_source": "$s2 = 20 (707846 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). O-27 (owner): one bonus only. Effect[2] (aura 108 SPELLMOD_ALL_EFFECTS, same percent) named Fel Fireball (word 1 bit 0) beside Twin Slice (bit 24); the Felsworn contract made Effect[2] SPELL_AURA_DUMMY (AscensionFelswornContracts.cpp, Felsworn ADR 0025 and its Felsworn O-39 (2026-11-24) amendment, which also removes the Twin Slice bonus), so Fel Fireball keeps only Effect[1] as Felrend does. The spell penetration fixture 823764 (aura 123, MiscValue 126, -9999) is set on the caster in both arms: it removes the partial resists of the dummy's monster linear resistance, the variance of the 47-trial reads (+21.53 / +16.48 at rank 1 before the fix, merged/fw-b3g3/proveC). Fel Fireball 801312 (Effect[0] SCHOOL_DAMAGE, cast time 1500 ms) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture spell_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707846: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: not listed (the snapshot lists 705123 only); expected values come from the tooltip and the DBC only.",
       "cast_wait_ms": 2500
     },
     {
@@ -11778,6 +11803,31 @@
         "attack_power": 20000
       },
       "observe_source": "$s2 = 20 (707846 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1, MiscValue 0 = SPELLMOD_DAMAGE; Effect[2] is the same percent on SPELLMOD_ALL_EFFECTS). Felrend 800210 (a weapon strike with both weapons) is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits only; the named precondition fixture attack_power +20000 is the same in both arms, so integer truncation is far inside the band; the mean damage per hit must rise by 20 percent (band 18..22, G-19). Reference search 2026-11-23: coa-history spell 707846: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot: not listed (the snapshot lists 705123 only); expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 707846,
+      "name": "Outland Slaver (Twin Slice damage unchanged)",
+      "kind": "hit_ratio",
+      "variant": "twin_slice_unchanged",
+      "label_suffix": "twin_slice_unchanged",
+      "quote": "Reduces the cost of your Felrend and Fel Fireball by $s1 and increases their damage dealt by $s2%.",
+      "expected": 1.0,
+      "observe_spell": 803462,
+      "cast_spell": 547211,
+      "cast_power": 100,
+      "cast_wait_ms": 1600,
+      "learn": [
+        547211
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          707846
+        ]
+      },
+      "critical": false,
+      "trials": 80,
+      "observe_source": "Felsworn O-39 (2026-11-24): the tooltip names Felrend and Fel Fireball only, so Twin Slice takes no Outland Slaver bonus. 707846 Effect[2] (aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 SPELLMOD_ALL_EFFECTS, BasePoints 19 + 1 = 20%) kept only the Twin Slice bit (word 1 bit 24) after Felsworn ADR 0025; the Felsworn contract now makes it SPELL_AURA_DUMMY (AscensionFelswornContracts.cpp, Felsworn ADR 0025 amendment). Twin Slice 547211 (the level 60 rank) Effect[0] is SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, BasePoints 264 + 1 = 265, passed as the base points of its main-hand strike 803462 (Effect[0] NORMALIZED_WEAPON_DMG), so a SPELLMOD_ALL_EFFECTS bonus on Twin Slice raises that strike by 20% of 265. 547211 is cast at the dummy trials times without the passive (control) and with it learned by a real learn (treatment), non-critical hits of 803462 only, no power fixture so the 265 term stays a large share of each hit: the mean damage per hit must not change (ratio 1.0, 2-point band). The Felrend and Fel Fireball entries of 707846 keep their +20% (Effect[1]). Reference search 2026-11-23 (the other 707846 entries): coa-history spell 707846: 0 events in 186 logs; expected values come from the tooltip, the DBC and the owner ruling only."
     },
     {
       "spell": 800204,

@@ -2419,7 +2419,8 @@
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
       "705123 behaviour_hit_ratio felrend_damage",
-      "705123 behaviour_hit_ratio fel_fireball_damage"
+      "705123 behaviour_hit_ratio fel_fireball_damage",
+      "705123 behaviour_hit_ratio twin_slice_unchanged"
     ],
     "kind": "claim"
   },
@@ -2970,7 +2971,8 @@
     "clause": "and increases their damage dealt by $s2%.",
     "labels": [
       "707846 behaviour_hit_ratio felrend_damage",
-      "707846 behaviour_hit_ratio fel_fireball_damage"
+      "707846 behaviour_hit_ratio fel_fireball_damage",
+      "707846 behaviour_hit_ratio twin_slice_unchanged"
     ],
     "kind": "claim"
   },
