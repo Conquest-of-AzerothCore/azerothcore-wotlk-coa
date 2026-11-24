@@ -550,6 +550,44 @@
       "min_detectable": 6,
       "events_exclude_trigger_casts": true,
       "trial_casts": true
+    },
+    {
+      "aura": 805245,
+      "name": "Demonic Fortitude (damage taken)",
+      "tooltip": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "taken_hit",
+        "spell": 41394,
+        "striker_entry": 36
+      },
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "min_parts": 10,
+      "trigger_text": "all damage taken",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 0,
+      "stack_per_cast": 0,
+      "stack_cap": 6,
+      "events_per_proc": 1,
+      "proc_spell": 800058,
+      "proc_spell_source": "Proc of 805245 calls Gain(player, 1) (AscensionFelswornEvents.cpp:173-175), which adds one stack of aura 800058 (AscensionFelsworn.cpp:223-233); no spell is cast.",
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 0,
+          "source": "Felfury 800058 set to 0 before every strike: the stack read after the strike interval counts the Gain(player, 1) events (aura_stacks events, ADR 1254, on the taken_hit trigger)."
+        },
+        {
+          "spell": 800209,
+          "stacks": 1,
+          "source": "Demonic Will 800209 held before every strike: the clause's condition (AscensionFelswornEvents.cpp:44-46, HasAura(800209)), not its subject. A real cast would gain 1 Felfury itself (ResourceGainRules, AscensionCustomResourceData.h) and mix that gain into the events, so the aura is set, as on the avoided leg (controller go, 2026-11-23)."
+        }
+      ],
+      "handler": "aura_ascension_felsworn_event: Check (AscensionFelswornEvents.cpp:43-48) passes damage taken (damage > 0), a dodge or a parry on the caster (id 805245) while Demonic Will 800209 or Hateforged Barrier 705129 is held, and rolls Chance(player, 805245) (Spell.dbc ProcChance 20, no cooldown, AscensionFelsworn.cpp:235-244); Proc gains 1 Felfury 800058. spell_proc 805245 ProcFlags 1048575, SpellPhaseMask 2 (rev_20260909_05_felsworn_completion.sql:36). Trigger: a stationary striker (creature 36) casts Light of the Naaru 41394 (Holy, magic, 1100 damage) at the caster, which is set to full health before every strike; each landed hit is one trial (damage taken leg). The avoided leg stays a tool gap. Hateforged Barrier 705129 as the condition is not read."
     }
   ],
   "triggers": [
