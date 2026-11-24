@@ -5008,6 +5008,1713 @@
         "source": "Darkwither 502220 is single-target (EffectRadiusIndex 0) at dummy_distance 10 yd; Presence of C'Thun 803339 and triggered 803340 are caster-only; streams are ungrouped."
       },
       "observe_source": "803283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +5% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). Expected 25% with 803283 learned; AscensionCultist.cpp:105-116 Chance() does not call ApplySpellMod(SPELLMOD_CHANCE_OF_SUCCESS), so this entry verifies the live proc rate against 25%. Reference search 2026-11-24: coa-history spell 803283: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 803283 matches installed Spell.dbc."
+    },
+    {
+      "spell": 524804,
+      "name": "Seething Void (Empire's Grasp cooldown)",
+      "kind": "cost_gate",
+      "quote": "Reduces the cooldown of Empire's Grasp by $/1000;s1 sec.",
+      "gated_spell": 500704,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "dummy",
+      "cast_power": 2000,
+      "margin_ms": 250,
+      "observe_source": "524804 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -5001 + EffectDieSides[0] 1 = -5000 ms ($/1000;s1 = 5 s), EffectSpellClassMask[2] 1048576 = SpellFamilyFlags[2] 1048576 of Empire's Grasp 500704 (SpellFamilyName 31, RecoveryTime 35000 ms, CategoryRecoveryTime 35000 ms, StartRecoveryTime 0, ManaCostPercentage 11; Spell.dbc). Cast at dummy with cast_power 2000 (<= 2297 MaxMana). Arms timed from priming cast: 30250 ms without 524804 (refused, SPELL_FAILED_NOT_READY 67, 35000 ms stock), 30250 ms with 524804 learned (goes through, 0), and 29750 ms with 524804 (refused, 67): reduced cooldown lies in [29750, 30250] ms, excluding 29500 and 30500 ms (10% off the 5 s cut) and 27000/33000 ms (10% off the 30 s reduced cooldown). Reference search 2026-11-24: coa-history spell 524804: 0 events in 186 logs (passive; positive control 500704 Empire's Grasp: 26 casts in 4 logs); coabuildhub spells_master_index.json entry 524804 says 'Reduces the cooldown of Empire's Grasp by -5 sec.' matching installed Spell.dbc.",
+      "arm_wait_ms": 5500
+    },
+    {
+      "spell": 573028,
+      "name": "Grasp of Zek'voz (30% slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slowing their movement speed by $s1%",
+      "trigger_spell": 573028,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.35,
+      "expected_ratio": 0.7,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "573028 Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, EffectBasePoints[0] -31 + EffectDieSides[0] 1 = -30% ($s1 = 30), TARGET_UNIT_TARGET_ENEMY, DurationIndex 1 (10000 ms), ManaCostPercentage 10 (Spell.dbc). Reads dummy run_speed_rate before any cast (control, uncast, >= 0.5; stock dummy 36 is 1.14286) and 500 ms after one real cast of 573028: ratio after / before must equal 0.70 within 0.001. Reference search 2026-11-24: coa-history spell 573028: 0 events in 186 logs; coabuildhub spells_master_index.json entry 573028 matches installed Spell.dbc ('slowing their movement speed by -30% for 10 seconds')."
+    },
+    {
+      "spell": 573028,
+      "name": "Grasp of Zek'voz (10 sec duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d.",
+      "trigger_spell": 573028,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 573028,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9400,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9200,
+          9600
+        ],
+        "expired": [
+          10300,
+          10800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "573028 DurationIndex 1 = 10000 ms ($d = 10 sec, SpellDuration.dbc), CastTime 0, Speed 0 (Spell.dbc). Reads aura 573028 absent on dummy before the cast (control = 0), present (1) at 9400 ms (game_time [9200, 9600], strictly above 9000 = 0.9 * 10000), and gone (0) at 10500 ms (game_time [10300, 10800], strictly below 11000 = 1.1 * 10000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 573028: 0 events in 186 logs; coabuildhub spells_master_index.json entry 573028 matches installed Spell.dbc ('for 10 seconds')."
+    },
+    {
+      "spell": 704885,
+      "name": "Dismay (Grasp of Zek'voz +20% slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "Increases the movement speed slowed by Grasp of Zek'voz by $s1%.",
+      "trigger_spell": 573028,
+      "gate_spell": 704885,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.357143,
+      "expected_ratio": 0.7142857,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 11000,
+      "void_on_cast_failure": true,
+      "observe_source": "704885 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 3 (SPELLMOD_EFFECT1), EffectBasePoints[0] -21 + EffectDieSides[0] 1 = -20% ($s1 = 20), EffectSpellClassMask[0] 2 = SpellFamilyFlags[0] 2 of Grasp of Zek'voz 573028 (base slow -30%, DurationIndex 1 = 10000 ms; Spell.dbc). Casts 573028 at dummy before learning 704885 (control: 0.70 * base run_speed_rate), waits 11000 ms for the 10000 ms debuff to expire, learns 704885 and casts 573028 again (0.50 * base run_speed_rate): ratio after / before = 0.50 / 0.70 = 0.7142857 within 0.001. Reference search 2026-11-24: coa-history spell 704885: 0 events in 186 logs (passive); coabuildhub spells_master_index.json entry 704885 matches installed Spell.dbc ('Increases the movement speed slowed by Grasp of Zek'voz by 20%.')."
+    },
+    {
+      "spell": 707747,
+      "name": "Disdain (removes Grasp of Zek'voz cooldown)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Removes the cooldown of Grasp of Zek'voz,",
+      "gated_spell": 573028,
+      "resource": "cooldown",
+      "reduction": 6000,
+      "removal_wait_ms": 1700,
+      "target": "dummy",
+      "cast_power": 2000,
+      "observe_source": "707747 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -6001 + EffectDieSides[0] 1 = -6000 ms, EffectSpellClassMask[0] 2 = SpellFamilyFlags[0] 2 of Grasp of Zek'voz 573028 (RecoveryTime 6000 ms, StartRecoveryTime 1500 ms; Spell.dbc). Reduction equals the 6000 ms cooldown (removal): attempts a second cast 1700 ms after the first (past the 1500 ms GCD), refused without 707747 (control, SPELL_FAILED_NOT_READY 67) and through with 707747 learned (0), plus remaining cooldown read 0 right after the first cast. Reference search 2026-11-24: coa-history spell 707747: 0 events in 186 logs (passive); coabuildhub spells_master_index.json entry 707747 matches installed Spell.dbc ('Removes the cooldown of Grasp of Zek'voz, but increases its mana cost by 25%.')."
+    },
+    {
+      "spell": 707747,
+      "name": "Disdain (Grasp of Zek'voz +25% mana cost)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "but increases its mana cost by $s2%.",
+      "trigger_spell": 573028,
+      "gate_spell": 707747,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "before_expected": 1849,
+      "expected": 1812,
+      "expected_gain": -37,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "void_on_cast_failure": true,
+      "observe_source": "707747 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 14 (SPELLMOD_COST), EffectBasePoints[1] 24 + EffectDieSides[1] 1 = +25% ($s2 = 25), EffectSpellClassMask[3] 2 = SpellFamilyFlags[0] 2 of Grasp of Zek'voz 573028 (ManaCostPercentage 10, RecoveryTime 6000 ms; Spell.dbc). Level 60 Cultist BaseMana = 1512 (MaxMana = 2297): base cost int32(CalculatePct(1512, 10)) = 151 mana; with +25% SPELLMOD_COST int32(151 * 1.25f) = 188 mana (+37 mana cost). Both phases set mana to 2000 with regeneration off, cast 573028 at dummy, and read remaining mana 500 ms later (6500 ms between phases clears the 6 s cooldown): 2000 - 151 = 1849 before learning 707747 (control) and 2000 - 188 = 1812 after (gain -37, exact tolerance 0). Reference search 2026-11-24: coa-history spell 707747: 0 events in 186 logs; coabuildhub spells_master_index.json entry 707747 matches installed Spell.dbc."
+    },
+    {
+      "spell": 500704,
+      "name": "Empire's Grasp (teleport enemy to your position)",
+      "kind": "metric_delta",
+      "variant": "teleport",
+      "label_suffix": "teleport",
+      "quote": "Teleport an enemy to your position",
+      "trigger_spell": 500704,
+      "target": "dummy",
+      "dummy_distance": 20,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "measure_actor": "caster",
+      "metric": "nearest_creature_distance",
+      "fields": {
+        "entry": 36
+      },
+      "before_expected": 20,
+      "expected": 2,
+      "tolerance": 0.1,
+      "after_at_least": 0,
+      "after_at_most": 5,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "500704 Effect[0] 5 SPELL_EFFECT_TELEPORT_UNITS, ImplicitTargetA 6 (TARGET_UNIT_TARGET_ENEMY), ImplicitTargetB 47 (TARGET_DEST_CASTER_FRONT), RangeIndex 4 (30 yd), Speed 90 yd/s (Spell.dbc). Dummy (creature entry 36) stands 20 yd from caster (dummy_distance 20, inside 30 yd range; 20/90 = 222 ms missile travel). Reads nearest_creature_distance of entry 36 from caster before any cast (control = 20 yd, tolerance 0.1) and 1000 ms after one real cast of 500704 (teleported to caster front, <= 5 yd). Reference search 2026-11-24: coa-history spell 500704: 26 casts in 4 logs; coabuildhub spells_master_index.json entry 500704 matches installed Spell.dbc ('Teleport an enemy to your position and slow their movement speed by 60% for 4 sec.')."
+    },
+    {
+      "spell": 500704,
+      "name": "Empire's Grasp (60% slow)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "slow their movement speed by $804533s1%",
+      "trigger_spell": 500704,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.2,
+      "expected_ratio": 0.4,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAbilities.cpp:433-434 casts 804533 on 500704 hit target; 804533 Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED, EffectBasePoints[0] -61 + EffectDieSides[0] 1 = -60% ($804533s1 = 60), DurationIndex 35 (4000 ms; Spell.dbc). Reads dummy run_speed_rate before any cast (control, uncast) and 500 ms after one real cast of 500704 at 3 yd (3/90 = 33 ms travel): ratio after / before must equal 0.40 within 0.001. Reference search 2026-11-24: coa-history spell 804533: 26 aura applied/removed in 4 logs; coabuildhub spells_master_index.json entry 500704 matches installed Spell.dbc ('60% for 4 sec')."
+    },
+    {
+      "spell": 500704,
+      "name": "Empire's Grasp (4 sec slow duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $804533d.",
+      "trigger_spell": 500704,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 804533,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3700,
+      "expiry_wait_ms": 600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3650,
+          3850
+        ],
+        "expired": [
+          4200,
+          4390
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804533 DurationIndex 35 = 4000 ms ($804533d = 4 sec, SpellDuration.dbc), applied on 500704 hit (AscensionCultistAbilities.cpp:433-434, 3 yd / 90 yd/s = 33 ms missile travel). Reads aura 804533 absent on dummy before the cast (control = 0), present (1) at 3700 ms (game_time [3650, 3850], strictly above 3600 = 0.9 * 4000), and gone (0) at 4300 ms (game_time [4200, 4390], strictly below 4400 = 1.1 * 4000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 804533: 26 aura applied/removed in 4 logs; coabuildhub spells_master_index.json entry 500704 matches installed Spell.dbc."
+    },
+    {
+      "spell": 301010,
+      "name": "Rapid Hunger (Devour Magic instant cast)",
+      "kind": "metric_delta",
+      "variant": "instant_cast",
+      "label_suffix": "instant_cast",
+      "quote": "Your Devour Magic is now instant cast.",
+      "trigger_spell": 520151,
+      "gate_spell": 301010,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "301010 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 10 (SPELLMOD_CASTING_TIME), EffectBasePoints[0] -101 + EffectDieSides[0] 1 = -100%, EffectSpellClassMask[0] 8388608 = SpellFamilyFlags[0] 8388608 of Devour Magic 520151 (CastingTimeIndex 14 = 1000 ms, StartRecoveryTime 1000 ms, ManaCostPercentage 25, TARGET_UNIT_TARGET_ALLY; Spell.dbc). Precondition fixture: phase_auras [[31589, 1, 'caster', 'caster']] (Slow, Dispel 1 Magic debuff so 520151 can be cast; 31589 Effect[2] aura 216 -30% spell haste lengthens the unbuffed control cast time from 1000 ms to 1300 ms, still < expire_ms 1500 ms and still casting at 300 ms). Casts 520151 at caster with cast_power 2000 and reads casting 300 ms later: 1 before learning 301010 (control, still casting the 1300 ms slowed spell) and 0 after learning 301010 (instant cast completed; 1500 ms between phases finishes the control cast and GCD). Reference search 2026-11-24: coa-history spell 301010: 0 events in 186 logs (passive); coabuildhub spells_master_index.json has no entry for 301010; installed Spell.dbc governs.",
+      "phase_auras": [
+        [
+          31589,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 680487,
+      "name": "Shadow Fiend (Voidborne +5 sec duration contrast)",
+      "kind": "metric_delta",
+      "variant": "duration_contrast",
+      "label_suffix": "duration_contrast",
+      "quote": "and increases its duration by $/1000;s2 sec.",
+      "trigger_spell": 681104,
+      "gate_spell": 680487,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 681104
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19550,
+          19850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "680487 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1] 1 (SPELLMOD_DURATION), EffectBasePoints[1] 4999 + EffectDieSides[1] 1 = +5000 ms ($/1000;s2 = 5 s), EffectSpellClassMask[5] 2147483648 = SpellFamilyFlags[2] 2147483648 of Voidborne 681104 (DurationIndex 8 = 15000 ms -> 20000 ms; Spell.dbc). Learned contrast: casts 681104 before learning 680487 (control, 15000 ms duration) and reads aura 681104 at 19600 ms (gone = 0); learns 680487, casts 681104 and reads aura 681104 at 19600 ms (game_time [19550, 19850], strictly above 19500 = 15000 + 0.9 * 5000: present = 1). Paired with duration_expiry to bracket both sides of 20000 ms. Reference search 2026-11-24: coa-history spell 680487: 0 events; coabuildhub spells_master_index.json entry 680487 matches installed Spell.dbc."
+    },
+    {
+      "spell": 680487,
+      "name": "Shadow Fiend (Voidborne +5 sec duration expiry)",
+      "kind": "metric_delta",
+      "variant": "duration_expiry",
+      "label_suffix": "duration_expiry",
+      "quote": "and increases its duration by $/1000;s2 sec.",
+      "trigger_spell": 681104,
+      "gate_spell": 680487,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 681104
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19600,
+      "expiry_wait_ms": 700,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19550,
+          19850
+        ],
+        "expired": [
+          20150,
+          20450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Expiry bracket for 680487 +5000 ms duration on Voidborne 681104 (15000 ms -> 20000 ms; Spell.dbc). With 680487 learned (gate_timing start), reads aura 681104 absent before cast (0), present (1) at 19600 ms (game_time [19550, 19850], strictly above 19500 = 15000 + 0.9 * 5000), and gone (0) at 20300 ms (game_time [20150, 20450], strictly below 20500 = 15000 + 1.1 * 5000), excluding durations 10% off the +5 s increase on both sides. Paired with duration_contrast (control without 680487 reads 0 at 19600 ms). Reference search 2026-11-24: coa-history spell 680487: 0 events; coabuildhub spells_master_index.json entry 680487 matches installed Spell.dbc."
+    },
+    {
+      "spell": 680487,
+      "name": "Shadow Fiend (Voidborne cooldown without)",
+      "kind": "cost_gate",
+      "variant": "cooldown_without",
+      "label_suffix": "cooldown_without",
+      "only_arm": "without",
+      "quote": "Reduces the cooldown of your Voidborne by $/1000;s1 sec",
+      "gated_spell": 681104,
+      "resource": "cooldown",
+      "reduction": 90000,
+      "target": "caster",
+      "margin_ms": 500,
+      "observe_source": "680487 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -90001 + EffectDieSides[0] 1 = -90000 ms ($/1000;s1 = 90 s), EffectSpellClassMask[2] 2147483648 = SpellFamilyFlags[2] 2147483648 of Voidborne 681104 (RecoveryTime 180000 ms, CategoryRecoveryTime 180000 ms, PowerType -2 health cost 10% + ManaPerSecond 80; Spell.dbc). Split via only_arm (without/with/beyond) so each arm starts at full health (cost_gate disables regeneration and two sequential Voidborne casts drain >2800 HP, triggering Spell.cpp:7423 SPELL_FAILED_CASTER_AURASTATE 22). Arms timed from priming cast: 90500 ms without 680487 (refused, 67), 90500 ms with 680487 (through, 0), 89500 ms with 680487 (refused, 67): reduced cooldown lies in [89500, 90500] ms, excluding 10% off the 90 s cut on both sides. Reference search 2026-11-24: coa-history spell 680487: 0 events; coabuildhub spells_master_index.json entry 680487 matches installed Spell.dbc."
+    },
+    {
+      "spell": 680487,
+      "name": "Shadow Fiend (Voidborne cooldown with)",
+      "kind": "cost_gate",
+      "variant": "cooldown_with",
+      "label_suffix": "cooldown_with",
+      "only_arm": "with",
+      "quote": "Reduces the cooldown of your Voidborne by $/1000;s1 sec",
+      "gated_spell": 681104,
+      "resource": "cooldown",
+      "reduction": 90000,
+      "target": "caster",
+      "margin_ms": 500,
+      "observe_source": "680487 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -90001 + EffectDieSides[0] 1 = -90000 ms ($/1000;s1 = 90 s), EffectSpellClassMask[2] 2147483648 = SpellFamilyFlags[2] 2147483648 of Voidborne 681104 (RecoveryTime 180000 ms, CategoryRecoveryTime 180000 ms, PowerType -2 health cost 10% + ManaPerSecond 80; Spell.dbc). Split via only_arm (without/with/beyond) so each arm starts at full health (cost_gate disables regeneration and two sequential Voidborne casts drain >2800 HP, triggering Spell.cpp:7423 SPELL_FAILED_CASTER_AURASTATE 22). Arms timed from priming cast: 90500 ms without 680487 (refused, 67), 90500 ms with 680487 (through, 0), 89500 ms with 680487 (refused, 67): reduced cooldown lies in [89500, 90500] ms, excluding 10% off the 90 s cut on both sides. Reference search 2026-11-24: coa-history spell 680487: 0 events; coabuildhub spells_master_index.json entry 680487 matches installed Spell.dbc."
+    },
+    {
+      "spell": 680487,
+      "name": "Shadow Fiend (Voidborne cooldown beyond)",
+      "kind": "cost_gate",
+      "variant": "cooldown_beyond",
+      "label_suffix": "cooldown_beyond",
+      "only_arm": "beyond",
+      "quote": "Reduces the cooldown of your Voidborne by $/1000;s1 sec",
+      "gated_spell": 681104,
+      "resource": "cooldown",
+      "reduction": 90000,
+      "target": "caster",
+      "margin_ms": 500,
+      "observe_source": "680487 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -90001 + EffectDieSides[0] 1 = -90000 ms ($/1000;s1 = 90 s), EffectSpellClassMask[2] 2147483648 = SpellFamilyFlags[2] 2147483648 of Voidborne 681104 (RecoveryTime 180000 ms, CategoryRecoveryTime 180000 ms, PowerType -2 health cost 10% + ManaPerSecond 80; Spell.dbc). Split via only_arm (without/with/beyond) so each arm starts at full health (cost_gate disables regeneration and two sequential Voidborne casts drain >2800 HP, triggering Spell.cpp:7423 SPELL_FAILED_CASTER_AURASTATE 22). Arms timed from priming cast: 90500 ms without 680487 (refused, 67), 90500 ms with 680487 (through, 0), 89500 ms with 680487 (refused, 67): reduced cooldown lies in [89500, 90500] ms, excluding 10% off the 90 s cut on both sides. Reference search 2026-11-24: coa-history spell 680487: 0 events; coabuildhub spells_master_index.json entry 680487 matches installed Spell.dbc."
+    },
+    {
+      "spell": 681102,
+      "name": "Void Rage (Shadow of the Void +5% Shadow damage)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "Increases the Shadow damage increased through Shadow of the Void by $s1%.",
+      "expected": 1.0454545,
+      "band_points": 1.818,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        502241,
+        574318
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          681102
+        ],
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "681102 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 3 (SPELLMOD_EFFECT1), EffectBasePoints[0] 4 + EffectDieSides[0] 1 = +5% ($s1 = 5), routed to Shadow of the Void 300277 at SpellInfo.cpp:1623 (300277 Effect[0] aura 79 +10% Shadow damage -> +15%; Spell.dbc). Both arms learn 574318, set Insanity 500706 to 41 stacks and beeg spellpen 823764 (precondition fixtures), and cast Malevolence 502241 at the dummy before each Horrorbolt 502182 (at +20000 SP, non-critical hits) to trigger 300277 for real; treatment learns 681102. Ratio 1.15 / 1.10 = 1.0454545 (+4.545%), band_points 1.818 maps the G-19 [3%, 7%] band of the stated +5% over the 1.10 baseline. Reference search 2026-11-24: coa-history spell 681102: 0 events (passive; positive control 300277: 211 aura applied in 12 logs); coabuildhub spells_master_index.json entry 681102 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 805117,
+      "name": "Nutcase (Shadow of the Void +10% critical damage)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "Your Shadow of the Void now also increases your critical damage dealt by $s1%.",
+      "expected": 1.1,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        502241,
+        574318
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "force_crit": "spell",
+      "control": {
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          805117
+        ],
+        "auras": [
+          [
+            500706,
+            41
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 502241,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "critical": true,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "805117 Effect[0] aura 107 bp 9 + die 1 = +10% ($s1 = 10; Spell.dbc). AscensionCultistContracts.cpp:117 and AscensionCultistAuras.cpp:132 set 300277 Effect[2] SPELL_AURA_MOD_CRIT_DAMAGE_BONUS (all schools) to Amount(805117) = +10 when 805117 is held (0 otherwise). Unit::SpellCriticalDamageBonus (Unit.cpp:10686-10701) multiplies total critical damage (1.5x) by 1 + crit_mod/100 = 1.10 (1.65x / 1.50x = 1.10). Both arms trigger 300277 for real via Malevolence 502241 with 574318 and 500706=41 (precondition fixtures) and observe forced-crit Horrorbolt 502182 at +20000 SP with 823764; treatment learns 805117. Reference search 2026-11-24: coa-history spell 805117: 0 events; coabuildhub spells_master_index.json entry 805117 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 681326,
+      "name": "Glory to N'Zoth (-15% damage taken under Shadow of the Void)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "judge": "damage_ratio",
+      "health_loss": true,
+      "expected": 0.85,
+      "quote": "While Shadow of the Void is active, you now take $s1% reduced damage.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "cast_power": 2000,
+      "learn": [
+        574318,
+        502122
+      ],
+      "trials": 8,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            681326
+          ],
+          "auras": [
+            [
+              500706,
+              41
+            ]
+          ],
+          "opening_casts": [
+            [
+              502122,
+              "dummy"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300277,
+              "equals": 1
+            }
+          ],
+          "opening_settle_ms": 500
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            681326
+          ],
+          "auras": [
+            [
+              500706,
+              41
+            ]
+          ],
+          "opening_casts": [
+            [
+              502122,
+              "dummy"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 300277,
+              "equals": 1
+            }
+          ],
+          "opening_settle_ms": 500
+        }
+      ],
+      "observe_source": "681326 Effect[0] bp -16 + die 1 = -15% ($s1 = 15; Spell.dbc). AscensionCultistContracts.cpp:343-344 (cultist_scaling::OnDamage, called in Unit::DealDamage after the spell damage log is built) multiplies incoming damage by 1 + (-15)/100 = 0.85 while Shadow of the Void 300277 is active. health_loss: true with caster_health_from_pct 99 (allow_regeneration: False) measures actual health lost from Void Zone 92559 (1000 Physical, DmgClass 0: zero miss, zero crit, zero partial resist) across 8 trials per arm (settle 100 ms, total 4.8 s < 8 s duration of 300277) from 100000 HP: both arms trigger 300277 for real via opening Blade of the Empire 502122 at dummy (no HoT unlike Malevolence 502241) with 574318 and Insanity 500706=41 (precondition fixture), verified present by arm checks; control unlearns 681326 (977 lost), treatment learns 681326 (831 lost, ratio 0.85). Reference search 2026-11-24: coa-history spell 681326: 0 events; coabuildhub spells_master_index.json entry 681326 matches installed Spell.dbc.",
+      "settle_ms": 100,
+      "caster_health_from_pct": 99
+    },
+    {
+      "spell": 806768,
+      "name": "Book of N'Zoth (Shadow of the Void max stacks 1 -> 2)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "Your Shadow of the Void now stacks $s1 additional time.",
+      "trigger_spell": 502241,
+      "gate_spell": 806768,
+      "learn": [
+        574318
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 2000,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 300277
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "observe_source": "806768 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 31 (SPELLMOD_STACK_AMOUNT), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1 ($s1 = 1), routed to Shadow of the Void 300277 at SpellInfo.cpp:1623 (300277 StackAmount 1 -> 2, Duration 8000 ms; Spell.dbc). With 574318 learned and Insanity 500706 at 41 stacks (precondition fixture), casts Malevolence 502241 (1500 ms cast, no cooldown) 3 times (2 setup casts 2000 ms apart + 1 trigger cast, total 4500 ms < 8000 ms duration) in both phases (9000 ms between phases lets 300277 expire): aura_stacks of 300277 reads 1 before learning 806768 (control) and 2 after learning 806768 (does not exceed 2 on the 3rd trigger). Reference search 2026-11-24: coa-history spell 806768: 0 events; coabuildhub spells_master_index.json entry 806768 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (+25% damage dealt)",
+      "kind": "metric_delta",
+      "variant": "damage_dealt",
+      "label_suffix": "damage_dealt",
+      "quote": "increasing your damage dealt and critical strike chance by $s1%,",
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        681104
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "gate_timing": "start",
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502182,
+        "target": "dummy"
+      },
+      "before_expected": 10000,
+      "expected": 22500,
+      "expected_ratio": 2.25,
+      "tolerance": 0.01,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, EffectMiscValue[0] 127 (all schools), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), DurationIndex 8 (15000 ms; Spell.dbc). Tested on Shadow spell Horrorbolt 502182; other schools and Physical are covered by the single stock DBC aura 79 with EffectMiscValue[0] 127 (all-schools mask). Casts Horrorbolt 502182 (2500 ms cast + 120 ms travel, 3000 ms wait) at dummy with +20000 SP, 823764 (no partial resist) and 16255 amount -100 (no crit; precondition fixtures) before casting 681104 (control, single hit D ~ 16690) and right after a real cast of 681104 (setup_only_after: second hit 1.25 * D, cumulative spell_damage_total = 2.25 * D): ratio after / before = 2.25 within 0.01 (equivalent to +24%..+26% bonus, tighter than the G-19 +23%..+27% band; single Voidborne cast avoids ManaPerSecond 80 health-drain death). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc for +25% damage."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (+25% critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_chance",
+      "label_suffix": "crit_chance",
+      "quote": "increasing your damage dealt and critical strike chance by $s1%,",
+      "trigger_spell": 681104,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "spell_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 25,
+      "expected_gain": 25,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT, EffectBasePoints[1] 24 + EffectDieSides[1] 1 = +25% ($s1 = 25; Spell.dbc). Reads live spell_crit_chance on caster before casting 681104 (control, uncast) and 500 ms after one real cast of 681104: expected gain +25.0 points within 0.01 (melee/ranged crit covered by the single stock DBC aura 290 SPELL_AURA_MOD_CRIT_PCT). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (stun immunity)",
+      "kind": "immunity",
+      "variant": "stun",
+      "target": "caster",
+      "quote": "and granting you immunity to stun effects for $d.",
+      "effects": [
+        {
+          "spell": 56,
+          "words": "stun"
+        }
+      ],
+      "observe_source": "AscensionCultistAuras.cpp:102-103,191-192 grants Immunity(player, 681104, {MECHANIC_STUN}, true) on Voidborne 681104 apply and clears it on remove (DurationIndex 8 = 15000 ms; Spell.dbc). Fixture: Stun 56 (single aura effect SPELL_AURA_MOD_STUN, MECHANIC_STUN 12, used across Felsworn immunity checks): present when set before 681104, blocked on 3 dummy casts while 681104 is active, and lands after 681104 expires (control). Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (15 sec duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and granting you immunity to stun effects for $d.",
+      "trigger_spell": 681104,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 681104
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14000,
+          14500
+        ],
+        "expired": [
+          15500,
+          16100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681104 DurationIndex 8 = 15000 ms ($d = 15 sec, SpellDuration.dbc). Reads aura 681104 absent before cast (control = 0), present (1) at 14200 ms (game_time [14000, 14500], strictly above 13500 = 0.9 * 15000), and gone (0) at 15800 ms (game_time [15500, 16100], strictly below 16500 = 1.1 * 15000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 681104: 10 casts; coabuildhub spells_master_index.json entry 681104 matches installed Spell.dbc ('for 15 seconds')."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (generates 1 Insanity on first tick)",
+      "kind": "metric_delta",
+      "variant": "insanity_tick1",
+      "label_suffix": "insanity_tick1",
+      "quote": "Generates 1 Insanity",
+      "trigger_spell": 681104,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          600,
+          900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[2] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude 500 ms ($T3 = 0.5 sec), EffectTriggerSpell 681103 (+1 Insanity Stack: Effect[0] 175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS, MiscValue 1, TriggerSpell 500706; AttributesEx5 0 = no initial tick; Spell.dbc). Reads aura_stacks of Insanity 500706 before casting 681104 (control = 0) and at 750 ms (game_time [600, 900], after 1st tick at 500 ms and before 2nd tick at 1000 ms): must equal 1. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 681104 is an older patch state ('every 1 sec'); installed Spell.dbc EffectAmplitude 500 ms governs (G-9)."
+    },
+    {
+      "spell": 681104,
+      "name": "Voidborne (every 0.5 sec Insanity period)",
+      "kind": "metric_delta",
+      "variant": "insanity_period",
+      "label_suffix": "insanity_period",
+      "quote": "every $T3 sec.",
+      "trigger_spell": 681104,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 5250,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5100,
+          5400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681104 Effect[2] EffectAmplitude 500 ms ($T3 = 0.5 sec; Spell.dbc), generating 1 stack of Insanity 500706 per tick via 681103 (confirmed 1 stack/tick by insanity_tick1). Reads aura_stacks of 500706 before casting 681104 (control = 0) and at 5250 ms (game_time [5100, 5400]): exactly 10 ticks fire at 500 ms period, whereas a period 10% faster (450 ms) fires >= 11 ticks by 5100 ms and a period 10% slower (550 ms) fires <= 9 ticks by 5400 ms, excluding 10% off 500 ms on both sides. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 681104 is an older patch state ('every 1 sec'); installed Spell.dbc EffectAmplitude 500 ms governs (G-9)."
+    },
+    {
+      "spell": 300265,
+      "name": "Devourer (Devour Magic affects 2 nearby allies)",
+      "kind": "metric_delta",
+      "variant": "chain_targets",
+      "label_suffix": "chain_targets",
+      "quote": "Your Devour Magic now affects $s1 nearby allies.",
+      "trigger_spell": 520151,
+      "gate_spell": 300265,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "strike": {
+        "spell": 122,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500
+      },
+      "ally_arm": {
+        "allies": 4,
+        "arms": [
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 122
+            },
+            "before_expected": 4,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "520151 EffectChainTarget 1 + 300265 Effect[0] SPELLMOD_JUMP_TARGETS +2 = 3 targets: 1 of 5 Frost Nova party members (caster + 4 allies) dispelled before 300265 (4 left), 3 of 5 dispelled after 300265 (2 left)"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520152,
+        "target": "caster"
+      },
+      "before_expected": 1,
+      "expected": 4,
+      "wait_ms": 1500,
+      "expire_ms": 8500,
+      "void_on_cast_failure": true,
+      "observe_source": "300265 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints[0] 1 + EffectDieSides[0] 1 = +2 ($s1 = 2), EffectSpellClassMask[0] 8388608 = SpellFamilyFlags[0] 8388608 of Devour Magic 520151 (EffectChainTarget 1, CastTime 1000 ms, Dispel Magic; Spell.dbc). Four grouped allies (ally..ally4) stand at the spawn beside the caster; in each phase the striker casts Frost Nova 122 (Dispel 1 Magic, 10 yd AoE, 8000 ms duration) to apply a magic debuff to all 5 party members (caster + ally..ally4) before Devour Magic 520151 is cast at ally (1500 ms settle covers the 1000 ms cast; 8500 ms between phases clears Frost Nova). SpellEffects.cpp:3728-3730 triggers heal 520152 on caster once per dispelled target (spell_heal_count 1 before learning 300265, +3 -> 4 cumulative after), and ally_arm confirms Frost Nova 122 aura sum across the 5 party members drops from 4 remaining (1 dispelled) to 2 remaining (3 dispelled, exactly +2 nearby allies). Reference search 2026-11-24: coa-history spell 300265: 0 events; coabuildhub spells_master_index.json entry 300265 is an older patch state ('dispels 1 additional magic effect'); installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 800402,
+      "name": "Devour Curse (dispels 2 of 3 curses)",
+      "kind": "dispel_count",
+      "label_suffix": "curse_dispel",
+      "quote": "dispelling $m1 curse effects",
+      "cast_spell": 800402,
+      "debuffs": [
+        [
+          2,
+          [
+            18267,
+            8282,
+            13583
+          ]
+        ]
+      ],
+      "trials": 1,
+      "wait_ms": 1500,
+      "arms": [
+        {
+          "name": "no_cast",
+          "cast": false,
+          "expected": [
+            [
+              2,
+              0
+            ]
+          ]
+        },
+        {
+          "name": "cast",
+          "expected": [
+            [
+              2,
+              2
+            ]
+          ]
+        }
+      ],
+      "expected_source": "800402 Effect[0] 38 SPELL_EFFECT_DISPEL, EffectMiscValue[0] 2 (DISPEL_CURSE), EffectBasePoints[0] 1 + EffectDieSides[0] 1 = 2 ($m1 = 2), CastTime 1000 ms (wait_ms 1500), TARGET_UNIT_TARGET_ALLY (Spell.dbc). Ally carries 3 curses (18267, 8282, 13583, each Dispel 2) so 2 removed is strictly less than all 3; no_cast control waits and expects 0 removed. Reference search 2026-11-24: coa-history spell 800402: 117 casts and 110 SPELL_DISPEL events in 7 logs; coabuildhub spells_master_index.json entry 800402 matches installed Spell.dbc ('dispelling 2 curse effects')."
+    },
+    {
+      "spell": 800402,
+      "name": "Devour Curse (self heal at base SP)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "healing you for ${$m2+0+$SP*.65}",
+      "trigger_spell": 800402,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          18267,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800402,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 177,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "800402 Effect[1] 10 SPELL_EFFECT_HEAL, TARGET_UNIT_CASTER, EffectBasePoints[1] 89, EffectDieSides[1] 1, EffectRealPointsPerLevel[1] 3.0, BaseLevel 31, SpellLevel 31, MaxLevel 0 (no SkillLineAbility cap; Spell.dbc). At level 60, SP 0: 89 + 1 + int((60 - 31) * 3.0) = 177 exact (Cultist class tuning aura 887013 Effect[2] healing mod = 0%). Precondition fixtures: Curse 18267 (Dispel 2, allows Devour Curse cast) and 16255 amount -100 (removes crits). Control is the uncast before read (0). Paired with heal_sp (+20000 SP) in the same pair. Reference search 2026-11-24: coa-history spell 800402: 116 SPELL_HEAL events (min 198, max 730, mean 377.0) in 7 logs; coabuildhub spells_master_index.json entry 800402 matches installed Spell.dbc ('90+0+SP*.65')."
+    },
+    {
+      "spell": 800402,
+      "name": "Devour Curse (self heal at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "healing you for ${$m2+0+$SP*.65}",
+      "trigger_spell": 800402,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          18267,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800402,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 13177,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell power contrast arm for 800402 self heal (${$m2+0+$SP*.65}): player_spell_power 20000 (hit_arm: true) adds 20000 * 0.65 = +13000 (AscensionCultistData.h:100 sp coefficient 0.65) to level-60 base 177 -> 13177 exact (Cultist tuning aura 887013 healing mod = 0%). Precondition fixtures: Curse 18267 and 16255 amount -100 (no crits). Control is heal_base (SP 0, 177) and the uncast before read (0). Reference search 2026-11-24: coa-history spell 800402: 116 SPELL_HEAL events; coabuildhub spells_master_index.json entry 800402 matches installed Spell.dbc ('90+0+SP*.65')."
+    },
+    {
+      "spell": 300284,
+      "name": "Dark Reservoir (Eldritch Mending +25% healing power scaling)",
+      "kind": "hit_ratio",
+      "variant": "mending_sp",
+      "label_suffix": "mending_sp",
+      "quote": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+      "metric": "spell_heal_total",
+      "expected": 1.25,
+      "observe_spell": 500711,
+      "target": "caster",
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 50000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          300284
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "observe_source": "300284 Effect[0] aura 108 bp 24 + die 1 = +25% ($s1 = 25; Spell.dbc). AscensionCultistContracts.cpp:281-282 scales row.healing of Eldritch Mending 500711 (0.56f, AscensionCultistData.h:8) by 1.25 -> 0.70f. At +50000 SP, bonus healing grows from 28000 to 35000 while base+AP is ~90 (ratio 35090 / 28090 = 1.2492, inside the G-19 [1.2375, 1.2625] band). Control has no 300284; treatment learns 300284. Paired with shock_sp for Eldritch Shock. Reference search 2026-11-24: coa-history spell 300284: 0 events; coabuildhub spells_master_index.json entry 300284 is an older patch state (mentions Eldritch Mending only); installed Spell.dbc includes Eldritch Shock too (G-9)."
+    },
+    {
+      "spell": 300284,
+      "name": "Dark Reservoir (Eldritch Shock +25% healing power scaling)",
+      "kind": "hit_ratio",
+      "variant": "shock_sp",
+      "label_suffix": "shock_sp",
+      "quote": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+      "metric": "spell_heal_total",
+      "expected": 1.25,
+      "cast_spell": 808036,
+      "observe_spell": 808050,
+      "target": "caster",
+      "fixture": {
+        "spell_power": 50000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300284
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "observe_source": "300284 Effect[0] bp 24 + die 1 = +25% ($s1 = 25; Spell.dbc). AscensionCultistContracts.cpp:281-282 scales row.healing of Eldritch Shock heal 808050 (triggered by casting 808036 on friendly target, healing coef 0.416018f, AscensionCultistData.h:125) by 1.25 -> 0.5200225f. Both arms hold Insanity 500706=40 (precondition fixture keeping CasterAuraSpell 680601 present across trials). At +50000 SP, bonus healing grows from 20801 to 26001 while base is ~390 (ratio 26391 / 21191 = 1.2454, inside G-19 [1.2375, 1.2625]). Control has no 300284; treatment learns 300284. Paired with shock_sp0 (0 SP contrast, expected ratio 1.0) to separate bonus-healing-power scaling from a flat +25% healing increase. Reference search 2026-11-24: coa-history spell 808050: 1 heal event (514); installed Spell.dbc governs."
+    },
+    {
+      "spell": 300284,
+      "name": "Dark Reservoir (Eldritch Mending 0 SP contrast, unchanged)",
+      "kind": "hit_ratio",
+      "variant": "mending_sp0",
+      "label_suffix": "mending_sp0",
+      "quote": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+      "metric": "spell_heal_total",
+      "expected": 1.0,
+      "observe_spell": 500711,
+      "target": "caster",
+      "cast_power": 2000,
+      "control": {},
+      "treatment": {
+        "learn": [
+          300284
+        ]
+      },
+      "critical": false,
+      "trials": 70,
+      "parts": 2,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-SP contrast arm paired with mending_sp for 300284 ('Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.', $s1 = 25; Spell.dbc). Reference character carries 0 bonus spell/healing power (reference_stats spell_power 1..6 = 0.0), so scaling row.healing of Eldritch Mending 500711 (0.56f -> 0.70f, AscensionCultistContracts.cpp:281-282, AscensionCultistData.h:8) adds 0 at 0 SP while base + 0.12*AP (~93) stays unchanged: expected ratio 1.0 (G-19 band [-2%, +2%], 2 parts x 70 = 140 trials/arm for tight 99% CI), separating healing-power scaling from a flat +25% healing increase (which would measure 1.25 and alert). Control has no 300284; treatment learns 300284. Reference search 2026-11-24: installed Spell.dbc governs."
+    },
+    {
+      "spell": 300284,
+      "name": "Dark Reservoir (Eldritch Shock 0 SP contrast, unchanged)",
+      "kind": "hit_ratio",
+      "variant": "shock_sp0",
+      "label_suffix": "shock_sp0",
+      "quote": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+      "metric": "spell_heal_total",
+      "expected": 1.0,
+      "cast_spell": 808036,
+      "observe_spell": 808050,
+      "target": "caster",
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300284
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 140,
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-SP contrast arm paired with shock_sp for 300284 ('Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.', $s1 = 25; Spell.dbc). Both arms hold Insanity 500706=40 (precondition fixture keeping CasterAuraSpell 680601 present across trials). Reference character carries 0 bonus spell/healing power (reference_stats spell_power 1..6 = 0.0), so scaling row.healing of Eldritch Shock heal 808050 (0.416018f -> 0.5200225f, AscensionCultistContracts.cpp:281-282, AscensionCultistData.h:125) adds 0 at 0 SP while base heal (~390) stays unchanged: expected ratio 1.0 (G-19 band [-2%, +2%], 140 trials/arm for tight 99% CI), separating healing-power scaling from a flat +25% healing increase (which would measure 1.25 and alert). Control has no 300284; treatment learns 300284. Reference search 2026-11-24: installed Spell.dbc governs."
+    },
+    {
+      "spell": 805607,
+      "name": "Shadow Training (Eldritch Mending +50% healing)",
+      "kind": "hit_ratio",
+      "variant": "mending_heal",
+      "label_suffix": "mending_heal",
+      "quote": "Increases the healing done by Eldritch Mending by $s3%",
+      "metric": "spell_heal_total",
+      "expected": 1.5,
+      "observe_spell": 500711,
+      "target": "caster",
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          805607
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "observe_source": "805607 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectBasePoints[2] 49 + EffectDieSides[2] 1 = +50% ($s3 = 50), EffectSpellClassMask[7] 4096 = SpellFamilyFlags[1] 4096 of Eldritch Mending 500711 (Spell.dbc). Control casts 500711 at caster (+20000 SP, non-crit) without 805607; treatment learns 805607 (expected ratio 1.50). Reference search 2026-11-24: coa-history spell 805607: 0 events (passive); coabuildhub spells_master_index.json entry 805607 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 805607,
+      "name": "Shadow Training (Gaze of C'Thun +100% healing)",
+      "kind": "hit_ratio",
+      "variant": "gaze_heal",
+      "label_suffix": "gaze_heal",
+      "quote": "and Gaze of C'Thun by $807701s1%.",
+      "metric": "spell_heal_total",
+      "expected": 2.0,
+      "cast_spell": 500110,
+      "observe_spell": 520333,
+      "target": "caster",
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          805607
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "observe_source": "807701 Effect[0] bp 99 + die 1 = +100% ($807701s1 = 100; Spell.dbc). aura_ascension_cultist_shadow_training (AscensionCultistAbilities.cpp:510-542) attaches a +100% SPELLMOD_PCT SPELLMOD_DAMAGE modifier to Gaze of C'Thun heal 520333 (triggered when casting 500110 on friendly target). Control casts 500110 at caster (+20000 SP, non-crit) without 805607; treatment learns 805607 (expected ratio 2.0). Reference search 2026-11-24: coa-history spell 520333: 2853 SPELL_HEAL events in 42 logs; coabuildhub spells_master_index.json entry 805607 matches installed Spell.dbc verbatim. void_on_cast_failure omitted because 500110 Effect[0] enemy damage sub-trigger 520334 always returns SPELL_FAILED_DONT_REPORT (27) on friendly casts while Effect[1] 520335 -> 520333 heals every trial."
+    },
+    {
+      "spell": 802049,
+      "name": "Eldritch Eye (15 sec duration)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Invoke the Old Gods for $d,",
+      "trigger_spell": 802049,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 802049
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14000,
+          14500
+        ],
+        "expired": [
+          15500,
+          16100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "802049 DurationIndex 8 = 15000 ms ($d = 15 sec, SpellDuration.dbc). Reads aura 802049 absent before cast (control = 0), present (1) at 14200 ms (game_time [14000, 14500], strictly above 13500 = 0.9 * 15000), and gone (0) at 15800 ms (game_time [15500, 16100], strictly below 16500 = 1.1 * 15000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 802049: 253 casts and 253 aura applied/removed in 18 logs; coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc ('for 15 sec')."
+    },
+    {
+      "spell": 802049,
+      "name": "Eldritch Eye (3rd Eldritch Mending instant)",
+      "kind": "metric_delta",
+      "variant": "mending_3rd_instant",
+      "label_suffix": "mending_3rd_instant",
+      "quote": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+      "trigger_spell": 500711,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        802049,
+        500711,
+        500711
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "gate_timing": "start",
+      "phase_power": [
+        0,
+        2297,
+        2297
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "802049 ProcCharges 3 ($n = 3), Effect[0] aura 108 SPELLMOD_CASTING_TIME -100% on Eldritch Mending 500711 (CastTime 2000 ms, ManaCostPercentage 20) and Malevolence 502241 (Spell.dbc). Control (before, no 802049): 500711 is still casting 300 ms in (casting = 1). Treatment (after, setup_only_after): casts 802049 and two instant 500711s (1700 ms apart, well within 15000 ms duration; total cost 529 + 3*302 = 1435 <= 2297 MaxMana), then the 3rd 500711 reads casting = 0 at 300 ms (instant). Paired with mending_4th_held to bracket 3 casts on both sides. Reference search 2026-11-24: coa-history spell 802049: 253 casts; coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 802049,
+      "name": "Eldritch Eye (4th Eldritch Mending not instant)",
+      "kind": "metric_delta",
+      "variant": "mending_4th_held",
+      "label_suffix": "mending_4th_held",
+      "quote": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+      "trigger_spell": 500711,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        802049,
+        500711,
+        500711,
+        500711
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "gate_timing": "start",
+      "phase_power": [
+        0,
+        2297,
+        2297
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket for 802049 ProcCharges 3 ($n = 3; Spell.dbc): after casting 802049 and three instant 500711s (total elapsed 6800 ms << 15000 ms duration; total mana 529 + 4*302 = 1737 <= 2297 MaxMana), all 3 charges are consumed and the 4th 500711 keeps its 2000 ms cast time (casting = 1 at 300 ms, matching control = 1). Together with mending_3rd_instant, brackets exactly 3 affected casts. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 802049,
+      "name": "Eldritch Eye (Malevolence instant cast)",
+      "kind": "metric_delta",
+      "variant": "malevolence_instant",
+      "label_suffix": "malevolence_instant",
+      "quote": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        802049
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "gate_timing": "start",
+      "phase_power": [
+        0,
+        2297,
+        2297
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "802049 Effect[0] SPELLMOD_CASTING_TIME -100% covers Malevolence 502241 (CastTime 1500 ms, SpellFamilyFlags[2] 2048; Spell.dbc). Control (no 802049): Malevolence is still casting at 300 ms (casting = 1). Treatment (after real cast of 802049): Malevolence completes instantly (casting = 0 at 300 ms). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 802049 matches verbatim."
+    },
+    {
+      "spell": 802049,
+      "name": "Eldritch Eye (Malevolence guaranteed critical strike)",
+      "kind": "crit_rate",
+      "variant": "malevolence_crit",
+      "label_suffix": "malevolence_crit",
+      "quote": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+      "expected": 100,
+      "treatment_share": 100,
+      "observe_spell": 502241,
+      "learn": [
+        502241,
+        802049
+      ],
+      "control": {},
+      "treatment": {
+        "casts": [
+          802049
+        ]
+      },
+      "cast_power": 2000,
+      "trials": 160,
+      "expected_source": "802049 Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +1000% on Eldritch Mending 500711 and Malevolence 502241 (Spell.dbc). crit_rate treatment_share 100 over 160 Malevolence casts per arm: treatment casts 802049 (TARGET_UNIT_CASTER) before each Malevolence (99% Wilson lower bound 160 / (160 + 2.576^2) = 96.0% >= 95% G-19 floor); control casts Malevolence without 802049 (Wilson upper bound well below 95%). Paired with mending_crit for Eldritch Mending 500711 heal critical strikes. Reference search 2026-11-24: coa-history spell 802049: 253 casts; coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 802049,
+      "name": "Eldritch Eye (Eldritch Mending guaranteed critical strike)",
+      "kind": "hit_ratio",
+      "variant": "mending_crit",
+      "label_suffix": "mending_crit",
+      "quote": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+      "metric": "spell_heal_total",
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 100,
+      "observe_spell": 500711,
+      "target": "caster",
+      "learn": [
+        500711,
+        802049
+      ],
+      "cast_power": 2000,
+      "control": {
+        "auras": [
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802049,
+            "target": "caster",
+            "power": 2000
+          }
+        ]
+      },
+      "trials": 40,
+      "void_on_cast_failure": true,
+      "expected_source": "802049 Effect[1] aura 107 SPELLMOD_CRITICAL_CHANCE +1000% covers Eldritch Mending 500711 (heal, SpellFamilyFlags[1] 4096) and Malevolence 502241 (Spell.dbc). hit_ratio metric spell_heal_total with rate 'critical' counts spell_heal_count(critical=True) / spell_heal_count over 40 Eldritch Mending casts at caster per arm. Both arms set aura 16255 Effect[0] (aura 290 SPELL_AURA_MOD_CRIT_PCT) amount -100 as a precondition fixture so the control arm without 802049 crits 0% deterministically, while treatment casts 802049 (TARGET_UNIT_CASTER, +1000% spellmod crit -> +900% net) before each 500711 and crits 100%: expected difference +100 points (G-19 band [95, 105]; zero random roll variance on a working server). Paired with malevolence_crit so both named spells (damage and heal) are proved directly. Reference search 2026-11-24: coa-history spell 802049: 253 casts; coabuildhub spells_master_index.json entry 802049 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 806266,
+      "name": "Saronite Mind (4th Malevolence instant)",
+      "kind": "metric_delta",
+      "variant": "4th_instant",
+      "label_suffix": "4th_instant",
+      "quote": "Your Eldritch Eye now affects 1 additional cast.",
+      "trigger_spell": 502241,
+      "gate_spell": 806266,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        802049,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy",
+        "dummy",
+        "dummy"
+      ],
+      "setup_wait_ms": 1700,
+      "phase_power": [
+        0,
+        2297,
+        2297
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "806266 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 4 (SPELLMOD_CHARGES), EffectBasePoints[0] 0 + EffectDieSides[0] 1 = +1 charge on Eldritch Eye 802049 (ProcCharges 3 -> 4, Duration 15000 ms; Spell.dbc). Both phases cast 802049 and three Malevolences 502241 (1700 ms apart = 6800 ms << 15000 ms; mana 529 + 4*136 = 1073 <= 2297 MaxMana), then cast the 4th 502241 and read casting 300 ms later (16000 ms between phases clears any remaining 802049): 1 before learning 806266 (control, 3 charges spent) and 0 after learning 806266 (4th cast is instant). Paired with 5th_held. Reference search 2026-11-24: coa-history spell 806266: 0 events; coabuildhub spells_master_index.json entry 806266 matches installed Spell.dbc ('1 additional charge')."
+    },
+    {
+      "spell": 806266,
+      "name": "Saronite Mind (5th Malevolence not instant)",
+      "kind": "metric_delta",
+      "variant": "5th_held",
+      "label_suffix": "5th_held",
+      "quote": "Your Eldritch Eye now affects 1 additional cast.",
+      "trigger_spell": 502241,
+      "gate_spell": 806266,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        802049,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy",
+        "dummy",
+        "dummy",
+        "dummy"
+      ],
+      "setup_wait_ms": 1700,
+      "phase_power": [
+        0,
+        2297,
+        2297
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket for 806266 (+1 charge on 802049 -> 4 total; Spell.dbc): after casting 802049 and four Malevolences 502241 (5*1700 = 8500 ms << 15000 ms; mana 529 + 5*136 = 1209 <= 2297), the 5th 502241 reads casting = 1 at 300 ms both before and after learning 806266. Together with 4th_instant, brackets exactly 4 affected casts (+1). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 806266 matches installed Spell.dbc."
+    },
+    {
+      "spell": 807879,
+      "name": "Saronite Mind (5th Malevolence instant)",
+      "kind": "metric_delta",
+      "variant": "5th_instant",
+      "label_suffix": "5th_instant",
+      "quote": "Your Eldritch Eye now affects 2 additional casts.",
+      "trigger_spell": 502241,
+      "gate_spell": 807879,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        802049,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy",
+        "dummy",
+        "dummy",
+        "dummy"
+      ],
+      "setup_wait_ms": 1700,
+      "phase_power": [
+        0,
+        2297,
+        2297
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "807879 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 4 (SPELLMOD_CHARGES), EffectBasePoints[0] 1 + EffectDieSides[0] 1 = +2 charges on Eldritch Eye 802049 (ProcCharges 3 -> 5, Duration 15000 ms; Spell.dbc). Both phases cast 802049 and four Malevolences 502241 (8500 ms << 15000 ms; mana 1209 <= 2297), then the 5th 502241 reads casting = 1 before learning 807879 (control) and 0 after learning 807879 (5th cast is instant). Paired with 6th_held. Reference search 2026-11-24: coa-history spell 807879: 0 events; coabuildhub has no entry for 807879; installed Spell.dbc governs."
+    },
+    {
+      "spell": 807879,
+      "name": "Saronite Mind (6th Malevolence not instant)",
+      "kind": "metric_delta",
+      "variant": "6th_held",
+      "label_suffix": "6th_held",
+      "quote": "Your Eldritch Eye now affects 2 additional casts.",
+      "trigger_spell": 502241,
+      "gate_spell": 807879,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        802049,
+        502241,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_cast_targets": [
+        "caster",
+        "dummy",
+        "dummy",
+        "dummy",
+        "dummy",
+        "dummy"
+      ],
+      "setup_wait_ms": 1700,
+      "phase_power": [
+        0,
+        2297,
+        2297
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket for 807879 (+2 charges on 802049 -> 5 total; Spell.dbc): after casting 802049 and five Malevolences 502241 (6*1700 = 10200 ms << 15000 ms; mana 529 + 6*136 = 1345 <= 2297), the 6th 502241 reads casting = 1 at 300 ms both before and after learning 807879. Together with 5th_instant, brackets exactly 5 affected casts (+2). Reference search 2026-11-24: installed Spell.dbc governs."
+    },
+    {
+      "spell": 704880,
+      "name": "Doomsayer (Eldritch Shock damage -> +100% next heal)",
+      "kind": "hit_ratio",
+      "variant": "dmg_to_heal",
+      "label_suffix": "dmg_to_heal",
+      "quote": "Damage dealt by Eldritch Shock now increases the amount healed by your next Eldritch Shock by 100%.",
+      "metric": "spell_heal_total",
+      "expected": 2.0,
+      "cast_spell": 808036,
+      "observe_spell": 808050,
+      "target": "caster",
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 808036,
+            "target": "dummy"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          704880
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 808036,
+            "target": "dummy"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAbilities.cpp:228-233 grants 705106 (bp 99 + die 1 = +100%; Spell.dbc) on Eldritch Shock damage (808043 via 808036 at enemy) when 704880 is held; AscensionCultistContracts.cpp:305-306 multiplies next Eldritch Shock heal 808050 by 2.0 and OnSpellHitResult consumes 705106. Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and cast 808036 at dummy before each observed 808036 heal at caster (+20000 SP, non-crit): control has no 704880; treatment learns 704880 (expected ratio 2.0). Reference search 2026-11-24: coa-history spell 705106: 64 aura applied/removed in 8 logs; coabuildhub spells_master_index.json entry 704880 is an older patch state ('Reduces mana cost of Presences'); installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 704880,
+      "name": "Doomsayer (Eldritch Shock full-health heal -> +100% next damage)",
+      "kind": "hit_ratio",
+      "variant": "heal_to_dmg_overheal",
+      "label_suffix": "heal_to_dmg_overheal",
+      "quote": "Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.",
+      "metric": "spell_damage_total",
+      "expected": 2.0,
+      "cast_spell": 808036,
+      "observe_spell": 808043,
+      "target": "dummy",
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 808036,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          704880
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 808036,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+    },
+    {
+      "spell": 704880,
+      "name": "Doomsayer (Eldritch Shock damaged-target heal -> +100% next damage, supporting evidence)",
+      "kind": "metric_delta",
+      "variant": "heal_to_dmg",
+      "label_suffix": "heal_to_dmg",
+      "quote": "Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.",
+      "trigger_spell": 808036,
+      "gate_spell": 704880,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health_pct": 50,
+      "after_trigger_casts": [
+        {
+          "spell": 808036,
+          "delay_ms": 1600,
+          "target": "dummy",
+          "in_before": true
+        }
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 808043,
+        "target": "dummy"
+      },
+      "before_expected": 5000,
+      "expected": 15000,
+      "expected_ratio": 3.0,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "observe_source": "Supporting evidence arm only (damaged target, caster_health_pct 50 -> 5000 effective heal, gain > 0): paired with heal_to_dmg_overheal (full-health pure overheal), which tests the tooltip as worded and alerts on AscensionCultistAbilities.cpp:228-233 checking healing (Spell.cpp:2868-2874,3069-3071 effective gain) instead of Spell.h:634 GetScriptHealingIncludingOverheal(). When the heal is effective, AscensionCultistAbilities.cpp:228-233 grants 705107 (+100%) and AscensionCultistContracts.cpp:307-308 multiplies next Eldritch Shock damage 808043 by 2.0 (cumulative spell_damage_total = 3.0 * D within 0.02). Both phases hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present), 823764 (no resist) and 16255 -100 (no crit; precondition fixtures) at +20000 SP. Does not prove the claim as worded by itself. Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     }
   ],
   "player_observations": [],
