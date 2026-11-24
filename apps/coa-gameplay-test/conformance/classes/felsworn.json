@@ -4055,23 +4055,22 @@
     {
       "spell": 520251,
       "name": "Dark Teachings (Illidari Intuition Agility)",
-      "kind": "metric_delta",
+      "kind": "effectiveness_delta",
       "variant": "intuition",
       "label_suffix": "intuition",
       "quote": "Increases the effectiveness of your Intuitions by $s2%",
       "trigger_spell": 800212,
       "gate_spell": 520251,
       "target": "caster",
-      "metric": "stat_exact",
+      "metric": "stat",
       "fields": {
         "stat": 1
       },
       "before_expected": 150,
       "expected": 154,
-      "tolerance": 0.05,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "observe_source": "520251 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 0 = 512, the SpellFamilyFlags word 0 of the Intuition auras (Illidari Intuition 800212: Effect[0] aura 29 MOD_STAT, MiscValue 1 Agility, BasePoints 19 + 1 = 20). The caster's exact Agility (reference 130) is read 500 ms after a real self cast of Illidari Intuition 800212: 130 + 20 = 150 before the learn (control) and 130 + 20 x 1.2 = 154 after a real learn. The read is a stat readback, and the clause names no stat word, so the ledger counts it as data. Reference search 2026-11-23: coa-history spell 520251: 0 events in 186 logs (a passive leaves no event; positive control 801904: 21 casts); the bindmysoul snapshot says 'Increases the effectiveness of your Intuitions by 20%.'."
+      "wait_ms": 1000,
+      "expire_ms": 1801000,
+      "observe_source": "520251 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 19 + 1 = 20 ($s2), EffectSpellClassMask word 0 = 512, the SpellFamilyFlags word 0 of the Intuition auras (Illidari Intuition 800212: Effect[0] aura 29 MOD_STAT, MiscValue 1 Agility, BasePoints 19 + 1 = 20, DurationIndex 30 = 1800000 ms). Same wording and shape as Necromancer Improved Mandates 560613 ('Increases the effectiveness of your Mandates by $s1%', claim 117.0, kind effectiveness_delta on Foul Mandate 573298, Stamina 122 -> 132): the caster's Agility (reference 130) after a real self cast of 800212 reads 150 without 520251 (control) and, after a real learn and the expiry of the first aura, 130 + int32(20 x 1.2) = 154 on a second real cast. Reference search 2026-11-24: coa-history spell 520251: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: 'Increases the effectiveness of your Intuitions by 20%.'; nothing else found."
     },
     {
       "spell": 501298,
@@ -5095,11 +5094,11 @@
         "power": 3
       },
       "before_expected": 125,
-      "expected": 137.5,
-      "tolerance": 1,
+      "expected": 137,
+      "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 10500,
-      "observe_source": "$s1 = 50: 804609 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 49 (+50%), class mask word 2 0x40 of family 20 = Skull of Gul'dan 800225. Skull Effect[1] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 3, Energy), EffectBasePoints 24 (+25%, $s1 of the Skull tooltip), DurationIndex 1 = 10000 ms. Maximum Energy is 100 on the reference character (the Templar Spiritual entry reads the same 100), so the Skull alone gives 125 (control: 804609 not learned, a real Skull cast) and, +50% effective, the aura amount 25 x 1.5 = 37.5 gives 137.5, judged to 1 point for the integer amount (137 or 138): a +45% or +55% effectiveness would read 136.25 or 138.75, outside the tolerance 1 on 137.5. The first Skull ends (expire_ms 10500 > 10000 ms) before the second cast under the learned modifier, as the Necromancer Plague Protection 570046 entry does for Wards. Reference search 2026-11-23: coa-history spell 804609: 0 events in 186 logs (passive); spell 800225: SPELL_AURA_APPLIED 16 events in 4 logs (no figure); bindmysoul talents snapshot (fetched 2026-07-22): Gul'dan's Gift 804609 'Increases the effectiveness of your Skull of Gul'dan by 50%, but its cooldown is increased by 30 sec.'; nothing else found."
+      "observe_source": "$s1 = 50: 804609 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 49 (+50%), class mask word 2 0x40 of family 20 = Skull of Gul'dan 800225. Skull Effect[1] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 3, Energy), EffectBasePoints 24 (+25%, $s1 of the Skull tooltip), DurationIndex 1 = 10000 ms. Maximum Energy is 100 on the reference character (the Templar Spiritual entry reads the same 100), so the Skull alone gives 125 (control: 804609 not learned, a real Skull cast) and, +50% effective, the modded aura amount 25 x 1.5 = 37.5 is stored as int32 (37), so the maximum Energy is 137, judged to the integer (tolerance 0): a +55% effectiveness stores int32(38.75) = 38 and reads 138, a +45% one stores int32(36.25) = 36 and reads 136, both alert. The first Skull ends (expire_ms 10500 > 10000 ms) before the second cast under the learned modifier, as the Necromancer Plague Protection 570046 entry does for Wards. Reference search 2026-11-23: coa-history spell 804609: 0 events in 186 logs (passive); spell 800225: SPELL_AURA_APPLIED 16 events in 4 logs (no figure); bindmysoul talents snapshot (fetched 2026-07-22): Gul'dan's Gift 804609 'Increases the effectiveness of your Skull of Gul'dan by 50%, but its cooldown is increased by 30 sec.'; nothing else found."
     },
     {
       "spell": 707513,
@@ -12978,13 +12977,21 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found. Precondition (after_setup_stacks, ADR 1257): Bane of Fire 707901 is read on the dummy at exactly 1 stack right after its setup cast in each phase, before the before reading and before the Bane of Chaos cast; a run where it did not land is void, not judged (the run-1 flip read 0 before the learn). No roll decides the judged reading: the removal is the aura apply handler AscensionFelswornAuras.cpp:48-58, which removes every other Bane of the same caster on the target when a Bane (AscensionFelsworn.cpp:114-117) applies, with no chance; the caster's spell hit rating 10000 (class file ratings) lifts HitChance to the 10000 clamp of Unit::MagicSpellHitResult (Unit.cpp:4039-4053), so the miss roll threshold is 0.",
+      "observe_source": "Bane of Fire 707901 (SpellFamilyFlags[0] 32, the Bane family mask of Bane of Chaos 706420) is cast at the dummy in both phases. The before phase casts no second Bane: Bane of Fire is on the dummy (the control, read 1). The after phase casts Bane of Chaos at the same dummy 1700 ms later: Bane of Fire is gone (read 0), so a second Bane replaces the first. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs (113 refreshes), no figure for the exclusivity; nothing else found. Precondition (after_setup_stacks, ADR 1257): Bane of Fire 707901 is read on the dummy at exactly 1 stack right after its setup cast in each phase, before the before reading and before the Bane of Chaos cast; a run where it did not land is void, not judged (the run-1 flip read 0 before the learn). No roll decides the judged reading: the removal is the aura apply handler AscensionFelswornAuras.cpp:48-58, which removes every other Bane of the same caster on the target when a Bane (AscensionFelsworn.cpp:114-117) applies, with no chance; the caster's spell hit rating 10000 (class file ratings) lifts HitChance to the 10000 clamp of Unit::MagicSpellHitResult (Unit.cpp:4039-4053), so the miss roll threshold is 0. Run evidence (fw-vb2b, 2026-11-24): in the archived failing run (stamp 20261124-000202) the first Bane of Fire cast of the scenario (step 33) was submitted without a cast failure (the result has no cast_failures) and 707901 read 0 on the dummy 1700 ms later, while the identical second cast (step 44) read 1: the cast was accepted and the aura did not land, which is a spell miss or resist, not a refused cast. Bane of Fire is DmgClass 1, school 4, and the dummy's fire resistance can make it a binary resist; spell penetration 823764 (aura 123, MiscValue 126, -9999) is therefore a named precondition fixture in both phases, as in the sibling entries. This is a hypothesis tested by the focused reruns, not a proven cause.",
       "after_setup_stacks": [
         {
           "spell": 707901,
           "actor": "dummy",
           "stacks": 1
         }
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
       ]
     },
     {
@@ -14950,6 +14957,290 @@
       "observe_source": "Felwrath 520693 (rank chain 520236-520693, Inner Demon rank 520832: Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, StackAmount 3, DurationIndex 32). Tooltip: 'Inner Demon: Striking at least 5 enemies with this spell causes it to deal an additional ... Shadowflame Damage over $520832d, stacking $520832u times.' Felwrath's area is Effect[0] TargetA 53 TARGET_DEST_TARGET_ENEMY and TargetB 16 TARGET_UNIT_DEST_AREA_ENEMY with radius index 14 = 8 yd (SpellRadius.dbc), so dummies standing 3 to 7 yd from the caster are within 4 yd of the primary at 3 yd and are all struck. Inner Demon 804216 is on the caster as a precondition fixture set by harness set_aura (the clause's own condition; its cast needs Felfury the arm also needs for Felwrath), 6 Felfury and Demonic 803468 cover the cast, 823764 keeps resists off. The 520832 stacks are read on the primary dummy 3500 ms after one real Felwrath cast (CastingTimeIndex 5 = 2000 ms): four enemies are struck (the primary and three more, one fewer than the 5 the tooltip names): the primary carries no 520832 (0), as in the control phase that casts nothing. Reference search 2026-11-23: coa-history spell 520832: SPELL_AURA_APPLIED 1558 events, SPELL_PERIODIC_DAMAGE 11712 events in 10 logs (the Inner Demon damage exists in play; the logs do not tell how many enemies each cast struck, so no figure decides); bindmysoul snapshot has no value beyond the tooltip; nothing else found."
     },
     {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon: two casts stack 520832 to 2)",
+      "variant": "inner_stack_two",
+      "label_suffix": "inner_stack_two",
+      "setup_casts": [
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. One setup Felwrath cast, then the trigger cast: two applications on the dummy, read 3000 ms after the trigger (1000 ms after it lands, well inside the 6000 ms aura): 2 stacks. Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon: three casts stack 520832 to 3)",
+      "variant": "inner_stack_three",
+      "label_suffix": "inner_stack_three",
+      "setup_casts": [
+        520693,
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "after_setup_stacks": [
+        {
+          "spell": 520832,
+          "actor": "dummy",
+          "stacks": 2
+        }
+      ],
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Two setup Felwrath casts (the dummy reads 2 stacks after them, a precondition read), then the trigger cast: three applications, read 3000 ms after the trigger: 3 stacks. Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "measure_actor": "dummy",
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520832
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon stacks cap at 3)",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "setup_casts": [
+        520693,
+        520693,
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "stack_feed": {
+        "aura": 520832,
+        "cap": 3,
+        "window_ms": 6000,
+        "trials": 2,
+        "refeed_auras": [
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            804216,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "source": "520832 StackAmount 3, DurationIndex 32 = 6000 ms"
+      },
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Four real Felwrath casts (three setup casts and the trigger, 2100 ms apart; each 2000 ms cast lands before the next starts) apply 520832 four times on the dummy; stack_feed counts the applications (aura_apply_count) and reads the stacks after every cast: a trial is valid with at least 4 counted applications and no poll span of 6000 ms or more, and passes at exactly 3 stacks, never 4 (the fourth application stays at 3). The end read comes 2500 ms after the trigger cast, after the fourth application lands. The feed is deterministic (one application per cast, no roll). Felfury x6, 803468, 804216 and 823764 are set again after every feed cast (refeed), as Felwrath costs 2 Felfury and Felfury caps at 6. Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
+      "spell": 520693,
+      "kind": "metric_delta",
+      "quote": "stacking $520832u times.",
+      "trigger_spell": 520693,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520832,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2851.2,
+      "tolerance": 0,
+      "wait_ms": 9000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0
+      ],
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "name": "Felwrath (Inner Demon: damage of three stacks, uncounted, N-7)",
+      "variant": "inner_total_three",
+      "label_suffix": "inner_total_three",
+      "setup_casts": [
+        520693,
+        520693
+      ],
+      "setup_wait_ms": 2100,
+      "after_at_least": 2708,
+      "after_at_most": 2994,
+      "observe_source": "520832 (Inner Demon rank of Felwrath, server DBC set): StackAmount 3 ($520832u; lab render \"stacking 3 times\"), DurationIndex 32 = 6000 ms. Felwrath 520693 CastingTimeIndex 5 = 2000 ms. Each real Felwrath cast strikes five enemies (the dummy at 3 yd and four area dummies at 4 to 7 yd, all within the 8 yd radius index 14 around the dummy) under Inner Demon 804216 and casts 520832 once on every struck enemy (AscensionFelswornAbilities.cpp:363-374); Effects[0] and [2] of 520832 target the struck enemy only (AscensionFelswornContracts.cpp:300-305, Felsworn ADR 0020), so the dummy takes exactly one application per Felwrath cast and the aura stacks (Unit.cpp:5441-5466). Setup casts are 2100 ms apart (the 2000 ms cast lands before the next starts). Felfury 800058 x6, Demonic 803468, Inner Demon 804216 and 823764 (no resist) are precondition fixtures, as on the inner_five entry. Control: the phase that casts nothing reads 0. Damage of the stacks as applied damage (uncounted while owner question N-7 is open). Effect[0] ticks every 1000 ms for 8 + 2.0 x 50 = 108 per stack (the periodic amount is multiplied by the stacks, SpellAuraEffects.cpp:659), x 1.1 under 804216; Effect[1] is SPELL_EFFECT_DUMMY and deals nothing. A reapplied periodic damage aura keeps its tick timer (SpellAuraEffects.cpp:748-751) and restarts its 6000 ms. Applications at 0, 2100 and 4200 ms: ticks at 1000 and 2000 ms at 1 stack, 3000 and 4000 at 2, 5000 to 10000 at 3 (the aura ends at 10200): 2 + 4 + 18 = 24 stack-ticks, 4 times the 6 of one stack (the inner_total entry). Reading (a) per tick, the server as is: 24 x 118.8 = 2851.2, band 5% (2708 to 2994). Reading (b) total over $d: 24 x 18 x 1.1 = 475.2. Spell crit removed (984954). Reference search 2026-11-24: nothing beyond the tooltip and Spell.dbc decides the stack count (B8 review M3)."
+    },
+    {
       "spell": 800206,
       "name": "Carve (consumes 2 Felfury)",
       "kind": "metric_delta",
@@ -15986,6 +16277,945 @@
         ]
       ],
       "observe_source": "Below-six arm of energy_at_six (50 Energy at six Felfury). The caster builds a real count of 5 Felfury 800058 (StackAmount 6) before each Inner Demon 804216 cast: Burning Hatred 805239 at the caster ('instantly generating 6 Felfury'), Sargeron Smite 802060 at the dummy ('Consumes 2 Felfury'), Bane of Fire 707901 at the dummy (a Bane hit on an enemy gives Gain(player, 1), AscensionFelswornAbilities.cpp:329-333; Fel Torpedo was dropped because its dash carried the caster past the dummy and the next Sargeron Smite was refused with SPELL_FAILED_UNIT_NOT_INFRONT, pair fw-tg1 proveP1); the per-cast targets are the setup_cast_targets option (ADR 1256) and the count is read at exactly 5 after the last setup cast of each phase (after_setup_stacks, ADR 1257), a mismatch voids the run. Inner Demon's own aura from the before phase is removed at the start of the after phase (after_auras), so both arms cast it the same way. The handler casts 520258 only when the Felfury consumed is at least 6 (AscensionFelswornAbilities.cpp:265-266): the energize events of 520258 on the caster are 0 before the learn of 520257 and 0 after it at five, where a threshold of 5 would restore 50. Reference search: as energy_at_six (2026-11-23)."
+    },
+    {
+      "spell": 704612,
+      "kind": "metric_delta",
+      "quote": "Increases the effectiveness of your Pacts by $s1%.",
+      "trigger_spell": 803885,
+      "gate_spell": 803885,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Pact Hunter (Vengeful Pact raises an ally's Shadow resistance by 97.5)",
+      "variant": "pact_resist_hunter",
+      "label_suffix": "pact_resist_hunter",
+      "learn": [
+        704612
+      ],
+      "expected": 97.5,
+      "tolerance": 0.5,
+      "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact (800031, 803488, 803718, 804764, 803343, 803885). Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, area aura on the party (SPELL_EFFECT_APPLY_AREA_AURA_RAID, radius index 23). Behaviour read: a real Vengeful Pact cast by the caster; the Shadow resistance of the grouped ally (resistance, school 5, a live stat read) is read before the cast (no Pact, 0) and after it. The control entry (pact_resist) has no Pact Hunter; the treatment entry (pact_resist_hunter) has Pact Hunter learned in both phases: 65 + 50% = 97.5, read as the integer 97 (the engine's integer percent modifier, tolerance 0.5 judges to the rounding, G-19). Evidence class: a stat read whose promise words ('resistance') the claim does not carry, so the audit counts it as data (163.0 stays uncounted): a second design, the damage shield hit of Vengeful Pact's Effect[1] read after a real Damage 100 (TEST) 2653 cast by the dummy at the Pact holder (the caster, and a grouped ally), read no shield hit and no health loss on the dummy. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (3 x 1.5 = 4.5 truncated). Reference search 2026-11-23: coa-history spells 704612 and 803885: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 704612,
+      "kind": "metric_delta",
+      "quote": "Increases the effectiveness of your Pacts by $s1%.",
+      "trigger_spell": 803885,
+      "gate_spell": 803885,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_in_before": false,
+      "before_expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Pact Hunter (control: Vengeful Pact raises an ally's Shadow resistance by 65)",
+      "variant": "pact_resist",
+      "label_suffix": "pact_resist",
+      "expected": 65,
+      "tolerance": 0.5,
+      "observe_source": "Pact Hunter 704612 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 49 + 1 = 50 ($s1%), SpellClassMask word 2 256 = SpellFamilyFlags[2] 256 of every Pact (800031, 803488, 803718, 804764, 803343, 803885). Vengeful Pact 803885 Description: 'Emanate an aura that increases nearby allies' Shadow Resistance by ${$m1+0}', Effect[0] aura 143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE, MiscValue 32 (Shadow), BasePoints 64 + 1 = 65, area aura on the party (SPELL_EFFECT_APPLY_AREA_AURA_RAID, radius index 23). Behaviour read: a real Vengeful Pact cast by the caster; the Shadow resistance of the grouped ally (resistance, school 5, a live stat read) is read before the cast (no Pact, 0) and after it. The control entry (pact_resist) has no Pact Hunter; the treatment entry (pact_resist_hunter) has Pact Hunter learned in both phases: 65 + 50% = 97.5, read as the integer 97 (the engine's integer percent modifier, tolerance 0.5 judges to the rounding, G-19). Evidence class: a stat read whose promise words ('resistance') the claim does not carry, so the audit counts it as data (163.0 stays uncounted): a second design, the damage shield hit of Vengeful Pact's Effect[1] read after a real Damage 100 (TEST) 2653 cast by the dummy at the Pact holder (the caster, and a grouped ally), read no shield hit and no health loss on the dummy. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (3 x 1.5 = 4.5 truncated). Reference search 2026-11-23: coa-history spells 704612 and 803885: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 300489,
+      "name": "Archimonde's Wrath (Ruin critical strike share rises by 10 points at 100 Energy)",
+      "kind": "hit_ratio",
+      "variant": "crit_energy",
+      "label_suffix": "crit_energy",
+      "quote": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
+      "expected": 1.1,
+      "observe_spell": 801895,
+      "learn": [
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300489
+        ]
+      },
+      "rate": "critical",
+      "expected_points": 10,
+      "trials": 60,
+      "parts": 140,
+      "cast_power": 100,
+      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). With 100 Energy at the time of casting the stated bonus is 10 x 1 = 10 critical strike points on Ruin 801895, a Felfury spender (it consumes 2 Felfury). Behaviour read: critical over all hits of the observed Ruin, control arm (300489 not learned) against treatment arm (300489 learned), the difference of the two rates judged in percent points inside the G-19 band of the stated 10 (2 points), pooled over parts of 300 casts per arm (ADR 0195); Energy is set to 100 before every cast; Felfury x2 and spell penetration 823764 are named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 300489,
+      "name": "Archimonde's Wrath (Ruin critical strike share rises by 5 points at 50 Energy)",
+      "kind": "hit_ratio",
+      "variant": "crit_energy_half",
+      "label_suffix": "crit_energy_half",
+      "quote": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
+      "expected": 1.05,
+      "observe_spell": 801895,
+      "learn": [
+        801895
+      ],
+      "control": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            800058,
+            2
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "learn": [
+          300489
+        ]
+      },
+      "rate": "critical",
+      "expected_points": 5,
+      "trials": 60,
+      "parts": 140,
+      "cast_power": 50,
+      "observe_source": "The 'for every 10 points of Energy' scaling arm of the crit_energy entry: Energy is set to 50 before every cast, so the stated bonus is 5 x 1 = 5 critical strike points ($s2 = 1, Effect[1] BasePoints 0 + 1), judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give. Same Ruin 801895 reads, control arm (300489 not learned) against treatment arm (300489 learned), Felfury x2 and spell penetration 823764 as named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 802058,
+      "name": "Reckoning (a Fel Fireball hit raises the damage dealt by 4%)",
+      "kind": "hit_ratio",
+      "variant": "stack_damage",
+      "label_suffix": "stack_damage",
+      "quote": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",
+      "expected": 1.04,
+      "observe_spell": 802060,
+      "learn": [
+        802060,
+        801312,
+        802058
+      ],
+      "control": {
+        "auras": [
+          [
+            524632,
+            0
+          ],
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802058,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            524632,
+            0
+          ],
+          [
+            800058,
+            4
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802058,
+            "target": "caster"
+          },
+          {
+            "spell": 801312,
+            "target": "dummy"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "Reckoning 802058 Description: 'For the duration, your falling speed is slowed and damage dealt by your Fel Fireball increases your damage dealt by $524632s2% for $524632d, ...'. Effect[1] amount of 524632 = 4 ($s2, read by the sibling stack_amount value entry). Behaviour read (hit_ratio): each trial first cleans 524632, casts Reckoning 802058 on the caster and, in the treatment arm only, a real Fel Fireball 801312 at the dummy (its hit gives one stack of 524632), then casts the observed Sargeron Smite 802060 at the dummy; the mean damage of the non-critical Smite hits must rise by 4% (one stack) over the control arm, which makes the same casts without the Fel Fireball (control band 2 points, G-19). Felfury 800058 x4 (Smite consumes 2), spell penetration 823764 and spell power +20000 (so the damage die is negligible) are named precondition fixtures in both arms. Reference search 2026-11-23: coa-history spells 802058 and 524632: 78 and 588 aura events in 6 logs, no damage figures; nothing found beyond the tooltip and Spell.dbc. "
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (the critical damage bonus lasts 6 s from its last application)",
+      "kind": "last_application_expiry",
+      "label_suffix": "crit_damage_duration",
+      "quote": "and grants you $300481s1% increased spell critical damage for $300481d,",
+      "gate_spell": 300483,
+      "trigger_spell": 802678,
+      "aura": 300481,
+      "expected_ms": 6000,
+      "control_window_ms": 2500,
+      "window_ms": 14000,
+      "poll_ms": 50,
+      "caster": true,
+      "observe_source": "300481 DurationIndex 32 = 6000 ms ($300481d). A real Felstrike 802678 cast at the dummy gives the buff on every tick (Chaotic Intuition 300483 known); the caster's aura_apply_count of 300481 and its presence are polled every 50 ms over 14 s: the last application lies between the two reads where the count last rises and the removal between the last read with the aura and the first without; the bracket must lie inside the G-19 band around 6000 ms, which excludes a duration 10% off on both sides. The control (before learn) casts Felstrike without the talent and must apply nothing. Reference search 2026-11-23: coa-history spells 300483 and 300481: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (two stacks raise the spell critical damage by 2%)",
+      "kind": "metric_delta",
+      "variant": "crit_damage",
+      "label_suffix": "crit_damage",
+      "quote": "and grants you $300481s1% increased spell critical damage for $300481d,",
+      "trigger_spell": 802678,
+      "gate_spell": 300483,
+      "target": "dummy",
+      "setup_only_after": true,
+      "setup_casts": [
+        802678
+      ],
+      "setup_wait_ms": 1500,
+      "after_setup_stacks": [
+        {
+          "spell": 300481,
+          "actor": "caster",
+          "stacks": 2
+        }
+      ],
+      "metric": "spell_critical_damage",
+      "fields": {
+        "spell": 802060,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 1500,
+      "expected": 1530,
+      "expected_gain": 30,
+      "tolerance": 0.5,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Chaotic Intuition 300483 Description: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by ... and grants you $300481s1% increased spell critical damage for $300481d, stacking $300481u times.' 300481 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (magic schools), BasePoints 0 + 1 = 1 ($s1 = 1% per stack), StackAmount 10, DurationIndex 32 = 6000 ms ($d). Behaviour read: the caster's critical damage of Sargeron Smite 802060 on the dummy (spell_critical_damage, the engine's own Unit::SpellCriticalDamageBonus use-time read, 1500 = the standard 1.5 critical multiplier) is read before (Chaotic Intuition known, no Felstrike cast: the control) and after a real Felstrike 802678 cast whose ticks gave the buff. The stack count is a precondition read (after_setup_stacks: exactly 2 stacks of 300481 on the caster after the setup cast), not a claim: 2 stacks at 1% = +2% of 1500 = 1530 (gain 30, tolerance 0.5). Aura 64481 (no critical hits) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 300483 and 300481: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300483,
+      "name": "Chaotic Intuition (three stacks raise a forced spell critical hit by 3%)",
+      "kind": "hit_ratio",
+      "variant": "crit_damage_hit",
+      "label_suffix": "crit_damage_hit",
+      "quote": "and grants you $300481s1% increased spell critical damage for $300481d,",
+      "observe_spell": 801312,
+      "learn": [
+        801312
+      ],
+      "cast_wait_ms": 3400,
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            300481,
+            3
+          ]
+        ]
+      },
+      "expected": 1.03,
+      "critical": true,
+      "force_crit": "spell",
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "observe_source": "300481 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (the schools of magic), EffectBasePoints 0 with DieSides 1 = 1 ($300481s1), StackAmount 10, DurationIndex 32 = 6000 ms (Spell.dbc, apps/coa-dbc/inspect_dbc.py). The data entry crit_damage reads Unit::SpellCriticalDamageBonus without a hit (1500 before, 1530 after two stacks); this entry applies the aura to real forced spell critical hits: Fel Fireball 801312 is cast at the dummy trials times with the spell critical rating forced (force_crit spell), critical hits only, in a control arm without 300481 and a treatment arm with 3 stacks of it, which is the cap of 300483 (max_stacks 300481 #3). Expected ratio 1.03 = 3 stacks of 1% on the whole critical total, the reading of the Elemental Bane and You Cheat, Gul'dan entries (AddPct on the critical bonus). The stacks are set by harness set_aura as a named precondition of the read; their grant by real Felstrikes is proven by the max_stacks and crit_damage_duration labels of this spell, not here. Spell power +20000 and spell penetration 823764 (aura 123, MiscValue 126, -9999: removes partial resists of the dummy) are named precondition fixtures in both arms. Reference search 2026-11-23: coa-history spells 300483 and 300481: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc."
+    },
+    {
+      "spell": 300474,
+      "name": "Expose (an ally's critical strike chance against the exposed target is 3 points higher)",
+      "kind": "metric_delta",
+      "variant": "crit_ally",
+      "label_suffix": "crit_ally",
+      "quote": "Direct Fire and Shadow spell damage dealt now applies Expose to enemies.",
+      "trigger_spell": 801895,
+      "gate_spell": 300474,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 802060,
+        "target": "dummy"
+      },
+      "ally_arm": {
+        "allies": 1
+      },
+      "phase_auras": [
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.05,
+      "wait_ms": 1500,
+      "expire_ms": 2500,
+      "void_on_cast_failure": true,
+      "observe_source": "Expose 300474 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL casts Expose 300475 on a Fire or Shadow direct hit (applied by the sibling 'applies' entry). 300475 Effect[1] aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE, MiscValue 127 all schools, BasePoints 2 + 1 = 3 ($s2). Behaviour read: a real Ruin 801895 hit (a Fire and Shadow direct hit, learning Expose 300474 between the phases) applies Expose to the dummy; the critical strike chance of the grouped ally against the dummy, Sargeron Smite 802060 through the engine's own Player::SpellDoneCritChance then Unit::SpellTakenCritChance of the dummy, is read before (no Expose on the dummy) and after. Felfury 800058 x2 (Ruin consumes 2) is a named precondition fixture. Reference search 2026-11-23: coa-history spells 300474 and 300475: 300475 has 88 aura applications in 1 log, no event carries a crit figure; nothing else found beyond the tooltip and Spell.dbc. The before reading is the control (Expose not learned, so no Expose on the dummy).",
+      "learn": [
+        801895
+      ]
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        705121
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (control: without it a Fury Unleashed cast leaves Sunder's damage unchanged)",
+      "variant": "sunder_taken_control",
+      "label_suffix": "sunder_taken_control",
+      "trigger_spell": 705121,
+      "setup_casts": [
+        555738
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 6600,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 712399,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 304,
+      "expected": 304,
+      "tolerance": 0.02,
+      "expected_ratio": 1.0,
+      "wait_ms": 2500,
+      "observe_source": "Control arm of sunder_taken: the same casts and reads with Whirling Vengeance 704602 never learned (the gate is Sunder 705121 itself): the Fury Unleashed cast leaves no debuff, so Sunder's explosion damage on the dummy reads the same in both phases (ratio 1.0, tolerance 0.02). Reference search 2026-11-23: as sunder_taken.",
+      "gate_spell": 705121,
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 712399,
+          "target": "dummy"
+        },
+        "increments": true
+      }
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        704602
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (the debuff is gone from the dummy 16.2 s after the strike)",
+      "variant": "sunder_gone",
+      "label_suffix": "sunder_gone",
+      "trigger_spell": 555738,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806096,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 21200,
+      "game_time": {
+        "after": [
+          21150,
+          21300
+        ]
+      },
+      "observe_source": "Whirling Vengeance 704602 Description (server DBC set): 'When Fury Unleashed ends, you strike all nearby enemies for ... and increase their damage taken from Sunder by $806096s2% for $806096d.' 806096 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 99 + 1 = 100 ($s2%), EffectSpellClassMask word 1 65536 (Annihilan Strike 572804) and word 2 2147483648 (Sunder 712399, SpellFamilyFlags[2] 2147483648), DurationIndex 8 = 15000 ms ($d). Fury Unleashed 555738 lasts 5000 ms (DurationIndex 28, its own duration entries), the strike 806096 and the debuff land when it ends. Reference search 2026-11-23: coa-history spells 704602 and 806096: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Duration read 2 of 2: the debuff 806096 is gone from the dummy 21200 ms after the cast, 16200 ms after the strike (1.08 x 15000), which excludes a duration 10% long (16500 ms)."
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        704602
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (the debuff is on the dummy 13.8 s after the strike)",
+      "variant": "sunder_held",
+      "label_suffix": "sunder_held",
+      "trigger_spell": 555738,
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 806096,
+        "caster": "caster"
+      },
+      "measure_actor": "dummy",
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 18800,
+      "game_time": {
+        "after": [
+          18750,
+          18900
+        ]
+      },
+      "observe_source": "Whirling Vengeance 704602 Description (server DBC set): 'When Fury Unleashed ends, you strike all nearby enemies for ... and increase their damage taken from Sunder by $806096s2% for $806096d.' 806096 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 99 + 1 = 100 ($s2%), EffectSpellClassMask word 1 65536 (Annihilan Strike 572804) and word 2 2147483648 (Sunder 712399, SpellFamilyFlags[2] 2147483648), DurationIndex 8 = 15000 ms ($d). Fury Unleashed 555738 lasts 5000 ms (DurationIndex 28, its own duration entries), the strike 806096 and the debuff land when it ends. Reference search 2026-11-23: coa-history spells 704602 and 806096: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Duration read 1 of 2: Fury Unleashed is cast (the strike and the debuff land at 5000 ms); the debuff 806096 is still on the dummy 18800 ms after the cast, 13800 ms after the strike (0.92 x 15000), which excludes a duration 10% short (13500 ms)."
+    },
+    {
+      "spell": 704602,
+      "kind": "metric_delta",
+      "quote": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        704602
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 500,
+      "name": "Whirling Vengeance (the debuffed dummy takes 100% more damage from Sunder)",
+      "variant": "sunder_taken",
+      "label_suffix": "sunder_taken",
+      "trigger_spell": 705121,
+      "setup_casts": [
+        555738
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 6600,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 712399,
+        "target": "dummy"
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 304,
+      "expected": 608,
+      "tolerance": 0.05,
+      "expected_ratio": 2.0,
+      "wait_ms": 2500,
+      "observe_source": "Whirling Vengeance 704602 Description (server DBC set): 'When Fury Unleashed ends, you strike all nearby enemies for ... and increase their damage taken from Sunder by $806096s2% for $806096d.' 806096 Effect[1] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER, BasePoints 99 + 1 = 100 ($s2%), EffectSpellClassMask word 1 65536 (Annihilan Strike 572804) and word 2 2147483648 (Sunder 712399, SpellFamilyFlags[2] 2147483648), DurationIndex 8 = 15000 ms ($d). Fury Unleashed 555738 lasts 5000 ms (DurationIndex 28, its own duration entries), the strike 806096 and the debuff land when it ends. Reference search 2026-11-23: coa-history spells 704602 and 806096: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc. Behaviour read: Sunder 705121 is cast at the dummy and the mean damage per hit of its explosion 712399 on the dummy (total over hit count, the after reading as the increase of both over the after phase) is read 2.5 s later, once without the debuff (before phase: Whirling Vengeance learned, no Fury Unleashed cast) and once after a real Fury Unleashed cast 6.6 s earlier whose end applied the debuff (setup_only_after). Expected per hit before = 245 x 0.98743 + 0.2 x 312 = 304.3, read as the integer 304 (Sunder 705121 tooltip: ${$712399m1*$<scalingbp>+$AP*0.2+$SP*.25}, m1 = 244 + 1, scalingbp 0.98743 at level 60, reference attack power 312, spell power 0); expected per hit after = 2 x before for +100%. Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742) and 823764 (spell penetration) are named precondition fixtures.",
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 712399,
+          "target": "dummy"
+        },
+        "increments": true
+      }
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (control: without Inner Demon no Chaos hit lands)",
+      "variant": "inner_none",
+      "label_suffix": "inner_none",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 12600,
+      "cast_in_before": false,
+      "observe_source": "Control arm: the same Bane of Chaos cast and wait of 12.6 s without Inner Demon (no setup cast): no Chaos 802676 hit lands, because the script casts Chaos only while Inner Demon is on the caster (AscensionFelswornAuras.cpp, Inner(player)). Reference search 2026-11-23: as the sibling entries."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: a Chaos hit by 6.6 s: count at 6.6 s)",
+      "variant": "inner_interval_b",
+      "label_suffix": "inner_interval_b",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6600,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          6550,
+          6700
+        ]
+      },
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Interval claim, read 2 of 2 (10% long): with a hit every 6000 ms exactly one hit has landed 6600 ms after the cast (6000 ms; the next is at 12000 ms); an interval 10% long (6600 ms or more) would have none, one 10% short (5400 ms) would have one too, which read 1 excludes."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: one Chaos hit by 6 s, not before 6 s: count at 5.4 s)",
+      "variant": "inner_interval_a",
+      "label_suffix": "inner_interval_a",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5400,
+      "cast_in_before": false,
+      "game_time": {
+        "after": [
+          5350,
+          5500
+        ]
+      },
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Interval claim, read 1 of 2 (10% short): with a Chaos hit every 6000 ms the first hit lands at 6000 ms, so the count 5400 ms after the cast is 0; an interval 10% short (5400 ms or less) would already show a hit. The before read has no cast (0)."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: damage per Chaos hit at +10000 spell power)",
+      "variant": "inner_damage_sp",
+      "label_suffix": "inner_damage_sp",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 802676,
+          "target": "dummy"
+        }
+      },
+      "before_expected": 5879.6,
+      "expected": 5879.6,
+      "tolerance": 294,
+      "wait_ms": 6500,
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Contrast arm of the $SP*0.48 term: spell power +10000 on the caster in both phases: (551 x 0.98743 + 0.48 x 10000) x 1.10 = 5879.6, tolerance 294 (5%) against 599.6 at spell power 0."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "quote": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      },
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "expire_ms": 20500,
+      "name": "Bane of Chaos (Inner Demon: damage per Chaos hit at the reference spell power)",
+      "variant": "inner_damage",
+      "label_suffix": "inner_damage",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802676,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 802676,
+          "target": "dummy"
+        }
+      },
+      "before_expected": 599.6,
+      "expected": 599.6,
+      "tolerance": 30,
+      "wait_ms": 6500,
+      "observe_source": "Bane of Chaos 706420 Description (server DBC set /srv/coa/server-data/dbc): 'Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.'. $802676m1 = Chaos 802676 Effect[0] BasePoints 550 + 1 = 551 (DieSides 3, so 551 to 553); $<scalingbp> is SpellDescriptionVariables id 182 on 802676 and 706420: 0.0267291844060354 + 0.0048541098014737 x $PL + 0.0001859597762293 x $PL^2 = 0.98743 at the level-60 reference character; $t2 = EffectAmplitude[1] 6000 ms. Inner Demon 804216 Effect[1] aura 79 BasePoints 9 + 1 = +10% damage done ($s2 of its own tooltip), so a hit read on the Inner Demon caster is the tooltip value times 1.10. Inner Demon is made by one real setup cast with 6 Felfury as precondition fixture (800058 required_aura_stacks, it lasts 6 x 5000 ms), Reg's Test Aura 984954 (the class files' crit-removal fixture, ADR 0742) and 823764 (spell penetration) are named precondition fixtures. Reference search 2026-11-23: coa-history spells 706420 and 802676: Bane of Chaos 1563 periodic events and Chaos 3327 hits in 12 logs, but Chaos is cast by several other spells, so the log hit gaps (0.5 s to 6.5 s, mode 2 s) decide nothing; nothing else found beyond the tooltip and Spell.dbc. Expected per hit: 551 x 0.98743 = 544.1 (m1 551) to 553 x 0.98743 = 546.0 (m1 553), x 1.10 = 598.5 to 600.6, plus $SP*0.48 with spell power 0 on the reference character. The reading is total over count of 802676 on the dummy, 6.5 s after the cast, in both phases (Inner Demon on the caster in both); tolerance 30 is the G-19 5% band. The no-Inner-Demon control is the sibling inner_none."
+    },
+    {
+      "spell": 560542,
+      "name": "Felguard (control: without Felguard the swings under Inner Demon heal nothing)",
+      "kind": "metric_delta",
+      "variant": "no_felguard_heal",
+      "label_suffix": "no_felguard_heal",
+      "quote": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
+      "trigger_spell": 560542,
+      "gate_spell": 805239,
+      "target": "dummy",
+      "attack_swings": 4,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560627,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of the Felguard clause: Inner Demon 804216 is on the caster (one real setup cast with 6 Felfury as precondition fixture, as the main entry) and the same four swings per phase are made, but Felguard 560542 is never learned or cast (the gate cast is Burning Hatred 805239, a spell with no heal): the heal of 560627 reads 0 over the swing damage. The main entry heals 15% of the same swings. Reference search 2026-11-23: coa-history spells 560542 and 560627: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "gate_cast": true,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      }
+    },
+    {
+      "spell": 560542,
+      "name": "Felguard (control: without Inner Demon the swings heal nothing)",
+      "kind": "metric_delta",
+      "variant": "no_inner_heal",
+      "label_suffix": "no_inner_heal",
+      "quote": "while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
+      "trigger_spell": 560542,
+      "gate_spell": 560542,
+      "target": "dummy",
+      "attack_swings": 4,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560627,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Control arm of the Inner Demon clause: Felguard cast between the phases, no setup cast so Inner Demon 804216 is absent in both phases (Check case 560542 requires Inner(player)), the same six swings: the heal of 560627 reads 0 over the swing damage. Felguard's own swings of the previous entry heal 15%, so a heal here would show the clause ignoring Inner Demon. Reference search 2026-11-23: coa-history spells 560542 and 560627: 0 events in 186 logs; nothing found beyond the tooltip and Spell.dbc.",
+      "gate_cast": true
+    },
+    {
+      "spell": 560542,
+      "name": "Felguard (Inner Demon: the heal is 15% of the swing damage)",
+      "kind": "metric_delta",
+      "variant": "inner_heal",
+      "label_suffix": "inner_heal",
+      "quote": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
+      "trigger_spell": 560542,
+      "gate_spell": 560542,
+      "target": "dummy",
+      "attack_swings": 4,
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 560627,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_total",
+        "fields": {},
+        "increments": true
+      },
+      "before_expected": 0.15,
+      "expected": 0.15,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560542 Effect[1] BasePoints 14 + 1 = 15 ($s2%). The event script (AscensionFelswornEvents.cpp: Check case 560542 returns an outgoing melee hit with damage while Inner Demon is on the caster and the spell is not derived; Proc case 560542 calls Copy(player, player, 560627, damage * 15 / 100)) casts Felguard 560627 (SPELL_EFFECT_HEAL) on the caster with that amount. Inner Demon 804216 is made by one real setup cast before the first phase (Inner Demon 804216 with 6 Felfury as its precondition fixture, 800058 required_aura_stacks: it lasts 6 x 5000 ms, $803465s1, over both four-swing phases) and is on the caster in both phases: the before arm (Felguard not learned) reads 0, the after arm (Felguard cast on the caster between the phases (gate_cast)) reads the heal of 560627 on the caster over the caster's own swing damage (melee_damage_total, both hands, increase over the after phase). Tolerance 0.02 (0.13 to 0.17, G-19: the larger of 5% and 2 points) excludes 10%, 20% and no heal. Reference search 2026-11-23: coa-history spells 560542 and 560627: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc.",
+      "gate_cast": true,
+      "learn": [
+        804216
+      ],
+      "setup_casts": [
+        804216
+      ],
+      "setup_wait_ms": 500,
+      "required_aura_stacks": {
+        "spell": 800058,
+        "stacks": 6
+      }
     },
     {
       "spell": 300476,
@@ -17162,21 +18392,40 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          1459,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          1459,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
-      "metric": "aura",
+      "metric": "carried_aura_count",
       "fields": {
-        "spell": 1243
-      },
-      "fields_sum": {
-        "spell": 1126
+        "spells": [
+          1243,
+          1126,
+          1459
+        ]
       },
       "before_expected": 1,
       "expected": 2,
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Two stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243 and Mark of the Wild 1126, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later the number of the two auras held by the caster is read: 1 before the learn (control), 2 after. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Three stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243, Mark of the Wild 1126 and Arcane Intellect 1459, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later carried_aura_count of the three auras on the caster is read: 1 before the learn (control), 2 after; a third stolen aura (an over-steal) reads 3. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 705145,
@@ -17320,6 +18569,798 @@
       "wait_ms": 12960,
       "expire_ms": 500,
       "observe_source": "$572792d = 12 s (572792 DurationIndex 29 = 12000 ms, SpellDuration.dbc). 806235 is a scripted passive (AscensionFelswornEvents.cpp:166-168): a non-periodic critical hit of a Felfury spender extends Inner Demon and casts 572792 on the struck enemy. Sargeron Smite 802060 (instant, a spender, one direct hit) is cast at the dummy with the strike forced critical, Inner Demon 804216 and Felfury 800058 x2 set on the caster in both phases (precondition fixtures, as the 806235 duration entry). The aura 572792 on the dummy is read 12960 ms after the cast: expected absent (0); the other arm reads the opposite side of the 12000 ms duration (11040 = 0.92 x 12000 and 12960 = 1.08 x 12000), so a duration 10% off either way is excluded. Control arm: before the learn of 806235 the same cast leaves no 572792 (before_expected 0). Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots list the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807430,
+      "name": "Suffering (Skull of Gul'dan aura present at 14580 ms)",
+      "kind": "metric_delta",
+      "variant": "skull_held",
+      "label_suffix": "skull_held",
+      "quote": "Increases the duration of Skull of Gul'dan by $/1000;S1 sec.",
+      "trigger_spell": 800225,
+      "gate_spell": 807430,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800225
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 14580,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14560,
+          14700
+        ]
+      },
+      "observe_source": "807430 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, SPELLMOD_DURATION, EffectBasePoints 4999 + 1 = 5000 ms ($/1000;S1 = 5 sec) on Skull of Gul'dan 800225 (DurationIndex 1 = 10000 ms). Skull is cast for real in both phases and the aura is read in game time after the cast: the control phase (807430 not learned) lasts 10000 ms and is gone at both reads; the learned phase lasts 15000 ms. The two reads bracket the stated extension: present at 14560 ms or later excludes an extension under 4560 ms (-8.8%), absent by 15500 ms excludes one over 5500 ms (+10%); a duration 10% off (4500 or 5500 ms) is outside the pair. Reference search 2026-11-24: coa-history spell 807430: 0 events in 186 logs (a passive leaves no event; positive control 800225 Skull of Gul'dan: found); bindmysoul talents snapshot: the tooltip words, no other figure; nothing else found."
+    },
+    {
+      "spell": 807430,
+      "name": "Suffering (Skull of Gul'dan aura absent at 15400 ms)",
+      "kind": "metric_delta",
+      "variant": "skull_gone",
+      "label_suffix": "skull_gone",
+      "quote": "Increases the duration of Skull of Gul'dan by $/1000;S1 sec.",
+      "trigger_spell": 800225,
+      "gate_spell": 807430,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 800225
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 15400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          15380,
+          15500
+        ]
+      },
+      "observe_source": "807430 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, SPELLMOD_DURATION, EffectBasePoints 4999 + 1 = 5000 ms ($/1000;S1 = 5 sec) on Skull of Gul'dan 800225 (DurationIndex 1 = 10000 ms). Skull is cast for real in both phases and the aura is read in game time after the cast: the control phase (807430 not learned) lasts 10000 ms and is gone at both reads; the learned phase lasts 15000 ms. The two reads bracket the stated extension: present at 14560 ms or later excludes an extension under 4560 ms (-8.8%), absent by 15500 ms excludes one over 5500 ms (+10%); a duration 10% off (4500 or 5500 ms) is outside the pair. Reference search 2026-11-24: coa-history spell 807430: 0 events in 186 logs (a passive leaves no event; positive control 800225 Skull of Gul'dan: found); bindmysoul talents snapshot: the tooltip words, no other figure; nothing else found."
+    },
+    {
+      "spell": 807438,
+      "name": "Evolving Hellfire (Inner Demon present at 5460 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_demon_held",
+      "label_suffix": "inner_demon_held",
+      "quote": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
+      "trigger_spell": 801901,
+      "gate_spell": 807438,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5460,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5455,
+          5475
+        ]
+      },
+      "observe_source": "807438 is a scripted passive (AscensionFelsworn.cpp:208-209: each Felfury generated extends Inner Demon 804216 by 500 ms). Inner Demon is applied by harness set_aura as a precondition fixture in both phases; its duration at application is 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:72-73), and the fixture holds no Felfury, so 5000 ms (the 4885 ms read 100 ms after the cast of the aura_duration_ms entry). A real Twin Slice 801901 (states 'Generates 1 Felfury') is cast at the dummy. The aura is read in game time: the control phase (807438 not learned) lasts 5000 ms and is gone at both reads; the learned phase lasts 5500 ms. The fixture is set about 15 ms before the cast (4885 ms left 100 ms after it), so the aura ends near 5485 ms after the cast with 500 ms and near 5435 ms with 450 ms (10% short) or 5535 ms with 550 ms (10% long). Present in a read from 5455 to 5475 ms excludes an extension of 450 ms or less (gone by 5435); absent in a read from 5505 to 5530 ms excludes 550 ms (present until 5535). Reference search 2026-11-24: coa-history spell 807438: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul snapshot: tooltip words only; nothing else found."
+    },
+    {
+      "spell": 807438,
+      "name": "Evolving Hellfire (Inner Demon absent at 5510 ms)",
+      "kind": "metric_delta",
+      "variant": "inner_demon_gone",
+      "label_suffix": "inner_demon_gone",
+      "quote": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
+      "trigger_spell": 801901,
+      "gate_spell": 807438,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5510,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5505,
+          5530
+        ]
+      },
+      "observe_source": "807438 is a scripted passive (AscensionFelsworn.cpp:208-209: each Felfury generated extends Inner Demon 804216 by 500 ms). Inner Demon is applied by harness set_aura as a precondition fixture in both phases; its duration at application is 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:72-73), and the fixture holds no Felfury, so 5000 ms (the 4885 ms read 100 ms after the cast of the aura_duration_ms entry). A real Twin Slice 801901 (states 'Generates 1 Felfury') is cast at the dummy. The aura is read in game time: the control phase (807438 not learned) lasts 5000 ms and is gone at both reads; the learned phase lasts 5500 ms. The fixture is set about 15 ms before the cast (4885 ms left 100 ms after it), so the aura ends near 5485 ms after the cast with 500 ms and near 5435 ms with 450 ms (10% short) or 5535 ms with 550 ms (10% long). Present in a read from 5455 to 5475 ms excludes an extension of 450 ms or less (gone by 5435); absent in a read from 5505 to 5530 ms excludes 550 ms (present until 5535). Reference search 2026-11-24: coa-history spell 807438: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul snapshot: tooltip words only; nothing else found."
+    },
+    {
+      "spell": 807431,
+      "name": "Abyssal Conditioning (Energy regeneration over 8 s)",
+      "kind": "metric_delta",
+      "variant": "regen_energy",
+      "label_suffix": "regen_energy",
+      "quote": "Casting Felfury spenders now increases your Energy regeneration by $521234s1% for $521234d,",
+      "trigger_spell": 803475,
+      "gate_spell": 807431,
+      "target": "dummy",
+      "metric": "power",
+      "fields": {
+        "power": 3
+      },
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 20,
+      "before_expected": 80,
+      "expected": 84,
+      "tolerance": 1.5,
+      "wait_ms": 8000,
+      "expire_ms": 10500,
+      "observe_source": "521234 Effect[0] aura 110 SPELL_AURA_MOD_POWER_REGEN_PERCENT, MiscValue 3 (Energy), BasePoints 4 + 1 = 5 ($521234s1%), applied to the caster by 807431 after a Felfury spender (AscensionFelswornAbilities.cpp:236). Same shape as Templar Spiritual 560833 (Energy regeneration +20%, 80 -> 96 over 8 s, stock base 10 Energy per second): Azzinoth's Assault 803475 (ManaCost 20, PowerType 3) is cast for real with exactly its cost, leaving 0, and the Energy is read 8000 ms later: 80 without 807431 (control: no 521234) and 84 with it (one stack, +5%). Judged within 1.5: +3.1% to +6.9% of the regenerated 80, inside the G-19 band of a 5% bonus (2 points: 3% to 7%), and the control reading 80 is outside it. Maximum Energy is 100, so 8 s is the longest window whose 10.5 per second stays below the cap. Fixtures by harness set_aura, preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 (the spender needs them). Reference search 2026-11-24: coa-history spell 807431: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: the tooltip words; nothing else found."
+    },
+    {
+      "spell": 805255,
+      "name": "Mannoroth's Rage (Burning Hatred cooldown, behaviour)",
+      "kind": "cost_gate",
+      "variant": "cd",
+      "label_suffix": "cd",
+      "quote": "Reduces the cooldown of Burning Hatred by $/1000;s1 sec.",
+      "gated_spell": 805239,
+      "resource": "cooldown",
+      "reduction": 60000,
+      "target": "caster",
+      "observe_source": "805255 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 11 (SPELLMOD_COOLDOWN), BasePoints -60001 + 1 = -60000 ms ($/1000;s1 = 60 sec), class mask of Burning Hatred 805239 (RecoveryTime 120000 ms), so the reduced cooldown is 60000 ms. Arms timed from a priming cast (the Whirling Vengeance 704602 cd pattern): an attempt 60500 ms later without the talent (refused), with it (goes through) and 59500 ms later with it (refused). A cut 10% off (54000 or 66000 ms) moves the end by 6000 ms, far outside the 500 ms margin. Observation, not tested: the bindmysoul snapshot words the talent 'Reduces the cooldown of Burning Hatred by sec and removes its Energy cost.'; the server tooltip names the cooldown only. Reference search 2026-11-24: coa-history spell 805255: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: the tooltip words; nothing else found."
+    },
+    {
+      "spell": 685321,
+      "name": "Doomscarring (Tyrant's Gaze against the scarred target, exact per-hit gain)",
+      "kind": "metric_delta",
+      "variant": "scar_ap_gaze_pin",
+      "label_suffix": "scar_ap_gaze_pin",
+      "quote": "increasing your allies' attack power against them by ${$563271m1+$563271ppl1+$AGI*0.15}.",
+      "trigger_spell": 805240,
+      "gate_spell": 685321,
+      "target": "dummy",
+      "cast_power": 100,
+      "setup_casts": [
+        801901
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805240,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 453,
+      "expected": 928,
+      "expected_gain": 475,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "phase_target_health_pct": [
+        34,
+        30
+      ],
+      "observe_source": "Pattern of Scars of Suffering 570158 scar_ap_gaze_pin (Felsworn ADR 0015). 685321 Effect[0] PROC_TRIGGER_SPELL 563271 on a cast of Twin Slice; 563271 Effect[0] aura 165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS, BasePoints 17 + 1 = 18, EffectRealPointsPerLevel 1.0, BaseLevel 33, so at level 60 18 + 27 = 45, plus 0.15 x Agility 130 = int32(19.5) = 19: 64 attack power against the scarred target. Both phases cast one Twin Slice 801901 at the dummy, wait 1600 ms, then one Tyrant's Gaze 805240; 685321 is learned between the phases, so only the after phase's Twin Slice scars the dummy. Gaze tooltip ${$m1+0+$AP*0.35}: m1 = 344 and attack power 312: before 344 + int(0.35 x 312 = 109.2) = 453; after 344 + int(0.35 x (312 + 64) = 131.6) = 475. spell_damage_total is cumulative, so the after reading is 453 + 475 = 928 and the judged gain is the after phase's single hit, 475 within 1: no victim term gives 453, a doubled term 344 + int(0.35 x 440 = 154) = 498. Fixtures as in the 570158 entry: 984954 removes crits, 823764 partial resists, the dummy sits at 34% then 30% health (Gaze). Reference search 2026-11-24: coa-history spell 685321: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: the tooltip words; nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 5925 ms after Sargeron Smite 802060)",
+      "kind": "metric_delta",
+      "variant": "duration_sargeron_held",
+      "label_suffix": "duration_sargeron_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 802060,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5925,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5915,
+          5950
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sargeron Smite 802060 (instant, a spender, one direct hit) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 6050 ms after Sargeron Smite 802060)",
+      "kind": "metric_delta",
+      "variant": "duration_sargeron_gone",
+      "label_suffix": "duration_sargeron_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 802060,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6050,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          6040,
+          6075
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sargeron Smite 802060 (instant, a spender, one direct hit) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 6925 ms after Carve 800206)",
+      "kind": "metric_delta",
+      "variant": "duration_carve_held",
+      "label_suffix": "duration_carve_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 800206,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6925,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          6915,
+          6950
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit, a SpenderImpact id) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244); its tooltip says 'with both weapons', so two critical strikes (both forced critical) give 2000 ms. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture), with 2 Felfury, the cost of Carve; its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 7000 ms with two critical strikes. The aura is read in game time 6925 ms after the cast: present (6915 to 6950 ms): the pair of reads (present at 6925 ms, absent at 7050 ms) puts the extension between 1.9 s and 2.1 s against the stated 2000 ms, excluding a value 10% off (1800 or 2200 ms). Observation, not a claim: with 6 Felfury before the cast (4 left after Carve) a probe read Inner Demon present until about 22000 ms with the talent, 5000 x 4 + 2000 (plan fw-vb6b probe3/probe4), a Felfury-dependent refresh not explained by the tooltip. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 7050 ms after Carve 800206)",
+      "kind": "metric_delta",
+      "variant": "duration_carve_gone",
+      "label_suffix": "duration_carve_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 800206,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 7050,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          7040,
+          7075
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit, a SpenderImpact id) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244); its tooltip says 'with both weapons', so two critical strikes (both forced critical) give 2000 ms. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture), with 2 Felfury, the cost of Carve; its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 7000 ms with two critical strikes. The aura is read in game time 7050 ms after the cast: absent (7040 to 7075 ms): the pair of reads (present at 6925 ms, absent at 7050 ms) puts the extension between 1.9 s and 2.1 s against the stated 2000 ms, excluding a value 10% off (1800 or 2200 ms). Observation, not a claim: with 6 Felfury before the cast (4 left after Carve) a probe read Inner Demon present until about 22000 ms with the talent, 5000 x 4 + 2000 (plan fw-vb6b probe3/probe4), a Felfury-dependent refresh not explained by the tooltip. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 5925 ms after Sunder 705121)",
+      "kind": "metric_delta",
+      "variant": "duration_sunder_held",
+      "label_suffix": "duration_sunder_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 705121,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5925,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5915,
+          5950
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 1 yd in front of the caster (dummy_distance 1), inside the first explosion only, so one critical hit (placed 3 yd in front it was struck by two explosions: Inner Demon present until about 7000 ms, plan fw-vb6b probe1). The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true,
+      "dummy_distance": 1
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 6050 ms after Sunder 705121)",
+      "kind": "metric_delta",
+      "variant": "duration_sunder_gone",
+      "label_suffix": "duration_sunder_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 705121,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6050,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          6040,
+          6075
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 1 yd in front of the caster (dummy_distance 1), inside the first explosion only, so one critical hit (placed 3 yd in front it was struck by two explosions: Inner Demon present until about 7000 ms, plan fw-vb6b probe1). The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true,
+      "dummy_distance": 1
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 5925 ms after Ruin 501298)",
+      "kind": "metric_delta",
+      "variant": "duration_ruin_held",
+      "label_suffix": "duration_ruin_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 501298,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5925,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5915,
+          5950
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Ruin 501298 (2500 ms cast, direct hit) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 6050 ms after Ruin 501298)",
+      "kind": "metric_delta",
+      "variant": "duration_ruin_gone",
+      "label_suffix": "duration_ruin_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 501298,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6050,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          6040,
+          6075
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Ruin 501298 (2500 ms cast, direct hit) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 5925 ms after Felwrath 520693)",
+      "kind": "metric_delta",
+      "variant": "duration_felwrath_held",
+      "label_suffix": "duration_felwrath_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 520693,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5925,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5915,
+          5950
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Felwrath 520693 (2000 ms cast, direct hit) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 6050 ms after Felwrath 520693)",
+      "kind": "metric_delta",
+      "variant": "duration_felwrath_gone",
+      "label_suffix": "duration_felwrath_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 520693,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6050,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          6040,
+          6075
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Felwrath 520693 (2000 ms cast, direct hit) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 9835 ms after Azzinoth's Assault 801904)",
+      "kind": "metric_delta",
+      "variant": "duration_azzinoth_held",
+      "label_suffix": "duration_azzinoth_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 801904,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 9835,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          9825,
+          9860
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Azzinoth's Assault 801904 (two weapon strikes, each forced critical) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, plus 3000 ms from the spell's own extension (803089 EffectBasePoints 2999 + 1, cast by AscensionFelswornAbilities.cpp:342), so 8000 ms without the talent and 10000 ms with two critical strikes. The aura is read in game time 9835 ms after the cast: present (9825 to 9860 ms): the pair of reads (present at 9835 ms, absent at 10145 ms) puts the extension between 1833 and 1871 ms against the stated 2000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 10145 ms after Azzinoth's Assault 801904)",
+      "kind": "metric_delta",
+      "variant": "duration_azzinoth_gone",
+      "label_suffix": "duration_azzinoth_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 801904,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 10145,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          10135,
+          10165
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Azzinoth's Assault 801904 (two weapon strikes, each forced critical) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, plus 3000 ms from the spell's own extension (803089 EffectBasePoints 2999 + 1, cast by AscensionFelswornAbilities.cpp:342), so 8000 ms without the talent and 10000 ms with two critical strikes. The aura is read in game time 10145 ms after the cast: absent (10135 to 10165 ms): the pair of reads (present at 9835 ms, absent at 10145 ms) puts the extension between 1833 and 2176 ms against the stated 2000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
     },
     {
       "spell": 800355,
@@ -17963,17 +20004,22 @@
       "target": "dummy",
       "measure_actor": "caster",
       "cast_power": 100,
-      "metric": "spell_cast_count",
+      "metric": "spell_damage_count",
       "fields": {
-        "spell": 800598
+        "spell": 808303,
+        "target": "dummy"
       },
-      "before_expected": 0,
-      "expected": 0,
+      "fields_sum": {
+        "spell": 800598,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "after_at_least": 0,
-      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 is cast 0 times; a server triggering on every melee hit reads 2. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
-      "after_at_most": 0,
+      "after_at_least": 2,
+      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 lands 0 times. Same-arm strike read (review fw-rl3b I-1): each judged reading is the sum of the applied damage events of the Twin Slice strike 808303 (Effect[0] 121 weapon damage, EffectTriggerSpell[0] of 801901) and of 800598 on the dummy, the reading is cumulative over the scenario: the before phase (92087 not learned, strikes landed, no trigger) reads 1 and the after phase adds one landed strike with no trigger, so exactly 2; a strike that did not land reads 1, and a server triggering on every melee hit reads 3 or more. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
+      "after_at_most": 2,
       "phase_auras": [
         [
           64481,
@@ -18686,7 +20732,7 @@
     },
     {
       "spell": 300483,
-      "name": "Chaotic Intuition (Cripple still on 16660 ms after its cast)",
+      "name": "Chaotic Intuition (Cripple still on 17500 ms after its cast)",
       "kind": "metric_delta",
       "variant": "held",
       "label_suffix": "held",
@@ -18712,16 +20758,16 @@
       "cast_in_before": true,
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 14830,
+      "wait_ms": 15700,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          14780,
-          14980
+          15650,
+          15850
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 16660 ms, at least 16560 = 0.92 x 18000 (excludes a duration 10% short); the control read before the learn of 300483 (same casts) must show Cripple already gone at 12000 ms. Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
+      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms, that is 1000 ms per Felstrike damage. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 17500 ms, at least 17450 over the game-time window, above 17400 = 12000 + 6 x 900 (an extension of 0.9 sec per hit, 10% short, would already be gone); the control read before the learn of 300483 (same casts) must show Cripple already gone at 12000 ms. Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
       "setup_casts": [
         704371
       ],
@@ -18732,7 +20778,7 @@
     },
     {
       "spell": 300483,
-      "name": "Chaotic Intuition (Cripple gone 19340 ms after its cast)",
+      "name": "Chaotic Intuition (Cripple gone 18500 ms after its cast)",
       "kind": "metric_delta",
       "variant": "gone",
       "label_suffix": "gone",
@@ -18758,16 +20804,16 @@
       "cast_in_before": false,
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 17510,
+      "wait_ms": 16700,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          17460,
-          17660
+          16650,
+          16800
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 19340 ms, at most 19440 = 1.08 x 18000 (excludes a duration 10% long). Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
+      "observe_source": "Tooltip 300483: 'Damage dealt by Felstrikes now extends the duration of Cripple on the target by $/1000;560643s1 sec' (560643 Effect[0] BasePoints 999 + 1 die side = 1000 ms = 1 sec). Cripple 704371 lasts 12000 ms (DurationIndex 29) and Felstrike 802678 ticks every 1000 ms for 6000 ms (Effect[0] amplitude 1000, DurationIndex 32): six ticks while Cripple is up extend it to 12000 + 6 x 1000 = 18000 ms, that is 1000 ms per Felstrike damage. Nothing is set by fixture except Inner Demon 804216 (the named precondition of Fel Apprentice 92088, learned in every arm): Cripple is cast for real, 1800 ms later a real Fel Fireball 801312 unleashes the real Felstrike. Cripple's age at the read is the setup wait (1800 ms, stamped by the cast) plus the wait after the trigger stamp: 18500 ms, at most 18600 over the game-time window, = 12000 + 6 x 1100 (an extension of 1.1 sec per hit, 10% long, would still be on). Reference search 2026-11-24: coa-history spell 704371: aura applied and refreshed events exist in the logs but no duration in the aggregates; nothing found beyond the tooltip and Spell.dbc.",
       "setup_casts": [
         704371
       ],
@@ -18802,14 +20848,14 @@
       "variant": "cast_landed",
       "label_suffix": "cast_landed",
       "expected": 1,
-      "wait_ms": 1090,
+      "wait_ms": 1060,
       "game_time": {
         "after": [
           1040,
-          1190
+          1080
         ]
       },
-      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Completed casts of 801312 (spell_cast_count) read 1090 ms after the cast start: 1 with Felforged (a cast time of at most 1090 ms excludes less than a 27% reduction), 0 without it (the control read before the fixture, a 1500 ms cast not yet completed). Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc.",
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Completed casts of 801312 (spell_cast_count) read at most 1080 ms after the cast start: 1 with Felforged (a cast time of at most 1080 ms is a reduction of at least 28%, which excludes the 27.9% of a -31% off by 10%), 0 without it (the control read before the fixture, a 1500 ms cast not yet completed). Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc.",
       "cast_in_before": false
     },
     {
@@ -18839,14 +20885,14 @@
       "label_suffix": "cast_early",
       "cast_in_before": false,
       "expected": 0,
-      "wait_ms": 985,
+      "wait_ms": 990,
       "game_time": {
         "after": [
-          935,
-          1085
+          990,
+          1030
         ]
       },
-      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The same cast read 985 ms after its start must not be completed (a cast time above 985 ms excludes more than a 34% reduction); with cast_landed this brackets the 31% reduction within 5%. Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The same cast read between 990 and 1030 ms after its start must not be completed (a cast time above 990 ms is a reduction below 34%): that excludes a reduction of 34.1% (-31% off by 10%); with cast_landed this brackets the stated 31% inside 28%..34%. Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc."
     },
     {
       "kind": "metric_delta",
@@ -21229,6 +23275,373 @@
       "trials": 10,
       "caster_max_health": 100000,
       "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2), DBC MiscValue 0 (no school; rank 1 705129 carries 1) set to 1 (Physical) by the Felsworn contract (mentor decision D-81, Felsworn ADR 0019); Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB, MiscValue 127, $m1 = 751 + 1..32 plus Stamina x 1 ($m1+0+$STA*1), stated separately. Kind taken_total_ratio (ADR 1266, provisional): each strike is read as damage plus resisted plus absorbed from the spell logs the caster receives, so the reduction is judged before the absorb: Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) without the barrier (control) and with it cast before each strike (treatment, the total must be 90% of the control total within the integer rounding, part of it absorbed); Light of the Naaru 41394 (1100 Holy, larger than the barrier) without and with it (equal totals, the absorbed amount within 752..783 plus the Stamina read at the arm start); and Void Zone after the barrier is broken by Light of the Naaru (the aura read absent, equal to the control: the reduction ends with the barrier). Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "force_crit": "spell",
+      "wait_ms": 22500,
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "metric": "spell_damage_count",
+      "name": "Bane of Chaos (periodic critical strikes)",
+      "variant": "periodic_crit",
+      "label_suffix": "periodic_crit",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy",
+        "critical": true
+      },
+      "expected": 7,
+      "tolerance": 0.5,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: 7 ticks (the ticks entry reads 7). The sentence is in the 706420 Description (@ext). The caster's spell crit rating is forced (force_crit spell, the Necromancer 501861 periodic_crit shape, ADR necromancer/0012), the dummy's Chaos resistance removed (823764, precondition fixture, set_aura); the crit-removal fixture 984954 of the total entry is not set. Reference search 2026-11-24: Necromancer 501861 'Periodic damage dealt by this can critically strike' (status 1 after FN-c4-1, 12 of 12 critical ticks; pre-fix 0 of 12) is the precedent; coa-history spell 706420 (run 2026-11-24, read-only): SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs, so the live periodic damage of Bane of Chaos crits (43.6 percent of its ticks); nothing else found beyond the tooltip and Spell.dbc. Read: critical Bane of Chaos ticks on the dummy 22500 ms after a real cast under the forced spell crit: 7 (every tick); no cast before (control, 0)."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "force_crit": "spell",
+      "wait_ms": 22500,
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "metric": "spell_damage_count",
+      "name": "Bane of Chaos (ticks under forced crit)",
+      "variant": "periodic_ticks",
+      "label_suffix": "periodic_ticks",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy"
+      },
+      "expected": 7,
+      "tolerance": 0.5,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, DurationIndex 86 = 21000 ms: 7 ticks (the ticks entry reads 7). The sentence is in the 706420 Description (@ext). The caster's spell crit rating is forced (force_crit spell, the Necromancer 501861 periodic_crit shape, ADR necromancer/0012), the dummy's Chaos resistance removed (823764, precondition fixture, set_aura); the crit-removal fixture 984954 of the total entry is not set. Reference search 2026-11-24: Necromancer 501861 'Periodic damage dealt by this can critically strike' (status 1 after FN-c4-1, 12 of 12 critical ticks; pre-fix 0 of 12) is the precedent; coa-history spell 706420 (run 2026-11-24, read-only): SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs, so the live periodic damage of Bane of Chaos crits (43.6 percent of its ticks); nothing else found beyond the tooltip and Spell.dbc. Companion of periodic_crit: every 706420 tick on the dummy, critical or not, under the same forcing: 7, so periodic_crit's 7 critical ticks are all of them; no cast before (0)."
+    },
+    {
+      "spell": 706420,
+      "name": "Bane of Chaos (direct spell crit under the same forcing)",
+      "kind": "metric_delta",
+      "variant": "direct_crit_control",
+      "label_suffix": "direct_crit_control",
+      "quote": "@ext:Periodic damage dealt by this effect can critically strike.:ext@",
+      "trigger_spell": 801312,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 100,
+      "force_crit": "spell",
+      "before_expected": 0,
+      "expected": 1,
+      "expire_ms": 500,
+      "wait_ms": 2800,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 801312,
+        "target": "dummy",
+        "critical": true
+      },
+      "observe_source": "Forcing check for periodic_crit: under the same forced spell crit rating a direct Felsworn spell, Fel Fireball 801312, lands one critical hit on the dummy (no cast before: 0)."
+    },
+    {
+      "spell": 561216,
+      "kind": "metric_delta",
+      "quote": "@ext:Requires a nearby enemy to cast.:ext@",
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 561216
+      },
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Fury of the Illidari (refused with no enemy nearby)",
+      "variant": "no_enemy",
+      "label_suffix": "no_enemy",
+      "relocate_before_trigger": {
+        "dx": -20
+      },
+      "expected": 12,
+      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Arm: the caster is moved 20 yd away from the only dummy (the step takes at most 20 yd; the dummy stands on +x, so it is then more than 15 yd away) right before the cast (relocate_before_trigger), so no enemy is within 15 yd; expected the refusal 12."
+    },
+    {
+      "spell": 561216,
+      "kind": "metric_delta",
+      "quote": "@ext:Requires a nearby enemy to cast.:ext@",
+      "trigger_spell": 561216,
+      "gate_spell": 561216,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 561216
+      },
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "name": "Fury of the Illidari (control: cast with an enemy beside the caster)",
+      "variant": "enemy_near",
+      "label_suffix": "enemy_near",
+      "expected": 0,
+      "observe_source": "Fury of the Illidari 561216 Description: 'Requires a nearby enemy to cast.' (@ext). Spell.dbc carries no target requirement for it (Effect[0] and Effect[2] TargetA 1 self), the server refuses a cast with no valid, visible attack target within 15 yd in line of sight with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062; AscensionFelswornAbilities.cpp:90-97). The cast_failure of 561216 is read 500 ms after one real cast: 0 before the learn (no cast, control) and, after it, the refusal code with the caster moved away, 0 with the dummy beside it. Reference search 2026-11-24: coa-history spell 561216: see the felfury entry; nothing found that decides a distance; the tooltip gives no distance, so only 'no enemy at all' against 'an enemy beside the caster' is claimed. Control arm of no_enemy: the same cast with the dummy beside the caster (not moved): accepted, cast_failure 0."
+    },
+    {
+      "spell": 300468,
+      "name": "Illidari Barrier (the absorb follows Stamina)",
+      "kind": "taken_hit",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "judge": "absorb",
+      "quote": "@ext:Absorption shield scales with Stamina.:ext@",
+      "strike_spell": 41394,
+      "trials": 5,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "absorb_constant": 328,
+      "absorb_terms": [
+        {
+          "coefficient": 1.0,
+          "reads": [
+            {
+              "metric": "stat",
+              "stat": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.2,
+          "reads": [
+            {
+              "metric": "spell_power",
+              "school": 2
+            }
+          ]
+        },
+        {
+          "coefficient": 0.08,
+          "reads": [
+            {
+              "metric": "attack_power"
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "shield",
+          "learn": [
+            300469
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        },
+        {
+          "name": "stamina",
+          "learn": [
+            300469
+          ],
+          "auras": [
+            [
+              9119,
+              1
+            ]
+          ],
+          "casts": [
+            [
+              300469,
+              "caster"
+            ]
+          ],
+          "absorb": "formula"
+        }
+      ],
+      "observe_source": "Companion of amount for the sentence 'Absorption shield scales with Stamina.' (@ext; the tooltip of 300468 gives the term $STA*1). Arms: no shield (control), the shield of 300469 cast at the caster (Stamina as is) and the same shield after Stamina +12 (9119, MOD_STAT Stamina BasePoints 11 + 1, a precondition fixture of the stamina arm; the claim's subject is the shield). Each arm's absorb is judged against the formula with the Stamina read on the caster at the arm start, so the stamina arm's absorb exceeds the shield arm's by the Stamina gained times the tooltip coefficient 1.0. Reference search 2026-11-24: coa-history spell 300468 and 300469; nothing found beyond the tooltip, Spell.dbc and the amount entry; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800206,
+      "name": "Carve (dodge while channeling)",
+      "kind": "metric_delta",
+      "variant": "channel_dodge",
+      "label_suffix": "channel_dodge",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 0,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control of this arm: the _control entry with Sargeras Embrace 800355 reads 3 landed strikes under the same fixture. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "name": "Sargeras Embrace (control: a channel without the exemption does not dodge)",
+      "kind": "metric_delta",
+      "variant": "channel_dodge_control",
+      "label_suffix": "channel_dodge_control",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "before_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "expected": 3,
+      "observe_source": "Carve 800206 Description (@ext): 'Can dodge and parry while channeling and you can channel while moving.' The engine zeroes a melee swing's dodge and parry while the victim casts or channels (Unit::RollMeleeOutcomeAgainst, Unit.cpp:3395-3397, 3429-3431) unless Unit::CanDefendDuringChannel allows it (Unit.cpp:5120-5133, a Demon Hunter channelling 800206). A passive striker (creature 36) casts Speed Slash 2118233 (melee, cannot miss, SPELL_ATTR7_NO_ATTACK_MISS) at the caster three times 800 ms into the channel, 200 ms apart, with the caster's dodge or parry set to 100% right before (harness set_combat_avoidance, a named precondition fixture); the damage events of 2118233 on the caster are counted. Carve: every strike is dodged or parried, 0 events. Control: Sargeras Embrace 800355, a Felsworn channel (ChannelInterruptFlags 0, no exemption), the same strikes land: 3 events, so the 0 of Carve is the exemption and not a failed strike. Felfury x6 and 803468 are set on the caster for Carve (precondition fixtures, as the consumes entry). Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 channel_dodge / channel_parry (taken_outcome) is the precedent shape; coa-history spell 800206: casts exist, no avoidance figure decides; nothing else found beyond the tooltip, Spell.dbc and the engine code. "
+    },
+    {
+      "spell": 800206,
+      "kind": "metric_delta",
+      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "before_expected": 0,
+      "relocate_during_wait": {
+        "every_ms": 500,
+        "count": 2,
+        "dy": 1.5
+      },
+      "metric": "cast_remaining_ms",
+      "name": "Carve (the channel continues while the caster moves)",
+      "variant": "moving_channel",
+      "label_suffix": "moving_channel",
+      "trigger_spell": 800206,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "fields": {
+        "spell": 800206
+      },
+      "expected": 1,
+      "after_at_least": 300,
+      "observe_source": "Carve 800206 is a channel (DurationIndex 66 = 2500 ms) whose ChannelInterruptFlags 4733956 (0x483C04) carry no movement bit in Spell.dbc, and the server adds none. The caster is moved by the harness relocate step (the native position update of a client movement packet, which interrupts a channel carrying AURA_INTERRUPT_FLAG_MOVE) 1.5 yd along y and back at 500 and 1000 ms; cast_remaining_ms of the caster's own cast is read 800 ms after the last move (about 1800 ms after the cast), the channel must still run (at least 300 of the 2500 ms). Before (control): no cast, 0. Felfury x6 and 803468 are set as precondition fixtures. Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel (the precedent shape); nothing else found beyond the tooltip and Spell.dbc. "
     }
   ],
   "player_observations": [],

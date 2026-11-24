@@ -14,7 +14,10 @@
     "claims": [
       {
         "claim": "Critical strikes with melee abilities now trigger Dancing Blades",
-        "labels": []
+        "labels": [
+          "92087 behaviour_metric_delta trigger",
+          "92087 behaviour_metric_delta noncrit"
+        ]
       },
       {
         "claim": "dealing off-hand Weapon Damage",
@@ -30,7 +33,7 @@
         ]
       }
     ],
-    "reason": "HELD claim 1 (review fw-rl3b I-1): the noncrit arm (learned, 0 crits) has no read showing the Twin Slice strikes landed, so 0 triggers could mean no strike; needs a same-arm strike damage or hit-count read before 'Critical strikes ... trigger' counts."
+    "reason": "Claim 1 same-arm strike read (fw-vb9): the noncrit arm sums the damage events of the Twin Slice strike 808303 and of 800598 on the dummy, so the learned no-crit arm shows the strike landed (1 before, 2 after) while 800598 never fires; trigger arm reads casts of 800598 under forced crit."
   },
   {
     "spell": 92088,
@@ -196,9 +199,10 @@
     "spell": 300468,
     "clause": "@ext:Absorption shield scales with Stamina.:ext@",
     "labels": [
-      "300468 effect_value #3"
+      "300468 behaviour_taken_hit stamina"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb9: absorb 431 without and 443 with Stamina +12 (9119), each judged exactly against the formula with the Stamina read at the arm start (coefficient 1.0 of the tooltip); control arm without the shield absorbs 0."
   },
   {
     "spell": 300470,
@@ -254,7 +258,7 @@
       {
         "claim": "critical strike chance of all allies against this target is increased by $s2%",
         "labels": [
-          "300474 effect_value 300475e1 #1"
+          "300474 behaviour_metric_delta crit_ally"
         ]
       },
       {
@@ -381,11 +385,23 @@
   {
     "spell": 300483,
     "clause": "and grants you $300481s1% increased spell critical damage for $300481d,",
-    "labels": [
-      "300483 effect_value 300481e0 #1",
-      "300483 spell_duration 300481 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "grants you $300481s1% increased spell critical damage",
+        "labels": [
+          "300483 behaviour_hit_ratio crit_damage_hit",
+          "300483 behaviour_metric_delta crit_damage"
+        ]
+      },
+      {
+        "claim": "for $300481d",
+        "labels": [
+          "300483 behaviour_metric_delta crit_damage_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-vb2c (2026-11-24): magnitude proven by a real hit: 3 stacks of 300481 on forced spell critical hits of Fel Fireball 801312 read +2.997 / +2.999% against the stated 3% (99% intervals +2.984 to +3.009 and +2.984 to +3.013, 20 trials per arm), excluding the control 0. The earlier reading of +1.55% (fw-vb2b) came from the fixture, not the server: 300481 lasts 6000 ms, the trial lasted 5600 ms and set_aura only sets the stack amount of an aura already present, so every second hit was unbuffed; cast_wait_ms 3400 makes a trial last 6500 ms, so each treatment hit follows a fresh application. Duration half: crit_damage_duration, unchanged."
   },
   {
     "spell": 300483,
@@ -434,10 +450,21 @@
   {
     "spell": 300489,
     "clause": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
-    "labels": [
-      "300489 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of your Felfury spenders by $s2%",
+        "labels": [
+          "300489 behaviour_hit_ratio crit_energy"
+        ]
+      },
+      {
+        "claim": "for every 10 points of Energy you have at the time of casting.",
+        "labels": [],
+        "reason": "Withheld (fw-vb2c, review I-4b): the label '300489 behaviour_hit_ratio crit_energy_half' (50 Energy, stated +5, band 3 to 7) reads +7.25 alert, +6.93 ok, +7.37 alert, every 99% interval excluding 5; the clause must not count in a pair where it lands inside the band. Lead kept for a mentor reading of 'Energy you have at the time of casting'; the arm stays in the class file."
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) reads +9.67 / +9.85 / +9.82 points against the stated +10 in three runs (all ok). The 50 Energy arm (crit_energy_half, stated +5, band 3 to 7, which excludes a flat +10) reads +7.25 (alert), +6.93 (ok, interval 6.16 to 7.71), +7.37 (alert): the dependence on Energy is real (0 without the passive, about +7 at 50, about +10 at 100) but the value at 50 Energy is not the stated 5 and the arm flips between runs, so the half arm's label is withheld from every claim (its claim has no labels), a lead and not a fix case. The Energy plus spell cost hypothesis (AscensionFelswornAbilities.cpp:158, energy = GetPower + max(0, GetPowerCost), Ruin 801895 ManaCost 30) does not fit both arms: a read before the cost deduction would give 13 at 100 Energy, not 9.7 to 9.8, and a read after it would give 5 at 50 Energy, not 7; it is dropped as an explanation. No server change on this check: needs a mentor reading of 'Energy you have at the time of casting' (before or after the cost)."
   },
   {
     "spell": 300490,
@@ -465,12 +492,8 @@
     "claims": [
       {
         "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
-        "labels": [
-          "300490 behaviour_metric_delta cast_landed",
-          "300490 behaviour_metric_delta cast_early",
-          "300490 behaviour_metric_delta cast_control",
-          "300490 behaviour_metric_delta felforged_duration"
-        ]
+        "labels": [],
+        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which alerts (fourth_cast); the clause is judged by the three exact-word claims below (D-22, review I-1)."
       },
       {
         "claim": "Your next 3 Fel Fireballs",
@@ -480,8 +503,19 @@
           "300490 behaviour_metric_delta other_spell",
           "300490 behaviour_metric_delta duration_left"
         ]
+      },
+      {
+        "claim": "have a $s1% reduced cast time",
+        "labels": []
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "300490 behaviour_metric_delta felforged_duration"
+        ]
       }
-    ]
+    ],
+    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed."
   },
   {
     "spell": 301287,
@@ -586,7 +620,10 @@
     "spell": 520693,
     "clause": "stacking $520832u times.",
     "labels": [
-      "520693 max_stacks 520832 #3"
+      "520693 max_stacks 520832 #3",
+      "520693 behaviour_metric_delta inner_stack_two",
+      "520693 behaviour_metric_delta inner_stack_three",
+      "520693 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -672,7 +709,8 @@
     "kind": "claim",
     "labels": [
       "520251 behaviour_metric_delta intuition"
-    ]
+    ],
+    "reason": "Same wording and shape as Necromancer Improved Mandates 560613 (claim 117.0, kind effectiveness_delta, Foul Mandate Stamina 122 -> 132). Measured on Illidari Intuition 800212 only (Agility 150 -> 154); the other Intuition ranks carry the same SpellFamilyFlags mask, so one mask holds them; that every member behaves alike is not separately tested (G-23). Reference search 2026-11-24: coa-history spell 520251: 0 events in 186 logs (passive); bindmysoul snapshot: 'Increases the effectiveness of your Intuitions by 20%.'; nothing else found."
   },
   {
     "spell": 520252,
@@ -1199,7 +1237,9 @@
     "spell": 560542,
     "clause": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
     "labels": [
-      "560542 effect_value e1 #2"
+      "560542 behaviour_metric_delta inner_heal",
+      "560542 behaviour_metric_delta no_inner_heal",
+      "560542 behaviour_metric_delta no_felguard_heal"
     ],
     "kind": "claim"
   },
@@ -1432,6 +1472,11 @@
       },
       {
         "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
+        "labels": [],
+        "reason": "Superseded by the exact-words claim 'for $572163d' below (D-22, review M-1); its labels moved there."
+      },
+      {
+        "claim": "for $572163d",
         "labels": [
           "560840 behaviour_metric_delta held",
           "560840 behaviour_metric_delta gone"
@@ -1445,7 +1490,17 @@
     "labels": [
       "561201 effect_value 801895e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin 801895 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "tool_gap": {
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561201,
@@ -1453,7 +1508,17 @@
     "labels": [
       "561201 effect_value 501297e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "tool_gap": {
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561201,
@@ -1567,9 +1632,11 @@
     "spell": 561216,
     "clause": "@ext:Requires a nearby enemy to cast.:ext@",
     "labels": [
-      "561216 effect_value #1"
+      "561216 behaviour_metric_delta no_enemy",
+      "561216 behaviour_metric_delta enemy_near"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb9: cast_failure 12 (SPELL_FAILED_BAD_TARGETS) with the caster 20 yd from the only dummy, 0 with the dummy beside it. The tooltip gives no distance, so only no enemy at all against an enemy beside the caster is claimed."
   },
   {
     "spell": 561343,
@@ -1862,9 +1929,10 @@
     "spell": 685321,
     "clause": "increasing your allies' attack power against them by ${$563271m1+$563271ppl1+$AGI*0.15}.",
     "labels": [
-      "685321 effect_value 563271e0 #2"
+      "685321 behaviour_metric_delta scar_ap_gaze_pin"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tyrant's Gaze 805240 against the scarred dummy: 453 without the scar, 475 with it (one Twin Slice with 685321 learned); the scar is 18 + 27 (level 60 from BaseLevel 33) + int32(0.15 x 130) = 64 attack power, 344 + int(0.35 x 376) = 475."
   },
   {
     "spell": 704360,
@@ -1950,10 +2018,14 @@
     "spell": 706420,
     "clause": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
     "labels": [
-      "706420 effect_value 802676e0 #1",
-      "706420 aura_amplitude_ms #2"
+      "706420 behaviour_metric_delta inner_damage",
+      "706420 behaviour_metric_delta inner_damage_sp",
+      "706420 behaviour_metric_delta inner_interval_a",
+      "706420 behaviour_metric_delta inner_interval_b",
+      "706420 behaviour_metric_delta inner_none"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): the damage half is proven in game (Chaos 802676 hit with Inner Demon: 598.3 per hit against the tooltip's 551 x 0.98743 x 1.10 = 598.5 to 600.6; +10000 spell power: 5879 against 5879.6). The interval half alerts: the tooltip and EffectAmplitude[1] say every $t2 = 6 sec, the server hits every 2 s (3 hits by 6.6 s, 2 by 5.4 s, 6 by 12.6 s; AscensionFelswornContracts.cpp:276-279 sets the Bane's periodic dummy to 2000 ms). Fix note in the fw-vb2 report; no server change."
   },
   {
     "spell": 706420,
@@ -1969,7 +2041,8 @@
     "labels": [
       "706420 effect_value #4"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "DEFECT LEAD (fw-vb9, not counted): under forced spell crit 706420 lands 7 of 7 ticks and 0 critical (periodic_crit, 0 of 7 in both runs; periodic_ticks 7; direct_crit_control: Fel Fireball 801312 lands 1 critical). Same shape as Necromancer 501861 before FN-c4-1 (ADR necromancer/0012). Live reference (coa-history spell 706420, 2026-11-24): SPELL_PERIODIC_DAMAGE 1563 events, 682 critical, 2 logs, so live periodic ticks crit. Fix note in .agents/plans/fw-vb9b/report.md. Labels stay on the data read until the fix."
   },
   {
     "spell": 704370,
@@ -2068,8 +2141,10 @@
     "spell": 704602,
     "clause": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
     "labels": [
-      "704602 effect_value 806096e1 #2",
-      "704602 spell_duration 806096 #3"
+      "704602 behaviour_metric_delta sunder_taken",
+      "704602 behaviour_metric_delta sunder_taken_control",
+      "704602 behaviour_metric_delta sunder_held",
+      "704602 behaviour_metric_delta sunder_gone"
     ],
     "kind": "claim"
   },
@@ -2157,18 +2232,29 @@
     "spell": 704612,
     "clause": "Increases the effectiveness of your Pacts by $s1%.",
     "labels": [
-      "704612 effect_value e0 #0"
+      "704612 behaviour_metric_delta pact_resist",
+      "704612 behaviour_metric_delta pact_resist_hunter"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), a live stat read after a real cast with its control entry, but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). fw-vb2b (2026-11-24): not status 3. The effectiveness_of route (ADR 0268, coverage.py subject_claims) was examined as the second design: it extends the claim only when the named spell's ledger clauses state exactly one value, and Vengeful Pact 803885 (Description: 'increases nearby allies' Shadow Resistance by ${$m1+0} and causes them to deal $s2 Shadow damage') states two values (resistance 65, shield damage 50) and has no Felsworn ledger row, while the claim says 'your Pacts' in the plural. The route does not apply to this clause; the resistance read stays data.",
+    "tool_gap": {
+      "reason": "The clause 'effectiveness of your Pacts' has no counting route: the resistance read (65 to 97) is a stat read the audit counts as data, the damage shield read of the same Pact observed no hit (design 1), and the effectiveness_of route, checked by fw-vb2b and not a second built design, needs one stated value on a single named spell, which Vengeful Pact 803885 (two values) and the plural 'Pacts' do not give. A route needs either a mentor reading of effectiveness_of for a two-value Pact or a harness read that makes the Pact's damage shield strike a real attacker (the shield hit read no event after a real 2653 cast by the dummy at the holder). The gap stays pending until a second design is built (guide 9.7).",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 704613,
     "clause": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
     "labels": [
-      "704613 behaviour_metric_delta stolen"
+      "704613 behaviour_metric_delta stolen_effects"
     ],
     "kind": "claim",
-    "reason": "HELD '704613 behaviour_metric_delta stolen_effects' (review fw-rvb5 I-2): only 2 buffs on the dummy, so the read saturates at the expected 2 and an over-steal would pass; needs a third Magic buff and a rerun."
+    "reason": "Third Magic buff added (Arcane Intellect 1459, fw-vb9): carried_aura_count of the three buffs on the caster reads 1 before the learn and 2 after, so an over-steal (3) fails; spellpen 823764 on the caster as precondition fixture. The audit classes carried_aura_count as data (coverage.py state metric, promise word 'empower'), so this read does not count: the clause stays uncounted until a behaviour read exists on an existing kind. The data read 'stolen' is dropped from the labels."
   },
   {
     "spell": 705102,
@@ -2378,7 +2464,16 @@
     "labels": [
       "705135 effect_value 680318e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Casting Chaos Rush dashes the caster 10 yd forward (Chaos Rush Jump 802028, CHARGE_DEST on the caster's front, EffectRadiusIndex 13), past a dummy placed at DUMMY_DISTANCE, and cost_gate has no step that moves or faces the caster again before the attempt of Felhoof Charge 800204 (a charge that needs its target in front). Design 1 (cost_gate after_casts, one scenario for the three arms): the without arm read 67 (not ready) and the with and beyond arms read 134 and 97 (SPELL_FAILED_UNIT_NOT_INFRONT, SPELL_FAILED_OUT_OF_RANGE: the position the previous arm's dash left). Design 2 (cost_gate only_arm, one scenario per arm, Sun Cleric 805581 precedent, counted-pair run vb6-prove3): without 67 and beyond 67 as expected, with 134 instead of 0 (the attempt 18100 ms after the priming cast, 2000 - 100 ms of the 20000 ms category recovery, is no longer refused as not ready but fails its facing); the order of those two checks in Spell::CheckCast was not read, so the 134 is a lead, not a proof. Route: a cost_gate option that re-places the caster before the attempt (a shared behaviours.py change) or a dash-free source of the 680318 cut; not a final status.",
+      "attempts": [
+        {
+          "agent": "fw-vb6",
+          "report": ".agents/plans/fw-vb6/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 705137,
@@ -2606,14 +2701,23 @@
       }
     ],
     "tool_gap": {
-      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum.",
+      "reason": "'strike 1 additional enemy ... based on how long you channeled' needs the channel ended at a set time, so that the extra targets of a short and of a full channel can be compared. No metric_delta option ends a channel: hold_power_during_wait and relocate_during_wait only keep or move the caster, Carve 800206 carries no movement channel interrupt (it can channel while moving), and the harness action cancel_aura is not wired into any metric_delta option (needs a new option, tool group). The full channel is read by extras_full (nine offered, all struck); the growth with the length is not. The nearest kind is metric_delta with area_dummies and area_sum. fw-vb9 (195.1, 2026-11-24): the L2 fixture covers the full channel only; no metric_delta option ends the channel at a set time (cancel_aura is wired only in clear_trigger_after_ms for a periodic hit count), relocation does not cut it (Carve carries no movement channel interrupt, moving_channel read 685 ms remaining after two moves). Attempt 2 (fw-vb9b, 2026-11-24, prove .cache/conformance/vb9b-p2, no flip over 2 runs): after_trigger_casts with Carve 800206 as trigger and a Fel Fireball 801312 cast 1100 ms later (in_before, learn 801312; first run read 0 because 801312 was not learned, spell_active false). The cast does interrupt the channel and the extras follow the ticks reached: control (no 707444) 1 hit, treatment 6 hits (primary + 5 extras) in both runs. The design cannot be counted: the expected number of ticks reached at 1100 ms is not derivable from the DBC alone (tick period 250 ms gives 4, the run gave 5, the tick offset of the harness cast is unknown), and an expected taken from the run is forbidden; a second arm at another delay would need an option comparing two delays inside one entry. The entry was removed so that no standing alert is left; its definition is in .agents/plans/fw-vb9b/extras_interrupted.entry.json.",
       "attempts": [
         {
           "agent": "fw-ea5",
           "report": ".agents/plans/fw-ea5/report.md"
+        },
+        {
+          "agent": "fw-vb9",
+          "report": ".agents/plans/fw-vb9/report.md"
+        },
+        {
+          "agent": "fw-vb9b",
+          "report": ".agents/plans/fw-vb9b/report.md"
         }
       ]
-    }
+    },
+    "reason": "fw-vb2 (2026-11-23): 195.1 ('strike 1 additional enemy ... based on how long you channeled') waits for the L2 Felfury/wait fixture, which is not merged at this head; not authored in batch B2."
   },
   {
     "spell": 707444,
@@ -2905,10 +3009,28 @@
   {
     "spell": 800206,
     "clause": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-    "labels": [
-      "800206 effect_value #3"
+    "labels": [],
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Can dodge",
+        "labels": [
+          "800206 behaviour_metric_delta channel_dodge",
+          "800206 behaviour_metric_delta channel_dodge_control"
+        ]
+      },
+      {
+        "claim": "and parry while channeling",
+        "labels": []
+      },
+      {
+        "claim": "you can channel while moving",
+        "labels": [
+          "800206 behaviour_metric_delta moving_channel"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too)."
   },
   {
     "spell": 572617,
@@ -3537,7 +3659,7 @@
       {
         "claim": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",
         "labels": [
-          "802058 behaviour_metric_delta stack_amount"
+          "802058 behaviour_hit_ratio stack_damage"
         ]
       },
       {
@@ -3856,7 +3978,16 @@
     "labels": [
       "804219 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "The 25% chance not to consume Felfury needs a keep-rate read on Ruin: Ruin consumes 2 Felfury and needs At Least 2 Felfury 803468, but the aura_keep_rate kind sets the consumed aura to 1 stack and applies no other fixture in the treatment arm. Design 1 (aura_keep_rate, Witch Hunter Lightbringer 680538 shape, Ruin 501298, control Twin Slice 801901, 20 treatment casts) measured 20 of 20 casts refused SPELL_FAILED_NO_POWER (85): no trial. No server mutant reaches the roll (a script constant), and flat_chance_rate reads no aura or stack event. The route is an aura_keep_rate extension (an aura_stacks option and treatment_auras); the band then needs 12443 casts and 15000 or more for a residual under 0.1% per pair (about 16 parts of 1000 casts at 2.5 s). Not a final status.",
+      "attempts": [
+        {
+          "agent": "fw-vb6",
+          "report": ".agents/plans/fw-vb6/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804609,
@@ -3866,7 +3997,8 @@
     ],
     "kind": "claim",
     "evidence": "data",
-    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068"
+    "spell_dbc_sha256": "d3dd607291d2d6793f72c7b13537f94fd7748d40a79a326db6a8b4cb2ed41068",
+    "effectiveness_of": 800225
   },
   {
     "spell": 804609,
@@ -4351,9 +4483,13 @@
     "spell": 805255,
     "clause": "Reduces the cooldown of Burning Hatred by $/1000;s1 sec.",
     "labels": [
-      "805255 behaviour_metric_delta cooldown"
+      "805255 behaviour_metric_delta cooldown",
+      "805255 cost_gate 805239 cd without",
+      "805255 cost_gate 805239 cd with",
+      "805255 cost_gate 805239 cd beyond"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "cost_gate on Burning Hatred 805239 (120000 ms recovery, 60000 ms cut): refused at 60500 ms without the talent, through at 60500 ms with it, refused at 59500 ms with it."
   },
   {
     "spell": 805256,
@@ -4499,7 +4635,9 @@
       {
         "claim": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec (Sargeron Smite)",
         "labels": [
-          "806235 behaviour_metric_delta duration"
+          "806235 behaviour_metric_delta duration",
+          "806235 behaviour_metric_delta duration_sargeron_held",
+          "806235 behaviour_metric_delta duration_sargeron_gone"
         ]
       },
       {
@@ -4507,10 +4645,21 @@
         "labels": [
           "806235 behaviour_metric_delta duration_azzinoth",
           "806235 behaviour_metric_delta duration_felwrath",
-          "806235 behaviour_metric_delta duration_ruin"
+          "806235 behaviour_metric_delta duration_ruin",
+          "806235 behaviour_metric_delta duration_azzinoth_held",
+          "806235 behaviour_metric_delta duration_azzinoth_gone",
+          "806235 behaviour_metric_delta duration_felwrath_held",
+          "806235 behaviour_metric_delta duration_felwrath_gone",
+          "806235 behaviour_metric_delta duration_ruin_held",
+          "806235 behaviour_metric_delta duration_ruin_gone",
+          "806235 behaviour_metric_delta duration_carve_held",
+          "806235 behaviour_metric_delta duration_carve_gone",
+          "806235 behaviour_metric_delta duration_sunder_held",
+          "806235 behaviour_metric_delta duration_sunder_gone"
         ]
       }
-    ]
+    ],
+    "reason": "Held/gone reads of Inner Demon 804216 around its stated end, one pair per spender (Sargeron Smite, Ruin, Felwrath: 5000 ms at application, 6000 ms with one critical strike, present at about 5934 ms, absent at about 6059 ms; Azzinoth's Assault: 8000 ms including its own 3000 ms, 10000 ms with two critical strikes, present at 9844 ms, absent at 10154 ms; Carve 800206 (impact 803715, a strike per weapon hand: 7000 ms with two critical strikes, present at 6925 ms, absent at 7050 ms) and Sunder 705121 (impact 712399 of the first explosion only, dummy 1 yd in front: 6000 ms with one critical strike, present at 5925 ms, absent at 6050 ms), the two other scripted spenders of AscensionFelsworn.cpp:56-60; every scripted spender is tested); the control phase (806235 not learned) is gone at both reads."
   },
   {
     "spell": 806235,
@@ -4545,9 +4694,12 @@
     "spell": 807430,
     "clause": "Increases the duration of Skull of Gul'dan by $/1000;S1 sec.",
     "labels": [
-      "807430 behaviour_metric_delta duration"
+      "807430 behaviour_metric_delta duration",
+      "807430 behaviour_metric_delta skull_held",
+      "807430 behaviour_metric_delta skull_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Held/gone reads of Skull of Gul'dan 800225 (10000 ms, 15000 ms with the talent): present at about 14589 ms, absent at about 15400 ms; the control phase (807430 not learned) is gone at both reads."
   },
   {
     "spell": 807431,
@@ -4563,7 +4715,7 @@
       {
         "claim": "by $521234s1%",
         "labels": [
-          "807431 behaviour_metric_delta regen_amount"
+          "807431 behaviour_metric_delta regen_energy"
         ]
       },
       {
@@ -4573,7 +4725,8 @@
           "807431 behaviour_metric_delta gone"
         ]
       }
-    ]
+    ],
+    "reason": "The Energy regeneration amount of 5% is read through the Energy regained over 8000 ms after a real Azzinoth's Assault (80 without 807431, 84 with it, within 1.5); the aura_amount value label regen_amount stays a data read outside the claims."
   },
   {
     "spell": 807431,
@@ -4587,9 +4740,12 @@
     "spell": 807438,
     "clause": "Generating Felfury now extends the duration of Inner Demon by 0.5 sec.",
     "labels": [
-      "807438 behaviour_metric_delta duration"
+      "807438 behaviour_metric_delta duration",
+      "807438 behaviour_metric_delta inner_demon_held",
+      "807438 behaviour_metric_delta inner_demon_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Held/gone reads of Inner Demon 804216 around 5500 ms (5000 ms at application, 500 ms per Felfury generated by a real Twin Slice): present at about 5449 ms, absent at about 5519 ms; the control phase (807438 not learned) is gone at both reads."
   },
   {
     "spell": 807461,
