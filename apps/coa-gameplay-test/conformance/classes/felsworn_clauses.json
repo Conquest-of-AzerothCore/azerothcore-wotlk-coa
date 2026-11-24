@@ -4557,7 +4557,7 @@
         ]
       },
       {
-        "claim": "plus 30 Energy per sec spent by the channel",
+        "claim": "plus 30 per sec",
         "labels": [
           "800355 behaviour_metric_delta drain_1",
           "800355 behaviour_metric_delta drain_2"
