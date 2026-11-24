@@ -5008,6 +5008,480 @@
         "source": "Darkwither 502220 is single-target (EffectRadiusIndex 0) at dummy_distance 10 yd; Presence of C'Thun 803339 and triggered 803340 are caster-only; streams are ungrouped."
       },
       "observe_source": "803283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +5% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). Expected 25% with 803283 learned; AscensionCultist.cpp:105-116 Chance() does not call ApplySpellMod(SPELLMOD_CHANCE_OF_SUCCESS), so this entry verifies the live proc rate against 25%. Reference search 2026-11-24: coa-history spell 803283: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 803283 matches installed Spell.dbc."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (duration 30 min on ally)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Link yourself to an ally for $d,",
+      "trigger_spell": 500751,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 500751,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 1725000,
+      "expiry_wait_ms": 120000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1790000
+        ],
+        "expired": [
+          1810000,
+          1890000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 500751 DurationIndex 30 = 1800000 ms ($d, 30 min), instant cast, 14% base mana. Casts 500751 at grouped ally (control: uncast before phase reads 0). Reads aura 500751 on ally present (1) at 1725000 ms (game_time [1710000, 1790000], above 1620000 ms = -10%) and expired (0) at 1845000 ms (game_time [1810000, 1890000], below 1980000 ms = +10%), excluding 10% off on both sides (ADR 0139 accelerated clock precedent). Reference search 2026-11-24: coa-history spell 500751: 148 casts, 92 applies, 88 removals in 25-27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (transfers 10% of ally damage taken to caster)",
+      "kind": "metric_delta",
+      "variant": "damage_transfer",
+      "label_suffix": "damage_transfer",
+      "quote": "transfering $s3% of all damage taken by them to you",
+      "trigger_spell": 500751,
+      "cast_in_before": false,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 3,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "health",
+            "before_expected": 6700,
+            "expected": 7030,
+            "tolerance": 0,
+            "source": "Spell.dbc 500751 Effect[2] SPELL_AURA_SPLIT_DAMAGE_PCT (81) BasePoints 9 + DieSides 1 = 10% (all schools 127): 3 strikes of Light of the Naaru 41394 (1100 Holy each = 3300) leave ally at 6700 without 500751 and 7030 (+330 spared = 10%) with 500751."
+          }
+        ]
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 6700,
+      "expected": 6370,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 500751 Effect[2] SPELL_AURA_SPLIT_DAMAGE_PCT (81), EffectBasePoints 9 + EffectDieSides 1 = 10%, MiscValue 127 (all schools), Unit.cpp:2927-2965 transfers CalculatePct(damage, 10) from ally to caster. Striker casts Light of the Naaru 41394 (1100 Holy, 3 times = 3300) at caster (base strike) and at grouped ally (ally_strikes) from 10000/10000 health with regeneration off. Control (before casting 500751): caster ends at 6700 (3300 taken), ally ends at 6700 (3300 taken). Treatment (after casting 500751 on ally): caster ends at 6370 (3300 + 330 transferred = 3630), ally ends at 7030 (3300 - 330 = 2970); tol 0 excludes 0%, 9%, 11%, and 20%. Reference search 2026-11-24: coa-history spell 500751: 37328 enemy DAMAGE_SPLIT events in 27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (converts 20% of damage dealt into healing for ally)",
+      "kind": "metric_delta",
+      "variant": "damage_to_heal",
+      "label_suffix": "damage_to_heal",
+      "quote": "causing $300295s1% of all damage you deal to be converted into healing for them.",
+      "trigger_spell": 500751,
+      "cast_in_before": false,
+      "learn": [
+        502182
+      ],
+      "select_dummy": true,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502182,
+          "delay_ms": 2000,
+          "target": "dummy"
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500862,
+              "target": "ally"
+            },
+            "source": "Spell.dbc 300295 Effect[0] aura 354 triggers 500862 healing on covenanted ally (AscensionCultistEvents.cpp:258-265)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "source": "Horrorbolt 502182 Shadow damage dealt by caster to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500862,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Abyssal Covenant 500751 triggers exactly 1 heal of 500862 on ally when Horrorbolt 502182 hits the dummy."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.2,
+            "tolerance": 0.005,
+            "floor_count": 0,
+            "source": "Spell.dbc 300295 Effect[0] BasePoints 19 + DieSides 1 = 20% ($300295s1); CalculatePct(damage, 20) truncates up to 1 per event (AscensionCultistEvents.cpp:262)."
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502182,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 300295 Effect[0] aura 354 BasePoints 19 + DieSides 1 = 20% ($300295s1), triggers 500862 heal on covenanted ally (AscensionCultistAuras.cpp:49-57, AscensionCultistEvents.cpp:258-265). Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000 (large denominator so uint32 truncation is <0.03%). Casts 500751 at grouped ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy: 0 heals of 500862 before (uncast control; paired with damage_to_heal_control casting 502182 without 500751), 1 heal of 500862 after with ratio 500862_heal / 502182_damage = 0.20 +- 0.005 (floor_count 0, excluding 0%, 10%, 18%, 22%, 40%). Reference search 2026-11-24: coa-history spell 500862: 55154 SPELL_HEAL events in 27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (single ally limit)",
+      "kind": "single_target",
+      "quote": "Can only be applied to 1 ally at a time.",
+      "observe_source": "Spell.dbc 500751 tooltip states \"Can only be applied to 1 ally at a time.\"; AscensionCultistAuras.cpp:49-55 removes 500751 from the previous covenanted ally when applied to a new ally. Casts 500751 on ally (present), waits GCD, casts 500751 on ally2 (removed from ally, present on ally2). Reference search 2026-11-24: coa-history spell 500751: 148 casts, 92 applies, 88 removals in 25-27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 704884,
+      "name": "Lead the Covenant (replicates 50% of Abyssal Covenant healing to caster)",
+      "kind": "metric_delta",
+      "variant": "replicated_heal",
+      "label_suffix": "replicated_heal",
+      "quote": "$s1% of all healing done to allies through Abyssal Covenant is now replicated to you.",
+      "gate_spell": 704884,
+      "learn": [
+        500751
+      ],
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "ally_casts": [
+          500751
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 707185,
+              "target": "caster"
+            },
+            "source": "Spell.dbc 704884 Effect[0] triggers 707185 healing on caster (AscensionCultistAbilities.cpp:222-224)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500862,
+              "target": "ally"
+            },
+            "source": "Abyssal Covenant 500862 effective healing on ally (2000/20000 health, no overheal) in the same window."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.5,
+            "tolerance": 0.005,
+            "floor_count": 0,
+            "source": "Spell.dbc 704884 Effect[0] BasePoints 49 + DieSides 1 = 50% ($s1); CalculatePct(healing, 50) truncates up to 1 per event (AscensionCultistAbilities.cpp:223)."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 707185,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 704884 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 707185; AscensionCultistAbilities.cpp:215,222-224 replicates CalculatePct(healing, 50) of 500862 ally healing to caster via 707185. Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000, ally at 2000/20000 health so 500862 never overheals. Both phases cast 500751 on ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy: control (before learning 704884) yields 0 heals of 707185 on caster; treatment (after real learn of 704884) yields 1 heal of 707185 on caster at ratio 707185 / 500862 = 0.50 +- 0.005 (floor_count 0, excluding 0%, 45%, 55%, 100%). Reference search 2026-11-24: coa-history spell 704884/707185: 0 events in 186 logs (positive control 500862: 55154 heals in 27 logs); coabuildhub spells_master_index.json entry 704884 matches verbatim."
+    },
+    {
+      "spell": 704897,
+      "name": "Dark Protection (+20% healing taken from caster on Abyssal Covenant ally)",
+      "kind": "hit_ratio",
+      "variant": "healing_taken",
+      "label_suffix": "healing_taken",
+      "quote": "Allies affected by Abyssal Covenant now also take $s1% increased healing from you.",
+      "expected": 1.2,
+      "metric": "spell_heal_total",
+      "observe_spell": 502234,
+      "learn": [
+        502234,
+        500751
+      ],
+      "target": "ally",
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          704897
+        ]
+      },
+      "critical": false,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 704897 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), BasePoints 19 + DieSides 1 = +20 ($s1), EffectSpellClassMask[0] 2147483648 = SpellFamilyFlags[0] of Abyssal Covenant 500751, raising 500751 Effect[1] SPELL_AURA_MOD_HEALING_RECEIVED (283, Unit.cpp:11086-11091 checks caster GUID == aurEff caster GUID) from 0% to +20%. Observes non-critical Eldritch Mending 502234 heals cast by caster at grouped ally with 500751 recast on ally in each arm (+5000 SP fixture so die variance is ~1%): control without 704897 vs treatment after real learn of 704897, expected ratio 1.20 (+20%, G-19 band +18% to +22%). Reference search 2026-11-24: coa-history spell 704897: 0 events in 186 logs (passive; positive control 500751: 148 casts in 26 logs); coabuildhub spells_master_index.json entry 704897 matches verbatim.",
+      "warmup": [
+        500751
+      ],
+      "warmup_power": 2000,
+      "trials": 25
+    },
+    {
+      "spell": 806384,
+      "name": "Visions of the Empire (+10% Abyssal Covenant damage-to-heal conversion)",
+      "kind": "metric_delta",
+      "variant": "conversion_bonus",
+      "label_suffix": "conversion_bonus",
+      "quote": "Increases the damage converted into healing through Abyssal Covenant by $s1%.",
+      "gate_spell": 806384,
+      "learn": [
+        500751
+      ],
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "ally_casts": [
+          500751
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500862,
+        "target": "ally"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 502182,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0.2,
+      "expected": 0.3,
+      "tolerance": 0.005,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 806384 Effect[0] BasePoints 9 + DieSides 1 = 10% ($s1); AscensionCultistEvents.cpp:262 adds Amount(806384) to Amount(300295) = 20% -> 30% of damage dealt converted to 500862 healing on covenanted ally. Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000 (denominator ~4700 so truncation <0.03%). Both phases cast 500751 on ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy, reading incremental ratio spell_heal_total(500862, ally) / spell_damage_total(502182, dummy): 0.20 before learning 806384 (control) and 0.30 after a real learn of 806384 (tol 0.005 excludes 0.20, 0.29, 0.31, and 0.40). Reference search 2026-11-24: coa-history spell 806384: 0 events in 186 logs (passive; positive control 500862: 55154 heals in 27 logs); coabuildhub spells_master_index.json entry 806384 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (control: no 500862 heal on ally without Abyssal Covenant)",
+      "kind": "metric_delta",
+      "variant": "damage_to_heal_control",
+      "label_suffix": "damage_to_heal_control",
+      "quote": "causing $300295s1% of all damage you deal to be converted into healing for them.",
+      "trigger_spell": 502182,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Witnesses that Horrorbolt 502182 landed on the dummy while Abyssal Covenant 500751 was absent."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500862,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for 500751 damage_to_heal: learns 500751 without casting it, casts Horrorbolt 502182 at dummy (witnessed by spell_damage_count 0 -> 1), and confirms 500862 heal count on grouped ally stays 0. Reference search 2026-11-24: coa-history spell 500862: 55154 heals in 27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
     }
   ],
   "player_observations": [],

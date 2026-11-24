@@ -1103,7 +1103,7 @@
     "spell": 500751,
     "clause": "Link yourself to an ally for $d,",
     "labels": [
-      "500751 aura_duration_ms #0"
+      "500751 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -1115,14 +1115,14 @@
       {
         "claim": "transfering $s3% of all damage taken by them to you",
         "labels": [
-          "500751 effect_value e2 #1",
-          "500751 aura_amount e2 #1"
+          "500751 behaviour_metric_delta damage_transfer"
         ]
       },
       {
         "claim": "causing $300295s1% of all damage you deal to be converted into healing for them",
         "labels": [
-          "500751 effect_value 300295e0 #2"
+          "500751 behaviour_metric_delta damage_to_heal",
+          "500751 behaviour_metric_delta damage_to_heal_control"
         ]
       }
     ]
@@ -1130,7 +1130,9 @@
   {
     "spell": 500751,
     "clause": "Can only be applied to 1 ally at a time.",
-    "labels": [],
+    "labels": [
+      "500751 behaviour_single_target"
+    ],
     "kind": "claim"
   },
   {
@@ -2677,7 +2679,7 @@
     "spell": 704884,
     "clause": "$s1% of all healing done to allies through Abyssal Covenant is now replicated to you.",
     "labels": [
-      "704884 effect_value e0 #0"
+      "704884 behaviour_metric_delta replicated_heal"
     ],
     "kind": "claim"
   },
@@ -2738,7 +2740,7 @@
     "spell": 704897,
     "clause": "Allies affected by Abyssal Covenant now also take $s1% increased healing from you.",
     "labels": [
-      "704897 effect_value e0 #0"
+      "704897 behaviour_hit_ratio healing_taken"
     ],
     "kind": "claim"
   },
@@ -3935,7 +3937,7 @@
     "spell": 806384,
     "clause": "Increases the damage converted into healing through Abyssal Covenant by $s1%.",
     "labels": [
-      "806384 effect_value e0 #0"
+      "806384 behaviour_metric_delta conversion_bonus"
     ],
     "kind": "claim"
   },
