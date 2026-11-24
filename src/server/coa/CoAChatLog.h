@@ -49,6 +49,8 @@ namespace CoAChatLog
     void Record(CoAChatRow row);
     bool Flush(bool wait);
     std::size_t Pending();
+    uint64 Dropped();
+    std::size_t SetMaxPending(std::size_t rows);
     void Cleanup(uint32 now, bool wait);
     std::optional<uint8> TypeByName(std::string_view name);
 }
