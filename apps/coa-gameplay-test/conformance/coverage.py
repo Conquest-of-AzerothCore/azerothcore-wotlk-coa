@@ -442,6 +442,7 @@ METRIC_EVIDENCE = {
                      'timeline_interval_max_ms', 'timeline_interval_median_ms', 'event_first_ms',
                      'event_interval_min_ms', 'event_interval_max_ms', 'event_interval_median_ms', 'water_walk',
                      'spell_absorb_total', 'spell_damage_with_resist_total', 'spell_log_count',
+                     'spell_heal_absorb_total',
                      'nearby_creature_at_client', 'spell_go_count',
                      'pet_melee_crits', 'pet_melee_plain_count', 'pet_melee_hits',
                      'pet_melee_blocked', 'health', 'owned_creature_avoided_count', 'owned_creature_attack_count',

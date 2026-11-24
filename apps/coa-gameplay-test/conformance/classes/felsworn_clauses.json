@@ -1504,10 +1504,11 @@
     "spell": 561201,
     "clause": "Damage dealt by Ruin now absorbs the next ${$801895m2+$801895ppl2} healing on the target based on rank,",
     "labels": [
-      "561201 effect_value 801895e1 #0"
+      "561201 effect_value 801895e1 #0",
+      "561201 behaviour_metric_delta heal_absorb"
     ],
     "kind": "claim",
-    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin 801895 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "reason": "fw-g39 (2026-11-24): read by \"561201 behaviour_metric_delta heal_absorb\": Ruin 801895 at an enemy player (Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target, DBC value 99), which then casts Gift of Life 23783 (1500) on itself; the absorbed amount of that heal's own log (spell_heal_absorb_total, ADR 1286) reads 0 without 561201 and 99 with it learned between the phases (prove pair 2/2 ok). The harness now records the heal log's absorb field. The dummy's own heal (fw-vb2b) never lands: six heal spells left its health unchanged and sent no heal log, so the enemy player carries the heal. Earlier reason (fw-vb2b) withdrawn.",
     "tool_gap": {
       "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
       "attempts": [
@@ -1522,10 +1523,11 @@
     "spell": 561201,
     "clause": "up to ${$501297m2+$501297ppl2} at rank 7,",
     "labels": [
-      "561201 effect_value 501297e1 #1"
+      "561201 effect_value 501297e1 #1",
+      "561201 behaviour_metric_delta heal_absorb_r7"
     ],
     "kind": "claim",
-    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "reason": "fw-g39 (2026-11-24): read by \"561201 behaviour_metric_delta heal_absorb_r7\": Ruin 501297 at an enemy player (Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target, DBC value 226), which then casts Gift of Life 23783 (1500) on itself; the absorbed amount of that heal's own log (spell_heal_absorb_total, ADR 1286) reads 0 without 561201 and 226 with it learned between the phases (prove pair 2/2 ok). The harness now records the heal log's absorb field. The dummy's own heal (fw-vb2b) never lands: six heal spells left its health unchanged and sent no heal log, so the enemy player carries the heal. Earlier reason (fw-vb2b) withdrawn.",
     "tool_gap": {
       "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
       "attempts": [

@@ -1508,6 +1508,32 @@ class GameplayClockGateTest(unittest.TestCase):
         self.assertEqual(self.verdict_of('real').status, 'ok')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HealAbsorbReadTest(unittest.TestCase):
+    def verdict_of(self, before, after):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 99.0,
+                 'before_expected': 0.0, 'tolerance': 0, 'metric': 'spell_heal_absorb_total'}
+        item = Expectation('561201 behaviour_metric_delta heal_absorb', BEHAVIOUR_METRIC_DELTA, SPELL, RANK, None,
+                           '99', 'prose: "absorbs the next 99 healing on the target" (561201)', model)
+        workspace = Workspace()
+        self.addCleanup(workspace.close)
+        workspace.scenario('heal-absorb', 'behaviour', [item],
+                           steps=[assert_step('before', before), assert_step('after', after)])
+        manifest, results = workspace.manifest()
+        return {verdict.label: verdict for verdict in compare(manifest, results)}[item.label]
+
+    def test_the_absorbed_healing_of_the_learned_arm_passes(self):
+        self.assertEqual(self.verdict_of('0', '99').status, 'ok')
+
+    def test_a_skipped_absorb_field_or_the_landed_heal_read_in_its_place_alerts(self):
+        for after in ('0', '1401'):
+            with self.subTest(after=after):
+                self.assertEqual(self.verdict_of('0', after).status, 'alert')
+
+    def test_an_absorb_in_the_not_learned_control_alerts(self):
+        self.assertEqual(self.verdict_of('99', '99').status, 'alert')
+
+
 class PassiveDeltaTest(unittest.TestCase):
     def setUp(self):
         self.workspace = Workspace()

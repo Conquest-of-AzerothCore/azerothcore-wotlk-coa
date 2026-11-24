@@ -204,7 +204,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
-    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
+    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total', 'spell_heal_absorb_total',
     'equipped_item', 'visible_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_stat', 'pet_health', 'pet_attack_power',
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
@@ -259,7 +259,7 @@ PLAYER_STAT_METRICS = {
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
-    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
+    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total', 'spell_heal_absorb_total',
     'equipped_item', 'visible_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_aura_duration_ms', 'pet_max_health', 'pet_stat', 'pet_health',
     'pet_attack_power',
@@ -1384,8 +1384,9 @@ def validate(scenario, clock=REAL_CLOCK):
                     'spell_immune', 'spell_effect_immune', 'spell_damage_count', 'spell_damage_total',
                     'spell_log_count', 'spell_absorb_total', 'spell_resist_total', 'spell_damage_with_resist_total',
                     'spell_uses_armor', 'pet_aura_amount', 'pet_aura_amplitude_ms', 'spell_heal_count', 'spell_heal_total',
-                    'spell_effective_heal_total', 'spell_energize_count', 'spell_energize_total',
-                    'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
+                    'spell_effective_heal_total', 'spell_heal_absorb_total', 'spell_energize_count',
+                    'spell_energize_total', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate',
+                    'temporary_spell_replacement',
                     'cast_failure',
                     'trainer_window_state', 'trainer_window_ability', 'spellbook_superseded_for',
                     'spellbook_loud_supersedes_for', 'spellbook_client_notable',
@@ -1425,6 +1426,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     require(metric in {'spell_damage_count', 'spell_damage_total', 'spell_heal_count',
                                        'spell_heal_total', 'spell_effective_heal_total', 'spell_log_count',
                                        'spell_absorb_total', 'spell_resist_total'}
+                            or (key == 'critical' and metric == 'spell_heal_absorb_total')
                             or (key == 'critical' and metric in MELEE_OUTCOME_METRICS | EVENT_TIME_METRICS
                                 | {'spell_damage_with_resist_total'})
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',

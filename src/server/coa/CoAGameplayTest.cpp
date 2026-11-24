@@ -1076,6 +1076,7 @@ struct SpellHealEvent
     uint32 spell = 0;
     uint32 heal = 0;
     uint32 overheal = 0;
+    uint32 absorb = 0;
     bool critical = false;
     uint32 casterEntry = 0;
     uint64 atMs = 0;
@@ -1189,6 +1190,7 @@ struct Actor
     std::vector<SpellDamageEvent> spellDamage;
     std::vector<SpellLogEvent> spellLogs;
     std::vector<SpellHealEvent> spellHeals;
+    std::vector<SpellHealEvent> spellHealLogs;
     std::vector<SpellEnergizeEvent> spellEnergizes;
     Tree castFailures;
     std::map<uint32, uint8> castFailureReason;
@@ -1386,18 +1388,19 @@ void ObserveSpellHealing(Actor& actor, WorldPacket const& packet, Player* player
         if (aura != SPELL_AURA_PERIODIC_HEAL && aura != SPELL_AURA_OBS_MOD_HEALTH)
             return;
     }
-    response >> event.heal >> event.overheal;
-    response.read_skip<uint32>();
+    response >> event.heal >> event.overheal >> event.absorb;
     uint8 critical;
     response >> critical;
     event.critical = critical != 0;
     Require(event.overheal <= event.heal, "Native overhealing exceeds healing");
-    if (event.heal)
+    if (event.heal || event.absorb)
     {
         event.casterEntry = ResolveLiveEntry(player, event.caster);
         event.atMs = GameNowMs();
-        actor.spellHeals.push_back(event);
+        actor.spellHealLogs.push_back(event);
     }
+    if (event.heal)
+        actor.spellHeals.push_back(event);
 }
 
 void ObserveSpellEnergize(Actor& actor, WorldPacket const& packet)
@@ -5401,6 +5404,23 @@ private:
                     else
                         value += uint64(event.damage) + event.resist;
                 }
+            return double(value);
+        }
+        if (metric == "spell_heal_absorb_total")
+        {
+            Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown spell in metric");
+            ObjectGuid caster = player->GetGUID();
+            if (auto id = step.get_optional<std::string>("caster"))
+                caster = GetUnit(*id)->GetGUID();
+            ObjectGuid target;
+            if (auto id = step.get_optional<std::string>("target"))
+                target = GetUnit(*id)->GetGUID();
+            auto critical = step.get_optional<bool>("critical");
+            uint64 value = 0;
+            for (SpellHealEvent const& event : _actors.at(step.get<std::string>("actor")).spellHealLogs)
+                if (event.caster == caster && event.spell == spell && (!target || event.target == target) &&
+                    (!critical || event.critical == *critical))
+                    value += event.absorb;
             return double(value);
         }
         if (metric == "owned_creature_avoided_count")

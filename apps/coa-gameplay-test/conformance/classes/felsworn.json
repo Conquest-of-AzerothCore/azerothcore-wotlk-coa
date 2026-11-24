@@ -22064,6 +22064,96 @@
       "observe_source": "Tooltip 561201: 'absorbs the next ... healing on the target ... for $/1000;s1 sec'; 561201 Effect[0] aura 107 ADD_FLAT_MODIFIER misc 1 (SPELLMOD_DURATION), BasePoints 7999 + 1 die side = 8000 ms = 8 sec on the Ruin 801895 absorb aura (Effect[1] aura 301, DurationIndex 0 in Ruin itself). One real Ruin 801895 (CastTime 2500 ms); the aura read on the dummy at game time 11040 ms: held at least 7360 ms after the cast ends, gone at most 8640 ms. In the held entry the same cast before the learn is the control (the aura must read absent). Reference search 2026-11-24: coa-history spell 801895: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
     },
     {
+      "spell": 561201,
+      "name": "Oppressive Ruin (heal absorbed on the target)",
+      "kind": "metric_delta",
+      "variant": "heal_absorb",
+      "label_suffix": "heal_absorb",
+      "quote": "Damage dealt by Ruin now absorbs the next ${$801895m2+$801895ppl2} healing on the target based on rank,",
+      "trigger_spell": 801895,
+      "gate_spell": 561201,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_absorb_total",
+      "fields": {
+        "spell": 23783,
+        "target": "enemy"
+      },
+      "cast_in_before": true,
+      "before_expected": 0,
+      "expected": 99,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "enemy_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 561201: 'Damage dealt by Ruin now absorbs the next ${$801895m2+$801895ppl2} healing on the target based on rank, up to ${$501297m2+$501297ppl2} at rank 7, for $/1000;s1 sec.' Server DBC set: Ruin 801895 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB, MiscValue 127 (every school), TargetA 6 (the hostile target), EffectBasePoints 98 + 1 die side, no points per level and no bonus multiplier on that effect = 99; Ruin's DurationIndex is 0 and 561201 Effect[0] aura 107 SPELLMOD_DURATION +8000 ms gives the aura its 8 sec (the held/gone entries). Both phases cast one real Ruin 801895 at an enemy player (race 2, Felfury 800058 x6 and the spell-penetration fixture 823764 on the caster, a refused cast voids the entry), then 3500 ms later the enemy player casts Gift of Life 23783 on itself (Effect[0] HEAL on the caster, EffectBasePoints 1499 + 1 die side = 1500, no bonus multiplier, far above 99, so one heal can spend the whole absorb: Unit::CalcHealAbsorb takes min(heal, remaining absorb)). The read is the absorbed amount of that heal's own log (spell_heal_absorb_total, caster and target the enemy player, read on its own session, ADR 1286), not its health, so Ruin's damage die does not enter it. Control (before, 561201 not known): the aura has no duration, 0 absorbed. Treatment (561201 learned between the phases by a real learn): 99 absorbed exactly (tolerance 0). The enemy player carries no other aura 301 in either phase; the not-learned control with the same Ruin and heal attributes the absorb to the talent, since the heal log names no absorber. A Ruin that misses in the treatment phase reads 0 and alerts (a false alarm, never a false pass). Reference search 2026-11-24: coa-history spell 801895: no heal-absorb amounts in the aggregates; ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc. The dummy cannot carry the heal: six heal spells it cast on itself (23783, 6925, 50643, 301161, 2061, 25235) were accepted but left its health unchanged and sent no heal log (fw-g39 diagnostic, cause not established)."
+    },
+    {
+      "spell": 561201,
+      "name": "Oppressive Ruin (heal absorbed on the target, rank 7)",
+      "kind": "metric_delta",
+      "variant": "heal_absorb_r7",
+      "label_suffix": "heal_absorb_r7",
+      "quote": "up to ${$501297m2+$501297ppl2} at rank 7,",
+      "trigger_spell": 501297,
+      "gate_spell": 561201,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_absorb_total",
+      "fields": {
+        "spell": 23783,
+        "target": "enemy"
+      },
+      "cast_in_before": true,
+      "before_expected": 0,
+      "expected": 226,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "enemy_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip 561201: 'Damage dealt by Ruin now absorbs the next ${$801895m2+$801895ppl2} healing on the target based on rank, up to ${$501297m2+$501297ppl2} at rank 7, for $/1000;s1 sec.' Server DBC set: Ruin 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB, MiscValue 127 (every school), TargetA 6 (the hostile target), EffectBasePoints 225 + 1 die side, no points per level and no bonus multiplier on that effect = 226; Ruin's DurationIndex is 0 and 561201 Effect[0] aura 107 SPELLMOD_DURATION +8000 ms gives the aura its 8 sec (the held/gone entries). Both phases cast one real Ruin 501297 at an enemy player (race 2, Felfury 800058 x6 and the spell-penetration fixture 823764 on the caster, a refused cast voids the entry), then 3500 ms later the enemy player casts Gift of Life 23783 on itself (Effect[0] HEAL on the caster, EffectBasePoints 1499 + 1 die side = 1500, no bonus multiplier, far above 226, so one heal can spend the whole absorb: Unit::CalcHealAbsorb takes min(heal, remaining absorb)). The read is the absorbed amount of that heal's own log (spell_heal_absorb_total, caster and target the enemy player, read on its own session, ADR 1286), not its health, so Ruin's damage die does not enter it. Control (before, 561201 not known): the aura has no duration, 0 absorbed. Treatment (561201 learned between the phases by a real learn): 226 absorbed exactly (tolerance 0). The enemy player carries no other aura 301 in either phase; the not-learned control with the same Ruin and heal attributes the absorb to the talent, since the heal log names no absorber. A Ruin that misses in the treatment phase reads 0 and alerts (a false alarm, never a false pass). Reference search 2026-11-24: coa-history spell 801895: no heal-absorb amounts in the aggregates; ~/CoaServer/reference: nothing beyond the tooltip and Spell.dbc. The dummy cannot carry the heal: six heal spells it cast on itself (23783, 6925, 50643, 301161, 2061, 25235) were accepted but left its health unchanged and sent no heal log (fw-g39 diagnostic, cause not established)."
+    },
+    {
       "spell": 300483,
       "name": "Chaotic Intuition (Cripple still on 17500 ms after its cast)",
       "kind": "metric_delta",
