@@ -1837,6 +1837,766 @@
       "expire_ms": 1000,
       "void_on_cast_failure": true,
       "observe_source": "Bouncing Thoughts 680607 at 100 Insanity with Dreadnought form passive 680750 learned (suppresses Total Madness 803060 at 100 Insanity, AscensionCultist.cpp:218-220; precondition fixture 500706 x100; expire_ms 1000 lets Refresh set 680607 Effect[0] SPELLMOD_JUMP_TARGETS to 100 / 20 = 5): Twilight Shieldtoss 572141 (base EffectChainTarget 3, Dreadnought weapon set) hits 3 + 5 = 8 enemies out of 9 dummies within 7.5 yd jump radius, leaving the 9th dummy untouched (0 in uncast before). Reference search 2026-11-24: coabuildhub 680607 and 680750 match verbatim; coa-history has 0 events for 680607/680750."
+    },
+    {
+      "spell": 92129,
+      "name": "Obliteration (Gaze of C'Thun base damage +177)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Your Gaze of C'Thun now gains an additional ${$m1+0} base damage and healing.",
+      "trigger_spell": 500110,
+      "gate_spell": 92129,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520332,
+        "target": "dummy"
+      },
+      "before_expected": 117,
+      "expected": 432,
+      "expected_gain": 315,
+      "tolerance": 4,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "92129 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 8 (SPELLMOD_ALL_EFFECTS), EffectSpellClassMask[0] 4 matching Gaze of C'Thun 500110 SpellFamilyFlags[0] 4, SkillLineAbility row 24175 (SkillLine 88), BaseLevel 1, SpellLevel 1, MaxLevel 0, EffectBasePoints[0] 14 + DieSides 1 = 15 + 59 * RealPointsPerLevel 2.75 = 177.25 (int32 177 at level 60; Spell.dbc). Gaze of C'Thun rank 1 (500110, SkillLineAbility 85452, BaseLevel 8, MaxLevel 12, bp0 20, DieSides 3, ppl0 2.0 -> 29..31 base) triggers 520334 -> 520332 (CultistCoefficients sp 0.5, ap 0.2; Godblade AP 376, SP 0 -> +75.2 = 104..106 raw). Cultist class tuning aura 887013 (AscensionClassTuning.h:34; Spell.dbc +12% all-school damage at level 60) scales raw damage by 1.12: 116..118 before 92129 (control) and (104..106 + 177) * 1.12 = 314..316 after a real learn of 92129 (cumulative total 430..434, gain 315 +- 4). Precondition fixtures: 823764 (spell pen) and 16255 at -100 (no crit). Dual-target 500110 legitimately emits benign SPELL_FAILED_DONT_REPORT (27) from its opposite-faction trigger 520335, so void_on_cast_failure is omitted; the actual 520332 damage proves the cast landed. Reference search 2026-11-24: coa-history spell 92129: 0 events in 186 logs (passive; 500110: 4 casts in 2 logs); coabuildhub spells_master_index.json 92129 says 'gains an additional 15 base damage and healing' (level-1 base value matching installed Spell.dbc)."
+    },
+    {
+      "spell": 92129,
+      "name": "Obliteration (Gaze of C'Thun base healing +177)",
+      "kind": "metric_delta",
+      "variant": "healing",
+      "label_suffix": "healing",
+      "quote": "Your Gaze of C'Thun now gains an additional ${$m1+0} base damage and healing.",
+      "trigger_spell": 500110,
+      "gate_spell": 92129,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 520333,
+        "target": "caster"
+      },
+      "before_expected": 65,
+      "expected": 307,
+      "expected_gain": 242,
+      "tolerance": 4,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "92129 Effect[0] aura 107 SPELLMOD_ALL_EFFECTS, EffectSpellClassMask[0] 4 matching Gaze of C'Thun 500110, SkillLineAbility 24175, BaseLevel 1, MaxLevel 0, EffectBasePoints 14 + DieSides 1 + 59 * 2.75 = 177.25 (int32 177 at level 60; Spell.dbc). Gaze of C'Thun rank 1 (500110, BaseLevel 8, MaxLevel 12, bp1 20, DieSides 3, ppl1 1.4 -> 26.6..28.6) cast on self triggers 520335 -> 520333 (CultistCoefficients healing 0.665, ap 0.1; Godblade AP 376, SP 0 -> +37.6): 64..66 before 92129 (control) and +177 = 241..243 after a real learn of 92129 (cumulative total 305..309, gain 242 +- 4). Precondition fixture: 16255 at -100 (no crit). Reference search 2026-11-24: coa-history spell 92129: 0 events (passive; 520333: 2853 heals in 42 logs); coabuildhub spells_master_index.json 92129 matches installed Spell.dbc."
+    },
+    {
+      "spell": 807512,
+      "name": "Whispers of C'Thun (Gaze of C'Thun generates 10 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "quote": "Your Gaze of C'Thun now generates 10 Insanity.",
+      "trigger_spell": 502141,
+      "gate_spell": 807512,
+      "target": "dummy",
+      "cast_power": 2000,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807512 Effect[0] aura 42 PROC_TRIGGER_SPELL 804210 (Effect[0] 175 SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS MiscValue 10 on Insanity 500706; AscensionClassContracts19To25Data.h:87-88 ResourceEvent::Cast on Gaze of C'Thun 500110/502135..502143). One real cast of Gaze of C'Thun 502141 at the dummy before (control: 0 Insanity) and after a real learn of 807512 (10 Insanity stacks on 500706). Reference search 2026-11-24: coa-history spell 807512: 0 events in 186 logs (passive; 500706: 15412 applied_dose in 44 logs); coabuildhub spells_master_index.json 807512 matches verbatim ('generates 10 Insanity')."
+    },
+    {
+      "spell": 707604,
+      "name": "Abyssal Cleave r1 (Gaze of C'Thun strikes 1 additional enemy)",
+      "kind": "metric_delta",
+      "variant": "extra_target",
+      "label_suffix": "extra_target",
+      "quote": "Your Gaze of C'Thun now strikes 1 additional nearby enemy.",
+      "trigger_spell": 500110,
+      "gate_spell": 707604,
+      "target": "dummy",
+      "cast_power": 2000,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520332,
+        "target": "dummy"
+      },
+      "before_expected": 2,
+      "expected": 5,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707604 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints 0 + DieSides 1 = +1, EffectSpellClassMask[0] 4 matching Gaze of C'Thun 500110 (EffectChainTarget[0] = 2, jump radius 10.0 yd in AscensionCultistAbilities.cpp:543; Spell.dbc). Primary dummy at 3 yd plus 5 area_dummies at 4..8 yd (all within 5 yd <= 10 yd jump radius). Control (before 707604 learned): 500110 strikes 2 enemies via 520332. Treatment (after real learn of 707604): 500110 strikes 3 enemies (cumulative area_sum 5, gain 3, +1 over base 2). Reference search 2026-11-24: coa-history spell 707604: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 707604 matches verbatim ('strikes 1 additional nearby enemy')."
+    },
+    {
+      "spell": 707748,
+      "name": "Abyssal Cleave r2 (Gaze of C'Thun strikes 2 additional enemies)",
+      "kind": "metric_delta",
+      "variant": "extra_target",
+      "label_suffix": "extra_target",
+      "quote": "Your Gaze of C'Thun now strikes $s1 additional nearby enemies.",
+      "trigger_spell": 500110,
+      "gate_spell": 707748,
+      "target": "dummy",
+      "cast_power": 2000,
+      "area_dummies": [
+        4.0,
+        5.0,
+        6.0,
+        7.0,
+        8.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520332,
+        "target": "dummy"
+      },
+      "before_expected": 2,
+      "expected": 6,
+      "expected_gain": 4,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707748 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 17 (SPELLMOD_JUMP_TARGETS), EffectBasePoints 1 + DieSides 1 = +2 ($s1 = 2), EffectSpellClassMask[0] 4 matching Gaze of C'Thun 500110 (EffectChainTarget[0] = 2, jump radius 10.0 yd in AscensionCultistAbilities.cpp:543; Spell.dbc). Primary dummy at 3 yd plus 5 area_dummies at 4..8 yd (all within 5 yd <= 10 yd jump radius). Control (before 707748 learned): 500110 strikes 2 enemies via 520332. Treatment (after real learn of 707748): 500110 strikes 4 enemies (cumulative area_sum 6, gain 4, +2 over base 2). Reference search 2026-11-24: coa-history spell 707748: 0 events in 186 logs (passive); coabuildhub spells_master_index.json has no entry for 707748; installed Spell.dbc governs."
+    },
+    {
+      "spell": 300264,
+      "name": "Prophetic Compulsion (+15% Gaze heal crit with Black Blood on ally)",
+      "kind": "metric_delta",
+      "variant": "with_black_blood",
+      "label_suffix": "with_black_blood",
+      "quote": "While Black Blood is active on an ally, healing done to them by your Gaze of C'Thun has a $s1% increased chance to critically strike.",
+      "trigger_spell": 502141,
+      "gate_spell": 300264,
+      "target": "ally",
+      "cast_in_before": false,
+      "select_dummy": true,
+      "learn": [
+        502241
+      ],
+      "setup_casts": [
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_in_before": true,
+      "setup_wait_ms": 2000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          5000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Malevolence 502241 applies Black Blood 804153 to the injured grouped ally (AscensionCultistAbilities.cpp:262-287)"
+          }
+        ]
+      },
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 520333,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 15,
+      "expected_gain": 15,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300264 Effect[0] BasePoints 14 + DieSides 1 = 15 ($s1 = 15; Spell.dbc); AscensionCultistAbilities.cpp:102-103 adds Amount(300264) to OnSpellCritChance of Gaze of C'Thun heal 520333 when the ally holds Black Blood 804153 from the caster. Reads engine SpellDoneCritChance plus OnSpellCritChance (spell_done_crit_chance_scripted) of 520333 targeting the grouped ally with Black Blood 804153 set as a precondition fixture in both phases, before (control) and after a real learn of 300264: expected gain +15.0 points (tol 0.05). Partnered with without_black_blood (gain 0). Reference search 2026-11-24: coa-history spell 300264: 0 events (passive; 520333: 2853 heals in 42 logs, 804153: 12941 applied in 28 logs); coabuildhub spells_master_index.json 300264 matches verbatim ('15% increased chance to critically strike')."
+    },
+    {
+      "spell": 300264,
+      "name": "Prophetic Compulsion (no bonus without Black Blood on ally)",
+      "kind": "metric_delta",
+      "variant": "without_black_blood",
+      "label_suffix": "without_black_blood",
+      "quote": "While Black Blood is active on an ally, healing done to them by your Gaze of C'Thun has a $s1% increased chance to critically strike.",
+      "trigger_spell": 502141,
+      "gate_spell": 300264,
+      "target": "ally",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 520333,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Negative condition partner for Prophetic Compulsion 300264: same spell_done_crit_chance_scripted read of Gaze of C'Thun heal 520333 targeting the grouped ally without Black Blood 804153, before and after a real learn of 300264: expected gain 0.0 points (tol 0.05). Reference search 2026-11-24: see with_black_blood."
+    },
+    {
+      "spell": 300296,
+      "name": "Servant of C'Thun (Gaze triggers Presence of C'Thun while active)",
+      "kind": "metric_delta",
+      "variant": "trigger",
+      "label_suffix": "trigger",
+      "quote": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
+      "trigger_spell": 502141,
+      "gate_spell": 300296,
+      "target": "caster",
+      "learn": [
+        803339
+      ],
+      "setup_casts": [
+        803339
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803340
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "observe_source": "AscensionCultistAbilities.cpp:128-129: casting Gaze of C'Thun (Named 500110, rank 502141) with Servant of C'Thun 300296 and Presence of C'Thun 803339 active always casts 803340 on the caster. Setup casts 803339 on self (real cast, 30% mana, cast_power 2000), then casts 502141 on self (healing self deals no damage, so 803339's own 20% damage-dealt proc cannot fire). Control (before 300296 learned): 0 casts of 803340. Treatment (after real learn of 300296): 1 cast of 803340. Reference search 2026-11-24: coa-history spell 300296: 0 events (passive; 803339: 21 casts in 8 logs, 803340: 9521 refresh in 27 logs); coabuildhub spells_master_index.json 300296 matches verbatim."
+    },
+    {
+      "spell": 300296,
+      "name": "Servant of C'Thun (does not trigger without Presence of C'Thun active)",
+      "kind": "metric_delta",
+      "variant": "no_presence",
+      "label_suffix": "no_presence",
+      "quote": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
+      "trigger_spell": 502141,
+      "gate_spell": 300296,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 803340
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Condition control for Servant of C'Thun 300296 ('while it is active'): casting Gaze of C'Thun 502141 on self without Presence of C'Thun 803339 active triggers 0 casts of 803340 both before and after learning 300296. Reference search 2026-11-24: see trigger."
+    },
+    {
+      "spell": 300296,
+      "name": "Servant of C'Thun (803340 spell haste +20%)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
+      "trigger_spell": 502141,
+      "gate_spell": 300296,
+      "target": "caster",
+      "learn": [
+        803339
+      ],
+      "setup_casts": [
+        803339
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 0.833333,
+      "tolerance": 0.0005,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "observe_source": "803340 (embedded via @s:803340:0@ in 300296) Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 19 + DieSides 1 = +20% ($s1 = 20; Spell.dbc): Unit::ApplyCastTimePercentMod(+20) divides UNIT_MOD_CAST_SPEED by 1.2 -> 0.833333. Real cast of 803339 then 502141 on self: cast_speed_multiplier reads 1.0 before 300296 (control) and 0.833333 after learning 300296. Reference search 2026-11-24: see trigger."
+    },
+    {
+      "spell": 300296,
+      "name": "Servant of C'Thun (803340 melee haste +20%)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
+      "trigger_spell": 502141,
+      "gate_spell": 300296,
+      "target": "caster",
+      "learn": [
+        803339
+      ],
+      "setup_casts": [
+        803339
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "metric": "attack_time_ms",
+      "fields": {},
+      "before_expected": 3300,
+      "expected": 2750,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "observe_source": "803340 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints 19 + DieSides 1 = +20% ($s1 = 20; Spell.dbc): divides main-hand attack_time_ms by 1.2. Corruption weapon set main-hand staff 2535 has speed_ms 3300: reads 3300 ms before 300296 (control) and 3300 / 1.2 = 2750 ms after learning 300296 and casting 803339 + 502141. Reference search 2026-11-24: see trigger."
+    },
+    {
+      "spell": 300296,
+      "name": "Servant of C'Thun (803340 lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
+      "trigger_spell": 502141,
+      "gate_spell": 300296,
+      "target": "caster",
+      "learn": [
+        803339
+      ],
+      "setup_casts": [
+        803339
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 803340
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5500,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5450,
+          5700
+        ],
+        "expired": [
+          6200,
+          6550
+        ]
+      },
+      "observe_source": "803340 DurationIndex 32 = 6000 ms ($d; SpellDuration.dbc). Reads aura 803340 absent before cast (control 0), present (1) at 5500 ms (window [5450, 5700] > 5400 ms = 0.9 * 6000), and expired (0) at 6500 ms (window [6200, 6550] < 6600 ms = 1.1 * 6000), excluding 10% off on both sides. Reference search 2026-11-24: see trigger."
+    },
+    {
+      "spell": 704869,
+      "name": "Hand of N'Zoth (Hammer of Twilight refreshes a charge of Blade of the Empire)",
+      "kind": "metric_delta",
+      "variant": "hammer",
+      "label_suffix": "hammer",
+      "quote": "Your Hammer of Twilight, Entropic Slam, and Gaze of C'Thun now refreshes a charge of Blade of the Empire.",
+      "trigger_spell": 806830,
+      "gate_spell": 704869,
+      "target": "dummy",
+      "learn": [
+        502122
+      ],
+      "setup_casts": [
+        502122,
+        502122,
+        502122
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 4,
+      "expected": 9,
+      "expected_gain": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 18500,
+      "observe_source": "AscensionCultistAbilities.cpp:147-148: casting Hammer of Twilight (Named 805116, rank 806830, requires 40 Insanity generated by the 3 Blade of the Empire casts at +20 each = 60) with Hand of N'Zoth 704869 calls RestoreBlade(player) -> RestoreSpellCharge(502122). Blade of the Empire 502122 has SpellChargesCategory 52: 3 charges, 6000 ms recharge (SpellCharges.dbc). Three setup casts drain all 3 charges at t=0, 1600, 3200 ms; Hammer fires at t=4800 ms; charge 1 naturally recharges at t=6000 ms; two follow-up 502122 casts at t=6400 and t=8000 ms (< 12000 ms 2nd natural recharge) yield 4 damaging hits in control (5th refused for 0 charges) and 5 damaging hits after a real learn of 704869 (cumulative 9, gain 5). expire_ms 18500 ms lets all 3 charges recharge before phase 2. Reference search 2026-11-24: coa-history spell 704869: 0 events (passive; 502122: 8145 casts in 14 logs, 806830: 2079 casts in 12 logs); coabuildhub spells_master_index.json 704869 matches verbatim."
+    },
+    {
+      "spell": 704869,
+      "name": "Hand of N'Zoth (Entropic Slam refreshes a charge of Blade of the Empire)",
+      "kind": "metric_delta",
+      "variant": "slam",
+      "label_suffix": "slam",
+      "quote": "Your Hammer of Twilight, Entropic Slam, and Gaze of C'Thun now refreshes a charge of Blade of the Empire.",
+      "trigger_spell": 572846,
+      "gate_spell": 704869,
+      "target": "dummy",
+      "learn": [
+        502122
+      ],
+      "setup_casts": [
+        502122,
+        502122,
+        502122
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 4,
+      "expected": 9,
+      "expected_gain": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 18500,
+      "observe_source": "AscensionCultistAbilities.cpp:147-148: casting Entropic Slam (Named 804152, rank 572846, requires 60 Insanity generated by the 3 Blade of the Empire casts at +20 each = 60) with Hand of N'Zoth 704869 calls RestoreBlade(player). Same 3-setup + trigger + 2-followup timing as hammer variant: 4 hits in control (before 704869) and 5 hits after a real learn of 704869 (cumulative 9, gain 5). Reference search 2026-11-24: coa-history 572846: 1018 casts in 12 logs; see hammer."
+    },
+    {
+      "spell": 704869,
+      "name": "Hand of N'Zoth (Gaze of C'Thun refreshes a charge of Blade of the Empire)",
+      "kind": "metric_delta",
+      "variant": "gaze",
+      "label_suffix": "gaze",
+      "quote": "Your Hammer of Twilight, Entropic Slam, and Gaze of C'Thun now refreshes a charge of Blade of the Empire.",
+      "trigger_spell": 502141,
+      "gate_spell": 704869,
+      "target": "dummy",
+      "learn": [
+        502122
+      ],
+      "setup_casts": [
+        502122,
+        502122,
+        502122
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 4,
+      "expected": 9,
+      "expected_gain": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 18500,
+      "observe_source": "AscensionCultistAbilities.cpp:126-127: casting Gaze of C'Thun (Named 500110, rank 502141) with Hand of N'Zoth 704869 calls RestoreBlade(player). Same 3-setup + trigger + 2-followup timing as hammer variant: 4 hits in control (before 704869) and 5 hits after a real learn of 704869 (cumulative 9, gain 5). Reference search 2026-11-24: coa-history 500110: 4 casts in 2 logs; see hammer."
+    },
+    {
+      "spell": 301180,
+      "name": "Twilight's Call (Hammer of Twilight crit refunds 10 Insanity)",
+      "kind": "metric_delta",
+      "variant": "crit",
+      "label_suffix": "crit",
+      "quote": "Critical strikes with Hammer of Twilight now refund 10 Insanity.",
+      "trigger_spell": 806830,
+      "gate_spell": 301180,
+      "target": "dummy",
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "301180 Effect[0] aura 42 PROC_TRIGGER_SPELL 804210 (Effect[0] 175 MiscValue 10 on Insanity 500706; AscensionClassContracts19To25Data.h:89-91 ResourceEvent::EachCriticalDamagingHit on Hammer of Twilight 805116/806830). Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89). Precondition fixtures in both phases: Insanity 500706 at 40 stacks + CasterAuraSpell 680602, force_crit melee. Control (before 301180 learned): 0 Insanity remains. Treatment (after real learn of 301180): 10 Insanity refunded. Reference search 2026-11-24: coa-history spell 301180: 0 events (passive; 806830: 2048 hits / 787 crits in 12 logs); coabuildhub spells_master_index.json 301180 says 'refund 20 Insanity' (older snapshot state; installed Spell.dbc says 10 Insanity and governs per guide section 4)."
+    },
+    {
+      "spell": 301180,
+      "name": "Twilight's Call (Hammer of Twilight non-crit refunds 0 Insanity)",
+      "kind": "metric_delta",
+      "variant": "noncrit",
+      "label_suffix": "noncrit",
+      "quote": "Critical strikes with Hammer of Twilight now refund 10 Insanity.",
+      "trigger_spell": 806830,
+      "gate_spell": 301180,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          705109,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          705109,
+          0,
+          -100
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative condition control for Twilight's Call 301180 ('Critical strikes'): Hammer of Twilight 806830 cast with Cruelty 705109 at -100 crit (precondition fixture preventing crit) leaves 0 Insanity both before and after learning 301180. Reference search 2026-11-24: see crit."
+    },
+    {
+      "spell": 680377,
+      "name": "God Blade (Rift guarantees next Hammer of Twilight to crit)",
+      "kind": "metric_delta",
+      "variant": "crit_guarantee",
+      "label_suffix": "crit_guarantee",
+      "quote": "Your Rift now guarantees your next Hammer of Twilight to critically strike.",
+      "trigger_spell": 806830,
+      "gate_spell": 680377,
+      "target": "dummy",
+      "learn": [
+        806250
+      ],
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          705109,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          705109,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806830,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "AscensionCultistAbilities.cpp:19,28,100-101: Rift 806250 is in selected[] for Hammer of Twilight (Named 805116, rank 806830), and OnSpellCritChance sets chance = 100 when spell->GetScriptValue(806250) && player->HasAura(680377). Both phases set Cruelty 705109 at -100 crit (precondition fixture eliminating natural melee crits) and 40 Insanity + 680602, cast Rift 806250 for real, then cast Hammer of Twilight 806830 at the dummy: critical hits of 806830 read 0 before 680377 is learned (control) and 1 after a real learn of 680377. Reference search 2026-11-24: coa-history spell 680377: 0 events (passive; 806250: 343 applied in 14 logs, 806830: 2048 hits / 787 crits in 12 logs); coabuildhub spells_master_index.json 680377 matches verbatim."
+    },
+    {
+      "spell": 680377,
+      "name": "God Blade (only the next Hammer crits; second Hammer does not)",
+      "kind": "metric_delta",
+      "variant": "second_hammer",
+      "label_suffix": "second_hammer",
+      "quote": "Your Rift now guarantees your next Hammer of Twilight to critically strike.",
+      "trigger_spell": 806830,
+      "gate_spell": 680377,
+      "target": "dummy",
+      "learn": [
+        806250
+      ],
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          705109,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          705109,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 806830,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806830,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Consumption control for God Blade 680377 ('your next Hammer of Twilight'): with 80 Insanity (two Hammers at 40 each) and Cruelty 705109 at -100 crit, casting Rift 806250 then two Hammers 806830 produces 0 crits before 680377 and exactly 1 crit (not 2) after learning 680377, proving Finish() consumes Rift on the first Hammer. Reference search 2026-11-24: see crit_guarantee."
     }
   ],
   "player_observations": [],

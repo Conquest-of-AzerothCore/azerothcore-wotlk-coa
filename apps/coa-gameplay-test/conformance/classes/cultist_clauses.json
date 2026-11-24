@@ -10,7 +10,8 @@
     "spell": 92129,
     "clause": "Your Gaze of C'Thun now gains an additional ${$m1+0} base damage and healing.",
     "labels": [
-      "92129 effect_value e0 #0"
+      "92129 behaviour_metric_delta damage",
+      "92129 behaviour_metric_delta healing"
     ],
     "kind": "claim"
   },
@@ -130,7 +131,8 @@
     "spell": 300264,
     "clause": "While Black Blood is active on an ally, healing done to them by your Gaze of C'Thun has a $s1% increased chance to critically strike.",
     "labels": [
-      "300264 effect_value e0 #0"
+      "300264 behaviour_metric_delta with_black_blood",
+      "300264 behaviour_metric_delta without_black_blood"
     ],
     "kind": "claim"
   },
@@ -314,7 +316,10 @@
   {
     "spell": 300296,
     "clause": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
-    "labels": [],
+    "labels": [
+      "300296 behaviour_metric_delta trigger",
+      "300296 behaviour_metric_delta no_presence"
+    ],
     "kind": "claim"
   },
   {
@@ -325,16 +330,17 @@
       {
         "claim": "Increases your haste by $s1%",
         "labels": [
-          "300296 effect_value 803340e0 #0"
+          "300296 behaviour_metric_delta melee_haste"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "300296 spell_duration 803340 #1"
+          "300296 behaviour_metric_delta duration"
         ]
       }
-    ]
+    ],
+    "labels": []
   },
   {
     "spell": 300298,
@@ -603,7 +609,10 @@
   {
     "spell": 301180,
     "clause": "Critical strikes with Hammer of Twilight now refund 10 Insanity.",
-    "labels": [],
+    "labels": [
+      "301180 behaviour_metric_delta crit",
+      "301180 behaviour_metric_delta noncrit"
+    ],
     "kind": "claim"
   },
   {
@@ -2032,7 +2041,10 @@
   {
     "spell": 680377,
     "clause": "Your Rift now guarantees your next Hammer of Twilight to critically strike.",
-    "labels": [],
+    "labels": [
+      "680377 behaviour_metric_delta crit_guarantee",
+      "680377 behaviour_metric_delta second_hammer"
+    ],
     "kind": "claim"
   },
   {
@@ -2583,7 +2595,11 @@
   {
     "spell": 704869,
     "clause": "Your Hammer of Twilight, Entropic Slam, and Gaze of C'Thun now refreshes a charge of Blade of the Empire.",
-    "labels": [],
+    "labels": [
+      "704869 behaviour_metric_delta hammer",
+      "704869 behaviour_metric_delta slam",
+      "704869 behaviour_metric_delta gaze"
+    ],
     "kind": "claim"
   },
   {
@@ -2982,7 +2998,9 @@
   {
     "spell": 707604,
     "clause": "Your Gaze of C'Thun now strikes 1 additional nearby enemy.",
-    "labels": [],
+    "labels": [
+      "707604 behaviour_metric_delta extra_target"
+    ],
     "kind": "claim"
   },
   {
@@ -3005,7 +3023,7 @@
     "spell": 707748,
     "clause": "Your Gaze of C'Thun now strikes $s1 additional nearby enemies.",
     "labels": [
-      "707748 effect_value e0 #0"
+      "707748 behaviour_metric_delta extra_target"
     ],
     "kind": "claim"
   },
@@ -3935,7 +3953,9 @@
   {
     "spell": 807512,
     "clause": "Your Gaze of C'Thun now generates 10 Insanity.",
-    "labels": [],
+    "labels": [
+      "807512 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
