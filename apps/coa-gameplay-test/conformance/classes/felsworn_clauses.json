@@ -493,7 +493,7 @@
       {
         "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
         "labels": [],
-        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which alerts (fourth_cast); the clause is judged by the three exact-word claims below (D-22, review I-1)."
+        "reason": "The words repeat the whole clause and overlap 'Your next 3 Fel Fireballs', which fourth_cast, third_cast, other_spell and duration_left judge (Felsworn ADR 0021); the clause is judged by the three exact-word claims below (D-22, review I-1)."
       },
       {
         "claim": "Your next 3 Fel Fireballs",

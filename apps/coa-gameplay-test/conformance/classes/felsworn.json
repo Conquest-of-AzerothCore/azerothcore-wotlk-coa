@@ -20612,13 +20612,13 @@
       "aura": 806104,
       "expected_ms": 8000,
       "control_window_ms": 500,
-      "window_ms": 10000,
+      "window_ms": 31000,
       "poll_ms": 50,
       "caster": true,
       "feed": {
         "every_ms": 3200
       },
-      "observe_source": "Expected 8000 ms: Spell.dbc 806104 DurationIndex 31, SpellDuration.dbc 31 = 8000 ms (the $806104d of the clause). 806104 is cast on the caster by the 300490 handler (AscensionFelswornEvents.cpp:205-207) after a periodic damage tick rolled Chance() on the raw ProcChance 15 (AscensionFelsworn.cpp:231-239), which no spell modifier forces, so the aura is earned for real: Bane of Chaos 704368 (periodic damage every 3000 ms) is recast every 3200 ms until 806104 is on the caster (feed, Felsworn ADR 0003), at most 47 casts (0.05% residual failure per arm, ceil(ln 0.0005 / ln 0.85)); the control arm runs the same loop with 300490 unlearned and alerts on any application. The expiry is bracketed in game time from the last application and must lie within 5% of 8000 ms (excludes a duration 10% off on both sides). Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
+      "observe_source": "Expected 8000 ms: Spell.dbc 806104 DurationIndex 31, SpellDuration.dbc 31 = 8000 ms (the $806104d of the clause). 806104 is cast on the caster by the 300490 handler (AscensionFelswornEvents.cpp:205-207) after a periodic damage tick rolled Chance() on the raw ProcChance 15 (AscensionFelsworn.cpp:231-239), which no spell modifier forces, so the aura is earned for real: Bane of Chaos 704368 (periodic damage every 3000 ms) is recast every 3200 ms until 806104 is on the caster (feed, Felsworn ADR 0003), at most 47 casts (0.05% residual failure per arm, ceil(ln 0.0005 / ln 0.85)); the control arm runs the same loop with 300490 unlearned and alerts on any application. The expiry is bracketed in game time from the last application and must lie within 5% of 8000 ms (excludes a duration 10% off on both sides). Re-grants after the stop: Bane of Chaos 704368 stays on the dummy for 21000 ms (Spell.dbc DurationIndex 86, SpellDuration.dbc) and its periodic ticks keep rolling 300490, so a later tick can grant 806104 again; the bracket is timed from the last application (a count rise), and the 31000 ms window outlasts the last possible tick (at most 21000 ms after the last feed cast, which precedes the stop) plus the 8000 ms duration (about 29000 ms), so the aura is gone inside the window whatever the re-grants. Residual failure probability per arm: the feed cap only, 0.05%; no re-grant can still be on at the window end. Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc."
     },
     {
       "spell": 681376,
