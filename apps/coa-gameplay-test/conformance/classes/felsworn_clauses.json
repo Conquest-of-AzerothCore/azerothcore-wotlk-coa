@@ -4392,8 +4392,7 @@
     "spell": 805245,
     "clause": "While Demonic Will or Hateforged Barrier are active, all damage taken or avoided now has a $h% chance to generate 1 Felfury.",
     "labels": [
-      "805245 effect_value #0",
-      "805245 proc_rate avoided"
+      "805245 effect_value #0"
     ],
     "kind": "claim",
     "tool_gap": {
