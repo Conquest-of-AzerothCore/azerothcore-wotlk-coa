@@ -18271,10 +18271,10 @@
       "fields": {
         "spell": 520832
       },
-      "before_expected": 2,
-      "expected": 3,
+      "before_expected": 3,
+      "expected": 7,
       "tolerance": 0,
-      "wait_ms": 500,
+      "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "area_dummies": [
@@ -18310,19 +18310,13 @@
         ],
         [
           520832,
-          2,
+          3,
           "dummy",
           "caster"
         ]
       ],
-      "observe_source": "520832 StackAmount 3 ($u), DurationIndex 32 = 6000 ms. Two real Felwrath casts (the trigger and one setup cast 1800 ms apart) each strike five enemies with Inner Demon (AscensionFelswornAbilities.cpp:361-373) and add a stack of 520832 on the dummy; 2 stacks are a precondition fixture (harness set_aura), so the second real cast would make 4 without a cap and reads 3. Felfury x6 (two casts cost 4), 803468, 804216 and 823764 are fixtures as in inner_five. The control phase makes no cast and reads the fixture (2). Reference search 2026-11-24: nothing found beyond the tooltip.",
-      "setup_casts": [
-        520693
-      ],
-      "setup_wait_ms": 1800,
-      "refill_power_after_setup_casts": {
-        "power": 3
-      }
+      "observe_source": "520832 StackAmount 3 ($u), DurationIndex 32 = 6000 ms. One real Felwrath cast with Inner Demon strikes five enemies (the dummy and four area dummies at 4 to 7 yd) and applies 520832 to each (AscensionFelswornAbilities.cpp:361-373; inner_five proves one stack on a clean dummy). The dummy holds 3 stacks as a precondition fixture (harness set_aura), the stack count read is the sum over the dummy and the four area dummies (area_sum): 3 before the cast; after it 3 on the capped dummy plus 1 on each of the four others is 7, where an uncapped dummy would read 4 and the sum 8. A cast that applied nothing reads 3. Felfury x6, 803468, 804216 and 823764 are fixtures as in inner_five. Reference search 2026-11-24: nothing found beyond the tooltip.",
+      "area_sum": true
     },
     {
       "spell": 681376,
@@ -18349,7 +18343,7 @@
       ],
       "setup_wait_ms": 3000,
       "wait_ms": 500,
-      "expire_ms": 500,
+      "expire_ms": 14000,
       "area_dummies": [
         4.0,
         5.0,
