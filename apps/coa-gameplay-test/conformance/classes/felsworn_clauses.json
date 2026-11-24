@@ -3333,9 +3333,7 @@
     "spell": 501298,
     "clause": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
     "labels": [
-      "501298 spell_duration 805748 #1",
-      "501298 behaviour_metric_delta inner_dot_held",
-      "501298 behaviour_metric_delta inner_dot_gone"
+      "501298 spell_duration 805748 #1"
     ],
     "kind": "claim"
   },

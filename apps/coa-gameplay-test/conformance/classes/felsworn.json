@@ -18196,108 +18196,6 @@
       "label_suffix": "duration_gone"
     },
     {
-      "spell": 501298,
-      "name": "Ruin (Inner Demon DoT present at 5500 ms)",
-      "kind": "metric_delta",
-      "variant": "inner_dot_held",
-      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
-      "trigger_spell": 501298,
-      "target": "dummy",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "metric": "aura",
-      "fields": {
-        "spell": 805748,
-        "caster": "caster"
-      },
-      "measure_actor": "dummy",
-      "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0,
-      "wait_ms": 5500,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          5450,
-          5550
-        ]
-      },
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          800058,
-          6,
-          "caster",
-          "caster"
-        ],
-        [
-          803468,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          804216,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "805748 DurationIndex 27 = 3000 ms (SpellDuration.dbc row 27; the $805748d of the clause), Effect[0] aura 3 PERIODIC_DAMAGE every 1000 ms. The DoT is copied onto the target by the Ruin hit while Inner Demon 804216 is up (AscensionFelswornAbilities.cpp:361-362, 30% of the damage). It starts when the 2500 ms cast (CastingTimeIndex 19) lands, so the reads at 5500 and 5750 ms after the cast start are 3000 ms minus the travel after the cast, and 3250 ms; present at 5500 excludes 2700 ms, gone at 5750 excludes 3300 ms for an application within 200 ms after the cast. Felfury and Inner Demon are precondition fixtures; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 805748 and 501298; bindmysoul: nothing beyond the tooltip.",
-      "label_suffix": "inner_dot_held"
-    },
-    {
-      "spell": 501298,
-      "name": "Ruin (Inner Demon DoT gone at 5750 ms)",
-      "kind": "metric_delta",
-      "variant": "inner_dot_gone",
-      "quote": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
-      "trigger_spell": 501298,
-      "target": "dummy",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "metric": "aura",
-      "fields": {
-        "spell": 805748,
-        "caster": "caster"
-      },
-      "measure_actor": "dummy",
-      "before_expected": 0,
-      "expected": 0,
-      "tolerance": 0,
-      "wait_ms": 5750,
-      "expire_ms": 500,
-      "game_time": {
-        "after": [
-          5700,
-          5800
-        ]
-      },
-      "void_on_cast_failure": true,
-      "phase_auras": [
-        [
-          800058,
-          6,
-          "caster",
-          "caster"
-        ],
-        [
-          803468,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          804216,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "805748 DurationIndex 27 = 3000 ms (SpellDuration.dbc row 27; the $805748d of the clause), Effect[0] aura 3 PERIODIC_DAMAGE every 1000 ms. The DoT is copied onto the target by the Ruin hit while Inner Demon 804216 is up (AscensionFelswornAbilities.cpp:361-362, 30% of the damage). It starts when the 2500 ms cast (CastingTimeIndex 19) lands, so the reads at 5500 and 5750 ms after the cast start are 3000 ms minus the travel after the cast, and 3250 ms; present at 5500 excludes 2700 ms, gone at 5750 excludes 3300 ms for an application within 200 ms after the cast. Felfury and Inner Demon are precondition fixtures; the control phase makes no cast (0). Reference search 2026-11-24: coa-history spell 805748 and 501298; bindmysoul: nothing beyond the tooltip.",
-      "label_suffix": "inner_dot_gone"
-    },
-    {
       "spell": 806109,
       "name": "Illidan's Guile (dash aura 806128 present at 12700 ms)",
       "kind": "metric_delta",
@@ -18365,8 +18263,8 @@
       "hit_spell": 555739,
       "expected_ms": 1000,
       "window": [
-        1300,
-        4700
+        1,
+        4800
       ],
       "fixtures": [],
       "poll_ms": 25,
@@ -18383,8 +18281,8 @@
       "hit_spell": 808303,
       "expected_ms": 500,
       "window": [
-        300,
-        2800
+        1,
+        3200
       ],
       "fixtures": [
         [
@@ -18446,7 +18344,7 @@
       "before_expected": 2,
       "expected": 3,
       "tolerance": 0,
-      "wait_ms": 3500,
+      "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "area_dummies": [
@@ -18491,7 +18389,7 @@
       "setup_casts": [
         520693
       ],
-      "setup_wait_ms": 1800
+      "setup_wait_ms": 1100
     },
     {
       "spell": 681376,
@@ -18514,9 +18412,10 @@
       "setup_casts": [
         555738,
         555738,
+        555738,
         555738
       ],
-      "setup_wait_ms": 5100,
+      "setup_wait_ms": 3000,
       "wait_ms": 500,
       "expire_ms": 500,
       "area_dummies": [
@@ -18536,7 +18435,7 @@
         "trials": 4,
         "source": "572782 StackAmount 3, DurationIndex 31 = 8000 ms"
       },
-      "observe_source": "572782 StackAmount 3 ($u), DurationIndex 31 = 8000 ms. Chaotic 681376 (AscensionFelswornEvents.cpp:56-57,148-149) rolls Chance() on the raw ProcChance 8 once per outgoing non-derived damage event and casts 572782 on the caster; no spell modifier forces it, so the stacks are earned: four real casts of Fury Unleashed 555738 (a 5000 ms aura striking every 1000 ms up to 8 enemies, 8 dummies within its radius, 40 events a cast, 160 in all, 5100 ms apart) feed 4 trials (stack_feed); a trial is valid with at least 4 counted applications and a span below 8000 ms, and passes at exactly 3 stacks. Residual per pair: P(fewer than 4 applications in 160 events) is below 1e-5 and the void rate sizes the rest as v^4. Reference search 2026-11-24: coa-history spell 572782 and 681376: nothing found that decides the cap.",
+      "observe_source": "572782 StackAmount 3 ($u), DurationIndex 31 = 8000 ms. Chaotic 681376 (AscensionFelswornEvents.cpp:56-57,148-149) rolls Chance() on the raw ProcChance 8 once per outgoing non-derived damage event and casts 572782 on the caster; no spell modifier forces it, so the stacks are earned: five real casts of Fury Unleashed 555738 3000 ms apart (a 5000 ms aura striking every 1000 ms up to 8 enemies, 8 dummies within its radius, 40 events a cast, 120 in all) feed 4 trials (stack_feed); a trial is valid with at least 4 counted applications and a span below 8000 ms, and passes at exactly 3 stacks. Residual per pair: P(fewer than 4 applications in 120 events) is about 1.5% per trial, voided, never a fail; the pair's residual is v^4 (about 5e-8) and the void rate sizes the rest as v^4. Reference search 2026-11-24: coa-history spell 572782 and 681376: nothing found that decides the cap.",
       "label_suffix": "stack_cap"
     },
     {
