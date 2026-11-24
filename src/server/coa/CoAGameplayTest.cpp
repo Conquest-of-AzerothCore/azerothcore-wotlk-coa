@@ -8248,8 +8248,11 @@ private:
             WorldPacket packet(CMSG_REPOP_REQUEST, 1);
             packet << uint8(0);
             player->GetSession()->HandleRepopRequestOpcode(packet);
-            Require(player->IsAlive() || player->HasPlayerFlag(PLAYER_FLAGS_GHOST),
-                "Native release request left the body unreleased");
+            if (step.get<bool>("refused", false))
+                Require(!player->IsAlive() && !player->HasPlayerFlag(PLAYER_FLAGS_GHOST), "Release was not refused");
+            else
+                Require(player->IsAlive() || player->HasPlayerFlag(PLAYER_FLAGS_GHOST),
+                    "Native release request left the body unreleased");
         }
         else if (action == "command")
         {

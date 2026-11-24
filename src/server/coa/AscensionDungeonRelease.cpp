@@ -1,6 +1,8 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionDungeonRelease.h"
+#include "Chat.h"
+#include "DataMap.h"
 #include "DBCStores.h"
 #include "Group.h"
 #include "InstanceScript.h"
@@ -19,8 +21,38 @@ namespace
 constexpr char const* PENDING_DUNGEON_RELEASE = "ascension_dungeon_release";
 constexpr float RELEASE_RESTORE_PERCENT = 0.5f;
 constexpr uint32 SPELL_CORPSE_RUNNER = 84015;
+constexpr char const* RAID_RELEASE_HOLD = "ascension_raid_release_hold";
+constexpr char const* RAID_RELEASE_REFUSED = "You cannot release your spirit during a boss fight.";
 
 struct PendingDungeonRelease : DataMap::Base { };
+
+struct RaidReleaseHold : DataMap::Base
+{
+    std::unordered_map<ObjectGuid, std::vector<uint32>> held;
+};
+
+bool InRaidFight(Map* map)
+{
+    if (!map->IsRaid())
+        return false;
+    InstanceMap* instanceMap = map->ToInstanceMap();
+    InstanceScript* instance = instanceMap ? instanceMap->GetInstanceScript() : nullptr;
+    return instance && instance->IsEncounterInProgress();
+}
+
+void Hold(Player* player)
+{
+    RaidReleaseHold* hold = player->GetMap()->CustomData.GetDefault<RaidReleaseHold>(RAID_RELEASE_HOLD);
+    if (hold->held.count(player->GetGUID()))
+        return;
+
+    std::vector<uint32> fighting;
+    InstanceScript* instance = player->GetMap()->ToInstanceMap()->GetInstanceScript();
+    for (uint32 bossId = 0; bossId < instance->GetEncounterCount(); ++bossId)
+        if (instance->GetBossState(bossId) == IN_PROGRESS)
+            fighting.push_back(bossId);
+    hold->held.emplace(player->GetGUID(), std::move(fighting));
+}
 
 std::mutex g_runStartsLock;
 std::unordered_map<uint32, std::pair<uint32, Position>> g_runStarts;
@@ -122,7 +154,24 @@ class ascension_dungeon_release_player : public PlayerScript
 public:
     ascension_dungeon_release_player()
         : PlayerScript("ascension_dungeon_release_player",
-            {PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_ON_PLAYER_ENTER_COMBAT}) { }
+            {PLAYERHOOK_ON_PLAYER_RELEASED_GHOST, PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD, PLAYERHOOK_ON_PLAYER_ENTER_COMBAT,
+                PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_CAN_RELEASE_SPIRIT}) { }
+
+    bool OnPlayerCanReleaseSpirit(Player* player) override
+    {
+        if (!InRaidFight(player->GetMap()))
+            return true;
+
+        Hold(player);
+        ChatHandler(player->GetSession()).SendNotification(RAID_RELEASE_REFUSED);
+        return false;
+    }
+
+    void OnPlayerJustDied(Player* player) override
+    {
+        if (InRaidFight(player->GetMap()))
+            Hold(player);
+    }
 
     void OnPlayerReleasedGhost(Player* player) override
     {

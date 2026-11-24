@@ -349,7 +349,7 @@ ACTIONS = {
     'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
     'die': ({'actor'}, {'actor', 'revived', 'pet'}),
-    'release_spirit': ({'actor'}, {'actor'}),
+    'release_spirit': ({'actor'}, {'actor', 'refused'}),
     'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination', 'destination_unit'}),
     'gossip_hello': ({'actor'}, {'actor', 'target', 'entry'}),
     'banker_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
