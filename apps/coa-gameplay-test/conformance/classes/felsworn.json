@@ -5094,11 +5094,11 @@
         "power": 3
       },
       "before_expected": 125,
-      "expected": 137.5,
-      "tolerance": 1,
+      "expected": 137,
+      "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 10500,
-      "observe_source": "$s1 = 50: 804609 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 49 (+50%), class mask word 2 0x40 of family 20 = Skull of Gul'dan 800225. Skull Effect[1] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 3, Energy), EffectBasePoints 24 (+25%, $s1 of the Skull tooltip), DurationIndex 1 = 10000 ms. Maximum Energy is 100 on the reference character (the Templar Spiritual entry reads the same 100), so the Skull alone gives 125 (control: 804609 not learned, a real Skull cast) and, +50% effective, the aura amount 25 x 1.5 = 37.5 gives 137.5, judged to 1 point for the integer amount (137 or 138): a +45% or +55% effectiveness would read 136.25 or 138.75, outside the tolerance 1 on 137.5. The first Skull ends (expire_ms 10500 > 10000 ms) before the second cast under the learned modifier, as the Necromancer Plague Protection 570046 entry does for Wards. Reference search 2026-11-23: coa-history spell 804609: 0 events in 186 logs (passive); spell 800225: SPELL_AURA_APPLIED 16 events in 4 logs (no figure); bindmysoul talents snapshot (fetched 2026-07-22): Gul'dan's Gift 804609 'Increases the effectiveness of your Skull of Gul'dan by 50%, but its cooldown is increased by 30 sec.'; nothing else found."
+      "observe_source": "$s1 = 50: 804609 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), EffectBasePoints 49 (+50%), class mask word 2 0x40 of family 20 = Skull of Gul'dan 800225. Skull Effect[1] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT (MiscValue 3, Energy), EffectBasePoints 24 (+25%, $s1 of the Skull tooltip), DurationIndex 1 = 10000 ms. Maximum Energy is 100 on the reference character (the Templar Spiritual entry reads the same 100), so the Skull alone gives 125 (control: 804609 not learned, a real Skull cast) and, +50% effective, the modded aura amount 25 x 1.5 = 37.5 is stored as int32 (37), so the maximum Energy is 137, judged to the integer (tolerance 0): a +55% effectiveness stores int32(38.75) = 38 and reads 138, a +45% one stores int32(36.25) = 36 and reads 136, both alert. The first Skull ends (expire_ms 10500 > 10000 ms) before the second cast under the learned modifier, as the Necromancer Plague Protection 570046 entry does for Wards. Reference search 2026-11-23: coa-history spell 804609: 0 events in 186 logs (passive); spell 800225: SPELL_AURA_APPLIED 16 events in 4 logs (no figure); bindmysoul talents snapshot (fetched 2026-07-22): Gul'dan's Gift 804609 'Increases the effectiveness of your Skull of Gul'dan by 50%, but its cooldown is increased by 30 sec.'; nothing else found."
     },
     {
       "spell": 707513,
@@ -17376,7 +17376,7 @@
     },
     {
       "spell": 807438,
-      "name": "Evolving Hellfire (Inner Demon present at 5440 ms)",
+      "name": "Evolving Hellfire (Inner Demon present at 5460 ms)",
       "kind": "metric_delta",
       "variant": "inner_demon_held",
       "label_suffix": "inner_demon_held",
@@ -17400,15 +17400,15 @@
       "before_expected": 0,
       "expected": 1,
       "tolerance": 0,
-      "wait_ms": 5440,
+      "wait_ms": 5460,
       "expire_ms": 10500,
       "game_time": {
         "after": [
-          5430,
-          5465
+          5455,
+          5475
         ]
       },
-      "observe_source": "807438 is a scripted passive (AscensionFelsworn.cpp:208-209: each Felfury generated extends Inner Demon 804216 by 500 ms). Inner Demon is applied by harness set_aura as a precondition fixture in both phases; its duration at application is 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:72-73), and the fixture holds no Felfury, so 5000 ms (the 4885 ms read 100 ms after the cast of the aura_duration_ms entry). A real Twin Slice 801901 (states 'Generates 1 Felfury') is cast at the dummy. The aura is read in game time: the control phase (807438 not learned) lasts 5000 ms and is gone at both reads; the learned phase lasts 5500 ms. Present at 5430 ms or later excludes an extension under 430 ms, absent by 5530 ms excludes one over 530 ms: a duration 10% off (450 or 550 ms) is outside the pair. Reference search 2026-11-24: coa-history spell 807438: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul snapshot: tooltip words only; nothing else found."
+      "observe_source": "807438 is a scripted passive (AscensionFelsworn.cpp:208-209: each Felfury generated extends Inner Demon 804216 by 500 ms). Inner Demon is applied by harness set_aura as a precondition fixture in both phases; its duration at application is 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:72-73), and the fixture holds no Felfury, so 5000 ms (the 4885 ms read 100 ms after the cast of the aura_duration_ms entry). A real Twin Slice 801901 (states 'Generates 1 Felfury') is cast at the dummy. The aura is read in game time: the control phase (807438 not learned) lasts 5000 ms and is gone at both reads; the learned phase lasts 5500 ms. The fixture is set about 15 ms before the cast (4885 ms left 100 ms after it), so the aura ends near 5485 ms after the cast with 500 ms and near 5435 ms with 450 ms (10% short) or 5535 ms with 550 ms (10% long). Present in a read from 5455 to 5475 ms excludes an extension of 450 ms or less (gone by 5435); absent in a read from 5505 to 5530 ms excludes 550 ms (present until 5535). Reference search 2026-11-24: coa-history spell 807438: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul snapshot: tooltip words only; nothing else found."
     },
     {
       "spell": 807438,
@@ -17444,7 +17444,7 @@
           5530
         ]
       },
-      "observe_source": "807438 is a scripted passive (AscensionFelsworn.cpp:208-209: each Felfury generated extends Inner Demon 804216 by 500 ms). Inner Demon is applied by harness set_aura as a precondition fixture in both phases; its duration at application is 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:72-73), and the fixture holds no Felfury, so 5000 ms (the 4885 ms read 100 ms after the cast of the aura_duration_ms entry). A real Twin Slice 801901 (states 'Generates 1 Felfury') is cast at the dummy. The aura is read in game time: the control phase (807438 not learned) lasts 5000 ms and is gone at both reads; the learned phase lasts 5500 ms. Present at 5430 ms or later excludes an extension under 430 ms, absent by 5530 ms excludes one over 530 ms: a duration 10% off (450 or 550 ms) is outside the pair. Reference search 2026-11-24: coa-history spell 807438: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul snapshot: tooltip words only; nothing else found."
+      "observe_source": "807438 is a scripted passive (AscensionFelsworn.cpp:208-209: each Felfury generated extends Inner Demon 804216 by 500 ms). Inner Demon is applied by harness set_aura as a precondition fixture in both phases; its duration at application is 5000 ms x max(1, Felfury stacks) (AscensionFelswornAbilities.cpp:72-73), and the fixture holds no Felfury, so 5000 ms (the 4885 ms read 100 ms after the cast of the aura_duration_ms entry). A real Twin Slice 801901 (states 'Generates 1 Felfury') is cast at the dummy. The aura is read in game time: the control phase (807438 not learned) lasts 5000 ms and is gone at both reads; the learned phase lasts 5500 ms. The fixture is set about 15 ms before the cast (4885 ms left 100 ms after it), so the aura ends near 5485 ms after the cast with 500 ms and near 5435 ms with 450 ms (10% short) or 5535 ms with 550 ms (10% long). Present in a read from 5455 to 5475 ms excludes an extension of 450 ms or less (gone by 5435); absent in a read from 5505 to 5530 ms excludes 550 ms (present until 5535). Reference search 2026-11-24: coa-history spell 807438: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul snapshot: tooltip words only; nothing else found."
     },
     {
       "spell": 807431,
@@ -17627,6 +17627,196 @@
         ]
       },
       "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a Felfury spender extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sargeron Smite 802060 (instant, a spender, one direct hit) is cast at the dummy with the strike forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 5925 ms after Carve 800206)",
+      "kind": "metric_delta",
+      "variant": "duration_carve_held",
+      "label_suffix": "duration_carve_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 800206,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5925,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5915,
+          5950
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244), one hand here (no off-hand weapon on the reference character); 803715 is a SpenderImpact id (AscensionFelsworn.cpp:71-74), so a critical strike extends Inner Demon. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 6050 ms after Carve 800206)",
+      "kind": "metric_delta",
+      "variant": "duration_carve_gone",
+      "label_suffix": "duration_carve_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 800206,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "melee",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6050,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          6040,
+          6075
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Carve 800206 (a 2500 ms channel, DurationIndex 66) casts 803715 (SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, a direct hit) once per weapon hand at each enemy within 8 yd when the channel ends (AscensionFelswornAuras.cpp:225-244), one hand here (no off-hand weapon on the reference character); 803715 is a SpenderImpact id (AscensionFelsworn.cpp:71-74), so a critical strike extends Inner Demon. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon present at 5925 ms after Sunder 705121)",
+      "kind": "metric_delta",
+      "variant": "duration_sunder_held",
+      "label_suffix": "duration_sunder_held",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 705121,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 5925,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          5915,
+          5950
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 3 yd in front of the caster, inside the first explosion only (distance 1 yd from its centre, 8 yd from the second), so one critical hit. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 5925 ms after the cast: present (5915 to 5950 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 961 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true,
+      "dummy_distance": 3
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (Inner Demon absent at 6050 ms after Sunder 705121)",
+      "kind": "metric_delta",
+      "variant": "duration_sunder_gone",
+      "label_suffix": "duration_sunder_gone",
+      "quote": "Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by $/1000;806236s1 sec",
+      "trigger_spell": 705121,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 804216
+      },
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6050,
+      "expire_ms": 10500,
+      "game_time": {
+        "after": [
+          6040,
+          6075
+        ]
+      },
+      "observe_source": "806235 is a scripted passive (AscensionFelswornEvents.cpp:65-66 and :166-167: a non-periodic critical hit of a SpenderImpact spell extends Inner Demon 804216 by $806236s1 = 1000 ms, BasePoints 999 + 1). Sunder 705121 schedules three explosions of 712399 (SPELL_EFFECT_SCHOOL_DAMAGE, a direct hit, a SpenderImpact id) 300 ms apart, centred 4, 11 and 18 yd in front of the caster (AscensionFelswornAbilities.cpp:429-458) with a 5 yd radius (EffectRadiusIndex 14, the 5 yd of the tooltip); the dummy is placed 3 yd in front of the caster, inside the first explosion only (distance 1 yd from its centre, 8 yd from the second), so one critical hit. The strike is forced critical. Inner Demon is set by harness set_aura on the caster before the Felfury fixtures in both phases (precondition fixture); its duration at application is 5000 ms x max(1, Felfury) (AscensionFelswornAbilities.cpp:72-73) = 5000 ms, so 5000 ms without the talent (control: 806235 not learned) and 6000 ms with one critical strike. The aura is read in game time 6050 ms after the cast: absent (6040 to 6075 ms): the pair of reads (present at 5925 ms, absent at 6050 ms) puts the extension between 923 and 1086 ms against the stated 1000 ms, excluding a value 10% off. Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event; positive control 804216 Inner Demon: found); bindmysoul talents snapshot: 'Direct critical strikes with Felfury spenders now extend the duration of Inner Demon by 1 sec' (same figure); nothing else found.",
+      "void_on_cast_failure": true,
+      "dummy_distance": 3
     },
     {
       "spell": 806235,
