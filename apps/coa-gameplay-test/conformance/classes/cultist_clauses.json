@@ -1541,14 +1541,10 @@
     "spell": 560002,
     "clause": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
     "labels": [
-      "560002 behaviour_metric_delta res_holy",
-      "560002 behaviour_metric_delta res_fire",
-      "560002 behaviour_metric_delta res_nature",
-      "560002 behaviour_metric_delta res_frost",
-      "560002 behaviour_metric_delta res_shadow",
-      "560002 behaviour_metric_delta res_arcane"
+      "560002 effect_value #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tool gap (uncounted): level-60 resistance +19 across all 6 magic schools (floor(5 + 0.5 * (60 - 31)), Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel = SpellLevel = 31, MaxLevel 0, SkillLineAbility 23039) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level arm (e.g. level 50 expecting floor(5 + 0.5 * (50 - 31)) = +14). No existing conformance kind/option sets a single caster level for a passive metric_delta resistance check: phase_caster_level requires two distinct levels per phase for cast buffs while Player::GiveLevel (Player.cpp:2623-2728 / StatSystem.cpp:344-369) does not recalculate already-applied passive aura amounts; hit_ratio.level only measures hits; shifted_control.caster_level only measures dummy spell_resist_chance. Because the amount and 'scaling with level' share one combined claim row, the claim stays uncounted until metric_delta supports a single caster_level option."
   },
   {
     "spell": 560080,
@@ -1698,9 +1694,12 @@
     "spell": 560526,
     "clause": "Does not stack with similar effects.",
     "labels": [
-      "560526 behaviour_group_stack_cap"
+      "560526 behaviour_metric_delta no_stack",
+      "560526 behaviour_metric_delta no_stack_aura",
+      "560526 behaviour_party_stat_ratio party_haste"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "promise_of": "Increases the spell haste of all party and raid members by $s1%."
   },
   {
     "spell": 560526,
@@ -3463,7 +3462,8 @@
     "labels": [
       "804633 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tool gap (uncounted, not a server defect): shipped Spell.dbc carries EffectBasePoints[0] = -21 (-20), but data/sql/updates/pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql overrides spell_dbc ID 804633 to EffectBasePoints_1 = 19, EffectDieSides_1 = 1 (+20% SPELL_AURA_MOD_DISPEL_RESIST, verified live in coa_test_00353e74d42a_world.spell_dbc), retracting cu-g1 Alert 3. Stays uncounted because no existing conformance kind measures offensive dispel resist rate on a caster's positive buff (taken_hit resist_rate and debuff_resist_rate test incoming debuff application resist, not dispel survival of a buff)."
   },
   {
     "spell": 804670,

@@ -1778,7 +1778,7 @@
       },
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "563123 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (all magic schools), BasePoints 49 + 1 = 50 ($s1; Spell.dbc). Native aura 163 semantics (Unit::SpellCriticalDamageBonus, Unit.cpp:10654-10663; Templar 705272 / Sun Cleric 300943 precedent): scales the whole critical hit by 1.50x. Forced spell crits of Horrorbolt 502182 with +20000 SP and 823764 in both arms; treatment learns 563123. Expected ratio 1.50. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 563123 matches (+50% crit damage, +30% Intellect as SP)."
+      "observe_source": "563123 Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 (all magic schools), BasePoints 49 + 1 = 50 ($s1; Spell.dbc). Native aura 163 semantics (Unit::SpellCriticalDamageBonus, Unit.cpp:10673, applied at Unit.cpp:10692-10701; Templar 705272 / Sun Cleric 300943 precedent): scales the whole critical hit by 1.50x. Forced spell crits of Horrorbolt 502182 with +20000 SP and 823764 in both arms; treatment learns 563123. Expected ratio 1.50. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 563123 matches (+50% crit damage, +30% Intellect as SP)."
     },
     {
       "spell": 563123,
@@ -2134,15 +2134,48 @@
     },
     {
       "spell": 560526,
-      "name": "Visions group stack cap",
-      "kind": "group_stack_cap",
+      "name": "Visions (does not stack with Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
       "quote": "Does not stack with similar effects.",
-      "effect": 0,
-      "partner": 560525,
-      "partner_effect": 0,
+      "trigger_spell": 60235,
+      "gate_spell": 560526,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
       "metric": "cast_speed_multiplier",
       "fields": {},
-      "observe_source": "spell_group 2000182 (stack_rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; rev_20260908_05_guardian_completion.sql) lists Visions 560526 and Fiery Passion 560525; both are Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + 1 = +3% (Spell.dbc). Combined cast_speed_multiplier stays at 1/1.03 = 0.970874, not 1/1.0609 = 0.942596. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+      "before_expected": 0.970874,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Visions 560526 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = +3% ($s1; Spell.dbc) and partner Fiery Passion 560525 Effect[0] 65, aura 216, BasePoints 2 + DieSides 1 = +3% (Spell.dbc); both are in spell_group 2000182 (stack_rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql:344-345,364). Unit::ApplyCastTimePercentMod (Unit.cpp:14991-14999) multiplies cast_speed_multiplier by 100 / (100 + pct): neither active = 1.0; one active or both capped = 1 / 1.03 = 0.970874; both stacked = 1 / (1.03 * 1.03) = 1 / 1.0609 = 0.942596 (additive stack 1 / 1.06 = 0.943396). Partner 560525 is learned up front (before_expected 0.970874 proves partner works alone, excluding 1.0), then Visions 560526 is learned between phases (expected 0.970874 proves capping, excluding both stacked 0.942596 and no-op 1.0; tolerance 0.0001 -> band [0.970774, 0.970974]). Paired with no_stack_aura (560526 aura 0 -> 1 alongside 560525) and party_haste (560526 alone 1.0 -> 0.970874). Replaces group_stack_cap which cannot set relation=inverse on cast_speed_multiplier without swings (behaviours.py:4014-4020). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
+    },
+    {
+      "spell": 560526,
+      "name": "Visions (aura present alongside Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack_aura",
+      "label_suffix": "no_stack_aura",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 560526,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 560526
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Companion to 560526 no_stack: with partner Fiery Passion 560525 (spell_group 2000182, +3% aura 216) already learned, Visions 560526 aura is absent before learning 560526 (0) and present on the caster after learning 560526 (1), proving both raid haste auras coexist while no_stack holds cast_speed_multiplier at 1 / 1.03 = 0.970874. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs."
     },
     {
       "spell": 560526,
