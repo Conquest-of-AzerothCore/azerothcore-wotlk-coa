@@ -25933,7 +25933,8 @@
       "learn": [
         804219
       ],
-      "observe_source": "804219 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 18, EffectBasePoints -26 + 1 = -25 ($s1 = 25) (server DBC set). Ruin 501292-501299 costs 2 Felfury 800058, 'Fixed' consumption, preserved with chance 25 while 804219 is up (AscensionCustomResourceData.h, ResourceCostRules; the roll is roll_chance_i in OnSpellCast, AscensionCompat.cpp:3474-3479); CheckCast refuses SPELL_FAILED_NO_POWER under 2 stacks (AscensionCompat.cpp:3402-3411) and Ruin 501298 needs CasterAuraSpell At Least 2 Felfury 803468 (set by the kind's cast step). Felfury 800058 is set at 2 stacks (aura_stacks, ADR 1278) by harness set_aura before every cast and read present after it; control Twin Slice 801901 (a generator, outside the cost table) keeps it every time; 804219 learned (a real learn). Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 804219: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found."
+      "observe_source": "804219 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 18, EffectBasePoints -26 + 1 = -25 ($s1 = 25) (server DBC set). Ruin 501292-501299 costs 2 Felfury 800058, 'Fixed' consumption, preserved with chance 25 while 804219 is up (AscensionCustomResourceData.h, ResourceCostRules; the roll is roll_chance_i in OnSpellCast, AscensionCompat.cpp:3474-3479); CheckCast refuses SPELL_FAILED_NO_POWER under 2 stacks (AscensionCompat.cpp:3402-3411) and Ruin 501298 needs CasterAuraSpell At Least 2 Felfury 803468 (set by the kind's cast step). Felfury 800058 is set at 2 stacks (aura_stacks, ADR 1278) by harness set_aura before every cast and read present after it; control Twin Slice 801901 (a generator, outside the cost table) keeps it every time; 804219 learned (a real learn). Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 804219: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found. Pilot (fw-bk1 pilot1, 2026-11-24, one part): 38 of 125 Ruin casts kept Felfury (30.4%, Wilson 99% [21.0, 41.8]), 0 failed casts; control kept it in 4 of 4. Sizing: 150 parts of 125 casts (Ruin's 2500 ms cast and the kind's settle fill a 600 s scenario), 18750 casts against the 12443 the band needs; residual failure probability 1.8e-4 per run (normal approximation), stated in the scenario contract.",
+      "parts": 150
     },
     {
       "spell": 803645,
@@ -25950,20 +25951,20 @@
       "strike_at_ms": 700,
       "windows": [
         [
-          1300,
-          1380
+          1450,
+          1490
         ],
         [
-          1600,
-          1680
-        ],
-        [
-          1300,
-          1380
+          1940,
+          1980
         ],
         [
           1450,
-          1530
+          1490
+        ],
+        [
+          1690,
+          1730
         ]
       ],
       "expected_pct": 50,
@@ -25973,7 +25974,8 @@
           1
         ]
       ],
-      "observe_source": "803645 Effect[1] aura 107, EffectBasePoints 49 + 1 = 50 ($s2) (server DBC set); the Felsworn contract turns it into SPELL_AURA_REDUCE_PUSHBACK, MiscValue 0 (AscensionFelswornContracts.cpp:322-327), and RefreshUnphased sets its amount to the full 50 only while Inner Demon 804216 is on the caster, 0 otherwise (AscensionFelsworn.cpp:285-293; called on learn and on every Inner Demon apply and remove). Inner Demon 804216 is a CONDITION aura held in every phase (caster_auras, ADR 1278: removed and set again by harness set_aura right before each cast); the contrast is the learn of 803645 (Lich Essence 802988 layout, ADR 0543). Fel Fireball 801312 (1500 ms, 35 Energy, power set to 100) at the dummy; the passive striker's Light of the Naaru 41394 hits the caster 700 ms into the hit casts. Reduction = 1 - (reduced hit end - reduced unhit end) / (hit end - unhit end), G-19 band 47.5..52.5 around 50. Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 803645: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found."
+      "observe_source": "803645 Effect[1] aura 107, EffectBasePoints 49 + 1 = 50 ($s2) (server DBC set); the Felsworn contract turns it into SPELL_AURA_REDUCE_PUSHBACK, MiscValue 0 (AscensionFelswornContracts.cpp:322-327), and RefreshUnphased sets its amount to the full 50 only while Inner Demon 804216 is on the caster, 0 otherwise (AscensionFelsworn.cpp:285-293; called on learn and on every Inner Demon apply and remove). Inner Demon 804216 is a CONDITION aura held in every phase (caster_auras, ADR 1278: removed and set again by harness set_aura right before each cast); the contrast is the learn of 803645 (Lich Essence 802988 layout, ADR 0543). Fel Fireball 801312 (1500 ms, 35 Energy, power set to 100) at the dummy; the passive striker's Light of the Naaru 41394 hits the caster 700 ms into the hit casts. Reduction = 1 - (reduced hit end - reduced unhit end) / (hit end - unhit end), G-19 band 47.5..52.5 around 50. Reference search 2026-11-24 (fw-vb6, fw-vb4b): coa-history spell 803645: 0 events in 186 logs (a passive leaves no event); bindmysoul snapshot: tooltip words only; nothing else found. Pilot (fw-bk1 pilot1, 2026-11-24, single casts, 81-poll windows): cast ends unhit (1499, 1509], hit (1994, 2004], reduced unhit (1499, 1509] ms; the reduced hit cast's strike did not land (cumulative strike count unchanged), so the reading was unmeasured, the Light of the Naaru miss the Lich Essence design met. Each cast is now repeated 10 times (ADR 0546: a hit cast whose strike does not land is left out, at least half of each kind must be valid) with 41-poll windows starting about 50 ms before the ends read (the reduced window also covers an unreduced end near 2000 ms).",
+      "repeats": 10
     },
     {
       "spell": 705135,

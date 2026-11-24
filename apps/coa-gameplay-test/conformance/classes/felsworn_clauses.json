@@ -2545,7 +2545,10 @@
     "spell": 705135,
     "clause": "Casting Chaos Rush now reduces the cooldown of Felhoof Charge by $/1000;680318s1 sec.",
     "labels": [
-      "705135 effect_value 680318e0 #0"
+      "705135 effect_value 680318e0 #0",
+      "705135 cost_gate 800204 cd without",
+      "705135 cost_gate 800204 cd with",
+      "705135 cost_gate 800204 cd beyond"
     ],
     "kind": "claim",
     "tool_gap": {
@@ -3997,7 +4000,8 @@
     "spell": 803645,
     "clause": "In addition, reduces spell pushback suffered from damaging attacks by $s2% while Inner Demon is active.",
     "labels": [
-      "803645 effect_value e1 #1"
+      "803645 effect_value e1 #1",
+      "803645 behaviour_metric_delta pushback_inner_demon"
     ],
     "kind": "claim",
     "reason": "Tool gap, uncounted (see tool_gap); the data label is the only label.",
@@ -4113,7 +4117,8 @@
     "spell": 804219,
     "clause": "Ruin now has a $s1% chance not to consume Felfury.",
     "labels": [
-      "804219 effect_value e0 #0"
+      "804219 effect_value e0 #0",
+      "804219 behaviour_metric_delta keep_rate"
     ],
     "kind": "claim",
     "tool_gap": {
