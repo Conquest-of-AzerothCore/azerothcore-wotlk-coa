@@ -3,6 +3,7 @@ from pathlib import Path
 import struct
 import tempfile
 import unittest
+from unittest import mock
 
 from tooltip import (MAX_EXPANSION_DEPTH, PER_TICK, CasterStats, DataSet, Displayed, ForcedPoints, Records, Tooltip,
                      Unreadable, client_spell_level, period_reading, read_tooltip, weapon_skill_spells)
@@ -41,6 +42,7 @@ HOLY_CONSTITUTION = 706323
 HOLY_CONSTITUTION_BASE_POINTS_2 = 29
 VEILED_IN_DARKNESS_RADIUS_YARDS = 100.0
 SCOURGEBANE_STRIKE = 801832
+BATTLE_STANCE = 7165
 INTERDICT_EXTENSION = 500014
 HOLY_LIGHT = 706449
 HOLY_LIGHT_CAST_TIME_POINTS = 1500
@@ -374,11 +376,10 @@ class ClientDbcTooltipTest(unittest.TestCase):
 
     def test_until_cancelled_duration_is_unreadable(self):
         records = Records(self.dbc)
-        description = records.dbc_field('Spell', SCOURGEBANE_STRIKE, 'Description[enUS]')
-        self.assertIn('over $d', description)
-        readout = Tooltip(records, SCOURGEBANE_STRIKE, LEVEL_60_TEMPLAR).read(description)
-        self.assertEqual(readout.unreadable, ['$d'])
-        self.assertEqual(displayed(readout, '$i'), Displayed('$i', 0, None, 'count'))
+        description = records.dbc_field('Spell', BATTLE_STANCE, 'Description[enUS]')
+        self.assertIn('Lasts $d', description)
+        self.assertEqual(Tooltip(records, BATTLE_STANCE, LEVEL_60_TEMPLAR).read(description).unreadable, ['$d'])
+        self.assertEqual(displayed(self.read(SCOURGEBANE_STRIKE), '$i'), Displayed('$i', 0, None, 'count'))
 
 
 SPELL_RECORD_BYTES = 936
@@ -407,7 +408,7 @@ def write_fixture(directory: Path, spells: dict[int, dict], variables: dict[int,
         row = bytearray(SPELL_RECORD_BYTES)
         struct.pack_into('<I', row, offsets['Id'], spell_id)
         for name, value in fields.items():
-            if name == 'Description[enUS]':
+            if name in ('Description[enUS]', 'ToolTip[enUS]'):
                 struct.pack_into('<I', row, offsets[name], strings.add(value))
             elif name.startswith('EffectRealPointsPerLevel'):
                 struct.pack_into('<f', row, offsets[name], value)
@@ -712,15 +713,28 @@ class StreamedTextTests(unittest.TestCase):
         self.assertIsNone(streamed_field(6, 'Description[enUS]', root))
         self.assertIsNone(streamed_field(5, 'SpellName[enUS]', root))
 
-    @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
     def test_the_reader_prefers_the_streamed_text_and_keeps_the_client_one(self):
-        records = Records(DataSet(DBC_DIR))
-        self.assertIn('${-$705299m1+$STA*0.1}', records.field('Spell', UNTAINTED, 'Description[enUS]'))
-        self.assertIn('${$705299m1+$STA*0.1}', records.dbc_field('Spell', UNTAINTED, 'Description[enUS]'))
-        self.assertEqual(records.field('Spell', UNTAINTED_EFFECT, 'ToolTip[enUS]'),
-                         'Physical damage taken reduced by ${-$m1+$STA*0.1}.')
-        self.assertEqual(records.field('Spell', UNTAINTED, 'ToolTip[enUS]'),
-                         records.dbc_field('Spell', UNTAINTED, 'ToolTip[enUS]'))
+        root = self.updates({
+            'pending_db_world/a.sql': "INSERT INTO `coa_client_spell_description` (`ID`, `Description`, `ToolTip`) "
+                                      "VALUES (10, 'Streamed ${-$11m1+$STA*0.1}.', ''), "
+                                      "(11, '', 'Streamed tooltip.');"})
+        with tempfile.TemporaryDirectory() as directory:
+            write_fixture(Path(directory), {
+                10: {'Description[enUS]': 'Client ${$11m1+$STA*0.1}.', 'ToolTip[enUS]': 'Client tooltip.'},
+                11: {'Description[enUS]': '', 'ToolTip[enUS]': 'Old tooltip.'},
+            }, {})
+            records = Records(DataSet(Path(directory)))
+
+            def override(spell, name):
+                return streamed_field(spell, name, root)
+
+            with mock.patch('tooltip.streamed_field', side_effect=override):
+                self.assertEqual(records.field('Spell', 10, 'Description[enUS]'), 'Streamed ${-$11m1+$STA*0.1}.')
+                self.assertEqual(records.dbc_field('Spell', 10, 'Description[enUS]'), 'Client ${$11m1+$STA*0.1}.')
+                self.assertEqual(records.field('Spell', 11, 'ToolTip[enUS]'), 'Streamed tooltip.')
+                self.assertEqual(records.dbc_field('Spell', 11, 'ToolTip[enUS]'), 'Old tooltip.')
+                self.assertEqual(records.field('Spell', 10, 'ToolTip[enUS]'),
+                                 records.dbc_field('Spell', 10, 'ToolTip[enUS]'))
 
 
 if __name__ == '__main__':
