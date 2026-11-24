@@ -5550,6 +5550,35 @@
     },
     {
       "spell": 572617,
+      "name": "Immolation Aura (one hit every 3 seconds)",
+      "kind": "metric_delta",
+      "variant": "tick_period",
+      "label_suffix": "tick_period",
+      "quote": "to nearby enemies every $t1 sec.",
+      "trigger_spell": 572617,
+      "target": "dummy",
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 800208,
+        "caster": "caster",
+        "target": "dummy",
+        "since_spell": 572617
+      },
+      "before_expected": 3000,
+      "expected": 3000,
+      "tolerance": 150,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572617 (rank of 572615/572616, SpellFamilyFlags[2] 0x800) Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000 ($t1), EffectTriggerSpell 800208 (Immolation: SCHOOL_DAMAGE on TARGET_UNIT_SRC_AREA_ENEMY, radius index 8 = 5 yd), DurationIndex 3 = 60000 ms ($d), EffectBasePoints 181 + DieSides 26. The median interval between the damage events of the tick 800208 on the dummy (within 5 yd of the caster) since the last cast of 572617 (since_spell) is read 15500 ms after a real cast (hits at 0, 3, 6, 9, 12 and 15 s, five intervals; 572617 has SPELL_ATTR5_EXTRA_INITIAL_PERIOD), in both phases (the same cast twice; the no-hit control is the tick_count entry), within 150 ms (5%, the G-19 band) which excludes a period 10% off (2700 or 3300). Reference search 2026-11-23: coa-history spell 572617: 0 events in 186 logs (the logged id is the class spell 800207: SPELL_CAST_SUCCESS 29 events in 2 logs, SPELL_AURA_APPLIED 29, SPELL_AURA_REMOVED 28; tick 800208 Immolation: SPELL_DAMAGE 1059 events in 5 logs, 289 crits, min 15 max 254 mean 80, gear and level differ, no figure decides); bindmysoul talents snapshot (fetched 2026-07-22): Immolation Aura 800207 'Wreathe yourself in fire for up to 1 minute, dealing 23 + 30% fire SP + 23% AP Fire Damage to nearby enemies every 3 sec.', same duration and period; nothing else found.",
+      "caster_health": [
+        10000,
+        10000
+      ]
+    },
+    {
+      "spell": 572617,
       "name": "Immolation Aura (hits only after the cast)",
       "kind": "metric_delta",
       "variant": "tick_count",
@@ -18254,93 +18283,6 @@
       "void_on_cast_failure": true,
       "observe_source": "300481 StackAmount 10 ($u), DurationIndex 32 = 6000 ms. AscensionFelswornEvents.cpp:82-83,192-199: every damage event of Felstrike 802678 (periodic ticks included) casts 300481 on the caster while 300483 is known. Felstrike 802678 (Effect[0] PERIODIC_DAMAGE every 1000 ms) is cast at the dummy; 9 stacks are a precondition fixture (harness set_aura); at 3500 ms three ticks have landed, so a stack count of exactly 10 (not 11 or 12) is the cap. Control: 300483 unlearned, the same cast, 9 stays. Reference search 2026-11-24: nothing found that decides the cap beyond the tooltip.",
       "label_suffix": "stack_cap"
-    },
-    {
-      "spell": 520693,
-      "name": "Felwrath (Inner Demon stacks cap at 3)",
-      "kind": "metric_delta",
-      "variant": "stack_cap",
-      "label_suffix": "stack_cap",
-      "quote": "stacking $520832u times.",
-      "trigger_spell": 520693,
-      "target": "dummy",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "measure_actor": "dummy",
-      "metric": "aura_stacks",
-      "fields": {
-        "spell": 520832
-      },
-      "before_expected": 0,
-      "expected": 3,
-      "tolerance": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "area_dummies": [
-        4.0,
-        5.0,
-        6.0,
-        7.0
-      ],
-      "phase_auras": [
-        [
-          800058,
-          6,
-          "caster",
-          "caster"
-        ],
-        [
-          803468,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          804216,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "observe_source": "520832 StackAmount 3 ($u), DurationIndex 32 = 6000 ms. Four real Felwrath casts (the trigger and three setup casts 1800 ms apart, the cast time is CastingTimeIndex 5) each strike five enemies (the dummy and four area dummies at 4 to 7 yd) with Inner Demon and apply 520832 (AscensionFelswornAbilities.cpp:361-373); stack_feed counts the applications on the dummy (aura_apply_count) and reads its stacks after every cast: a trial is valid with at least 4 counted applications and passes at exactly 3 stacks, never more. Felfury x6, 803468, 804216 and 823764 are precondition fixtures set again after every feed cast (refeed), as the cost of Felwrath is 2 Felfury. Control: the same casts with nothing learned read 0. Reference search 2026-11-24: nothing found beyond the tooltip.",
-      "setup_casts": [
-        520693,
-        520693,
-        520693
-      ],
-      "setup_wait_ms": 1800,
-      "stack_feed": {
-        "aura": 520832,
-        "cap": 3,
-        "window_ms": 6000,
-        "trials": 2,
-        "refeed_auras": [
-          [
-            800058,
-            6
-          ],
-          [
-            803468,
-            1
-          ],
-          [
-            804216,
-            1
-          ],
-          [
-            823764,
-            1
-          ]
-        ],
-        "source": "520832 StackAmount 3, DurationIndex 32 = 6000 ms"
-      }
     },
     {
       "spell": 681376,

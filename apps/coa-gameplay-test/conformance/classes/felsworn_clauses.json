@@ -564,8 +564,7 @@
     "spell": 520693,
     "clause": "stacking $520832u times.",
     "labels": [
-      "520693 max_stacks 520832 #3",
-      "520693 behaviour_metric_delta stack_cap"
+      "520693 max_stacks 520832 #3"
     ],
     "kind": "claim"
   },
