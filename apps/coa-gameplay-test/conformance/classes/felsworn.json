@@ -16434,24 +16434,21 @@
     },
     {
       "spell": 300489,
-      "name": "Archimonde's Wrath (Ruin critical strike share rises by 5 points at 50 Energy)",
+      "name": "Archimonde's Wrath (Assault critical strike share rises by 5 points at 50 Energy)",
       "kind": "hit_ratio",
       "variant": "crit_energy_half",
       "label_suffix": "crit_energy_half",
       "quote": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
       "expected": 1.05,
-      "observe_spell": 801895,
-      "learn": [
-        801895
-      ],
+      "observe_spell": 520262,
       "control": {
         "auras": [
           [
             800058,
-            2
+            6
           ],
           [
-            823764,
+            803468,
             1
           ]
         ]
@@ -16460,10 +16457,10 @@
         "auras": [
           [
             800058,
-            2
+            6
           ],
           [
-            823764,
+            803468,
             1
           ]
         ],
@@ -16473,10 +16470,12 @@
       },
       "rate": "critical",
       "expected_points": 5,
-      "trials": 60,
+      "trials": 80,
       "parts": 140,
-      "cast_power": 30,
-      "observe_source": "The 'for every 10 points of Energy' scaling arm of the crit_energy entry: Ruin has a 2.5 s cast and Energy regenerates 10 per second during it (probe 20261124-034318: from 50, Energy read 62 at 1.2 s and 47 after the cast and its 30 cost, i.e. 77 at completion, against 50, 50 and 20 with regeneration off), so Energy is set to 30 (the cost, the least that can start the cast) before every cast and reaches about 57 at the time of casting; the stated bonus is 5 x 1 = 5 critical strike points ($s2 = 1, Effect[1] BasePoints 0 + 1), judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give. Same Ruin 801895 reads, control arm (300489 not learned) against treatment arm (300489 learned), Felfury x2 and spell penetration 823764 as named precondition fixtures. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event); nothing found beyond the tooltip and Spell.dbc."
+      "cast_power": 50,
+      "observe_source": "Archimonde's Wrath 300489 Description: 'Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.' Effect[1] BasePoints 0 + 1 = 1 ($s2 = 1). Azzinoth's Assault 803475 is a Felfury spender with an instant cast (CastingTimeIndex 1 = SpellCastTimes 1 = 0 ms, Spell.dbc /srv/coa/server-data/dbc), so the Energy at the start of the cast and at its completion are the same and no regeneration runs between them. Energy is set to 50 before every cast; the tooltip then gives 50 / 10 x 1 = 5 critical strike points on the main-hand strike 520262 of Assault, judged inside the G-19 band of 2 points (3 to 7), which excludes the flat +10 that a script ignoring the Energy would give and the +0 of a passive that does nothing. Regeneration between the Energy step and the cast would only add to the 50 and leaves 5 for any value from 50 to 59. Behaviour read: critical over all hits of 520262, control arm (300489 not learned, same Felfury 800058 x6 and 803468 fixtures) against treatment arm (300489 learned), the difference of the two rates in percent points, pooled over parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 300489: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); ~/CoaServer/reference holds only talent listings, no behaviour text; nothing found on the moment the Energy is read. Untested, by design: whether 'at the time of casting' means the start or the completion of a cast on a spender with a cast time (Ruin 801895, 2.5 s); the 100 Energy arm on Ruin cannot tell, since Energy is capped at 100 at both moments.",
+      "cast_spell": 803475,
+      "cast_wait_ms": 1600
     },
     {
       "spell": 802058,
