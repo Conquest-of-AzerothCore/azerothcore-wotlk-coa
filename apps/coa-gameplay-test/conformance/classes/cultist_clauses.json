@@ -1940,7 +1940,9 @@
     "spell": 582589,
     "clause": "Reduces the cooldown of Hallucination by $/1000;s1 sec",
     "labels": [
-      "582589 effect_value e0 #0"
+      "582589 cost_gate 560301 cooldown without",
+      "582589 cost_gate 560301 cooldown with",
+      "582589 cost_gate 560301 cooldown beyond"
     ],
     "kind": "claim"
   },
@@ -1948,7 +1950,7 @@
     "spell": 582589,
     "clause": "and reduces its mana cost by $s2%.",
     "labels": [
-      "582589 effect_value e1 #1"
+      "582589 behaviour_metric_delta mana_cost"
     ],
     "kind": "claim"
   },

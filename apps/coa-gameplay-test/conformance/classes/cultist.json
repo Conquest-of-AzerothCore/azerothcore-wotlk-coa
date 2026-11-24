@@ -739,6 +739,46 @@
       "cast_power": 2000,
       "margin_ms": 500,
       "observe_source": "520810 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -60001 + EffectDieSides[0] 1 = -60000 ms ($/1000;s1 = 60 s), EffectSpellClassMask[2] 16384 = SpellFamilyFlags[2] 16384 of Dark Veil 520345 (SpellFamilyName 31, RecoveryTime 120000 ms, CategoryRecoveryTime 120000 ms, ManaCostPercentage 30, DurationIndex 28 = 5000 ms channeled; Spell.dbc). Dark Veil rejects self-cast (AscensionCultistAbilities.cpp:56), so it is cast at the friendly ally with cast_power 2000 (<= 2297 MaxMana). Arms timed from a priming cast: 60500 ms without 520810 (refused, SPELL_FAILED_NOT_READY 67, 120000 ms stock cooldown), 60500 ms with 520810 learned (goes through, 0), and 59500 ms with 520810 (refused, 67): the reduced cooldown lies in [59500, 60500] ms, excluding 54000 and 66000 ms (10% off on both sides). Reference search 2026-11-24: coa-history spell 520810: 0 events in 186 logs (passive; positive control 520345 Dark Veil: 2 casts in 2 logs); coabuildhub spells_master_index.json entry 520810 says 'Reduces the cooldown of Dark Veil by -60 sec.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 582589,
+      "name": "Mind Games (Hallucination cooldown)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of Hallucination by $/1000;s1 sec",
+      "gated_spell": 560301,
+      "resource": "cooldown",
+      "reduction": 5000,
+      "target": "caster",
+      "cast_power": 2000,
+      "margin_ms": 250,
+      "observe_source": "582589 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[0] -5001 + EffectDieSides[0] 1 = -5000 ms ($/1000;s1 = 5 s), EffectSpellClassMask[1] 4 = SpellFamilyFlags[1] 4 of Hallucination 560301 (SpellFamilyName 31, RecoveryTime 30000 ms, StartRecoveryTime 0, ManaCostPercentage 15; Spell.dbc). Self-cast with cast_power 2000 (<= 2297 MaxMana). Arms timed from a priming cast: 25250 ms without 582589 (refused, SPELL_FAILED_NOT_READY 67, 30000 ms stock), 25250 ms with 582589 learned (goes through, 0), and 24750 ms with 582589 (refused, 67): the reduced cooldown lies in [24750, 25250] ms, excluding 24500 and 25500 ms (10% off the 5 s cut) as well as 22500 and 27500 ms (10% off the 25 s reduced cooldown). Reference search 2026-11-24: coa-history spell 582589: 0 events in 186 logs (passive; positive control 560301 Hallucination: 36 casts in 11 logs); coabuildhub spells_master_index.json entry 582589 says 'Reduces the cooldown of Hallucination by -5 sec and reduces its mana cost by -20%.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 582589,
+      "name": "Mind Games (Hallucination mana cost)",
+      "kind": "metric_delta",
+      "variant": "mana_cost",
+      "label_suffix": "mana_cost",
+      "quote": "and reduces its mana cost by $s2%.",
+      "trigger_spell": 560301,
+      "gate_spell": 582589,
+      "target": "caster",
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "before_expected": 1774,
+      "expected": 1820,
+      "expected_gain": 46,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "582589 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 14 (SPELLMOD_COST), EffectBasePoints[1] -21 + EffectDieSides[1] 1 = -20% ($s2 = 20), EffectSpellClassMask[4] 4 (effect 1 word 1 = 4) = SpellFamilyFlags[1] 4 of Hallucination 560301 (SpellFamilyName 31, ManaCostPercentage 15; Spell.dbc). Level 60 Cultist BaseMana = 1512 (player_class_stats class 25 level 60; MaxMana = 2297): SpellInfo::CalcPowerCost (SpellInfo.cpp:3216) computes base cost int32(CalculatePct(1512, 15)) = int32(226.8) = 226 mana; Player::ApplySpellMod (Player.cpp:10687) applies -20% -> int32(226 * 0.8f) = int32(180.8) = 180 mana (saving 46 mana, 46/226 = 20.35%). Both phases set mana to cast_power 2000 with regeneration disabled and cast Hallucination 560301 for real, reading remaining mana 500 ms later: 2000 - 226 = 1774 before learning 582589 (control) and 2000 - 180 = 1820 after learning 582589 (gain +46, exact tolerance 0). Reference search 2026-11-24: coa-history spell 582589: 0 events in 186 logs (passive; positive control 560301 Hallucination: 36 casts in 11 logs); coabuildhub spells_master_index.json entry 582589 says 'reduces its mana cost by -20%' matching installed Spell.dbc."
     }
   ],
   "player_observations": [],
