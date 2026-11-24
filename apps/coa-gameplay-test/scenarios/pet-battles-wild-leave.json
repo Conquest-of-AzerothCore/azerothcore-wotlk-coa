@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Pet battles: wild pets leave once nobody is near",
+  "contract": [
+    "Phase 4b. After the area fills, the GM teleports to GM Island (map 1, not a pet battle zone, so nothing",
+    "new spawns there). With nobody within 90 yards for 60 s, the next tick removes every wild pet."
+  ],
+  "timeout_ms": 180000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "wild pets live in the normal world phase",
+      "actor": "gm",
+      "value": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".gm on"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "teleport",
+      "actor": "gm",
+      "map": 0,
+      "x": -9178.4,
+      "y": 37.5,
+      "z": 78.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle wild"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the area is full",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Wild pets near you: 3 of ",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".go xyz 16222.1 16252.1 12.6 1"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 62000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle wild"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "every wild pet is gone",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Wild pets near you: 0 of 0",
+      "equals": 1
+    }
+  ]
+}

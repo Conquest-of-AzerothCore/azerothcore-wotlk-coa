@@ -89,7 +89,9 @@ namespace CoAPetBattles::Wild
         bool IsWild(uint64_t key) const { return _pets.count(key) != 0; }
         size_t Count() const { return _pets.size(); }
         std::vector<std::string> Describe(uint64_t character);
-        std::optional<uint64_t> Nearest(uint64_t character);
+        std::optional<uint64_t> Nearest(uint64_t character, double range);
+        std::optional<Spot> Location(uint64_t key) { return _world.Where(key); }
+        WildSettings const& Config() const { return _settings; }
 
     private:
         struct Pet

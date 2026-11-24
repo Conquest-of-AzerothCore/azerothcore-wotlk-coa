@@ -23,6 +23,7 @@ namespace CoAPetBattles::Wild
         bool Hello(Player* player, Creature* creature);
         bool Select(Player* player, Creature* creature, uint32_t action);
         std::vector<std::string> Describe(Player* player);
+        size_t Count();
         bool ChallengeNearest(Player* player);
 
     private:

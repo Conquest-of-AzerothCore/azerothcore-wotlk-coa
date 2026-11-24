@@ -6,6 +6,7 @@
 #include "GameTime.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
+#include "Log.h"
 #include "Map.h"
 #include "MapMgr.h"
 #include "MotionMaster.h"
@@ -17,7 +18,6 @@
 #include "ScriptedGossip.h"
 #include "TemporarySummon.h"
 #include "WorldSession.h"
-#include "WorldSessionMgr.h"
 #include <random>
 
 namespace CoAPetBattles::Wild
@@ -67,9 +67,8 @@ namespace CoAPetBattles::Wild
         std::vector<WildPlayer> Players() override
         {
             std::vector<WildPlayer> players;
-            for (auto const& [id, session] : sWorldSessionMgr->GetAllSessions())
+            for (auto const& [guid, player] : ObjectAccessor::GetPlayers())
             {
-                Player* player = session ? session->GetPlayer() : nullptr;
                 if (!Human(player))
                     continue;
                 uint32_t const phase = player->GetPhaseMask();
@@ -113,11 +112,18 @@ namespace CoAPetBattles::Wild
             Map* map = sMapMgr->FindMap(at.map, 0);
             uint32_t const standIn = sPetBattleData->StandInEntry(species);
             if (!map)
+            {
+                LOG_ERROR("module", "Wild pet {}: map {} is not loaded", species, at.map);
                 return std::nullopt;
+            }
             TempSummon* summon = map->SummonCreature(standIn ? standIn : species,
                 Position(float(at.x), float(at.y), float(at.z), float(facing)));
             if (!summon)
+            {
+                LOG_ERROR("module", "Wild pet {}: creature {} could not be summoned at {} {} {} on map {}", species,
+                    standIn ? standIn : species, at.x, at.y, at.z, at.map);
                 return std::nullopt;
+            }
             summon->SetReactState(REACT_PASSIVE);
             summon->SetFaction(PeacefulFaction);
             summon->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
@@ -389,10 +395,19 @@ namespace CoAPetBattles::Wild
     bool WildPets::ChallengeNearest(Player* player)
     {
         Registry* registry = Current();
-        std::optional<uint64_t> const key = registry ? registry->Nearest(Character(player)) : std::nullopt;
-        if (!key)
+        std::optional<uint64_t> const key =
+            registry ? registry->Nearest(Character(player), registry->Config().spacing) : std::nullopt;
+        std::optional<Spot> const at = key ? registry->Location(*key) : std::nullopt;
+        if (!at)
             return false;
-        registry->Select(Character(player), *key, 1, player->GetPositionX(), player->GetPositionY());
+        player->NearTeleportTo(float(at->x), float(at->y), float(at->z), player->GetOrientation());
+        registry->Select(Character(player), *key, 1, at->x, at->y);
         return true;
+    }
+
+    size_t WildPets::Count()
+    {
+        Registry* registry = Current();
+        return registry ? registry->Count() : 0;
     }
 }

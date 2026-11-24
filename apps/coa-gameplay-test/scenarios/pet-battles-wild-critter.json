@@ -1,0 +1,117 @@
+{
+  "schema": 1,
+  "name": "Pet battles: critters become wild pets themselves and are given back",
+  "contract": [
+    "Phase 4b, user decision: critters are adopted. North of Goldshire (-9146.0, 417.8, 94.0; production",
+    "spawns, read-only) the lowest wild species within 60 yards are the critters Rabbit 721, Deer 883 and",
+    "Fawn 890, so the area fills with adopted critters, not stand-ins. Leaving releases them: none stays",
+    "registered."
+  ],
+  "timeout_ms": 180000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "wild pets live in the normal world phase",
+      "actor": "gm",
+      "value": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".gm on"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "teleport",
+      "actor": "gm",
+      "map": 0,
+      "x": -9146.0,
+      "y": 417.8,
+      "z": 94.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle wild"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "critters are adopted",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": " adopted ",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".go xyz 16222.1 16252.1 12.6 1"
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 62000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle wild"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "every critter was released",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Wild pets near you: 0 of 0",
+      "equals": 1
+    }
+  ]
+}

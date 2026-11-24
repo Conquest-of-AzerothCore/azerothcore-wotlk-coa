@@ -110,6 +110,8 @@ numbers are `CoAPetBattles.Wild.*` settings with upstream's values as defaults.
   when the last pet nearby is gone.
 - **Differences from upstream, by decision**: critters are adopted (upstream's adoption code exists but no species uses
   it); a shutdown releases adopted critters; upstream's GM size tools and its rescale workaround are not ported.
+- **Known gap**: `coa_pet_zone` holds upstream's retail zone ids; zones that CoA's client data gives their own id
+  (Northshire is 10138, not Elwynn's 12) have no wild pets until they are mapped.
 - **Proof**: `tools/pet_data/trace_wild.py` runs upstream's `pb_wild.lua` in a scripted world and records 24 situations
   (`tests/fixtures/wild.txt`); the unit tests replay each one spawn for spawn, roll for roll.
 - **GM commands**: `.petbattle wild` lists the wild pets near you; `.petbattle challenge` challenges the nearest one

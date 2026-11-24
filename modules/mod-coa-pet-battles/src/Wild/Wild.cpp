@@ -414,13 +414,13 @@ namespace CoAPetBattles::Wild
         return lines;
     }
 
-    std::optional<uint64_t> Registry::Nearest(uint64_t character)
+    std::optional<uint64_t> Registry::Nearest(uint64_t character, double range)
     {
         std::optional<WildPlayer> const player = FindPlayer(_world.Players(), character);
         if (!player)
             return std::nullopt;
         std::optional<uint64_t> best;
-        double bestDistance = _settings.talkRange * _settings.talkRange;
+        double bestDistance = range * range;
         for (auto const& [key, pet] : _pets)
         {
             std::optional<Spot> const where = _world.Where(key);

@@ -308,7 +308,8 @@ namespace
             if (!player)
                 return false;
             std::vector<std::string> const lines = sWildPets->Describe(player);
-            handler->SendSysMessage("Wild pets near you: " + std::to_string(lines.size()));
+            handler->SendSysMessage("Wild pets near you: " + std::to_string(lines.size()) + " of " +
+                std::to_string(sWildPets->Count()));
             for (std::string const& line : lines)
                 handler->SendSysMessage(line);
             return true;
@@ -321,7 +322,7 @@ namespace
                 return false;
             if (!sWildPets->ChallengeNearest(player))
             {
-                handler->SendErrorMessage("no wild pet within reach", false);
+                handler->SendErrorMessage("no wild pet near you", false);
                 return false;
             }
             return true;
