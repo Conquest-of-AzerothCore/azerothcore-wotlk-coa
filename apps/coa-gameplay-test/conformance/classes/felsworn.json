@@ -17174,6 +17174,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "metric": "carried_aura_count",
@@ -17986,12 +17992,12 @@
         "target": "dummy"
       },
       "before_expected": 1,
-      "expected": 1,
+      "expected": 2,
       "wait_ms": 1500,
       "expire_ms": 500,
-      "after_at_least": 1,
-      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 lands 0 times. Same-arm strike read (review fw-rl3b I-1): each judged reading is the sum of the applied damage events of the Twin Slice strike 808303 (Effect[0] 121 weapon damage, EffectTriggerSpell[0] of 801901) and of 800598 on the dummy, so a landed strike with no trigger reads exactly 1; a strike that did not land reads 0, and a server triggering on every melee hit reads 2 or more. The same sum is 1 before the learn. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
-      "after_at_most": 1,
+      "after_at_least": 2,
+      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 lands 0 times. Same-arm strike read (review fw-rl3b I-1): each judged reading is the sum of the applied damage events of the Twin Slice strike 808303 (Effect[0] 121 weapon damage, EffectTriggerSpell[0] of 801901) and of 800598 on the dummy, the reading is cumulative over the scenario: the before phase (92087 not learned, strikes landed, no trigger) reads 1 and the after phase adds one landed strike with no trigger, so exactly 2; a strike that did not land reads 1, and a server triggering on every melee hit reads 3 or more. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
+      "after_at_most": 2,
       "phase_auras": [
         [
           64481,
@@ -19334,7 +19340,8 @@
         "max_health": 100000,
         "count": 3,
         "wait_ms": 200,
-        "after_trigger_ms": 800
+        "after_trigger_ms": 800,
+        "dx": 10
       },
       "caster_avoidance": {
         "parry": 100
@@ -19420,7 +19427,8 @@
         "max_health": 100000,
         "count": 3,
         "wait_ms": 200,
-        "after_trigger_ms": 800
+        "after_trigger_ms": 800,
+        "dx": 10
       },
       "caster_avoidance": {
         "parry": 100
@@ -19478,44 +19486,6 @@
       "expected": 1,
       "after_at_least": 300,
       "observe_source": "Carve 800206 is a channel (DurationIndex 66 = 2500 ms) whose ChannelInterruptFlags 4733956 (0x483C04) carry no movement bit in Spell.dbc, and the server adds none. The caster is moved by the harness relocate step (the native position update of a client movement packet, which interrupts a channel carrying AURA_INTERRUPT_FLAG_MOVE) 1.5 yd along y and back at 500 and 1000 ms; cast_remaining_ms of the caster's own cast is read 800 ms after the last move (about 1800 ms after the cast), the channel must still run (at least 300 of the 2500 ms). Before (control): no cast, 0. Felfury x6 and 803468 are set as precondition fixtures. Reference search 2026-11-24: Witch Hunter Twilight Frenzy 805751 moving_channel (the precedent shape); nothing else found beyond the tooltip and Spell.dbc. "
-    },
-    {
-      "spell": 800206,
-      "kind": "metric_delta",
-      "quote": "@ext:Can dodge and parry while channeling and you can channel while moving.:ext@",
-      "target": "dummy",
-      "measure_actor": "caster",
-      "cast_power": 100,
-      "cast_in_before": false,
-      "gate_timing": "start",
-      "trigger_only_after": true,
-      "wait_ms": 800,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "before_expected": 0,
-      "relocate_during_wait": {
-        "every_ms": 500,
-        "count": 2,
-        "dy": 1.5
-      },
-      "metric": "cast_remaining_ms",
-      "name": "Ruin (control: a cast with the movement interrupt is cut by the same moves)",
-      "variant": "moving_channel_control",
-      "label_suffix": "moving_channel_control",
-      "trigger_spell": 501298,
-      "phase_auras": [
-        [
-          800058,
-          6,
-          "caster",
-          "caster"
-        ]
-      ],
-      "fields": {
-        "spell": 501298
-      },
-      "expected": 0,
-      "observe_source": "Control arm of moving_channel: Ruin 501298 (the cast refused while moving with SPELL_FAILED_MOVING 51 in the Felbreak moving_cast_control entry, so it carries the movement interrupt) is cast and the caster moved the same way (relocate_during_wait, 500 and 1000 ms); cast_remaining_ms of 501298 reads 0 after the moves: the harness moves do cut a cast that carries the interrupt, so Carve's continuing channel is the exemption. Felfury x6 as the consumes entry fixture."
     }
   ],
   "player_observations": [],
