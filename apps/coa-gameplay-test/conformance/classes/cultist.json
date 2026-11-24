@@ -2597,6 +2597,1615 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Consumption control for God Blade 680377 ('your next Hammer of Twilight'): with 80 Insanity (two Hammers at 40 each) and Cruelty 705109 at -100 crit, casting Rift 806250 then two Hammers 806830 produces 0 crits before 680377 and exactly 1 crit (not 2) after learning 680377, proving Finish() consumes Rift on the first Hammer. Reference search 2026-11-24: see crit_guarantee."
+    },
+    {
+      "spell": 706188,
+      "name": "Eyes of Eternity (Gaze heal on ally reveals stealthed enemy, held at 7400 ms)",
+      "kind": "metric_delta",
+      "variant": "held",
+      "label_suffix": "held",
+      "quote": "Healing an ally with Gaze of C'Thun now additionally reveals nearby stealthed enemies for $807344d.",
+      "trigger_spell": 502141,
+      "gate_spell": 706188,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          5000
+        ]
+      },
+      "dummy_distance": 15,
+      "phase_auras": [
+        [
+          1787,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7300,
+          7600
+        ]
+      },
+      "observe_source": "AscensionCultistAbilities.cpp:226-227: when Gaze of C'Thun heal 520333 heals an ally with Eyes of Eternity 706188 known, Cast(player, target, 807344) applies 807344 (Effect[0] aura 17 SPELL_AURA_MOD_STEALTH_DETECT +150, TARGET_UNIT_CASTER, DurationIndex 31 = 8000 ms; Spell.dbc) on the caster. Enemy dummy at 15 yd (outside 502141's 10 yd GazeJumpRadius) holds level-60 Stealth 1787 (300 stealth): Object.cpp:2101-2131 gives base detect range 10.275 yd < 15 yd (can_detect 0 before 706188) and 30.0 yd > 15 yd with 807344 (can_detect 1 at 7400 ms, window [7300, 7600] > 7200 ms = 0.9 * 8000). Paired with gone at 8600 ms (< 8800 ms = 1.1 * 8000). Reference search 2026-11-24: coa-history spell 706188/807344: 0 events (passive/self buff; 520333: 2853 heals in 42 logs); coabuildhub spells_master_index.json 706188 matches verbatim."
+    },
+    {
+      "spell": 706188,
+      "name": "Eyes of Eternity (reveal expires by 8600 ms)",
+      "kind": "metric_delta",
+      "variant": "gone",
+      "label_suffix": "gone",
+      "quote": "Healing an ally with Gaze of C'Thun now additionally reveals nearby stealthed enemies for $807344d.",
+      "trigger_spell": 502141,
+      "gate_spell": 706188,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          5000
+        ]
+      },
+      "dummy_distance": 15,
+      "phase_auras": [
+        [
+          1787,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          8450,
+          8750
+        ]
+      },
+      "observe_source": "Expiry half for Eyes of Eternity 706188 -> 807344 (8000 ms, DurationIndex 31; SpellDuration.dbc): same setup as held, read at 8600 ms (window [8450, 8750] < 8800 ms = 1.1 * 8000): can_detect returns to 0 after 807344 expires. Together with held, excludes durations 10% off 8000 ms on both sides. Reference search 2026-11-24: see held."
+    },
+    {
+      "spell": 802047,
+      "name": "Warrior of the Old Gods (Hammer of Twilight +20% weapon damage)",
+      "kind": "hit_ratio",
+      "variant": "hammer",
+      "label_suffix": "hammer",
+      "quote": "Increases the Weapon Damage dealt by Hammer of Twilight and Entropic Slam by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 806830,
+      "learn": [
+        806830
+      ],
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            680602,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          802047
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            680602,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "802047 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER misc 3 (SPELLMOD_EFFECT1) BasePoints 19 + DieSides 1 = +20% ($s1 = 20), routed to Hammer of Twilight (root 805116, level 60 rank 806830, SpellInfo.cpp:1621). 806830 Effect[0] WEAPON_PERCENT_DAMAGE 195% becomes 234% (ratio 234/195 = 1.20, G-19 band 1.18..1.22). Godblade 2H Axe 2531 (90.86..127.3, normalized 3.3 s), +20000 AP precondition fixture so AP dominates weapon spread and flat Effect[1] 169 normalized bonus, Insanity 500706 x40 + 680602 + 823764 precondition fixtures, non-critical hits only. Reference search 2026-11-24: coa-history 802047: 0 events (passive; 806830: 2048 hits in 12 logs); coabuildhub spells_master_index.json 802047 matches verbatim."
+    },
+    {
+      "spell": 802047,
+      "name": "Warrior of the Old Gods (Entropic Slam +20% weapon damage)",
+      "kind": "hit_ratio",
+      "variant": "slam",
+      "label_suffix": "slam",
+      "quote": "Increases the Weapon Damage dealt by Hammer of Twilight and Entropic Slam by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 572846,
+      "learn": [
+        572846
+      ],
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          802047
+        ],
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "802047 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER misc 12 (SPELLMOD_EFFECT2) BasePoints 19 + DieSides 1 = +20% ($s1 = 20), routed to Entropic Slam (root 804152, level 52 rank 572846, SpellInfo.cpp:1621). 572846 Effect[1] WEAPON_PERCENT_DAMAGE 130% becomes 156% (ratio 156/130 = 1.20, G-19 band 1.18..1.22). Godblade 2H Axe 2531 (90.86..127.3, normalized 3.3 s), +20000 AP, Insanity 500706 x60 + 680603 + 823764 precondition fixtures, non-critical hits only. Reference search 2026-11-24: coa-history 572846: 5366 hits in 12 logs; see hammer."
+    },
+    {
+      "spell": 680500,
+      "name": "Oblivion's Embrace (Hammer of Twilight +25% crit bonus -> 1.125x)",
+      "kind": "hit_ratio",
+      "variant": "hammer_crit",
+      "label_suffix": "hammer_crit",
+      "quote": "Increases the critical damage of your Hammer of Twilight and Eldritch Shock by $s2%.",
+      "expected": 1.125,
+      "observe_spell": 806830,
+      "learn": [
+        806830
+      ],
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            680602,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680500
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            680602,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": true,
+      "force_crit": "melee",
+      "trials": 20,
+      "expected_source": "680500 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER misc 15 (SPELLMOD_CRIT_DAMAGE_BONUS) BasePoints 24 + DieSides 1 = +25% ($s2 = 25), EffectSpellClassMask[5] 540672 matching Hammer of Twilight 806830 (SpellFamilyFlags[2] 16384) and Eldritch Shock damage 808043 (SpellFamilyFlags[2] 524288; Spell.dbc). Per owner ruling Q-r1b-1 (2026-11-12, class-conformance-rulings.md:401) and Unit::SpellCriticalDamageBonus (Unit.cpp:10673-10712), op 15 scales the critical bonus: melee DmgClass 2 base crit 2.0x (bonus 1.0x) becomes 2.25x -> ratio 2.25 / 2.0 = 1.125 (G-19 band 1.105..1.145). Forced melee crits at +20000 AP, Insanity 500706 x40 + 680602 + 823764 precondition fixtures. Reference search 2026-11-24: coa-history 680500: 0 events (passive); coabuildhub spells_master_index.json 680500 omits Eldritch Shock (older snapshot; installed Spell.dbc governs)."
+    },
+    {
+      "spell": 680500,
+      "name": "Oblivion's Embrace (Eldritch Shock +25% crit bonus -> 1.0833x)",
+      "kind": "hit_ratio",
+      "variant": "shock_crit",
+      "label_suffix": "shock_crit",
+      "quote": "Increases the critical damage of your Hammer of Twilight and Eldritch Shock by $s2%.",
+      "expected": 1.0833333333333333,
+      "cast_spell": 808036,
+      "observe_spell": 808043,
+      "learn": [
+        808036
+      ],
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            20
+          ],
+          [
+            680601,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680500
+        ],
+        "auras": [
+          [
+            500706,
+            20
+          ],
+          [
+            680601,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": true,
+      "force_crit": "spell",
+      "trials": 20,
+      "expected_source": "680500 Effect[1] SPELLMOD_CRIT_DAMAGE_BONUS +25% on Eldritch Shock damage 808043 (cast via 808036, DmgClass 1 magic, SpellFamilyFlags[2] 524288; Spell.dbc). Per owner ruling Q-r1b-1 and Unit.cpp:10686-10709, magic base crit 1.5x (bonus 0.5x) becomes 1 + 0.5 * 1.25 = 1.625x -> ratio 1.625 / 1.5 = 1.083333 (G-19 band 1.0633..1.1033). Forced spell crits at +20000 SP, Insanity 500706 x20 + 680601 + 823764 precondition fixtures. Reference search 2026-11-24: coa-history 808036: 2 casts in 1 log; see hammer_crit."
+    },
+    {
+      "spell": 680508,
+      "name": "Touch of the Void (+3% Magic damage dealt)",
+      "kind": "hit_ratio",
+      "variant": "magic_damage",
+      "label_suffix": "magic_damage",
+      "quote": "Increases your Magic damage dealt by $s1%",
+      "expected": 1.03,
+      "observe_spell": 502182,
+      "learn": [
+        502182
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680508
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "680508 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE BasePoints 2 + DieSides 1 = +3% ($s1 = 3), EffectMiscValue 127 (all schools including magic; Spell.dbc). Non-critical Horrorbolt 502182 (Shadow magic) hits at +20000 SP + 823764 (precondition fixtures), before (control) and after a real learn of 680508: expected ratio 1.03 (G-19 band 1.01..1.05, excludes control 1.00 and doubled 1.06). Reference search 2026-11-24: coa-history 680508: 0 events (passive; 572046: 303 applied / 911 refresh in 11 logs); coabuildhub spells_master_index.json 680508 matches verbatim."
+    },
+    {
+      "spell": 680508,
+      "name": "Touch of the Void (Hammer applies 572046 debuff)",
+      "kind": "metric_delta",
+      "variant": "applies_debuff",
+      "label_suffix": "applies_debuff",
+      "quote": "and Hammer of Twilight now increases the target's spell damage taken by $572046s1% for $572046d.",
+      "trigger_spell": 806830,
+      "gate_spell": 680508,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 572046,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistEvents.cpp:94,214: Hammer of Twilight (Named 805116, rank 806830) damaging a target with Touch of the Void 680508 known casts 572046 on the target. Control (before 680508 learned): 572046 absent (0). Treatment (after real learn of 680508): 572046 present (1). Reference search 2026-11-24: see magic_damage."
+    },
+    {
+      "spell": 680508,
+      "name": "Touch of the Void (572046 increases spell damage taken by +10%)",
+      "kind": "hit_ratio",
+      "variant": "debuff_damage",
+      "label_suffix": "debuff_damage",
+      "quote": "and Hammer of Twilight now increases the target's spell damage taken by $572046s1% for $572046d.",
+      "expected": 1.1,
+      "observe_spell": 502182,
+      "learn": [
+        680508,
+        806830,
+        502182
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            680602,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 806830,
+            "target": "dummy"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "572046 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN BasePoints 9 + DieSides 1 = +10% ($572046s1 = 10), EffectMiscValue 126 (all 6 magic schools; Spell.dbc). Both arms hold 680508 learned (so Effect[0] +3% is identical in both arms); control casts Horrorbolt 502182 without 572046 on the dummy, treatment casts Hammer of Twilight 806830 for real (applying 572046 via AscensionCultistEvents.cpp:94,214) before each Horrorbolt: expected ratio 1.10 (G-19 band 1.08..1.12). Non-critical hits at +20000 SP + 823764 precondition fixtures. Reference search 2026-11-24: see magic_damage."
+    },
+    {
+      "spell": 680508,
+      "name": "Touch of the Void (572046 lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and Hammer of Twilight now increases the target's spell damage taken by $572046s1% for $572046d.",
+      "trigger_spell": 806830,
+      "gate_spell": 680508,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 572046,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14000,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13900,
+          14300
+        ],
+        "expired": [
+          15850,
+          16300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "572046 DurationIndex 8 = 15000 ms ($572046d; SpellDuration.dbc). Aura 572046 on dummy reads 0 before cast (control), 1 at 14000 ms (window [13900, 14300] > 13500 ms = 0.9 * 15000), and 0 at 16000 ms (window [15850, 16300] < 16500 ms = 1.1 * 15000), excluding 10% off on both sides. Reference search 2026-11-24: see magic_damage."
+    },
+    {
+      "spell": 300280,
+      "name": "Encroaching Presence (Gaze CD ready at 7200 ms after melee crit)",
+      "kind": "metric_delta",
+      "variant": "gaze_through",
+      "label_suffix": "gaze_through",
+      "quote": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
+      "trigger_spell": 502122,
+      "gate_spell": 300280,
+      "target": "dummy",
+      "learn": [
+        502141
+      ],
+      "setup_casts": [
+        502141
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "after_trigger_casts": [
+        {
+          "spell": 502141,
+          "target": "dummy",
+          "delay_ms": 5600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 502141
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_gain": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300280 -> 505168 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN BasePoints -3001 + 1 = -3000 ms ($/1000;505168s1 = 3 sec; Spell.dbc; AscensionCultistEvents.cpp:79,160-162 Reduce(500110, 3000) on melee crit). Gaze of C'Thun 502141 has 10000 ms CategoryRecoveryTime: setup casts 502141 at t=0, Blade of the Empire 502122 crits (force_crit melee) at t=1600 ms, follow-up 502141 attempted at t=7200 ms (< 7300 ms = 10000 - 0.9*3000): refused in control (before 300280: 1 cast) and goes through after real learn of 300280 (2 casts in after, cumulative 3, gain 2). Paired with gaze_still_cd at 6800 ms and gaze_noncrit. Reference search 2026-11-24: coa-history 300280: 0 events (passive); coabuildhub spells_master_index.json 300280 matches verbatim ('by -3 sec')."
+    },
+    {
+      "spell": 300280,
+      "name": "Encroaching Presence (Gaze still on CD at 6800 ms after melee crit)",
+      "kind": "metric_delta",
+      "variant": "gaze_still_cd",
+      "label_suffix": "gaze_still_cd",
+      "quote": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
+      "trigger_spell": 502122,
+      "gate_spell": 300280,
+      "target": "dummy",
+      "learn": [
+        502141
+      ],
+      "setup_casts": [
+        502141
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "after_trigger_casts": [
+        {
+          "spell": 502141,
+          "target": "dummy",
+          "delay_ms": 5200,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 502141
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Upper-bound bracket for Encroaching Presence 300280 on Gaze 502141: follow-up cast at t=6800 ms (> 6700 ms = 10000 - 1.1*3000) is still refused even with 300280 learned (1 cast before, 1 cast after, gain 1). Together with gaze_through (7200 ms), brackets the cooldown cut in [2800, 3200] ms, excluding 2700 and 3300 ms (10% off 3000 ms on both sides). Reference search 2026-11-24: see gaze_through."
+    },
+    {
+      "spell": 300280,
+      "name": "Encroaching Presence (non-crit melee hit does not reduce Gaze CD)",
+      "kind": "metric_delta",
+      "variant": "gaze_noncrit",
+      "label_suffix": "gaze_noncrit",
+      "quote": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
+      "trigger_spell": 502122,
+      "gate_spell": 300280,
+      "target": "dummy",
+      "learn": [
+        502141
+      ],
+      "setup_casts": [
+        502141
+      ],
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          705109,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          705109,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502141,
+          "target": "dummy",
+          "delay_ms": 5600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 502141
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Negative condition control for Encroaching Presence 300280 ('melee critical strikes'): same timing as gaze_through (t=7200 ms) with Cruelty 705109 at -100 crit (precondition fixture): non-critical Blade of the Empire does not cut Gaze CD (refused in both phases, gain 1). Reference search 2026-11-24: see gaze_through."
+    },
+    {
+      "spell": 300280,
+      "name": "Encroaching Presence (Rift CD ready at 42200 ms after melee crit)",
+      "kind": "metric_delta",
+      "variant": "rift_through",
+      "label_suffix": "rift_through",
+      "quote": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
+      "trigger_spell": 502122,
+      "gate_spell": 300280,
+      "target": "dummy",
+      "learn": [
+        806250
+      ],
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "after_trigger_casts": [
+        {
+          "spell": 806250,
+          "target": "caster",
+          "delay_ms": 40600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 806250
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_gain": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "300280 -> 505168 Effect[0] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -3000 ms on Rift 806250 (RecoveryTime 45000 ms; Spell.dbc; AscensionCultistEvents.cpp:161 Reduce(806250, 3000)). Setup casts 806250 at t=0, Blade of the Empire 502122 crits at t=1600 ms, follow-up 806250 attempted at t=42200 ms (< 42300 ms = 45000 - 0.9*3000): refused in control (1 cast) and goes through after real learn of 300280 (cumulative 3, gain 2). Paired with rift_still_cd at 41800 ms. Reference search 2026-11-24: see gaze_through."
+    },
+    {
+      "spell": 300280,
+      "name": "Encroaching Presence (Rift still on CD at 41800 ms after melee crit)",
+      "kind": "metric_delta",
+      "variant": "rift_still_cd",
+      "label_suffix": "rift_still_cd",
+      "quote": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
+      "trigger_spell": 502122,
+      "gate_spell": 300280,
+      "target": "dummy",
+      "learn": [
+        806250
+      ],
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "after_trigger_casts": [
+        {
+          "spell": 806250,
+          "target": "caster",
+          "delay_ms": 40200,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 806250
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Upper-bound bracket for Encroaching Presence 300280 on Rift 806250: follow-up cast at t=41800 ms (> 41700 ms = 45000 - 1.1*3000) is still refused even with 300280 learned (gain 1). Together with rift_through (42200 ms), brackets the cooldown cut in [2800, 3200] ms, excluding 2700 and 3300 ms (10% off 3000 ms on both sides). Reference search 2026-11-24: see gaze_through."
+    },
+    {
+      "spell": 806250,
+      "name": "Rift (dark boon lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "boon_duration",
+      "label_suffix": "boon_duration",
+      "quote": "Apply a dark boon to yourself for $d,",
+      "trigger_spell": 806250,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 806250
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14000,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13900,
+          14300
+        ],
+        "expired": [
+          15850,
+          16300
+        ]
+      },
+      "observe_source": "Rift 806250 DurationIndex 8 = 15000 ms ($d; SpellDuration.dbc). Aura 806250 on caster reads 0 before cast (control), 1 at 14000 ms (window [13900, 14300] > 13500 ms = 0.9 * 15000), and 0 at 16000 ms (window [15850, 16300] < 16500 ms = 1.1 * 15000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history 806250: 343 applied in 14 logs, 807216: 1599 applied in 14 logs, 807854: 1341 applied in 14 logs; coabuildhub spells_master_index.json 806250 matches verbatim (with older 11.0 ppl vs installed 10.0 ppl; installed Spell.dbc governs)."
+    },
+    {
+      "spell": 806250,
+      "name": "Rift (next Hammer of Twilight deals +80% Shadow damage via 807083)",
+      "kind": "metric_delta",
+      "variant": "hammer_bonus",
+      "label_suffix": "hammer_bonus",
+      "quote": "causing your next Hammer of Twilight to deal an additional $s1% of its damage dealt as Shadow damage.",
+      "trigger_spell": 806830,
+      "gate_spell": 806250,
+      "target": "dummy",
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807083,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 806830,
+          "target": "dummy"
+        },
+        "ratio": 0.8,
+        "tolerance": 0.04,
+        "least": 1,
+        "source": "Rift 806250 Effect[0] BasePoints 79 + DieSides 1 = 80 ($s1); AscensionCultistAbilities.cpp:248-250 Copy(player, target, 807083, CalculatePct(damage, Amount(806250)))"
+      },
+      "observe_source": "806250 Effect[0] BasePoints 79 + 1 = 80% ($s1; Spell.dbc); AscensionCultistAbilities.cpp:248-250 copies 80% of Hammer of Twilight 806830's dealt damage as Shadow damage 807083 (AscensionCultistContracts.cpp:49-60 CultistCopies: CANT_CRIT, IGNORE_CASTER_MODIFIERS, IGNORE_DAMAGE_TAKEN_MODIFIERS, IGNORE_ARMOR). Before (control, no Rift): 0 damage from 807083. After (real cast of Rift 806250 then Hammer 806830): same_arm_ratio judges 807083 / 806830 = 0.80 +- 0.04 (5% band, excludes 0.72 and 0.88). Reference search 2026-11-24: see boon_duration."
+    },
+    {
+      "spell": 806250,
+      "name": "Rift (absorbs 1254 healing on enemy at reference AP)",
+      "kind": "metric_delta",
+      "variant": "heal_absorb_base",
+      "label_suffix": "heal_absorb_base",
+      "quote": "Creates a rift that absorbs the next ${$807854m1+$807854ppl1+$AP*1.5} healing taken by enemies that step inside",
+      "trigger_spell": 806830,
+      "gate_spell": 806250,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "enemy_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "metric": "spell_heal_absorb_total",
+      "fields": {
+        "spell": 23783,
+        "target": "enemy"
+      },
+      "before_expected": 0,
+      "expected": 1254,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "observe_source": "806250 -> Hammer 806830 spawns persistent area aura 807216 at target (AscensionCultistAbilities.cpp:251-255), which casts 807854 on enemies inside (AscensionCultistAuras.cpp:75-76). 807854 Effect[0] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB MiscValue 127, no SkillLineAbility row (triggered by 807216), BaseLevel 11, SpellLevel 11, MaxLevel 0, BasePoints 199 + DieSides 1 = 200, RealPointsPerLevel 10.0 * (60 - 11) = 490, plus CultistCoefficients AP * 1.5 (Godblade reference AP 376 * 1.5 = 564) -> 200 + 490 + 564 = 1254 exact (Spell.dbc). Enemy player (race 2) casts Gift of Life 23783 (1500 heal > 1254) on itself in both phases: 0 absorbed before Rift (control) and 1254 absorbed after Rift (tolerance 0). Paired with heal_absorb_ap (+150 AP -> 1479). Reference search 2026-11-24: see boon_duration."
+    },
+    {
+      "spell": 806250,
+      "name": "Rift (absorbs 1479 healing on enemy at +150 AP)",
+      "kind": "metric_delta",
+      "variant": "heal_absorb_ap",
+      "label_suffix": "heal_absorb_ap",
+      "quote": "Creates a rift that absorbs the next ${$807854m1+$807854ppl1+$AP*1.5} healing taken by enemies that step inside",
+      "trigger_spell": 806830,
+      "gate_spell": 806250,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "player_attack_power": 150,
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "enemy_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "metric": "spell_heal_absorb_total",
+      "fields": {
+        "spell": 23783,
+        "target": "enemy"
+      },
+      "before_expected": 0,
+      "expected": 1479,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "observe_source": "AP contrast arm for Rift 806250 -> 807854 heal absorb (+$AP*1.5): player_attack_power +150 gives total AP 376 + 150 = 526; 200 + 490 + 526 * 1.5 = 1479 (< 1500 of Gift of Life 23783), +225 above 1254 base (tolerance 0). Reference search 2026-11-24: see boon_duration."
+    },
+    {
+      "spell": 806250,
+      "name": "Rift (reduces enemy periodic healing received by 50%)",
+      "kind": "metric_delta",
+      "variant": "hot_reduction",
+      "label_suffix": "hot_reduction",
+      "quote": "and reduces their periodic healing received by $807216s2% for $807216d while inside.",
+      "trigger_spell": 806830,
+      "gate_spell": 806250,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "cast_in_before": false,
+      "enemy_casts_in_before": true,
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "enemy_casts": [
+        23783,
+        9840
+      ],
+      "enemy_cast_wait_ms": 3500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 9840,
+        "target": "enemy"
+      },
+      "before_expected": 78,
+      "expected": 429,
+      "expected_gain": 351,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "observe_source": "807216 Effect[1] SPELL_EFFECT_PERSISTENT_AREA_AURA aura 259 SPELL_AURA_MOD_HOT_PCT BasePoints -51 + DieSides 1 = -50% ($807216s2 = 50; Spell.dbc). Enemy player (race 2, level-60 Cultist 0 SP) casts Gift of Life 23783 (1500 heal, consuming the 1254 absorb from 807854 in the Rift phase) then Rejuvenation Rank 9 9840 (SpellLevel 52, BasePoints 77 + 1 = 78 per 3000 ms tick, 15000 ms / 5 ticks; witch_doctor 681465 / necromancer 504050 precedent) with 3500 ms wait per cast. Before (control, no Rift): 1 tick lands -> 78. Between phases (expire_ms 16000): the remaining 4 ticks of the control 9840 finish (4 * 78 = 312, cumulative 390) and 9840 expires. After (real cast of Rift 806250 + Hammer 806830 spawning 10000 ms 807216 at t=0, 23783 at t=1500 ms clearing 807854, 9840 at t=5000 ms): 1st tick lands at t=8000 ms inside 807216 for 78 * 0.5 = 39 exact (cumulative 390 + 39 = 429, gain 351 +- 1; no effect would gain 390, doubled -100% would gain 312). Reference search 2026-11-24: see boon_duration."
+    },
+    {
+      "spell": 806250,
+      "name": "Rift (807216 field aura lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "rift_duration",
+      "label_suffix": "rift_duration",
+      "quote": "and reduces their periodic healing received by $807216s2% for $807216d while inside.",
+      "trigger_spell": 806830,
+      "gate_spell": 806250,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        806250
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807216,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9400,
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9300,
+          9600
+        ],
+        "expired": [
+          10450,
+          10800
+        ]
+      },
+      "observe_source": "807216 DurationIndex 1 = 10000 ms ($807216d; SpellDuration.dbc). Aura 807216 on the dummy inside the rift reads 0 before cast (control), 1 at 9400 ms (window [9300, 9600] > 9000 ms = 0.9 * 10000), and 0 at 10600 ms (window [10450, 10800] < 11000 ms = 1.1 * 10000), excluding 10% off on both sides. Reference search 2026-11-24: see boon_duration."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (5th ability crit transforms Gaze of C'Thun into 680576)",
+      "kind": "metric_delta",
+      "variant": "transform_5th",
+      "label_suffix": "transform_5th",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 502241,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "metric": "temporary_spell_replacement",
+      "fields": {
+        "spell": 502141
+      },
+      "before_expected": 502141,
+      "expected": 680576,
+      "tolerance": 0,
+      "wait_ms": 1800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistEvents.cpp:96,222-226 & AscensionCultist.cpp:313-321: each non-periodic ability crit with 681474 adds a stack of 681532 (StackAmount 5, 15000 ms); at 5 stacks grants 681794, which sets temporary spell replacement of Gaze of C'Thun 502141 to Eldritch Force 680576. Five forced melee crits of Malevolence 502241 (1500 ms cast, 1700 ms spacing): temporary_spell_replacement of 502141 reads 502141 before 681474 (control) and 680576 after a real learn of 681474. Paired with transform_4th (4 crits stay 502141). Reference search 2026-11-24: coa-history 681474/680576: 0 events; coabuildhub spells_master_index.json 681474 matches verbatim."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (4 ability crits do not transform Gaze yet)",
+      "kind": "metric_delta",
+      "variant": "transform_4th",
+      "label_suffix": "transform_4th",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 502241,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "metric": "temporary_spell_replacement",
+      "fields": {
+        "spell": 502141
+      },
+      "before_expected": 502141,
+      "expected": 502141,
+      "tolerance": 0,
+      "wait_ms": 1800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold control for Eldritch Force 681474 ('Every 5th critical strike'): 4 forced melee crits of Malevolence 502241 leave Gaze 502141 unreplaced (502141 before and 502141 after learning 681474). Reference search 2026-11-24: see transform_5th."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 generates 30 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 50,
+      "expected": 80,
+      "expected_gain": 30,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAbilities.cpp:142-146: casting Eldritch Force 680576 calls Resource(player, Insanity, 30). Because AscensionCultist.cpp:313-324 removes 680576 every 500 ms unless 681794 is active, both phases clear Insanity 500706 to 0 then cast 5 forced melee crits of Malevolence 502241 (+50 Insanity); control (before 681474 learned) does not cast 680576 and reads 50 Insanity, treatment (after real learn of 681474) earns 681794 -> learns 680576 -> casts 680576 and reads 80 Insanity (gain +30, tolerance 0). Reference search 2026-11-24: see transform_5th."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 Shadow damage at reference SP/AP)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680576,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 812,
+      "after_at_least": 759,
+      "after_at_most": 866,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "680576 (embedded via @s:680576:0@ in 681474) Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Shadow, SkillLineAbility 23322, BaseLevel 0, MaxLevel 0, BasePoints 630, DieSides 96 -> raw 631..726, plus CultistCoefficients sp 0.76255, ap 0.125 (Dreadnought reference AP 376 * 0.125 = 47, SP 0 -> 678..773), times Cultist class tuning aura 887013 (+12%, AscensionClassTuning.h:34) -> [759..866]. After real learn of 681474, 5 forced melee crits of Malevolence 502241 earn 681794 and teach 680576 (AscensionCultist.cpp:313-324); precondition fixtures 823764 (spell pen) and 16255 at -100 prevent spell crits on 680576 (DmgClass 1). Paired with damage_sp (+20000 SP) and damage_ap (+20000 AP). Reference search 2026-11-24: see transform_5th."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 Shadow damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680576,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 17893,
+      "after_at_least": 17840,
+      "after_at_most": 17947,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP contrast arm for Eldritch Force 680576 (+$SP*0.76255): raw (631..726 + 47 + 20000 * 0.76255 = 15929..16024) * 1.12 (887013) = [17840..17947]. Real 5-crit trigger via 502241 earns 681794 -> 680576. Reference search 2026-11-24: see transform_5th."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 Shadow damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 680576,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3612,
+      "after_at_least": 3559,
+      "after_at_most": 3666,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP contrast arm for Eldritch Force 680576 (+$AP*0.125): total AP 376 + 20000 = 20376; raw (631..726 + 20376 * 0.125 = 3178..3273) * 1.12 (887013) = [3559..3666]. Real 5-crit trigger via 502241 earns 681794 -> 680576. Reference search 2026-11-24: see transform_5th."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 reduces movement speed by 30%)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.35,
+      "expected_ratio": 0.7,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "680576 Effect[1] BasePoints -31 + DieSides 1 = -30% ($s2 = 30), rewritten to SPELL_AURA_MOD_DECREASE_SPEED in AscensionCultistContracts.cpp:185-189. After real learn of 681474 and 5 forced melee crits of 502241 earning 681794 -> 680576, dummy run_speed_rate reads 0.5 before cast (control) and 0.35 after (ratio 0.70, tol 0.001). Reference search 2026-11-24: see transform_5th."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 slow lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "slow_duration",
+      "label_suffix": "slow_duration",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        502141,
+        502241
+      ],
+      "setup_casts": [
+        502241,
+        502241,
+        502241,
+        502241,
+        502241
+      ],
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 680576,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9400,
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9300,
+          9600
+        ],
+        "expired": [
+          10450,
+          10800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "680576 DurationIndex 1 = 10000 ms ($d; SpellDuration.dbc). Aura 680576 on dummy reads 0 before cast (control), 1 at 9400 ms after 680576 cast (window [9300, 9600] > 9000 ms = 0.9 * 10000), and 0 at 10600 ms (window [10450, 10800] < 11000 ms = 1.1 * 10000), excluding 10% off on both sides. Real 5-crit trigger via 502241 earns 681794 -> 680576. Reference search 2026-11-24: see transform_5th."
+    },
+    {
+      "spell": 92130,
+      "name": "Corrupting Whispers (706725 +20% Magic damage dealt)",
+      "kind": "hit_ratio",
+      "variant": "magic_damage",
+      "label_suffix": "magic_damage",
+      "quote": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
+      "expected": 1.2,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        706725
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 706725,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "706725 (embedded via @s:706725:0@ in 92130) Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE BasePoints 19 + DieSides 1 = +20% ($s1 = 20), EffectMiscValue 126 (all 6 magic schools; Spell.dbc). Non-critical Horrorbolt 502182 hits at +20000 SP + 823764 (precondition fixtures), control without 706725 vs treatment after a real cast of 706725: expected ratio 1.20 (G-19 band 1.18..1.22). Reference search 2026-11-24: coa-history 92130/706725: 0 events; coabuildhub spells_master_index.json 92130 matches verbatim."
+    },
+    {
+      "spell": 92130,
+      "name": "Corrupting Whispers (706725 lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
+      "trigger_spell": 706725,
+      "gate_spell": 92130,
+      "target": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 706725
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7400,
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7300,
+          7600
+        ],
+        "expired": [
+          8450,
+          8750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "706725 DurationIndex 31 = 8000 ms ($d; SpellDuration.dbc). Aura 706725 on caster reads 0 before cast (control), 1 at 7400 ms (window [7300, 7600] > 7200 ms = 0.9 * 8000), and 0 at 8600 ms (window [8450, 8750] < 8800 ms = 1.1 * 8000), excluding 10% off on both sides. Reference search 2026-11-24: see magic_damage."
+    },
+    {
+      "spell": 706921,
+      "name": "Foul Play (Corrupting Whispers damage bonus +20% -> +25%)",
+      "kind": "hit_ratio",
+      "variant": "damage_bonus",
+      "label_suffix": "damage_bonus",
+      "quote": "Increases the damage bonus provided by your Corrupting Whispers by $s1%.",
+      "expected": 1.0416666666666667,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        706725
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 706725,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          706921
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 706725,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "706921 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 3 (SPELLMOD_EFFECT1) BasePoints 4 + DieSides 1 = +5 ($s1 = 5), EffectSpellClassMask[0] 524288 matching Corrupting Whispers 706725 SpellFamilyFlags[0] 524288 (Spell.dbc). 706725 Effect[0] +20% Magic damage done becomes +25%: mean non-critical Horrorbolt 502182 hit under real 706725 cast rises by 1.25 / 1.20 = 1.041667 (G-19 band 1.0217..1.0617, excludes control 1.00 and doubled 1.0833). +20000 SP + 823764 precondition fixtures. Reference search 2026-11-24: coa-history 706921: 0 events (passive); coabuildhub spells_master_index.json 706921 matches verbatim."
+    },
+    {
+      "spell": 92130,
+      "name": "Corrupting Whispers (706725 reduces Horrorbolt mana cost to <= 127)",
+      "kind": "metric_delta",
+      "variant": "mana_cost_through",
+      "label_suffix": "mana_cost_through",
+      "quote": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
+      "trigger_spell": 502182,
+      "gate_spell": 706725,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        706725
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true,
+      "cast_power": 127,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 502182
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2700,
+      "expire_ms": 500,
+      "observe_source": "706725 Effect[2] aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT BasePoints -31 + DieSides 1 = -30% ($s3 = 30), EffectMiscValue 127 (Spell.dbc). Horrorbolt 502182 costs 12% of player_class_stats Class 25 Level 60 BaseMana 1512 = 181 mana (CoA.ClassLevelSixtyStats.Enable 0); with -30% from 706725, 181 * 0.70 = 126.7 mana (ceil 127, floor - 1 = 125). With regen off and mana set to 127: control (no 706725) cannot pay 181 and casts 0 times; after a real cast of 0-mana 706725, 502182 goes through (1 cast). Paired with mana_cost_refused at 125 mana (refused in both arms, bounding cost in [126, 127], excluding 0% = 181 and doubled -60% = 72). Reference search 2026-11-24: see magic_damage."
+    },
+    {
+      "spell": 92130,
+      "name": "Corrupting Whispers (706725 Horrorbolt mana cost still refused at 125)",
+      "kind": "metric_delta",
+      "variant": "mana_cost_refused",
+      "label_suffix": "mana_cost_refused",
+      "quote": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
+      "trigger_spell": 502182,
+      "gate_spell": 706725,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        706725
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "disable_regeneration": true,
+      "cast_power": 125,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 502182
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2700,
+      "expire_ms": 500,
+      "observe_source": "Lower-bound gate for Corrupting Whispers 706725 (-30% mana cost on Horrorbolt 502182, 181 * 0.70 = 126.7 -> floor - 1 = 125): with regen off and mana set to 125, 502182 is refused both before (0 casts) and after a real cast of 706725 (0 casts). Together with mana_cost_through (127 mana), proves the reduced mana cost is in [126, 127]. Reference search 2026-11-24: see magic_damage."
     }
   ],
   "player_observations": [],

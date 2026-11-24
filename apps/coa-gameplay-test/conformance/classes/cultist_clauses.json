@@ -27,7 +27,7 @@
     "spell": 92130,
     "clause": "Increases your Magic Damage dealt by $s1%",
     "labels": [
-      "92130 effect_value 706725e0 #1"
+      "92130 behaviour_hit_ratio magic_damage"
     ],
     "kind": "claim"
   },
@@ -39,13 +39,14 @@
       {
         "claim": "and reduces your mana costs by $s3%",
         "labels": [
-          "92130 effect_value 706725e2 #2"
+          "92130 behaviour_metric_delta mana_cost_through",
+          "92130 behaviour_metric_delta mana_cost_refused"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "92130 spell_duration 706725 #3"
+          "92130 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -221,7 +222,11 @@
     "spell": 300280,
     "clause": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
     "labels": [
-      "300280 effect_value 505168e0 #0"
+      "300280 behaviour_metric_delta gaze_through",
+      "300280 behaviour_metric_delta gaze_still_cd",
+      "300280 behaviour_metric_delta gaze_noncrit",
+      "300280 behaviour_metric_delta rift_through",
+      "300280 behaviour_metric_delta rift_still_cd"
     ],
     "kind": "claim"
   },
@@ -2067,7 +2072,8 @@
     "spell": 680500,
     "clause": "Increases the critical damage of your Hammer of Twilight and Eldritch Shock by $s2%.",
     "labels": [
-      "680500 effect_value e1 #0"
+      "680500 behaviour_hit_ratio hammer_crit",
+      "680500 behaviour_hit_ratio shock_crit"
     ],
     "kind": "claim"
   },
@@ -2075,7 +2081,7 @@
     "spell": 680508,
     "clause": "Increases your Magic damage dealt by $s1%",
     "labels": [
-      "680508 effect_value e0 #0"
+      "680508 behaviour_hit_ratio magic_damage"
     ],
     "kind": "claim"
   },
@@ -2087,13 +2093,14 @@
       {
         "claim": "increases the target's spell damage taken by $572046s1%",
         "labels": [
-          "680508 effect_value 572046e0 #1"
+          "680508 behaviour_metric_delta applies_debuff",
+          "680508 behaviour_hit_ratio debuff_damage"
         ]
       },
       {
         "claim": "for $572046d",
         "labels": [
-          "680508 spell_duration 572046 #2"
+          "680508 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -2492,13 +2499,18 @@
   {
     "spell": 681474,
     "clause": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
-    "labels": [],
+    "labels": [
+      "681474 behaviour_metric_delta transform_5th",
+      "681474 behaviour_metric_delta transform_4th"
+    ],
     "kind": "claim"
   },
   {
     "spell": 681474,
     "clause": "Generates 30 Insanity",
-    "labels": [],
+    "labels": [
+      "681474 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
@@ -2509,19 +2521,21 @@
       {
         "claim": "dealing ${$m1+0+$SP*0.76255+$AP*.125} Shadow damage",
         "labels": [
-          "681474 effect_value 680576e0 #0"
+          "681474 behaviour_metric_delta damage_base",
+          "681474 behaviour_metric_delta damage_sp",
+          "681474 behaviour_metric_delta damage_ap"
         ]
       },
       {
         "claim": "reducing their movement speed by $s2%",
         "labels": [
-          "681474 effect_value 680576e1 #1"
+          "681474 behaviour_metric_delta slow"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "681474 spell_duration 680576 #2"
+          "681474 behaviour_metric_delta slow_duration"
         ]
       }
     ]
@@ -2849,7 +2863,8 @@
     "spell": 706188,
     "clause": "Healing an ally with Gaze of C'Thun now additionally reveals nearby stealthed enemies for $807344d.",
     "labels": [
-      "706188 spell_duration 807344 #0"
+      "706188 behaviour_metric_delta held",
+      "706188 behaviour_metric_delta gone"
     ],
     "kind": "claim"
   },
@@ -2969,7 +2984,7 @@
     "spell": 706921,
     "clause": "Increases the damage bonus provided by your Corrupting Whispers by $s1%.",
     "labels": [
-      "706921 effect_value e0 #0"
+      "706921 behaviour_hit_ratio damage_bonus"
     ],
     "kind": "claim"
   },
@@ -3351,7 +3366,8 @@
     "spell": 802047,
     "clause": "Increases the Weapon Damage dealt by Hammer of Twilight and Entropic Slam by $s1%.",
     "labels": [
-      "802047 effect_value e0 #0"
+      "802047 behaviour_hit_ratio hammer",
+      "802047 behaviour_hit_ratio slam"
     ],
     "kind": "claim"
   },
@@ -3796,7 +3812,7 @@
     "spell": 806250,
     "clause": "Apply a dark boon to yourself for $d,",
     "labels": [
-      "806250 aura_duration_ms #0"
+      "806250 behaviour_metric_delta boon_duration"
     ],
     "kind": "claim"
   },
@@ -3804,8 +3820,7 @@
     "spell": 806250,
     "clause": "causing your next Hammer of Twilight to deal an additional $s1% of its damage dealt as Shadow damage.",
     "labels": [
-      "806250 effect_value e0 #1",
-      "806250 aura_amount e0 #1"
+      "806250 behaviour_metric_delta hammer_bonus"
     ],
     "kind": "claim"
   },
@@ -3813,7 +3828,8 @@
     "spell": 806250,
     "clause": "Creates a rift that absorbs the next ${$807854m1+$807854ppl1+$AP*1.5} healing taken by enemies that step inside",
     "labels": [
-      "806250 effect_value 807854e0 #2"
+      "806250 behaviour_metric_delta heal_absorb_base",
+      "806250 behaviour_metric_delta heal_absorb_ap"
     ],
     "kind": "claim"
   },
@@ -3825,13 +3841,13 @@
       {
         "claim": "reduces their periodic healing received by $807216s2%",
         "labels": [
-          "806250 effect_value 807216e1 #3"
+          "806250 behaviour_metric_delta hot_reduction"
         ]
       },
       {
         "claim": "for $807216d",
         "labels": [
-          "806250 spell_duration 807216 #4"
+          "806250 behaviour_metric_delta rift_duration"
         ]
       }
     ]
