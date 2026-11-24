@@ -461,14 +461,24 @@
   {
     "spell": 300490,
     "clause": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
-    "labels": [
-      "300490 behaviour_metric_delta cast_landed",
-      "300490 behaviour_metric_delta cast_early",
-      "300490 behaviour_metric_delta cast_control",
-      "300490 behaviour_metric_delta fourth_cast",
-      "300490 behaviour_metric_delta felforged_duration"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your next 3 Fel Fireballs have a $s1% reduced cast time for $d.",
+        "labels": [
+          "300490 behaviour_metric_delta cast_landed",
+          "300490 behaviour_metric_delta cast_early",
+          "300490 behaviour_metric_delta cast_control",
+          "300490 behaviour_metric_delta felforged_duration"
+        ]
+      },
+      {
+        "claim": "Your next 3 Fel Fireballs",
+        "labels": [
+          "300490 behaviour_metric_delta fourth_cast"
+        ]
+      }
+    ]
   },
   {
     "spell": 301287,

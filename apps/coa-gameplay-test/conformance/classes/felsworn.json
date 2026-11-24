@@ -18879,7 +18879,7 @@
         801312
       ],
       "setup_wait_ms": 1800,
-      "expected": 3,
+      "expected": 4,
       "wait_ms": 1090,
       "game_time": {
         "after": [
@@ -18887,7 +18887,7 @@
           1190
         ]
       },
-      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). Three Fel Fireballs are cast for real (1800 ms apart, so both arms complete them), then the 4th: completed casts read 1090 ms after the 4th starts are 3 when the 4th keeps its 1500 ms cast time (the aura used up by three casts) and 4 when it is still reduced; the arm without the fixture reads 3. Reference search 2026-11-24: coa-history spell 806104: aura applied/removed events exist in the logs but carry no duration in the aggregates; ~/CoaServer/reference: nothing found that decides the duration beyond the tooltip and Spell.dbc.",
+      "observe_source": "Tooltip 300490/806104: 'Your next 3 Fel Fireballs have a $s1% reduced cast time'; 806104 Effect[0] aura 108 ADD_PCT_MODIFIER misc 10 (SPELLMOD_CASTING_TIME), BasePoints -31 (+1 die side, Spell.dbc), Fel Fireball 801312 CastTime 1500 ms (CastingTimes.dbc 16). Felforged is a named precondition fixture (harness set_aura on the caster, after the learn-free control read): the subject here is the cast time, not the grant (the grant and its 8000 ms are timed for real by felforged_duration). The cast count is cumulative over both phases: the before phase's one control cast (no aura) completes during the expire wait (1), then three real Fel Fireballs are cast with the aura (1800 ms apart, so they complete) for 3 more, then the 4th: 4 in total when the 4th keeps its 1500 ms cast time and is not yet completed at 1090 ms (the aura used up by three casts), 5 when the 4th is still reduced. Reference search 2026-11-24: nothing found beyond the tooltip and Spell.dbc (806104 has ProcCharges 0).",
       "cast_in_before": false,
       "setup_only_after": true
     },
