@@ -258,7 +258,7 @@
       {
         "claim": "critical strike chance of all allies against this target is increased by $s2%",
         "labels": [
-          "300474 effect_value 300475e1 #1"
+          "300474 behaviour_metric_delta crit_ally"
         ]
       },
       {
@@ -385,11 +385,23 @@
   {
     "spell": 300483,
     "clause": "and grants you $300481s1% increased spell critical damage for $300481d,",
-    "labels": [
-      "300483 effect_value 300481e0 #1",
-      "300483 spell_duration 300481 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "grants you $300481s1% increased spell critical damage",
+        "labels": [
+          "300483 behaviour_hit_ratio crit_damage_hit",
+          "300483 behaviour_metric_delta crit_damage"
+        ]
+      },
+      {
+        "claim": "for $300481d",
+        "labels": [
+          "300483 behaviour_metric_delta crit_damage_duration"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-vb2c (2026-11-24): magnitude proven by a real hit: 3 stacks of 300481 on forced spell critical hits of Fel Fireball 801312 read +2.997 / +2.999% against the stated 3% (99% intervals +2.984 to +3.009 and +2.984 to +3.013, 20 trials per arm), excluding the control 0. The earlier reading of +1.55% (fw-vb2b) came from the fixture, not the server: 300481 lasts 6000 ms, the trial lasted 5600 ms and set_aura only sets the stack amount of an aura already present, so every second hit was unbuffed; cast_wait_ms 3400 makes a trial last 6500 ms, so each treatment hit follows a fresh application. Duration half: crit_damage_duration, unchanged."
   },
   {
     "spell": 300483,
@@ -438,10 +450,21 @@
   {
     "spell": 300489,
     "clause": "Increases the critical strike chance of your Felfury spenders by $s2% for every 10 points of Energy you have at the time of casting.",
-    "labels": [
-      "300489 effect_value e1 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance of your Felfury spenders by $s2%",
+        "labels": [
+          "300489 behaviour_hit_ratio crit_energy"
+        ]
+      },
+      {
+        "claim": "for every 10 points of Energy you have at the time of casting.",
+        "labels": [],
+        "reason": "Withheld (fw-vb2c, review I-4b): the label '300489 behaviour_hit_ratio crit_energy_half' (50 Energy, stated +5, band 3 to 7) reads +7.25 alert, +6.93 ok, +7.37 alert, every 99% interval excluding 5; the clause must not count in a pair where it lands inside the band. Lead kept for a mentor reading of 'Energy you have at the time of casting'; the arm stays in the class file."
+      }
     ],
-    "kind": "claim"
+    "reason": "fw-vb2b (2026-11-24): the 100 Energy arm (crit_energy) reads +9.67 / +9.85 / +9.82 points against the stated +10 in three runs (all ok). The 50 Energy arm (crit_energy_half, stated +5, band 3 to 7, which excludes a flat +10) reads +7.25 (alert), +6.93 (ok, interval 6.16 to 7.71), +7.37 (alert): the dependence on Energy is real (0 without the passive, about +7 at 50, about +10 at 100) but the value at 50 Energy is not the stated 5 and the arm flips between runs, so the half arm's label is withheld from every claim (its claim has no labels), a lead and not a fix case. The Energy plus spell cost hypothesis (AscensionFelswornAbilities.cpp:158, energy = GetPower + max(0, GetPowerCost), Ruin 801895 ManaCost 30) does not fit both arms: a read before the cost deduction would give 13 at 100 Energy, not 9.7 to 9.8, and a read after it would give 5 at 50 Energy, not 7; it is dropped as an explanation. No server change on this check: needs a mentor reading of 'Energy you have at the time of casting' (before or after the cost)."
   },
   {
     "spell": 300490,
@@ -1208,7 +1231,9 @@
     "spell": 560542,
     "clause": "In addition, while Inner Demon is active, you now heal for $s2% of all melee damage dealt.",
     "labels": [
-      "560542 effect_value e1 #2"
+      "560542 behaviour_metric_delta inner_heal",
+      "560542 behaviour_metric_delta no_inner_heal",
+      "560542 behaviour_metric_delta no_felguard_heal"
     ],
     "kind": "claim"
   },
@@ -1459,7 +1484,17 @@
     "labels": [
       "561201 effect_value 801895e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin 801895 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "tool_gap": {
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561201,
@@ -1467,7 +1502,17 @@
     "labels": [
       "561201 effect_value 501297e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2b (2026-11-24): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
+    "tool_gap": {
+      "reason": "A recording extension, inside G-39 without a note: add an absorb field to SpellHealEvent (CoAGameplayTest.cpp:1388 reads it instead of skipping it) and a heal-absorb metric over it, with a seeded test and a mutant. The dummy's own heal then gives min(heal, absorb value) exactly, whatever the heal's die or Ruin's damage, because the read is taken from the heal packet and not from the dummy's health. Design 1 (fw-vb2): a health read around the dummy's own heal, rejected because Ruin's die cannot be separated from it. Design 2: the recording extension above, identified and not built (the harness is outside the author's scope); the gap stays pending until it is tried (guide 9.7: status 5 only after two different designs failed; coverage.tool_gap_state accepts a gap only with two attempting agents or an owner acceptance).",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561201,
@@ -1967,10 +2012,14 @@
     "spell": 706420,
     "clause": "Inner Demon: The enemy takes an additional ${$802676m1*$<scalingbp>+$SP*0.48} Chaos Damage every $t2 sec.",
     "labels": [
-      "706420 effect_value 802676e0 #1",
-      "706420 aura_amplitude_ms #2"
+      "706420 behaviour_metric_delta inner_damage",
+      "706420 behaviour_metric_delta inner_damage_sp",
+      "706420 behaviour_metric_delta inner_interval_a",
+      "706420 behaviour_metric_delta inner_interval_b",
+      "706420 behaviour_metric_delta inner_none"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): the damage half is proven in game (Chaos 802676 hit with Inner Demon: 598.3 per hit against the tooltip's 551 x 0.98743 x 1.10 = 598.5 to 600.6; +10000 spell power: 5879 against 5879.6). The interval half alerts: the tooltip and EffectAmplitude[1] say every $t2 = 6 sec, the server hits every 2 s (3 hits by 6.6 s, 2 by 5.4 s, 6 by 12.6 s; AscensionFelswornContracts.cpp:276-279 sets the Bane's periodic dummy to 2000 ms). Fix note in the fw-vb2 report; no server change."
   },
   {
     "spell": 706420,
@@ -2086,8 +2135,10 @@
     "spell": 704602,
     "clause": "and increase their damage taken from Sunder by $806096s2% for $806096d.",
     "labels": [
-      "704602 effect_value 806096e1 #2",
-      "704602 spell_duration 806096 #3"
+      "704602 behaviour_metric_delta sunder_taken",
+      "704602 behaviour_metric_delta sunder_taken_control",
+      "704602 behaviour_metric_delta sunder_held",
+      "704602 behaviour_metric_delta sunder_gone"
     ],
     "kind": "claim"
   },
@@ -2175,9 +2226,20 @@
     "spell": 704612,
     "clause": "Increases the effectiveness of your Pacts by $s1%.",
     "labels": [
-      "704612 effect_value e0 #0"
+      "704612 behaviour_metric_delta pact_resist",
+      "704612 behaviour_metric_delta pact_resist_hunter"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "fw-vb2 (2026-11-23): Pact Hunter +50% on Vengeful Pact's Shadow resistance reads 65 then 97 (97.5 truncated, inside the 5% band), a live stat read after a real cast with its control entry, but the audit counts a resistance read as data because the claim carries no 'resistance' promise word. A damage shield hit after a real Damage 100 (TEST) 2653 cast by the dummy at the holder read no shield hit. Demonfire Pact's +3 crit chance reads +4 with Pact Hunter (4.5 truncated). fw-vb2b (2026-11-24): not status 3. The effectiveness_of route (ADR 0268, coverage.py subject_claims) was examined as the second design: it extends the claim only when the named spell's ledger clauses state exactly one value, and Vengeful Pact 803885 (Description: 'increases nearby allies' Shadow Resistance by ${$m1+0} and causes them to deal $s2 Shadow damage') states two values (resistance 65, shield damage 50) and has no Felsworn ledger row, while the claim says 'your Pacts' in the plural. The route does not apply to this clause; the resistance read stays data.",
+    "tool_gap": {
+      "reason": "The clause 'effectiveness of your Pacts' has no counting route: the resistance read (65 to 97) is a stat read the audit counts as data, the damage shield read of the same Pact observed no hit (design 1), and the effectiveness_of route, checked by fw-vb2b and not a second built design, needs one stated value on a single named spell, which Vengeful Pact 803885 (two values) and the plural 'Pacts' do not give. A route needs either a mentor reading of effectiveness_of for a two-value Pact or a harness read that makes the Pact's damage shield strike a real attacker (the shield hit read no event after a real 2653 cast by the dummy at the holder). The gap stays pending until a second design is built (guide 9.7).",
+      "attempts": [
+        {
+          "agent": "fw-vb2",
+          "report": ".agents/plans/fw-vb2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 704613,
@@ -2648,7 +2710,8 @@
           "report": ".agents/plans/fw-vb9b/report.md"
         }
       ]
-    }
+    },
+    "reason": "fw-vb2 (2026-11-23): 195.1 ('strike 1 additional enemy ... based on how long you channeled') waits for the L2 Felfury/wait fixture, which is not merged at this head; not authored in batch B2."
   },
   {
     "spell": 707444,
@@ -3590,7 +3653,7 @@
       {
         "claim": "damage dealt by your Fel Fireball increases your damage dealt by $524632s2%",
         "labels": [
-          "802058 behaviour_metric_delta stack_amount"
+          "802058 behaviour_hit_ratio stack_damage"
         ]
       },
       {
