@@ -2951,7 +2951,20 @@
         "claim": "and draining mana from the target based on your Spirit.",
         "labels": []
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "The drain of Felbreak ('draining mana from the target based on your Spirit') is Spellbreak 804809 (POWER_DRAIN, value = caster Spirit, AscensionFelswornContracts.cpp:517-518, cast on a successful interrupt, AscensionFelswornAbilities.cpp:414-417), applied at the instant of the interrupt. Reading it needs the target's mana set to a known value BEFORE the interrupt lands. The only option that sets a dummy's power, dummy_power_after_trigger, sets it after_ms >= 0 after the trigger cast (parser rejects after_ms < 0) or, in an uncast before phase, at the point of the cast, so it resets the pool after the drain; the first design (Scarlet Magus 1832 channelling Evocation) read an unset control mana (5206 / 5340, e2ff868f34). Needs tool group B: a dummy_power_before_trigger option (set_power on the dummy before the interrupt, with a Spirit contrast arm: positive drain and a strictly larger drain at a higher Spirit, coefficient unasserted as for 92089). Live reference: coa-history spell 804809 holds 2 SPELL_DRAIN events of 166 mana in 1 log (the caster's Spirit is not logged).",
+      "attempts": [
+        {
+          "agent": "fw-l2b",
+          "report": "e2ff868f34"
+        },
+        {
+          "agent": "fw-fa1",
+          "report": ".agents/plans/fw-fa1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 800203,
@@ -3041,16 +3054,21 @@
       },
       {
         "claim": "and parry while channeling",
-        "labels": []
+        "labels": [
+          "800206 behaviour_metric_delta channel_parry",
+          "800206 behaviour_metric_delta channel_parry_control"
+        ]
       },
       {
         "claim": "you can channel while moving",
         "labels": [
-          "800206 behaviour_metric_delta moving_channel"
+          "800206 behaviour_metric_delta moving_channel_state",
+          "800206 behaviour_metric_delta moving_channel_mindflay_moved",
+          "800206 behaviour_metric_delta moving_channel_mindflay_still"
         ]
       }
     ],
-    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too)."
+    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too). fw-fa1 2026-11-24: parry fixed by Parry Dance 560651 as a precondition (Player::CanParry); moving read by the STATE metric casting with Mind Flay 15407 moved/still controls."
   },
   {
     "spell": 572617,
