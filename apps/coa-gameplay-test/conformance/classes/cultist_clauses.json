@@ -335,7 +335,8 @@
       {
         "claim": "Increases your haste by $s1%",
         "labels": [
-          "300296 behaviour_metric_delta melee_haste"
+          "300296 behaviour_metric_delta melee_haste",
+          "300296 behaviour_metric_delta spell_haste"
         ]
       },
       {
@@ -2537,6 +2538,10 @@
         "labels": [
           "681474 behaviour_metric_delta slow_duration"
         ]
+      },
+      {
+        "claim": "to enemies in front of you",
+        "labels": []
       }
     ]
   },
