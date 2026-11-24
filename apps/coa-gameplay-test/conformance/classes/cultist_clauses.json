@@ -1017,6 +1017,32 @@
     "kind": "claim"
   },
   {
+    "spell": 502122,
+    "clause": "3 Charge,",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 502122,
+    "clause": "6 sec recharge",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 502122,
+    "clause": "Generates 20 Insanity",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 502122,
+    "clause": "Strike an enemy, dealing $?a803339[${$m1+0+$sps*.3+$AP*.25}][${$m1+0+$sps*.15+$AP*.25}] Shadow damage.",
+    "labels": [
+      "502122 effect_value #0"
+    ],
+    "kind": "claim"
+  },
+  {
     "spell": 570249,
     "clause": "3 Charges,",
     "labels": [],
@@ -3347,6 +3373,21 @@
     "kind": "claim"
   },
   {
+    "spell": 572846,
+    "clause": "Crush enemies in front of you, dealing $s2% Weapon Damage plus ${$m1+0} as Shadow damage",
+    "labels": [
+      "572846 effect_value e1 #0",
+      "572846 effect_value e0 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572846,
+    "clause": "and draining 40 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
     "spell": 804286,
     "clause": "Level 20 Passive",
     "labels": [],
@@ -3516,6 +3557,27 @@
         ]
       }
     ]
+  },
+  {
+    "spell": 806830,
+    "clause": "Smash an enemy for $s1% Weapon Damage plus ${$m2+0} Shadow damage,",
+    "labels": [
+      "806830 effect_value e0 #0",
+      "806830 effect_value e1 #1"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806830,
+    "clause": "ignoring absorption effects and draining 40 Insanity.",
+    "labels": [],
+    "kind": "claim"
+  },
+  {
+    "spell": 806830,
+    "clause": "$?s704869[ Refreshes a charge of Blade of the Empire.][]",
+    "labels": [],
+    "kind": "claim"
   },
   {
     "spell": 805117,

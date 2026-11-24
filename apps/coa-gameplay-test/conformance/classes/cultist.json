@@ -51,7 +51,23 @@
   "off_hand_weapons": [],
   "known_auras": [],
   "probe_auras": [],
-  "extra_spells": [],
+  "extra_spells": [
+    {
+      "spell": 500720,
+      "name": "Blade of the Empire",
+      "citation": "2026-08-31 19:09:41.673, spell 502122 Blade of the Empire, Ascension combat log, private archive"
+    },
+    {
+      "spell": 804152,
+      "name": "Entropic Slam",
+      "citation": "2026-08-31 19:12:11.142, spell 572846 Entropic Slam, Ascension combat log, private archive"
+    },
+    {
+      "spell": 805116,
+      "name": "Hammer of Twilight",
+      "citation": "2026-08-31 19:18:56.205, spell 806830 Hammer of Twilight, Ascension combat log, private archive"
+    }
+  ],
   "disabled_foreign_effects": [],
   "foreign_aura_grants": [],
   "effect_overrides": [],
