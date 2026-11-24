@@ -4220,6 +4220,12 @@ private:
             Require(entry != nullptr, "Spell has no proc entry");
             return entry->Chance;
         }
+        if (metric == "spell_proc_cooldown_ms")
+        {
+            SpellProcEntry const* entry = sSpellMgr->GetSpellProcEntry(spell);
+            Require(entry != nullptr, "Spell has no proc entry");
+            return double(entry->Cooldown.count());
+        }
         if (metric == "aura_proc_rate")
         {
             Aura* aura = unit->GetAura(spell);
