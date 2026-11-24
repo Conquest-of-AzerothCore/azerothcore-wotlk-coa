@@ -35,7 +35,7 @@ bound sums `window // speed + 1` over every melee hand the scenario equips, sinc
 hands. Untested by the rule: missed or avoided swings (only landed attacks count) and the aura's end at the last
 count.
 
-`main_hand` (ADR 1275, optional, with `swings` only) is `{"item", "speed_ms", "skill_line", "proficiency"}`, all
+`main_hand` (ADR 1277, optional, with `swings` only) is `{"item", "speed_ms", "skill_line", "proficiency"}`, all
 positive integers read from `item_template` (`delay`, the subclass's skill line) and Spell.dbc. It replaces the
 scenario's melee equip steps (slots 15 and 16 with their `add_item`) by one main-hand weapon: the caster learns
 `proficiency` (refused unless Spell.dbc gives it Effect[0] 25 on item class 2), equips `item` in slot 15 and sets

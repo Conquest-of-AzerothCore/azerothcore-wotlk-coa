@@ -1,4 +1,4 @@
-# 1275. script_count main_hand fixture and the fed_charge_casts expiry void
+# 1277. script_count main_hand fixture and the fed_charge_casts expiry void
 
 - Status: proposed (provisional number, numbered at merge)
 - Date: 2026-11-24
