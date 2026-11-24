@@ -1512,7 +1512,8 @@
     "spell": 561201,
     "clause": "Damage dealt by Ruin now absorbs the next ${$801895m2+$801895ppl2} healing on the target based on rank,",
     "labels": [
-      "561201 effect_value 801895e1 #0"
+      "561201 effect_value 801895e1 #0",
+      "561201 behaviour_metric_delta heal_absorb"
     ],
     "kind": "claim",
     "reason": "fw-vb2b (2026-11-24): the absorb is Ruin 801895 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
@@ -1530,7 +1531,8 @@
     "spell": 561201,
     "clause": "up to ${$501297m2+$501297ppl2} at rank 7,",
     "labels": [
-      "561201 effect_value 501297e1 #1"
+      "561201 effect_value 501297e1 #1",
+      "561201 behaviour_metric_delta heal_absorb_r7"
     ],
     "kind": "claim",
     "reason": "fw-vb2b (2026-11-24): the absorb is Ruin rank 7 501297 Effect[1] aura 301 SPELL_AURA_SCHOOL_HEAL_ABSORB on the hostile target (TargetA 6, DBC), so the amount it takes is read from a heal landing on that hostile unit, which the dummy's own heal (target_casts) provides. The earlier reason (fw-vb2: no route, because the dummy's health also carries Ruin's random damage) is withdrawn: the server's heal log carries the absorbed amount (Unit::SendHealSpellLog writes healInfo.GetAbsorb(), src/server/game/Entities/Unit/Unit.cpp:9296, 'Absorb amount'), and the harness reads the heal and the overheal of that packet then skips the absorb field (ObserveSpellHealing, response.read_skip<uint32>(), src/server/coa/CoAGameplayTest.cpp:1388). The value read stays data; part uncounted until the harness records the field.",
