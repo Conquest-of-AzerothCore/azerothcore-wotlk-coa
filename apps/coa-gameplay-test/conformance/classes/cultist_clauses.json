@@ -19,7 +19,7 @@
     "spell": 92130,
     "clause": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
     "labels": [
-      "92130 effect_value #0"
+      "92130 behaviour_metric_delta proc_rate"
     ],
     "kind": "claim"
   },
@@ -2896,7 +2896,8 @@
     "spell": 706245,
     "clause": "Grants your Horrorbolt and Wrath of the Black Empire a $h% chance to reset the cooldown of Gaze of C'thun.",
     "labels": [
-      "706245 effect_value #0"
+      "706245 behaviour_metric_delta wrath_reset_rate",
+      "706245 behaviour_metric_delta horrorbolt_reset_rate"
     ],
     "kind": "claim"
   },

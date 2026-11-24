@@ -4206,6 +4206,116 @@
       "wait_ms": 2700,
       "expire_ms": 500,
       "observe_source": "Lower-bound gate for Corrupting Whispers 706725 (-30% mana cost on Horrorbolt 502182, 181 * 0.70 = 126.7 -> floor - 1 = 125): with regen off and mana set to 125, 502182 is refused both before (0 casts) and after a real cast of 706725 (0 casts). Together with mana_cost_through (127 mana), proves the reduced mana cost is in [126, 127]. Reference search 2026-11-24: see magic_damage."
+    },
+    {
+      "spell": 92130,
+      "kind": "flat_chance_rate",
+      "variant": "proc_rate",
+      "label_suffix": "proc_rate",
+      "name": "Corrupting Whispers (damage dealt procs 706725 at 15%)",
+      "quote": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
+      "chance_pct": 15,
+      "trigger_spell": 502220,
+      "trigger_target": "dummy",
+      "dummy_distance": 10,
+      "cast_power": 2000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "caster aura 823764 (target resistance -9999 on magic schools): prevents full resists on Darkwither 502220 periodic Shadow ticks so every tick deals damage and enters the proc check (precondition fixture; test-only aura with no player cast)"
+        },
+        {
+          "spell": 500706,
+          "stacks": 0,
+          "source": "clears Insanity 500706 before each Darkwither 502220 cast (+10 Insanity per cast) so Insanity stays at 0->10 and never reaches 100 to trigger Insane 803060 (+30% spell haste) (precondition fixture)"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 502220,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 706725
+      },
+      "cycles": 80,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 4,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Darkwither 502220 has single-target EffectImplicitTargetA 6 with EffectRadiusIndex 0 and EffectChainTarget 0 on all three effects (including triggered Withered 706913 aura 259, EffectImplicitTargetA 6, EffectRadiusIndex 0) and is cast at the stream's own dummy by id at dummy_distance 10 yd (outside 5 yd melee range, inside 30 yd RangeIndex 4); 823764, Insanity 500706, 805606 and Corrupting Whispers 706725 are caster-only auras (EffectImplicitTargetA 1, EffectRadiusIndex 0); aura_ascension_cultist_event only accepts event.GetActor() == player (AscensionCultistEvents.cpp:103-104,251); streams are ungrouped."
+      },
+      "observe_source": "Corrupting Whispers 92130 (passive, aura_ascension_cultist_lifecycle -> AscensionCultist.cpp:286 SetHelper(player, 805606, player->HasSpell(92130))): helper aura 805606 has Spell.dbc ProcChance 15 ($805606h = 15) and aura_ascension_cultist_event (AscensionCultistEvents.cpp:103-104,251: dealt && event.GetActor() == player && (!info || info->Id != Thoughtseize) && Chance(player, 805606), rolling ProcChance directly via roll_chance_f ignoring spell mods so forced_roll cannot force it, then Cast(player, player, 706725), counted by spell_cast_count of 706725). Trigger: Darkwither 502220 (instant, 1500 ms GCD, 17% of 1512 BaseMana = 257 mana, cast_power 2000; 15000 ms duration, 3000 ms period -> 5 ticks per cast inside 15500 ms). Unlearned control: 2 cycles x 5 ticks x 4 parts x 8 streams = 320 trials (>= 50), expects 0 procs. Treatment: 80 cycles x 5 ticks x 4 parts x 8 streams = 12800 trials (>= 12632 flip-proof trials for 15% with G-19 +-2 pt band over 4 parts, residual edge-crossing failure <= 0.1% per pair). Reference search 2026-11-24: coa-history 92130/805606/706725: 0 events; coabuildhub spells_master_index.json 92130 matches verbatim."
+    },
+    {
+      "spell": 706245,
+      "name": "Dark Revelation (Wrath of the Black Empire resets Gaze CD at 20%)",
+      "kind": "cooldown_reset_rate",
+      "variant": "wrath",
+      "label_suffix": "wrath_reset_rate",
+      "quote": "Grants your Horrorbolt and Wrath of the Black Empire a $h% chance to reset the cooldown of Gaze of C'thun.",
+      "talent": 706245,
+      "trigger_spell": 800413,
+      "reset_spell": 502141,
+      "chance_pct": 20,
+      "control_casts": 50,
+      "casts": 1400,
+      "parts": 14,
+      "cast_wait_ms": 2300,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 20,
+          "source": "precondition fixture: Wrath of the Black Empire 800413 requires >= 20 Insanity (CasterAuraSpell 680601) and triggers resource helper 503695 on cast (Spell.dbc)"
+        },
+        {
+          "spell": 680601,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680601 (20 Insanity helper marker) required by Wrath of the Black Empire 800413 (Spell.dbc)"
+        },
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: caster aura 823764 (target resistance -9999 on magic schools) prevents full resists on Wrath of the Black Empire 800413 Shadow damage"
+        }
+      ],
+      "observe_source": "$h = 20 (706245 Spell.dbc ProcChance 20; AscensionCultistEvents.cpp:97 returns dealt && Any(info, {800416, 800413}) && Chance(player, 706245), rolling ProcChance via roll_chance_f ignoring spell mods so forced_roll cannot force it; :170-171 calls Reduce(player, 500110, INT32_MAX) -> Player::RemoveSpellCooldown(502141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Wrath of the Black Empire 800413 (0 mana, 0 CD, 2000 ms cast, 25 yd/s projectile -> 120 ms flight at 3 yd, 2300 ms wait). Control: 50 casts x 14 parts = 700 hits before 706245 is learned (0 resets). Treatment: 14 pooled parts x 1400 casts = 19600 damaging hits (>= 19386 trials needed for residual_target 0.001 per pair and min_detectable 4 pts, G-20 +-2 pt band around 20%). Paired with horrorbolt_reset_rate on 502182. Reference search 2026-11-24: coa-history 706245: 0 events (passive; 500110 Gaze: 4 casts in 2 logs); coabuildhub spells_master_index.json 706245 matches verbatim."
+    },
+    {
+      "spell": 706245,
+      "name": "Dark Revelation (Horrorbolt resets Gaze CD at 20%)",
+      "kind": "cooldown_reset_rate",
+      "variant": "horrorbolt",
+      "label_suffix": "horrorbolt_reset_rate",
+      "quote": "Grants your Horrorbolt and Wrath of the Black Empire a $h% chance to reset the cooldown of Gaze of C'thun.",
+      "talent": 706245,
+      "trigger_spell": 502182,
+      "reset_spell": 502141,
+      "chance_pct": 20,
+      "base_mana_per_attempt": true,
+      "control_casts": 50,
+      "casts": 1150,
+      "parts": 17,
+      "cast_wait_ms": 2800,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: caster aura 823764 (target resistance -9999 on magic schools) prevents full resists on Horrorbolt 502182 Shadow damage"
+        }
+      ],
+      "observe_source": "$h = 20 (706245 Spell.dbc ProcChance 20; AscensionCultistEvents.cpp:97,170-171: Any(info, {800416, 800413}) matches level-60 Horrorbolt rank 502182 and resets Gaze of C'Thun 502141 cooldown via SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Horrorbolt 502182 (12% of BaseMana 1512 refilled via base_mana_per_attempt, 0 CD, 2500 ms cast, 25 yd/s projectile -> 120 ms flight at 3 yd, 2800 ms wait). Control: 50 casts x 17 parts = 850 hits before 706245 is learned (0 resets). Treatment: 17 pooled parts x 1150 casts = 19550 damaging hits (>= 19386 trials needed for residual_target 0.001 per pair and min_detectable 4 pts, G-20 +-2 pt band around 20%). Paired with wrath_reset_rate on 800413. Reference search 2026-11-24: coa-history 502182: 27 casts in 1 log; see wrath_reset_rate."
     }
   ],
   "player_observations": [],
@@ -4522,5 +4632,10 @@
     "807877": "Heretic",
     "807879": "Heretic",
     "807969": "Corruption"
+  },
+  "base_mana": {
+    "power": 0,
+    "value": 1512,
+    "source": "player_class_stats class 25 level 60 BaseMana 1512, read in the world database of the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable = 0); set before every cast of a scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
   }
 }
