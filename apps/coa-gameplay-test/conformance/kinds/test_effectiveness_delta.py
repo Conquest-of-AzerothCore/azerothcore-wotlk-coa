@@ -1,5 +1,6 @@
 import unittest
 from dataclasses import replace
+from unittest import mock
 
 from behaviours import behaviour_scenario
 from compare import judge_behaviour
@@ -13,6 +14,7 @@ ENTRY = {'spell': 560613, 'name': 'Improved Mandates (Grim Mandate spell power)'
          'trigger_spell': 572789, 'gate_spell': 560613, 'target': 'caster', 'expire_ms': 1801000, 'wait_ms': 1000,
          'metric': 'spell_power', 'fields': {'school': 5}}
 CLAUSE = 'Increases the effectiveness of your Mandates by 20%.'
+READ_METRICS_BEFORE_RESISTANCE = ('spell_power', 'stat', 'dodge_chance', 'parry_chance', 'run_speed_rate')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
@@ -100,6 +102,38 @@ class EffectivenessDeltaTests(unittest.TestCase):
         self.assertEqual(judged(0.57143, 0.285715).status, 'ok')
         self.assertEqual(judged(0.57143, 0.57143).status, 'alert')
         self.assertTrue(promised_state(judged(0.57143, 0.285715), 'and effectiveness of your Jinxes by 50%'))
+
+    def test_an_ally_resistance_is_judged_as_its_effectiveness_state(self):
+        from coverage import STATE, metric_evidence, promised_state
+        entry = {'spell': 704612, 'name': 'Pact Hunter (Vengeful Pact Shadow resistance)',
+                 'kind': 'effectiveness_delta', 'label_suffix': 'pact_effectiveness',
+                 'quote': 'Increases the effectiveness of your Pacts by $s1%.',
+                 'trigger_spell': 803885, 'gate_spell': 704612, 'target': 'dummy', 'measure_actor': 'ally',
+                 'ally_arm': {'allies': 1}, 'metric': 'resistance', 'fields': {'school': 5}, 'before_expected': 65,
+                 'expected': 97, 'tolerance': 0.5, 'wait_ms': 1500, 'expire_ms': 500}
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        model = expectation.model
+        reads = [step for step in scenario['steps'] if step.get('label') in (model['before_label'],
+                                                                              model['after_label'])]
+        self.assertEqual([(step['metric'], step['actor'], step['school']) for step in reads],
+                         [('resistance', 'ally', 5), ('resistance', 'ally', 5)])
+        self.assertEqual(model['metric'], 'effectiveness_resistance')
+        self.assertEqual(metric_evidence()['effectiveness_resistance'], STATE)
+
+        def judged(before: float, after: float):
+            return judge_behaviour(base_verdict(expectation),
+                                   FakeRun({model['before_label']: before, model['after_label']: after}),
+                                   expectation)
+
+        self.assertEqual(judged(65, 97).status, 'ok')
+        self.assertEqual(judged(65, 65).status, 'alert')
+        self.assertEqual(judged(65, 130).status, 'alert')
+        self.assertTrue(promised_state(judged(65, 97), 'Increases the effectiveness of your Pacts by 50%.'))
+        self.assertFalse(promised_state(judged(65, 97), "increases nearby allies' Shadow Resistance by 65"))
+        with mock.patch('kinds.effectiveness_delta.READ_METRICS', READ_METRICS_BEFORE_RESISTANCE), \
+                self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), entry)
 
     def test_an_entry_without_a_modifier_or_without_the_control_cast_is_refused(self):
         for changes in ({'gate_spell': None}, {'cast_in_before': False}, {'metric': 'aura'},

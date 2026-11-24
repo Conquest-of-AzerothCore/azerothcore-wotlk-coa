@@ -1,0 +1,54 @@
+{
+  "schema": 1,
+  "name": "The Tirisfal Tree woodcutting node stays off the Brill road (#11791)",
+  "contract": "#8932 moved Tirisfal Tree node 8000416 (entry 244624) 9 yd west off the stone road into west Brill onto grass (rev_20261024_95). The GatherMate revert (rev_20261105_100, #11290) re-inserted the node at its old road spot (2253.41, 509.29), which #11791 reported. rev_20261124_11791 re-applies the #8932 spot, and the node stands on the ground there.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 2244.4,
+    "y": 505.3,
+    "z": 35.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 5,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the tree stands on the grass west of the road, not 9 yd east on it",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 2244.4,
+      "y": 509.3,
+      "z": 35.152,
+      "max": 0.3,
+      "guid": 8000416,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the tree stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -1.0,
+      "max": 1.0,
+      "guid": 8000416,
+      "spawn_type": "gameobject"
+    }
+  ]
+}

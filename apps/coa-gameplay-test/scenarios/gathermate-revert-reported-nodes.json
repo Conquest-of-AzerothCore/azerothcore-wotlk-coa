@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "name": "Gathering nodes reported after the GatherMate2 import are gone after its revert (#10542, #10619, #10632, #11205, #11293)",
+  "contract": "rev_20261105_100_coa_revert_gathermate_nodes (#11290) deletes the GatherMate2 import nodes (guids 12000000-12099999) outside Pale Reach and restores the stock pools. At each reported spot the import node the report described does not spawn: Searing Gorge Blackchar Cave ore in terrain 12007669 (#10542), the Eastern Plaguelands Gold Vein 12010182 near the report (#10619), the Stagnant Oasis Briarthorn inside a tree 12017140 (#10632), the out-of-reach Deathknell Copper Vein 12010065 (#11205) and the floating Duskwood nodes 12010708/12010705 (#11293). The restored stock ore spot 205463 at the cave entrance and the stock Briarthorn 213377 at the oasis stand on the ground.",
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -7289.6, "y": -806.34, "z": 302.5, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the import ore in the Blackchar Cave terrain is gone (#10542)", "actor": "p", "metric": "spawn_active", "spawn": 12007669, "equals": 0 },
+    { "action": "assert", "label": "the restored stock ore spot at the cave entrance stands on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 205463, "spawn_type": "gameobject", "min": -0.35, "max": 0.35 },
+
+    { "action": "teleport", "actor": "p", "map": 0, "x": 2338.51, "y": -5207.55, "z": 81.6, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the import Gold Vein near the Eastern Plaguelands report is gone (#10619)", "actor": "p", "metric": "spawn_active", "spawn": 12010182, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": -1871.09, "y": -3372.66, "z": 65.2, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the import Briarthorn inside the oasis tree is gone (#10632)", "actor": "p", "metric": "spawn_active", "spawn": 12017140, "equals": 0 },
+    { "action": "assert", "label": "the restored stock Briarthorn stands on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 213377, "spawn_type": "gameobject", "min": -0.35, "max": 0.35 },
+
+    { "action": "teleport", "actor": "p", "map": 0, "x": 1866.5, "y": 1813.14, "z": 156.0, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the out-of-reach import Copper Vein in Deathknell is gone (#11205)", "actor": "p", "metric": "spawn_active", "spawn": 12010065, "equals": 0 },
+
+    { "action": "teleport", "actor": "p", "map": 0, "x": -10837.5, "y": -176.685, "z": 34.0, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the floating import Duskwood node beside the report is gone (#11293)", "actor": "p", "metric": "spawn_active", "spawn": 12010708, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: the second floating import Duskwood node is gone (#11293)", "actor": "p", "metric": "spawn_active", "spawn": 12010705, "equals": 0 }
+  ]
+}

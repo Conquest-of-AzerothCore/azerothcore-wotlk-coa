@@ -9601,6 +9601,13 @@ public:
                 case 804704:
                     spellInfo->AttributesEx6 &= ~SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS;
                     break;
+                case SPELL_PERSONAL_BANK:
+                case SPELL_CELESTIAL_PERSONAL_BANK:
+                case SPELL_REALM_BANK:
+                    spellInfo->Effects[EFFECT_0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+                    spellInfo->Effects[EFFECT_0].TargetB = SpellImplicitTargetInfo(0);
+                    spellInfo->AttributesCu |= SPELL_ATTR0_CU_NO_PVP_FLAG;
+                    break;
                 default:
                     break;
             }

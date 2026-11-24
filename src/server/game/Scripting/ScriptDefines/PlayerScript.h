@@ -236,6 +236,7 @@ enum PlayerHook
     PLAYERHOOK_ON_SPELL_CHARGE_CONSUMED,
     PLAYERHOOK_ON_SPELL_COOLDOWN_CALCULATED,
     PLAYERHOOK_CAN_ENTER_MANASTORM,
+    PLAYERHOOK_CAN_RELEASE_SPIRIT,
     PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE,
     PLAYERHOOK_ON_PLAYER_BREATH_INVERTED,
     PLAYERHOOK_ON_CAN_REGENERATE,
@@ -978,6 +979,15 @@ public:
      * @return true if player is allowed to enter the Manastorm
      */
     virtual bool OnPlayerCanEnterManastorm(Player* /*player*/) { return true; }
+
+    /**
+     * @brief This hook is called when a dead player asks to release their spirit.
+     *
+     * @param player Contains information about the Player
+     *
+     * @return true if the player may release now
+     */
+    virtual bool OnPlayerCanReleaseSpirit(Player* /*player*/) { return true; }
 
     // Called when a player withdraws from a bank the Ascension personal/realm bank items
     // open (an item moved out, or money taken out). `kind`: 0 = personal, 1 = realm.

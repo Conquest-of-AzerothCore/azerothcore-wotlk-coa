@@ -68,7 +68,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
     'vanity_owned',
-    'mana_regen', 'mana_regen_interrupted', 'resting', 'track_creature_type', 'free_for_all_pvp',
+    'mana_regen', 'mana_regen_interrupted', 'resting', 'track_creature_type', 'free_for_all_pvp', 'pvp_flagged',
     'sent_mana_regen', 'sent_mana_regen_interrupted',
     'moving', 'spline_remaining_ms', 'spline_speed', 'water_walk', 'in_water', 'terrain_in_water', 'ground_height',
     'forced_forward', 'distance_2d',
@@ -200,11 +200,11 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_effect_radius', 'spell_calc_amount_hooks',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
-    'melee_attacks_taken', 'melee_missed_taken',
+    'melee_attacks_taken', 'melee_missed_taken', 'melee_attack_taken_last_ms',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
-    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
+    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total', 'spell_heal_absorb_total',
     'equipped_item', 'visible_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_max_health', 'pet_stat', 'pet_health', 'pet_attack_power',
     'pet_melee_swings', 'pet_melee_crits', 'pet_melee_glancing', 'pet_melee_plain_count', 'pet_melee_plain_damage',
@@ -255,11 +255,11 @@ PLAYER_STAT_METRICS = {
     'spell_calc_amount_hooks',
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'melee_attack_count',
-    'melee_attacks_taken', 'melee_missed_taken',
+    'melee_attacks_taken', 'melee_missed_taken', 'melee_attack_taken_last_ms',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
-    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total',
+    'spell_heal_count', 'spell_heal_total', 'spell_effective_heal_total', 'spell_heal_absorb_total',
     'equipped_item', 'visible_item',
     'pet_aura_amount', 'pet_aura_amplitude_ms', 'pet_aura_duration_ms', 'pet_max_health', 'pet_stat', 'pet_health',
     'pet_attack_power',
@@ -349,7 +349,7 @@ ACTIONS = {
     'encounter_start': ({'actor', 'boss_entry'}, {'actor', 'boss_entry', 'radius'}),
     'leave_group': ({'actor'}, {'actor'}),
     'die': ({'actor'}, {'actor', 'revived', 'pet'}),
-    'release_spirit': ({'actor'}, {'actor'}),
+    'release_spirit': ({'actor'}, {'actor', 'refused'}),
     'cast_charm': ({'actor', 'spell'}, {'actor', 'spell', 'target', 'pet', 'destination', 'destination_unit'}),
     'gossip_hello': ({'actor'}, {'actor', 'target', 'entry'}),
     'banker_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
@@ -396,7 +396,7 @@ ACTIONS = {
     'reward_quest': ({'actor', 'quest'}, {'actor', 'quest', 'choice'}),
     'restore_quest_spells': ({'actor'}, {'actor'}),
     'login_hooks': ({'actor'}, {'actor'}),
-    'relog': ({'actor'}, {'actor', 'race', 'offline_seconds'}),
+    'relog': ({'actor'}, {'actor', 'race', 'offline_seconds', 'logout_repop'}),
     'reconnect': ({'actor'}, {'actor'}),
     'talent': ({'actor', 'talent', 'rank'}, {'actor', 'talent', 'rank', 'command'}),
     'reset_talents': ({'actor'}, {'actor'}),
@@ -1058,6 +1058,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 number(step['race'], f'{where}.race', 1, 255, True)
             if 'offline_seconds' in step:
                 number(step['offline_seconds'], f'{where}.offline_seconds', 1, 2**31 - 1, True)
+            require(type(step.get('logout_repop', False)) is bool, f'{where}: logout_repop must be boolean')
         if action == 'specialization':
             require(step['actor'] in player_ids, f'{where}: specialization needs a player')
             number(step['id'], f'{where}.id', 1, 0xFFFF, True)
@@ -1392,8 +1393,9 @@ def validate(scenario, clock=REAL_CLOCK):
                     'spell_immune', 'spell_effect_immune', 'spell_damage_count', 'spell_damage_total',
                     'spell_log_count', 'spell_absorb_total', 'spell_resist_total', 'spell_damage_with_resist_total',
                     'spell_uses_armor', 'pet_aura_amount', 'pet_aura_amplitude_ms', 'spell_heal_count', 'spell_heal_total',
-                    'spell_effective_heal_total', 'spell_energize_count', 'spell_energize_total',
-                    'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
+                    'spell_effective_heal_total', 'spell_heal_absorb_total', 'spell_energize_count',
+                    'spell_energize_total', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate',
+                    'temporary_spell_replacement',
                     'cast_failure',
                     'trainer_window_state', 'trainer_window_ability', 'spellbook_superseded_for',
                     'spellbook_loud_supersedes_for', 'spellbook_client_notable',
@@ -1405,7 +1407,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 if metric == 'spell_id_for_difficulty':
                     require('target' in step, f'{where}: spell_id_for_difficulty needs a target')
             if 'victim_state' in step:
-                require(metric == 'melee_attacks_taken', f'{where}: victim_state only filters melee attacks taken')
+                require(metric in ('melee_attacks_taken', 'melee_attack_taken_last_ms'),
+                        f'{where}: victim_state only filters melee attacks taken')
                 number(step['victim_state'], f'{where}.victim_state', 0, MAX_VICTIM_STATE, True)
             for key in ('glancing', 'blocked'):
                 if key in step:
@@ -1432,6 +1435,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     require(metric in {'spell_damage_count', 'spell_damage_total', 'spell_heal_count',
                                        'spell_heal_total', 'spell_effective_heal_total', 'spell_log_count',
                                        'spell_absorb_total', 'spell_resist_total'}
+                            or (key == 'critical' and metric == 'spell_heal_absorb_total')
                             or (key == 'critical' and metric in MELEE_OUTCOME_METRICS | EVENT_TIME_METRICS
                                 | {'spell_damage_with_resist_total'})
                             or (key == 'pet' and metric in {'spell_go_count', 'spell_energize_count',

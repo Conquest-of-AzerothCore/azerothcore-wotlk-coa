@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Glaiving raises Fury Unleashed's damage and lowers its Energy cost (#2015)",
-  "contract": "Glaiving 560578 adds a flat 49 (resolved 50 via the DieSides==1 +1 rule) to Fury Unleashed's damage sub-spell (555739, effect 0, base 149 resolved 150) via SPELLMOD_EFFECT1, and reduces Fury Unleashed's cast (555738, 60 Energy) cost via a -51 (resolved -50%) SPELLMOD_COST percentage modifier (aura 108 ADD_PCT_MODIFIER, not a flat op).",
+  "contract": "Since owner ruling O-33 (Felsworn ADR 0027) Fury Unleashed's damage sub-spell 555739 carries 806095's 200% (effect 0 base 199 resolved 200) and Glaiving 560578 raises its damage through a 50% SPELLMOD_DAMAGE percent modifier, not a flat SPELLMOD_EFFECT1, so the effect 0 value reads 200 with and without Glaiving (the damage rise is judged by the conformance entry 560578 hit_ratio damage); Glaiving reduces Fury Unleashed's cast (555738, 60 Energy) cost via a -51 (resolved -50%) SPELLMOD_COST percentage modifier (aura 108 ADD_PCT_MODIFIER, not a flat op).",
   "timeout_ms": 90000,
   "players": [
     {
@@ -45,7 +45,7 @@
       "metric": "spell_effect_value",
       "spell": 555739,
       "effect": 0,
-      "equals": 150
+      "equals": 200
     },
     {
       "action": "assert",

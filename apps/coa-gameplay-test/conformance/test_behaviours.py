@@ -67,9 +67,10 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         target_count_scenario, target_count_spec, threat_tick_ratio_scenario,
                         threat_tick_ratio_spec)
 from bonus import bonus_band
-from behaviours import hit_arm, hit_ratio_entry_label, metric_delta_strike, cast_combat_spec
+from behaviours import (RUN_DEFAULT_TIMEOUT_MS, hit_arm, hit_ratio_entry_label, metric_delta_strike, cast_combat_spec,
+                        waited_ms)
 from compare import STACKED_SAME, Verdict, judge_behaviour
-from hits import MAX_SCENARIO_MS, aura_modifiers, creature_fixture
+from hits import MAX_SCENARIO_MS, TIMEOUT_MARGIN_MS, aura_modifiers, creature_fixture
 import hit_ratio_versus
 from mitigation import armor_reduction
 from passives import BEHAVIOUR_LABELS
@@ -2123,6 +2124,20 @@ class MetricDeltaScenarioTests(unittest.TestCase):
         return {'spell': 802006, 'name': 'Hunt (charges and recharge)', 'kind': 'charge_recharge',
                 'quote': '2 Charges, 25 sec recharge', 'max_charges': 2, 'recharge_ms': 25000, 'target': 'dummy',
                 **changes}
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_charge_recharge_waiting_past_the_run_default_timeout_carries_its_own_timeout(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.hunt_charge_entry(recharge_ms=90000))
+        run.validate(scenario)
+        waited = waited_ms(scenario['steps'])
+        self.assertGreaterEqual(waited, RUN_DEFAULT_TIMEOUT_MS)
+        self.assertEqual(scenario['timeout_ms'], waited + TIMEOUT_MARGIN_MS)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_charge_recharge_inside_the_run_default_timeout_keeps_no_timeout_key(self):
+        scenario, _ = behaviour_scenario(CLASS_FILE, self.hunt_charge_entry())
+        self.assertLess(waited_ms(scenario['steps']), RUN_DEFAULT_TIMEOUT_MS)
+        self.assertNotIn('timeout_ms', scenario)
 
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_a_charge_with_a_dummy_distance_steps_back_before_every_cast_after_the_first(self):
@@ -10374,6 +10389,75 @@ class ScriptHitNormalizedPercentTests(unittest.TestCase):
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ScriptHitStatedHandTests(unittest.TestCase):
+    BETRAYER, STRIKE = 300476, 804336
+
+    def entry(self, **changes):
+        return {'spell': self.BETRAYER, 'name': 'Betrayer (off-hand Weapon Damage of the strike back)',
+                'kind': 'script_hit', 'label_suffix': 'offhand_strike',
+                'quote': 'Dodging attacks causes $804336s2% off-hand Weapon Damage to attackers',
+                'hit_spell': self.STRIKE, 'weapon_only': True, 'normalized_percent': True, 'hand': 'off',
+                'casts': [[self.STRIKE, 'dummy']], 'control_casts': [], 'trials': 40, 'minimum_hits': 15,
+                **changes}
+
+    def model(self, hand):
+        from hits import reference_script_hit_model
+        return reference_script_hit_model(load_class_file(14), self.BETRAYER, self.STRIKE, weapon_only=True,
+                                          normalized_percent=True, hand=hand)
+
+    def hands(self):
+        from hits import reference_caster
+        from profile import spec_weapon_set
+        class_file = load_class_file(14)
+        hands = class_file['weapon_sets'][spec_weapon_set(class_file, self.STRIKE)]
+        return hands, reference_caster(class_file).ap
+
+    def test_the_off_hand_strike_is_the_percent_of_half_the_normalized_roll_and_the_flat_part_truncates(self):
+        hands, ap = self.hands()
+        weapon = hands['off_hand']
+        model = self.model('off')
+        rolled = (weapon['min_damage'] + weapon['max_damage']) / 2 + ap / 14.0 * weapon['normalized_speed']
+        self.assertAlmostEqual(model.tooltip_mean, 0.4 * (0.5 * rolled + int(1 * 0.5)))
+        self.assertIn('off-hand stated by the tooltip', model.displayed)
+        self.assertIn('effect 0 flat 1', model.displayed)
+
+    def test_without_the_hand_the_dbc_hand_reads_the_main_hand_with_its_flat_point_before_the_percent(self):
+        hands, ap = self.hands()
+        weapon = hands['main_hand']
+        model = self.model(None)
+        rolled = (weapon['min_damage'] + weapon['max_damage']) / 2 + ap / 14.0 * weapon['normalized_speed']
+        self.assertAlmostEqual(model.tooltip_mean, 0.4 * (rolled + 1))
+        self.assertNotIn('off-hand stated by the tooltip', model.displayed)
+
+    def test_mutant_a_main_hand_strike_alerts_against_the_off_hand_expectation(self):
+        scenario, [expectation] = behaviour_scenario(load_class_file(14), self.entry())
+        run.validate(scenario)
+        self.assertEqual(expectation.model['hand'], 'off')
+        stated, main = self.model('off'), self.model(None)
+        labels = expectation.model['measurements']
+
+        def judged(mean):
+            values = {labels['total']: mean * 40, labels['count']: 40, expectation.model['control_label']: 0}
+            return compare_module.judged_hit(base_verdict(expectation), {},
+                                             [(None, FakeRun(values), expectation)], lambda *_: stated)
+        self.assertEqual(judged(stated.mean).status, 'ok')
+        self.assertEqual(judged(main.mean).status, 'alert')
+        self.assertGreater(main.mean, 1.8 * stated.mean)
+
+    def test_an_entry_without_the_hand_keeps_its_model_record(self):
+        _, [expectation] = behaviour_scenario(load_class_file(15), ScriptHitNormalizedPercentTests().entry())
+        self.assertNotIn('hand', expectation.model)
+
+    def test_the_hand_is_refused_outside_its_shape(self):
+        class_file = load_class_file(14)
+        for changes in ({'hand': 'main'}, {'hand': True}, {'normalized_percent': False}):
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                behaviour_scenario(class_file, self.entry(**changes))
+        with self.assertRaises(NotModelled):
+            behaviour_scenario(load_class_file(15), ScriptHitNormalizedPercentTests().entry(hand='off'))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class ScriptHitControlCastTests(unittest.TestCase):
     ARGENT_BLADE = 807268
     RIGHTEOUS_LUNGE = 570233
@@ -13437,6 +13521,7 @@ class MetricDeltaOwnCastContrastTests(unittest.TestCase):
 
 from test_periodic_dispel_party import PartyPulseTests  # noqa: E402,F401
 from test_fixed_count_swing import FixedCountSwingTests  # noqa: E402,F401
+from test_cost_gate_relocate import CostGateRelocateBeforeAttemptTests  # noqa: E402,F401
 
 
 UNBROKEN = 707407

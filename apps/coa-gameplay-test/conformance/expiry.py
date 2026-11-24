@@ -12,7 +12,8 @@ from hits import MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, UNMODELLED, creature_fi
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import FORCED_CRIT_RATING, TARGET, Expectation, armed_for, dataset, facts_of, required_aura_steps
+from values import (FORCED_CRIT_RATING, TARGET, Expectation, armed_for, dataset, facts_of, pay_power_steps,
+                    required_aura_steps)
 
 BEHAVIOUR_EXPIRY = 'behaviour_expiry'
 EXPIRY_KIND = 'expiry'
@@ -343,16 +344,14 @@ def duration_refresh_expiry(class_file: dict, entry: dict) -> tuple[dict, list[E
     def apply(arm: ExpiryArm | None) -> list[dict]:
         cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.apply_spell, 'target': TARGET}
         return [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': 1},
-                {'action': 'set_power', 'actor': CASTER, 'power': facts_apply.power_type,
-                 'value': facts_apply.mana_cost},
+                *pay_power_steps(facts_apply.power_type, facts_apply.mana_cost),
                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.apply_spell},
                 acted(cast, arm) if arm else cast]
 
     def breaker(arm: ExpiryArm | None) -> list[dict]:
         cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.breaker_spell, 'target': TARGET}
         return [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': spec.gating_stacks},
-                {'action': 'set_power', 'actor': CASTER, 'power': facts_breaker.power_type,
-                 'value': facts_breaker.mana_cost},
+                *pay_power_steps(facts_breaker.power_type, facts_breaker.mana_cost),
                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.breaker_spell},
                 acted(cast, arm) if arm else cast]
 
@@ -473,8 +472,7 @@ def trigger_duration_expiry(class_file: dict, entry: dict) -> tuple[dict, list[E
             len({facts.power_type for facts in costs}) > 1:
         raise NotModelled(f'{observe} and {trigger["spell"]} need separate power steps; one of them would fall '
                           f'between the act and the readings')
-    prepare = [{'action': 'set_power', 'actor': CASTER, 'power': costs[0].power_type,
-                'value': sum(facts.mana_cost for facts in costs)}] if costs else []
+    prepare = pay_power_steps(costs[0].power_type, sum(facts.mana_cost for facts in costs)) if costs else []
     prepare += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell} for spell in (observe, trigger['spell'])]
 
     def tail(name: str) -> list[dict]:

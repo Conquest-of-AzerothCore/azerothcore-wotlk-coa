@@ -50,7 +50,10 @@ is a resurrection (`SPELL_EFFECT_RESURRECT` 18 or `SPELL_EFFECT_RESURRECT_NEW` 1
 is killed with a `die` step right before the cast, since `TARGET_FLAG_CORPSE_ALLY` needs a dead friendly unit, not
 a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — and the caster otherwise; an aura
 whose target is the caster is read on the caster. A cost in a power other than mana is set to its cost before the
-cast. A rank whose
+cast. A cost paid from health (PowerType -2, read as 4294967294) writes no `set_power`: a `SETUP:` assertion checks
+that the caster's health is above the cost instead, since the server refuses the cast at health equal to or below it
+(`Spell.cpp` `CheckPower`), and every generator that pays a cost goes through `values.pay_power_steps` (ADR 1246).
+A rank whose
 record names a `CasterAuraSpell` gets that aura as a one-stack fixture (`set_aura`) right before the cast: without it
 the server refuses the cast with `SPELL_FAILED_CASTER_AURASTATE` (22, `Spell.cpp:5930`). Templar: Oath Chain 704576
 for Righteous Upheaval, Blade of Faith, Righteous Tempest and Reckoning; Recently Parried or Dodged 681170, a dummy
@@ -104,6 +107,16 @@ citing the DBC trigger effect or the script that applies it) lists the pairs thi
 test player reached by its own reset-cooldown-and-recast sequence, chosen by whether the rank's own effects target
 `TARGET_UNIT_TARGET_ALLY` (`targets_ally`). Only the listed pairs get this extra check, so an uninvestigated
 `foreign_duration` match elsewhere in the class is unaffected (ADR 0051).
+A foreign effect token that totals a periodic effect over its ticks (the periodic probe of
+[tooltip-reading.md](tooltip-reading.md) re-reads the rank's whole tooltip at the token's ordinal, so a token of an
+`@s:` expansion keeps its expansion's `$d`, `$T1` and `$m1`) goes to the hit scenario as a periodic total; any other
+non-empty probe reason on a foreign token makes it `unmeasurable`, never one tick compared with the total. A class
+file's `per_tick_foreign_totals` (`{spell, effect, reason}`, ADR 1248) keeps a listed total as a no-combat
+`effect_value` instead: the step reads `spell_effect_value` (one tick), the model carries `ticks` (duration over
+amplitude) and `compare` expects the token divided by it, with the total's flat band divided by it too, so
+one point off per tick alerts. A listed effect whose points roll, or whose token is not a
+total over its ticks, stops generation. Felsworn lists Felstrike 802678 effect 0: Malice of Gul'dan 800214 and Fel
+Apprentice 92088 show `${($d*1000/$T1)*($m1+0+$SP*.05)}`, 54 over six ticks at SP 0, judged as 9 per tick.
 An aura that `SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS` (190) applies reaches the caster's summons only, never the
 caster. A class file's `summon_aura_carriers` (`{spell, entry, summon, learn, reason}`, ADR 0697) names a summon for
 such a rank: `value_scenario` learns `learn` and `summon`, casts `summon` (at the dummy when it is hostile), requires

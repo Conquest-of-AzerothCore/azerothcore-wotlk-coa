@@ -647,7 +647,7 @@ def mounted_roots(worktree: Path) -> list[Path]:
 
 def prove_command(args) -> int:
     from prove import SUMMARY_FILE, ProveSpec, is_under, prove
-    from pilot import hit_ratio_pilot, sizable_labels
+    from pilot import hit_ratio_pilot, sizable_labels, trial_floors
     from prove_ledger import ledger_hooks
     if not (args.behaviour or args.proc or args.trigger):
         raise ValueError('prove needs at least one --behaviour, --proc or --trigger entry of the class file')
@@ -669,7 +669,7 @@ def prove_command(args) -> int:
     out = Path(args.out).resolve()
     spec = ProveSpec(out, args.worktree, args.runs, args.build, args.timeout_ms, db_workers=args.db_workers)
     rows, enrich, annotate = ledger_hooks(args.clauses) if args.clauses else (None, None, None)
-    pilot = hit_ratio_pilot(sizable_labels(sized), make_pilot, make)
+    pilot = hit_ratio_pilot(sizable_labels(sized), make_pilot, make, floors=trial_floors(sized))
     code = prove(spec, make, rows, enrich, annotate, pilot=pilot)
     print(f'{out / SUMMARY_FILE}: exit {code}')
     return code

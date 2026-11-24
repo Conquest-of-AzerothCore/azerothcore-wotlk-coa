@@ -316,7 +316,8 @@ judged, and the judged runs must be on its build. The command passes `pilot.hit_
 entry is a `hit_ratio`: the pilot generates those entries at 20 trials (`generate(..., trials={label: n})`), each
 verdict's `detail.sized_trials` (the trials whose 99% half-width would be 0.8 of half the owner's band, ADR 0125)
 sizes the judged runs, never below the pilot's 20 and capped at what one scenario holds (`detail.trial_limit`;
-`capped` in the record); a label without a pilot verdict or interval keeps its class-file trials.
+`capped` in the record); an entry's `min_trials` floors the size (ADR 1255, `min_trials` in the record); a label
+without a pilot verdict or interval keeps its class-file trials.
 
 ### Server mutants and K3 consumption
 
@@ -504,7 +505,7 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 | `scenarios_dir`, `manifest` | the generate target (needed by `generate` and `runs`); the manifest, `scenarios_dir/manifest.json` by default |
 | `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
 | `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
-| `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
+| `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (default `apps`, `src`, `data/sql/updates`, `data/sql/archive`, `data/sql/base`, `data/sql/custom`, `data/coa-world`, `modules`: every path the generator reads, ADR 1267) |
 | `gate_accepted` | intended changes of a guard class's generated files, `[{"class_id": 19, "added_fields": ["min_level_armor"], "why": "ADR 0658"}]`: a differing scenario file must equal the base file once the named keys are removed from the head file at any depth and differ from it as JSON (an added key, never a changed one; a formatting-only difference stops), the manifest may differ only by those keys and by the sha256 of those files; any other difference, or a declared change that no file shows, stops the gate |
 | `other_verdicts_accepted` | the "other" record verdicts the cycle may pass: `{"keys": [["label", "check", "scenario"]], "why": "..."}`, the exact keys found: a found key not listed and a listed key no longer found (stale) both stop, and both are named; without it the tally and the checkpoint stop |
 | `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (exactly its two compare outputs), `manifest` |

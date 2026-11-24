@@ -226,8 +226,8 @@ class SpellClampTests(unittest.TestCase):
             with self.subTest(changes=changes), self.assertRaises(ValueError):
                 self.built(**changes)
 
-    def judged(self, misses: dict, casts=None, auras=(0.0, 1.0)):
-        _, [expectation] = self.built()
+    def judged(self, misses: dict, casts=None, auras=(0.0, 1.0), size=None):
+        _, [expectation] = self.built() if size is None else self.built(casts=size)
         clamp = expectation.model['spell_clamp']
         values = {clamp['auras']['control']: auras[0], clamp['auras']['treatment']: auras[1]}
         for arm, reads in clamp['reads'].items():
@@ -251,6 +251,31 @@ class SpellClampTests(unittest.TestCase):
                               ('control aura present', self.judged(correct, auras=(1.0, 1.0)))):
             with self.subTest(name=name):
                 self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
+
+    def test_a_casts_option_sizes_every_arm_and_the_judge_and_absent_keeps_the_default(self):
+        default, _ = self.built()
+        self.assertEqual(self.built(casts=share.spell_clamp_casts())[0], default)
+        scenario, [expectation] = self.built(casts=1100)
+        per_attacker = [len([step for step in scenario['steps'] if step['action'] == 'cast'
+                             and step['actor'] == creature['id'] and step['spell'] == 585])
+                        for creature in scenario['creatures']]
+        self.assertEqual(per_attacker, [1100] * 4)
+        self.assertEqual(expectation.model['spell_clamp']['casts'], 1100)
+        self.assertIn('cast 585 at the caster 1100 times', scenario['contract'])
+        self.assertIn(f'{4 * 0.99 ** 1100:.2e} per pair', scenario['contract'])
+
+    def test_a_casts_option_under_the_default_or_not_a_whole_count_is_refused(self):
+        for casts in (share.spell_clamp_casts() - 1, 0, 1100.0, '1100', True):
+            with self.subTest(casts=casts), self.assertRaises(ValueError):
+                self.built(casts=casts)
+
+    def test_a_sized_entry_passes_alerts_on_mutants_and_is_unmeasured_on_the_default_count(self):
+        correct = {'control edge': 11, 'treatment edge': 10}
+        self.assertEqual(self.judged(correct, size=1100).status, 'ok')
+        self.assertEqual(self.judged({**correct, 'treatment clamp': 1}, size=1100).status, 'alert')
+        self.assertEqual(self.judged({'control edge': 11}, size=1100).status, 'alert')
+        short = self.judged(correct, casts=share.spell_clamp_casts(), size=1100)
+        self.assertEqual(short.status, 'unmeasured', short.explanation)
 
     def test_the_spell_variant_is_classed_behaviour_by_its_damage_log_metric(self):
         verdict = self.judged({'control edge': 8, 'treatment edge': 9})

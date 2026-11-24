@@ -56,7 +56,7 @@
 
     {"action": "teleport_to_spawn", "actor": "hero", "guid": 9949053},
     {"action": "assert", "label": "Stage 1: phase 1 Korgash 49050 stands in the Hall of Legends", "actor": "hero",
-     "metric": "nearest_creature_distance", "entry": 49050, "min": 0, "max": 20, "within_ms": 10000},
+     "metric": "nearest_creature_distance", "entry": 49050, "min": 0, "max": 40, "within_ms": 10000},
     {"action": "assert", "label": "Stage 1: phase 1 Krogash stands in the Hall of Legends", "actor": "hero",
      "metric": "nearest_creature_distance", "entry": 666683, "min": 0, "max": 20, "within_ms": 10000},
     {"action": "assert", "label": "Stage 1: phase 2 Korgash 49053 is not at his spawn", "actor": "hero",

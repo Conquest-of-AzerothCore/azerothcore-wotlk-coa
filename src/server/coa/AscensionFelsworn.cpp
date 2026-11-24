@@ -73,8 +73,9 @@ bool SpenderImpact(SpellInfo const* info)
     return Spender(info) ||
            (info && (info->Id == 520262 || info->Id == 572585 || info->Id == 803715 || info->Id == 712399));
 }
-bool ResistDebuff(Player* player, SpellInfo const* info)
+bool ResistDebuff(Player* player, Unit* caster, Spell const* spell)
 {
+    SpellInfo const* info = spell->GetSpellInfo();
     if (!Owner(player) || !player->IsAlive() || !player->IsFullHealth() || !player->HasAura(804613) ||
         player->HasAura(706818) || !info || info->IsPositive() || info->HasAttribute(SPELL_ATTR4_NO_CAST_LOG) ||
         (info->Dispel != DISPEL_MAGIC && info->Dispel != DISPEL_CURSE))
@@ -88,6 +89,9 @@ bool ResistDebuff(Player* player, SpellInfo const* info)
             aura = true;
         }
     if (!aura)
+        return false;
+    SpellMissInfo const roll = caster->SpellHitResult(player, spell, false);
+    if (roll != SPELL_MISS_MISS && roll != SPELL_MISS_RESIST)
         return false;
     Cast(player, player, 706818);
     return true;

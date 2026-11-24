@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Worldforged Bloodsail Decksweeper rests on the Stranglethorn beach (#11718)",
+  "contract": "#11718 reported the Bloodsail Decksweeper pickup (gameobject entry 95713, guid 6940150) slightly floating. It stood 0.8 yd above the beach the server measures at its position (the realm-map pass moved it 2.2 yd off the rowboat and kept the boat height). It now rests on the beach at z 0.102, stays out of the sea and still opens.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -14862.6,
+    "y": 70.6,
+    "z": 1.1,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95713,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the pickup stays at its spot, lowered to the ground",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -14862.6,
+      "y": 70.6,
+      "z": 0.102,
+      "max": 0.3,
+      "guid": 6940150,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the ground instead of 0.8 yd above it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 6940150,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.3 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.3,
+      "equals": 0,
+      "guid": 6940150,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940150,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95713
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

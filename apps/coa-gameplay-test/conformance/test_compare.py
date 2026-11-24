@@ -287,6 +287,55 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([item], ['$s2'], [assert_step(label, '-50')], reader)
         self.assertEqual((verdicts[label].status, verdicts[label].expected), ('ok', -50.0))
 
+    def per_tick_verdict(self, read, ticks=6):
+        label = '1001 effect_value 2002e0 #0'
+        text = '${($d*1000/$T1)*($m1+0+$SP*.05)}'
+        model = {'effect_spell': 2002, 'effect': 0, **({'ticks': ticks} if ticks else {})}
+        item = expectation(label, 'effect_value', text, 'read flat', model=model)
+        reader = constant_reader(Displayed(text, 54.0, None, 'flat', 2002))
+        return self.value_run([item], [text], [assert_step(label, read)], reader)[label]
+
+    def test_a_per_tick_foreign_total_is_judged_against_its_per_tick_part(self):
+        verdict = self.per_tick_verdict('9')
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 9.0))
+        self.assertIn('divided by its 6 ticks', verdict.explanation)
+
+    def test_a_per_tick_foreign_total_read_above_its_per_tick_part_alerts(self):
+        verdict = self.per_tick_verdict('34')
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0))
+
+    def test_seeded_mutant_reading_the_whole_total_per_tick_alerts(self):
+        verdict = self.per_tick_verdict('54')
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0))
+
+    def test_one_point_off_per_tick_alerts_as_six_points_off_the_total(self):
+        for read in ('8', '10'):
+            verdict = self.per_tick_verdict(read)
+            self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0), read)
+            self.fresh()
+        verdict = self.per_tick_verdict('9')
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('|measured x 6 - total|', verdict.explanation)
+
+    def test_a_per_tick_per_level_term_is_the_total_term_divided_by_its_ticks(self):
+        text = '${($d*1000/$T1)*($m1+0)}'
+        label = '1001 effect_value e0 #0'
+        fields = {(RANK, 'EffectRealPointsPerLevel[0]'): 1.085, (RANK, 'BaseLevel'): 22, (RANK, 'SpellLevel'): 22,
+                  (RANK, 'MaxLevel'): 30}
+        reader = FakeTooltips(lambda caster, forced: [Displayed(text, 6 * 60.58, 0, 'flat')], {(RANK, 0): (51, 1)},
+                              fields, lambda caster, forced: [Displayed(text, 6 * 51.9, 0, 'flat')])
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'effect_spell': RANK, 'effect': 0,
+                                                                         'ticks': 6})
+        steps = [assert_step(label, '59')] + [assert_step(effect_modifier_label(label, op), '1000')
+                                              for op in ('all', 0)]
+        verdict = self.value_run([item], [text], steps, reader)[label]
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['truncated_to'], 8.0)
+
+    def test_an_unlisted_total_token_keeps_its_undivided_expectation(self):
+        verdict = self.per_tick_verdict('54', ticks=None)
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 54.0))
+
     def rolled_verdict(self, reads, value_of_roll=lambda roll: roll, samples=None):
         text = '${$m1+0+$AP*0.45}'
         label = '1001 effect_value e0 #0'
@@ -1457,6 +1506,32 @@ class GameplayClockGateTest(unittest.TestCase):
 
     def test_a_real_clock_run_of_a_real_clock_only_scenario_is_judged_normally(self):
         self.assertEqual(self.verdict_of('real').status, 'ok')
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HealAbsorbReadTest(unittest.TestCase):
+    def verdict_of(self, before, after):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 99.0,
+                 'before_expected': 0.0, 'tolerance': 0, 'metric': 'spell_heal_absorb_total'}
+        item = Expectation('561201 behaviour_metric_delta heal_absorb', BEHAVIOUR_METRIC_DELTA, SPELL, RANK, None,
+                           '99', 'prose: "absorbs the next 99 healing on the target" (561201)', model)
+        workspace = Workspace()
+        self.addCleanup(workspace.close)
+        workspace.scenario('heal-absorb', 'behaviour', [item],
+                           steps=[assert_step('before', before), assert_step('after', after)])
+        manifest, results = workspace.manifest()
+        return {verdict.label: verdict for verdict in compare(manifest, results)}[item.label]
+
+    def test_the_absorbed_healing_of_the_learned_arm_passes(self):
+        self.assertEqual(self.verdict_of('0', '99').status, 'ok')
+
+    def test_a_skipped_absorb_field_or_the_landed_heal_read_in_its_place_alerts(self):
+        for after in ('0', '1401'):
+            with self.subTest(after=after):
+                self.assertEqual(self.verdict_of('0', after).status, 'alert')
+
+    def test_an_absorb_in_the_not_learned_control_alerts(self):
+        self.assertEqual(self.verdict_of('99', '99').status, 'alert')
 
 
 class PassiveDeltaTest(unittest.TestCase):

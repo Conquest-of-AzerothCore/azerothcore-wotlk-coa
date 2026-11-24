@@ -51,6 +51,12 @@ def option_setup_cast_steps(spec, index: int, after: bool) -> list[dict]:
             for step in module.setup_cast_steps(spec, present[module.NAME], index, after)]
 
 
+def option_setup_cast_target(spec, index: int) -> str | None:
+    present = dict(spec.options)
+    return next((module.setup_cast_target(spec, present[module.NAME], index) for module in option_modules()
+                 if module.NAME in present and hasattr(module, 'setup_cast_target')), None)
+
+
 def option_after_trigger_steps(spec, after: bool) -> list[dict]:
     present = dict(spec.options)
     return [step for module in option_modules() if module.NAME in present and hasattr(module, 'after_trigger_steps')

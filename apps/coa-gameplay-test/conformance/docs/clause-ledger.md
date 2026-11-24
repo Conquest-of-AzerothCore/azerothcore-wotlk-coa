@@ -52,6 +52,10 @@ A JSON array. Each entry is one clause:
   clause that continues a sentence ("increasing by $s1% every ...") is promised the state its subject clause names
   ("critical strike chance"). A source that is not an earlier clause of the spell is refused. Witch Hunter: Slayer's
   Mark 804068.
+- `state_promise` (optional, on a declared claim, ADR 1283): a metric of the closed map `CLAIM_STATE_PROMISES`
+  (`coverage.py`; only `casting`, which adds `channel\w*`). For that claim only, the metric's promise words gain the
+  mapped words. Refused on a clause, for a metric outside the map, or when the claim's own words do not say the
+  mapped words. Felsworn: Carve 800206 "you can channel while moving".
 
 ### Stated claims
 
