@@ -17448,6 +17448,51 @@
     },
     {
       "spell": 800206,
+      "name": "Carve (Inner Demon slows affected enemies ranged haste)",
+      "kind": "metric_delta",
+      "variant": "ranged_haste",
+      "label_suffix": "ranged_haste",
+      "quote": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
+      "trigger_spell": 800206,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 2
+      },
+      "before_expected": 1000,
+      "expected": 1200,
+      "expected_ratio": 1.2,
+      "tolerance": 0.01,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          800058,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "observe_source": "578317 Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE, BasePoints -21 + 1 = -20 ($578317s1). The same aura slows the ranged timer: Unit::ApplyAttackTimePercentMod runs for the ranged attack too. The dummy's ranged attack time (UNIT_FIELD_BASEATTACKTIME, hand 2, read as in Sun Cleric 300327 ranged_haste, attack_time_ms hand 2 on the dummy) is read before (control: no cast) and after a real Carve with Inner Demon: x1.2 within 0.01, the convention of Templar 572769 attack_slow (classes/templar.json, 301061 aura 192 -20, 2000 -> 2400); a literal x1.25 is excluded. Fixtures and convention as the melee haste entry. Reference search 2026-11-24: coa-history spell 578317: events by players in 3 logs, no value; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800206,
       "name": "Carve (slowed haste held around its duration)",
       "kind": "metric_delta",
       "variant": "haste_held",
@@ -17543,6 +17588,108 @@
         ]
       ],
       "observe_source": "578317 DurationIndex 31 gives 8000 ms ($578317d, SpellDuration.dbc); the channel of 800206 lasts 2500 ms (DurationIndex 66) and the aura is cast when it ends. The aura is gone 11100 ms after the cast, 8600 ms after the channel end (1.075 of 8000, excludes a duration 10% long, 8800 ms); the before read, absent, is the control. Fixtures as the haste entry. Reference search as the haste entry."
+    },
+    {
+      "spell": 707527,
+      "name": "Hateforged Barrier (Physical damage taken)",
+      "kind": "taken_hit",
+      "variant": "physical_taken",
+      "label_suffix": "physical_taken",
+      "judge": "damage_ratio",
+      "expected": 0.8792,
+      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 4,
+      "strikes": 40,
+      "settle_ms": 50,
+      "arms": [
+        {
+          "name": "control",
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 707527,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              707527,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 707527,
+              "equals": 1
+            }
+          ],
+          "casts": [
+            [
+              707527,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "707527 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints -11 + 1 = -10 ($s2); Effect[0] is the absorb aura 69 (752 + Stamina x 1, Stamina 79 of the reference stats = 831). Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) strikes the caster 40 times per trial in each arm, 4 trials, the barrier recast before each treatment trial. The logged damage is taken after the absorb, so the expected mean per strike is (40 x 1000 x 0.90 - 831) / (40 x 1000) = 0.8792, against 0.9792 if the 10% were not applied: the 831 of the first strike is the same absorb in either case, and 40 strikes make its weight 2 points of the ratio, small beside the 10 points of the claim. Control arm: no barrier, 1000 per strike. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 and SPELL_AURA_APPLIED 274 events by players in 7 logs, no value; ~/CoaServer/reference bindmysoul talents snapshot: Hateforged Barrier 705129 text differs (a regeneration clause, an older state); expected values come from the tooltip and the DBC only. The control for this entry is the rank 1 entry 705129 below, whose Effect[1] carries MiscValue 1. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
+    },
+    {
+      "spell": 705129,
+      "name": "Hateforged Barrier rank 1 (Physical damage taken, control of rank 707527)",
+      "kind": "taken_hit",
+      "variant": "physical_taken",
+      "label_suffix": "physical_taken",
+      "judge": "damage_ratio",
+      "expected": 0.8902,
+      "quote": "While the barrier holds, you take $s2% reduced Physical Damage.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 4,
+      "strikes": 40,
+      "settle_ms": 50,
+      "arms": [
+        {
+          "name": "control",
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 705129,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              705129,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 705129,
+              "equals": 1
+            }
+          ],
+          "casts": [
+            [
+              705129,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "705129 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 1 (Physical), BasePoints -11 + 1 = -10 ($s2); Effect[0] aura 69 absorbs 176 + 1..32 + 2.45 per level (60 x 2.45 = 147) + Stamina 79 x 1, about 419. Same design as the 707527 entry (Void Zone 92559, 40 strikes, 4 trials, barrier recast per trial): expected mean (40 x 0.90 x 954 - 419) / (40 x 954) = 0.8902, 0.9803 if the 10% were not applied; the 2-point band holds any absorb of this rank. Control entry: rank 1 carries MiscValue 1 in the DBC where ranks 2 to 6 (707523 to 707527) carry MiscValue 0. Reference search 2026-11-24: coa-history spell 707527: SPELL_CAST_SUCCESS 303 events by players in 7 logs, no value; expected values come from the tooltip and the DBC only. Lead, not a proof (fw-vb4b, review I-2): the strike that breaks the barrier also removes the 10%, so the mean per strike cannot tell 10% from none (-2.43% against -2.18% on the logged 954 per strike); the entry alerts against the stated ratio and the part stays uncounted."
     }
   ],
   "player_observations": [],
