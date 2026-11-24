@@ -1424,7 +1424,7 @@
         ]
       },
       {
-        "claim": "for $572163d",
+        "claim": "for $572163d (duration pending: a summon timed from its third cast, not entered)",
         "labels": [
           "560840 behaviour_metric_delta held",
           "560840 behaviour_metric_delta gone"
