@@ -1129,7 +1129,10 @@ public:
      * @param quest The daily quest
      * @return true to let the player take and turn in the daily quest once more today
      */
-    [[nodiscard]] virtual bool OnPlayerCanRepeatDailyQuest(Player const* /*player*/, Quest const* /*quest*/) { return false; }
+    [[nodiscard]] virtual bool OnPlayerCanRepeatDailyQuest(Player const* /*player*/, Quest const* /*quest*/)
+    {
+        return false;
+    }
 
     /**
      * @brief This hook is called after a quest reward request from a validated quest giver, before the core rewards it.
