@@ -2858,13 +2858,11 @@
       "trigger_spell": 804247,
       "gate_spell": 301287,
       "target": "caster",
-      "metric": "spell_cast_time_ms",
-      "fields": {
-        "spell": 801312
-      },
-      "before_expected": 1500,
-      "expected": 1415,
-      "tolerance": 1,
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0.943396,
+      "tolerance": 0.0001,
       "wait_ms": 500,
       "expire_ms": 500,
       "phase_auras": [
@@ -2875,7 +2873,7 @@
           "caster"
         ]
       ],
-      "observe_source": "Spell haste half of 301287: Felfury 800058 Effect[0] aura 216 HASTE_SPELLS carries 0 + 1% per stack under 301287 (SPELLMOD_ALL_EFFECTS, BasePoints 0 + 1), 6% at six stacks. The cast time of Fel Fireball 801312 (CastingTimeIndex 16 = 1500 ms, SpellCastTimes.dbc; DmgClass 1, so Unit::ModSpellCastTime multiplies by UNIT_MOD_CAST_SPEED, Unit.cpp:13158-13160) is read for the caster 500 ms after the stacks are set: 1500 ms before (control: 301287 not learned) and int32(1500 / 1.06) = 1415 ms after a real learn, within 1 ms. The Felfury stacks are a precondition fixture by harness set_aura in both phases, named as such. Reference search 2026-11-23: bindmysoul snapshot says 'Each Felfury active now increases your haste by 1%.'; coa-history spell 301287: 0 events in 186 logs. Counted as data: spell_cast_time_ms is a readback of the computed cast time (coverage.py), not a behaviour read."
+      "observe_source": "301287 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 0 + 1 = 1 ($s1) per Felfury stack: Felfury 800058 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS carries 1% per stack under 301287, 6% at six stacks (phase_auras sets six Felfury on the caster in both phases). The caster's native cast-time multiplier (UNIT_MOD_CAST_SPEED, harness metric cast_speed_multiplier, smaller is faster) is read 500 ms after the setup, before 301287 is learned (control, 1) and after the learn: 1 / 1.06 = 0.943396 (the same read form as Infernal Whipcrack 805243 spell_haste, 10% = 0.909091). The previous spell_cast_time_ms readback of Fel Fireball is replaced because it is a data read. Reference search 2026-11-24: coa-history spell 301287: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 520257,
@@ -16806,6 +16804,394 @@
         }
       ],
       "observe_source": "560641 Warlock Training: Effect[0] aura 42 PROC_TRIGGER_SPELL, EffectTriggerSpell 704397 (Crippling Pain, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT -100000, DurationIndex 35 = 4000 ms, tooltip 'Unable to critically strike.'); AscensionFelswornAbilities.cpp:336-337 casts 704397 on the target of Cripple 704371 when 560641 is known. The melee leg of the no_crit entry: on a player 290 also lowers the melee crit percentage (SpellAuraEffects.cpp HandleAuraModCritPct, UpdateAllWeaponDependentCritAuras), which a melee-class spell reads for its crit (Unit::SpellDoneCritChance, SPELL_DAMAGE_CLASS_MELEE -> PLAYER_CRIT_PERCENTAGE; code reading). A PvP-flagged player striker (race 2) holding 100000 melee crit rating (every strike crits) casts Fatal Wound 21140 (server DBC: Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE 240, SchoolMask 1 Physical, DmgClass 2 melee, Attributes 0, no cost, no cooldown, no weapon requirement, no server script) at the caster once per trial (harness cast, triggered); before each strike the caster (the player fixture's 10000 spell hit rating) casts Cripple at the striker. Control unlearns 560641, treatment learns it (D-67, a real learn). After each trial the Cripple and Crippling Pain auras of the caster on the striker are read as states: a trial without Cripple on the striker is void; a judged trial must read 1 critical strike and no Crippling Pain in control, 0 critical strikes with Crippling Pain in treatment. A trial is judged when its strike landed (a dodged, parried or missed strike logs no damage and is left out). Not covered here: a creature striker's melee (Unit.cpp:4567-4571) and spell (m_baseSpellCritChance) crit paths, which have no forced-crit fixture. Reference search 2026-11-24: coa-history spell 704397 and 21140: 0 events in 186 logs; bindmysoul talents snapshot (fetched 2026-07-22): Warlock Training 560641 'Cripple now causes the enemy target to be unable to critically strike for 4 seconds.'; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 804611,
+      "name": "Azzinoth's Rage 804611 (armor penetration 10%)",
+      "kind": "hit_ratio",
+      "variant": "armor_penetration",
+      "label_suffix": "armor_penetration",
+      "quote": "Increases your Armor penetration by $s1%",
+      "expected": 1.034483,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "critical": false,
+      "trials": 150,
+      "parts": 5,
+      "control": {
+        "auras": [
+          [
+            37643,
+            1
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            37643,
+            1
+          ]
+        ],
+        "learn": [
+          804611
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "expected_source": "$s1 = 10 (804611 Effect[0] aura 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT, EffectBasePoints 9 + DieSides 1, EquippedItemClass -1, EffectMiscValue 0, Spell.dbc). The engine's stock rule (Unit.cpp CalcArmorReducedDamage, no Felsworn code for this aura): the armor removed is the sum of aura 280 times the cap maxArmorPen = min((armor + C) / 3, armor), C = 85 x level + 400 = 5500 at level 60 (ClassicPlusCombat::ArmorConstant), not that percent of the armor; the hit is reduced by r / (1 + r), r = armor / C. Carve's strike 803715 (physical weapon damage, mitigated by armor) is cast at the dummy in two arms; each hit non-critical. Increase Damage 37643 (Effect[0] aura 79, MiscValue 127) is set on the caster in both arms with its effect 0 amount 19900 and Lesser Armor 673 effect 0 amount 5000 on the dummy in both arms (fixture sizes, not claimed values; same fixtures as the 803903 ignores_armor entry), so the dummy armor is 528 pinned reference armor + 5000 = 5528 and each hit is large enough that the engine's ceil adds under 0.1%. Control arm: 804611 not learned, the full armor 5528 applies, kept = C / (5528 + C). Treatment arm: 804611 learned, cap = (5528 + 5500) / 3 = 3676, armor removed 10% of 3676, kept = C / (5528 - 0.1 x 3676 + C). Ratio = 11028 / (11028 x (1 - 0.1/3)) = 1 / (1 - 0.1/3) = 30/29 = 1.034483 (+3.45%), independent of the armor as long as it exceeds C / 2. Band: the larger of 5% of the gain and 2 points; a server ignoring 10% of the full armor instead of 10% of the cap would read 1.0528, and a missing aura reads 1.0. Expected from the DBC amount and the formula, never from a run. The dummy level and the armor read in the run replace these figures if they differ. Control arm: the same entry without 804611. Reference search 2026-11-24: coa-history spell 804611: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807901,
+      "name": "Azzinoth's Rage 807901 (armor penetration 20%)",
+      "kind": "hit_ratio",
+      "variant": "armor_penetration",
+      "label_suffix": "armor_penetration",
+      "quote": "Increases your Armor penetration by $s1%",
+      "expected": 1.071429,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "critical": false,
+      "trials": 150,
+      "parts": 5,
+      "control": {
+        "auras": [
+          [
+            37643,
+            1
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            37643,
+            1
+          ]
+        ],
+        "learn": [
+          807901
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "expected_source": "$s1 = 20 (807901 Effect[0] aura 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT, EffectBasePoints 19 + DieSides 1, EquippedItemClass -1, EffectMiscValue 0, Spell.dbc). The engine's stock rule (Unit.cpp CalcArmorReducedDamage, no Felsworn code for this aura): the armor removed is the sum of aura 280 times the cap maxArmorPen = min((armor + C) / 3, armor), C = 85 x level + 400 = 5500 at level 60 (ClassicPlusCombat::ArmorConstant), not that percent of the armor; the hit is reduced by r / (1 + r), r = armor / C. Carve's strike 803715 (physical weapon damage, mitigated by armor) is cast at the dummy in two arms; each hit non-critical. Increase Damage 37643 (Effect[0] aura 79, MiscValue 127) is set on the caster in both arms with its effect 0 amount 19900 and Lesser Armor 673 effect 0 amount 5000 on the dummy in both arms (fixture sizes, not claimed values; same fixtures as the 803903 ignores_armor entry), so the dummy armor is 528 pinned reference armor + 5000 = 5528 and each hit is large enough that the engine's ceil adds under 0.1%. Control arm: 807901 not learned, the full armor 5528 applies, kept = C / (5528 + C). Treatment arm: 807901 learned, cap = (5528 + 5500) / 3 = 3676, armor removed 20% of 3676, kept = C / (5528 - 0.2 x 3676 + C). Ratio = 11028 / (11028 x (1 - 0.2/3)) = 1 / (1 - 0.2/3) = 15/14 = 1.071429 (+7.14%), independent of the armor as long as it exceeds C / 2. Band: the larger of 5% of the gain and 2 points; a server ignoring 20% of the full armor instead of 20% of the cap would read 1.1114, and a missing aura reads 1.0. Expected from the DBC amount and the formula, never from a run. The dummy level and the armor read in the run replace these figures if they differ. Control arm: the same entry without 807901. Reference search 2026-11-24: coa-history spell 807901: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 807914,
+      "name": "Azzinoth's Rage 807914 (armor penetration 30%)",
+      "kind": "hit_ratio",
+      "variant": "armor_penetration",
+      "label_suffix": "armor_penetration",
+      "quote": "Increases your Armor penetration by $s1%",
+      "expected": 1.111111,
+      "observe_spell": 803715,
+      "learn": [
+        803715
+      ],
+      "critical": false,
+      "trials": 150,
+      "parts": 5,
+      "control": {
+        "auras": [
+          [
+            37643,
+            1
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            37643,
+            1
+          ]
+        ],
+        "learn": [
+          807914
+        ],
+        "target_aura_amounts": [
+          [
+            673,
+            0,
+            5000
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "expected_source": "$s1 = 30 (807914 Effect[0] aura 280 SPELL_AURA_MOD_ARMOR_PENETRATION_PCT, EffectBasePoints 29 + DieSides 1, EquippedItemClass -1, EffectMiscValue 0, Spell.dbc). The engine's stock rule (Unit.cpp CalcArmorReducedDamage, no Felsworn code for this aura): the armor removed is the sum of aura 280 times the cap maxArmorPen = min((armor + C) / 3, armor), C = 85 x level + 400 = 5500 at level 60 (ClassicPlusCombat::ArmorConstant), not that percent of the armor; the hit is reduced by r / (1 + r), r = armor / C. Carve's strike 803715 (physical weapon damage, mitigated by armor) is cast at the dummy in two arms; each hit non-critical. Increase Damage 37643 (Effect[0] aura 79, MiscValue 127) is set on the caster in both arms with its effect 0 amount 19900 and Lesser Armor 673 effect 0 amount 5000 on the dummy in both arms (fixture sizes, not claimed values; same fixtures as the 803903 ignores_armor entry), so the dummy armor is 528 pinned reference armor + 5000 = 5528 and each hit is large enough that the engine's ceil adds under 0.1%. Control arm: 807914 not learned, the full armor 5528 applies, kept = C / (5528 + C). Treatment arm: 807914 learned, cap = (5528 + 5500) / 3 = 3676, armor removed 30% of 3676, kept = C / (5528 - 0.3 x 3676 + C). Ratio = 11028 / (11028 x (1 - 0.3/3)) = 1 / (1 - 0.3/3) = 10/9 = 1.111111 (+11.11%), independent of the armor as long as it exceeds C / 2. Band: the larger of 5% of the gain and 2 points; a server ignoring 30% of the full armor instead of 30% of the cap would read 1.1770, and a missing aura reads 1.0. Expected from the DBC amount and the formula, never from a run. The dummy level and the armor read in the run replace these figures if they differ. Control arm: the same entry without 807914. Reference search 2026-11-24: coa-history spell 807914: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 704613,
+      "name": "Magic Fiend 704613 (Consume Magic steals 2 effects)",
+      "kind": "metric_delta",
+      "variant": "stolen_effects",
+      "label_suffix": "stolen_effects",
+      "quote": "Increases the amount of beneficial magic effects stolen by your Consume Magic by $s1.",
+      "trigger_spell": 800353,
+      "gate_spell": 704613,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "void_on_cast_failure": true,
+      "phase_auras": [
+        [
+          1243,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          1126,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          1243,
+          1,
+          "dummy",
+          "dummy"
+        ],
+        [
+          1126,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 1243
+      },
+      "fields_sum": {
+        "spell": 1126
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Consume Magic 800353 Description: 'Steal $s1 beneficial magic effect' (Effect[0] aura/effect 126 STEAL_BENEFICIAL_BUFF, BasePoints 0 + DieSides 1 = 1 stolen) and 704613 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), + 1 ($s1) on Consume Magic (SpellFamilyFlags[2] 8192): the cast steals 1 effect without the talent, 2 with it. Two stock beneficial Magic buffs (Dispel 1 in Spell.dbc), Power Word: Fortitude 1243 and Mark of the Wild 1126, are set on the dummy (precondition fixtures, by the dummy) and removed from the caster at the start of both phases; a real Consume Magic cast at the dummy follows, 500 ms later the number of the two auras held by the caster is read: 1 before the learn (control), 2 after. No aura is placed on the caster by the harness. Reference search 2026-11-24: coa-history spell 704613: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 705145,
+      "name": "Nether Champion (five stacks raise Sargeron Smite damage by 40%)",
+      "kind": "hit_ratio",
+      "variant": "stack_damage",
+      "label_suffix": "stack_damage",
+      "quote": "Triggering Dancing Blades now increases the damage of next Sargeron Smite by $705146s1%",
+      "expected": 1.4,
+      "observe_spell": 802060,
+      "learn": [
+        802060
+      ],
+      "critical": false,
+      "trials": 100,
+      "parts": 15,
+      "control": {
+        "auras": [
+          [
+            37643,
+            1
+          ],
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            37643,
+            1
+          ],
+          [
+            800058,
+            6
+          ],
+          [
+            803468,
+            1
+          ],
+          [
+            705146,
+            5
+          ]
+        ],
+        "aura_amounts": [
+          [
+            37643,
+            0,
+            19900
+          ]
+        ]
+      },
+      "expected_source": "$705146s1 = 8 (705146 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 7 + 1 = 8 per stack, StackAmount 5 = $705146u): five stacks add 8 x 5 = 40% to the damage of the spell its class mask names, a percent modifier that sums with other additive modifiers: expected ratio 1.40 of a Sargeron Smite 802060 hit with five stacks over the same hit without. The stacks are set on the caster by the harness (set_aura 705146 x5, a named precondition fixture; its grant by Dancing Blades and its 5-stack cap are proven by the stack_amount, stack_cap and consumed entries, and its own real-path grant is not the subject here). Increase Damage 37643 (aura 79 MiscValue 127) at amount 19900 is set in both arms, so each hit large so the engine's ceil adds under 0.1% (fixture size, not a claimed value). Control arm: no 705146. Band: the larger of 5% of the +40% gain and 2 points. Reference search 2026-11-24: coa-history spell 705146 and 802060: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only. Sargeron Smite 802060 (CasterAuraSpell 803468, 'Consumes 2 Felfury'): Felfury 800058 x6 and 803468 are set on the caster before every cast in both arms (the spender's cost and caster aura, precondition fixtures). Sizing: the pilot of the first pair measured a per-hit spread (the Shadowflame hit takes the engine's partial resists) that needs 2429 trials per arm for the 99% half-width to stay at half the band (the verdict's own trials_needed), so the entry runs 15 parts of 100 trials."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (mark 572792 held at 11040 ms (0.92 x 12000))",
+      "kind": "metric_delta",
+      "variant": "mark_held",
+      "label_suffix": "mark_held",
+      "quote": "for $572792d",
+      "trigger_spell": 802060,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 572792
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 11040,
+      "expire_ms": 500,
+      "observe_source": "$572792d = 12 s (572792 DurationIndex 29 = 12000 ms, SpellDuration.dbc). 806235 is a scripted passive (AscensionFelswornEvents.cpp:166-168): a non-periodic critical hit of a Felfury spender extends Inner Demon and casts 572792 on the struck enemy. Sargeron Smite 802060 (instant, a spender, one direct hit) is cast at the dummy with the strike forced critical, Inner Demon 804216 and Felfury 800058 x2 set on the caster in both phases (precondition fixtures, as the 806235 duration entry). The aura 572792 on the dummy is read 11040 ms after the cast: expected present (1); the other arm reads the opposite side of the 12000 ms duration (11040 = 0.92 x 12000 and 12960 = 1.08 x 12000), so a duration 10% off either way is excluded. Control arm: before the learn of 806235 the same cast leaves no 572792 (before_expected 0). Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots list the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 806235,
+      "name": "Hellfire Command (mark 572792 gone at 12960 ms (1.08 x 12000))",
+      "kind": "metric_delta",
+      "variant": "mark_gone",
+      "label_suffix": "mark_gone",
+      "quote": "for $572792d",
+      "trigger_spell": 802060,
+      "gate_spell": 806235,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "phase_auras": [
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "force_crit": "spell",
+      "cast_power": 100,
+      "metric": "aura",
+      "fields": {
+        "spell": 572792
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 12960,
+      "expire_ms": 500,
+      "observe_source": "$572792d = 12 s (572792 DurationIndex 29 = 12000 ms, SpellDuration.dbc). 806235 is a scripted passive (AscensionFelswornEvents.cpp:166-168): a non-periodic critical hit of a Felfury spender extends Inner Demon and casts 572792 on the struck enemy. Sargeron Smite 802060 (instant, a spender, one direct hit) is cast at the dummy with the strike forced critical, Inner Demon 804216 and Felfury 800058 x2 set on the caster in both phases (precondition fixtures, as the 806235 duration entry). The aura 572792 on the dummy is read 12960 ms after the cast: expected absent (0); the other arm reads the opposite side of the 12000 ms duration (11040 = 0.92 x 12000 and 12960 = 1.08 x 12000), so a duration 10% off either way is excluded. Control arm: before the learn of 806235 the same cast leaves no 572792 (before_expected 0). Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots list the talent name only, no values; expected values come from the tooltip and the DBC only."
     }
   ],
   "player_observations": [],

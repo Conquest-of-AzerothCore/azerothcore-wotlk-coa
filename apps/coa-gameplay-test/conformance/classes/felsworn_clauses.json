@@ -625,10 +625,10 @@
   {
     "spell": 520251,
     "clause": "Increases the effectiveness of your Intuitions by $s2%.",
+    "kind": "claim",
     "labels": [
       "520251 behaviour_metric_delta intuition"
-    ],
-    "kind": "claim"
+    ]
   },
   {
     "spell": 520252,
@@ -2098,7 +2098,8 @@
     "labels": [
       "704613 behaviour_metric_delta stolen"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "HELD '704613 behaviour_metric_delta stolen_effects' (review fw-rvb5 I-2): only 2 buffs on the dummy, so the read saturates at the expected 2 and an over-steal would pass; needs a third Magic buff and a rerun."
   },
   {
     "spell": 705102,
@@ -2372,7 +2373,8 @@
       {
         "claim": "by $705146s1%",
         "labels": [
-          "705145 behaviour_metric_delta stack_amount"
+          "705145 behaviour_metric_delta stack_amount",
+          "705145 behaviour_hit_ratio stack_damage"
         ]
       },
       {
@@ -3781,7 +3783,7 @@
     "spell": 804611,
     "clause": "Increases your Armor penetration by $s1%",
     "labels": [
-      "804611 effect_value e0 #0"
+      "804611 behaviour_hit_ratio armor_penetration"
     ],
     "kind": "claim"
   },
@@ -4372,11 +4374,31 @@
   {
     "spell": 806235,
     "clause": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells for $572792d.",
-    "labels": [
-      "806235 effect_value 572792e0 #1",
-      "806235 spell_duration 572792 #2"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells",
+        "labels": [
+          "806235 effect_value 572792e0 #1"
+        ]
+      },
+      {
+        "claim": "for $572792d.",
+        "labels": [
+          "806235 behaviour_metric_delta mark_held",
+          "806235 behaviour_metric_delta mark_gone"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The increased chance to be hit by spells on the struck enemy has no victim-side hit read; a statistical design needs about 2000 casts per arm (fw-vb5 report) and was not run; the effect_value label is data only. Review fw-rvb5 minor: tool gap, not status 3.",
+      "attempts": [
+        {
+          "agent": "fw-vb5",
+          "report": ".agents/plans/fw-vb5/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 807430,
@@ -4456,7 +4478,7 @@
     "spell": 807901,
     "clause": "Increases your Armor penetration by $s1%",
     "labels": [
-      "807901 effect_value e0 #0"
+      "807901 behaviour_hit_ratio armor_penetration"
     ],
     "kind": "claim"
   },
@@ -4488,7 +4510,7 @@
     "spell": 807914,
     "clause": "Increases your Armor penetration by $s1%",
     "labels": [
-      "807914 effect_value e0 #0"
+      "807914 behaviour_hit_ratio armor_penetration"
     ],
     "kind": "claim"
   },
