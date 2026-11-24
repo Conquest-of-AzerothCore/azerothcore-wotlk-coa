@@ -673,7 +673,8 @@
     "spell": 301241,
     "clause": "Reduces the duration of curse effects on you by $s1%.",
     "labels": [
-      "301241 effect_value e0 #0"
+      "301241 behaviour_duration_ratio",
+      "301241 behaviour_expiry"
     ],
     "kind": "claim"
   },
