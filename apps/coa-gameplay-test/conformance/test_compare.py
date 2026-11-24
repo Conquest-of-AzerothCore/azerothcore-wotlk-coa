@@ -1510,20 +1510,16 @@ class GameplayClockGateTest(unittest.TestCase):
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
 class HealAbsorbReadTest(unittest.TestCase):
-    def setUp(self):
-        self.workspace = Workspace()
-
-    def tearDown(self):
-        self.workspace.close()
-
     def verdict_of(self, before, after):
         model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 99.0,
                  'before_expected': 0.0, 'tolerance': 0, 'metric': 'spell_heal_absorb_total'}
         item = Expectation('561201 behaviour_metric_delta heal_absorb', BEHAVIOUR_METRIC_DELTA, SPELL, RANK, None,
                            '99', 'prose: "absorbs the next 99 healing on the target" (561201)', model)
-        self.workspace.scenario('heal-absorb', 'behaviour', [item],
-                                steps=[assert_step('before', before), assert_step('after', after)])
-        manifest, results = self.workspace.manifest()
+        workspace = Workspace()
+        self.addCleanup(workspace.close)
+        workspace.scenario('heal-absorb', 'behaviour', [item],
+                           steps=[assert_step('before', before), assert_step('after', after)])
+        manifest, results = workspace.manifest()
         return {verdict.label: verdict for verdict in compare(manifest, results)}[item.label]
 
     def test_the_absorbed_healing_of_the_learned_arm_passes(self):
