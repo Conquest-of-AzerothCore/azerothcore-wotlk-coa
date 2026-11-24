@@ -18782,7 +18782,7 @@
           "caster"
         ]
       ],
-      "quote": "Your next 3 Fel Fireballs have a $s1% reduced cast time",
+      "quote": "grant you Felforged",
       "spell": 300490,
       "name": "Felforged (a Fel Fireball completes at the reduced cast time)",
       "variant": "cast_landed",
@@ -18817,7 +18817,7 @@
           "caster"
         ]
       ],
-      "quote": "Your next 3 Fel Fireballs have a $s1% reduced cast time",
+      "quote": "grant you Felforged",
       "spell": 300490,
       "name": "Felforged (not faster than the stated reduction)",
       "variant": "cast_early",
@@ -18853,7 +18853,7 @@
           "caster"
         ]
       ],
-      "quote": "Your next 3 Fel Fireballs have a $s1% reduced cast time",
+      "quote": "grant you Felforged",
       "spell": 300490,
       "name": "Felforged (only the next 3 Fel Fireballs)",
       "variant": "fourth_cast",
