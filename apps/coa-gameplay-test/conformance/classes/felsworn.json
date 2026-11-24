@@ -12523,6 +12523,41 @@
       "after_at_most": 948.2
     },
     {
+      "spell": 706266,
+      "name": "Armaments of the Legion (damage Hateforged Barrier absorbs from one strike, +10%)",
+      "kind": "metric_delta",
+      "variant": "barrier_absorbed",
+      "label_suffix": "barrier_absorbed",
+      "quote": "and increases the absorption value of Hateforged Barrier by $s2%.",
+      "trigger_spell": 707527,
+      "gate_spell": 706266,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 846.5,
+      "expected": 931.1500000000001,
+      "tolerance": 16.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 948.2 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 706266 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 706266, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 10% ($s2 = BasePoints 9 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.10 = [914.1, 948.2]; a doubled bonus (1.21x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 706266: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC.",
+      "after_at_least": 914.1,
+      "after_at_most": 948.2,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true
+    },
+    {
       "spell": 707844,
       "name": "Armaments of the Legion (Hateforged Barrier absorption)",
       "kind": "metric_delta",
@@ -12546,6 +12581,41 @@
       "observe_source": "707844 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT BasePoints 19 + 1 = 20 ($s2), and Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 19 + 1 = 20, both aimed at Hateforged Barrier. O-27 (owner): one bonus only; the Felsworn contract turns Effect[2] into a dummy (AscensionFelswornContracts.cpp, Felsworn ADR 0025) and keeps aura 317, which scales the completed absorb (SpellAuraEffects.cpp); before the fix the reads were 1016 / 1029 (rank 1) and 1233 / 1207 (rank 2), 1.21x and 1.44x (merged/fw-b3g3/proveF2). The absorb amount of Hateforged Barrier 707527 (831 at the reference Stamina) is read 500 ms after a real cast, before the learn (control) and after it: ratio 1.20 within 0.02 (the larger of 5% of the bonus and 2 points, G-19), so a doubled bonus (1.44) is excluded. Reference search 2026-11-23: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); bindmysoul talents snapshot: not listed; expected values come from the tooltip and the DBC only. The absorb is rolled per cast (EffectDieSides 32: 752..783 plus Stamina 79, 831..862), so the control reading is judged in 830..863 and the treatment reading in [997.2, 1034.4] (831..862 times 1.20); a doubled bonus would read 1197..1241.",
       "after_at_least": 997.2,
       "after_at_most": 1034.4
+    },
+    {
+      "spell": 707844,
+      "name": "Armaments of the Legion (damage Hateforged Barrier absorbs from one strike, +20%)",
+      "kind": "metric_delta",
+      "variant": "barrier_absorbed",
+      "label_suffix": "barrier_absorbed",
+      "quote": "and increases the absorption value of Hateforged Barrier by $s2%.",
+      "trigger_spell": 707527,
+      "gate_spell": 707844,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 846.5,
+      "expected": 1015.8,
+      "tolerance": 16.5,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Behaviour read of the same claim as barrier_absorb (D-98): the damage Hateforged Barrier 707527 actually absorbs, not its stored amount. In each phase one real cast of 707527 on the caster, then one real strike of Light of the Naaru 41394 (Effect[0] SCHOOL_DAMAGE BasePoints 1099 + 1 = 1100) cast at the caster by the striker creature 500 ms later; the damage absorbed is read in the spell logs of that strike (spell_absorb_total, as the absorbed entry of 707527). The strike is larger than the barrier in both phases (the barrier reads at most 862 without the talent and 1034.4 with it, under 1100), so the absorbed damage is the whole barrier, which the strike consumes. Control arm: the before phase, the same cast and strike without 707844 known, read in 830..863 (707527 BasePoints 751 + 1 = 752, EffectDieSides 32, plus Stamina 79: 831..862). Treatment: after the learn of 707844, tooltip 'increases the absorption value of Hateforged Barrier by $s2%' = 20% ($s2 = BasePoints 19 + 1), owner ruling O-27 / ADR 0025: one bonus only, so 831..862 x 1.20 = [997.2, 1034.4]; a doubled bonus (1.44x) is excluded, as is no bonus. The expectation comes from the tooltip and the DBC, never from the stored-amount read. Reference search 2026-11-24: coa-history spell 707844: 0 events in 186 logs (a passive leaves no event); 707527: 303 casts in 7 logs, no absorbed amount in a log event; nothing else found beyond the tooltip and the server DBC.",
+      "after_at_least": 997.2,
+      "after_at_most": 1034.4,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true
     },
     {
       "spell": 707845,
@@ -23804,13 +23874,13 @@
         "critical": true
       },
       "before_expected": 0,
-      "expected": 279.72,
-      "after_at_least": 265.73,
-      "after_at_most": 293.71,
+      "expected": 253.73,
+      "after_at_least": 241.04,
+      "after_at_most": 266.42,
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. At attack power 312: 2 x (17.25 + 53.49 + 158 + 45.24) to 2 x (28.75 + 53.49 + 158 + 45.24) = 547.9 to 571.0, so a flat of 0 (about 130 to 153) or a missing attack power term (about 457 to 480) is excluded. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 carries its own 0.145 attack power row (AscensionFelswornData.h:53, beside 520262 at :38); with the factor applied to the whole hit (weapon roll, the 158 flat and the attack power term) the expected critical is 0.5 x 559.45 = 279.72, range 0.5 x (547.9 to 571.0) less truncation. The coa-history means 148 (520262) and 100 (572585) differ by about 0.68 with unknown gear: no figure decides. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (559.45 / 13216.59), the weapon part alone halved (about 483 / 9712) and a missing flat or attack power term."
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. At attack power 312: 2 x (17.25 + 53.49 + 158 + 45.24) to 2 x (28.75 + 53.49 + 158 + 45.24) = 547.9 to 571.0, so a flat of 0 (about 130 to 153) or a missing attack power term (about 457 to 480) is excluded. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the weapon roll is half of the main-hand roll. The flat is not the main hand's 158: owner ruling O-36 (N-9, 2026-11-24) keeps the data's 132. 803475 Effect[1] is TRIGGER_SPELL_WITH_VALUE of 572585 with BasePoints 131 + DieSides 1 = 132 (Effect[0], the main-hand trigger of 520262, is 157 + 1 = 158 = $m1); Spell::EffectTriggerSpell passes that value as SPELLVALUE_BASE_POINT0 (SpellEffects.cpp:1847-1852) and SpellEffectInfo::CalcBaseValue (SpellInfo.cpp:595) gives 132 for the off-hand effect of 572585 (DieSides 1). Off-hand strike 572585 carries its own 0.145 attack power row (AscensionFelswornData.h:53, beside 520262 at :38); with the factor applied to the whole hit (weapon roll, the 132 flat and the attack power term) at attack power 312: 0.5 x 2 x (23 + 53.49 + 132 + 45.24) = 253.73. The coa-history means 148 (520262) and 100 (572585) differ by about 0.68 with unknown gear: no figure decides. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the 158 flat (279.72), the unhalved strike (about 559), the weapon part alone halved (about 483) and a missing flat or attack power term."
     },
     {
       "kind": "metric_delta",
@@ -23857,13 +23927,13 @@
         "critical": true
       },
       "before_expected": 0,
-      "expected": 6608.3,
-      "after_at_least": 6277.89,
-      "after_at_most": 6938.72,
+      "expected": 6582.3,
+      "after_at_least": 6253.19,
+      "after_at_most": 6911.42,
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. Contrast arm of the attack power term: +20000 attack power (player_attack_power), attack power 20312: 2 x (17.25 + 3482.29 + 158 + 2945.24) to 2 x (28.75 + 3482.29 + 158 + 2945.24) = 13205.6 to 13228.6; without the 0.145 term the same hit is 7.4 to 7.5 thousand lower. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 at attack power 20312: expected 0.5 x 13216.59 = 6608.30. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (559.45 / 13216.59), the weapon part alone halved (about 483 / 9712) and a missing flat or attack power term.",
+      "observe_source": "803475 Effect[0] trigger spell 520262 (the main-hand strike), BasePoints 157 + DieSides 1 = 158 ($m1); the tooltip adds attack power x 0.145. Main-hand hit 520262 (Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG) with the reference Slayer set (item 2027, damage 17.25 to 28.75, normalized speed 2.4): weapon roll plus attack power / 14 x 2.4 plus 158 plus 0.145 x attack power. Felfury 800058 x6 and At Least 2 Felfury 803468 (Azzinoth's Assault needs 803468 and consumes 2 Felfury), Reg's Armor Pen 985345 (100% armor penetration) and Reg's Hit rating 984948 (no miss) by harness set_aura as named preconditions in both phases; forced melee crit so the hit is read as a critical, twice the hit. Contrast arm of the attack power term: +20000 attack power (player_attack_power), attack power 20312: 2 x (17.25 + 3482.29 + 158 + 2945.24) to 2 x (28.75 + 3482.29 + 158 + 2945.24) = 13205.6 to 13228.6; without the 0.145 term the same hit is 7.4 to 7.5 thousand lower. Reference search 2026-11-24: coa-history spells 520262 (main-hand strike of Azzinoth's Assault) and 572585 (off hand): 124 and 115 SPELL_DAMAGE events by players in 6 logs (means 148 and 100; 42 and 32 crits); gear and attack power of the loggers unknown, so no figure decides; spell 803475 itself: 0 events; nothing else found beyond the tooltip and Spell.dbc. The lower edge is 2 points under the minimum roll because each integer truncation of the weapon damage before the crit multiplier loses under 1 point, times that factor (2). Off-hand strike: the engine halves the off-hand base damage (Unit.cpp:518 'implement 50% base damage from offhand', UNIT_MOD_DAMAGE_OFFHAND TOTAL_PCT 0.5, and the same factor on the fixed and spell bonus of a physical weapon spell, SpellEffects.cpp:4692-4709), the off hand is the same Slayer item 2027, so the expected value is half of the main-hand figure. Off-hand strike 572585 at attack power 20312 with the 132 flat of the off-hand effect (803475 Effect[1] BasePoints 131 + DieSides 1, owner ruling O-36): expected 0.5 x 2 x (23 + 3482.06 + 132 + 2945.24) = 6582.30. Band 5% of the expected value: the halving is an engine rule applied to the weapon roll, the flat and the attack power term together, and a tighter band would claim a rounding order the code does not state; 5% still excludes the unhalved strike (about 13165), the weapon part alone halved (about 9700) and a missing attack power term; the flat itself is proved by the hit_off entry at the reference attack power.",
       "player_attack_power": 20000
     },
     {
