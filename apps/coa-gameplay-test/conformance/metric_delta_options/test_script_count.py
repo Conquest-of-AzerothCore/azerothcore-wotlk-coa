@@ -356,9 +356,23 @@ class ScriptCountMainHandTests(unittest.TestCase):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 generated(pit_lord(script_count=raw, expire_ms=12500))
 
+    def dual_wield_swings(self) -> dict:
+        class_file = load_fixture_class_file(19)
+        main, off = class_file['weapon'], class_file['off_hand_weapons'][0]
+        scenario = {'contract': '', 'steps': [
+            {'action': 'add_item', 'actor': 'caster', 'item': main['item']},
+            {'action': 'equip', 'actor': 'caster', 'item': main['item'], 'slot': 15},
+            {'action': 'add_item', 'actor': 'caster', 'item': off['item']},
+            {'action': 'equip', 'actor': 'caster', 'item': off['item'], 'slot': 16}]}
+        spec = metric_delta_spec(pit_lord(script_count=DAGGER_SWUNG, expire_ms=12500))
+        script_count.swing_fixtures(class_file, spec, script_count.parse(DAGGER_SWUNG), scenario)
+        return scenario
+
+    def test_a_dual_wield_fixture_becomes_one_main_hand_inside_the_bound(self):
+        scenario = self.dual_wield_swings()
+        self.assertEqual(self.melee(scenario['steps']), [('add_item', 2208, None), ('equip', 2208, 15)])
+
     def test_mutant_keeping_an_off_hand_beside_the_main_hand_is_refused_by_the_bound(self):
-        entry = pit_lord(script_count=DAGGER_SWUNG, expire_ms=12500)
-        self.assertTrue(generated(entry)[0]['steps'])
         original = script_count.melee_equip_indexes
 
         def main_only(steps):
@@ -369,7 +383,7 @@ class ScriptCountMainHandTests(unittest.TestCase):
                               ('melee_equip_indexes', main_only)):
             with self.subTest(mutant=name), mock.patch.object(script_count, name, patched), \
                     self.assertRaisesRegex(ValueError, 'equipped melee hands'):
-                generated(entry)
+                self.dual_wield_swings()
 
 if __name__ == '__main__':
     unittest.main()
