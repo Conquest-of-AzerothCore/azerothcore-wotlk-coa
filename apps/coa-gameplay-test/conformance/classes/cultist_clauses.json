@@ -241,14 +241,16 @@
   {
     "spell": 300286,
     "clause": "Direct healing done now applies Void-Touched.",
-    "labels": [],
+    "labels": [
+      "300286 behaviour_metric_delta apply"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300286,
     "clause": "Marks the ally for $d,",
     "labels": [
-      "300286 spell_duration 301982 #0"
+      "300286 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -930,14 +932,18 @@
   {
     "spell": 502241,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "502241 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
     "spell": 502241,
     "clause": "Smash an enemy with eldritch force, dealing ${$m1+0+$AP*0.1+$SP*.52} Shadow damage",
     "labels": [
-      "502241 effect_value e0 #0"
+      "502241 behaviour_metric_delta damage_base",
+      "502241 behaviour_metric_delta damage_sp",
+      "502241 behaviour_metric_delta damage_ap"
     ],
     "kind": "claim"
   },
@@ -945,7 +951,7 @@
     "spell": 502241,
     "clause": "and applying Black Blood to $804113i nearby allies,",
     "labels": [
-      "502241 effect_value #1"
+      "502241 behaviour_metric_delta black_blood_targets"
     ],
     "kind": "claim"
   },
@@ -953,7 +959,8 @@
     "spell": 502241,
     "clause": "healing them for ${$m2+0+$AP*0.1},",
     "labels": [
-      "502241 effect_value e1 #2"
+      "502241 behaviour_metric_delta black_blood_heal_base",
+      "502241 behaviour_metric_delta black_blood_heal_ap"
     ],
     "kind": "claim"
   },
@@ -965,13 +972,14 @@
       {
         "claim": "every $804153t1 sec",
         "labels": [
-          "502241 aura_amplitude_ms #3"
+          "502241 behaviour_metric_delta black_blood_period",
+          "502241 behaviour_metric_delta black_blood_heal_base"
         ]
       },
       {
         "claim": "for $804153D",
         "labels": [
-          "502241 spell_duration 804153 #4"
+          "502241 behaviour_metric_delta black_blood_duration"
         ]
       }
     ]
@@ -979,7 +987,10 @@
   {
     "spell": 502241,
     "clause": "Usable while moving.",
-    "labels": [],
+    "labels": [
+      "502241 behaviour_metric_delta moving_cast",
+      "502241 behaviour_metric_delta moving_cast_control"
+    ],
     "kind": "claim"
   },
   {
@@ -1537,7 +1548,7 @@
     "spell": 525307,
     "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
     "labels": [
-      "525307 effect_value e0 #0"
+      "525307 behaviour_metric_delta auto_heal"
     ],
     "kind": "claim"
   },
@@ -2997,7 +3008,7 @@
     "spell": 706926,
     "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
     "labels": [
-      "706926 effect_value e0 #0"
+      "706926 behaviour_metric_delta auto_heal"
     ],
     "kind": "claim"
   },
