@@ -2705,7 +2705,7 @@
     "spell": 706179,
     "clause": "Reduces spell pushback suffered from damaging attacks by $s1%",
     "labels": [
-      "706179 effect_value e0 #0"
+      "706179 behaviour_metric_delta pushback"
     ],
     "kind": "claim"
   },
@@ -3026,7 +3026,7 @@
     "spell": 707783,
     "clause": "Reduces spell pushback suffered from damaging attacks by $s1%",
     "labels": [
-      "707783 effect_value e0 #0"
+      "707783 behaviour_metric_delta pushback"
     ],
     "kind": "claim"
   },

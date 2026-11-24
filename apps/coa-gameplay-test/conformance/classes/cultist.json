@@ -1824,21 +1824,27 @@
           2480
         ],
         [
-          2940,
-          2980
+          2880,
+          2940
         ],
         [
           2440,
           2480
         ],
         [
-          2765,
-          2805
+          2740,
+          2800
         ]
       ],
       "expected_pct": 35,
       "repeats": 10,
-      "observe_source": "706179 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK, EffectBasePoints[0] 34 + EffectDieSides[0] 1 = 35% ($s1 = 35; Spell.dbc). Horrorbolt 502182 (2500 ms cast) unhit and hit once by Light of the Naaru 41394 at 1000 ms before (control: 500 ms pushback -> 3000 ms) and after a real learn of 706179 (325 ms pushback -> 2825 ms), 10 repeats each, judged in G-19 band [33%, 37%]. Reference search 2026-11-24: coa-history spell 706179: 0 events in 186 logs (passive); coabuildhub spells_master_index.json entry 706179 matches verbatim."
+      "observe_source": "706179 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK, EffectBasePoints[0] 34 + EffectDieSides[0] 1 = 35% ($s1 = 35; Spell.dbc). Horrorbolt 502182 (2500 ms cast) unhit and hit once by Light of the Naaru 41394 at 1000 ms before (control: 500 ms pushback -> 3000 ms) and after a real learn of 706179 (325 ms pushback -> 2825 ms), 10 repeats each, judged in G-19 band [33%, 37%]. Reference search 2026-11-24: coa-history spell 706179: 0 events in 186 logs (passive); coabuildhub spells_master_index.json entry 706179 matches verbatim. Precondition fixture caster_auras [[500706, 1]] resets Insanity to 1 stack before each Horrorbolt cast so 10 repeats never reach 100 Insanity / Insane 803060 (+30% haste).",
+      "caster_auras": [
+        [
+          500706,
+          1
+        ]
+      ]
     },
     {
       "spell": 706179,
@@ -1885,21 +1891,27 @@
           2480
         ],
         [
-          2940,
-          2980
+          2880,
+          2940
         ],
         [
           2440,
           2480
         ],
         [
-          2590,
-          2630
+          2560,
+          2620
         ]
       ],
       "expected_pct": 70,
       "repeats": 10,
-      "observe_source": "707783 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK, EffectBasePoints[0] 69 + EffectDieSides[0] 1 = 70% ($s1 = 70; Spell.dbc). Horrorbolt 502182 (2500 ms cast) unhit and hit once by Light of the Naaru 41394 at 1000 ms before (control: 500 ms pushback -> 3000 ms) and after a real learn of 707783 (150 ms pushback -> 2650 ms), 10 repeats each, judged in G-19 band [66.5%, 73.5%]. Reference search 2026-11-24: coa-history spell 707783: 0 events in 186 logs; coabuildhub spells_master_index.json has no entry for 707783; installed Spell.dbc governs."
+      "observe_source": "707783 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK, EffectBasePoints[0] 69 + EffectDieSides[0] 1 = 70% ($s1 = 70; Spell.dbc). Horrorbolt 502182 (2500 ms cast) unhit and hit once by Light of the Naaru 41394 at 1000 ms before (control: 500 ms pushback -> 3000 ms) and after a real learn of 707783 (150 ms pushback -> 2650 ms), 10 repeats each, judged in G-19 band [66.5%, 73.5%]. Reference search 2026-11-24: coa-history spell 707783: 0 events in 186 logs; coabuildhub spells_master_index.json has no entry for 707783; installed Spell.dbc governs. Precondition fixture caster_auras [[500706, 1]] resets Insanity to 1 stack before each Horrorbolt cast so 10 repeats never reach 100 Insanity / Insane 803060 (+30% haste).",
+      "caster_auras": [
+        [
+          500706,
+          1
+        ]
+      ]
     },
     {
       "spell": 707783,
@@ -2168,6 +2180,122 @@
       "expire_ms": 1600,
       "void_on_cast_failure": true,
       "observe_source": "803283 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 14 (SPELLMOD_COST), EffectBasePoints[1] -51 + EffectDieSides[1] 1 = -50% ($s2 = 50), EffectSpellClassMask[3..5] [512, 0, 64] matching Presence of C'Thun 803339 (SpellFamilyFlags [16384, 0, 64], ManaCostPercentage 30; Spell.dbc). Level 60 Cultist BaseMana = 1512: base cost int32(CalculatePct(1512, 30)) = 453 mana; with -50% -> int32(453 * 0.5f) = 226 mana (saving 227 mana). Both phases set mana to cast_power 2000 with regen disabled and self-cast 803339: 1547 before learning 803283 (control) and 1774 after (gain +227, tol 0). Reference search 2026-11-24: coa-history spell 803283: 0 events in 186 logs (passive; positive control 803339 Presence of C'Thun: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 803283 is an older state omitting the mana cost clause; installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300272,
+      "kind": "flat_chance_rate",
+      "variant": "presence_proc",
+      "label_suffix": "presence_proc",
+      "name": "Everpresent (Presence of C'Thun proc chance 20% + 10% = 30%)",
+      "quote": "Increases the chance to trigger Presences by $s1%.",
+      "chance_pct": 30,
+      "talents": [
+        803339,
+        300272
+      ],
+      "setup": {
+        "spell": 803339,
+        "target": "caster",
+        "every": 200,
+        "power": 2000
+      },
+      "setup_wait_ms": 1600,
+      "trigger_spell": 502220,
+      "trigger_target": "dummy",
+      "dummy_distance": 10,
+      "cast_power": 2000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "spellpen precondition fixture so Darkwither ticks never resist"
+        },
+        {
+          "spell": 500706,
+          "stacks": 0,
+          "source": "clears Insanity before each Darkwither cast so Insane 803060 never triggers"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 502220,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 803340
+      },
+      "cycles": 105,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Darkwither 502220 is single-target (EffectRadiusIndex 0) at dummy_distance 10 yd; Presence of C'Thun 803339 and triggered 803340 are caster-only; streams are ungrouped."
+      },
+      "observe_source": "300272 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +10% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). Expected 30% with 300272 learned; AscensionCultist.cpp:105-116 Chance() does not call ApplySpellMod(SPELLMOD_CHANCE_OF_SUCCESS), so this entry verifies the live proc rate against 30%. Reference search 2026-11-24: coa-history spell 300272: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 300272 matches installed Spell.dbc."
+    },
+    {
+      "spell": 803283,
+      "kind": "flat_chance_rate",
+      "variant": "presence_proc",
+      "label_suffix": "presence_proc",
+      "name": "Embodied Presences (Presence of C'Thun proc chance 20% + 5% = 25%)",
+      "quote": "Increases the chance to trigger your Presences by $s1%",
+      "chance_pct": 25,
+      "talents": [
+        803339,
+        803283
+      ],
+      "setup": {
+        "spell": 803339,
+        "target": "caster",
+        "every": 200,
+        "power": 2000
+      },
+      "setup_wait_ms": 1600,
+      "trigger_spell": 502220,
+      "trigger_target": "dummy",
+      "dummy_distance": 10,
+      "cast_power": 2000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "spellpen precondition fixture so Darkwither ticks never resist"
+        },
+        {
+          "spell": 500706,
+          "stacks": 0,
+          "source": "clears Insanity before each Darkwither cast so Insane 803060 never triggers"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 502220,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 803340
+      },
+      "cycles": 95,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Darkwither 502220 is single-target (EffectRadiusIndex 0) at dummy_distance 10 yd; Presence of C'Thun 803339 and triggered 803340 are caster-only; streams are ungrouped."
+      },
+      "observe_source": "803283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +5% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). Expected 25% with 803283 learned; AscensionCultist.cpp:105-116 Chance() does not call ApplySpellMod(SPELLMOD_CHANCE_OF_SUCCESS), so this entry verifies the live proc rate against 25%. Reference search 2026-11-24: coa-history spell 803283: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 803283 matches installed Spell.dbc."
     }
   ],
   "player_observations": [],
