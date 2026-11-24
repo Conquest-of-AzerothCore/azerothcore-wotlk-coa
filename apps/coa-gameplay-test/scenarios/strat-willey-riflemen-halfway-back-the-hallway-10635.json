@@ -74,7 +74,7 @@
       "actor": "p",
       "metric": "nearby_creature_count",
       "entry": 9780720,
-      "min": 3,
+      "equals": 3,
       "within_ms": 20000
     },
     {
