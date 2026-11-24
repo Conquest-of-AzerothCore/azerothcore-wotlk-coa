@@ -1670,17 +1670,26 @@
     "spell": 560320,
     "clause": "Melee attacks now have a $h% chance to reset the cooldown of your Netherstrike,",
     "labels": [
-      "560320 effect_value #0"
+      "560320 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim"
   },
   {
     "spell": 560320,
     "clause": "allowing the next use regardless of the target's health for $561288d.",
-    "labels": [
-      "560320 spell_duration 561288 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "allowing the next use regardless of the target's health",
+        "labels": []
+      },
+      {
+        "claim": "for $561288d",
+        "labels": [
+          "560320 behaviour_metric_delta voidseeker_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 560321,
@@ -3012,7 +3021,8 @@
     "spell": 707640,
     "clause": "Blade of the Empire now has a $h% chance to cause your next auto attack to hit twice.",
     "labels": [
-      "707640 effect_value #0"
+      "707640 behaviour_metric_delta rate",
+      "707640 behaviour_metric_delta extra_attack"
     ],
     "kind": "claim"
   },
@@ -3259,13 +3269,25 @@
       {
         "claim": "$h% chance",
         "labels": [
-          "800463 effect_value #0"
+          "800463 proc_rate avoided"
         ]
       },
       {
         "claim": "deal $502133s2% more damage",
         "labels": [
-          "800463 effect_value 502133e1 #1"
+          "800463 behaviour_hit_ratio blade_damage_earned"
+        ]
+      },
+      {
+        "claim": "hit an additional nearby enemy",
+        "labels": [
+          "800463 behaviour_metric_delta cleave_earned"
+        ]
+      },
+      {
+        "claim": "cost no mana",
+        "labels": [
+          "800463 behaviour_metric_delta free_mana_earned"
         ]
       }
     ]

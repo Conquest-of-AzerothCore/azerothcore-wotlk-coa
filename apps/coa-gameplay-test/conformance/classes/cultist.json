@@ -116,6 +116,45 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 800463,
+      "name": "Void Reaver",
+      "tooltip": "Avoiding or absorbing an attack now has a $h% chance to make your next Blade of the Empire deal $502133s2% more damage and hit an additional nearby enemy and cost no mana.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "avoided",
+        "striker_entry": 36,
+        "swing_ms": 500,
+        "dodge": 100,
+        "parry": 0,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ]
+      },
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "min_parts": 10,
+      "trigger_text": "Avoiding or absorbing an attack",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 502133,
+      "events_per_proc": 1,
+      "proc_spell_source": "EffectTriggerSpell[0] of 800463; aura_ascension_cultist_event casts 502133 on caster (AscensionCultistEvents.cpp:64,104,234).",
+      "handler": "aura_ascension_cultist_event: Check (AscensionCultistEvents.cpp:64,104) accepts avoided (PROC_HIT_DODGE | PROC_HIT_PARRY | PROC_HIT_MISS) or absorbed hits and rolls Chance(player, 800463) (roll_chance_f of Spell.dbc ProcChance 20, no cooldown; spell_proc.Chance zeroed by rev_20261003_10); Proc (:234) casts 502133 on caster. Dreadnought weapon set (2534 Dagger + 2129 Shield). Ten stationary strikers (creature 36) with Self Root Forever 42716, Molten 62531 and Enrage 2116852 swing at the caster with dodge 100 and parry 0 so every attempt is a dodge. Sized for residual_target 0.001 per pair, min_detectable 4 pts (G-20 +-2 pt band on 20%). Reference search 2026-11-24: coa-history spell 800463 has 0 events (passive; 502133 has SPELL_AURA_REFRESH in 1 log); coabuildhub spells_master_index.json has an older version of 800463 omitting 'and cost no mana'; installed server Spell.dbc (502133 Effect[2] aura 108 -100% cost) governs.",
+      "dbc": {
+        "800463": {
+          "ProcChance": 20,
+          "ProcFlags": 4,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
     }
   ],
   "triggers": [
@@ -3810,6 +3849,470 @@
         ]
       },
       "expected_source": "807308 EffectRadiusIndex[0]=10 (30 yd; IsWithinDistInMap adds ~3 yd combined reach -> ~33 yd edge). At 35 yd, ally still holds Wracked Mind (1) at ~14500 ms even though Blade of the Empire landed on dummy, ruling out unbounded or 2x (60 yd) radius. Reference search 2026-11-24: coa-history spells 807307 and 807308 have 0 events in 186 logs; coabuildhub spells_master_index.json matches 807307 verbatim ('Melee ability damage now reduces the duration of Wracked Mind by 1 sec on all allies within 30 yds.')."
+    },
+    {
+      "spell": 560320,
+      "name": "Voidseeker (Netherstrike cooldown reset at 10%)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "Melee attacks now have a $h% chance to reset the cooldown of your Netherstrike,",
+      "talent": 560320,
+      "trigger_spell": 806830,
+      "reset_spell": 578263,
+      "chance_pct": 10,
+      "control_casts": 50,
+      "casts": 1800,
+      "parts": 7,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89)"
+        },
+        {
+          "spell": 680602,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680602 (40 Insanity helper marker) required by Hammer of Twilight 806830 (Spell.dbc)"
+        }
+      ],
+      "observe_source": "$h = 10 (560320 Spell.dbc ProcChance 10; AscensionCultistEvents.cpp:91,201-204 checks dealt && melee && Chance(player, 560320) via roll_chance_f and calls Reduce(player, 806222, INT32_MAX) -> Player::RemoveSpellCooldown(578263, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (0 mana, instant, 1500 ms GCD, DmgClass 2 melee hit with default Godblade 2531 2H Axe). Control: 50 casts per part (300 total) unlearned (0 resets). Treatment: 7 pooled parts x 1800 casts = 12600 (>= 10905 needed) damaging melee hits (residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 10%). Reference search 2026-11-24: coa-history spell 560320 has 0 events (passive; 561288 has SPELL_AURA_REFRESH in 10 logs, 578263 has 256 casts in 3 logs); coabuildhub spells_master_index.json matches 560320 verbatim ('Melee attacks now have a 10% chance to reset the cooldown of your Netherstrike, allowing the next use regardless of the target's health for 8 sec.')."
+    },
+    {
+      "spell": 560320,
+      "name": "Voidseeker (Netherstrike health-gate bypass aura 561288 lasts 8000 ms)",
+      "kind": "last_application_expiry",
+      "label_suffix": "voidseeker_duration",
+      "quote": "allowing the next use regardless of the target's health for $561288d.",
+      "gate_spell": 560320,
+      "trigger_spell": 502241,
+      "aura": 561288,
+      "expected_ms": 8000,
+      "control_window_ms": 500,
+      "window_ms": 10000,
+      "poll_ms": 50,
+      "caster": true,
+      "feed": {
+        "every_ms": 1700
+      },
+      "observe_source": "Expected 8000 ms: Spell.dbc 561288 DurationIndex 31 (SpellDuration.dbc row 31 = 8000 ms, $561288d). 561288 is cast on caster by aura_ascension_cultist_event (AscensionCultistEvents.cpp:91,203) when a melee hit rolls Chance(player, 560320) (ProcChance 10%, roll_chance_f). Earned for real via cast_until_aura feeding Malevolence 502241 (DmgClass 2 melee, instant, 0 CD) every 1700 ms (max_casts = ceil(ln 0.0005 / ln 0.9) = 73, residual <= 0.1% per pair); expiry timed on game-time stamps within G-19 band around 8000 ms. Reference search 2026-11-24: coa-history spell 560320 has 0 events (passive; 561288 has SPELL_AURA_REFRESH in 10 logs, 578263 has 256 casts in 3 logs); coabuildhub spells_master_index.json matches 560320 verbatim ('Melee attacks now have a 10% chance to reset the cooldown of your Netherstrike, allowing the next use regardless of the target's health for 8 sec.').",
+      "trigger_power": 2000
+    },
+    {
+      "spell": 707640,
+      "kind": "flat_chance_rate",
+      "variant": "rate",
+      "label_suffix": "rate",
+      "name": "Shadow Strikes (Blade of the Empire procs 805113 at 30%)",
+      "quote": "Blade of the Empire now has a $h% chance to cause your next auto attack to hit twice.",
+      "chance_pct": 30,
+      "trigger_spell": 502122,
+      "trigger_target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: prevents Shadow full resists on Blade of the Empire 502122 so every cast deals damage and enters the proc check"
+        },
+        {
+          "spell": 500706,
+          "stacks": 0,
+          "source": "precondition fixture: clears Insanity 500706 before each 502122 cast so Insanity never reaches 100 to trigger Insane 803060"
+        }
+      ],
+      "cast_wait_ms": 6100,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 805113
+      },
+      "cycles": 230,
+      "unlearned_cycles": 5,
+      "trials_per_cycle": 1,
+      "parts": 14,
+      "streams": 8,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Blade of the Empire 502122 has single-target EffectImplicitTargetA 6 with EffectRadiusIndex 0 and EffectChainTarget 0, cast at each stream's own dummy at 4 yd; 823764 and Insanity 500706 are caster-only; 805113 Effect[0]=19 ADD_EXTRA_ATTACKS targets caster's own dummy; aura_ascension_cultist_event only accepts the caster's own outgoing damage (AscensionCultistEvents.cpp:99,233); streams are ungrouped."
+      },
+      "observe_source": "Shadow Strikes 707640 (Spell.dbc ProcChance 30 = $h, EffectTriggerSpell[0]=805113; spell_proc.Chance zeroed by rev_20261003_10): AscensionCultistEvents.cpp:99,233 checks dealt && Named(info, 500720) && Chance(player, 707640) via roll_chance_f and calls Cast(player, player, 805113), counted by spell_cast_count of 805113. Casts 502122 every 6100 ms (> 6000 ms per-charge recharge, so 1 charge recharges before every cast and charges never exhaust). Unlearned control: 5 cycles x 14 parts x 8 streams = 560 trials (expects 0 procs). Treatment: 230 cycles x 14 parts x 8 streams = 25760 (>= 25497 needed) trials (G-19 +-2 pt band around 30%, residual <= 0.1% per pair). Reference search 2026-11-24: coa-history spell 707640 has 0 events (passive; 805113 has SPELL_EXTRA_ATTACKS in 13 logs); coabuildhub spells_master_index.json matches 707640 verbatim ('Blade of the Empire now has a 30% chance to cause your next auto attack to hit twice.')."
+    },
+    {
+      "spell": 707640,
+      "kind": "metric_delta",
+      "variant": "extra_attack",
+      "label_suffix": "extra_attack",
+      "name": "Shadow Strikes (each 805113 proc adds exactly 1 extra main-hand auto-attack)",
+      "quote": "Blade of the Empire now has a $h% chance to cause your next auto attack to hit twice.",
+      "learn": [
+        582856
+      ],
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2200,
+      "cast_in_before": true,
+      "expire_ms": 18500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "melee_damage_count",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 0,
+      "expected": 7,
+      "after_at_least": 1,
+      "same_arm_ratio": {
+        "metric": "spell_cast_count",
+        "fields": {
+          "spell": 805113
+        },
+        "ratio": 1.0,
+        "tolerance": 0.05,
+        "least": 1,
+        "source": "805113 Effect[0]=19 ADD_EXTRA_ATTACKS (bp 0+1 = 1) adds 1 extra main-hand AttackerStateUpdate (Unit.cpp:708) per proc; ratio 1.0 +- 0.05 fails 0 (no extra hit) and 2.0 (two extra hits)"
+      },
+      "expected_source": "24 damaging casts of Blade of the Empire 502122 (1600 ms apart with reset_cooldown=true so all 24 casts land in each phase; Abyssal Edge 582856 learned as precondition so 24 casts x 90 mana = 2160 <= 2200 cast_power <= 2297 MaxMana). Probability of 0 procs at 30% = 0.7^24 = 0.00019 per run (0.038% per pair <= 0.1%). Unlearned phase produces 0 melee_damage_count and 0 procs; learned phase produces >= 1 extra main-hand melee hit with melee_damage_count / spell_cast_count(805113) = 1.0 +- 0.05. Reference search 2026-11-24: coa-history spell 707640 has 0 events (passive; 805113 has SPELL_EXTRA_ATTACKS in 13 logs); coabuildhub spells_master_index.json matches 707640 verbatim ('Blade of the Empire now has a 30% chance to cause your next auto attack to hit twice.').",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502122,
+              "target": "dummy"
+            },
+            "before_expected": 24,
+            "expected": 48,
+            "tolerance": 0,
+            "source": "all 24 Blade of the Empire 502122 casts land in each phase (cumulative 24 before, 48 after), guaranteeing P(0 procs at 30%) = 0.7^24 = 0.019% per run (0.038% per pair <= 0.1%)"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 800463,
+      "name": "Void Reaver (Blade of the Empire +20% damage under 502133 earned by dodged swings)",
+      "kind": "hit_ratio",
+      "variant": "blade_damage_earned",
+      "label_suffix": "blade_damage_earned",
+      "quote": "deal $502133s2% more damage",
+      "expected": 1.2,
+      "observe_spell": 502122,
+      "target": "striker",
+      "cast_wait_ms": 2100,
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          800463
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "trials": 40,
+      "parts": 4,
+      "critical": false,
+      "avoided_grant": {
+        "proc_aura": 502133,
+        "striker_entry": 36,
+        "strikers": 10,
+        "striker_auras": [
+          42716,
+          62531,
+          2116852
+        ],
+        "swing_ms": 500,
+        "grant_ms": 1500,
+        "lead_ms": 5000
+      },
+      "expected_source": "502133 Effect[1] aura 107/108 SPELL_AURA_ADD_PCT_MODIFIER (BasePoints 19 + 1 = 20%, $502133s2) applied to Blade of the Empire 502122 (AscensionCultistContracts.cpp:70-74). Earned via real avoided_grant: 10 stationary strikers 36 swing at caster (dodge 100%, parry 0%) with 800463 learned only in treatment arm (read present before every treatment cast and absent before every control cast, else void). At +20000 SP (823764 removes Shadow partial resists), 502122 non-crit spread is [3717..3756] (+-0.5%), so 4 parts x 40 trials = 160 trials per arm yields 99% CI half-width < 0.15 pts against +-2 pt band around 1.20. Trial spacing 2100 + 1500 = 3600 ms > 2000 ms/charge so 502122 charges never exhaust. Reference search 2026-11-24: coa-history spell 800463 has 0 events (passive; 502133 has SPELL_AURA_REFRESH in 1 log); coabuildhub spells_master_index.json has an older version of 800463 omitting 'and cost no mana'; installed server Spell.dbc (502133 Effect[2] aura 108 -100% cost) governs."
+    },
+    {
+      "spell": 800463,
+      "kind": "metric_delta",
+      "variant": "cleave_earned",
+      "label_suffix": "cleave_earned",
+      "name": "Void Reaver (next Blade of the Empire hits 1 additional nearby enemy via 707750)",
+      "quote": "Avoiding or absorbing an attack now has a $h% chance to make your next Blade of the Empire deal $502133s2% more damage and hit an additional nearby enemy and cost no mana.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "area_dummies": [
+        4.0
+      ],
+      "cast_power": 2000,
+      "cast_in_before": true,
+      "expire_ms": 11000,
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 35,
+        "wait_ms": 200
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 707750,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "expected_source": "AscensionCultistAbilities.cpp:240-246: while 502133 is active, Blade of the Empire 502122 copies its damage via 707750 to 1 nearby enemy within 8 yd. 502133 is earned via real dodge: 35 melee strikes of 2118233 with dodge 100% (7000 ms < 10000 ms 502133 duration; P(0 procs at 20%) = 0.8^35 = 0.00041 per run, 0.08% per pair <= 0.1%). Unlearned phase: 0 hits on area1 (4 yd from dummy); learned phase: 1 hit of 707750 on area1 (tolerance 0 fails 0 no-effect and 2 double-cleave). Reference search 2026-11-24: coa-history spell 800463 has 0 events (passive; 502133 has SPELL_AURA_REFRESH in 1 log); coabuildhub spells_master_index.json has an older version of 800463 omitting 'and cost no mana'; installed server Spell.dbc (502133 Effect[2] aura 108 -100% cost) governs."
+    },
+    {
+      "spell": 800463,
+      "kind": "metric_delta",
+      "variant": "free_mana_earned",
+      "label_suffix": "free_mana_earned",
+      "name": "Void Reaver (next Blade of the Empire costs 0 mana under earned 502133)",
+      "quote": "Avoiding or absorbing an attack now has a $h% chance to make your next Blade of the Empire deal $502133s2% more damage and hit an additional nearby enemy and cost no mana.",
+      "trigger_spell": 502122,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "cast_in_before": true,
+      "expire_ms": 11000,
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 35,
+        "wait_ms": 200
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 1819,
+      "expected": 2000,
+      "expected_gain": 181,
+      "tolerance": 1,
+      "expected_source": "502133 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER (BasePoints -101 + 1 = -100% mana cost on Blade of the Empire 502122). Earned via real dodge: 35 melee strikes of 2118233 with dodge 100% (7000 ms < 10000 ms 502133 duration; P(0 procs at 20%) = 0.00041 per run, 0.08% per pair <= 0.1%). Base mana cost of 502122 = floor(1512 * 12 / 100) = 181 (cast_power 2000 -> 1819 unlearned vs 2000 learned, gain +181 +- 1; fails 0 no-effect 1819 and 50% reduction 1909). Reference search 2026-11-24: coa-history spell 800463 has 0 events (passive; 502133 has SPELL_AURA_REFRESH in 1 log); coabuildhub spells_master_index.json has an older version of 800463 omitting 'and cost no mana'; installed server Spell.dbc (502133 Effect[2] aura 108 -100% cost) governs."
     }
   ],
   "player_observations": [],
