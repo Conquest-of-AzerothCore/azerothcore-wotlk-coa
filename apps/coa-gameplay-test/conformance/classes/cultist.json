@@ -714,6 +714,29 @@
         "source": "Psychic Suppression 800432 has single-target EffectImplicitTargetA 6/1 with EffectRadiusIndex 0 and EffectChainTarget 0 on all effects; triggered 803296 (EffectImplicitTargetA 1, EffectRadiusIndex 0) and lifecycle-cast 802789 / 803746 (AscensionCultistAuras.cpp:66-70,155-159; EffectImplicitTargetA 6, EffectRadiusIndex 0) have zero radius and target only the stream's own dummy; cast at dummy_distance 10 yd (outside 5 yd melee range, inside 30 yd RangeIndex 4); 823764 is caster-only; Mind Rot 560943 has EffectImplicitTargetA 6, EffectRadiusIndex 0; aura_ascension_cultist_event only accepts the caster's own outgoing damage (AscensionCultistEvents.cpp:71,82,165); streams are ungrouped."
       },
       "observe_source": "Mind Rot 300300 (passive, ProcChance 25 = $h; AscensionCultistEvents.cpp:82 checks dealt && (periodic || (info && info->IsChanneled())) && Chance(player, id) and :165 casts 560943). Trigger: Psychic Suppression 800432 (channeled AttributesEx 0x4, GCD 1500 ms, RecoveryTime 90000 ms reset before each cast by flat_chance_rate, 17% of 1512 BaseMana = 257 mana, cast_power 2000 <= 2297 MaxMana; Duration 5000 ms, Effect[0] aura 3 periodic Shadow damage, EffectAmplitude 500 ms, no START_PERIODIC_AT_APPLY -> 10 ticks per cast inside 5500 ms). Unlearned control: 2 cycles x 10 ticks x 5 parts x 8 streams = 800 trials (>= 50), expects 0 procs. Treatment: 47 cycles x 10 ticks x 5 parts x 8 streams = 18800 trials (>= 18576 flip-proof trials for 25% with G-19 +-2 pt band over 5 parts, residual edge-crossing failure <= 0.1% per pair). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 300300 matches verbatim; ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 300305,
+      "name": "Occultism (Wrath of the Black Empire critical strike chance)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Increases the critical strike chance of Wrath of the Black Empire by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 300305,
+      "target": "caster",
+      "metric": "spell_done_crit_chance",
+      "fields": {
+        "spell": 504904,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 10 (300305 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 7 SPELLMOD_CRITICAL_CHANCE, EffectBasePoints 9 + EffectDieSides 1, EffectSpellClassMask[1] 256, SpellFamilyName 31; Spell.dbc). Wrath of the Black Empire 504904 (level 60 rank, AscensionSpellProgressionData.h:1707) carries SpellFamilyFlags[1] 288 (0x120, matching 0x100). Reads live Player::SpellDoneCritChance for 504904 before (control: 300305 not learned) and after a real learn of 300305: expected gain +10.0 points. Reference search 2026-11-24: coa-history spell 300305: 0 events in 186 logs (passive; positive control 502122 Blade of the Empire: 8145 casts in 14 logs); coabuildhub spells_master_index.json entry 300305 matches verbatim ('Increases the critical strike chance of Wrath of the Black Empire by 10%.')."
     }
   ],
   "player_observations": [],

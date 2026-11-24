@@ -435,7 +435,7 @@
     "spell": 300305,
     "clause": "Increases the critical strike chance of Wrath of the Black Empire by $s1%.",
     "labels": [
-      "300305 effect_value e0 #0"
+      "300305 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
