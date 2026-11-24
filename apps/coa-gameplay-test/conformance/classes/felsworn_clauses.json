@@ -96,13 +96,25 @@
         "claim": "Allows you to wield a Two-Handed Axe, Mace, Polearm or Sword in each hand",
         "labels": [
           "92089 behaviour_metric_delta equip"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "grants you additional Armor and magic resistance based on your attack power",
         "labels": []
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "Armor part and the larger-delta-at-higher-attack-power part need a tool extension (batch A3, mentor D-90 method). Armor: the reference character's Armor reads 270 before the learn (a stat-derived base, not 0), the metric_delta judge asserts the before reading exactly (before_expected, tolerance) or a stated gain (expected_gain, which would assert the coefficient D-90 leaves unasserted), and has no direction-only gain option (after minus before above a floor). Ordering: judging 'strictly larger delta at a higher attack power' needs one scenario holding two attack power levels (monotone covers phase_power only), because separate entries cannot compare their readings. Design 1 (armor, entry armor_ap3000, run 20261124-054659): alert, before 270 expected 0, after 1926. Design 2 (an after_at_least bound above the read baseline) was rejected: the bound would come from a reading. The six resistance entries (resist_<school>_ap3000, baseline 0 exact) measure the direction for each magic school and are listed as an extra claim. Route: a tool group adding a gain-above-floor direction option and an attack power monotone option to metric_delta.",
+      "attempts": [
+        {
+          "agent": "fw-fa3",
+          "report": ".agents/plans/fw-fa3/report.md"
+        }
+      ]
+    },
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Claim 4.1 not final (review fw-rfa3 I-1, mentor D-90 method): the six magic-resistance directions are proven (entries resist_holy..arcane_ap3000, learned passive at +3000 attack power, ok in both runs of the fw-fa3 pair) but the Armor direction (Armor reads 270 with an unasserted baseline) and the strictly larger delta at a higher attack power are tool gaps (metric_delta direction-only gain above a floor + attack power ordering, group B). The coefficient is unasserted."
   },
   {
     "spell": 300465,
@@ -2395,10 +2407,12 @@
     "spell": 707527,
     "clause": "Manifest a barrier of pure hatred, absorbing ${$m1+0+$STA*1} damage,",
     "labels": [
-      "707527 behaviour_metric_delta absorb",
-      "707527 behaviour_metric_delta absorb_stamina"
+      "707527 behaviour_metric_delta absorbed",
+      "707527 behaviour_metric_delta absorbed_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707527,
@@ -2408,17 +2422,21 @@
       {
         "claim": "scaling with your Stamina,",
         "labels": [
-          "707527 behaviour_metric_delta absorb_stamina"
-        ]
+          "707527 behaviour_metric_delta absorbed_stamina",
+          "707527 behaviour_metric_delta absorbed_control"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $d.",
         "labels": [
           "707527 behaviour_metric_delta duration_held",
           "707527 behaviour_metric_delta duration_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 707527,
@@ -2428,7 +2446,9 @@
       "707527 behaviour_hit_ratio magic_taken",
       "707527 behaviour_hit_ratio physical_after_break"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "evidence": "behaviour",
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705131,
@@ -2490,17 +2510,20 @@
       {
         "claim": "Casting $?s520853[Fel Torpedo][Chaos Rush] now increases your Physical damage by $705142s1%",
         "labels": [
-          "705141 behaviour_metric_delta rush_damage_amount"
-        ]
+          "705141 behaviour_metric_delta rush_damage_hit"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $705142d.",
         "labels": [
           "705141 behaviour_metric_delta rush_damage_held",
           "705141 behaviour_metric_delta rush_damage_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705141,
@@ -2510,17 +2533,20 @@
       {
         "claim": "Casting Felhoof Charge increases your critical strike chance by $705143s1%",
         "labels": [
-          "705141 behaviour_metric_delta charge_crit_amount"
-        ]
+          "705141 behaviour_metric_delta charge_crit_chance"
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "for $705143d.",
         "labels": [
           "705141 behaviour_metric_delta charge_crit_held",
           "705141 behaviour_metric_delta charge_crit_gone"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 705145,
@@ -3479,13 +3505,15 @@
         "claim": "dealing ${...} at 0 spell power (2163 to the roll's end)",
         "labels": [
           "501298 behaviour_metric_delta damage_0sp"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "the 1.32 spell power coefficient",
         "labels": [
           "501298 behaviour_metric_delta damage_sp"
-        ]
+        ],
+        "evidence": "behaviour"
       },
       {
         "claim": "piercing all absorption effects",
@@ -3493,17 +3521,42 @@
           "501298 behaviour_metric_delta pierce_shield",
           "501298 behaviour_metric_delta pierce_damage",
           "501298 behaviour_metric_delta pierce_shield_control"
-        ]
+        ],
+        "evidence": "behaviour"
       }
-    ]
+    ],
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 501298,
     "clause": "Inner Demon: Deals an additional 30% of the damage dealt over $805748d.",
-    "labels": [
-      "501298 spell_duration 805748 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Inner Demon: Deals an additional 30% of the damage dealt",
+        "labels": [
+          "501298 behaviour_metric_delta inner_dot_share",
+          "501298 behaviour_metric_delta inner_dot_control"
+        ],
+        "evidence": "behaviour"
+      },
+      {
+        "claim": "over $805748d.",
+        "labels": [
+          "501298 spell_duration 805748 #1"
+        ]
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "The duration part ($805748d = 3000 ms, DurationIndex 27 of the DoT 805748) has no behaviour route yet. Design 1 (apply_stamp on 805748 with held read 5750 ms and gone read 6250 ms, windows 2710..2990 and 3010..3290 ms, run 20261124-055254): both verdicts unmeasured, 'apply stamp: 1 apply after the trigger cast, so the last apply is not bounded': the option brackets an aura applied before the trigger cast (a proc or strike), while the DoT is applied by the Ruin hit 2500 ms after the cast plus two projectile flights (2866 ms by the data, fix-805748 note). Design 2 (plain game_time reads without a stamp) cannot exclude a duration 10% long (3300 ms): from an apply at 2866 ms a gone read at 6250 ms leaves 84 ms of margin, and the apply time is not measured. Route: an apply_stamp mode that stamps the apply of an aura applied after the trigger cast (tool group). The 30% share is proven by inner_dot_share with its control.",
+      "attempts": [
+        {
+          "agent": "fw-fa3",
+          "report": ".agents/plans/fw-fa3/report.md"
+        }
+      ]
+    },
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
   },
   {
     "spell": 801899,
