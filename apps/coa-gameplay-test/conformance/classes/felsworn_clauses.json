@@ -4274,11 +4274,11 @@
       {
         "claim": "deal $807163s1% increased damage",
         "labels": [
-          "804822 effect_value 807163e0 #1"
+          "804822 behaviour_hit_ratio twin_slice_damage_earned"
         ]
       }
     ],
-    "reason": "HELD 'deal $807163s1% increased damage' (mentor D-67): the entry 804822 behaviour_hit_ratio twin_slice_damage measures the +30% on Twin Slice hits with 807163 put by set_aura; no existing kind reads the amount of 807163 or the Twin Slice damage total after the real dodge grant (avoided_proc_instances reads hit counts and Felfury only), so the equivalence arm is missing and the entry label is not attached. Needs tool group B: avoided_proc_instances reading aura_amount of the earned aura and the damage total of its hits."
+    "reason": "HELD 'deal $807163s1% increased damage' (mentor D-67): the entry 804822 behaviour_hit_ratio twin_slice_damage measures the +30% on Twin Slice hits with 807163 put by set_aura; no existing kind reads the amount of 807163 or the Twin Slice damage total after the real dodge grant (avoided_proc_instances reads hit counts and Felfury only), so the equivalence arm is missing and the entry label is not attached. Needs tool group B: avoided_proc_instances reading aura_amount of the earned aura and the damage total of its hits. fw-bk4 2026-11-24 (mentor Felsworn D-109 (2), second real design, ADR 1285): 'deal $807163s1% increased damage' is judged by twin_slice_damage_earned: 807163 is never set; 10 strikers swing at the caster (dodge 100%) in both arms and 804822 is learned for the treatment arm only, 807163 read present before every treatment cast and absent before every control cast; plain 808303 hits over 13 parts of 52 trials per arm: +29.65% (99% +28.73 to +30.56) and +29.52% (+28.62 to +30.41) against +30% within 2 points, ok in both runs of the fw-bk4 pair. The not_measured label 804822 effect_value 807163e0 #1 is dropped (it never counted); the set_aura entry twin_slice_damage stays an unattached observation."
   },
   {
     "spell": 804822,
