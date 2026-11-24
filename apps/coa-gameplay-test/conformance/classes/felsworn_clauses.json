@@ -523,7 +523,7 @@
         ]
       }
     ],
-    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed. HELD 'Your next 3 Fel Fireballs' (review fw-rf300490 I-2, mentor D-67): the charge entries put 806104 by set_aura; no tool feeds 806104 by its real proc and then counts Fel Fireballs (tool note fw-fix300490b report); the server fix (ADR 0021) is verified on the set_aura arms only. fw-fa2 2026-11-24: no existing kind reads 806104's amount or a partial cast-time reduction after the real feed (aura_fed_effect has instant/damage/heal/cooldown/window only; last_application_expiry feed reads the remaining duration only), and a fixed-count feed in metric_delta cannot read at a known moment because every later periodic tick re-grants the aura. Needs tool group B-AF: a cast_time variant of aura_fed_effect that feeds for real, reads aura_amount of 806104 against the DBC, and casts Fel Fireball at the reduced time."
+    "reason": "HELD 'have a $s1% reduced cast time' (review fw-rvb7b I-3a, mentor D-67): the cast-time reads put 806104 by set_aura; no attempt record of a real-feed cast-time route and no arm reading 806104's amount after the real feed. HELD 'Your next 3 Fel Fireballs' (review fw-rf300490 I-2, mentor D-67): the charge entries put 806104 by set_aura; no tool feeds 806104 by its real proc and then counts Fel Fireballs (tool note fw-fix300490b report); the server fix (ADR 0021) is verified on the set_aura arms only. fw-fa2 2026-11-24: no existing kind reads 806104's amount or a partial cast-time reduction after the real feed (aura_fed_effect has instant/damage/heal/cooldown/window only; last_application_expiry feed reads the remaining duration only), and a fixed-count feed in metric_delta cannot read at a known moment because every later periodic tick re-grants the aura. Needs tool group B-AF: a cast_time variant of aura_fed_effect that feeds for real, reads aura_amount of 806104 against the DBC, and casts Fel Fireball at the reduced time. fw-fa4 2026-11-24 (review fw-rfa2 I-1): the metric_delta aura_amount route was tried on a real feed (Bane of Chaos 704368 cast 47 times 3200 ms apart through setup_casts, 806104 Effect[0] read on the caster 100 ms after the last cast, control phase the same feed with 300490 unlearned): the read was 0 in 4 of 4 runs, while a second design reading the application count (aura_apply_count of 806104, same feed) read 3 applications: the feed grants for real, but 806104 lasts 8000 ms (DurationIndex 31) and a periodic feed of 3000 ms ticks leaves it on at the read only when one of the last two or three ticks rolled the 15% ProcChance (at best 1 - 0.85^3 = 39%), so no feed size reaches the 0.1% residual: an expiry between the last grant and the read, not a re-grant, hides the amount (the review reasoning that a longer feed sizes the residual does not hold). Felsworn Chance() rolls the raw ProcChance (AscensionFelsworn.cpp:231-239), so forced_chance cannot force it. The tool gap stands, narrower: a read of the amount at the moment of the grant, which is the stop of cast_until_aura (last_application_expiry feed reads the remaining duration there), or a polled assert (assert min within_ms) after the feed. Entries removed after the attempt (builds 64b17c781882)."
   },
   {
     "spell": 301287,
@@ -1083,7 +1083,16 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok."
+    "reason": "Owner ruling O-33 (Felsworn ADR 0027): 555739 now carries 806095's 200%. '555738 behaviour_metric_delta hit_ap' read 14090 and 14094 (band 13992 to 14107; before: 10580 and 10570 at 150%) in the fw-f3 counted pair .cache/verify-all/20261124-062216 / -062313 (build 4a226aa8cc33, server commit 2fb6e708e05c); 5 focused reruns 20261124-062930 to -063324 all ok.",
+    "tool_gap": {
+      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
+      "attempts": [
+        {
+          "agent": "fw-fa1",
+          "report": ".agents/plans/fw-fa1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 555738,
@@ -1563,9 +1572,21 @@
     "spell": 561216,
     "clause": "Move quickly from enemy to enemy, attacking them every $t1 sec with both weapons until 6 assaults are made,",
     "labels": [
-      "561216 aura_amplitude_ms #0"
+      "561216 aura_amplitude_ms #0",
+      "561216 behaviour_metric_delta assaults_sum",
+      "561216 behaviour_metric_delta assaults_first",
+      "561216 behaviour_metric_delta assaults_off_hand"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "hit_period (the cast_period judge) needs a first read of none before the first tick; this periodic effect ticks at the cast instant (6 hits of 808303 in the window with 1 already at the first read, 5 of 555739 with 1 at the first read, both runs of prove-a2, window starting 1 ms after the cast, poll 10 ms), so the verdict is an alert on 'at least 3 casts after a read of none', not on the period. Needs tool group B: a period judge that accepts an immediate first tick (stamps from the second hit on).",
+      "attempts": [
+        {
+          "agent": "fw-fa1",
+          "report": ".agents/plans/fw-fa1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561216,
@@ -2225,11 +2246,10 @@
     "spell": 704610,
     "clause": "Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.",
     "labels": [
-      "704610 effect_value #0",
       "704610 proc_rate"
     ],
     "kind": "claim",
-    "reason": "AWAITING OWNER (status 5). Tooltip: \"Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.\" ($h = 30, ProcChance of 704610). Measured (counted pair prove-final, proc 704610): 0.2297 (12474/54306) and 0.2317 (12613/54445) additional hits per landed hit of 520262 or 572585 (the extra hits are trials too); 0 events in 40 baseline trials. 0.23 = 0.3/1.3: the handler rolls 0.3 per base strike and the extra hit does not roll (event guard, AscensionFelswornEvents.cpp:40 and :126-127), so the server gives about 0.60 additional hits per Assault (two strikes x 0.3, derived, not read), against the tooltip's 0.30 per Assault. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 casts because it is the Assault's own main-hand strike, not the talent's extra hit; they give no evidence of the 30% proc and no rate for it. Options: (a) one 30% roll per Assault (tooltip, 0.30 per cast); (b) keep 30% per strike as served (0.60 per cast, tooltip corrected). No server change made."
+    "reason": "Owner ruling O-31 (2026-11-24): one 30% roll per Azzinoth's Assault, not per hit (Felsworn ADR 0024). Status 1, counted pair fw-f2 prove-2 (build 35135215000b): 0.2986 (6246 extra hits in 20916 Assault casts) and 0.3019 (6315/20916), Wilson 99.95% intervals inside the band [0.28, 0.32]; baseline arm before the learn: no extra hit. Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): 0.2968, 0.3002, 0.3028, 0.2950, 0.3008, all ok. Before the fix (prove-final): 0.2297 and 0.2317 per landed strike, about 0.60 per Assault."
   },
   {
     "spell": 704611,
@@ -2982,7 +3002,20 @@
         "claim": "and draining mana from the target based on your Spirit.",
         "labels": []
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "The drain of Felbreak ('draining mana from the target based on your Spirit') is Spellbreak 804809 (POWER_DRAIN, value = caster Spirit, AscensionFelswornContracts.cpp:517-518, cast on a successful interrupt, AscensionFelswornAbilities.cpp:414-417), applied at the instant of the interrupt. Reading it needs the target's mana set to a known value BEFORE the interrupt lands. The only option that sets a dummy's power, dummy_power_after_trigger, sets it after_ms >= 0 after the trigger cast (parser rejects after_ms < 0) or, in an uncast before phase, at the point of the cast, so it resets the pool after the drain; the first design (Scarlet Magus 1832 channelling Evocation) read an unset control mana (5206 / 5340, e2ff868f34). Needs tool group B: a dummy_power_before_trigger option (set_power on the dummy before the interrupt, with a Spirit contrast arm: positive drain and a strictly larger drain at a higher Spirit, coefficient unasserted as for 92089). Live reference: coa-history spell 804809 holds 2 SPELL_DRAIN events of 166 mana in 1 log (the caster's Spirit is not logged).",
+      "attempts": [
+        {
+          "agent": "fw-l2b",
+          "report": "e2ff868f34"
+        },
+        {
+          "agent": "fw-fa1",
+          "report": ".agents/plans/fw-fa1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 800203,
@@ -3072,16 +3105,21 @@
       },
       {
         "claim": "and parry while channeling",
-        "labels": []
+        "labels": [
+          "800206 behaviour_metric_delta channel_parry",
+          "800206 behaviour_metric_delta channel_parry_control"
+        ]
       },
       {
         "claim": "you can channel while moving",
         "labels": [
-          "800206 behaviour_metric_delta moving_channel"
+          "800206 behaviour_metric_delta moving_channel_state",
+          "800206 behaviour_metric_delta moving_channel_whirlwind_moved",
+          "800206 behaviour_metric_delta moving_channel_whirlwind_still"
         ]
       }
     ],
-    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too)."
+    "reason": "fw-vb9. Dodge: three Speed Slash strikes with dodge 100% are all avoided during Carve (0 landed) while the same strikes land 3 of 3 during Sargeras Embrace 800355, a channel without the exemption (control). Moving: cast_remaining_ms 685 after two harness relocations; the uncast phase reads 0; the harness relocation cuts a channel that carries the move flag (Witch Hunter Witchbane moving_channel_witchbane_moved, same step). Parry: not proven, the striker fixture does not put the strike in the parry arc (two designs not yet tried; strikes at dx 0 landed with parry 100% and dx 10 gave 0 landed in the control too). fw-fa1 2026-11-24: parry fixed by Parry Dance 560651 as a precondition (Player::CanParry); moving read by the STATE metric casting with Whirlwind 13736 moved/still controls. The move half reads the STATE metric casting (1 for Carve after two relocations, 0 for Whirlwind 13736 moved, 1 not moved; ok in both runs of prove-a5b) but the audit classes it data: the promise words of casting (coverage.py) carry no 'channel', so the claim 'you can channel while moving' stays uncounted pending tool group B (add channel to the casting promise)."
   },
   {
     "spell": 572617,
@@ -3673,7 +3711,7 @@
     "spell": 803475,
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
     "kind": "claim",
-    "reason": "Cast part only: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent). The value part, 'by $/1000;803089s1 sec' (3 s, 803089 Effect[0] 2999 + 1), is not counted. The earlier +28009 ms reading was an incorrect test (fixture order, fix-250/note.md). Second design (fw-l3, pairs prove-a6/prove-a7): Inner Demon set first (5000 ms), Assault cast at the dummy, aura held at age 7700 ms and gone at 8200 ms (extension 3000 + 124 ms from the 0.4 x AP term: end at 8124 ms whatever the cast time), read as presence 1 then 0 in both runs; the age of the aura is bracketed by apply_stamp, which reads 'first missing' because the aura comes from the harness set_aura before the encounter timeline opens, so the 10% bounds (7750 held, 8250 gone) are not proven. Needs the apply stamp of a set_aura fixture or a real Inner Demon cast placed after the timeline start (tool change, not taken by an entries batch). The server value adds 0.4 x AP (owner question N-3). Reference search 2026-11-23: nothing found for the value.",
+    "reason": "Owner ruling O-30 (2026-11-24): the extension is $/1000;803089s1 = 3 sec flat, no attack power term (Felsworn ADR 0023). Cast part: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent). Value part, status 1, counted pair fw-f2 prove-5 (build 935450e6b11e, commit 7d97c900af), both runs identical: Inner Demon (10000 ms at the fixtures) present 12844 ms and absent 13154 ms after one Assault (extend_held, extend_gone), absent at 13154 ms at +20000 attack power too (extend_ap_gone, where the removed 0.4 x AP row would hold it to about 21124 ms); remaining duration 9994 ms before and 12879 ms 100 ms after, a gain of 2885 against 2900 at both attack powers (extend, extend_ap). Five more runs (fw-f2 rerun-5, build 374cb1e7dac2): extend and extend_ap 2885 in each. The earlier +28009 ms reading was an incorrect test (fixture order, fix-250/note.md).",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
     "claims": [
       {
@@ -3686,7 +3724,14 @@
       },
       {
         "claim": "by $/1000;803089s1 sec",
-        "labels": []
+        "labels": [
+          "803475 behaviour_metric_delta extend",
+          "803475 behaviour_metric_delta extend_ap",
+          "803475 behaviour_metric_delta extend_held",
+          "803475 behaviour_metric_delta extend_gone",
+          "803475 behaviour_metric_delta extend_ap_gone"
+        ],
+        "evidence": "behaviour"
       }
     ]
   },
@@ -4680,10 +4725,13 @@
       },
       {
         "claim": "now dashes an additional 20 yds.",
-        "labels": []
+        "labels": [
+          "806109 behaviour_metric_delta dash_range",
+          "806109 behaviour_metric_delta dash_range_torpedo"
+        ]
       }
     ],
-    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is not measured (uncounted)."
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'. fw-fa4 2026-11-24 (review fw-rfa1 I1, G-21.6): the 20 yd extra dash is read by dash_range (Chaos Rush 500423) and dash_range_torpedo (Fel Torpedo 500610) after a real 806109 expiry, no set_aura: 806109 is cast for real, 8500 ms later 806109 reads absent and 806128 present (preconditions, a mismatch voids the trial), then the dash is cast; the before phase makes no 806109 cast. Pair run1/run2 on build 22150ab2469f server commit 64b17c781882: dash_range and dash_range_torpedo ok both runs (10 before, 30 after, gain 20 within 1). The audit classes the claim as data, not behaviour: behaviours.metric_delta_contrast looks up spec.metric in the static coverage.METRIC_EVIDENCE, which has no position_x row (displacement.py adds it only through option_rows), so a setup_only_after read whose setup is the entry's own cast is stamped condition, not own_cast (ADR 0553); needs tool group B: metric_delta_contrast reading coverage.metric_evidence()."
   },
   {
     "spell": 806111,

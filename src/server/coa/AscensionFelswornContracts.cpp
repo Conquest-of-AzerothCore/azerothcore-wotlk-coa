@@ -514,6 +514,8 @@ class felsworn_scaling : public UnitScript
                 value += row.ap * player->GetTotalAttackPowerValue(BASE_ATTACK) + row.sp * std::max(0.0f, sp) +
                          row.stamina * player->GetStat(STAT_STAMINA) + row.agility * player->GetStat(STAT_AGILITY);
             }
+        if (info->Id == 520832 && index == 0 && info->Effects[EFFECT_0].Amplitude > 0)
+            value /= float(std::max(1, info->GetMaxDuration() / int32(info->Effects[EFFECT_0].Amplitude)));
         if (Named(info, 801895) && index == 0)
         {
             float fire = float(std::max(0, player->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_FIRE)));

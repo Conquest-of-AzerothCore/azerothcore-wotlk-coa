@@ -45,6 +45,7 @@ struct FelswornState
     uint32 spenderCrit = 0;
     uint32 resolvePct = 0;
     bool event = false;
+    bool assaultRoll = false;
     bool refreshing = false;
 };
 Player* Owner(Unit const* unit);
