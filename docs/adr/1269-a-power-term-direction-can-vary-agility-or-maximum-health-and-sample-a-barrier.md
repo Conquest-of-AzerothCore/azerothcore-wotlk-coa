@@ -63,7 +63,7 @@ verdict text stay byte-identical (the finished-class scenarios regenerate unchan
 
 - Felsworn entries: 574145 on Sargeron Smite and Twin Slice (808303), 574146 on Fel Fireball, Sargeron Smite and Twin
   Slice, 30 casts per arm; 803478 on Hateforged Barrier 707527 with Infernal Constitution 805256 (+10% maximum health),
-  Ray of Pain 54416 (2000 Shadow) and Full Heal 17683, 15 casts per arm. The entry states the margin of the strike
+  Ray of Pain 54416 (2000 Shadow) and Full Heal 17683, 40 casts per arm. The entry states the margin of the strike
   over the largest learned barrier.
 - The kind's tests seed each option, with mutants (no term, a fixture whose stat falls back, unbroken and refused
   barriers) that must alert or void.
