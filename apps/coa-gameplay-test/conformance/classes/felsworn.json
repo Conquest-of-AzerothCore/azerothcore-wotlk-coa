@@ -1058,9 +1058,10 @@
           560645
         ]
       },
-      "trials": 20,
+      "trials": 80,
+      "min_trials": 80,
       "critical": false,
-      "expected_source": "560645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1 = 20 ($s2). The main-hand strike 520262 of Azzinoth's Assault 801904 (Effect[0] trigger 520262, Effect[1] trigger 572585) is cast by a real cast; its non-critical hits are averaged in a control arm without 560645 and a treatment arm with it learned: ratio 1.20 within the 2-point band. Non-critical hits only (the critical filter), so no crit fixture is needed. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds.",
+      "expected_source": "560645 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 19 + 1 = 20 ($s2). The main-hand strike 520262 of Azzinoth's Assault 801904 (Effect[0] trigger 520262, Effect[1] trigger 572585) is cast by a real cast; its non-critical hits are averaged in a control arm without 560645 and a treatment arm with it learned: ratio 1.20 within the 2-point band. Non-critical hits only (the critical filter), so no crit fixture is needed. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and At Least 2 Felfury 803468 on the caster before each cast (Azzinoth's Assault 801904 needs 803468 and consumes 2 Felfury; AscensionFelsworn.cpp:219-228), in both arms and phases. Reference search 2026-11-23: coa-history spell 560645 and 560646: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); the bindmysoul snapshot says Assault damage +10% where the DBC tooltip and Effect[1] say 20% (an older state, the tooltip prevails, G-9) and repeats the 20% haste for 5 seconds. Sizing (2026-11-24, for the chosen sizes): the last pair read a 99% half-width of 1.43 and 1.50 points at 20 trials per arm (verdict trials_needed 42 and 46, sized_trials 65 and 71, trial limit 83), so the entry runs 80 trials per arm (min_trials 80) and the half-width falls to about 0.75 points, under half the band (1 point). The verdict states the interval it excludes; a bonus outside the band reads ok with less than a 0.5% chance per run, so a nonconformant server passes both runs of a pair with at most 0.003% probability, and a flip between the runs is not counted.",
       "cast_spell": 803475,
       "cast_power": 100
     },
@@ -8565,11 +8566,12 @@
           804610
         ]
       },
-      "trials": 20,
+      "trials": 80,
+      "min_trials": 80,
       "critical": false,
       "cast_spell": 803475,
       "cast_power": 100,
-      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 520262 main-hand strike of Azzinoth's Assault 801904 (cast 803475, needs Felfury 800058 x6 and At Least 2 Felfury 803468 as precondition fixtures by set_aura) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 520262 main-hand strike of Azzinoth's Assault 801904 (cast 803475, needs Felfury 800058 x6 and At Least 2 Felfury 803468 as precondition fixtures by set_aura) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy slowed by Daze 38767 (aura 33 SPELL_AURA_MOD_DECREASE_SPEED, set on the dummy before every cast as a precondition fixture): ratio 1.15, within the 2-point band. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Sizing (2026-11-24, for the chosen sizes): the last pair read a 99% half-width of 1.27 and 1.47 points at 20 trials per arm (verdict trials_needed 33 and 44, sized_trials 51 and 68, trial limit 83), so the entry runs 80 trials per arm (min_trials 80) and the half-width falls to about 0.75 points, under half the band (1 point). The verdict states the interval it excludes; a bonus outside the band reads ok with less than a 0.5% chance per run, so a nonconformant server passes both runs of a pair with at most 0.003% probability, and a flip between the runs is not counted."
     },
     {
       "spell": 804610,
@@ -8608,11 +8610,12 @@
           804610
         ]
       },
-      "trials": 20,
+      "trials": 80,
+      "min_trials": 80,
       "critical": false,
       "cast_spell": 803475,
       "cast_power": 100,
-      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 520262 main-hand strike of Azzinoth's Assault 801904 (cast 803475, needs Felfury 800058 x6 and At Least 2 Felfury 803468 as precondition fixtures by set_aura) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only."
+      "expected_source": "804610 Effect[0] aura 112, BasePoints 14 + 1 = 15 ($s1), against slowed enemies. The non-critical hits of the 520262 main-hand strike of Azzinoth's Assault 801904 (cast 803475, needs Felfury 800058 x6 and At Least 2 Felfury 803468 as precondition fixtures by set_aura) are averaged in a control arm without 804610 and a treatment arm with it learned, on a dummy with no slow (the control claim: the passive adds nothing against an unslowed enemy): ratio 1.00, within the 2-point band, which excludes 1.15. Reference search 2026-11-23: coa-history spell 804610: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); advancement.tsv lists the talent name only, no values; expected values come from the tooltip and the DBC only. Sizing (2026-11-24, for the chosen sizes): the last pair read a 99% half-width of 1.19 and 1.24 points at 20 trials per arm (verdict trials_needed 29 and 31, sized_trials 45 and 48, trial limit 83), so the entry runs 80 trials per arm (min_trials 80) and the half-width falls to about 0.75 points, under half the band (1 point). The verdict states the interval it excludes; a bonus outside the band reads ok with less than a 0.5% chance per run, so a nonconformant server passes both runs of a pair with at most 0.003% probability, and a flip between the runs is not counted."
     },
     {
       "spell": 804610,
@@ -18490,8 +18493,8 @@
         802060
       ],
       "critical": false,
-      "trials": 100,
-      "parts": 15,
+      "trials": 150,
+      "parts": 26,
       "control": {
         "auras": [
           [
@@ -18542,7 +18545,7 @@
           ]
         ]
       },
-      "expected_source": "$705146s1 = 8 (705146 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 7 + 1 = 8 per stack, StackAmount 5 = $705146u): five stacks add 8 x 5 = 40% to the damage of the spell its class mask names, a percent modifier that sums with other additive modifiers: expected ratio 1.40 of a Sargeron Smite 802060 hit with five stacks over the same hit without. The stacks are set on the caster by the harness (set_aura 705146 x5, a named precondition fixture; its grant by Dancing Blades and its 5-stack cap are proven by the stack_amount, stack_cap and consumed entries, and its own real-path grant is not the subject here). Increase Damage 37643 (aura 79 MiscValue 127) at amount 19900 is set in both arms, so each hit large so the engine's ceil adds under 0.1% (fixture size, not a claimed value). Control arm: no 705146. Band: the larger of 5% of the +40% gain and 2 points. Reference search 2026-11-24: coa-history spell 705146 and 802060: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only. Sargeron Smite 802060 (CasterAuraSpell 803468, 'Consumes 2 Felfury'): Felfury 800058 x6 and 803468 are set on the caster before every cast in both arms (the spender's cost and caster aura, precondition fixtures). Sizing: the pilot of the first pair measured a per-hit spread (the Shadowflame hit takes the engine's partial resists) that needs 2429 trials per arm for the 99% half-width to stay at half the band (the verdict's own trials_needed), so the entry runs 15 parts of 100 trials."
+      "expected_source": "$705146s1 = 8 (705146 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 7 + 1 = 8 per stack, StackAmount 5 = $705146u): five stacks add 8 x 5 = 40% to the damage of the spell its class mask names, a percent modifier that sums with other additive modifiers: expected ratio 1.40 of a Sargeron Smite 802060 hit with five stacks over the same hit without. The stacks are set on the caster by the harness (set_aura 705146 x5, a named precondition fixture; its grant by Dancing Blades and its 5-stack cap are proven by the stack_amount, stack_cap and consumed entries, and its own real-path grant is not the subject here). Increase Damage 37643 (aura 79 MiscValue 127) at amount 19900 is set in both arms, so each hit large so the engine's ceil adds under 0.1% (fixture size, not a claimed value). Control arm: no 705146. Band: the larger of 5% of the +40% gain and 2 points. Reference search 2026-11-24: coa-history spell 705146 and 802060: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots (bindmysoul, ascension-data advancement.tsv and coabuildhub index) list the talent name only, no values; expected values come from the tooltip and the DBC only. Sargeron Smite 802060 (CasterAuraSpell 803468, 'Consumes 2 Felfury'): Felfury 800058 x6 and 803468 are set on the caster before every cast in both arms (the spender's cost and caster aura, precondition fixtures). Sizing: the pilot of the first pair measured a per-hit spread (the Shadowflame hit takes the engine's partial resists) that needs 2429 trials per arm for the 99% half-width to stay at half the band (the verdict's own trials_needed), so the entry runs 15 parts of 100 trials. Sizing (2026-11-24, replaces the 15 parts of 100 above): the last pair pooled 1500 trials per arm and read a 99% half-width of 1.23 and 1.25 points against the 1 point the judge needs (verdict trials_needed 2261 and 2357, sized_trials 3532 and 3683), so the entry runs 26 parts of 150 trials (3900 per arm, one scenario holds 166): the half-width falls to about 0.78 points. The verdict states the interval it excludes; a bonus outside the band reads ok with less than a 0.5% chance per run, so a nonconformant server passes both runs of a pair with at most 0.003% probability, and a flip between the runs is not counted."
     },
     {
       "spell": 806235,
