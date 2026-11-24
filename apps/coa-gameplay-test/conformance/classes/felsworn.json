@@ -27201,7 +27201,7 @@
     },
     {
       "spell": 805243,
-      "name": "Infernal Whipcrack (radius: an ally at 20.0 yd enraged, one at 25.5 yd not, without 800220)",
+      "name": "Infernal Whipcrack (radius: an ally at 23.7 yd enraged, one at 25.5 yd not, without 800220)",
       "kind": "metric_delta",
       "variant": "whipcrack_radius",
       "label_suffix": "whipcrack_radius",
@@ -27233,7 +27233,7 @@
             "before_expected": 1,
             "expected": 1,
             "tolerance": 0.5,
-            "source": "the ally at 20.0 yd: inside Effects[0-1]'s edge in both phases (1), beyond Effect[2]'s 19.16 yd edge before the learn, so only the 20 yd radius reaches it"
+            "source": "the ally at 23.7 yd: inside Effects[0-1]'s 24.16 yd edge in both phases (1, 0.46 yd margin), beyond Effect[2]'s 19.16 yd edge before the learn, so only the 20 yd radius reaches it; a radius 10% low (18 yd, edge 22.16) misses it"
           },
           {
             "actors": [
@@ -27256,10 +27256,10 @@
             "fields": {
               "target": "caster"
             },
-            "before_expected": 20.0,
-            "expected": 20.0,
+            "before_expected": 23.7,
+            "expected": 23.7,
             "tolerance": 0.1,
-            "source": "ally_offsets moves ally 20.0 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s 19.16 yd edge (0.84 yd margin) and inside Effects[0-1]'s 21.5 yd edge without the leeway (1.5 yd margin); the read is the server's own float distance (GetExactDist2d)"
+            "source": "ally_offsets moves ally 23.7 yd along x from the shared spawn, dz 0, the caster stays: beyond Effect[2]'s 19.16 yd edge (4.54 yd margin) and inside Effects[0-1]'s 24.16 yd edge (0.46 yd margin, with the party area leeway of 2.66 yd, which holds at run speed 7 > 4.97 whether or not the caster moves); the read is the server's own float distance (GetExactDist2d)"
           },
           {
             "actors": [
@@ -27289,10 +27289,10 @@
         ]
       },
       "ally_offsets": {
-        "ally": 20.0,
+        "ally": 23.7,
         "ally2": 25.5
       },
-      "observe_source": "805243 Infernal Whipcrack (server DBC): 'Enrage $?s800220[all][up to $i] allies within $a yds', Effects[0-1] TargetB 56 TARGET_UNIT_CASTER_AREA_RAID radius index 9 (20 yd, $a), Effect[2] radius index 18 (15 yd), MaxAffectedTargets 8. The caster and two grouped players: ally 20.0 yd and ally2 25.5 yd from the caster along x. Infernal Whipcrack is cast for real in both phases (cooldown reset before each cast; 10600 ms between phases let the 10000 ms aura expire); 800220 is learned between them (it widens every radius by 15 yd and adds the script's 'all' targets, AscensionFelswornAbilities.cpp:162-167). The radius read is the before phase: Effects[0-1] (radius index 9, $a = 20 yd) reach 20 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, IsWithinDist3d, Spell.cpp:9465, Object.cpp:1355-1358) = 24.16 yd (21.5 yd without the leeway); Effect[2] (index 18, 15 yd) reaches 19.16 yd (16.5 yd), so the ally at 20.0 yd holds the aura through Effects[0-1] alone and the ally at 25.5 yd does not; three candidates stay below the cap 8, so the pick is not random. The after phase reads both allies enraged. The caster holds the aura in both phases (main reading 1 and 1). The target cap $i is not read here (a deterministic cap read needs a per-effect aura holder read, a tool idea). Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
+      "observe_source": "805243 Infernal Whipcrack (server DBC): 'Enrage $?s800220[all][up to $i] allies within $a yds', Effects[0-1] TargetB 56 TARGET_UNIT_CASTER_AREA_RAID radius index 9 (20 yd, $a), Effect[2] radius index 18 (15 yd), MaxAffectedTargets 8. The caster and two grouped players: ally 23.7 yd and ally2 25.5 yd from the caster along x. Infernal Whipcrack is cast for real in both phases (cooldown reset before each cast; 10600 ms between phases let the 10000 ms aura expire); 800220 is learned between them (it widens every radius by 15 yd and adds the script's 'all' targets, AscensionFelswornAbilities.cpp:162-167). The radius read is the before phase: Effects[0-1] (radius index 9, $a = 20 yd) reach 20 + 2.66 (party area leeway, Spell.cpp:1396-1401, Object.cpp:1787-1808) + 1.5 (the ally's object size, IsWithinDist3d, Spell.cpp:9465, Object.cpp:1355-1358) = 24.16 yd (21.5 yd without the leeway); Effect[2] (index 18, 15 yd) reaches 19.16 yd (16.5 yd), so the ally at 23.7 yd holds the aura through Effects[0-1] alone and the ally at 25.5 yd does not; the two arms bracket the edge (a radius 10% low, 18 yd, edge 22.16 yd, misses the ally at 23.7 yd; one 10% high, 22 yd, edge 26.16 yd, reaches the ally at 25.5 yd); the 2.66 yd leeway is read from code only (Spell.cpp:1396-1401, Object.cpp:1787-1808; no stock area control, accepted under G-29 and ADR 0253), and the ally at 23.7 yd is inside the edge only with it, the ally at 25.5 yd outside with or without it; three candidates stay below the cap 8, so the pick is not random. The after phase reads both allies enraged. The caster holds the aura in both phases (main reading 1 and 1). The target cap $i is not read here (a deterministic cap read needs a per-effect aura holder read, a tool idea). Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; expected values come from the tooltip and the DBC only."
     },
     {
       "spell": 300476,
