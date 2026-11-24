@@ -4827,7 +4827,8 @@
       {
         "claim": "and cause enemies struck to have a $572792s1% increased chance to be hit by spells",
         "labels": [
-          "806235 effect_value 572792e0 #1"
+          "806235 effect_value 572792e0 #1",
+          "806235 behaviour_hit_ratio felshock_hit_landed"
         ]
       },
       {
@@ -4837,16 +4838,7 @@
           "806235 behaviour_metric_delta mark_gone"
         ]
       }
-    ],
-    "tool_gap": {
-      "reason": "The increased chance to be hit by spells on the struck enemy has no victim-side hit read; a statistical design needs about 2000 casts per arm (fw-vb5 report) and was not run; the effect_value label is data only. Review fw-rvb5 minor: tool gap, not status 3.",
-      "attempts": [
-        {
-          "agent": "fw-vb5",
-          "report": ".agents/plans/fw-vb5/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 807430,
