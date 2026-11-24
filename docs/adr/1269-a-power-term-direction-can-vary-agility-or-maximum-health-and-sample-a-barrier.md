@@ -42,9 +42,11 @@ The second option, with (c) for the barrier. Every field is optional; without th
 verdict text stay byte-identical (the finished-class scenarios regenerate unchanged).
 
 - `power_metric`: `agility` (the power aura must carry `SPELL_AURA_MOD_STAT` of Agility; read `stat` 1) or
-  `max_health` (aura 34 or 133; read `max_health`). Such an arm reads the stat before and after the arm, and the
-  attack power before it; the verdict is `unmeasured` unless the high arms read higher than the low arms both before
-  and after (the fixture's effect is measured, mentor D-94 condition 4). The verdict and contract name the stat.
+  `max_health` (aura 34 or 133; read `max_health`). Such an arm reads the stat and the attack power before and after
+  the arm; the verdict is `unmeasured` unless the high arms read higher than the low arms both before and after, each
+  arm's stat reads the same before and after, and the attack power reads the same in all eight reads (the fixtures'
+  effect is measured, mentor D-94 condition 4: a moved fixture voids the run, never alerts). The verdict and contract
+  name the stat.
 - `power_stacks` and `power_companions` (`[{"spell", "stacks", "source"}]`): the power aura's stacks, and auras set
   with it in the high arms and removed with it. They hold another input equal, here the attack power that Agility
   gives (QA Test +100 Agility 300111 x3, Raid Debuff 3 (70) 530003 -312 attack power, Attack Power 12 9141 +12).

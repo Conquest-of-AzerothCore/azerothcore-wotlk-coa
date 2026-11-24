@@ -1862,7 +1862,7 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "The tooltip states no coefficient, so the claim is a direction only (damage grows with Agility, and belongs to the passive): the same shape as power_term_direction (Sun Cleric Sun's Gift 680656, mentor D-106), which requires a power aura with SPELL_AURA_MOD_ATTACK_POWER (kinds/power_term_direction.py:23,83) and reads the caster's attack power. An Agility variant (an aura raising Agility, a read of Agility, Twin Slice 802060 as the cast spell) is a new option of that kind. hit_ratio needs a stated bonus and stat_gain judges a stat added by a cast, neither fits. The nearest kind is power_term_direction.",
+      "reason": "Closed by B-PTD (ADR 1269): the tooltip states no coefficient, so the claim is a direction only (damage grows with Agility, and belongs to the passive), judged by power_term_direction with power_metric agility (QA Test +100 Agility 300111 x3, attack power held equal by power_companions 530003 and 9141). hit_ratio needs a stated bonus and stat_gain judges a stat added by a cast, neither fits.",
       "attempts": [
         {
           "agent": "fw-ea5",
@@ -1896,7 +1896,7 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "Same as 129.0 with Fel Fireball 801312, Sargeron Smite and Twin Slice 802060 as cast spells: no coefficient in the tooltip, a direction-only claim, power_term_direction needs an Agility variant (an aura raising Agility, a read of Agility). The nearest kind is power_term_direction.",
+      "reason": "Closed by B-PTD (ADR 1269), as 129.0 with Fel Fireball 801312, Sargeron Smite 802060 and Twin Slice as cast spells: no coefficient in the tooltip, a direction-only claim judged by power_term_direction with power_metric agility.",
       "attempts": [
         {
           "agent": "fw-ea5",
@@ -3948,7 +3948,7 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "'also scales with your maximum health': Hateforged Barrier 705129 absorb (Effect[0] 176 + 1..32, plus STA x 1) gains 10% of maximum health with 803478 (AscensionFelswornContracts.cpp:356-357), a term no tooltip number states, so only the direction can be judged. power_term_direction is built on attack power (aura 99) and has no maximum-health variant; 805256 Infernal Constitution (+10% maximum health) gives the contrast arm. Needs tool group B: a max-health analogue of power_term_direction with arms control low/high and learned low/high.",
+      "reason": "Closed by B-PTD (ADR 1269): 'also scales with your maximum health': Hateforged Barrier 705129 absorb (Effect[0] 176 + 1..32, plus STA x 1) gains 10% of maximum health with 803478 (AscensionFelswornContracts.cpp:535-536), a term no tooltip number states, so only the direction is judged, by power_term_direction with power_metric max_health and sample absorb; 805256 Infernal Constitution (+10% maximum health) gives the contrast arm.",
       "attempts": [
         {
           "agent": "fw-ea3",

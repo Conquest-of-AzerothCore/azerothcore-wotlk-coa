@@ -117,6 +117,7 @@ def arm_reads(spec: PowerTermDirectionSpec, arm: str) -> dict:
     if spec.power_metric != ATTACK_POWER:
         reads['power after'] = mark(spec, f'{arm} {power} after')
         reads['attack power'] = mark(spec, f'{arm} attack power')
+        reads['attack power after'] = mark(spec, f'{arm} attack power after')
     if spec.sample == ABSORB:
         return {**reads, 'absorbs': [mark(spec, f'{arm} cast {cast} absorb') for cast in range(spec.casts + 1)],
                 'logs': [mark(spec, f'{arm} cast {cast} strikes') for cast in range(spec.casts + 1)],
@@ -210,8 +211,9 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
     if spec.power_metric == ATTACK_POWER:
         read_text = 'The attack power is read before each arm'
     else:
-        read_text = (f'The {power_name} is read before and after each arm (the fixture\'s effect is measured), the '
-                     f'attack power before each arm')
+        read_text = (f'The {power_name} and the attack power are read before and after each arm (the fixtures\' '
+                     f'effect is measured); an arm whose {power_name} moved inside it, or an attack power that is not '
+                     f'the same in every read, voids the run')
     if spec.sample == ABSORB:
         read_text += absorb_text(spec)
     elif spec.hit_spell is not None:
@@ -240,7 +242,8 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
                       {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET},
                       {'action': 'wait', 'label': f'{arm} cast', 'ms': spec.cast_wait_ms}] + sample(arm, cast)
         if spec.power_metric != ATTACK_POWER:
-            steps.append(power_read(spec, reads[arm]['power after']))
+            steps += [power_read(spec, reads[arm]['power after']),
+                      measurement(reads[arm]['attack power after'], CASTER, 'attack_power')]
         return steps
 
     def power(on: bool) -> list[dict]:
@@ -381,6 +384,18 @@ def power_term_direction_verdict(base: Verdict, run: Run, model: dict) -> Verdic
                                    f'(read {", ".join(f"{arm} {value:g}" for arm, value in power.items())}'
                                    + (f'; after {", ".join(f"{arm} {value:g}" for arm, value in after.items())}'
                                       if after else '') + ')')
+    attack = ({arm: run.values[reads[arm]['attack power']] for arm in reads}
+              if 'attack power' in reads['control low'] else {})
+    attack_after = {arm: run.values[reads[arm]['attack power after']] for arm in reads
+                    if 'attack power after' in reads[arm]}
+    moved = [arm for arm in after if after[arm] != power[arm]]
+    if moved or len({*attack.values(), *attack_after.values()}) > 1:
+        return replace(base, status='unmeasured',
+                       explanation=f'a fixture moved inside an arm: {name} before / after '
+                                   + ', '.join(f'{arm} {power[arm]:g} / {after[arm]:g}' for arm in after)
+                                   + '; attack power before / after '
+                                   + ', '.join(f'{arm} {attack[arm]:g} / {attack_after.get(arm, attack[arm]):g}'
+                                               for arm in attack))
     samples = {arm: arm_samples(run.values, reads[arm]) for arm in reads}
     short = {arm: len(found) for arm, found in samples.items() if len(found) < model['minimum_samples']}
     if short:
@@ -391,8 +406,6 @@ def power_term_direction_verdict(base: Verdict, run: Run, model: dict) -> Verdic
     control, interaction = found.control, found.interaction
     control_p, direction_p = model['control_probability'], model['direction_probability']
     sampled = 'mean barrier' if model.get('sample') == ABSORB else 'mean non-critical hit'
-    attack = ({arm: run.values[reads[arm]['attack power']] for arm in reads}
-              if 'attack power' in reads['control low'] else {})
     stated = (f'{name} {power["control low"]:g} / {power["control high"]:g} (control), '
               f'{power["learned low"]:g} / {power["learned high"]:g} (learned)'
               + (f', after the arms {after["control low"]:g} / {after["control high"]:g} (control), '
@@ -410,7 +423,8 @@ def power_term_direction_verdict(base: Verdict, run: Run, model: dict) -> Verdic
               'control_dof': control.dof, 'learned_growth': found.learned_growth, 'means': found.means,
               'attack_power': power}
     if name != 'attack power':
-        detail = {**detail, 'attack_power': attack, 'power': power, 'power_after': after}
+        detail = {**detail, 'attack_power': attack, 'attack_power_after': attack_after, 'power': power,
+                  'power_after': after}
     measured = interaction.difference
     quantity = 'absorb' if model.get('sample') == ABSORB else 'damage'
     if control_alerts(found, control_p):

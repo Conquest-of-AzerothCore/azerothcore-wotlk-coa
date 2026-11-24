@@ -38,8 +38,10 @@ Entry fields: `spell`, `name`, `quote`, `talent`, `cast_spell`, `power_aura` (a 
 Options (ADR 1269; without them the scenario, model and verdict text stay byte-identical):
 
 - `power_metric`: `agility` (the power aura carries `SPELL_AURA_MOD_STAT` of Agility, read `stat` 1) or `max_health`
-  (aura 34 or 133, read `max_health`). The stat is read before and after each arm and the attack power before each
-  arm; a high arm that does not read above its low arm before or after is `unmeasured`. The texts name the stat.
+  (aura 34 or 133, read `max_health`). The stat and the attack power are read before and after each arm; a high arm
+  that does not read above its low arm before or after, a stat that moved inside an arm, or an attack power that is
+  not the same in all eight reads is `unmeasured` (a moved fixture voids the run, never alerts; mentor D-94
+  condition 4). The texts name the stat.
 - `power_stacks` (default 1) and `power_companions` (`[{"spell", "stacks", "source"}]`): the power aura's stacks and
   auras set with it in the high arms and removed with it, to hold another input equal (the attack power that
   Agility gives).

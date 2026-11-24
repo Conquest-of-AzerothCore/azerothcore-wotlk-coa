@@ -67,13 +67,14 @@ AGILITY_TERM = {'control low': 300.0, 'control high': 300.0, 'learned high': 385
 ABSORB_TERM = {'control low': 845.0, 'control high': 845.0, 'learned high': 1290.0, 'learned low': 1250.0}
 
 
-def variant_values(expectation, means, power, after=None, seed=11, held=1, remaining=0):
+def variant_values(expectation, means, power, after=None, seed=11, held=1, remaining=0, attack_after=None):
     rolls = random.Random(seed)
     values = {}
     for arm, reads in expectation.model['reads'].items():
         values[reads['power']] = power[arm]
         values[reads['power after']] = (after or power)[arm]
         values[reads['attack power']] = 312.0
+        values[reads['attack power after']] = (attack_after or {}).get(arm, 312.0)
         if 'absorbs' in reads:
             absorbed = 0.0
             for cast in range(len(reads['absorbs'])):
@@ -203,12 +204,16 @@ class PowerTermDirectionAgilityTests(unittest.TestCase):
         self.assertEqual((reads[arm['power']]['metric'], reads[arm['power']]['stat']), ('stat', 1))
         self.assertEqual((reads[arm['power after']]['metric'], reads[arm['power after']]['stat']), ('stat', 1))
         self.assertEqual(reads[arm['attack power']]['metric'], 'attack_power')
+        self.assertEqual(reads[arm['attack power after']]['metric'], 'attack_power')
+        order = [step['label'] for step in steps if step['action'] == 'assert']
+        self.assertEqual(order.index(arm['attack power after']), order.index(arm['power after']) + 1)
+        self.assertGreater(order.index(arm['power after']), order.index(arm['totals'][-1]))
         self.assertEqual(reads[arm['totals'][2]]['spell'], 808303)
         casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
         self.assertEqual(len(casts), 48)
         self.assertTrue(all(steps[index - 2] == {'action': 'set_power', 'actor': 'caster', 'power': 3, 'value': 100}
                             for index in casts))
-        self.assertIn('The Agility is read before and after each arm', scenario['contract'])
+        self.assertIn('The Agility and the attack power are read before and after each arm', scenario['contract'])
         self.assertIn('each non-critical hit of 808303 is one sample', scenario['contract'])
         self.assertEqual(expectation.model['power_name'], 'Agility')
         fixtures = [(step['spell'], step['stacks']) for step in steps
@@ -233,6 +238,19 @@ class PowerTermDirectionAgilityTests(unittest.TestCase):
         verdict = variant_judged(AGILITY_ENTRY, AGILITY_TERM, STAT, after={**STAT, 'control high': 130.0})
         self.assertEqual(verdict.status, 'unmeasured')
         self.assertIn('did not raise the Agility', verdict.explanation)
+
+    def test_mutant_whose_attack_power_moved_inside_a_high_arm_is_unmeasured_not_alerted(self):
+        for arm in ARMS:
+            with self.subTest(arm=arm):
+                verdict = variant_judged(AGILITY_ENTRY, AGILITY_TERM, STAT, attack_after={arm: 255.0})
+                self.assertEqual(verdict.status, 'unmeasured')
+                self.assertIn(f'{arm} 312 / 255', verdict.explanation)
+
+    def test_mutant_whose_agility_drifted_inside_an_arm_is_unmeasured(self):
+        verdict = variant_judged(AGILITY_ENTRY, AGILITY_TERM, STAT, after={**STAT, 'learned high': 330.0})
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn('a fixture moved inside an arm', verdict.explanation)
+        self.assertIn('learned high 430 / 330', verdict.explanation)
 
     def test_an_aura_of_another_stat_and_a_short_power_are_refused(self):
         for change in ({'power_aura': 35785}, {'power_metric': 'max_health'}, {'power_metric': 'spirit'},
