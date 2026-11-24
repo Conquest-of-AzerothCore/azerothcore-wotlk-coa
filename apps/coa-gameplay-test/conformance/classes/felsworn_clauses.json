@@ -9,10 +9,28 @@
   {
     "spell": 92087,
     "clause": "Critical strikes with melee abilities now trigger Dancing Blades, dealing off-hand Weapon Damage to up to $800598i nearby enemies.",
-    "labels": [
-      "92087 effect_value #0"
+    "kind": "claim",
+    "labels": [],
+    "claims": [
+      {
+        "claim": "Critical strikes with melee abilities now trigger Dancing Blades",
+        "labels": []
+      },
+      {
+        "claim": "dealing off-hand Weapon Damage",
+        "labels": [
+          "92087 behaviour_metric_delta hit"
+        ]
+      },
+      {
+        "claim": "to up to $800598i nearby enemies",
+        "labels": [
+          "92087 effect_value #0",
+          "92087 behaviour_metric_delta count"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "HELD claim 1 (review fw-rl3b I-1): the noncrit arm (learned, 0 crits) has no read showing the Twin Slice strikes landed, so 0 triggers could mean no strike; needs a same-arm strike damage or hit-count read before 'Critical strikes ... trigger' counts."
   },
   {
     "spell": 92088,
@@ -87,7 +105,10 @@
     "spell": 300465,
     "clause": "Reduces the duration of movement impairing effects on you by $s1%.",
     "labels": [
-      "300465 behaviour_duration_ratio snare"
+      "300465 behaviour_duration_ratio snare",
+      "300465 behaviour_expiry snare",
+      "300465 behaviour_duration_ratio root",
+      "300465 behaviour_expiry root"
     ],
     "kind": "claim"
   },
@@ -742,7 +763,9 @@
     "spell": 520817,
     "clause": "Your Twin Slice and Felrend now have a $h% chance to generate 1 additional Felfury.",
     "labels": [
-      "520817 effect_value #0"
+      "520817 effect_value #0",
+      "520817 proc_rate 800058 801901",
+      "520817 proc_rate 800058 563268"
     ],
     "kind": "claim"
   },
@@ -1084,22 +1107,21 @@
     "claims": [
       {
         "claim": "Sargeron Smite leeches $s1% of the strike as Shadowflame damage while Inner Demon is active",
-        "labels": []
+        "labels": [
+          "560503 behaviour_metric_delta smite",
+          "560503 behaviour_metric_delta smite_no_inner",
+          "560503 behaviour_metric_delta smite_heal"
+        ]
       },
       {
         "claim": "Carve leeches $s1% of the strike as Shadowflame damage while Inner Demon is active",
-        "labels": []
+        "labels": [
+          "560503 behaviour_metric_delta carve",
+          "560503 behaviour_metric_delta carve_no_inner",
+          "560503 behaviour_metric_delta carve_heal"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "No existing kind proves the leech share with a control arm: cast_leech_ratio (nearest, heal of 705124 over the strike damage) has no way to give the caster the 2 Felfury Sargeron Smite consumes before the control cast and the treatment cast (the control cast is refused with SPELL_FAILED_NO_POWER, so 'the control cast must land' fails, pair prove_p2), and its also-spell option for Carve's triggered strike 803715 is refused together with auras. Needs a caster aura fixture on both arms of cast_leech_ratio and a controlled Carve route.",
-      "attempts": [
-        {
-          "agent": "fw-b2b",
-          "report": ".agents/plans/fw-b2b/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 560533,
@@ -1794,7 +1816,9 @@
     "spell": 685321,
     "clause": "Twin Slice now deals an additional ${$m2+0+$AP*0.3} Physical damage",
     "labels": [
-      "685321 effect_value #0"
+      "685321 effect_value #0",
+      "685321 behaviour_metric_delta damage",
+      "685321 behaviour_metric_delta damage_ap"
     ],
     "kind": "claim"
   },
@@ -1873,11 +1897,26 @@
   {
     "spell": 706420,
     "clause": "Unleash fel magic on an enemy, dealing $o1 Chaos damage over $d.",
-    "labels": [
-      "706420 aura_duration_ms #0",
-      "706420 effect_value #3"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $o1 Chaos damage",
+        "labels": [
+          "706420 effect_value #3",
+          "706420 behaviour_metric_delta total",
+          "706420 behaviour_metric_delta ticks"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "706420 aura_duration_ms #0",
+          "706420 behaviour_metric_delta duration_held",
+          "706420 behaviour_metric_delta duration_gone"
+        ]
+      }
     ],
-    "kind": "claim"
+    "labels": []
   },
   {
     "spell": 706420,
@@ -2049,9 +2088,11 @@
     "spell": 704610,
     "clause": "Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.",
     "labels": [
-      "704610 effect_value #0"
+      "704610 effect_value #0",
+      "704610 proc_rate"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "AWAITING OWNER (status 5). Tooltip: \"Azzinoth's Assault now has a $h% chance to hit an additional time with your main-hand Weapon.\" ($h = 30, ProcChance of 704610). Measured (counted pair prove-final, proc 704610): 0.2297 (12474/54306) and 0.2317 (12613/54445) additional hits per landed hit of 520262 or 572585 (the extra hits are trials too); 0 events in 40 baseline trials. 0.23 = 0.3/1.3: the handler rolls 0.3 per base strike and the extra hit does not roll (event guard, AscensionFelswornEvents.cpp:40 and :126-127), so the server gives about 0.60 additional hits per Assault (two strikes x 0.3, derived, not read), against the tooltip's 0.30 per Assault. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 casts because it is the Assault's own main-hand strike, not the talent's extra hit; they give no evidence of the 30% proc and no rate for it. Options: (a) one 30% roll per Assault (tooltip, 0.30 per cast); (b) keep 30% per strike as served (0.60 per cast, tooltip corrected). No server change made."
   },
   {
     "spell": 704611,
@@ -3370,7 +3411,7 @@
     "spell": 803475,
     "clause": "$?s804216[\r\n\r\nInner Demon: Extends the duration of Inner Demon by $/1000;803089s1 sec.][]",
     "kind": "claim",
-    "reason": "Cast part only: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent); this proves the cast, not that the duration grows. The value part, 'by $/1000;803089s1 sec' (3 s, 803089 Effect[0] 2999 + 1), is not measured: the duration read of Inner Demon after Assault gained 28009 ms against 3000 in all four runs of the pairs 20261123-220340/-220424 and -220711/-220741 (4991 -> 33000), an alert lead with no isolated cause (33000 = 6 x 5000 + 3000 is a lead: Felfury 803465 adds +5000 ms duration per stack and the fixture holds 6). Reference search 2026-11-23: nothing found for the value.",
+    "reason": "Cast part only: the extension spell 803089 is cast once per Assault with Inner Demon (extend_casts 0 -> 1) and not without it (extend_absent). The value part, 'by $/1000;803089s1 sec' (3 s, 803089 Effect[0] 2999 + 1), is not counted. The earlier +28009 ms reading was an incorrect test (fixture order, fix-250/note.md). Second design (fw-l3, pairs prove-a6/prove-a7): Inner Demon set first (5000 ms), Assault cast at the dummy, aura held at age 7700 ms and gone at 8200 ms (extension 3000 + 124 ms from the 0.4 x AP term: end at 8124 ms whatever the cast time), read as presence 1 then 0 in both runs; the age of the aura is bracketed by apply_stamp, which reads 'first missing' because the aura comes from the harness set_aura before the encounter timeline opens, so the 10% bounds (7750 held, 8250 gone) are not proven. Needs the apply stamp of a set_aura fixture or a real Inner Demon cast placed after the timeline start (tool change, not taken by an entries batch). The server value adds 0.4 x AP (owner question N-3). Reference search 2026-11-23: nothing found for the value.",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
     "claims": [
       {
@@ -3799,7 +3840,7 @@
     "spell": 804613,
     "clause": "While at full health, your chance to resist the next Curse or Magic effect on you is increased by 100%.",
     "labels": [],
-    "reason": "HELD (review fw-rea1 I-1..I-3): resist_next (804613 behaviour_taken_hit) proves the Curse leg only; the Magic leg (AscensionFelsworn.cpp:78-80) and the full-health gate are not contrasted, and the treatment sets 804613 itself (mentor ruling pending).",
+    "reason": "HELD (review fw-rea1 I-1..I-3): resist_next (804613 behaviour_taken_hit) proves the Curse leg only; the Magic leg (AscensionFelsworn.cpp:78-80) and the full-health gate are not contrasted, and the treatment sets 804613 itself (mentor ruling pending). fw-l3: the Magic leg, the below-full-health arm and the learned route (D-67) need taken_rate_arm_steps to honour the arm's learn and caster health (behaviours.py:7619-7629 ignores both for judge resist_rate); that shared tool belongs to batch L1 (part 282.0), so no entry was written here.",
     "kind": "claim",
     "evidence": "behaviour",
     "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
@@ -4527,6 +4568,21 @@
     "clause": "30 Energy, plus 30 per sec",
     "labels": [],
     "kind": "claim",
-    "reason": "HELD (review fw-rf500610c I-1): the free_3900/free_4100 bracket admits an up-front cost 21-40 and a drain 28-33/s, so neither 10% error is excluded; needs direct Energy reads (up-front and per second). Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on the measured drain: from 100 Energy with no power hold the channel aura is present at 3900 ms and gone at 4100 ms, the end of the fourth 30 Energy drain derived from the DBC and 10 Energy per second regeneration. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger."
+    "reason": "Cost line of the spell card, not the Description (lab render render2/answers/spell-800355.json: '30 Energy, plus 30 per sec'; Spell.dbc ManaCost 30, ManaPerSecond 30). Owner ruling O-24: the cost is conformant and the channel stopping near 4.0 s from 100 Energy without the Energy talents is accepted (Felsworn ADR 0014). Counted on exact Energy reads with regeneration off (disable_regeneration) from a pool set to 100: 70 at 100 ms (up front), 40 at 1450-1900 ms (after one drain) and 10 after the second, each excluding a cost or drain of 27 or 33; the reading before the cast is the control (100). The drain claim reads the Energy the real channel spends over measured intervals. No other ledger row represents a cost line (grep of every class ledger), so this row is new at the end of the ledger.",
+    "claims": [
+      {
+        "claim": "30 Energy",
+        "labels": [
+          "800355 behaviour_metric_delta up_front"
+        ]
+      },
+      {
+        "claim": "plus 30 per sec",
+        "labels": [
+          "800355 behaviour_metric_delta drain_1",
+          "800355 behaviour_metric_delta drain_2"
+        ]
+      }
+    ]
   }
 ]

@@ -474,6 +474,134 @@
       },
       "spell_proc": {},
       "internal_cooldown_ms": 0
+    },
+    {
+      "aura": 520817,
+      "name": "Vengeance",
+      "tooltip": "Your |cffffffffTwin Slice|r and |cffffffffFelrend|r now have a $h% chance to generate 1 additional |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801901
+      },
+      "residual_target": 0.001,
+      "min_detectable": 6,
+      "trials_per_attempt": 1,
+      "trigger_text": "Your Twin Slice",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 1,
+      "stack_per_cast": 1,
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 1,
+          "source": "precondition fixture, not the subject: Felfury (aura 800058) is set to 1 stack before every Twin Slice cast so that each attempt starts from a known count below the 6-stack cap; the subject is the extra stack the cast adds"
+        }
+      ],
+      "proc_spell": 800058,
+      "events_per_proc": 1,
+      "proc_spell_source": "No spell is cast: the resource gain rules of AscensionCustomResourceData.h:160-175 give Twin Slice 801901 one extra Felfury (aura 800058) with ChancePercent 60 while 520817 is on the caster (RequiredAuraSpellId 520817); the tooltip $h reads ProcChance 60 of 520817 (Spell.dbc), the same 60.",
+      "handler": "Resource gain rule (not a scripted OnProc case): a completed Twin Slice 801901 gains 1 Felfury unconditionally (ResourceGainRules, FirstSuccessfulHostileTarget) and, while 520817 is known, one more with a 60% roll. Trial: one completed cast (trial_casts); event: the 800058 stacks read after the cast exceed the 1 set before it by 1 (base) plus 1 per success (aura_stacks event metric, tool ADR 1254). Baseline arm: the same casts before 520817 is learned must read no extra event. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the resource rules in the server data.",
+      "dbc": {
+        "520817": {
+          "ProcChance": 60,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "trial_casts": true,
+      "sized_attempts": 19386
+    },
+    {
+      "aura": 520817,
+      "name": "Vengeance",
+      "tooltip": "Your |cffffffffTwin Slice|r and |cffffffffFelrend|r now have a $h% chance to generate 1 additional |cff32cd32Felfury|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 563268
+      },
+      "residual_target": 0.001,
+      "min_detectable": 6,
+      "trials_per_attempt": 1,
+      "trigger_text": "Your Felrend",
+      "event_metric": "aura_stacks",
+      "stack_aura": 800058,
+      "stack_set": 1,
+      "stack_per_cast": 1,
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 1,
+          "source": "precondition fixture, not the subject: Felfury (aura 800058) is set to 1 stack before every Felrend cast so that each attempt starts from a known count below the 6-stack cap; the subject is the extra stack the cast adds"
+        }
+      ],
+      "proc_spell": 800058,
+      "events_per_proc": 1,
+      "proc_spell_source": "No spell is cast: the resource gain rules of AscensionCustomResourceData.h:160-175 give Felrend 563268 one extra Felfury (aura 800058) with ChancePercent 60 while 520817 is on the caster (RequiredAuraSpellId 520817); the tooltip $h reads ProcChance 60 of 520817 (Spell.dbc), the same 60.",
+      "handler": "Resource gain rule (not a scripted OnProc case): a completed Felrend 563268 gains 1 Felfury unconditionally (ResourceGainRules, FirstSuccessfulHostileTarget) and, while 520817 is known, one more with a 60% roll. Trial: one completed cast (trial_casts); event: the 800058 stacks read after the cast exceed the 1 set before it by 1 (base) plus 1 per success (aura_stacks event metric, tool ADR 1254). Baseline arm: the same casts before 520817 is learned must read no extra event. Reference search 2026-11-23: nothing found beyond the tooltip, Spell.dbc and the resource rules in the server data.",
+      "dbc": {
+        "520817": {
+          "ProcChance": 60,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "trial_casts": true,
+      "sized_attempts": 19386
+    },
+    {
+      "aura": 704610,
+      "name": "A Thousand Cuts",
+      "tooltip": "|cFFFFFFFFAzzinoth's Assault|r now has a $h% chance to hit an additional time with your main-hand Weapon.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 801904
+      },
+      "trigger_text": "Azzinoth's Assault",
+      "event_metric": "spell_damage_count",
+      "attempt_auras": [
+        {
+          "spell": 800058,
+          "stacks": 2,
+          "source": "precondition fixture, not the subject: Azzinoth's Assault 801904 costs 2 Felfury (aura 800058, ResourceCostRules AscensionCustomResourceData.h:520) and is refused with SPELL_FAILED_NO_POWER below it, so 2 stacks are set before every cast"
+        }
+      ],
+      "proc_spell": 520262,
+      "events_per_proc": 1,
+      "proc_spell_source": "Casts of 520262 beyond the completed Azzinoth's Assault casts: EffectTriggerSpell[0] of 704610; each Assault itself casts 520262 once (EffectTriggerSpell[0] of 801904), the handler casts the additional one (AscensionFelswornEvents.cpp:176-177). Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs. Nothing found that states a rate per hit or per cast.",
+      "handler": "aura_ascension_felsworn_event: Check case 704610 (AscensionFelswornEvents.cpp:69-71) passes a damage event of 801904, 520262 or 572585 and rolls Chance(player, 704610); Proc (AscensionFelswornEvents.cpp:176-177) casts 520262 at the target. Baseline arm: the same casts before 704610 is learned must read no extra hit. Reference search 2026-11-23: see trigger_spells_source.",
+      "dbc": {
+        "704610": {
+          "ProcChance": 30,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0,
+      "residual_target": 0.001,
+      "min_detectable": 6,
+      "events_exclude_trigger_casts": true,
+      "trigger_spells": [
+        801904,
+        520262,
+        572585
+      ],
+      "trigger_lands_no_hit": "AscensionFelswornEvents.cpp:69-71: case 704610: return info && (Named(info, 801904) || info->Id == 520262 || info->Id == 572585) && !periodic && Chance(player, id): the handler rolls once per landed non-periodic damage event of the strikes 520262 (main hand) and 572585 (off hand), never per cast of 801904. The extra 520262 hit it casts (:176-177) does not roll again: the Proc sets State(player).event (:126-127, reset at :278) and Check returns false while it is set (:40).",
+      "trigger_spells_source": "Azzinoth's Assault 801904 (Effect[0] and Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE, EffectTriggerSpell 520262 main hand and 572585 off hand) has no damage of its own; the two strikes are the landed hits and each rolls the chance once; the additional 520262 hit does not roll (event guard, see trigger_lands_no_hit). A trial is one landed hit of 520262 or 572585 on the dummy, additional hits included, so the measured rate per landed hit is 0.3/1.3 = 0.231 for 0.3 per base strike. Reference search 2026-11-24: coa-history spell 704610: 0 events in 186 logs. Live logs (atc/report.md:7-10, :36): 520262 follows 124 of 148 Assault casts (0.84 per cast) because it is the Assault's own main-hand strike (EffectTriggerSpell of 801904), not the talent's extra hit; no evidence of the 30% proc in the logs."
     }
   ],
   "triggers": [
@@ -17192,6 +17320,792 @@
       "wait_ms": 12960,
       "expire_ms": 500,
       "observe_source": "$572792d = 12 s (572792 DurationIndex 29 = 12000 ms, SpellDuration.dbc). 806235 is a scripted passive (AscensionFelswornEvents.cpp:166-168): a non-periodic critical hit of a Felfury spender extends Inner Demon and casts 572792 on the struck enemy. Sargeron Smite 802060 (instant, a spender, one direct hit) is cast at the dummy with the strike forced critical, Inner Demon 804216 and Felfury 800058 x2 set on the caster in both phases (precondition fixtures, as the 806235 duration entry). The aura 572792 on the dummy is read 12960 ms after the cast: expected absent (0); the other arm reads the opposite side of the 12000 ms duration (11040 = 0.92 x 12000 and 12960 = 1.08 x 12000), so a duration 10% off either way is excluded. Control arm: before the learn of 806235 the same cast leaves no 572792 (before_expected 0). Reference search 2026-11-24: coa-history spell 806235: 0 events in 186 logs (a passive leaves no event); ~/CoaServer/reference snapshots list the talent name only, no values; expected values come from the tooltip and the DBC only."
+    },
+    {
+      "spell": 800355,
+      "kind": "metric_delta",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Sargeras Embrace (up_front)",
+      "variant": "up_front",
+      "label_suffix": "up_front",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 3
+      },
+      "before_expected": 100,
+      "wait_ms": 100,
+      "expected": 70,
+      "game_time": {
+        "after": [
+          50,
+          800
+        ]
+      },
+      "observe_source": "Spell.dbc 800355: PowerType 3 Energy, ManaCost 30, ManaPerSecond 30 (the card reads '30 Energy, plus 30 per sec'); Aura::Update charges ManaPerSecond every 1000 ms (SpellAuras.cpp:771-801). Energy regeneration is off (disable_regeneration) and the pool is set to 100 before the cast, so the readings are exact, not a bracket: read 100 ms after the cast, before the first drain: 100 - 30 = 70. A cost of 27 or 33 reads 73 or 67, so a 10% error is excluded."
+    },
+    {
+      "spell": 800355,
+      "kind": "metric_delta",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Sargeras Embrace (drain_1)",
+      "variant": "drain_1",
+      "label_suffix": "drain_1",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 3
+      },
+      "before_expected": 100,
+      "wait_ms": 1500,
+      "expected": 40,
+      "game_time": {
+        "after": [
+          1450,
+          1900
+        ]
+      },
+      "observe_source": "Spell.dbc 800355: PowerType 3 Energy, ManaCost 30, ManaPerSecond 30 (the card reads '30 Energy, plus 30 per sec'); Aura::Update charges ManaPerSecond every 1000 ms (SpellAuras.cpp:771-801). Energy regeneration is off (disable_regeneration) and the pool is set to 100 before the cast, so the readings are exact, not a bracket: read 1500 ms after the cast, after one drain and before the second: 70 - 30 = 40. A drain of 27 or 33 reads 43 or 37, so a 10% error is excluded."
+    },
+    {
+      "spell": 800355,
+      "kind": "metric_delta",
+      "trigger_spell": 800355,
+      "target": "dummy",
+      "cast_power": 100,
+      "phase_auras": [],
+      "cast_in_before": false,
+      "expire_ms": 500,
+      "measure_actor": "caster",
+      "name": "Sargeras Embrace (drain_2)",
+      "variant": "drain_2",
+      "label_suffix": "drain_2",
+      "quote": "Channel a beam of fel magic upon an enemy",
+      "disable_regeneration": true,
+      "metric": "power",
+      "fields": {
+        "power": 3
+      },
+      "before_expected": 100,
+      "wait_ms": 2500,
+      "expected": 10,
+      "game_time": {
+        "after": [
+          2450,
+          2900
+        ]
+      },
+      "observe_source": "Spell.dbc 800355: PowerType 3 Energy, ManaCost 30, ManaPerSecond 30 (the card reads '30 Energy, plus 30 per sec'); Aura::Update charges ManaPerSecond every 1000 ms (SpellAuras.cpp:771-801). Energy regeneration is off (disable_regeneration) and the pool is set to 100 before the cast, so the readings are exact, not a bracket: read 2500 ms after the cast, after two drains and before the pool (10) falls below 30 at the third: 70 - 60 = 10. A drain of 27 or 33 reads 16 or 4, so a 10% error is excluded."
+    },
+    {
+      "spell": 92087,
+      "name": "Dancing Blades (trigger)",
+      "kind": "metric_delta",
+      "variant": "trigger",
+      "label_suffix": "trigger",
+      "quote": "Critical strikes with melee abilities now trigger",
+      "gate_spell": 92087,
+      "trigger_spell": 801901,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "melee",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 800598
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "after_at_least": 1,
+      "observe_source": "Dancing Blades 92087 (Level 10 Passive, Description): 'Critical strikes with melee abilities now trigger Dancing Blades, dealing off-hand Weapon Damage to up to $800598i nearby enemies'; 800598 MaxAffectedTargets 5 ($800598i), Effect[0] 121 normalized weapon damage, SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON. Twin Slice 801901 is a melee ability (DmgClass 2) striking with both weapons (EffectTriggerSpell 808303 and 808304, two strikes); the caster's melee crit rating is forced (force_crit melee) so every strike is a critical hit. 92087 is unlearned in the before phase (control) and learned in the after phase. Reference search 2026-11-23: coa-history spells 92087 and 800598 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Read: casts of 800598 by the caster 1500 ms after one Twin Slice at one dummy: 0 without the passive (control), at least 1 with it."
+    },
+    {
+      "spell": 92087,
+      "name": "Dancing Blades (count)",
+      "kind": "metric_delta",
+      "variant": "count",
+      "label_suffix": "count",
+      "quote": "to up to $800598i nearby enemies",
+      "gate_spell": 92087,
+      "trigger_spell": 801901,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "melee",
+      "cast_power": 100,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800598,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "area_dummies": [
+        3.0,
+        3.5,
+        4.0,
+        4.5,
+        5.0,
+        5.5
+      ],
+      "area_sum": true,
+      "tolerance": 0,
+      "observe_source": "Dancing Blades 92087 (Level 10 Passive, Description): 'Critical strikes with melee abilities now trigger Dancing Blades, dealing off-hand Weapon Damage to up to $800598i nearby enemies'; 800598 MaxAffectedTargets 5 ($800598i), Effect[0] 121 normalized weapon damage, SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON. Twin Slice 801901 is a melee ability (DmgClass 2) striking with both weapons (EffectTriggerSpell 808303 and 808304, two strikes); the caster's melee crit rating is forced (force_crit melee) so every strike is a critical hit. 92087 is unlearned in the before phase (control) and learned in the after phase. Reference search 2026-11-23: coa-history spells 92087 and 800598 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Read: damage events of 800598 summed over the dummy and six more enemies at 3 to 5.5 yd (seven enemies, all inside the 8 yd search of AscensionFelswornEvents.cpp). Each of the two forced-critical strikes triggers one cast that strikes at most 5 of the seven enemies, so the sum is 2 x 5 = 10 (a server striking 6 or all 7 reads 12 or 14); 0 before the learn (control)."
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Bane of Chaos (total)",
+      "variant": "total",
+      "label_suffix": "total",
+      "quote": "Unleash fel magic on an enemy, dealing $o1 Chaos damage over $d.",
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy"
+      },
+      "expected": 2285.5,
+      "wait_ms": 22500,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, EffectBasePoints 325 with EffectDieSides 2 (a roll of 1 or 2 added: 326 or 327 per tick), RealPointsPerLevel 1.536 x (caster level 60 - BaseLevel 60) = 0, DurationIndex 86 = 21000 ms ($d, SpellDuration.dbc), so 21000 / 3000 = 7 ticks; the reference character has no spell power, so the spell power part of $o1 is 0. Caster crit removed (984954) and the dummy's Chaos resistance removed (823764) in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs; no tick figure decides; nothing else found beyond the tooltip and Spell.dbc. Read: the dummy's total Bane of Chaos damage 22500 ms after the cast, past the last tick: 7 x (326..327) = 2282..2289 (a duration or a tick count 10% off reads outside); 0 before the cast (control).",
+      "after_at_least": 2282,
+      "after_at_most": 2289
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Bane of Chaos (ticks)",
+      "variant": "ticks",
+      "label_suffix": "ticks",
+      "quote": "Unleash fel magic on an enemy, dealing $o1 Chaos damage over $d.",
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 706420,
+        "target": "dummy"
+      },
+      "expected": 7,
+      "wait_ms": 22500,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, EffectBasePoints 325 with EffectDieSides 2 (a roll of 1 or 2 added: 326 or 327 per tick), RealPointsPerLevel 1.536 x (caster level 60 - BaseLevel 60) = 0, DurationIndex 86 = 21000 ms ($d, SpellDuration.dbc), so 21000 / 3000 = 7 ticks; the reference character has no spell power, so the spell power part of $o1 is 0. Caster crit removed (984954) and the dummy's Chaos resistance removed (823764) in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs; no tick figure decides; nothing else found beyond the tooltip and Spell.dbc. Read: the dummy's Bane of Chaos tick count 22500 ms after the cast: 21000 / 3000 = 7; 0 before the cast (control).",
+      "tolerance": 0.5
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Bane of Chaos (duration_held)",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Unleash fel magic on an enemy, dealing $o1 Chaos damage over $d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 706420
+      },
+      "expected": 1,
+      "wait_ms": 19900,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, EffectBasePoints 325 with EffectDieSides 2 (a roll of 1 or 2 added: 326 or 327 per tick), RealPointsPerLevel 1.536 x (caster level 60 - BaseLevel 60) = 0, DurationIndex 86 = 21000 ms ($d, SpellDuration.dbc), so 21000 / 3000 = 7 ticks; the reference character has no spell power, so the spell power part of $o1 is 0. Caster crit removed (984954) and the dummy's Chaos resistance removed (823764) in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs; no tick figure decides; nothing else found beyond the tooltip and Spell.dbc. Read: the aura on the dummy 19900 ms after the cast (a duration 10% short, 18900 ms, is excluded); 0 before the cast (control).",
+      "measure_actor": "dummy",
+      "game_time": {
+        "after": [
+          19850,
+          20200
+        ]
+      }
+    },
+    {
+      "spell": 706420,
+      "kind": "metric_delta",
+      "trigger_spell": 706420,
+      "target": "dummy",
+      "cast_power": 100,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "name": "Bane of Chaos (duration_gone)",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Unleash fel magic on an enemy, dealing $o1 Chaos damage over $d.",
+      "metric": "aura",
+      "fields": {
+        "spell": 706420
+      },
+      "expected": 0,
+      "wait_ms": 22100,
+      "observe_source": "Bane of Chaos 706420 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, EffectAmplitude 3000, EffectBasePoints 325 with EffectDieSides 2 (a roll of 1 or 2 added: 326 or 327 per tick), RealPointsPerLevel 1.536 x (caster level 60 - BaseLevel 60) = 0, DurationIndex 86 = 21000 ms ($d, SpellDuration.dbc), so 21000 / 3000 = 7 ticks; the reference character has no spell power, so the spell power part of $o1 is 0. Caster crit removed (984954) and the dummy's Chaos resistance removed (823764) in both phases as precondition fixtures. Reference search 2026-11-23: coa-history spell 706420: 324 casts, 206 aura applied and 206 removed in 2 logs; no tick figure decides; nothing else found beyond the tooltip and Spell.dbc. Read: the aura on the dummy 22100 ms after the cast (a duration 10% long, 23100 ms, is excluded); 0 before the cast (control).",
+      "measure_actor": "dummy",
+      "game_time": {
+        "after": [
+          22050,
+          22400
+        ]
+      }
+    },
+    {
+      "spell": 685321,
+      "name": "Doomscarring (damage)",
+      "kind": "metric_delta",
+      "variant": "damage",
+      "label_suffix": "damage",
+      "quote": "Twin Slice now deals an additional ${$m2+0+$AP*0.3} Physical damage",
+      "gate_spell": 685321,
+      "trigger_spell": 801901,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 563271,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 428,
+      "after_at_least": 407,
+      "after_at_most": 450,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Doomscarring 685321 Effect[0] aura 42 triggers 563271 Doomscar; the handler casts 563271 at the target on every non-periodic damage event of a Twin Slice strike (Twin(): 801901 or SpellFamilyFlags[0] 1048576; the two strikes 808303 and 808304 both carry it), AscensionFelswornEvents.cpp:57-58 and :151-152, so one Twin Slice 801901 lands two Doomscar hits. 563271 Effect[1] SCHOOL_DAMAGE (SchoolMask 0, physical), BasePoints 59 + 1 (DieSides 1 adds 1) = 60 plus RealPointsPerLevel 3.0 x (level 60 - BaseLevel 33) = 81, so m2 = 141, and the AP coefficient 0.3 of the tooltip (AscensionFelswornData.h:51); reference attack power 312 (class file reference_stats). The harness dummy's armor, from the data (Harvest Golem 36, creature_template unit_class 1, ArmorModifier 1, level 11 base armor 528, as the Sun Cleric Justice entry derives it), mitigates once with kept fraction 5500/6028 = 0.912409 and ceil (Unit.cpp:2547-2554 under ClassicPlus.CombatRules). Weapon crit removed by 64481 (Reduce Critical Strike Chance -100%) on the caster in both phases as a precondition fixture. 685321 is learned between the phases: the before phase is the control (0 damage of 563271). Reference search 2026-11-23: coa-history spells 685321 and 563271 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Read at the reference attack power: two hits of ceil(int(141 + 0.3 x 312 = 234.6) x 0.912409) = 214 (215 if the sum is kept fractional) each, so the total lies in 426..432 (a server without the attack power term deals 2 x 129 = 258). Band: the tooltip value ceil((141 + 93.6) x 0.912409) = 214 per hit, two hits 428, judged within the larger of 5% and 2 points (G-19): 407..450. Measured 445 in the first pair (222 and 223 per hit): the served flat is about 150 against the DBC-derived 141, 3.8% on the hit, inside the band; recorded as an observation, not a claim."
+    },
+    {
+      "spell": 685321,
+      "name": "Doomscarring (damage_ap)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Twin Slice now deals an additional ${$m2+0+$AP*0.3} Physical damage",
+      "gate_spell": 685321,
+      "trigger_spell": 801901,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 563271,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 11378,
+      "after_at_least": 10809,
+      "after_at_most": 11946,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Doomscarring 685321 Effect[0] aura 42 triggers 563271 Doomscar; the handler casts 563271 at the target on every non-periodic damage event of a Twin Slice strike (Twin(): 801901 or SpellFamilyFlags[0] 1048576; the two strikes 808303 and 808304 both carry it), AscensionFelswornEvents.cpp:57-58 and :151-152, so one Twin Slice 801901 lands two Doomscar hits. 563271 Effect[1] SCHOOL_DAMAGE (SchoolMask 0, physical), BasePoints 59 + 1 (DieSides 1 adds 1) = 60 plus RealPointsPerLevel 3.0 x (level 60 - BaseLevel 33) = 81, so m2 = 141, and the AP coefficient 0.3 of the tooltip (AscensionFelswornData.h:51); reference attack power 312 (class file reference_stats). The harness dummy's armor, from the data (Harvest Golem 36, creature_template unit_class 1, ArmorModifier 1, level 11 base armor 528, as the Sun Cleric Justice entry derives it), mitigates once with kept fraction 5500/6028 = 0.912409 and ceil (Unit.cpp:2547-2554 under ClassicPlus.CombatRules). Weapon crit removed by 64481 (Reduce Critical Strike Chance -100%) on the caster in both phases as a precondition fixture. 685321 is learned between the phases: the before phase is the control (0 damage of 563271). Reference search 2026-11-23: coa-history spells 685321 and 563271 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Contrast arm of the attack power term: +20000 attack power (player_attack_power, reading 20312): two hits of ceil(int(141 + 0.3 x 20312) = 6234) x 0.912409) = 5688 (5689 fractional), total 11376..11378, bounds 11374..11380 (a flat 141 reads 258). Band: two hits of 5688 = 11376, within 5%: 10809..11946. The difference of the two arms over the added attack power (20000 x 0.912409 x 2 hits) is the coefficient: a flat 141 reads 258.",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (smite)",
+      "kind": "metric_delta",
+      "variant": "smite",
+      "label_suffix": "smite",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 802060,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 705124,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0.2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 802060,
+          "target": "dummy"
+        },
+        "ratio": 0.2,
+        "tolerance": 0.01,
+        "least": 1,
+        "source": "tooltip of 560503: leeches $s1% (20) of the damage dealt from the initial strike"
+      },
+      "observe_source": "Straight to the Nether 560503 Effect[0] aura 354 with EffectTriggerSpell 705124; EffectBasePoints 19 + 1 = 20 is the $s1 of the tooltip. The handler (AscensionFelswornEvents.cpp:101-102 and :234-235) passes a non-periodic damage event of Sargeron Smite (family of 802060) or of Carve's strike 803715 while Inner Demon 804216 is on the caster, and casts 705124 (Shadowflame, SchoolMask 36) at the target with 20% of the event's damage. The leech is read as the 705124 damage total over the strike's own damage total in the same window (same_arm_ratio): 0.20 within 0.01 (5% of 20%), the same pattern as Demonic Machinations 806111 bleed_ratio. The dummy's Shadowflame resistance is removed by 823764 and weapon crit of the leech by 64481 in both phases (precondition fixtures); Inner Demon 804216 is set by harness set_aura as a precondition fixture (it is the condition of the clause, not its subject, and has its own entries). 560503 is learned between the phases: the before phase is the control (no 705124 damage). Reference search 2026-11-23: coa-history spells 560503 and 705124 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Sargeron Smite 802060 at the dummy with Inner Demon: leech over strike = 0.20; the strike casts twice under Inner Demon, the totals are summed over the window. Open observation (not a label): whether the 705124 damage takes the Inner Demon damage bonus again is read from this ratio, a ratio above 0.21 would show it. Attack power +20000 (player_attack_power) in both phases makes the amounts large, so integer rounding of small hits does not move the ratio (first pair: 0.182 and 0.1875 on small Carve hits).",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (carve)",
+      "kind": "metric_delta",
+      "variant": "carve",
+      "label_suffix": "carve",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 803715,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 705124,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0.2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 803715,
+          "target": "dummy"
+        },
+        "ratio": 0.2,
+        "tolerance": 0.01,
+        "least": 1,
+        "source": "tooltip of 560503: leeches $s1% (20) of the damage dealt from the initial strike"
+      },
+      "observe_source": "Straight to the Nether 560503 Effect[0] aura 354 with EffectTriggerSpell 705124; EffectBasePoints 19 + 1 = 20 is the $s1 of the tooltip. The handler (AscensionFelswornEvents.cpp:101-102 and :234-235) passes a non-periodic damage event of Sargeron Smite (family of 802060) or of Carve's strike 803715 while Inner Demon 804216 is on the caster, and casts 705124 (Shadowflame, SchoolMask 36) at the target with 20% of the event's damage. The leech is read as the 705124 damage total over the strike's own damage total in the same window (same_arm_ratio): 0.20 within 0.01 (5% of 20%), the same pattern as Demonic Machinations 806111 bleed_ratio. The dummy's Shadowflame resistance is removed by 823764 and weapon crit of the leech by 64481 in both phases (precondition fixtures); Inner Demon 804216 is set by harness set_aura as a precondition fixture (it is the condition of the clause, not its subject, and has its own entries). 560503 is learned between the phases: the before phase is the control (no 705124 damage). Reference search 2026-11-23: coa-history spells 560503 and 705124 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Carve 803715 at the dummy with Inner Demon: leech over strike = 0.20. Attack power +20000 (player_attack_power) in both phases makes the amounts large, so integer rounding of small hits does not move the ratio (first pair: 0.182 and 0.1875 on small Carve hits).",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (smite_no_inner)",
+      "kind": "metric_delta",
+      "variant": "smite_no_inner",
+      "label_suffix": "smite_no_inner",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 802060,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 705124,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Straight to the Nether 560503 Effect[0] aura 354 with EffectTriggerSpell 705124; EffectBasePoints 19 + 1 = 20 is the $s1 of the tooltip. The handler (AscensionFelswornEvents.cpp:101-102 and :234-235) passes a non-periodic damage event of Sargeron Smite (family of 802060) or of Carve's strike 803715 while Inner Demon 804216 is on the caster, and casts 705124 (Shadowflame, SchoolMask 36) at the target with 20% of the event's damage. The leech is read as the 705124 damage total over the strike's own damage total in the same window (same_arm_ratio): 0.20 within 0.01 (5% of 20%), the same pattern as Demonic Machinations 806111 bleed_ratio. The dummy's Shadowflame resistance is removed by 823764 and weapon crit of the leech by 64481 in both phases (precondition fixtures); Inner Demon 804216 is set by harness set_aura as a precondition fixture (it is the condition of the clause, not its subject, and has its own entries). 560503 is learned between the phases: the before phase is the control (no 705124 damage). Reference search 2026-11-23: coa-history spells 560503 and 705124 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Control of the condition: the same cast without Inner Demon, 560503 learned: no leech (ratio 0)."
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (carve_no_inner)",
+      "kind": "metric_delta",
+      "variant": "carve_no_inner",
+      "label_suffix": "carve_no_inner",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 803715,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 705124,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Straight to the Nether 560503 Effect[0] aura 354 with EffectTriggerSpell 705124; EffectBasePoints 19 + 1 = 20 is the $s1 of the tooltip. The handler (AscensionFelswornEvents.cpp:101-102 and :234-235) passes a non-periodic damage event of Sargeron Smite (family of 802060) or of Carve's strike 803715 while Inner Demon 804216 is on the caster, and casts 705124 (Shadowflame, SchoolMask 36) at the target with 20% of the event's damage. The leech is read as the 705124 damage total over the strike's own damage total in the same window (same_arm_ratio): 0.20 within 0.01 (5% of 20%), the same pattern as Demonic Machinations 806111 bleed_ratio. The dummy's Shadowflame resistance is removed by 823764 and weapon crit of the leech by 64481 in both phases (precondition fixtures); Inner Demon 804216 is set by harness set_aura as a precondition fixture (it is the condition of the clause, not its subject, and has its own entries). 560503 is learned between the phases: the before phase is the control (no 705124 damage). Reference search 2026-11-23: coa-history spells 560503 and 705124 and the bindmysoul talents snapshot: nothing found that decides a value; expected values come from the tooltip and the DBC only. Control of the condition: the same cast without Inner Demon, 560503 learned: no leech (ratio 0)."
+    },
+    {
+      "spell": 92087,
+      "name": "Dancing Blades (off-hand weapon damage)",
+      "kind": "metric_delta",
+      "variant": "hit",
+      "label_suffix": "hit",
+      "quote": "dealing off-hand Weapon Damage",
+      "gate_spell": 92087,
+      "trigger_spell": 801901,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "melee",
+      "cast_power": 100,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 800598,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 140,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Dancing Blades 800598 Effect[0] 121 (normalized weapon damage), SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, flat $m1 = 0 + 1 (DieSides 1). Off-hand weapon item 2027, 17.25-28.75, normalized speed 2.4; reference attack power 312 adds 312/14 x 2.4 = 53.49, so the roll is the integer 70..82; the off-hand factor 0.5 (hits.py OFF_HAND_DAMAGE_FACTOR, the engine's off-hand penalty) gives 35..41 and the flat 0 after the factor. Every melee hit is critical here (force_crit melee, the trigger needs a crit; 800598 is a melee ability), so x2: 70..82, then the dummy's armor (528, kept fraction 5500/6028 = 0.912409, ceil, as the Sun Cleric Justice entry derives it): 64..75 per hit; crit and armor in the other order give 64..76. Two hits (two forced-critical Twin Slice strikes, one dummy): 128..152. A main-hand hit (no 0.5) would read 256..304 and a hit without the attack power term 30..52. 0 before the learn (control). Reference search 2026-11-23: nothing found that decides a value; expected values come from the tooltip, the DBC and the class file.",
+      "after_at_least": 128,
+      "after_at_most": 152
+    },
+    {
+      "spell": 300465,
+      "name": "Cunning (root duration)",
+      "kind": "duration_ratio",
+      "variant": "root",
+      "label_suffix": "root",
+      "quote": "Reduces the duration of movement impairing effects on you by $s1%",
+      "expected_ratio": 0.8,
+      "vehicle_spell": 29991,
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "300465 Effect[0] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD, EffectMiscValue 7 (MECHANIC_ROOT), BasePoints -21 + 1 = -20 ($s1 = 20): root durations on the caster x0.8 (Effect[1] covers MECHANIC_SNARE 11, the snare entry). Vehicle 29991 (Spell.dbc: Mechanic 7, Effect[0] aura 26 SPELL_AURA_MOD_ROOT, DurationIndex 1 = 10000 ms) is a real root cast once per phase by the striker entry 36 at the caster, before (control: 300465 not learned) and after a real learn. The generated behaviour_expiry label reads the aura held and gone around the stated end of both arms (10000 ms without, 8000 ms with). Reference search 2026-11-24: coa-history spell 300465: 0 events in 186 logs (a passive leaves no event); nothing found that decides a value; expected values come from the tooltip and the DBC."
+    },
+    {
+      "spell": 92087,
+      "name": "Dancing Blades (control: no critical strike, no trigger)",
+      "kind": "metric_delta",
+      "variant": "noncrit",
+      "label_suffix": "noncrit",
+      "quote": "Critical strikes with melee abilities now trigger",
+      "gate_spell": 92087,
+      "trigger_spell": 801901,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 800598
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "after_at_least": 0,
+      "observe_source": "Dancing Blades 92087: the passive triggers on a critical melee ability only (AscensionFelswornEvents.cpp:52-53 case 92087 returns melee && crit && !periodic). Control of the condition: the same Twin Slice 801901 cast with 92087 learned in the after phase and Reduce Critical Strike Chance 64481 (Effect[0] MOD_WEAPON_CRIT_PERCENT -1000, a precondition fixture) on the caster in both phases, no forced critical: no strike is critical, so 800598 is cast 0 times; a server triggering on every melee hit reads 2. Without 92087 (before phase) it also reads 0. Reference search 2026-11-24: nothing found that decides a value.",
+      "after_at_most": 0,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (smite_heal)",
+      "kind": "metric_delta",
+      "variant": "smite_heal",
+      "label_suffix": "smite_heal",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 802060,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          803468,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          800058,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 705124,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 705124,
+          "target": "dummy"
+        },
+        "ratio": 1.0,
+        "tolerance": 0.02,
+        "least": 1,
+        "source": "705124 Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0: the caster is healed by the damage the leech deals"
+      },
+      "observe_source": "Heal leg of 705124 (Spell.dbc Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0): the caster's heal total of 705124 over the 705124 damage total of the same window (same_arm_ratio) is 1.0 within 0.02; 0 before the learn (control). The damage share of the same leech is the smite entry (0.20 of the strike). Reference search 2026-11-24: nothing found that decides a value; expected values come from the tooltip and the DBC.",
+      "player_attack_power": 20000
+    },
+    {
+      "spell": 560503,
+      "name": "Straight to the Nether (carve_heal)",
+      "kind": "metric_delta",
+      "variant": "carve_heal",
+      "label_suffix": "carve_heal",
+      "quote": "now leeches $s1% of the damage dealt from the initial strike as Shadowflame Damage.",
+      "gate_spell": 560503,
+      "trigger_spell": 803715,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 100,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          804216,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 705124,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 705124,
+          "target": "dummy"
+        },
+        "ratio": 1.0,
+        "tolerance": 0.02,
+        "least": 1,
+        "source": "705124 Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0: the caster is healed by the damage the leech deals"
+      },
+      "observe_source": "Heal leg of 705124 (Spell.dbc Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0): the caster's heal total of 705124 over the 705124 damage total of the same window (same_arm_ratio) is 1.0 within 0.02; 0 before the learn (control). The damage share of the same leech is the carve entry (0.20 of the strike). Reference search 2026-11-24: nothing found that decides a value; expected values come from the tooltip and the DBC.",
+      "player_attack_power": 20000
     }
   ],
   "player_observations": [],
