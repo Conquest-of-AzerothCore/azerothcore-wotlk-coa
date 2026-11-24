@@ -3526,7 +3526,7 @@
     "spell": 805114,
     "clause": "Spread nightmares of the black empire to up to $i nearby enemies,",
     "labels": [
-      "805114 effect_value #0"
+      "805114 targets behaviour_fixed_count"
     ],
     "kind": "claim"
   },
@@ -3534,7 +3534,7 @@
     "spell": 805114,
     "clause": "horrifying them for $d",
     "labels": [
-      "805114 aura_duration_ms #1"
+      "805114 behaviour_metric_delta horrify_duration"
     ],
     "kind": "claim"
   },
@@ -3542,7 +3542,7 @@
     "spell": 805114,
     "clause": "and interrupting non-player spellcasting for $32747d.",
     "labels": [
-      "805114 spell_duration 32747 #2"
+      "805114 behaviour_expiry lockout"
     ],
     "kind": "claim"
   },

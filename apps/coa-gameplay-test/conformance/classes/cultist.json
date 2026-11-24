@@ -779,6 +779,76 @@
       "expire_ms": 1500,
       "void_on_cast_failure": true,
       "observe_source": "582589 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 14 (SPELLMOD_COST), EffectBasePoints[1] -21 + EffectDieSides[1] 1 = -20% ($s2 = 20), EffectSpellClassMask[4] 4 (effect 1 word 1 = 4) = SpellFamilyFlags[1] 4 of Hallucination 560301 (SpellFamilyName 31, ManaCostPercentage 15; Spell.dbc). Level 60 Cultist BaseMana = 1512 (player_class_stats class 25 level 60; MaxMana = 2297): SpellInfo::CalcPowerCost (SpellInfo.cpp:3216) computes base cost int32(CalculatePct(1512, 15)) = int32(226.8) = 226 mana; Player::ApplySpellMod (Player.cpp:10687) applies -20% -> int32(226 * 0.8f) = int32(180.8) = 180 mana (saving 46 mana, 46/226 = 20.35%). Both phases set mana to cast_power 2000 with regeneration disabled and cast Hallucination 560301 for real, reading remaining mana 500 ms later: 2000 - 226 = 1774 before learning 582589 (control) and 2000 - 180 = 1820 after learning 582589 (gain +46, exact tolerance 0). Reference search 2026-11-24: coa-history spell 582589: 0 events in 186 logs (passive; positive control 560301 Hallucination: 36 casts in 11 logs); coabuildhub spells_master_index.json entry 582589 says 'reduces its mana cost by -20%' matching installed Spell.dbc."
+    },
+    {
+      "spell": 805114,
+      "name": "Mass Nightmare (up to 5 nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "targets",
+      "label_suffix": "targets",
+      "quote": "Spread nightmares of the black empire to up to $i nearby enemies,",
+      "expected": 5,
+      "radius": 8,
+      "headroom": 1,
+      "metric": "aura",
+      "cast_spell": 805114,
+      "target_rank": 805114,
+      "cast_target": "caster",
+      "layout": "caster",
+      "count_primary": true,
+      "repeats": 1,
+      "dummy_entry": 6,
+      "radius_reason": "Mass Nightmare 805114 Effect[0] TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 (8 yd), MaxAffectedTargets 5 ($i); dummy_entry 6 (Kobold Vermin, Humanoid) because stock dummy 36 (Harvest Golem, Mechanical) is immune to MECHANIC_HORROR 24; 7 dummies inside 8 yd (1..7 yd) prove the 5-target cap (count_primary) and the far dummy at 13 yd stays unhit",
+      "observe_source": "805114 MaxAffectedTargets = 5 ($i = 5), Effect[0] aura 12 SPELL_AURA_MOD_STUN (EffectMechanic 24 MECHANIC_HORROR), TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 (8 yd), CasterAuraSpell 680601 (set by required_aura_steps, 20 Insanity marker; Spell.dbc). Dummy entry 6 (Kobold Vermin, Humanoid) is used because stock dummy 36 (Harvest Golem, Mechanical) is immune to horror. One cast at the caster with 7 dummies inside 8 yd and 1 far dummy at 13 yd (control) must horrify exactly 5 of the 7 nearby dummies and 0 at 13 yd. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs, 19 aura applied/removed in 4 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('Spread nightmares of the black empire to up to 5 nearby enemies, horrifying them for 5 sec and interrupting non-player spellcasting for 3 sec.')."
+    },
+    {
+      "spell": 805114,
+      "name": "Mass Nightmare (horrifying them for 5 sec)",
+      "kind": "metric_delta",
+      "variant": "horrify_duration",
+      "label_suffix": "horrify_duration",
+      "quote": "horrifying them for $d",
+      "trigger_spell": 805114,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "target_entry": 6,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 805114,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4600,
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4800
+        ],
+        "expired": [
+          5200,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "805114 DurationIndex 28 = 5000 ms ($d = 5 sec, SpellDuration.dbc), Effect[0] aura 12 SPELL_AURA_MOD_STUN (EffectMechanic 24 MECHANIC_HORROR), CasterAuraSpell 680601 (set by required_aura_steps; Spell.dbc). Target is creature entry 6 (Kobold Vermin, Humanoid) at 3 yd (inside 8 yd radius) because stock dummy 36 (Harvest Golem, Mechanical) is immune to horror. Reads aura 805114 absent before the cast (control = 0), present (1) at 4600 ms (game_time [4550, 4800], above 4500 = 0.9 * 5000), and gone (0) at 5400 ms (game_time [5200, 5450], below 5500 = 1.1 * 5000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs, 19 aura applied/removed in 4 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('horrifying them for 5 sec')."
+    },
+    {
+      "spell": 805114,
+      "name": "Mass Nightmare (non-player interrupt 3 sec)",
+      "kind": "school_lockout",
+      "variant": "lockout",
+      "label_suffix": "lockout",
+      "quote": "and interrupting non-player spellcasting for $32747d.",
+      "interrupt_spell": 32747,
+      "cast_spell": 805114,
+      "channel_spell": 12051,
+      "observe_source": "805114 carries SPELL_ATTR7_CAN_CAUSE_INTERRUPT (AttributesEx7 33556480) and spell_ascension_cultist_ability::EffectHitTarget (AscensionCultistAbilities.cpp:435-436) casts Interrupt 32747 at non-player targets before EffectApplyAura (Spell.cpp:5802-5809). 32747 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($32747d, SpellDuration.dbc); Spell::EffectInterruptCast stops a channel whose ChannelInterruptFlags hold CHANNEL_INTERRUPT_FLAG_INTERRUPT and PreventionType is silence, locking that school for 3000 ms (Creature::ProhibitSpellSchool). CasterAuraSpell 680601 is set by required_aura_steps. The dummy channels Evocation 12051 (Arcane, PreventionType 1, ChannelInterruptFlags 31756, 8 s) on itself: Arcane is unlocked before the cast (control = 0), locked before 3000 ms and free after 3000 ms. Reference search 2026-11-24: coa-history spell 805114: 10 casts in 6 logs; coabuildhub spells_master_index.json entry 805114 matches verbatim ('interrupting non-player spellcasting for 3 sec')."
     }
   ],
   "player_observations": [],
