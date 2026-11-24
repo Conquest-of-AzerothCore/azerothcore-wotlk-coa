@@ -3471,10 +3471,21 @@
   {
     "spell": 804056,
     "clause": "Unleash a wave of maddening resonance, interrupting the current spell cast of all enemies around you and preventing any spell in that school from being cast for $d.",
-    "labels": [
-      "804056 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "interrupting the current spell cast of all enemies around you",
+        "labels": [
+          "804056 behaviour_metric_delta interrupt_stops_cast"
+        ]
+      },
+      {
+        "claim": "preventing any spell in that school from being cast for $d.",
+        "labels": [
+          "804056 behaviour_expiry lockout"
+        ]
+      }
+    ]
   },
   {
     "spell": 572846,
@@ -3533,20 +3544,20 @@
       {
         "claim": "reducing your damage taken by ${-($u*$m2)}%",
         "labels": [
-          "804670 effect_value e1 #0",
-          "804670 aura_amount e1 #0"
+          "804670 behaviour_hit_ratio damage_reduction"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "804670 aura_duration_ms #1"
+          "804670 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "$u attacks",
         "labels": [
-          "804670 max_stacks 804670 #2"
+          "804670 behaviour_metric_delta four_attacks_hold",
+          "804670 behaviour_metric_delta five_attacks_remove"
         ]
       }
     ]
@@ -3555,15 +3566,18 @@
     "spell": 804670,
     "clause": "For the duration, each attack received will decrease the value by $s2%.",
     "labels": [
-      "804670 effect_value e1 #3",
-      "804670 aura_amount e1 #3"
+      "804670 behaviour_hit_ratio decay_step"
     ],
     "kind": "claim"
   },
   {
     "spell": 804670,
     "clause": "Usable while stunned.",
-    "labels": [],
+    "labels": [
+      "804670 cast_state control",
+      "804670 cast_state state",
+      "804670 cast_state allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -3722,7 +3736,7 @@
     "spell": 805126,
     "clause": "Your Abyssal Ward now stacks $s1 additional times.",
     "labels": [
-      "805126 effect_value e0 #0"
+      "805126 behaviour_metric_delta extra_stacks"
     ],
     "kind": "claim"
   },

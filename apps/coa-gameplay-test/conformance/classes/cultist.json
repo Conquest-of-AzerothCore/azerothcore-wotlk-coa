@@ -5008,6 +5008,254 @@
         "source": "Darkwither 502220 is single-target (EffectRadiusIndex 0) at dummy_distance 10 yd; Presence of C'Thun 803339 and triggered 803340 are caster-only; streams are ungrouped."
       },
       "observe_source": "803283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +5% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). Expected 25% with 803283 learned; AscensionCultist.cpp:105-116 Chance() does not call ApplySpellMod(SPELLMOD_CHANCE_OF_SUCCESS), so this entry verifies the live proc rate against 25%. Reference search 2026-11-24: coa-history spell 803283: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 803283 matches installed Spell.dbc."
+    },
+    {
+      "spell": 804056,
+      "name": "Crushing Dissonance (interrupts enemy cast)",
+      "kind": "metric_delta",
+      "variant": "interrupt_stops_cast",
+      "label_suffix": "interrupt_stops_cast",
+      "quote": "Unleash a wave of maddening resonance, interrupting the current spell cast of all enemies around you and preventing any spell in that school from being cast for $d.",
+      "trigger_spell": 804056,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "target_casts_before": [
+        12051
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "804056 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 (8 yd), ManaCostPercentage 18, RecoveryTime 30000 ms (Spell.dbc). Dummy at 3 yd (inside 8 yd) channels Evocation 12051 (8 s, interruptible Arcane channel) before each phase: without casting 804056 (control, cast_in_before false), casting reads 1; after casting 804056, casting reads 0. Reference search 2026-11-24: coa-history spell 804056: 1 cast in 1 log (SPELL_CAST_SUCCESS); coabuildhub spells_master_index.json entry 804056 says '2 sec' (older state, G-9), while installed server Spell.dbc carries DurationIndex 27 = 3000 ms (3 sec, SpellDuration.dbc) and governs."
+    },
+    {
+      "spell": 804056,
+      "name": "Crushing Dissonance (school lockout 3 sec)",
+      "kind": "school_lockout",
+      "variant": "lockout",
+      "label_suffix": "lockout",
+      "quote": "Unleash a wave of maddening resonance, interrupting the current spell cast of all enemies around you and preventing any spell in that school from being cast for $d.",
+      "interrupt_spell": 804056,
+      "cast_spell": 804056,
+      "channel_spell": 12051,
+      "observe_source": "804056 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, DurationIndex 27 = 3000 ms ($d, SpellDuration.dbc), TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 (8 yd), EffectMechanic 26, ManaCostPercentage 18 (Spell.dbc). Dummy channels Evocation 12051 (Arcane, PreventionType 1, ChannelInterruptFlags 31756, 8 s): Arcane school_prohibited reads 0 before cast, 1 before 3000 ms and 0 after 3000 ms (excluding 10% off on both sides). Reference search 2026-11-24: coa-history spell 804056: 1 cast in 1 log (SPELL_CAST_SUCCESS); coabuildhub spells_master_index.json entry 804056 says '2 sec' (older state, G-9), while installed server Spell.dbc carries DurationIndex 27 = 3000 ms (3 sec, SpellDuration.dbc) and governs."
+    },
+    {
+      "spell": 804670,
+      "name": "Abyssal Ward (reduces initial damage taken by 50%)",
+      "kind": "taken_hit",
+      "variant": "damage_reduction",
+      "label_suffix": "damage_reduction",
+      "judge": "damage_ratio",
+      "expected": 0.5,
+      "quote": "Coalesce an Abyssal Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "strikes": 1,
+      "settle_ms": 200,
+      "cast_power": 2000,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "casts": [
+            [
+              804670,
+              "caster"
+            ]
+          ],
+          "after_casts": []
+        }
+      ],
+      "observe_source": "804670 StackAmount 5 ($u = 5), Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, EffectBasePoints[1] -11 + EffectDieSides[1] 1 = -10% per stack ($m2 = -10, ${-($u*$m2)} = 50%), EffectMiscValue[1] 127 (all schools), ManaCostPercentage 20 (Spell.dbc); AscensionCultistAbilities.cpp:190-193 sets 5 stacks on cast. Light of the Naaru 41394 (1100 Holy, deterministic, 0 Holy resistance): 1 strike per trial, control (no aura) vs treatment (804670 cast before strike), expected ratio 0.50 (-50%). Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+    },
+    {
+      "spell": 804670,
+      "name": "Abyssal Ward (lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Coalesce an Abyssal Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+      "trigger_spell": 804670,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 804670,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10400,
+          10900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804670 DurationIndex 1 = 10000 ms ($d = 10 sec, SpellDuration.dbc). Reads aura 804670 absent before cast (control = 0), present (1) at 9200 ms (game_time [9100, 9600] > 9000 ms = 0.9*10000), and gone (0) at 10800 ms (game_time [10400, 10900] < 11000 ms = 1.1*10000), excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+    },
+    {
+      "spell": 804670,
+      "name": "Abyssal Ward (holds after 4 attacks with 1 stack remaining)",
+      "kind": "metric_delta",
+      "variant": "four_attacks_hold",
+      "label_suffix": "four_attacks_hold",
+      "quote": "Coalesce an Abyssal Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+      "trigger_spell": 804670,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 4,
+        "wait_ms": 200,
+        "after_trigger_ms": 500
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804670,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "804670 StackAmount 5 ($u = 5), Effect[0] aura 42 proc triggers 807692 Effect[0] 176 removing 1 stack per attack received (Spell.dbc). Without casting 804670 (control, cast_in_before false), aura_stacks reads 0; after casting 804670 and taking 4 strikes of Light of the Naaru 41394 (1100 Holy), 1 stack remains. Paired with five_attacks_remove to prove the 5-attack limit. Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+    },
+    {
+      "spell": 804670,
+      "name": "Abyssal Ward (removed after 5 attacks)",
+      "kind": "metric_delta",
+      "variant": "five_attacks_remove",
+      "label_suffix": "five_attacks_remove",
+      "quote": "Coalesce an Abyssal Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+      "trigger_spell": 804056,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        804670
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 500,
+      "after_setup_stacks": [
+        {
+          "spell": 804670,
+          "actor": "caster",
+          "stacks": 5
+        }
+      ],
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 5,
+        "wait_ms": 200
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804670,
+        "caster": "caster"
+      },
+      "before_expected": 5,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "804670 StackAmount 5 ($u = 5), Effect[0] aura 42 proc triggers 807692 removing 1 stack per attack received (Spell.dbc). Both phases cast 804670 as setup_casts (after_setup_stacks confirms 5 stacks in both phases); the before phase takes no strikes (cast_in_before false, strike in_before false) and reads 5 stacks; the after phase takes 5 strikes of Light of the Naaru 41394 and reads 0 stacks (aura removed). Crushing Dissonance 804056 is a neutral self-cast closing the after phase. Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+    },
+    {
+      "spell": 804670,
+      "name": "Abyssal Ward (2nd attack takes 10% less reduction: 50% then 40%)",
+      "kind": "taken_hit",
+      "variant": "decay_step",
+      "label_suffix": "decay_step",
+      "judge": "damage_ratio",
+      "expected": 0.55,
+      "quote": "For the duration, each attack received will decrease the value by $s2%.",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "strikes": 2,
+      "settle_ms": 200,
+      "cast_power": 2000,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "casts": [
+            [
+              804670,
+              "caster"
+            ]
+          ]
+        }
+      ],
+      "observe_source": "804670 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN -10% per stack ($s2 = 10), 5 stacks on cast, proc 807692 removes 1 stack per attack received (Spell.dbc). Over 2 strikes of Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) under one 804670 cast: strike 1 takes 50% (550), strike 2 takes 60% (660), total 1210 vs control 2200, ratio 0.55 (excludes 0.50 no-decay and 0.60 double-decay under the G-19 band +-2.25 pts). Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+    },
+    {
+      "spell": 804670,
+      "name": "Abyssal Ward (usable while stunned)",
+      "kind": "cast_state",
+      "quote": "Usable while stunned.",
+      "state_aura": 56,
+      "control_spell": 582591,
+      "blocked_result": 108,
+      "observe_source": "804670 AttributesEx5 = 8 (SPELL_ATTR5_ALLOW_WHILE_STUNNED, Spell.dbc); control spell Embrace the Void 582591 has AttributesEx5 = 0 (TARGET_UNIT_CASTER, instant). Fixture stun 56 (Stun, Mechanic 12, aura 12 SPELL_AURA_MOD_STUN) applied by dummy via set_aura: control 582591 is refused with SPELL_FAILED_STUNNED (108, SharedDefines.h:1158), stun 56 remains present (1), and 804670 goes through (0). Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+    },
+    {
+      "spell": 805126,
+      "name": "Shroud of Pride (Abyssal Ward +3 stacks: 5 to 8)",
+      "kind": "metric_delta",
+      "variant": "extra_stacks",
+      "label_suffix": "extra_stacks",
+      "quote": "Your Abyssal Ward now stacks $s1 additional times.",
+      "trigger_spell": 804670,
+      "gate_spell": 805126,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804670,
+        "caster": "caster"
+      },
+      "before_expected": 5,
+      "expected": 8,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "805126 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[0] 31 (SPELLMOD_MAX_AURA_STACKS), EffectBasePoints[0] 2 + EffectDieSides[0] 1 = +3 ($s1 = 3), EffectSpellClassMask[1] 2147483648 matching Abyssal Ward 804670 SpellFamilyFlags[1] 2147483648 (Spell.dbc); AscensionCultistAbilities.cpp:193 sets ward->SetStackAmount(5 + Amount(805126)) = 8 on cast. Reads aura_stacks of 804670 after real cast: 5 without 805126 (control) and 8 after real learn of 805126. Reference search 2026-11-24: coa-history spell 805126: 0 events in 186 logs (passive; positive control 804670 Abyssal Ward: 53 casts in 19 logs); coabuildhub spells_master_index.json entry 805126 matches installed Spell.dbc ('Your Abyssal Ward now stacks 3 additional times.')."
     }
   ],
   "player_observations": [],
