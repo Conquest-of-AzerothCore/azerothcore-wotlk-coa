@@ -2309,13 +2309,18 @@
     "spell": 705135,
     "clause": "Casting Chaos Rush now reduces the cooldown of Felhoof Charge by $/1000;680318s1 sec.",
     "labels": [
-      "705135 effect_value 680318e0 #0",
-      "705135 cost_gate 800204 cd without",
-      "705135 cost_gate 800204 cd with",
-      "705135 cost_gate 800204 cd beyond"
+      "705135 effect_value 680318e0 #0"
     ],
     "kind": "claim",
-    "reason": "cost_gate on Felhoof Charge 800204 (20000 ms category recovery, 2000 ms cut after a real Chaos Rush), one scenario per arm (only_arm): refused at 18100 ms without the talent, through at 18100 ms with it, refused at 17900 ms with it."
+    "tool_gap": {
+      "reason": "Casting Chaos Rush dashes the caster 10 yd forward (Chaos Rush Jump 802028, CHARGE_DEST on the caster's front, EffectRadiusIndex 13), past a dummy placed at DUMMY_DISTANCE, and cost_gate has no step that moves or faces the caster again before the attempt of Felhoof Charge 800204 (a charge that needs its target in front). Design 1 (cost_gate after_casts, one scenario for the three arms): the without arm read 67 (not ready) and the with and beyond arms read 134 and 97 (SPELL_FAILED_UNIT_NOT_INFRONT, SPELL_FAILED_OUT_OF_RANGE: the position the previous arm's dash left). Design 2 (cost_gate only_arm, one scenario per arm, Sun Cleric 805581 precedent, counted-pair run vb6-prove3): without 67 and beyond 67 as expected, with 134 instead of 0 (the attempt 18100 ms after the priming cast, 2000 - 100 ms of the 20000 ms category recovery, is no longer refused as not ready but fails its facing); the order of those two checks in Spell::CheckCast was not read, so the 134 is a lead, not a proof. Route: a cost_gate option that re-places the caster before the attempt (a shared behaviours.py change) or a dash-free source of the 680318 cut; not a final status.",
+      "attempts": [
+        {
+          "agent": "fw-vb6",
+          "report": ".agents/plans/fw-vb6/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 705137,
