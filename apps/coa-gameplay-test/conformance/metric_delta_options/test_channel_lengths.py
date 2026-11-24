@@ -16,8 +16,8 @@ def lengths_entry(**changes) -> dict:
             'channel_lengths': {'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': 2}, **changes}
 
 
-def judged_entry() -> dict:
-    return lengths_entry(channel_lengths={'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': 4})
+def judged_entry(repeats: int = 4) -> dict:
+    return lengths_entry(channel_lengths={'spell': 500237, 'events': 2, 'cancel_ms': [600, 1500], 'repeats': repeats})
 
 
 def expectation_of(entry: dict):
@@ -98,11 +98,11 @@ class ChannelLengthsTests(unittest.TestCase):
                 self.assertEqual(self.judged(run_values(expectation, damages), expectation), 'alert')
 
     def test_critical_repeats_leave_the_mean_and_a_wholly_critical_length_is_unmeasured(self):
-        expectation = expectation_of(judged_entry())
-        damages = {600: [80, 400, 82, 81], 1500: [170, 175, 172, 171], 'full': [330, 320, 325, 322]}
-        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [2, 1, 2, 2]}), expectation),
+        expectation = expectation_of(judged_entry(5))
+        damages = {600: [80, 400, 82, 81, 83], 1500: [170, 175, 172, 171, 173], 'full': [330, 320, 325, 322, 327]}
+        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [2, 1, 2, 2, 2]}), expectation),
                          'ok')
-        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [1] * 4}), expectation),
+        self.assertEqual(self.judged(run_values(expectation, damages, plain={600: [1] * 5}), expectation),
                          'unmeasured')
 
     def test_a_missing_end_strike_alerts(self):
@@ -112,9 +112,9 @@ class ChannelLengthsTests(unittest.TestCase):
         self.assertEqual(self.judged(values, expectation), 'alert')
 
     def test_a_cancel_that_leaves_the_channel_up_voids_its_cast(self):
-        expectation = expectation_of(judged_entry())
-        damages = {600: [80, 900, 82, 81], 1500: [170, 175, 172, 171], 'full': [330, 320, 325, 322]}
-        values = run_values(expectation, damages, still_up={600: [0, 1, 0, 0]})
+        expectation = expectation_of(judged_entry(5))
+        damages = {600: [80, 900, 82, 81, 83], 1500: [170, 175, 172, 171, 173], 'full': [330, 320, 325, 322, 327]}
+        values = run_values(expectation, damages, still_up={600: [0, 1, 0, 0, 0]})
         self.assertEqual(self.judged(values, expectation), 'ok')
 
     def test_failed_cancels_never_pass_on_full_channels_read_in_rising_order(self):
