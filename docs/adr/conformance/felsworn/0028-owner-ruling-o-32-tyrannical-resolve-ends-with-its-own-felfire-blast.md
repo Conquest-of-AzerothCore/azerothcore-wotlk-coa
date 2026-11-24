@@ -44,4 +44,5 @@ already uses for Carve (`carveSteps`, a state set around a cast).
   Hatred's proc (`AscensionFelswornEvents.cpp`). No engine, SQL, DBC or client text change.
 - Regression: `804823 end_leech` (counts judge): arms of 1, 3 and 5 hits, each trial exactly one 804825 hit on the
   striker and no 807347 hit, the 804825 damage rising strictly with the hits and the heal equal to it; 64481 removes the
-  blast's melee crit and 984948 its miss in every arm.
+  blast's melee crit, 984948 its miss and 823764 the striker's partial resistance (Fire and Shadow) in every arm.
+- The blast's Fire and Shadow school can be partially resisted, which the all-school 807347 could not.

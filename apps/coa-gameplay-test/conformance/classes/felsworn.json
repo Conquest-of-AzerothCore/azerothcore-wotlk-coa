@@ -18262,6 +18262,10 @@
             [
               984948,
               1
+            ],
+            [
+              823764,
+              1
             ]
           ],
           "casts": [
@@ -18285,6 +18289,10 @@
             ],
             [
               984948,
+              1
+            ],
+            [
+              823764,
               1
             ]
           ],
@@ -18310,6 +18318,10 @@
             [
               984948,
               1
+            ],
+            [
+              823764,
+              1
             ]
           ],
           "casts": [
@@ -18325,7 +18337,7 @@
           }
         }
       ],
-      "observe_source": "804823 Tyrannical Resolve: on its removal while the caster lives (not by death) the server counts the strikes absorbed during the effect (script value 804823, one per absorbed damage event, aura_ascension_felsworn_resolve in AscensionFelswornAuras.cpp) and, since owner ruling O-32 (Felsworn ADR 0028), casts Felfire Blast 804825 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, RadiusIndex 13, MaxAffectedTargets 20, SchoolMask 36, DmgClass 2 melee) with its own points raised by 804823 Effect[0] (aura 108 SPELLMOD_DAMAGE, BasePoints 1 + DieSides 1 = 2%) per hit, capped at 804823 StackAmount 100. Its own points at the level-60 reference character: BasePoints 59 + RealPointsPerLevel 1.44 x (60 - SpellLevel 59) = 60, + DieSides 2 roll = 61 to 62; with the hits: 62 to 63 at one hit, 64 to 65 at three, 67 to 68 at five. Before O-32 the server cast Burning Hatred 807347 for 1% of maximum health per hit (measured 200 at one hit and 600 at three, L1 pair, night question N-6). Each trial: the caster is set to 20000 of 20000 health, casts 804823, a passive striker 3 yd away casts Light of the Naaru 41394 (1100) at it 1, 3 or 5 times, then the trial waits 31000 ms past the 30000 ms duration (DurationIndex 9) for the natural end. Fixtures on the caster in every arm: 64481 (Reduce Critical Strike Chance -100%, aura 52, EffectBasePoints -1000: 804825 is DmgClass melee, whose crit is the weapon crit, so a critical blast cannot double one arm's read) and Reg's Hit rating 984948 (aura 54, no miss). Judged per trial: exactly one 804825 hit on the striker and no 807347 hit; the 804825 damage rises strictly from 1 to 3 to 5 hits; the caster's 804825 heal equals that damage (multiplier 1.0). The kind judges counts exactly, so the per-hit figures above are read from the verdict summary, not banded. Reference search 2026-11-24: coa-history spell 804823, 804825, 807347, 'Felfire Blast', 'Burning Hatred': 0 events in 186 logs each; ~/CoaServer/reference snapshots carry only the 804823 tooltip text; expected values come from the tooltip, the DBC and the owner ruling."
+      "observe_source": "804823 Tyrannical Resolve: on its removal while the caster lives (not by death) the server counts the strikes absorbed during the effect (script value 804823, one per absorbed damage event, aura_ascension_felsworn_resolve in AscensionFelswornAuras.cpp) and, since owner ruling O-32 (Felsworn ADR 0028), casts Felfire Blast 804825 (Effect[0] SPELL_EFFECT_HEALTH_LEECH, EffectValueMultiplier 1.0, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, RadiusIndex 13, MaxAffectedTargets 20, SchoolMask 36, DmgClass 2 melee) with its own points raised by 804823 Effect[0] (aura 108 SPELLMOD_DAMAGE, BasePoints 1 + DieSides 1 = 2%) per hit, capped at 804823 StackAmount 100. Its own points at the level-60 reference character: BasePoints 59 + RealPointsPerLevel 1.44 x (60 - SpellLevel 59) = 60, + DieSides 2 roll = 61 to 62; with the hits: 62 to 63 at one hit, 64 to 65 at three, 67 to 68 at five. Before O-32 the server cast Burning Hatred 807347 for 1% of maximum health per hit (measured 200 at one hit and 600 at three, L1 pair, night question N-6). Each trial: the caster is set to 20000 of 20000 health, casts 804823, a passive striker 3 yd away casts Light of the Naaru 41394 (1100) at it 1, 3 or 5 times, then the trial waits 31000 ms past the 30000 ms duration (DurationIndex 9) for the natural end. Fixtures on the caster in every arm: 64481 (Reduce Critical Strike Chance -100%, aura 52, EffectBasePoints -1000: 804825 is DmgClass melee, whose crit is the weapon crit, so a critical blast cannot double one arm's read) Reg's Hit rating 984948 (aura 54, no miss) and beeg spellpen 823764 (Effect[0] aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE, MiscValue 126, BasePoints -9999: the striker's Fire and Shadow resistance cannot partially resist the blast; a first fw-f3 pair without it read 10% steps below the expected figures, 45 to 68). Judged per trial: exactly one 804825 hit on the striker and no 807347 hit; the 804825 damage rises strictly from 1 to 3 to 5 hits; the caster's 804825 heal equals that damage (multiplier 1.0). The kind judges counts exactly, so the per-hit figures above are read from the verdict summary, not banded. Reference search 2026-11-24: coa-history spell 804823, 804825, 807347, 'Felfire Blast', 'Burning Hatred': 0 events in 186 logs each; ~/CoaServer/reference snapshots carry only the 804823 tooltip text; expected values come from the tooltip, the DBC and the owner ruling."
     },
     {
       "spell": 560641,
@@ -22710,7 +22722,8 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "560578 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1, SpellDefines.h:79) in Spell.dbc, BasePoints 49 + DieSides 1 = 50 ($s1); owner ruling O-33 (Felsworn ADR 0027): the class contract turns it into aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 (SPELLMOD_DAMAGE), so the hit deals 50% more instead of 50 more weapon percent points (measured before: +26.13% and +26.15%, counted pair 20261123-232654 / -232744); EffectSpellClassMask[0..2] = 0/0/0x400000 of family 20 (the Fury Unleashed hit flag). The weapon hits 555739 (Effect[0] aura 23 trigger spell of 555738, EffectAmplitude 1000, 5000 ms) of a real Fury Unleashed 555738 cast are averaged non-critical in a control arm without 560578 and a treatment arm with it learned: ratio 1.50 within the band (5% of 50 = 2.5 points). Energy cost is the cost_gate claim of the same clause. Reference search 2026-11-24: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; 555738 Fury Unleashed: 2 casts); the hit 806095 has no logged event either; nothing else found beyond the tooltip and Spell.dbc."
+      "expected_source": "560578 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 3 (SPELLMOD_EFFECT1, SpellDefines.h:79) in Spell.dbc, BasePoints 49 + DieSides 1 = 50 ($s1); owner ruling O-33 (Felsworn ADR 0027): the class contract turns it into aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 0 (SPELLMOD_DAMAGE), so the hit deals 50% more instead of 50 more weapon percent points (measured before: +26.13% and +26.15%, counted pair 20261123-232654 / -232744); EffectSpellClassMask[0..2] = 0/0/0x400000 of family 20 (the Fury Unleashed hit flag). The weapon hits 555739 (Effect[0] aura 23 trigger spell of 555738, EffectAmplitude 1000, 5000 ms) of a real Fury Unleashed 555738 cast are averaged non-critical in a control arm without 560578 and a treatment arm with it learned: ratio 1.50 within the band (5% of 50 = 2.5 points). Energy cost is the cost_gate claim of the same clause. Reference search 2026-11-24: coa-history spell 560578: 0 events in 186 logs (a passive leaves no event; 555738 Fury Unleashed: 2 casts); the hit 806095 has no logged event either; nothing else found beyond the tooltip and Spell.dbc. Two parts pooled (fw-f3 pair, 2026-11-24): one part held 37 trials per arm, the judge asked for 68 (ratios 1.4895 and 1.5003, insufficient trials).",
+      "parts": 2
     },
     {
       "kind": "metric_delta",
