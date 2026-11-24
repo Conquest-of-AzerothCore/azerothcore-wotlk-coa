@@ -64,7 +64,7 @@ class AttackSwingPhaseAuraTests(unittest.TestCase):
             generated(folly(after_auras=[INNER_DEMON]))
 
     def test_the_heal_share_of_critical_swing_damage_is_judged(self):
-        self.assertEqual(judged(folly(), 0, 1000, 4000, 8000), 'ok')
+        self.assertEqual(judged(folly(), 0, 2000, 4000, 8000), 'ok')
         self.assertEqual(judged(folly(expected=0), 0, 0, 4000, 8000), 'ok')
 
     def test_mutant_heal_without_the_condition_or_at_another_share_alerts(self):
