@@ -21473,6 +21473,10 @@
           [
             803468,
             1
+          ],
+          [
+            7778,
+            1
           ]
         ]
       },
@@ -21484,6 +21488,10 @@
           ],
           [
             803468,
+            1
+          ],
+          [
+            7778,
             1
           ]
         ],
@@ -21497,7 +21505,7 @@
       "trials": 80,
       "parts": 140,
       "target_entry": 416,
-      "expected_source": "705109 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 1 + 1 = 2 ($s1), Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS MiscValue 4 (Demon), BasePoints 2 + 1 = 3 ($s2), moved by the Felsworn contract to aura 112 ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 4 (AscensionFelswornContracts.cpp:97-102, Felsworn ADR 0005). The critical share of Azzinoth's Assault main-hand strikes 520262 is compared between a control arm without 705109 and a treatment arm with it learned: on an Imp 416 (creature type Demon) the gain is 2 + 3 = 5 points; expected 5 points inside the larger of 5% and 2 points, pooled over 140 parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 705109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "expected_source": "705109 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 1 + 1 = 2 ($s1), Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS MiscValue 4 (Demon), BasePoints 2 + 1 = 3 ($s2), moved by the Felsworn contract to aura 112 ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 4 (AscensionFelswornContracts.cpp:97-102, Felsworn ADR 0005). The critical share of Azzinoth's Assault main-hand strikes 520262 is compared between a control arm without 705109 and a treatment arm with it learned: on an Imp 416 (creature type Demon) the gain is 2 + 3 = 5 points; expected 5 points inside the larger of 5% and 2 points, pooled over 140 parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 705109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only. Precondition fixture by harness set_aura, in both arms: Minor Agility 7778 (Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 Agility, BasePoints 0, the same +1 Agility in control and treatment) so that the stat update refreshes the melee critical strike field (Player::UpdateAllCritPercentages) in the control arm as the learn of aura 290 does in the treatment arm: the diagnosis of 2026-11-24 (classend pair fw-pair3) read 0 critical strikes in 11200 control hits against 6.40 (non-Demon) and 9.35 (Demon) per hundred in the treatment arm, within their intervals equal to the refreshed computed chances 4.32 + 2 = 6.32 and 4.32 + 5 = 9.32 of the metric_delta entries, so the control field had never been computed since login. With the fixture the control arm reads 4.3 to 4.5 per hundred hits (counted pair 2026-11-24, the 705109 prove of fw-fa1), the refreshed 4.32. The chance itself is unchanged by this fixture.",
       "observe_source": ""
     },
     {
@@ -21520,6 +21528,10 @@
           [
             803468,
             1
+          ],
+          [
+            7778,
+            1
           ]
         ]
       },
@@ -21532,6 +21544,10 @@
           [
             803468,
             1
+          ],
+          [
+            7778,
+            1
           ]
         ],
         "learn": [
@@ -21543,7 +21559,7 @@
       "expected_points": 2,
       "trials": 80,
       "parts": 140,
-      "expected_source": "705109 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 1 + 1 = 2 ($s1), Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS MiscValue 4 (Demon), BasePoints 2 + 1 = 3 ($s2), moved by the Felsworn contract to aura 112 ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 4 (AscensionFelswornContracts.cpp:97-102, Felsworn ADR 0005). The critical share of Azzinoth's Assault main-hand strikes 520262 is compared between a control arm without 705109 and a treatment arm with it learned: on the stock dummy (not a Demon) the gain is the 2 points of $s1 only, so the 3 additional points need the creature type; expected 2 points inside the larger of 5% and 2 points, pooled over 140 parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 705109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only.",
+      "expected_source": "705109 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 1 + 1 = 2 ($s1), Effect[1] aura 169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS MiscValue 4 (Demon), BasePoints 2 + 1 = 3 ($s2), moved by the Felsworn contract to aura 112 ASCENSION_CREATURE_GLOBAL_CRIT with MiscValueB 4 (AscensionFelswornContracts.cpp:97-102, Felsworn ADR 0005). The critical share of Azzinoth's Assault main-hand strikes 520262 is compared between a control arm without 705109 and a treatment arm with it learned: on the stock dummy (not a Demon) the gain is the 2 points of $s1 only, so the 3 additional points need the creature type; expected 2 points inside the larger of 5% and 2 points, pooled over 140 parts of 80 casts per arm. Fixtures by harness set_aura, named as preconditions: Felfury 800058 x6 and 803468 before each cast of Assault 803475 (it needs 803468), in both arms. Reference search 2026-11-23: coa-history spell 705109: 0 events in 186 logs (a passive leaves no event; positive control 801904 Azzinoth's Assault: 21 casts); bindmysoul talents snapshot (fetched 2026-07-22) repeats the tooltip; expected values come from the tooltip and Spell.dbc only. Precondition fixture by harness set_aura, in both arms: Minor Agility 7778 (Effect[0] aura 29 SPELL_AURA_MOD_STAT, MiscValue 1 Agility, BasePoints 0, the same +1 Agility in control and treatment) so that the stat update refreshes the melee critical strike field (Player::UpdateAllCritPercentages) in the control arm as the learn of aura 290 does in the treatment arm: the diagnosis of 2026-11-24 (classend pair fw-pair3) read 0 critical strikes in 11200 control hits against 6.40 (non-Demon) and 9.35 (Demon) per hundred in the treatment arm, within their intervals equal to the refreshed computed chances 4.32 + 2 = 6.32 and 4.32 + 5 = 9.32 of the metric_delta entries, so the control field had never been computed since login. With the fixture the control arm reads 4.3 to 4.5 per hundred hits (counted pair 2026-11-24, the 705109 prove of fw-fa1), the refreshed 4.32. The chance itself is unchanged by this fixture.",
       "observe_source": ""
     },
     {
