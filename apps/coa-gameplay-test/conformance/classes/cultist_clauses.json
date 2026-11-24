@@ -1523,21 +1523,30 @@
     "spell": 560002,
     "clause": "Reduces damage taken by party and raid members by $s1%.",
     "labels": [
-      "560002 effect_value e0 #0"
+      "560002 behaviour_hit_ratio damage_taken",
+      "560002 behaviour_metric_delta ally_aura"
     ],
     "kind": "claim"
   },
   {
     "spell": 560002,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560002 behaviour_hit_ratio no_stack",
+      "560002 behaviour_hit_ratio partner_alone"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560002,
     "clause": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
     "labels": [
-      "560002 effect_value #1"
+      "560002 behaviour_metric_delta res_holy",
+      "560002 behaviour_metric_delta res_fire",
+      "560002 behaviour_metric_delta res_nature",
+      "560002 behaviour_metric_delta res_frost",
+      "560002 behaviour_metric_delta res_shadow",
+      "560002 behaviour_metric_delta res_arcane"
     ],
     "kind": "claim"
   },
@@ -1681,21 +1690,23 @@
     "spell": 560526,
     "clause": "Increases the spell haste of all party and raid members by $s1%.",
     "labels": [
-      "560526 effect_value e0 #0"
+      "560526 behaviour_party_stat_ratio party_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 560526,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560526 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560526,
     "clause": "In addition, your Shadow damage is increased by $s2%.",
     "labels": [
-      "560526 effect_value e1 #1"
+      "560526 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -1772,7 +1783,7 @@
     "spell": 563123,
     "clause": "Increases your critical damage dealt by $s1%",
     "labels": [
-      "563123 effect_value e0 #0"
+      "563123 behaviour_hit_ratio crit_damage"
     ],
     "kind": "claim"
   },
@@ -1780,7 +1791,8 @@
     "spell": 563123,
     "clause": "and your spell power by $s2% of your Intellect.",
     "labels": [
-      "563123 effect_value e1 #1"
+      "563123 behaviour_metric_delta sp_base",
+      "563123 behaviour_metric_delta sp_int"
     ],
     "kind": "claim"
   },
@@ -1932,7 +1944,7 @@
     "spell": 582308,
     "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
     "labels": [
-      "582308 effect_value e0 #0"
+      "582308 behaviour_metric_delta absorb"
     ],
     "kind": "claim"
   },
@@ -2488,7 +2500,8 @@
     "spell": 704434,
     "clause": "Reduces all damage taken by party and raid members by $s1%.",
     "labels": [
-      "704434 effect_value e0 #0"
+      "704434 behaviour_hit_ratio damage_taken",
+      "704434 behaviour_metric_delta ally_aura"
     ],
     "kind": "claim"
   },
@@ -2496,7 +2509,7 @@
     "spell": 704434,
     "clause": "In addition, your Holy damage taken is reduced by $s2%.",
     "labels": [
-      "704434 effect_value e1 #1"
+      "704434 behaviour_hit_ratio holy_taken"
     ],
     "kind": "claim"
   },
@@ -2713,7 +2726,7 @@
     "spell": 706181,
     "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
     "labels": [
-      "706181 effect_value e0 #0"
+      "706181 behaviour_metric_delta absorb"
     ],
     "kind": "claim"
   },
@@ -2815,7 +2828,7 @@
     "spell": 706189,
     "clause": "Increases your Shadow damage dealt by $s1%",
     "labels": [
-      "706189 effect_value e0 #0"
+      "706189 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -2823,7 +2836,7 @@
     "spell": 706189,
     "clause": "and healing done by $s2%.",
     "labels": [
-      "706189 effect_value e1 #1"
+      "706189 behaviour_hit_ratio healing_done"
     ],
     "kind": "claim"
   },
