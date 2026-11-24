@@ -391,7 +391,7 @@
     "spell": 300483,
     "clause": "stacking $300481u times.",
     "labels": [
-      "300483 max_stacks 300481 #3"
+      "300483 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -544,7 +544,8 @@
     "spell": 520693,
     "clause": "Blast an enemy and all enemies near them with fel magic, dealing ${$m1+0+$SP*0.4} Shadowflame Damage.",
     "labels": [
-      "520693 effect_value e0 #0"
+      "520693 behaviour_metric_delta damage",
+      "520693 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
@@ -556,7 +557,9 @@
       {
         "claim": "an additional ${$520832m1+$520832ppl1+$SP*.1} Shadowflame Damage",
         "labels": [
-          "520693 effect_value 520832e0 #1"
+          "520693 behaviour_metric_delta inner_total",
+          "520693 behaviour_metric_delta inner_total_sp",
+          "520693 behaviour_metric_delta inner_total_bare"
         ]
       },
       {
@@ -739,7 +742,8 @@
         "evidence": "behaviour"
       }
     ],
-    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7"
+    "spell_dbc_sha256": "4e4ed9ba1c2e10089b543182da6836b2298fdeafd61f8602dc25f79fe5facfa7",
+    "reason": "Part 1 \"and Manaburn\" status 3 (G-24, D-76; fw-vb4 data check 2026-11-24 and the two recorded attempts): Spell.dbc 805248 Manaburn has PowerType 3 (Energy), ManaCost 0 and ManaCostPercentage 0 (no cost to remove); 520592 Effect[1] aura 108 SPELLMOD_COST (MiscValue 14), BasePoints -101 + 1 = -100%, SpellClassMask [0] 17301504 covers Manaburn (SpellFamilyFlags[0] 16777216) and mask [1] 8192 covers Felbane 525001 (SpellFamilyFlags[1] 8192, ManaCost 15 Energy): the data states the claim for both spells and the Felbane part is proven in game (felbane_cost). Attempt 1: the felbane_cost arm (fw-r1c), which reads the cast of Felbane only. Attempt 2: the Manaburn arms (fw-b1f, runs 20261123-155204 / -155657, build 1fc6a00e01d6, as recorded in counted.md): a cast of a spell whose cost is already 0 reads the same with and without 520592, so no control arm can differ. No behaviour route exists; the data check conforms. The part is \"data conformant, no behaviour route\", not \"client only\" (status 4 of D-20 is relabelled by D-76). Reference search 2026-11-24 (fw-vb4b, review M-3): coa-history spell 520592: 0 events in 186 logs (a passive leaves no event); spell 805248 Manaburn: 25 casts, 22 damage and 22 drain events by players in 4 logs, no cost figure in a combat log; nothing else found. The data check above is written by hand in this reason: no data label exists for this clause, which has no $ token (not verified further; review M-4 left open)."
   },
   {
     "spell": 520805,
@@ -1019,7 +1023,7 @@
       {
         "claim": "dealing $806095s1% Weapon Damage",
         "labels": [
-          "555738 effect_value 806095e0 #2"
+          "555738 behaviour_metric_delta hit_ap"
         ]
       },
       {
@@ -1265,7 +1269,7 @@
       {
         "claim": "Increases the damage dealt",
         "labels": [
-          "560578 effect_value e0 #0"
+          "560578 behaviour_hit_ratio damage"
         ]
       },
       {
@@ -1645,8 +1649,9 @@
     "spell": 572889,
     "clause": "Critically striking now increases your damage dealt by $705148s1% for $705148d,",
     "labels": [
-      "572889 effect_value 705148e0 #0",
-      "572889 spell_duration 705148 #1"
+      "572889 behaviour_hit_ratio stack_damage",
+      "572889 behaviour_metric_delta duration_held",
+      "572889 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -1734,7 +1739,7 @@
     "spell": 574145,
     "clause": "In addition, your critical auto attacks now deal $s2% additional damage as Chaos damage.",
     "labels": [
-      "574145 effect_value e1 #0"
+      "574145 behaviour_metric_delta chaos_copy"
     ],
     "kind": "claim"
   },
@@ -1812,7 +1817,7 @@
       {
         "claim": "increase your damage by $572782s1%",
         "labels": [
-          "681376 effect_value 572782e0 #1"
+          "681376 behaviour_hit_ratio stack_damage"
         ]
       },
       {
@@ -1827,7 +1832,7 @@
     "spell": 681376,
     "clause": "stacking $572782u times.",
     "labels": [
-      "681376 max_stacks 572782 #3"
+      "681376 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -1991,7 +1996,7 @@
     "spell": 704370,
     "clause": "stacking $707511u times.",
     "labels": [
-      "704370 max_stacks 707511 #2"
+      "704370 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -2201,8 +2206,8 @@
     "spell": 705109,
     "clause": "and an additional $s2% against Demons.",
     "labels": [
-      "705109 behaviour_metric_delta crit_demon",
-      "705109 behaviour_metric_delta crit_other_type"
+      "705109 behaviour_hit_ratio crit_share_demon",
+      "705109 behaviour_hit_ratio crit_share_other_type"
     ],
     "kind": "claim"
   },
@@ -2331,8 +2336,9 @@
     "spell": 707527,
     "clause": "While the barrier holds, you take $s2% reduced Physical Damage.",
     "labels": [
-      "707527 effect_value e1 #2",
-      "707527 aura_amount e1 #2"
+      "707527 behaviour_hit_ratio physical_taken",
+      "707527 behaviour_hit_ratio magic_taken",
+      "707527 behaviour_hit_ratio physical_after_break"
     ],
     "kind": "claim"
   },
@@ -2474,10 +2480,18 @@
   {
     "spell": 706266,
     "clause": "Reduces your chance to be hit by spells by $s1%",
-    "labels": [
-      "706266 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "reason": "Status withheld, tool gap (see tool_gap): measured exactly 2 points, residual 0.16% per pair above 0.1%.",
+    "tool_gap": {
+      "reason": "Withheld (fw-vb4b, review I-1): the entry attacker_miss_share spell_clamp of 706266 measured the reduction at exactly 2 points in both runs of 20261123-233905 / -234132 (826 casts per arm, control arm, 1 and 3 points excluded), but the cast count is fixed by the tool (kinds/attacker_miss_share.py spell_clamp_casts: ceil(ln(0.001/4)/ln(0.99)) = 826, from an assumed 1% edge miss chance) and the entry has no cast-count option. The edge misses read in proveF2 average 0.94% of casts (4 to 11 per edge arm), which gives P(no miss in one edge arm) = e^-7.8 = 4.1e-4 and 0.16% per pair for four edge arms: above the 0.1% limit of rule 3, so no label is counted. The risk is a false alert, not a false pass. Reference search 2026-11-23: nothing found for the value beyond the tooltip and the DBC. The extension is a casts option on spell_clamp (about 1100 casts per edge arm for under 0.1%); the entry stays in the class file as evidence.",
+      "attempts": [
+        {
+          "agent": "fw-vb4b",
+          "report": ".agents/plans/fw-vb4b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706266,
@@ -2543,17 +2557,14 @@
       },
       {
         "claim": "gains $706269s1% increased critical strike chance",
-        "labels": [
-          "706425 behaviour_metric_delta crit_amount"
-        ]
+        "labels": []
       },
       {
         "claim": "and damage.",
-        "labels": [
-          "706425 behaviour_metric_delta damage_amount"
-        ]
+        "labels": []
       }
-    ]
+    ],
+    "reason": "HELD claims 'gains ... critical strike chance' and 'and damage.' (review fw-rvb3 I-1, mentor D-67): the crit_share / damage_hit entries put 706269 (the mechanic buff) by set_aura and never learn 706425; the real grant works (ten_felfury ok); needs the learned route or a documented failure plus an equivalence arm."
   },
   {
     "spell": 707416,
@@ -2675,10 +2686,18 @@
   {
     "spell": 707844,
     "clause": "Reduces your chance to be hit by spells by $s1%",
-    "labels": [
-      "707844 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "labels": [],
+    "kind": "claim",
+    "reason": "Status withheld, tool gap (see tool_gap): measured exactly 4 points, residual 0.16% per pair above 0.1%.",
+    "tool_gap": {
+      "reason": "Withheld (fw-vb4b, review I-1): the entry attacker_miss_share spell_clamp of 707844 measured the reduction at exactly 4 points in both runs of 20261123-233905 / -234132 (826 casts per arm, control arm, 1 and 3 points excluded), but the cast count is fixed by the tool (kinds/attacker_miss_share.py spell_clamp_casts: ceil(ln(0.001/4)/ln(0.99)) = 826, from an assumed 1% edge miss chance) and the entry has no cast-count option. The edge misses read in proveF2 average 0.94% of casts (4 to 11 per edge arm), which gives P(no miss in one edge arm) = e^-7.8 = 4.1e-4 and 0.16% per pair for four edge arms: above the 0.1% limit of rule 3, so no label is counted. The risk is a false alert, not a false pass. Reference search 2026-11-23: nothing found for the value beyond the tooltip and the DBC. The extension is a casts option on spell_clamp (about 1100 casts per edge arm for under 0.1%); the entry stays in the class file as evidence.",
+      "attempts": [
+        {
+          "agent": "fw-vb4b",
+          "report": ".agents/plans/fw-vb4b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707844,
@@ -2775,9 +2794,11 @@
     "spell": 800188,
     "clause": "and dodge chance by $s2%.",
     "labels": [
-      "800188 effect_value e1 #1"
+      "800188 behaviour_metric_delta dodge",
+      "800188 behaviour_metric_delta agility_held"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-233905 / -234132 (prove1, build 2f5c75a93d3b, server 6bab3cf100da, no flip)): dodge_chance 40.1218 before and 43.1218 after a real learn of 800188, a gain of 3 within 0.01 in both runs (3 = Effect[1] aura 49, 2 + 1); the before read is the control; the Agility share is held out (Agility 8116 amount -9 in the learned phase only, agility_held reads 130 in both phases) and Stoicism 804802 lifts the sum off the floor, both named precondition fixtures."
   },
   {
     "spell": 800203,
@@ -2846,7 +2867,8 @@
     "spell": 800206,
     "clause": "Charge up a powerful attack over $d.",
     "labels": [
-      "800206 aura_duration_ms #0"
+      "800206 behaviour_metric_delta duration_held",
+      "800206 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
@@ -2869,10 +2891,13 @@
     "spell": 800206,
     "clause": "Inner Demon: Reduces affected enemies melee and ranged haste by $578317s1% for $578317d.",
     "labels": [
-      "800206 effect_value 578317e0 #1",
-      "800206 spell_duration 578317 #2"
+      "800206 behaviour_metric_delta haste",
+      "800206 behaviour_metric_delta ranged_haste",
+      "800206 behaviour_metric_delta haste_held",
+      "800206 behaviour_metric_delta haste_gone"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-234412 / -234445 (prove2, same build, no flip)): haste: the dummy attack time reads 2000 before and 2400 after a real Carve with Inner Demon, ratio 1.2 within 0.01 in both runs (stock engine convention, as Sacred Swing 572769: a haste of -20% multiplies the attack time by 1.2, a literal x1.25 is excluded); the 578317 aura is present 10000 ms after the cast and gone 11100 ms after it (7500 ms and 8600 ms after the 2500 ms channel, 0.94 and 1.075 of 8000, which excludes a duration 10% short or long); control: the before read without a cast. Felfury 800058 x6, 803468 and Inner Demon 804216 are set by harness set_aura as precondition fixtures."
   },
   {
     "spell": 800206,
@@ -2977,7 +3002,8 @@
     "spell": 563268,
     "clause": "dealing Weapon Damage plus $s1.",
     "labels": [
-      "563268 effect_value e0 #1"
+      "563268 behaviour_metric_delta hit",
+      "563268 behaviour_metric_delta hit_ap"
     ],
     "kind": "claim"
   },
@@ -3013,7 +3039,7 @@
         "evidence": "behaviour"
       }
     ],
-    "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura).",
+    "reason": "fw-tgs2 (review I3): the clause declares its claims. The label '800214 effect_value #0' is dropped: $h is a chance, not a value (guide 9.4, 'A $h chance cannot be measured as a value'; Necromancer 300235 C8 precedent), and it resolved to unmodelled. The chance is judged by two proc entries sharing the roll (AscensionFelswornEvents.cpp:97-98, one Proc branch casting Felstrike 802678 on the target and Fragment of Malice 800239 on the caster, :227-229): '800214 proc_rate 800239' counts the Fragment casts and '800214 proc_rate 802678' the Felstrike casts, each on critical Fel Fireball 801312 hits only with the critical_trials control (non-critical hits proc 0). The old label '800214 proc_rate' is renamed by the second entry (shares_aura). D-76 data check (fw-vb4, 2026-11-24), claim 0 \"Direct critical strikes\": Spell.dbc 800214 ProcFlags 0, Effect[0] aura 42 PROC_TRIGGER_SPELL 800239, Effect[2] aura 42 PROC_TRIGGER_SPELL 802678; spell_proc (rev_20260909_05_felsworn_completion.sql:31) ProcFlags 1048575 (bits 0 to 19, including PROC_FLAG_DONE_PERIODIC 0x40000), SpellTypeMask 7, SpellPhaseMask 2, HitMask 63 then 9331 (rev_20260909_08), Chance 100 (rev_20261003_10). The proc flags do not exclude periodic damage: the exclusion is the script condition crit && !periodic (AscensionFelswornEvents.cpp:97-98), code and not data. The data check does not verify the claim, so status 3 does not apply; status 4 stays (D-35): a periodic critical strike needs aura 286 and class 14 has none, so the exclusion cannot be exercised in play.",
     "tool_gap": {
       "reason": "Claim 'Direct critical strikes': the critical part is in the critical_trials control of both proc_rate verdicts, the direct (non-periodic, the !periodic term of AscensionFelswornEvents.cpp:97-98) part needs a control in which a periodic critical tick procs 0, and class 14 has no periodic crit: CalcPeriodicCritChance grants one only through aura 286 or Rogue Rupture (SpellAuraEffects.cpp:1180-1206), so the control would need foreign-class spells; no Rogue fixtures (controller t5, 2026-11-23). Not observable in play; sent to the mentor as a possible status-4 candidate.",
       "attempts": [
@@ -3060,9 +3086,10 @@
     "spell": 800214,
     "clause": "Restores $s2 Energy",
     "labels": [
-      "800214 effect_value 800239e1 #4"
+      "800239 behaviour_metric_delta fragment_energy"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-234412 / -234445 (prove2, same build, no flip)): spell_energize_total of 800239 on the caster is 0 before and 5 after one real cast of Fragment of Malice (the spell the handler casts, AscensionFelswornEvents.cpp:227-229), in both runs; control: no cast. coa-history spell 800239: SPELL_ENERGIZE min 5 max 5 in 4744 events."
   },
   {
     "spell": 800214,
@@ -3072,7 +3099,8 @@
       {
         "claim": "increases your critical strike chance by $s1%",
         "labels": [
-          "800214 effect_value 800239e0 #5"
+          "800239 behaviour_metric_delta fragment_crit_spell",
+          "800239 behaviour_metric_delta fragment_crit_melee"
         ]
       },
       {
@@ -3082,7 +3110,8 @@
           "800214 behaviour_metric_delta fragment_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Claim 0 status 1 (fw-vb4, counted pair 20261123-234412 / -234445 (prove2, same build, no flip)): one real cast of 800239 raises spell_crit_chance (Shadow) 1.20828 -> 11.2083 and melee_crit_chance_refreshed 4.32 -> 14.32, +10 within 0.01 in both runs; control: no cast. The first pair read the unrefreshed melee field (0 -> 14.32, a stale field, G-21 point 5) and is not counted. Claim 1 keeps its duration entry."
   },
   {
     "spell": 800220,
@@ -3276,7 +3305,7 @@
       {
         "claim": "is instant cast.",
         "labels": [
-          "555277 behaviour_metric_delta instant"
+          "555277 behaviour_metric_delta instant_cast"
         ]
       }
     ]
@@ -3392,7 +3421,10 @@
     "spell": 572804,
     "clause": "Unleash a devastating attack, dealing $s2% Weapon Damage to your target with both weapons.",
     "labels": [
-      "572804 effect_value e1 #0"
+      "572804 behaviour_metric_delta hit",
+      "572804 behaviour_metric_delta hit_ap",
+      "572804 behaviour_metric_delta hit_off",
+      "572804 behaviour_metric_delta hit_ap_off"
     ],
     "kind": "claim"
   },
@@ -3423,7 +3455,10 @@
     "spell": 803475,
     "clause": "Strike an enemy for Weapon Damage plus ${$m1+0+$AP*.145} with both weapons, additionally scaling with your attack power.",
     "labels": [
-      "803475 effect_value e0 #0"
+      "803475 behaviour_metric_delta hit",
+      "803475 behaviour_metric_delta hit_ap",
+      "803475 behaviour_metric_delta hit_off",
+      "803475 behaviour_metric_delta hit_ap_off"
     ],
     "kind": "claim"
   },
@@ -3472,7 +3507,7 @@
       {
         "claim": "instant cast",
         "labels": [
-          "802058 behaviour_metric_delta instant"
+          "802058 behaviour_metric_delta instant_cast"
         ]
       },
       {
@@ -3556,7 +3591,7 @@
     "spell": 802076,
     "clause": "and your Physical damage dealt is now increased by $s2%.",
     "labels": [
-      "802076 behaviour_metric_delta physical_damage"
+      "802076 behaviour_hit_ratio physical_hit"
     ],
     "kind": "claim"
   },
@@ -3579,9 +3614,11 @@
     "spell": 802108,
     "clause": "In addition, Inner Demon now increases your spell damage and critical strike rating by an additional $801208s2% of your Spirit.",
     "labels": [
-      "802108 effect_value 801208e1 #1"
+      "802108 behaviour_metric_delta inner_spell_power",
+      "802108 behaviour_metric_delta inner_crit_rating"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 1 (fw-vb4, counted pair 20261123-233905 / -234132 (prove1, build 2f5c75a93d3b, server 6bab3cf100da, no flip)): with Inner Demon 804216 set on the caster (precondition fixture) a real learn of 802108 gains 22 Shadow spell power (22.6 expected within 1.0: 15% of Intellect 34 and 15% + 20% of Spirit 50) and 10 spell critical strike rating (20% of Spirit 50), in both runs; the unlearned phase reads 0 and the entry without Inner Demon (spell_power) gains 12.6, so the 10 extra points are Inner Demon's. The bindmysoul snapshot says 'critical strike chance' where the DBC says 'rating' (older state, G-9)."
   },
   {
     "spell": 802110,
@@ -3605,7 +3642,7 @@
     "spell": 802110,
     "clause": "and your Physical damage dealt is now increased by $s2%.",
     "labels": [
-      "802110 behaviour_metric_delta physical_damage"
+      "802110 behaviour_hit_ratio physical_hit"
     ],
     "kind": "claim"
   },
@@ -3670,7 +3707,21 @@
     "labels": [
       "803645 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tool gap, uncounted (see tool_gap); the data label is the only label.",
+    "tool_gap": {
+      "reason": "Tool gap, uncounted (fw-vb4b, review I-3; guide G-25: a tool gap is not a final status): A route needs a ratio-or-equality judge between two arms (a Shadow-resistance fixture aura on the dummy, lowered in the control phase against the learned phase, with the engine formula of the resist chance). Two designs were written, none was run, so G-24 is not met: Design 1: metric_delta spell_resist_chance (Unit::GetEffectiveResistChance, the engine use-time function that adds the aura and clamps the victim resistance at 0) before and after a real learn: it needs a dummy with a positive Shadow resistance and an expected chance, which is an engine formula of that resistance, not a tooltip or DBC value; with the stock dummy at 0 resistance the read cannot move. Design 2: an equality of two reads, a MOD_RESISTANCE fixture aura on the dummy lowered by 60 in the control phase against the learned phase (before_auras, after_auras and phase_aura_amounts allow it): the expected gain is 0, which cannot be told from its control (Vampiric Tonic 802276, status 3 by ruling D-360) and no entry states a non-zero control gain without the engine formula. The nearest option and the extension: metric_delta with phase_aura_amounts; a ratio-or-equality judge between two arms is the extension. The scaling \"with your level\" is the data label. Reference search 2026-11-24: nothing found beyond the tooltip and the DBC (coa-history spell 803645: a passive leaves no event).",
+      "attempts": [
+        {
+          "agent": "fw-vb4",
+          "report": ".agents/plans/fw-vb4/report.md"
+        },
+        {
+          "agent": "fw-vb4b",
+          "report": ".agents/plans/fw-vb4b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 803645,
@@ -3678,7 +3729,21 @@
     "labels": [
       "803645 effect_value e1 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Tool gap, uncounted (see tool_gap); the data label is the only label.",
+    "tool_gap": {
+      "reason": "Tool gap, uncounted (fw-vb4b, review I-3; guide G-25: a tool gap is not a final status): A route needs pushback_reduction with a caster-aura fixture (Inner Demon 804216 held on the caster during the three casts) or a metric_delta cast_pushback_ms with a control strike. Two designs were written, none was run, so G-24 is not met: Design 1: pushback_reduction (the unhit / hit / reduced casts of Dawnsear-like spells read in game time): its spec has no fixture for a condition on the caster, the reducer is learned or cast and Inner Demon 804216 cannot be held during the three casts, so the reduced arm would read the unconditional case (the talent is also not learned by the kind unless it is the reducer). Design 2: metric_delta cast_pushback_ms with after_trigger_strike and Inner Demon as a phase aura: the strike lands in the treatment phase only, so the control phase has no strike and the 50% would have to be judged against the engine base pushback of 500 ms, which no tooltip or DBC value states (the Necromancer 802988 finding). The nearest option and the extension: pushback_reduction with a caster-aura fixture, an extension. Reference search 2026-11-24: nothing found beyond the tooltip and the DBC (coa-history spell 803645: a passive leaves no event).",
+      "attempts": [
+        {
+          "agent": "fw-vb4",
+          "report": ".agents/plans/fw-vb4/report.md"
+        },
+        {
+          "agent": "fw-vb4b",
+          "report": ".agents/plans/fw-vb4b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 803840,
@@ -4129,7 +4194,7 @@
     "spell": 805243,
     "clause": "reducing their damage taken by $s1%",
     "labels": [
-      "805243 behaviour_metric_delta amount_e0"
+      "805243 behaviour_hit_ratio damage_taken"
     ],
     "kind": "claim"
   },
@@ -4315,7 +4380,7 @@
     "spell": 806103,
     "clause": "Increases your Magic damage dealt by $s1%",
     "labels": [
-      "806103 behaviour_metric_delta magic_damage"
+      "806103 behaviour_hit_ratio magic_damage_hit"
     ],
     "kind": "claim"
   },
@@ -4381,10 +4446,22 @@
   {
     "spell": 806109,
     "clause": "At the end of the duration, your next $?s520853[Fel Torpedo][Chaos Rush] within $806128d now dashes an additional 20 yds.",
-    "labels": [
-      "806109 spell_duration 806128 #1"
+    "labels": null,
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $806128d",
+        "labels": [
+          "806109 behaviour_metric_delta dash_held",
+          "806109 behaviour_metric_delta dash_gone"
+        ]
+      },
+      {
+        "claim": "now dashes an additional 20 yds.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Split (review fw-rvb8 I1): the held/gone reads prove the window 'within $806128d'; the 20 yd extra dash is not measured (uncounted)."
   },
   {
     "spell": 806111,
@@ -4499,7 +4576,7 @@
     "spell": 807431,
     "clause": "stacking up to $521234u times.",
     "labels": [
-      "807431 max_stacks 521234 #2"
+      "807431 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
