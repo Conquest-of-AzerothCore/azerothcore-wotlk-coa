@@ -54,7 +54,8 @@ Three Felsworn parts were tool gaps (triage groups B-ALLY, B-SH, B-SP2):
   (`Spell.cpp:1003-1004`). With the allies at 20.0 yd it reaches the caster alone, and the count without 800220 is 8 or
   9 (both the cap of 8), expected 8.5 +- 0.5; with 800220, 10. Per-ally distance arms prove the placement.
 - 17.1 reads `300476 script_hit 804336 offhand_strike`. Code reading: the server casts 804336 with BASE_ATTACK
-  (`Spell.cpp:597-603`, `AscensionFelswornEvents.cpp:227`), so the pair is expected to alert.
+  (`Spell.cpp:597-603`, `AscensionFelswornEvents.cpp:227`); the pair alerts (59.6 and 60.2 against the off-hand 29.75,
+  the main-hand model 59.4), an owner question, not a fix.
 - `hand` without `normalized_percent`, any other value, or on the other effect order is refused.
 - 253.0 reads `803645 behaviour_metric_delta spell_pen` (level 60, shift 60) and `spell_pen_level40` (level 40, shift
   40), tolerance_share 0.05 (excludes a penetration 10% off the shift under a resist chance linear in resistance) and
