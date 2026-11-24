@@ -134,6 +134,226 @@
       "flat": 60,
       "settle_ms": 500,
       "observe_source": "$s2 = 30 (707784 Effect[1] aura 10 SPELL_AURA_MOD_THREAT, EffectBasePoints -31 + EffectDieSides 1 = -30, EffectMiscValue 32 = Shadow; Spell.dbc). Casts Horrorbolt 502182 (SchoolMask 32 Shadow, SpellLevel 60) at a fresh dummy with 707784 learned by a real learn; ThreatManager::CalculateModifiedThreat multiplies Shadow damage threat by 0.70 while SpellLevel 60 initial threat stays unmodified, so (threat - 60) / health_lost must equal 0.70 (control arm without 707784 reads 1.0). Reference search 2026-11-24: coabuildhub spells_master_index.json has no entry for 707784; ~/Projects/coa-log-history/coa-history not present; nothing else found."
+    },
+    {
+      "spell": 500712,
+      "name": "Ancient Curse (Generates 20 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "quote": "Generates 20 Insanity",
+      "trigger_spell": 500712,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Ancient Curse 500712 tooltip states 'Generates 20 Insanity'; AscensionClassContracts19To25Data.h:67 grants 20 stacks of Insanity 500706 on cast of 500712. Reads aura_stacks of 500706 on the caster before (0, uncast control) and 500 ms after one real cast of 500712 at the dummy (20). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 500712 is an earlier patch state (10 sec / +10% Shadow damage taken) but carries the same 'Generates 20 Insanity'; installed server Spell.dbc governs (G-9); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 500712,
+      "name": "Ancient Curse (instant Shadow damage at reference spell power)",
+      "kind": "metric_delta",
+      "variant": "instant_base",
+      "label_suffix": "instant_base",
+      "quote": "dealing ${$m1+0+$sp*1.5} Shadow damage instantly",
+      "trigger_spell": 500712,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500712,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1127,
+      "after_at_least": 1094,
+      "after_at_most": 1160,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 500712 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (SchoolMask 32 Shadow), EffectBasePoints 975, EffectDieSides 60, EffectRealPointsPerLevel 1.25, BaseLevel 59, SpellLevel 59, MaxLevel 0 (no SkillLineAbility row). At level 60, per-level points = (60 - 59) * 1.25 = 1.25 (truncated to 1 in SpellEffectInfo::CalcValue), so raw roll at SP 0 is 975 + 1 + [1..60] = [977..1036]. Cultist class tuning aura 887013 (AscensionClassTuning.h:34; Spell.dbc BaseLevel 10, MaxLevel 60, Effect[0] aura 341 bp -1 + die 1 + int(50 * 0.25) = +12% all schools) multiplies every hit by 1.12 (floor(hit * 112 / 100)): [1094..1160]. Precondition fixtures: 823764 (beeg spellpen, removes partial resists) and 16255 amount -100 (removes crits). Control is the uncast before read (0). Paired with instant_sp (+20000 SP) in the same counted pair. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 500712 is an older patch state (SP*1); installed Spell.dbc governs (G-9); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 500712,
+      "name": "Ancient Curse (instant Shadow damage at +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "instant_sp",
+      "label_suffix": "instant_sp",
+      "quote": "dealing ${$m1+0+$sp*1.5} Shadow damage instantly",
+      "trigger_spell": 500712,
+      "target": "dummy",
+      "cast_in_before": false,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500712,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 34727,
+      "after_at_least": 34694,
+      "after_at_most": 34760,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell power contrast arm for 500712 instant Shadow damage (${$m1+0+$sp*1.5}): player_spell_power 20000 (hit_arm: true) adds 20000 * 1.5 = +30000 to raw [977..1036] -> [30977..31036] (AscensionCultistData.h:9 coefficient 1.5), then Cultist class tuning aura 887013 (+12%, floor(hit * 112 / 100)) gives [34694..34760]. Precondition fixtures: 823764 (no partial resist) and 16255 amount -100 (no crit). Control is instant_base (SP 0, [1094..1160]) and the uncast before read (0). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 500712 is an older patch state; installed Spell.dbc governs (G-9); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 500712,
+      "name": "Ancient Curse (delayed 354191 Shadow damage at reference spell power)",
+      "kind": "metric_delta",
+      "variant": "delayed_base",
+      "label_suffix": "delayed_base",
+      "quote": "plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage",
+      "trigger_spell": 500712,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 354191,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2248,
+      "after_at_least": 2210,
+      "after_at_most": 2287,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 354191 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (SchoolMask 32 Shadow), EffectBasePoints 1952, EffectDieSides 69, EffectRealPointsPerLevel 4.32, BaseLevel 55, SpellLevel 55, MaxLevel 0 (no SkillLineAbility row). At level 60, per-level points = (60 - 55) * 4.32 = 21.6 (truncated to 21 in SpellEffectInfo::CalcValue), so raw roll at SP 0 is 1952 + 21 + [1..69] = [1974..2042]. Cultist class tuning aura 887013 (+12%, floor(hit * 112 / 100)) gives [2210..2287]. Read 5500 ms after 500712 cast (past the 5000 ms delay). Precondition fixtures: 823764 (no partial resist) and 16255 amount -100 (no crit). Control is the uncast before read (0). Paired with delayed_sp (+20000 SP) in the same counted pair. Reference search 2026-11-24: coabuildhub spells_master_index.json entry 500712 is an older patch state (1211+73.3 ppl+ShaP*1); installed Spell.dbc governs (G-9); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 500712,
+      "name": "Ancient Curse (delayed 354191 Shadow damage at +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "delayed_sp",
+      "label_suffix": "delayed_sp",
+      "quote": "plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage",
+      "trigger_spell": 500712,
+      "target": "dummy",
+      "cast_in_before": false,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 354191,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 24648,
+      "after_at_least": 24610,
+      "after_at_most": 24687,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell power contrast arm for 354191 delayed Shadow damage (${$354191m1+$354191ppl1+$sps*1}): player_spell_power 20000 (hit_arm: true) adds 20000 * 1.0 = +20000 to raw [1974..2042] -> [21974..22042] (AscensionCultistData.h:7 coefficient 1.0), then Cultist class tuning aura 887013 (+12%, floor(hit * 112 / 100)) gives [24610..24687]. Precondition fixtures: 823764 (no partial resist) and 16255 amount -100 (no crit). Control is delayed_base (SP 0, [2210..2287]) and the uncast before read (0). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 500712 is an older patch state; installed Spell.dbc governs (G-9); ~/Projects/coa-log-history/coa-history not present."
+    },
+    {
+      "spell": 500712,
+      "name": "Ancient Curse (delayed 354191 timing)",
+      "kind": "event_delay",
+      "quote": "after $d",
+      "expected_ms": 5000,
+      "observe_spell": 354191,
+      "trials": 3,
+      "wait_ms": 6000,
+      "observe_source": "Tooltip states 'after $d' where 500712 DurationIndex 28 = 5000 ms (SpellDuration.dbc). 500712 Effect[2] 183 SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DELAYED has EffectBasePoints 4899 + EffectDieSides 1 = 4900 ms, TriggerSpell 354191 (SpellEffects.cpp:1061-1101 schedules 354191 damage ms later). event_delay stamps 354191's hit from 500712's cast and from 354191's own cast across 3 trials; tolerance is max(5% of 5000, 50) = 250 ms ([4750, 5250] ms), excluding 10% off on both sides (4500 and 5500 ms). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 500712 is an earlier patch state (10 sec); installed Spell.dbc governs (G-9); ~/Projects/coa-log-history/coa-history not present."
     }
   ],
   "player_observations": [],

@@ -875,7 +875,9 @@
   {
     "spell": 500712,
     "clause": "Generates 20 Insanity",
-    "labels": [],
+    "labels": [
+      "500712 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
@@ -886,19 +888,21 @@
       {
         "claim": "dealing ${$m1+0+$sp*1.5} Shadow damage instantly",
         "labels": [
-          "500712 effect_value e0 #0"
+          "500712 behaviour_metric_delta instant_base",
+          "500712 behaviour_metric_delta instant_sp"
         ]
       },
       {
         "claim": "plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage",
         "labels": [
-          "500712 effect_value 354191e0 #1"
+          "500712 behaviour_metric_delta delayed_base",
+          "500712 behaviour_metric_delta delayed_sp"
         ]
       },
       {
         "claim": "after $d",
         "labels": [
-          "500712 aura_duration_ms #2"
+          "500712 behaviour_event_delay"
         ]
       }
     ]
