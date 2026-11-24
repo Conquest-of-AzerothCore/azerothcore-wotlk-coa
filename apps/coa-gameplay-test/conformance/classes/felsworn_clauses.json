@@ -4432,13 +4432,26 @@
   {
     "spell": 805243,
     "clause": "Enrage $?s800220[all][up to $i] allies within $a yds,",
-    "labels": [
-      "805243 effect_value #0",
-      "805243 effect_value #4",
-      "805243 behaviour_metric_delta whipcrack_radius"
-    ],
     "kind": "claim",
-    "reason": "Mentor D-91 item 5: status 2 only with an ok radius read and an ok target-cap read. Radius read: 805243 behaviour_metric_delta whipcrack_radius (an ally at 20.0 yd enraged and one at 25.5 yd not, without 800220; three candidates below the cap). Target-cap read open: the caster always holds the aura through Effect[2] (15 yd, selected apart), so a count of holders reads the cap 8 as 8 or 9 at random; a deterministic read needs a per-effect aura holder metric (tool idea 'aura_effect', fw-bk6 2026-11-24), not built (no harness change now, t5)."
+    "claims": [
+      {
+        "claim": "$?s800220[all]",
+        "labels": [
+          "800220 behaviour_metric_delta whipcrack_all"
+        ]
+      },
+      {
+        "claim": "[up to $i]",
+        "labels": []
+      },
+      {
+        "claim": "allies within $a yds",
+        "labels": [
+          "805243 behaviour_metric_delta whipcrack_radius"
+        ]
+      }
+    ],
+    "reason": "Mentor D-91 item 5: status 2 only with an ok radius read and an ok target-cap read; the cap claim 'up to $i' has no label, so the row stays open. Radius read: 805243 behaviour_metric_delta whipcrack_radius (an ally at 23.7 yd enraged and one at 25.5 yd not, without 800220; edge 20 + 2.66 + 1.5 = 24.16 yd, a radius 10% low or 10% high changes a read; three candidates below the cap). 'all' read: 800220 whipcrack_all (ten of ten at 34.6 yd with 800220, one without). Target-cap read open: the caster always holds the aura through Effect[2] (15 yd, selected apart), so a count of holders reads the cap 8 as 8 or 9 at random; a deterministic read needs a per-effect aura holder metric (tool idea 'aura_effect', fw-bk6 2026-11-24), not built (no harness change now, t5, recorded out of scope). Dropped labels (D-112): '805243 effect_value #0' would read Effect[0] (server DBC EffectBasePoints[0] = -16), a value this clause names no token for and which the generator marks unmodelled, so it proves no claim of the clause; '805243 effect_value #4' names effect index 4, but spell 805243 has Effects 0-2 only in the server DBC (nothing to read). Neither is counted (precedent 259.0, 92087). Reference search 2026-11-24: coa-history spell 805243: 0 events in 186 logs; nothing found."
   },
   {
     "spell": 805243,
