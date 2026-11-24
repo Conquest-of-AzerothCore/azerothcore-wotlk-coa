@@ -852,6 +852,150 @@
       "expire_ms": 1000,
       "void_on_cast_failure": true,
       "observe_source": "Negative control arm for Bulwark of Shadow 301182: identical to above_80 with Insanity 500706 at 81 stacks (precondition fixture), except 301182 is NOT learned (gate_spell 60235). Without 301182, Refresh does not grant 572758 and level-60 Void Shield 578115 at player_spell_power 2000 absorbs only its unboosted [776..830] + 4000 = [4776..4830] against 6x Light of the Naaru 41394 (6600 Holy); uncast before reads 0. Reference search 2026-11-24: coabuildhub spells_master_index.json 301182 matches verbatim; coa-history has 0 events for 301182/572758."
+    },
+    {
+      "spell": 806897,
+      "name": "Obliteration Beam (Generates 10 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "quote": "Generates 10 Insanity",
+      "trigger_spell": 806897,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Obliteration Beam 806897 tooltip states 'Generates 10 Insanity'; AscensionClassContracts19To25Data.h:63 and AscensionCustomResourceData.h:289 grant 10 stacks of Insanity 500706 on cast of 806897. Reads aura_stacks of 500706 on the caster before (0, uncast control) and 500 ms after one real cast of 806897 at the dummy (10). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 805572 (Rank 1) matches verbatim ('Generates 10 Insanity'); coa-history records 159 player casts of 806897 and 1879 player damage events of 805573."
+    },
+    {
+      "spell": 806897,
+      "name": "Obliteration Beam (Shadow damage at reference spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Unleash a beam of eldritch energy, dealing ${$m1+0+$sps*.65} Shadow damage to an enemy and all nearby enemies.",
+      "trigger_spell": 806897,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 798,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 806897 (BaseLevel 60, SpellLevel 60, MaxLevel 66, no SkillLineAbility row) Effect[0] 142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (EffectBasePoints 712, EffectDieSides 1 -> 713 exact) triggers 805573 (Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 32 Shadow, EffectDieSides 1, SPELLVALUE_BASE_POINT0 via CalcBaseValue -> 713 exact at SP 0). Cultist class tuning aura 887013 (+12% all schools, floor(713 * 112 / 100)) gives 798 exact. Precondition fixtures: 823764 (no partial resist) and 16255 amount -100 (no crit). Control is the uncast before read (0). Paired with damage_sp (+20000 SP) in the same counted pair. Reference search 2026-11-24: coabuildhub spells_master_index.json 805572 matches formula ('$m1+0+$sps*.65'); coa-history records 1879 player 805573 hits (mean 3437.0 with live gear/SP)."
+    },
+    {
+      "spell": 806897,
+      "name": "Obliteration Beam (Shadow damage at +20000 spell power)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Unleash a beam of eldritch energy, dealing ${$m1+0+$sps*.65} Shadow damage to an enemy and all nearby enemies.",
+      "trigger_spell": 806897,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 15358,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Spell power contrast arm for Obliteration Beam 806897 (${$m1+0+$sps*.65}): player_spell_power 20000 (hit_arm: true) adds 20000 * 0.65 = +13000 to triggered 805573 base 713 -> 13713 (AscensionCultistData.h:114 coeff 0.65), then Cultist class tuning aura 887013 (+12%, floor(13713 * 112 / 100)) gives 15358 exact. Precondition fixtures: 823764 (no partial resist) and 16255 amount -100 (no crit). Control is damage_base (SP 0, 798) and the uncast before read (0). Reference search 2026-11-24: coabuildhub spells_master_index.json 805572 matches '$sps*.65'; coa-history records 1879 player 805573 hits."
+    },
+    {
+      "spell": 806897,
+      "name": "Obliteration Beam (strikes primary and nearby enemies within 8 yd)",
+      "kind": "metric_delta",
+      "variant": "area_nearby",
+      "label_suffix": "area_nearby",
+      "quote": "Unleash a beam of eldritch energy, dealing ${$m1+0+$sps*.65} Shadow damage to an enemy and all nearby enemies.",
+      "trigger_spell": 806897,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "area_dummies": [
+        5.0,
+        7.0,
+        9.0,
+        20.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Triggered Obliteration Beam 805573 Effect[0] has TargetA 53 (TARGET_DEST_TARGET_ENEMY), TargetB 16 (TARGET_UNIT_DEST_AREA_ENEMY), EffectRadiusIndex 14 (SpellRadius.dbc 14 = 8.0 yd). Primary dummy stands at 3 yd; area_dummies places area1..area3 at 5, 7, 9 yd (2, 4, 6 yd from dummy, inside 8 yd) and area4 at 20 yd (17 yd from dummy, well outside 8 yd + 1.275 yd reach). area_sum sums spell_damage_count of 805573 across all 5 dummies: 0 in uncast control, 4 after one real cast of 806897 (primary + 3 nearby struck, far dummy untouched). Reference search 2026-11-24: coabuildhub 805572 matches verbatim; coa-history records 1879 hits across 159 casts (~11.8 hits/cast in AoE pulls)."
     }
   ],
   "player_observations": [],

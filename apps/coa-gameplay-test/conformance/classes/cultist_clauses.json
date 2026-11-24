@@ -3637,14 +3637,18 @@
   {
     "spell": 806897,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "806897 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806897,
     "clause": "Unleash a beam of eldritch energy, dealing ${$m1+0+$sps*.65} Shadow damage to an enemy and all nearby enemies.",
     "labels": [
-      "806897 effect_value e0 #0"
+      "806897 behaviour_metric_delta damage_base",
+      "806897 behaviour_metric_delta damage_sp",
+      "806897 behaviour_metric_delta area_nearby"
     ],
     "kind": "claim"
   },
