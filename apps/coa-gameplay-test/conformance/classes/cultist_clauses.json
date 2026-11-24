@@ -531,14 +531,16 @@
     "spell": 300313,
     "clause": "Grants all periodic damage and damage dealt a $h% chance to reset the cooldown of Gaze of C'Thun",
     "labels": [
-      "300313 effect_value #0"
+      "300313 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim"
   },
   {
     "spell": 300313,
     "clause": "and generate 5 Insanity.",
-    "labels": [],
+    "labels": [
+      "300313 proc_rate"
+    ],
     "kind": "claim"
   },
   {

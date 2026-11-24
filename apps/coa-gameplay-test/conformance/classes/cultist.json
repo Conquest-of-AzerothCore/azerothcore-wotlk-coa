@@ -76,7 +76,48 @@
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
-  "procs": [],
+  "procs": [
+    {
+      "aura": 300313,
+      "name": "Dark Revelation",
+      "tooltip": "|cFF66DDFFLevel 40 Passive|r\r\nGrants all periodic damage and damage dealt a $h% chance to reset the cooldown of |cffffffffGaze of C'Thun|r and generate 5 |cffcfa6ffInsanity|r.",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "cast",
+        "spell": 806830
+      },
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "sized_attempts": 10251,
+      "trigger_text": "damage dealt",
+      "event_metric": "aura_stacks",
+      "stack_aura": 500706,
+      "stack_set": 40,
+      "stack_per_cast": -40,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture, not the subject: Insanity 500706 is set to 40 stacks before every Hammer of Twilight 806830 cast (which drains 40 Insanity at AscensionCultistAbilities.cpp:88-89); the subject is the +5 Insanity Dark Revelation 300313 adds on proc"
+        }
+      ],
+      "proc_spell": 500706,
+      "events_per_proc": 5,
+      "proc_spell_source": "Proc of 300313 calls Resource(player, Insanity, 5) (AscensionCultistEvents.cpp:170-173, AscensionCultist.cpp:201-222), adding 5 stacks of Insanity aura 500706 directly without casting 804209.",
+      "handler": "aura_ascension_cultist_event: Check case 300313 (AscensionCultistEvents.cpp:84) returns dealt && Chance(player, id) (ProcChance 6 in Spell.dbc, rolled via roll_chance_f ignoring spell mods so forced_roll cannot force it); Proc (AscensionCultistEvents.cpp:170-173) resets Gaze of C'Thun 500110 and calls Resource(player, Insanity, 5). Trigger: Hammer of Twilight 806830 (level 60 rank, 0 mana, instant, 1500 ms GCD, CasterAuraSpell 680602 set by required_aura_steps, drains 40 Insanity on cast, DmgClass 2 melee hit); each cast starts at 40 Insanity (stack_set 40, stack_per_cast -40) and reads 0 without proc or 5 with proc (events_per_proc 5, aura_stacks event metric, tool ADR 1254). Baseline arm before 300313 is learned must read no event. Sized at 10251 attempts (residual_target 0.001 per pair, min_detectable 4 pts, >= 6834 trials). Reference search 2026-11-24: coa-history spell 300313: 0 events in 186 logs (passive; positive control 500110 Gaze of C'Thun: 4 casts in 2 logs); coabuildhub spells_master_index.json entry 300313 matches verbatim ('6% chance to reset the cooldown of Gaze of C'Thun and generate 5 Insanity.').",
+      "dbc": {
+        "300313": {
+          "ProcChance": 6,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {},
+      "internal_cooldown_ms": 0
+    }
+  ],
   "triggers": [
     {
       "aura": 574318,
@@ -1045,6 +1086,36 @@
         }
       ],
       "observe_source": "Baseline verification for 524879: with 524879 learned, Void Zone 92559 (1000 Physical, DmgClass 0) deals the same damage during a Satiate 804275 channel (treatment) as without Satiate (control): expected ratio 1.0. Paired with 524879 taken_removed (0.833333 against unlearned Satiate's +20% taken). Reference search 2026-11-24: coa-history spell 524879: 0 events (positive control 804275: 59 casts); coabuildhub entry 524879 matches verbatim."
+    },
+    {
+      "spell": 300313,
+      "name": "Dark Revelation (Gaze of C'Thun cooldown reset at 6%)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "Grants all periodic damage and damage dealt a $h% chance to reset the cooldown of Gaze of C'Thun",
+      "talent": 300313,
+      "trigger_spell": 806830,
+      "reset_spell": 502141,
+      "chance_pct": 6,
+      "control_casts": 50,
+      "casts": 1800,
+      "parts": 4,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89)"
+        },
+        {
+          "spell": 680602,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680602 (40 Insanity helper marker) required by Hammer of Twilight 806830 (Spell.dbc)"
+        }
+      ],
+      "observe_source": "$h = 6 (300313 Spell.dbc ProcChance 6; AscensionCultistEvents.cpp:84 returns dealt && Chance(player, id), rolling ProcChance via roll_chance_f ignoring spell mods so forced_roll cannot force it; :170-173 calls Reduce(player, 500110, INT32_MAX) -> Player::RemoveSpellCooldown(502141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (level 60 rank, 0 mana, instant, 1500 ms GCD, DmgClass 2 melee hit with default Godblade 2531 2H Axe). Control: 50 casts per part (200 total) before 300313 is learned (0 resets). Treatment: 4 pooled parts x 1800 casts = 7200 damaging hits (>= 6834 trials needed for residual_target 0.001 per pair and min_detectable 4 pts, G-20 +-2 pt band around 6%). Reference search 2026-11-24: coa-history spell 300313: 0 events in 186 logs (passive; positive control 500110 Gaze of C'Thun: 4 casts in 2 logs); coabuildhub spells_master_index.json entry 300313 matches verbatim."
     }
   ],
   "player_observations": [],
