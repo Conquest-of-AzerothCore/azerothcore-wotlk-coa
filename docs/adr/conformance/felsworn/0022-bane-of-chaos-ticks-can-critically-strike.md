@@ -1,4 +1,4 @@
-# 0019. Bane of Chaos ticks can critically strike
+# 0022. Bane of Chaos ticks can critically strike
 
 - Status: accepted (Felsworn mentor decision D-82, 2026-11-24)
 - Date: 2026-11-24
