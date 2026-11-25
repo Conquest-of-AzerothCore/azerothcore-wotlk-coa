@@ -13,9 +13,9 @@ your main-hand weapon damage."`).
 ```json
 {
   "weapons": [
-    {"item": 2534, "source": "Dreadnought Rondel (weapon_sets.Dreadnought.main_hand, 28.46-45.46)"},
-    {"item": 2535, "source": "Heretic War Staff (weapon_sets.Heretic.main_hand, 84.53-119.41)"},
-    {"item": 2531, "source": "Godblade Great Axe (weapon_sets.Godblade.main_hand, 90.86-127.3)"}
+    {"item": 2092, "source": "Worn Dagger (alternate_weapons, subclass 15, 1600 ms, 1.1607-3.4821)"},
+    {"item": 2209, "source": "Kris (alternate_weapons, subclass 15, 1600 ms, 15.36-25.6)"},
+    {"item": 2534, "source": "Rondel (weapon_sets.Dreadnought.main_hand, subclass 15, 1600 ms, 28.46-45.46)"}
   ],
   "unrelated": {
     "metric": "combat_rating",
@@ -31,9 +31,11 @@ your main-hand weapon damage."`).
 - **No expected figure is configurable:** `FORBIDS_EXPECTED = True` causes `metric_delta_spec` to refuse `expected` and
   `before_expected`, and `weapon_damage_arms.check` refuses `expected_gain`, `expected_ratio`, `after_at_least`,
   `after_at_most`, `after_expiry_expected` and `phase_power`. `parse` accepts only `{weapons, unrelated, wait_ms}`.
-- **At least three distinct main-hand weapons:** every item must be declared as a main-hand weapon (slot 15) in the
-  class file (`weapon`, `alternate_weapons` or `weapon_sets[*].main_hand`). Missing items and skill lines are added and
-  set before the first swap.
+- **At least three distinct same-subclass, equal-speed main-hand weapons:** every item must be declared as a main-hand
+  weapon (slot 15) in the class file (`weapon`, `alternate_weapons` or `weapon_sets[*].main_hand`) with integer
+  `subclass` and positive integer `speed_ms` metadata. Generation refuses any weapon list whose items differ in
+  `subclass` or unhasted base `speed_ms`, eliminating weapon-type and weapon-speed confounding. Missing items and skill
+  lines are added and set before the first swap.
 - **Equal attack power:** every weapon arm and the unrelated-stat arm read `attack_power` in both the unlearned control
   phase and the learned phase; any attack-power difference across arms voids the verdict as `unmeasured` (preventing
   attack-power confounding).

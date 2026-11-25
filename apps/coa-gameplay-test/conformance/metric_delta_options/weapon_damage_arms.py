@@ -150,6 +150,22 @@ def fixtures(class_file: dict, spec, value: dict, scenario: dict):
     if missing_items:
         raise ValueError(f'{spec.spell} {NAME} items {missing_items} are not declared main-hand weapons of '
                          f'{class_file["name"]}')
+    subclasses = set()
+    speeds = set()
+    for weapon in value['weapons']:
+        meta = declared[weapon['item']]
+        subclass = meta.get('subclass')
+        speed_ms = meta.get('speed_ms')
+        if isinstance(subclass, bool) or not isinstance(subclass, int) or subclass < 0:
+            raise ValueError(f'{spec.spell} {NAME} item {weapon["item"]} lacks integer subclass metadata')
+        if isinstance(speed_ms, bool) or not isinstance(speed_ms, int) or speed_ms <= 0:
+            raise ValueError(f'{spec.spell} {NAME} item {weapon["item"]} lacks positive integer speed_ms metadata')
+        subclasses.add(subclass)
+        speeds.add(speed_ms)
+    if len(subclasses) != 1 or len(speeds) != 1:
+        raise ValueError(f'{spec.spell} {NAME} requires all weapons to share one subclass and one base speed_ms '
+                         f'(got subclasses={sorted(subclasses)}, speed_ms={sorted(speeds)})')
+    shared_subclass, shared_speed = next(iter(subclasses)), next(iter(speeds))
     names = labels(spec, value)
     steps = scenario['steps']
     before_label, after_label = metric_delta_label(spec, BEFORE), metric_delta_label(spec, AFTER)
@@ -209,15 +225,15 @@ def fixtures(class_file: dict, spec, value: dict, scenario: dict):
     weapon_desc = ', '.join(f'{weapon["item"]} ({weapon["source"]})' for weapon in value['weapons'])
     unrel = value['unrelated']
     scenario['contract'] += (
-        f' Weapon damage arms (D-38): equips {len(value["weapons"])} main-hand weapons [{weapon_desc}] before and '
-        f'after learning {spec.spell}, reading equipped_item (slot 15), weapon_damage_min, attack_power and '
-        f'{spec.metric} in each arm, plus an unrelated-stat control on {unrel["metric"]} {unrel["fields"]} via '
-        f'{unrel["aura"]} x{unrel["stacks"]} ({unrel["source"]}) at weapon {value["weapons"][0]["item"]}. '
-        f'Preconditions (void as unmeasured on failure): each weapon equips cleanly, weapon_damage_min strictly rises '
-        f'across arms and matches between control and learned, attack_power is equal across every read, and the '
-        f'unrelated stat rises without moving weapon_damage_min or attack_power. Judged strictly monotonic across all '
-        f'{len(value["weapons"])} weapon arms and unchanged under the unrelated stat, with no slope, ratio or expected '
-        f'figure.')
+        f' Weapon damage arms (D-38): equips {len(value["weapons"])} main-hand weapons [{weapon_desc}] at shared '
+        f'subclass {shared_subclass} and base speed {shared_speed} ms before and after learning {spec.spell}, reading '
+        f'equipped_item (slot 15), weapon_damage_min, attack_power and {spec.metric} in each arm, plus an '
+        f'unrelated-stat control on {unrel["metric"]} {unrel["fields"]} via {unrel["aura"]} x{unrel["stacks"]} '
+        f'({unrel["source"]}) at weapon {value["weapons"][0]["item"]}. Preconditions (void as unmeasured on failure): '
+        f'each weapon equips cleanly, weapon_damage_min strictly rises across arms and matches between control and '
+        f'learned, attack_power is equal across every read, and the unrelated stat rises without moving '
+        f'weapon_damage_min or attack_power. Judged strictly monotonic across all {len(value["weapons"])} weapon arms '
+        f'and unchanged under the unrelated stat, with no slope, ratio or expected figure.')
 
 
 def model(spec, value: dict) -> dict:

@@ -10,9 +10,9 @@ from test_behaviours import FakeRun, base_verdict
 
 WEAPON_ARMS = {
     'weapons': [
-        {'item': 2534, 'source': 'Dreadnought Rondel (28.46-45.46)'},
-        {'item': 2535, 'source': 'Heretic War Staff (84.53-119.41)'},
-        {'item': 2531, 'source': 'Godblade Great Axe (90.86-127.3)'},
+        {'item': 2092, 'source': 'Worn Dagger (subclass 15, 1600 ms, 1.1607-3.4821)'},
+        {'item': 2209, 'source': 'Kris (subclass 15, 1600 ms, 15.36-25.6)'},
+        {'item': 2534, 'source': 'Rondel (subclass 15, 1600 ms, 28.46-45.46)'},
     ],
     'unrelated': {
         'metric': 'combat_rating', 'fields': {'rating': 17}, 'aura': 10033, 'stacks': 1,
@@ -48,22 +48,23 @@ class WeaponDamageArmsTests(unittest.TestCase):
         self.assertIsNone(exp.model['expected'])
         self.assertIsNone(exp.model['before_expected'])
         self.assertIn('Weapon damage arms (D-38)', valid['contract'])
+        self.assertIn('shared subclass 15 and base speed 1600 ms', valid['contract'])
         equips = [step['item'] for step in valid['steps'] if step['action'] == 'equip' and step['slot'] == 15]
-        self.assertEqual(equips, [2531, 2534, 2535, 2531, 2534, 2534, 2535, 2531, 2534])
+        self.assertEqual(equips, [2531, 2092, 2209, 2534, 2092, 2092, 2209, 2534, 2092])
         added = {step['item'] for step in valid['steps'] if step['action'] == 'add_item'}
-        self.assertTrue({2531, 2534, 2535} <= added)
+        self.assertTrue({2531, 2092, 2209, 2534} <= added)
         skills = {step['skill'] for step in valid['steps'] if step['action'] == 'set_skill'}
-        self.assertTrue({172, 173, 136} <= skills)
+        self.assertTrue({172, 173} <= skills)
 
-    def judge(self, ctrl_out=(0.0, 0.0, 0.0, 0.0), lrn_out=(79.0, 190.0, 205.0, 79.0),
-              ctrl_eq=(2534, 2535, 2531, 2534), lrn_eq=(2534, 2535, 2531, 2534),
-              ctrl_dmg=(71.4, 173.2, 187.6, 71.4), lrn_dmg=(71.4, 173.2, 187.6, 71.4),
+    def judge(self, ctrl_out=(0.0, 0.0, 0.0, 0.0), lrn_out=(45.0, 63.0, 79.0, 45.0),
+              ctrl_eq=(2092, 2209, 2534, 2092), lrn_eq=(2092, 2209, 2534, 2092),
+              ctrl_dmg=(44.1, 58.3, 71.4, 44.1), lrn_dmg=(44.1, 58.3, 71.4, 44.1),
               ctrl_ap=(376.0, 376.0, 376.0, 376.0), lrn_ap=(376.0, 376.0, 376.0, 376.0),
               unrel=(0.0, 100.0, 0.0, 100.0), drop=None, cast_failures=None):
         _, [exp] = built_entry()
         rec = exp.model['weapon_damage_arms']
         found = {
-            rec['before_label']: 0.0, rec['after_label']: 205.0,
+            rec['before_label']: 0.0, rec['after_label']: 79.0,
             **{label: val for label, val in zip(rec['reads']['control'], ctrl_out[:3])},
             rec['reads']['control_unrelated']: ctrl_out[3],
             **{label: val for label, val in zip(rec['reads']['learned'], lrn_out[:3])},
@@ -94,28 +95,57 @@ class WeaponDamageArmsTests(unittest.TestCase):
         verdict = self.judge()
         self.assertEqual(verdict.status, 'ok')
         self.assertIsNone(verdict.expected)
-        self.assertEqual(verdict.detail['arm_gains'], [79.0, 190.0, 205.0])
+        self.assertEqual(verdict.detail['arm_gains'], [45.0, 63.0, 79.0])
         self.assertEqual(verdict.detail['attack_power'], 376.0)
         self.assertEqual(metric_evidence()['healing_power'], STATE)
         self.assertTrue(promised_state(verdict, void_power_entry()['quote']))
 
     def test_mutants_alert_on_flat_plateau_falling_or_unrelated_movement(self):
-        self.assertEqual(self.judge(lrn_out=(100.0, 100.0, 100.0, 100.0)).status, 'alert')
-        self.assertEqual(self.judge(lrn_out=(79.0, 190.0, 190.0, 79.0)).status, 'alert')
-        self.assertEqual(self.judge(lrn_out=(79.0, 205.0, 190.0, 79.0)).status, 'alert')
-        self.assertEqual(self.judge(lrn_out=(79.0, 190.0, 205.0, 95.0)).status, 'alert')
+        self.assertEqual(self.judge(lrn_out=(60.0, 60.0, 60.0, 60.0)).status, 'alert')
+        self.assertEqual(self.judge(lrn_out=(45.0, 63.0, 63.0, 45.0)).status, 'alert')
+        self.assertEqual(self.judge(lrn_out=(45.0, 79.0, 63.0, 45.0)).status, 'alert')
+        self.assertEqual(self.judge(lrn_out=(45.0, 63.0, 79.0, 60.0)).status, 'alert')
 
     def test_unmeasured_on_missing_reads_ap_confound_or_bad_fixtures(self):
         self.assertEqual(self.judge(drop=lambda r: r['ap']['learned'][1]).status, 'unmeasured')
         self.assertEqual(self.judge(drop=lambda r: r['reads']['learned'][2]).status, 'unmeasured')
         self.assertEqual(self.judge(lrn_ap=(376.0, 420.0, 376.0, 376.0)).status, 'unmeasured')
         self.assertEqual(self.judge(ctrl_ap=(376.0, 376.0, 376.0, 390.0)).status, 'unmeasured')
-        self.assertEqual(self.judge(ctrl_dmg=(71.4, 71.4, 187.6, 71.4)).status, 'unmeasured')
-        self.assertEqual(self.judge(lrn_dmg=(71.4, 180.0, 187.6, 71.4)).status, 'unmeasured')
-        self.assertEqual(self.judge(ctrl_eq=(2534, 2534, 2531, 2534)).status, 'unmeasured')
+        self.assertEqual(self.judge(ctrl_dmg=(44.1, 44.1, 71.4, 44.1)).status, 'unmeasured')
+        self.assertEqual(self.judge(lrn_dmg=(44.1, 60.0, 71.4, 44.1)).status, 'unmeasured')
+        self.assertEqual(self.judge(ctrl_eq=(2092, 2092, 2534, 2092)).status, 'unmeasured')
         self.assertEqual(self.judge(unrel=(0.0, 0.0, 0.0, 0.0)).status, 'unmeasured')
-        self.assertEqual(self.judge(ctrl_dmg=(71.4, 173.2, 187.6, 80.0)).status, 'unmeasured')
+        self.assertEqual(self.judge(ctrl_dmg=(44.1, 58.3, 71.4, 52.0)).status, 'unmeasured')
         self.assertEqual(self.judge(cast_failures={60235: [55]}).status, 'unmeasured')
+
+    def test_refuses_differing_subclass_or_speed_ms_or_missing_weapon_metadata(self):
+        base = load_class_file(25)
+        confounded_arms = {
+            **WEAPON_ARMS,
+            'weapons': [
+                {'item': 2534, 'source': 'Dagger 1600 ms'},
+                {'item': 2535, 'source': 'Staff 3300 ms'},
+                {'item': 2531, 'source': '2H Axe 3600 ms'},
+            ],
+        }
+        with self.assertRaisesRegex(ValueError, 'share one subclass and one base speed_ms'):
+            behaviour_scenario(base, void_power_entry(weapon_damage_arms=confounded_arms))
+
+        def class_with_alt_override(target_item: int, **override) -> dict:
+            alts = [{**w, **override} if w['item'] == target_item else dict(w) for w in base['alternate_weapons']]
+            return {**base, 'alternate_weapons': alts}
+
+        for label, bad_class in (
+                ('differing_speed_ms', class_with_alt_override(2209, speed_ms=1700)),
+                ('differing_subclass', class_with_alt_override(2209, subclass=10)),
+                ('missing_speed_ms', {**base, 'alternate_weapons': [
+                    {k: v for k, v in w.items() if k != 'speed_ms'} if w['item'] == 2209 else dict(w)
+                    for w in base['alternate_weapons']]}),
+                ('missing_subclass', {**base, 'alternate_weapons': [
+                    {k: v for k, v in w.items() if k != 'subclass'} if w['item'] == 2209 else dict(w)
+                    for w in base['alternate_weapons']]})):
+            with self.subTest(case=label), self.assertRaises(ValueError):
+                behaviour_scenario(bad_class, void_power_entry())
 
     def test_refuses_expected_figures_too_few_weapons_or_undeclared_items(self):
         for bad_raw in (
