@@ -35,8 +35,9 @@ observe a single copy of `840025` (`AscensionCultistAbilities.cpp:495-497`, `Asc
      (`8` casts x `3` copies for `560301`), reads GUID-sorted `(x, y)` at `+50 ms` and `+1550 ms` (`< 3000 ms`
      duration), waiting `2000 ms` between casts for clean despawn.
    - Alerts if any copy displaces `< min_run_yd` (`5.0 yd` in `1500 ms`, excluding stationary `0 yd` and walk
-     `~3.75 yd` against run `~10.5 yd`), if mean resultant length `R > 0.65` (catching single-direction and narrow-cone
-     mutants), or if fewer than `5` of `8` 45-degree sectors are occupied (catching deterministic 1/2/3/4-way fans).
+     `~3.75 yd` against creature `840025` run `~12.0 yd` at `speed_run = 1.14286`), if mean resultant length
+     `R > 0.65` (catching single-direction and narrow-cone mutants), or if fewer than `min_sectors` (`>= max(5,
+     copies + 1)` with `copies < 8`) of `8` 45-degree sectors are occupied (catching deterministic fixed fans).
    - Uniform-direction false-fail upper bound at `M = 24`: `4.4e-5`/run (`8.8e-5` per 2-run pair `<= 0.1%`). Complies
      with D-38 (asserts no unstated numeric speed or distribution parameter beyond running displacement and
      non-fixed direction spread).

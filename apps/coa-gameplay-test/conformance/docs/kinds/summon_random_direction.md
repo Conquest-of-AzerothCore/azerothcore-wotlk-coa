@@ -30,6 +30,7 @@ walk speed) in unbiased, non-deterministic directions across repeated casts.
 
 ## Refusals
 
-Refuses unknown fields, `copies < 2`, fewer than `24` total observed copies, non-positive `min_run_yd`,
-`max_resultant` outside `(0, 1)`, `min_sectors` outside `5..8`, and timings that read at/after `duration_ms` or fail
-to wait past `duration_ms` for despawn.
+Refuses unknown fields, `copies` outside `2..7`, fewer than `24` total observed copies, non-positive `min_run_yd`,
+`max_resultant` outside `(0, 1)`, `min_sectors` outside `max(5, copies + 1)..8` (preventing any deterministic
+per-cast fan of `copies` directions from reaching `min_sectors`), and timings that read at/after `duration_ms` or
+fail to wait past `duration_ms` for despawn.

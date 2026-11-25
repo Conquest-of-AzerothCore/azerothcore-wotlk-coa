@@ -5396,7 +5396,8 @@ private:
                 else if (kind == "full")
                     match = event.victimState == VICTIMSTATE_BLOCKS;
                 else if (kind == "normal")
-                    match = event.victimState != VICTIMSTATE_BLOCKS && baseBlock > 0 && event.blockedAmount == baseBlock;
+                    match = event.victimState != VICTIMSTATE_BLOCKS && baseBlock > 0 &&
+                        event.blockedAmount == baseBlock;
                 else if (kind == "critical")
                     match = event.victimState != VICTIMSTATE_BLOCKS && baseBlock > 0 &&
                         event.blockedAmount == baseBlock * 2;

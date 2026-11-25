@@ -106,11 +106,13 @@ def mark(spec: SwingChargeSpec, read: str) -> str:
 
 
 def moment_reads(spec: SwingChargeSpec, moment: str) -> tuple[list[dict], dict[str, str]]:
+    other_hand = 1 - spec.hand
     names = {
         'time': mark(spec, f'{moment} time'),
         'aura': mark(spec, f'{moment} aura'),
         'charges': mark(spec, f'{moment} charges'),
         'swings': mark(spec, f'{moment} swings'),
+        'other_swings': mark(spec, f'{moment} other_swings'),
         'hits': mark(spec, f'{moment} hits'),
         'crits': mark(spec, f'{moment} crits'),
     }
@@ -119,6 +121,7 @@ def moment_reads(spec: SwingChargeSpec, moment: str) -> tuple[list[dict], dict[s
         measurement(names['aura'], CASTER, 'aura', spell=spec.aura),
         measurement(names['charges'], CASTER, 'aura_charges', spell=spec.aura),
         measurement(names['swings'], CASTER, 'melee_attack_count', hand=spec.hand),
+        measurement(names['other_swings'], CASTER, 'melee_attack_count', hand=other_hand),
         measurement(names['hits'], CASTER, 'melee_damage_count', hand=spec.hand),
         measurement(names['crits'], CASTER, 'melee_damage_count', hand=spec.hand, critical=True),
     ]
@@ -151,7 +154,9 @@ def swing_charge_scenario(class_file: dict, spec: SwingChargeSpec) -> tuple[dict
     entry = behaviour_entry(records, quote_target, spec.name, KIND, spec.quote, float(charges))
     class_file = armed_for(class_file, records, spec.spell)
     trigger_facts = facts_of(records, spec.trigger_spell)
-    max_window_ms = int(duration_ms * (1.0 - TIME_MARGIN))
+    max_window_ms = int(duration_ms * (1.0 - TIME_MARGIN)) - spec.trigger_wait_ms
+    if max_window_ms <= 0:
+        raise ValueError(f'{spec.spell} {KIND} max_window_ms {max_window_ms} must be positive')
 
     def prepare_trigger() -> list[dict]:
         steps = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura_id, 'stacks': 1}
@@ -211,8 +216,9 @@ def swing_charge_scenario(class_file: dict, spec: SwingChargeSpec) -> tuple[dict
                      f'({spec.no_crit_aura}), verifies initial aura == 1 and aura_charges == {charges}, delivers '
                      f'exactly {charges - 1} non-crit melee auto-attacks via attack_until_swings and requires '
                      f'aura == 1 and aura_charges == 1, then delivers 1 more non-crit swing and requires aura == 0 '
-                     f'and aura_charges == 0 within {max_window_ms} ms (< {100 * (1 - TIME_MARGIN):g}% of '
-                     f'{duration_ms} ms duration). Any refused cast, crit swing, swing mismatch, or elapsed time '
+                     f'and aura_charges == 0 within {max_window_ms} ms (total age including {spec.trigger_wait_ms} ms '
+                     f'trigger settle < {100 * (1 - TIME_MARGIN):g}% of {duration_ms} ms duration) and 0 off-hand '
+                     f'swings. Any refused cast, crit swing, swing mismatch, inactive-hand swing, or elapsed time '
                      f'>= {max_window_ms} ms voids the run as unmeasured.'),
         'players': [player],
         'creatures': [creature_fixture(class_file)],
@@ -254,9 +260,11 @@ def swing_charge_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         'pen_aura': pen['aura'], 'pen_charges': pen['charges'],
         'final_aura': final['aura'], 'final_charges': final['charges'],
         'pen_swings': pen['swings'] - start['swings'],
+        'pen_other_swings': pen['other_swings'] - start['other_swings'],
         'pen_hits': pen['hits'] - start['hits'],
         'pen_crits': pen['crits'] - start['crits'],
         'final_swings': final['swings'] - start['swings'],
+        'final_other_swings': final['other_swings'] - start['other_swings'],
         'final_hits': final['hits'] - start['hits'],
         'final_crits': final['crits'] - start['crits'],
         'elapsed_ms': final['time'] - start['time'],
@@ -269,17 +277,20 @@ def swing_charge_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
         return replace(base, status='alert', measured=start['charges'], expected=float(expected), detail=detail,
                        explanation=f'treatment start had aura {start["aura"]:g}, charges {start["charges"]:g} '
                                    f'against expected {expected}')
-    if (detail['pen_swings'] != expected - 1 or detail['pen_hits'] != expected - 1 or detail['pen_crits'] != 0
-            or detail['final_swings'] != expected or detail['final_hits'] != expected or detail['final_crits'] != 0):
+    if (detail['pen_swings'] != expected - 1 or detail['pen_other_swings'] != 0
+            or detail['pen_hits'] != expected - 1 or detail['pen_crits'] != 0
+            or detail['final_swings'] != expected or detail['final_other_swings'] != 0
+            or detail['final_hits'] != expected or detail['final_crits'] != 0):
         return replace(base, status='unmeasured', detail=detail,
                        explanation=f'swing fixture mismatch: pen ({detail["pen_swings"]:g} swings, '
-                                   f'{detail["pen_hits"]:g} hits, {detail["pen_crits"]:g} crits), final '
-                                   f'({detail["final_swings"]:g} swings, {detail["final_hits"]:g} hits, '
+                                   f'{detail["pen_other_swings"]:g} other-hand, {detail["pen_hits"]:g} hits, '
+                                   f'{detail["pen_crits"]:g} crits), final ({detail["final_swings"]:g} swings, '
+                                   f'{detail["final_other_swings"]:g} other-hand, {detail["final_hits"]:g} hits, '
                                    f'{detail["final_crits"]:g} crits) against {expected - 1}/{expected} non-crit hits')
     if detail['elapsed_ms'] <= 0 or detail['elapsed_ms'] >= max_window_ms:
         return replace(base, status='unmeasured', detail=detail,
-                       explanation=f'10 swings elapsed {detail["elapsed_ms"]:.0f} ms, outside (0, {max_window_ms}) ms '
-                                   f'before duration expiry')
+                       explanation=f'{expected} swings elapsed {detail["elapsed_ms"]:.0f} ms, outside '
+                                   f'(0, {max_window_ms}) ms before duration expiry')
     if pen['aura'] != 1 or pen['charges'] != 1:
         return replace(base, status='alert', measured=pen['charges'], expected=1.0, detail=detail,
                        explanation=f'after {expected - 1} swings aura={pen["aura"]:g}, charges={pen["charges"]:g} '

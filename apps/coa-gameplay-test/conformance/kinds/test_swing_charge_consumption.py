@@ -30,18 +30,21 @@ def seeded_run(model: dict, overrides: dict | None = None, cast_failures: dict |
         reads['start']['aura']: 1.0,
         reads['start']['charges']: float(expected),
         reads['start']['swings']: 0.0,
+        reads['start']['other_swings']: 0.0,
         reads['start']['hits']: 0.0,
         reads['start']['crits']: 0.0,
         reads['penultimate']['time']: 15400.0,
         reads['penultimate']['aura']: 1.0,
         reads['penultimate']['charges']: 1.0,
         reads['penultimate']['swings']: float(expected - 1),
+        reads['penultimate']['other_swings']: 0.0,
         reads['penultimate']['hits']: float(expected - 1),
         reads['penultimate']['crits']: 0.0,
         reads['final']['time']: 16060.0,
         reads['final']['aura']: 0.0,
         reads['final']['charges']: 0.0,
         reads['final']['swings']: float(expected),
+        reads['final']['other_swings']: 0.0,
         reads['final']['hits']: float(expected),
         reads['final']['crits']: 0.0,
     }
@@ -61,6 +64,7 @@ class SwingChargeConsumptionTests(unittest.TestCase):
         self.assertEqual([step['swings'] for step in swings], [9, 1])
         self.assertEqual(exp.model['expected_charges'], 10)
         self.assertEqual(exp.model['duration_ms'], 15000)
+        self.assertEqual(exp.model['max_window_ms'], 12350)
         verdict = swing_charge_verdict(base_verdict(exp), seeded_run(exp.model), exp.model)
         self.assertEqual(verdict.status, 'ok', verdict.explanation)
         self.assertEqual(EVIDENCE[verdict.check], BY_METRIC)
@@ -94,12 +98,19 @@ class SwingChargeConsumptionTests(unittest.TestCase):
         for name, overrides in (
                 ('missed_swing_at_9', {reads['penultimate']['hits']: 8.0}),
                 ('extra_swing_at_9', {reads['penultimate']['swings']: 10.0, reads['penultimate']['hits']: 10.0}),
+                ('other_hand_swing', {reads['penultimate']['other_swings']: 1.0, reads['final']['other_swings']: 1.0}),
                 ('crit_swing_at_9', {reads['penultimate']['crits']: 1.0}),
                 ('crit_swing_at_10', {reads['final']['crits']: 1.0}),
+                ('elapsed_hits_adjusted_window', {reads['final']['time']: 22350.0}),
                 ('elapsed_too_close_to_duration', {reads['final']['time']: 23000.0})):
             with self.subTest(case=name):
                 verdict = swing_charge_verdict(base_verdict(exp), seeded_run(exp.model, overrides), exp.model)
                 self.assertEqual(verdict.status, 'unmeasured', f'{name}: {verdict.explanation}')
+        custom_model = {**exp.model, 'expected_charges': 6}
+        slow_verdict = swing_charge_verdict(
+            base_verdict(exp), seeded_run(custom_model, {reads['final']['time']: 22350.0}), custom_model)
+        self.assertEqual(slow_verdict.status, 'unmeasured')
+        self.assertIn('6 swings elapsed', slow_verdict.explanation)
 
     def test_refuses_bad_specs_and_missing_proc_charges(self):
         for bad in (

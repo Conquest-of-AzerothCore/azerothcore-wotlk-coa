@@ -24,9 +24,12 @@ after `N - 1` non-critical melee auto-attacks, and is removed on the `N`th melee
   so auto-attacks cannot crit and refresh `aura`, reads `start` (`aura == 1`,
   `aura_charges == N`), executes `attack_until_swings(swings = N - 1)` and reads `penultimate` (`aura == 1`,
   `aura_charges == 1`), then executes `attack_until_swings(swings = 1)` and reads `final` (`aura == 0`,
-  `aura_charges == 0`) with elapsed game time `< 0.85 * duration_ms`.
-- Any refused cast, crit swing, missed/extra swing, or elapsed time `>= 0.85 * duration_ms` voids the run as
-  `unmeasured`.
+  `aura_charges == 0`) with elapsed swing time `< int(0.85 * duration_ms) - trigger_wait_ms` (so total aura age from
+  trigger cast stays strictly `< 0.85 * duration_ms`) and `0` swings on the inactive hand (`1 - hand`).
+- Any refused cast, crit swing, missed/extra swing, inactive-hand swing, or elapsed time
+  `>= int(0.85 * duration_ms) - trigger_wait_ms` voids the run as `unmeasured`.
+- `swing_charge_consumption` proves exact swing-count removal before duration expiry; pair it with a companion
+  no-swing duration check (such as `duration` or `duration_contrast`) to rule out purely time-driven charge decay.
 - Uses `metric = 'aura'` (`EVENT`), so `BEHAVIOUR_METRIC_DELTA` classifies as `behaviour` evidence without changing
   `coverage.py`.
 

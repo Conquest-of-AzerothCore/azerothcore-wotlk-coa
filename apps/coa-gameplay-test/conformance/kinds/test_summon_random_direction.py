@@ -80,6 +80,11 @@ class SummonRandomDirectionTests(unittest.TestCase):
             with self.subTest(mutant=name):
                 verdict = summon_random_direction_verdict(base_verdict(exp), runs, exp.model)
                 self.assertEqual(verdict.status, 'alert', f'{name}: {verdict.explanation}')
+        five_copy = {**HALLUCINATION_ENTRY, 'copies': 5, 'casts': 5, 'min_sectors': 6}
+        _, [exp5] = scenario_of(five_copy)
+        fan5 = [2.0 * math.pi * k / 5.0 for k in range(5)] * 5
+        verdict5 = summon_random_direction_verdict(base_verdict(exp5), seeded_run(exp5.model, fan5), exp5.model)
+        self.assertEqual(verdict5.status, 'alert', verdict5.explanation)
 
     def test_unmeasured_on_missing_nan_leftover_or_refused_cast(self):
         _, [exp] = scenario_of(HALLUCINATION_ENTRY)
@@ -107,6 +112,8 @@ class SummonRandomDirectionTests(unittest.TestCase):
         for bad in (
                 {**HALLUCINATION_ENTRY, 'unknown_field': 1},
                 {**HALLUCINATION_ENTRY, 'copies': 1},
+                {**HALLUCINATION_ENTRY, 'copies': 8, 'casts': 3},
+                {**HALLUCINATION_ENTRY, 'copies': 5, 'casts': 5, 'min_sectors': 5},
                 {**HALLUCINATION_ENTRY, 'casts': 2},
                 {**HALLUCINATION_ENTRY, 'min_run_yd': 0},
                 {**HALLUCINATION_ENTRY, 'max_resultant': 1.0},

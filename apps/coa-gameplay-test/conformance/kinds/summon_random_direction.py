@@ -60,8 +60,8 @@ def summon_random_direction_spec(entry: dict) -> SummonRandomDirectionSpec:
     for name, value in (('entry', creature_entry), ('copies', copies), ('casts', casts), ('parts', parts)):
         if isinstance(value, bool) or not isinstance(value, int) or value < 1:
             raise ValueError(f'{spell} {KIND} {name} must be a positive integer')
-    if copies < 2:
-        raise ValueError(f'{spell} {KIND} copies must be >= 2')
+    if copies < 2 or copies >= SECTORS:
+        raise ValueError(f'{spell} {KIND} copies must be in 2..{SECTORS - 1}')
     if casts * copies * parts < MIN_COPIES_OBSERVED:
         raise ValueError(f'{spell} {KIND} observes {casts * copies * parts} copies, below minimum '
                          f'{MIN_COPIES_OBSERVED}')
@@ -81,9 +81,10 @@ def summon_random_direction_spec(entry: dict) -> SummonRandomDirectionSpec:
     if isinstance(max_resultant, bool) or not isinstance(max_resultant, (int, float)) or not 0 < max_resultant < 1:
         raise ValueError(f'{spell} {KIND} max_resultant must lie strictly in (0, 1)')
     min_sectors = entry.get('min_sectors', DEFAULT_MIN_SECTORS)
+    min_allowed = max(DEFAULT_MIN_SECTORS, copies + 1)
     if (isinstance(min_sectors, bool) or not isinstance(min_sectors, int)
-            or not DEFAULT_MIN_SECTORS <= min_sectors <= SECTORS):
-        raise ValueError(f'{spell} {KIND} min_sectors must be in {DEFAULT_MIN_SECTORS}..{SECTORS}')
+            or not min_allowed <= min_sectors <= SECTORS):
+        raise ValueError(f'{spell} {KIND} min_sectors must be in {min_allowed}..{SECTORS}')
     cast_power = entry.get('cast_power')
     if cast_power is not None and (isinstance(cast_power, bool) or not isinstance(cast_power, int) or cast_power < 0):
         raise ValueError(f'{spell} {KIND} cast_power must be a non-negative integer')

@@ -40,8 +40,10 @@ behaviour, but left `r85[1]` (`"$n attacks"`) at `data` evidence (`initial_charg
      haste fixtures (`62531`, `2116852` -> `660 ms` swings on `2535`), triggers `aura`, applies `no_crit_aura`
      (`64481`, preventing crit refreshes), checks `start` (`1 / N`), delivers `N - 1` swings via
      `attack_until_swings` and checks `penultimate` (`1 / 1`), then delivers `1` swing and checks `final` (`0 / 0`)
-     within `0.85 * duration_ms` in game time.
-   - Any refused cast, crit swing, missed/extra swing, or slow window voids the run as `unmeasured`.
+     within `int(0.85 * duration_ms) - trigger_wait_ms` in game time (total aura age `< 0.85 * duration_ms`) with `0`
+     swings on the inactive hand (`1 - hand`).
+   - Any refused cast, crit swing, missed/extra swing, inactive-hand swing, or slow window voids the run as
+     `unmeasured`. Pair with a companion no-swing duration check to rule out purely time-driven charge decay.
    - Uses `metric = 'aura'` (`EVENT`), classifying as `behaviour` evidence with zero edits to `coverage.py`.
 
 ## Consequences
