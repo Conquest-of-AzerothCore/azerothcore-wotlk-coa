@@ -93,13 +93,14 @@ No shared engine, DBC, SQL, tool, or client text changes.
 - **Immediate removal & single-target tether:** When `501464`'s target leaves the `15.0 yd` (`17.025 yd` c2c) range,
   `owner`'s `Thoughtseize` (`806596`) is removed on the very next `UpdateAI` tick (`<= 50 ms`), before `501464`
   acquires any replacement target — neither dual-target affliction nor lingering out-of-range silence/DoT occurs.
-- **No-other-target & target-return behaviour (observations where tooltip is silent):**
+- **No-other-target & target-return behaviour (observations where tooltip is silent, not owner rulings):**
   - When no other combat target is within `15 yd`, the escaped target still loses `806596` immediately on the next tick
     and `501464` remains alive until its natural `8000 ms` despawn (preserving ADR 0034 Observation (b)).
   - Because `Pulse` remains at `6000 ms` (existing cadence), if the escaped target walks back inside `15 yd` before the
     `6000 ms` `Pulse`, that `Pulse` re-applies `806596` until natural `8000 ms` despawn (where ADR 0016's
     `ClearThoughtseize(ExpiryGrace())` clears it cleanly because `~6000 ms > 200 ms`). If the target returns after
-    `6000 ms`, no further `Pulse` fires before despawn and `806596` is not re-applied.
+    `6000 ms`, no further `Pulse` fires before despawn and `806596` is not re-applied. This return-in-range cadence is
+    an unruled observation and is intentionally not asserted in the committed regression scenarios.
 - **Tick arithmetic preserved:**
   - In-range control (`0..8000 ms`, `Amplitude = 2000 ms`): `8000 / 2000 = 4` ticks on primary (`2, 4, 6, 8 s`, 4th tick
     spared by ADR 0016 `ExpiryGrace()`), `0` on secondary.
@@ -121,33 +122,47 @@ No shared engine, DBC, SQL, tool, or client text changes.
     arm), and does not read `spell_damage_count` on `dummy`/`area1`.
   - `metric_delta` has no option to issue `move_point` on a creature (`TARGET`) after `trigger_spell`.
 - **Verification (worldserver build `539312883947`, `b95b241990dd+`):**
-  - `572103` counted pair (`cu-fix5-o22-prove-572103`, runs `20261125-134612` and `20261125-134642`, `15/15 ok` in both
-    runs, `0` flips, all `5` ledger rows `behaviour`):
-    - `572103 retarget_out_of_range` (`end` at `6800 ms`): `ok / ok`; raw `result.json` control `primary_aura = 1`,
-      `secondary_aura = 0` (`10.62` / `10.55 yd`); near `primary_aura = 0`, `secondary_aura = 1` (`26.66` / `24.17 yd`);
-      far `primary_aura = 0`, `secondary_aura = 1` (`46.29` / `51.40 yd`).
-    - `572103 retarget_short_delay` (`end` at `3300 ms`, `2700 ms` before `6000 ms` `Pulse`): `ok / ok`; raw
-      `result.json` control `primary_aura = 1`, `secondary_aura = 0` (`11.59` / `9.59 yd`); near `primary_aura = 0`,
-      `secondary_aura = 1` (`23.56` / `26.43 yd`); far `primary_aura = 0`, `secondary_aura = 1` (`38.20` / `36.92 yd`).
-    - `search_inside_15yd` (`0 -> 1`), `search_beyond_15yd` (`0 -> 0`), `damage_base` (`528` / `528`, 4 ticks),
-      `damage_sp` (`3900` / `3888`, 4 ticks), `presence_eternal_grasp_expiry` (5 ticks / 12 s),
+  - `572103` counted pairs (`cu-fix5-o22-prove-572103` runs `20261125-134612` / `20261125-134642` and refreshed
+    `cu-fix5-h-prove-572103` runs `20261125-144748` / `20261125-144817`; `15/15 ok` in every run, `0` flips, all `5`
+    ledger rows `behaviour`):
+    - `572103 retarget_out_of_range` (`end` at `6800 ms`): `ok / ok`; control `area1 = 0` (`9.17` / `10.13 yd`),
+      near (`21.35` / `22.49 yd`) and far (`40+ yd`) retargeted `area1 = 1` with raw `primary_aura = 0`.
+    - `572103 retarget_short_delay` (`end` at `3300 ms`, `2700 ms` before `6000 ms` `Pulse`): `ok / ok`; control
+      `area1 = 0` (`5.60` / `9.82 yd`), near (`26.35` / `23.10 yd`) and far retargeted `area1 = 1` with raw
+      `primary_aura = 0`.
+    - `search_inside_15yd` (`0 -> 1`), `search_beyond_15yd` (`0 -> 0`), `damage_base` (`536` / `524`, 4 ticks),
+      `damage_sp` (`3892` / `3900`, 4 ticks), `presence_eternal_grasp_expiry` (5 ticks / 12 s),
       `tentacle_death_ends_silence`: all `ok / ok`.
-  - Direct O-22 gameplay verification runs (`20261125-134725` and `20261125-134830`, `3/3 passed` in both runs):
-    - Retarget + non-overlap + ticks: control `4` ticks on `dummy`, `0` on `area1`; treatment (`dummy` `25.18` /
-      `18.17 yd` at `2800 ms`) `dummy = 0`, `area1 = 1` at `2800`, `3300`, `6800 ms`, `0` delta ticks on `dummy` and
-      `3` ticks on `area1` (`0 + 3 = 3 <= 4`).
-    - No other target + return: control `4` ticks; out-of-range (`23.81` / `23.30 yd`) `501464 = 1`, `dummy = 0` at
-      `2800` and `6800 ms`, `0` delta ticks; return inside `15 yd` by `5300 ms` (`2.28` / `2.90 yd`) stayed `0` before
-      `6000 ms` pulse, re-applied `1` at `6800 ms`, cleared to `0` at `9500 ms`.
-    - Two-Cultist isolation: `caster1` (`22.75` / `22.70 yd`) lost `806596` (`0`) while `caster2` (`15.72` / `9.54 yd`)
-      kept `806596` (`1`).
+  - Committed O-22 catalog gameplay scenarios (counted pair `20261125-142643` and `20261125-142712`,
+    `VERIFY ALL: PASSED`, `3/3 passed` in both runs):
+    - `apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-retarget-clears-primary.json`: control (`7.47` /
+      `9.23 yd`) kept `dummy = 1`, `area1 = 0`, `4` ticks on `dummy`, `0` on `area1`; treatment (`22.70` / `25.33 yd`)
+      asserted `dummy = 0` and `area1 = 1` at `2800`, `3300`, and `6800 ms`, clean `0/0` at `9500 ms`, `0` delta ticks
+      on `dummy` (cumulative `4`), and `3` ticks on `area1` (`0 + 3 = 3 <= 4`).
+    - `apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-no-other-target.json` (control + no-other-target
+      arms only; unruled return-in-range cadence intentionally omitted): control (`11.55` / `6.78 yd`) kept
+      `dummy = 1` and `4` ticks; out-of-range (`21.75` / `23.56 yd`) kept `501464 = 1` and `dummy = 0` at `2800` and
+      `6800 ms`, clean `0/0` at `9500 ms`, `0` delta ticks (cumulative `4`).
+    - `apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-two-cultists-owner-isolation.json`: `caster1`
+      (`23.43` / `24.44 yd > 17.025 yd`) lost `806596` (`0`) while `caster2` (`12.11` / `10.11 yd <= 17.025 yd`) kept
+      `806596` (`1`).
   - Shared-summon counted pair (`cu-fix5-o22-prove-shared`, runs `20261125-135133` and `20261125-135408`, 15 spells /
-    61 entries): `60/61 ok` in both runs; 2 unrelated non-oks on summons untouched by the `entry == 501464`-gated diff:
-    `802728 tentacle_crit_damage` (`ok` / `insufficient_trials` `+9.991%`, confirmed `ok / ok` in focused pair
-    `20261125-135803` / `20261125-135915`) and `706911 portal_casts` (Void Portal `533030` low-sample proc RNG flake:
-    `alert` `0` / `ok` `3`, and `alert` `0` / `ok` `2` in focused pair while all 4 other `706911` entries passed
-    `ok / ok`).
+    61 entries): `60/61 ok` in both runs; 2 unrelated pre-existing test defects on summons untouched by the
+    `entry == 501464`-gated diff were diagnosed and repaired in `cultist.json`:
+    - `706911 portal_casts` had omitted `refill_power_after_setup_casts: {"power": 0}`, causing `76/96` casts of
+      `500110` (`ManaCostPercentage = 15`) to fail with `SPELL_FAILED_NO_POWER` (`reason 85`), leaving `10` effective
+      casts (`0.85^10 = 19.69%` zero-portal rate per run). Fixed with `refill_power_after_setup_casts: {"power": 0}`
+      and `85` casts (`84` setup + `1` trigger, `0.85^85 = 1.001e-6` per run / `2.003e-6` per pair); 5-pair (10-run)
+      proof of `706911`, `301068`, and `301200` (`cu-fix5-h-prove-portals`, `20261125-143333` through `20261125-144612`)
+      passed `21/21 ok` in all 10 runs (`0` alerts, `0` flips, `0` OOM failures, `portal_casts` hits `7..22`, mean
+      `11.7`).
+    - `802728 tentacle_crit_damage` suffered 1-tick `total`/`count` measurement tearing against autonomous `50272`'s
+      `1500 ms` channel (`~28.8%` tearing rate per run). Switched to synchronously commanded `50096` (`802044`/`802046`,
+      zero autonomous ticks after warmup, matching `802048`); 5-pair (10-run) proof (`cu-fix5-h-prove-802728`, pilot
+      `20261125-142800` + runs `20261125-142828` through `20261125-143237`) passed `2/2 ok` in all 10 runs (`0` alerts,
+      `0` flips, exact `235` vs `214` = `+9.813%`, 99% CI `[+9.813%, +9.813%]`).
   - Existing `*nzoth*` / `*tentacle*` catalog scenarios (`20261125-135659`): **`13/13 passed`** (`VERIFY ALL: PASSED`).
 - Ledger row 206 (`apps/coa-gameplay-test/conformance/classes/cultist_clauses.json`) links `retarget_short_delay`
-  alongside `retarget_out_of_range`, `search_inside_15yd`, and `search_beyond_15yd`.
+  alongside `retarget_out_of_range`, `search_inside_15yd`, and `search_beyond_15yd`, and cites the three committed
+  O-22 catalog gameplay scenarios in `reason` as supporting evidence.
 - No other class is reached.
