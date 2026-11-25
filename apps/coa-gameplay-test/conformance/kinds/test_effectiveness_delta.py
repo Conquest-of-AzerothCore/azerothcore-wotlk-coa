@@ -15,6 +15,7 @@ ENTRY = {'spell': 560613, 'name': 'Improved Mandates (Grim Mandate spell power)'
          'metric': 'spell_power', 'fields': {'school': 5}}
 CLAUSE = 'Increases the effectiveness of your Mandates by 20%.'
 READ_METRICS_BEFORE_RESISTANCE = ('spell_power', 'stat', 'dodge_chance', 'parry_chance', 'run_speed_rate')
+READ_METRICS_BEFORE_ATTACK_POWER = (*READ_METRICS_BEFORE_RESISTANCE, 'resistance')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
@@ -132,6 +133,45 @@ class EffectivenessDeltaTests(unittest.TestCase):
         self.assertTrue(promised_state(judged(65, 97), 'Increases the effectiveness of your Pacts by 50%.'))
         self.assertFalse(promised_state(judged(65, 97), "increases nearby allies' Shadow Resistance by 65"))
         with mock.patch('kinds.effectiveness_delta.READ_METRICS', READ_METRICS_BEFORE_RESISTANCE), \
+                self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), entry)
+
+    def test_a_dummy_attack_power_debuff_is_judged_as_its_effectiveness_state(self):
+        from coverage import STATE, metric_evidence, promised_state
+        entry = {'spell': 706177, 'name': 'Improved Sermon of Dread (Sermon of Dread attack power debuff)',
+                 'kind': 'effectiveness_delta', 'label_suffix': 'sermon_attack_power',
+                 'quote': 'Increases the effectiveness of |cFFFFFFFFSermon of Dread|r by $s1%.',
+                 'trigger_spell': 620614, 'gate_spell': 706177, 'target': 'dummy', 'measure_actor': 'dummy',
+                 'cast_power': 2000, 'phase_auras': [[35785, 1, 'dummy', 'dummy']],
+                 'metric': 'attack_power', 'fields': {}, 'before_expected': 900, 'expected': 843,
+                 'expected_gain': -57, 'tolerance': 0.5, 'wait_ms': 1000, 'expire_ms': 31000}
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        model = expectation.model
+        reads = [step for step in scenario['steps'] if step.get('label') in (model['before_label'],
+                                                                              model['after_label'])]
+        self.assertEqual([(step['metric'], step['actor']) for step in reads],
+                         [('attack_power', 'dummy'), ('attack_power', 'dummy')])
+        self.assertEqual(model['metric'], 'effectiveness_attack_power')
+        self.assertEqual(metric_evidence()['effectiveness_attack_power'], STATE)
+
+        def judged(before: float | None, after: float | None):
+            values = {}
+            if before is not None:
+                values[model['before_label']] = before
+            if after is not None:
+                values[model['after_label']] = after
+            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+        self.assertEqual(judged(900.0, 843.0).status, 'ok')
+        self.assertEqual(judged(900.0, 900.0).status, 'alert')
+        self.assertEqual(judged(900.0, 800.0).status, 'alert')
+        self.assertEqual(judged(900.0, None).status, 'unmeasured')
+        self.assertTrue(promised_state(judged(900.0, 843.0),
+                                       'Increases the effectiveness of Sermon of Dread by 40%.'))
+        self.assertFalse(promised_state(judged(900.0, 843.0),
+                                        'reducing the attack power of all enemies within 10 yds by 144'))
+        with mock.patch('kinds.effectiveness_delta.READ_METRICS', READ_METRICS_BEFORE_ATTACK_POWER), \
                 self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), entry)
 
