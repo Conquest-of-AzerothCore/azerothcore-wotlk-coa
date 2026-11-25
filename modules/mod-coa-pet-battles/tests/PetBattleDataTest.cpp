@@ -112,6 +112,49 @@ TEST(CoAPetBattles, StandInEntryIsOffsetFromSpecies)
     EXPECT_EQ(StandInEntry(data, 30), 0u);
 }
 
+TEST(CoAPetBattles, ExplicitStandInIsUsed)
+{
+    DataSet data = MakeValidData();
+    data.standIns[10] = 9850005;
+    EXPECT_EQ(StandInEntry(data, 10), 9850005u);
+    EXPECT_TRUE(Validate(data, AnyTemplate).errors.empty());
+}
+
+TEST(CoAPetBattles, ExplicitStandInOutsideItsRangeIsReported)
+{
+    DataSet data = MakeValidData();
+    data.standIns[10] = 9849999;
+    Report report = Validate(data, AnyTemplate);
+    EXPECT_TRUE(Contains(report.errors, "species 10: stand-in entry 9849999 outside reserved range"));
+    EXPECT_EQ(StandInEntry(data, 10), 0u);
+}
+
+TEST(CoAPetBattles, ExplicitStandInsMustBeUnique)
+{
+    DataSet data = MakeValidData();
+    data.species[20].standin = true;
+    data.standIns[10] = 9850000;
+    data.standIns[20] = 9850000;
+    Report report = Validate(data, AnyTemplate);
+    EXPECT_TRUE(Contains(report.errors, "stand-in entry 9850000 used by species 10 and 20"));
+}
+
+TEST(CoAPetBattles, ExplicitStandInNeedsCreatureTemplate)
+{
+    DataSet data = MakeValidData();
+    data.standIns[10] = 9850000;
+    Report report = Validate(data, [](uint32_t entry) { return entry != 9850000; });
+    EXPECT_TRUE(Contains(report.errors, "species 10: stand-in template 9850000 missing"));
+}
+
+TEST(CoAPetBattles, ExplicitStandInForUnknownSpeciesIsReported)
+{
+    DataSet data = MakeValidData();
+    data.standIns[77] = 9850001;
+    Report report = Validate(data, AnyTemplate);
+    EXPECT_TRUE(Contains(report.errors, "stand-in 77: species missing"));
+}
+
 TEST(CoAPetBattles, StandInBeyondTheReservedRangeIsReported)
 {
     DataSet data = MakeValidData();

@@ -130,12 +130,27 @@ namespace CoAPetBattles
                     report.errors.push_back(Text({ "companion ", Id(spell), ": species ", Id(companion.species),
                         " missing" }));
 
+            std::map<uint32_t, uint32_t> standInOwners;
+            for (auto const& [entry, standIn] : data.standIns)
+            {
+                if (!data.species.count(entry))
+                    report.errors.push_back(Text({ "stand-in ", Id(entry), ": species missing" }));
+                auto const [owner, added] = standInOwners.emplace(standIn, entry);
+                if (!added)
+                    report.errors.push_back(Text({ "stand-in entry ", Id(standIn), " used by species ",
+                        Id(owner->second), " and ", Id(entry) }));
+            }
+
             for (auto const& [entry, species] : data.species)
             {
                 if (!species.standin)
                     continue;
-                uint64_t const standIn = uint64_t(StandInBase) + entry;
-                if (standIn > StandInLimit)
+                auto const explicitStandIn = data.standIns.find(entry);
+                bool const isExplicit = explicitStandIn != data.standIns.end();
+                uint64_t const standIn = isExplicit ? explicitStandIn->second : uint64_t(StandInBase) + entry;
+                bool const outside = isExplicit
+                    ? standIn < ExplicitStandInBase || standIn > ExplicitStandInLimit : standIn > StandInLimit;
+                if (outside)
                     report.errors.push_back(Text({ "species ", Id(entry), ": stand-in entry ", Id(standIn),
                         " outside reserved range" }));
                 else if (!creatureTemplateExists(uint32_t(standIn)))
@@ -150,6 +165,10 @@ namespace CoAPetBattles
         auto const found = data.species.find(species);
         if (found == data.species.end() || !found->second.standin)
             return 0;
+        auto const explicitStandIn = data.standIns.find(species);
+        if (explicitStandIn != data.standIns.end())
+            return explicitStandIn->second < ExplicitStandInBase || explicitStandIn->second > ExplicitStandInLimit ? 0
+                : explicitStandIn->second;
         uint64_t const entry = uint64_t(StandInBase) + species;
         return entry > StandInLimit ? 0 : uint32_t(entry);
     }

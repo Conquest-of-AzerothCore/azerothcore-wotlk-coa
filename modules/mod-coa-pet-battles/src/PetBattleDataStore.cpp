@@ -35,6 +35,10 @@ namespace CoAPetBattles
                     f[8].Get<std::string>(), f[9].Get<float>() };
                 data.species[row.entry] = row;
             });
+            ReadRows("SELECT `species`, `entry` FROM `coa_pet_standin`", [&data](Field* f)
+            {
+                data.standIns[f[0].Get<uint32>()] = f[1].Get<uint32>();
+            });
             ReadRows("SELECT `id`, `name`, `family`, `power`, `speed`, `stamina` FROM `coa_pet_kit`", [&data](Field* f)
             {
                 Kit row { f[0].Get<uint32>(), f[1].Get<std::string>(), f[2].Get<uint8>(), f[3].Get<int16>(),

@@ -13,6 +13,8 @@ namespace CoAPetBattles
 {
     constexpr uint32_t StandInBase = 9800000;
     constexpr uint32_t StandInLimit = 9849999;
+    constexpr uint32_t ExplicitStandInBase = 9850000;
+    constexpr uint32_t ExplicitStandInLimit = 9899999;
 
     struct Species
     {
@@ -168,6 +170,7 @@ namespace CoAPetBattles
         std::map<uint32_t, Companion> companions;
         std::map<uint16_t, State> states;
         std::map<uint8_t, XpLevel> xp;
+        std::map<uint32_t, uint32_t> standIns;
         std::vector<KitAbility> kitAbilities;
         std::vector<AbilityTurn> turns;
         std::vector<AbilityEffect> effects;
