@@ -1273,7 +1273,10 @@
     "spell": 520345,
     "clause": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
     "labels": [
-      "520345 effect_value #3"
+      "520345 behaviour_metric_delta absorb_caster_base",
+      "520345 behaviour_metric_delta absorb_caster_sp",
+      "520345 behaviour_metric_delta absorb_caster_ap",
+      "520345 behaviour_metric_delta absorb_ally_base"
     ],
     "kind": "claim"
   },
@@ -1281,7 +1284,7 @@
     "spell": 520345,
     "clause": "stacking $520346u times,",
     "labels": [
-      "520345 max_stacks 520346 #0"
+      "520345 behaviour_metric_delta stacks"
     ],
     "kind": "claim"
   },
@@ -1293,13 +1296,14 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "520345 aura_amplitude_ms #1"
+          "520345 behaviour_metric_delta period_early",
+          "520345 behaviour_metric_delta period_late"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "520345 aura_duration_ms #2"
+          "520345 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -1308,18 +1312,33 @@
     "spell": 520345,
     "clause": "At the end of the duration, if the shield holds, you teleport to them.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind/option counts Dark Veil 520345's teleport to the grouped ally as behaviour evidence under no-tool-code-changes: AscensionCultistAuras.cpp:164-172 calls player->NearTeleportTo(target->...) on 520345 expiry when both 520346 shield effects remain > 0, and metric_delta has ally_arm + ally_offsets + distance_2d / displacement_2d, but coverage.py:530 (STATE_PROMISES['distance_2d'] = r'location|hook\\w*|pull\\w*') and metric_delta_options/displacement.py:8 (STATE_PROMISES['displacement_2d'] = r'dash\\w*|direction|distance|leap\\w*|range|yds?') do not match 'teleport', so coverage.py:831-833 classifies any such entry as data rather than behaviour; nearest_creature_distance (coverage.py:512) only reads a creature entry, not a grouped ally player. Nearest kind: metric_delta with ally_arm, ally_offsets, and distance_2d or displacement (needs 'teleport\\w*' in STATE_PROMISES).",
+      "attempts": [
+        {
+          "agent": "cu-g8c",
+          "report": ".agents/plans/cu-g8c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 520345,
     "clause": "While channeling you are immune to stuns and silences.",
-    "labels": [],
+    "labels": [
+      "520345 behaviour_metric_delta immune_stun",
+      "520345 behaviour_metric_delta immune_silence"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520345,
     "clause": "Not usable on yourself.",
-    "labels": [],
+    "labels": [
+      "520345 behaviour_metric_delta no_self_cast",
+      "520345 behaviour_metric_delta ally_cast_allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -1390,7 +1409,10 @@
     "spell": 520682,
     "clause": "Your Dark Veil now performs its effect $s1% faster.",
     "labels": [
-      "520682 effect_value e0 #0"
+      "520682 behaviour_metric_delta faster_period_early",
+      "520682 behaviour_metric_delta faster_period_late",
+      "520682 behaviour_metric_delta faster_duration",
+      "520682 behaviour_metric_delta duration_contrast"
     ],
     "kind": "claim"
   },
@@ -1452,36 +1474,52 @@
   {
     "spell": 524877,
     "clause": "Every 1 sec while Hand of Yogg-Saron is active,",
-    "labels": [],
+    "labels": [
+      "524877 behaviour_metric_delta period_early",
+      "524877 behaviour_metric_delta period_late"
+    ],
     "kind": "claim"
   },
   {
     "spell": 524877,
     "clause": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.",
-    "labels": [],
+    "labels": [
+      "524877 behaviour_metric_delta trigger_and_insanity"
+    ],
     "kind": "claim"
   },
   {
     "spell": 524877,
     "clause": "Heals a friendly target for ${$m1+0+$SP*0.678496},",
     "labels": [
-      "524877 effect_value 704473e0 #0"
+      "524877 behaviour_metric_delta heal_base",
+      "524877 behaviour_metric_delta heal_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 524877,
     "clause": "scaling with Insanity, and increases their critical strike chance by $s2%,",
-    "labels": [
-      "524877 effect_value 704473e1 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases their critical strike chance by $s2%,",
+        "labels": [
+          "524877 behaviour_metric_delta crit_buff"
+        ]
+      },
+      {
+        "claim": "scaling with Insanity",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) — no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
   },
   {
     "spell": 524877,
     "clause": "stacking $u times,",
     "labels": [
-      "524877 max_stacks 704473 #2"
+      "524877 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -1489,7 +1527,7 @@
     "spell": 524877,
     "clause": "for $d.",
     "labels": [
-      "524877 spell_duration 704473 #3"
+      "524877 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -1600,29 +1638,58 @@
     "labels": [
       "525060 effect_value e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind runs a pooled hostile-dispel-resist trial loop against a re-applied positive buff (Void Shield 578115) on a grouped ally: SpellAuras.cpp:1153-1178 (Aura::CalcDispelChance, called from SpellEffects.cpp:3656) applies 525060 Effect[1] SPELLMOD_RESIST_DISPEL_CHANCE (+50% on 578115 class mask 536870912), but dispel_removal and dispel_count (behaviours.py:2433-2539,9767-9822) only test the caster dispelling debuffs, and debuff_resist_rate (kinds/debuff_resist_rate.py) requires 0 < base_chance_pct < 50, applies harmful debuffs rather than offensive dispels against a friendly buff on an ally, and hardcodes a 3-arm low_health_pct structure. Nearest kind: debuff_resist_rate / dispel_count (needs hostile dispel survival trial loop on an ally's positive aura).",
+      "attempts": [
+        {
+          "agent": "cu-g8c",
+          "report": ".agents/plans/cu-g8c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 525060,
     "clause": "and it now also reflects $s1% of the damage absorbed.",
     "labels": [
-      "525060 effect_value e0 #1"
+      "525060 behaviour_metric_delta reflect_absorbed"
     ],
     "kind": "claim"
   },
   {
     "spell": 525065,
     "clause": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
-    "labels": [
-      "525065 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deflecting all spells and abilities",
+        "labels": [
+          "525065 behaviour_metric_delta deflect_magic",
+          "525065 behaviour_metric_delta deflect_melee_ability"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "525065 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "making you unable to attack or cast spells.",
+        "labels": [
+          "525065 behaviour_metric_delta no_cast",
+          "525065 behaviour_metric_delta no_attack",
+          "525065 behaviour_metric_delta no_attack_applied"
+        ]
+      }
+    ]
   },
   {
     "spell": 525065,
     "clause": "Casters whose magic is deflected are silenced for $525066d.",
     "labels": [
-      "525065 spell_duration 525066 #1"
+      "525065 behaviour_metric_delta silence_on_deflect"
     ],
     "kind": "claim"
   },
@@ -2149,23 +2216,39 @@
   {
     "spell": 582591,
     "clause": "Become one with the void, preventing you from dying for $d,",
-    "labels": [
-      "582591 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "preventing you from dying",
+        "labels": [
+          "582591 behaviour_metric_delta survive_control",
+          "582591 behaviour_metric_delta survive_treatment"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "582591 behaviour_metric_delta duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 582591,
     "clause": "or until you take damage equal to a maximum of 100% of your total health.",
-    "labels": [],
+    "labels": [
+      "582591 behaviour_metric_delta cap_2000_holds",
+      "582591 behaviour_metric_delta cap_1900_breaks",
+      "582591 behaviour_metric_delta cap_3000_holds",
+      "582591 behaviour_metric_delta cap_2850_breaks"
+    ],
     "kind": "claim"
   },
   {
     "spell": 582591,
     "clause": "When the effect ends you instantly regenerate health equal to $s1% of the damage taken while active.",
     "labels": [
-      "582591 effect_value e0 #1",
-      "582591 aura_amount e0 #1"
+      "582591 behaviour_metric_delta end_heal"
     ],
     "kind": "claim"
   },
@@ -2840,7 +2923,7 @@
     "spell": 704881,
     "clause": "Increases the duration of Embrace the Void by $/1000;s3 sec",
     "labels": [
-      "704881 effect_value e2 #0"
+      "704881 behaviour_metric_delta duration_expiry"
     ],
     "kind": "claim"
   },
@@ -2848,7 +2931,7 @@
     "spell": 704881,
     "clause": "and it now heals you for an additional $s1% of the damage taken while active",
     "labels": [
-      "704881 effect_value e0 #1"
+      "704881 behaviour_metric_delta heal_bonus"
     ],
     "kind": "claim"
   },
@@ -2856,7 +2939,9 @@
     "spell": 704881,
     "clause": "and its cooldown is reduced by $/1000;s2 sec.",
     "labels": [
-      "704881 effect_value e1 #2"
+      "704881 cost_gate 582591 without",
+      "704881 cost_gate 582591 with",
+      "704881 cost_gate 582591 beyond"
     ],
     "kind": "claim"
   },
@@ -3729,10 +3814,34 @@
   {
     "spell": 804056,
     "clause": "Unleash a wave of maddening resonance, interrupting the current spell cast of all enemies around you and preventing any spell in that school from being cast for $d.",
-    "labels": [
-      "804056 aura_duration_ms #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "interrupting the current spell cast",
+        "labels": [
+          "804056 behaviour_metric_delta interrupt_stops_cast"
+        ]
+      },
+      {
+        "claim": "preventing any spell in that school from being cast for $d.",
+        "labels": [
+          "804056 behaviour_expiry lockout"
+        ]
+      },
+      {
+        "claim": "of all enemies around you",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance kind/option can prove Crushing Dissonance 804056 (Effect[0] SPELL_EFFECT_INTERRUPT_CAST, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd) interrupts multiple casting enemies around the caster at distinct bearings and distances up to near the edge while leaving a casting enemy outside the radius uninterrupted, with position reads: (1) metric_delta target_casts_before (behaviours.py:1928,2036-2038) casts only on the single 'dummy' actor (TARGET) and never on area1/area2; (2) area_dummies (area_dummies.py:125,133,151) places extra dummies only along +x with no casting step, and its edge/cone forms require spell_damage_count or spell_damage_total (804056 deals no damage); (3) radius_edge (kinds/radius_edge.py) has no creature-casting step and reads only spell_damage_count or aura (804056 deals no damage and applies no aura); (4) school_lockout (expiry.py:557-597) spawns only one dummy at default 3 yd; (5) enemy_casts_before (enemy_casts_before.py:18-27) casts only once at the start of the before phase on one enemy player at fixed position, never before the treatment trigger. Nearest kind: metric_delta with target_casts_before and area_dummies (needs multi-dummy casting at distinct bearings/distances with position reads and per-dummy casting reads).",
+      "attempts": [
+        {
+          "agent": "cu-g8d",
+          "report": ".agents/plans/cu-g8d/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 572846,
@@ -3791,20 +3900,20 @@
       {
         "claim": "reducing your damage taken by ${-($u*$m2)}%",
         "labels": [
-          "804670 effect_value e1 #0",
-          "804670 aura_amount e1 #0"
+          "804670 behaviour_hit_ratio damage_reduction"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "804670 aura_duration_ms #1"
+          "804670 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "$u attacks",
         "labels": [
-          "804670 max_stacks 804670 #2"
+          "804670 behaviour_metric_delta four_attacks_hold",
+          "804670 behaviour_metric_delta five_attacks_remove"
         ]
       }
     ]
@@ -3813,15 +3922,18 @@
     "spell": 804670,
     "clause": "For the duration, each attack received will decrease the value by $s2%.",
     "labels": [
-      "804670 effect_value e1 #3",
-      "804670 aura_amount e1 #3"
+      "804670 behaviour_hit_ratio decay_step"
     ],
     "kind": "claim"
   },
   {
     "spell": 804670,
     "clause": "Usable while stunned.",
-    "labels": [],
+    "labels": [
+      "804670 cast_state control",
+      "804670 cast_state state",
+      "804670 cast_state allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -3985,7 +4097,7 @@
     "spell": 805126,
     "clause": "Your Abyssal Ward now stacks $s1 additional times.",
     "labels": [
-      "805126 effect_value e0 #0"
+      "805126 behaviour_metric_delta extra_stacks"
     ],
     "kind": "claim"
   },
