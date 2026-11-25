@@ -36,10 +36,10 @@ Add `kinds/avoided_charge_restore.py`
 ([doc](../../apps/coa-gameplay-test/conformance/docs/kinds/avoided_charge_restore.md)):
 
 - Declares `METRIC_EVIDENCE = {'avoided_charge_restore_rate': 'event'}` (no edits to `coverage.py` or `procs.py`).
-- Each cycle resets `charge_spell` with `restore_charges` (clearing natural recharge), spends `spend_charges` charges
-  with `ignore_gcd` at `dummy`, reads `spell_charges` before and after a short avoided-swing window (`window_ms` well
-  below recharge time), and reads cumulative avoided swings (`dodged`, `parried`, optional `missed` + attack-balance
-  `total`).
+- Each cycle pauses the strikers with Stun (`56`) while resetting `charge_spell` (`restore_charges`), spending
+  `spend_charges` charges with `ignore_gcd` at `dummy` (`stop_attack` immediately after), and reading `spell_charges`
+  and cumulative avoided swings (`dodged`, `parried`, optional `missed` + attack-balance `total`), unpausing strikers
+  only during the `window_ms` sampling window so no swing can fall between reads or resets.
 - Enforces a zero-capping invariant: any window with `avoided_swings > max_charges - charges_before` voids the run as
   `unmeasured`, preventing charge-cap bias. Any cycle restoring more charges than avoided swings alerts.
 - Runs an unlearned control arm (requiring `0` restores over `>= minimum_control_trials`) and a learned treatment arm

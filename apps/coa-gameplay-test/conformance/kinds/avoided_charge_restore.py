@@ -22,6 +22,7 @@ DEFAULT_RESIDUAL = 1e-3
 PAIR_RUNS = 2
 TAIL_SDS = 14
 DEFAULT_DUMMY_DISTANCE = 5.0
+PAUSE_AURA = 56
 FIELDS = {'spell', 'name', 'kind', 'variant', 'label_suffix', 'quote', 'charge_spell', 'max_charges',
           'spend_charges', 'expected_pct', 'striker_entry', 'strikers', 'striker_auras', 'window_ms',
           'dodge', 'parry', 'count_misses', 'miss_exclusion', 'dummy_distance', 'control_cycles',
@@ -188,7 +189,13 @@ def start_labels(prefix: str, misses: bool) -> dict:
     }
 
 
-def cycle_steps(spec: AvoidedChargeRestoreSpec, mana: list[dict], labels: dict) -> list[dict]:
+def pause_steps(avoided: dict, on: bool) -> list[dict]:
+    stacks = 1 if on else 0
+    return [{'action': 'set_aura', 'actor': CASTER, 'target': striker, 'caster': striker, 'spell': PAUSE_AURA,
+             'stacks': stacks} for striker in proc_avoided.striker_ids(avoided)]
+
+
+def cycle_steps(spec: AvoidedChargeRestoreSpec, avoided: dict, mana: list[dict], labels: dict) -> list[dict]:
     steps = [{'action': 'restore_charges', 'actor': CASTER, 'spell': spec.charge_spell}, *mana]
     for _ in range(spec.spend_charges):
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.charge_spell, 'target': TARGET,
@@ -197,7 +204,9 @@ def cycle_steps(spec: AvoidedChargeRestoreSpec, mana: list[dict], labels: dict) 
               fixture_health_step(CASTER, 100),
               {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': spec.dodge, 'parry': spec.parry},
               measurement(labels['charges_before'], CASTER, 'spell_charges', spell=spec.charge_spell),
+              *pause_steps(avoided, False),
               {'action': 'wait', 'ms': spec.window_ms},
+              *pause_steps(avoided, True),
               measurement(labels['charges_after'], CASTER, 'spell_charges', spell=spec.charge_spell),
               *proc_avoided.trial_steps(labels['trials']['dodged'], labels['total'], misses=spec.count_misses)]
     return steps
@@ -220,12 +229,13 @@ def avoided_charge_restore_scenario(class_file: dict,
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spec.charge_spell}]
              + proc_avoided.engage_steps(avoided)
+             + pause_steps(avoided, True)
              + proc_avoided.trial_steps(start['trials']['dodged'], start['total'], misses=spec.count_misses))
     for reads in control_reads:
-        steps += cycle_steps(spec, mana, reads)
+        steps += cycle_steps(spec, avoided, mana, reads)
     steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
     for reads in treatment_reads:
-        steps += cycle_steps(spec, mana, reads)
+        steps += cycle_steps(spec, avoided, mana, reads)
     steps += proc_avoided.guard_steps(avoided)
     if len(steps) > MAX_SCENARIO_STEPS:
         raise ValueError(f'{spec.spell} {KIND} takes {len(steps)} steps, above {MAX_SCENARIO_STEPS}: '

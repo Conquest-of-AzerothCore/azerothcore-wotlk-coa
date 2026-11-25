@@ -16,8 +16,10 @@ In each cycle:
 2. `spend_charges` instant `ignore_gcd` casts of `charge_spell` at `dummy` (placed at `dummy_distance` yd so melee-class
    ranged casts do not start caster auto-attacks) open `spend_charges` empty charge slots and start a fresh recharge
    timer.
-3. `spell_charges` is read before and after one `window_ms` avoided-swing window alongside cumulative avoided-swing
-   counters (`melee_attacks_taken` dodged/parried, optional `melee_missed_taken`, and total `melee_attacks_taken`).
+3. Strikers are paused with Stun (`56`) during charge resets, spend casts and counter reads, and unpaused only for the
+   `window_ms` avoided-swing window, keeping charge restores and avoided-swing counts atomic across every cycle.
+4. `spell_charges` is read before and after the `window_ms` window alongside cumulative avoided-swing counters
+   (`melee_attacks_taken` dodged/parried, optional `melee_missed_taken`, and total `melee_attacks_taken`).
 
 Any cycle where avoided swings exceed the open charge slots (`w_trials > max_charges - charges_before`) voids the run as
 `unmeasured` so charge capping can never silently bias the measured rate downward. Choosing `strikers <= spend_charges`
@@ -36,5 +38,5 @@ with `window_ms` below a single striker's swing period guarantees at most `strik
   guards), attack-balance equality when `count_misses` is true, and `miss_share >= miss_exclusion.min_share` when set.
 - **Evidence class:** declares `METRIC_EVIDENCE = {'avoided_charge_restore_rate': 'event'}` (counted as `behaviour`).
 
-Cultist: Bulwark of Horror 300278 (40% chance to refresh a charge of Blade of the Empire 502122, 3 strikers with
-`[42716, 62531, 2116852]`, `window_ms: 400`, `count_misses: true`, `miss_exclusion: {"min_share": 0.04}`, 16 parts).
+Cultist: Bulwark of Horror 300278 (40% chance to refresh a charge of Blade of the Empire 502122, 1 striker with
+`[42716, 62531, 2116852]`, `window_ms: 1100`, `count_misses: true`, `miss_exclusion: {"min_share": 0.04}`, 18 parts).
