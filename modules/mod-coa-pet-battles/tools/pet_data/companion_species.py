@@ -1,11 +1,16 @@
+import argparse
 import collections
+import csv
 import re
+import subprocess
 import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[3]
 sys.path.insert(0, str(HERE))
 
+import sql_reader
 import sql_writer
 import tables
 
@@ -16,9 +21,71 @@ EXPLICIT_STAND_IN_LIMIT = 9899999
 GENERATED_TABLES = ('coa_pet_species', 'coa_pet_kit', 'coa_pet_kit_ability', 'coa_pet_presentation',
                     'coa_pet_companion', 'coa_pet_standin')
 ACCEPTED_RULES = ('1 ', '2 ', '3 ', '4 ', '5 ')
+WORLD_SQL = ROOT / 'data/sql/updates/pending_db_world'
+GENERATED_SQL = WORLD_SQL / 'rev_20261125_02_coa_pet_companion_species.sql'
+PROPOSAL = HERE.parents[1] / 'data/companion_proposal.tsv'
+TEMPLATE_SCHEMA = ROOT / 'data/sql/base/db_world/creature_template.sql'
 
 RetailKit = collections.namedtuple('RetailKit', 'species name family kind rows stats')
 Generated = collections.namedtuple('Generated', 'tables notes')
+
+
+def pet_sql_paths():
+    return sorted(WORLD_SQL.glob('rev_2026112[34]_*_coa_pet_battles_*.sql'))
+
+
+def read_proposal(path):
+    lines = [line for line in Path(path).read_text(encoding='utf-8').splitlines() if not line.startswith('#')]
+    return list(csv.DictReader(lines, delimiter='\t'))
+
+
+def read_csv(path):
+    csv.field_size_limit(10 ** 8)
+    return list(csv.DictReader(open(path, encoding='utf-8', newline='')))
+
+
+def read_retail(directory):
+    directory = Path(directory)
+    return {
+        'species': read_csv(directory / 'BattlePetSpecies.csv'),
+        'creatures': {r['ID']: r['Name_lang'] for r in read_csv(directory / 'Creature.csv')},
+        'links': read_csv(directory / 'BattlePetSpeciesXAbility.csv'),
+        'abilities': {r['ID']: r for r in read_csv(directory / 'BattlePetAbility.csv')},
+        'states': {r['ID']: r['LuaName'] for r in read_csv(directory / 'BattlePetState.csv')},
+        'species_states': read_csv(directory / 'BattlePetSpeciesState.csv'),
+    }
+
+
+def taken_entries(defaults, entries):
+    out = subprocess.run(['mysql', f'--defaults-extra-file={defaults}', '-N', '-B', 'acore_world', '-e',
+                          'SELECT entry FROM creature_template WHERE entry IN (' + id_list(entries) + ')'],
+                         capture_output=True, text=True, check=True).stdout
+    return sorted(int(line) for line in out.split())
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--retail', required=True)
+    parser.add_argument('--retail-date', required=True)
+    parser.add_argument('--state-date', required=True)
+    parser.add_argument('--mysql-defaults', required=True)
+    parser.add_argument('--out', default=str(GENERATED_SQL))
+    args = parser.parse_args()
+    generated = generate(read_proposal(PROPOSAL), sql_reader.read(pet_sql_paths()), read_retail(args.retail))
+    taken = taken_entries(args.mysql_defaults, [entry for _, entry in generated.tables['coa_pet_standin']])
+    if taken:
+        raise SystemExit(f'stand-in entries already in creature_template: {taken[:10]}')
+    header = ('-- CoA companions as battle pets: modules/mod-coa-pet-battles/tools/pet_data/companion_species.py\n'
+              '-- retail: wago.tools DB2 CSVs BattlePetSpecies, BattlePetSpeciesXAbility, BattlePetAbility, Creature '
+              f'fetched {args.retail_date}; BattlePetSpeciesState, BattlePetState fetched {args.state_date}')
+    sql = companion_sql(generated, sql_writer.creature_template_columns(TEMPLATE_SCHEMA), header)
+    Path(args.out).write_text(sql, encoding='utf-8')
+    for name in GENERATED_TABLES:
+        print(f'{name:22} {len(generated.tables[name])}')
+    print('notes', len(generated.notes))
+    kit_family = {r[0]: r[2] for r in sql_reader.read(pet_sql_paths())['coa_pet_kit'] + generated.tables['coa_pet_kit']}
+    families = collections.Counter(FAMILIES[kit_family[r[2]]] for r in generated.tables['coa_pet_species'])
+    print('families', dict(sorted(families.items())))
 
 
 def kind_of(name):
@@ -129,6 +196,7 @@ def matched_species(row):
 
 
 def generate(proposal, tables, retail):
+    tables = {name: [tuple(row) for row in rows] for name, rows in tables.items()}
     accepted = [row for row in proposal if row['rule'].startswith(ACCEPTED_RULES)]
     kits = retail_kits(retail, qualifying_abilities(tables))
     family_pools = pools(kits, tables)
@@ -136,6 +204,7 @@ def generate(proposal, tables, retail):
     species_by_entry = {row[0]: row for row in tables['coa_pet_species']}
     kit_family = {row[0]: row[2] for row in tables['coa_pet_kit']}
     known_kits = set(kit_family)
+    existing_rows = existing_kit_rows(tables)
     icons = family_icons(tables)
     notes = {}
 
@@ -154,8 +223,12 @@ def generate(proposal, tables, retail):
             to_deal.append((creature, row['name'], row['family']))
         elif row['rule'].startswith('2 '):
             source = matched_species(row)
-            copied_from[creature] = source
-            chosen[creature] = species_by_entry[source][2]
+            if len(existing_rows.get(species_by_entry[source][2], ())) == 6:
+                copied_from[creature] = source
+                chosen[creature] = species_by_entry[source][2]
+                continue
+            notes[creature] = f'species {source} kit is incomplete; dealt a {row["family"]} kit'
+            to_deal.append((creature, row['name'], row['family']))
         else:
             to_deal.append((creature, row['name'], row['family']))
     chosen.update(deal(to_deal, family_pools))
@@ -245,3 +318,7 @@ def companion_sql(generated, template_columns, header):
         f'`src`.`VerifiedBuild` FROM `creature_equip_template` AS `src` {joined("CreatureID")};',
     ]
     return '\n'.join(lines) + '\n'
+
+
+if __name__ == '__main__':
+    main()

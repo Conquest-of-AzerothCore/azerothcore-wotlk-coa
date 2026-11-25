@@ -1,3 +1,4 @@
+import collections
 import sys
 import unittest
 from pathlib import Path
@@ -151,6 +152,13 @@ class GenerateTest(unittest.TestCase):
         copied = sorted(r for r in generated.tables['coa_pet_presentation'] if r[0] == 60000)
         self.assertEqual(copied, [(60000,) + r[1:] for r in source])
 
+    def test_rule2_with_an_incomplete_kit_is_dealt_instead(self):
+        generated = self.generate([row(1, 60000, 'New Wolf', '2 same model', 'Beast', '501 (existing)',
+                                       'species 7003 Wolf')])
+        self.assertEqual(self.species_row(generated, 60000)[2], 500)
+        self.assertIn('species 7003', generated.notes[60000])
+        self.assertEqual(len([r for r in generated.tables['coa_pet_presentation'] if r[0] == 60000]), 6)
+
     def test_two_spells_one_creature_make_one_species_two_companions(self):
         generated = self.generate([row(1, 60000, 'Zork', '5 picked', 'Beast'),
                                    row(2, 60000, 'Zork', '5 picked', 'Beast')])
@@ -223,6 +231,47 @@ class SqlTest(unittest.TestCase):
         self.assertIn('0 AS `npcflag`', insert)
         self.assertIn('ROW(60000, 9850000), ROW(60002, 9850001)', insert)
         self.assertIn('ON DUPLICATE KEY UPDATE', insert)
+
+
+class GeneratedFileTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        import sql_reader
+        cls.existing = sql_reader.read(companion_species.pet_sql_paths())
+        cls.generated = sql_reader.read([companion_species.GENERATED_SQL])
+        cls.accepted = [r for r in companion_species.read_proposal(companion_species.PROPOSAL)
+                        if r['rule'].startswith(companion_species.ACCEPTED_RULES)]
+
+    def test_generated_file_covers_every_accepted_proposal_row(self):
+        self.assertEqual(len(self.accepted), 1324)
+        self.assertEqual(sorted(tuple(r) for r in self.generated['coa_pet_companion']),
+                         sorted((int(r['spell']), int(r['creature'])) for r in self.accepted))
+        self.assertEqual(sorted(r[0] for r in self.generated['coa_pet_species']),
+                         sorted({int(r['creature']) for r in self.accepted}))
+
+    def test_generated_species_have_six_presented_abilities_from_the_ability_table(self):
+        abilities = {r[0] for r in self.existing['coa_pet_ability']}
+        kit_rows = collections.Counter(r[0] for r in self.existing['coa_pet_kit_ability'] + self.generated['coa_pet_kit_ability'])
+        presented = collections.defaultdict(list)
+        for r in self.generated['coa_pet_presentation']:
+            presented[r[0]].append(r[4])
+        for species in self.generated['coa_pet_species']:
+            self.assertEqual(kit_rows[species[2]], 6, species)
+            self.assertEqual(len(presented[species[0]]), 6, species)
+            self.assertTrue(set(presented[species[0]]) <= abilities, species)
+
+    def test_generated_standins_are_unique_and_in_range(self):
+        entries = [r[1] for r in self.generated['coa_pet_standin']]
+        self.assertEqual(len(entries), len(set(entries)))
+        self.assertTrue(all(9850000 <= entry <= 9899999 for entry in entries))
+        self.assertEqual(sorted(r[0] for r in self.generated['coa_pet_standin']),
+                         sorted(r[0] for r in self.generated['coa_pet_species']))
+
+    def test_generated_file_adds_no_existing_species(self):
+        existing = {r[0] for r in self.existing['coa_pet_species']}
+        self.assertFalse(existing & {r[0] for r in self.generated['coa_pet_species']})
+        existing_kits = {r[0] for r in self.existing['coa_pet_kit']}
+        self.assertFalse(existing_kits & {r[0] for r in self.generated['coa_pet_kit']})
 
 
 if __name__ == '__main__':
