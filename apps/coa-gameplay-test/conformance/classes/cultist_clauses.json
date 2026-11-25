@@ -2989,18 +2989,11 @@
       },
       {
         "claim": "to enemies in front of you",
-        "labels": []
+        "labels": [
+          "681474 behaviour_metric_delta cone_edge"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "Claim 3 ('to enemies in front of you'): Eldritch Force 680576 is a narrow 24-degree, 8 yd cone (TARGET_UNIT_CONE_ENEMY_24, Spell.cpp:1289-1291, RadiusIndex 14 = 8 yd) reached only after 5 crit setup_casts transforming Gaze of C'Thun (681794). area_dummies.cone (area_dummies.py:54,59,134) enforces offset >= 2 yd (at 10.8 deg inside bearing, 2/sin(10.8 deg) = 10.67 yd > radius - 1 = 7 yd) and refuses setup_casts; fixed_count cannot place a just-outside-cone dummy at ~13.2 deg with verified position/bearing reads. Nearest kind: metric_delta with generalized position-aware multi-target area_dummies (shared with 804056).",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 704434,

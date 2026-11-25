@@ -30307,6 +30307,67 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Dreadnought 680750 (level-10 automatic passive of specialization 96 Dreadnought, AscensionTaughtAbilityData.h:36 {25, 96, 10, 680750, 567524}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1082-1104) teaches active spell Dreadnought 567524 when 680750 is learned in specialization 96. Switches to spec 96 (specialization 96, ADR 1102), then unlearns auto-learned [680750, 567524] via unlearn_after_specialization (ADR 1292) so control arm reads knows_spell(567524) == 0; real learn of 680750 between phases teaches 567524 (after == 1). Self-contained entry with no dependency on other 680750 entries. Reference search 2026-11-25: coabuildhub spells_master_index.json 680750 matches verbatim ('Teaches you Dreadnought.')."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 24-degree 8 yd cone hits inside, spares outside and behind)",
+      "kind": "metric_delta",
+      "variant": "cone_edge",
+      "label_suffix": "cone_edge",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141
+      ],
+      "setup_casts": [
+        500712,
+        500712,
+        500712,
+        500712,
+        500712
+      ],
+      "setup_wait_ms": 1600,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "cone": {
+          "angle": 24,
+          "radius": 8,
+          "offset": 1.0,
+          "behind": 166,
+          "source": "Eldritch Force 680576 EffectImplicitTargetA[0]=24 (TARGET_UNIT_CONE_ENEMY_24, 24 deg at Spell.cpp:1289-1291) and EffectRadiusIndex[0]=14 (8 yd in SpellRadius.dbc)"
+        }
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 680576,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Force 681474 -> 680576 ('to enemies in front of you', EffectImplicitTargetA[0] = 24 TARGET_UNIT_CONE_ENEMY_24 = 24 degrees at Spell.cpp:1289-1291, EffectRadiusIndex[0] = 14 = 8 yd in SpellRadius.dbc). Five forced spell crits of Ancient Curse 500712 (instant, 30 yd range, single-target, hits dummy at 13.25 yd before cone relocation) earn 681794 and teach 680576 (AscensionCultist.cpp:313-324); precondition fixtures 823764 (spell pen) and 500706=0 (Insanity clear). area_dummies.cone (offset 1.0 yd, behind 166 deg, ADR 1293) relocates the caster before 680576 so dummy stands at 10.8 deg / 5.34 yd (inside cone, struck: 0 -> 1), area1 at 13.2 deg / 4.38 yd (just outside cone, 0 hits), and area2 at 166 deg / 4.13 yd (behind caster, 0 hits), verified from read positions and caster orientation. Reference search 2026-11-25: see transform_5th."
     }
   ],
   "player_observations": [],
