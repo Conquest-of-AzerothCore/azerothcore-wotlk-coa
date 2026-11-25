@@ -28488,7 +28488,7 @@
       "setup_cast_targets": [
         "caster"
       ],
-      "setup_wait_ms": 1000,
+      "setup_wait_ms": 2000,
       "cast_power": 2000,
       "metric": "spell_damage_count",
       "fields": {
