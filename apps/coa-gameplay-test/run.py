@@ -177,7 +177,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'cast_failure', 'guid_counter', 'game_time_ms',
     'stealth_detection', 'can_detect',
     'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
-    'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
+    'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room', 'quest_poi_count',
     'ball_offer_count', 'ball_offers_quest',
     'ball_carried_count', 'ball_carried_quest', 'ball_turn_in_count', 'ball_turn_in_quest',
     'gossip_text',
@@ -1655,7 +1655,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'nearby_gameobject_display', 'nearby_gameobject_orientation'}:
                 require('entry' in step, f'{where}: metric needs gameobject entry')
             if metric in {'quest_status', 'quest_takeable', 'quest_objective_count', 'quest_log_slot',
-                          'quest_log_client_slot', 'quest_log_client_count'}:
+                          'quest_log_client_slot', 'quest_log_client_count', 'quest_poi_count'}:
                 require('quest' in step, f'{where}: metric needs quest')
             if metric == 'dialog_status':
                 require('entry' in step, f'{where}: metric needs creature entry')
@@ -1788,6 +1788,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'has_title',
                           'quest_status', 'quest_takeable', 'quest_objective_count', 'dialog_status',
                           'quest_log_slot', 'quest_log_client_slot', 'quest_log_client_count', 'quest_log_has_room',
+                          'quest_poi_count',
                           'ball_offer_count', 'ball_offers_quest',
                           'ball_carried_count', 'ball_carried_quest',
                           'ball_turn_in_count', 'ball_turn_in_quest',
