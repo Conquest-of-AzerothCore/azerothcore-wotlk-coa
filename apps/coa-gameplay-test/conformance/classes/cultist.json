@@ -45731,6 +45731,222 @@
       "treatment_cycles": 550,
       "parts": 22,
       "observe_source": "Bulwark of Horror 300278 row 25 (\"Avoiding an attack now has a $h% chance to refresh a charge of Blade of the Empire.\"): Spell.dbc 300278 ProcChance 40 ($h = 40%); AscensionCultistEvents.cpp:52,62,155-156 rolls roll_chance_f on avoided (PROC_HIT_DODGE|PROC_HIT_PARRY|PROC_HIT_MISS) and calls RestoreBlade -> RestoreSpellCharge(502122) (3 charges, 6 s recharge). avoided_charge_restore (ADR 1303) runs 1 stationary striker (entry 36 with 42716, 62531, 2116852 -> ~500 ms swing speed, paused by Stun 56 during charge resets, spend casts and reads so each window is atomic) over 1100 ms windows (<= 3 swings/window <= 3 open charge slots after spending all 3 charges of 502122 at dummy 5 yd with ignore_gcd + stop_attack, and << 6000 ms natural recharge), with count_misses true and miss_exclusion min_share 0.04, pooled over 22 parts (~25,000+ treatment swings >= 22,014 exact binomial minimum for G-20 +-2 pt band at 40% with pair false-fail and false-pass <= 0.1%; ~680 unlearned control swings expecting 0 restores)."
+    },
+    {
+      "spell": 806382,
+      "name": "Dark Matter (2 allies in radius each healed once per tick)",
+      "kind": "metric_delta",
+      "variant": "heal_once_2_allies",
+      "label_suffix": "heal_once_2_allies",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "gate_spell": 806382,
+      "trigger_spell": 804275,
+      "target": "caster",
+      "measure_actor": "caster",
+      "ally_offsets": {
+        "ally": 10.0,
+        "ally2": 20.0
+      },
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Second grouped ally at 20.0 yd receives exactly 1 heal of 807219 on the 1000 ms tick."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 10.0,
+            "expected": 10.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets places ally 10.0 yd from caster (inside 30.0 yd radius of 807219)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets places ally2 20.0 yd from caster (inside 30.0 yd radius of 807219)."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807219,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "Regression for Dark Matter 806382 AoE heal count (Cultist ADR 0023): Spell.dbc 807219 is already TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ALLY (30.0 yd), so one Cast(player, player, 807219) per 807124 tick heals each of 2 grouped allies inside 30 yd (ally at 10 yd, ally2 at 20 yd) exactly once at 1500 ms (0 before learning 806382, 1 after; before the fix both received 3 heals per tick)."
+    },
+    {
+      "spell": 806382,
+      "name": "Dark Matter (3 allies in radius each healed once per tick, 4th outside not healed)",
+      "kind": "metric_delta",
+      "variant": "heal_once_3_allies",
+      "label_suffix": "heal_once_3_allies",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "gate_spell": 806382,
+      "trigger_spell": 804275,
+      "target": "caster",
+      "measure_actor": "caster",
+      "ally_offsets": {
+        "ally": 10.0,
+        "ally2": 20.0,
+        "ally3": 28.5,
+        "ally4": 31.5
+      },
+      "ally_arm": {
+        "allies": 4,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Second grouped ally at 20.0 yd receives exactly 1 heal of 807219 on the 1000 ms tick."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally3"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Third grouped ally at 28.5 yd (inside 30.0 yd radius) receives exactly 1 heal of 807219 on the 1000 ms tick."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally4"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Control arm: fourth grouped ally at 31.5 yd (outside 30.0 yd exact AoE radius of 807219) receives 0 heals."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 10.0,
+            "expected": 10.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets places ally 10.0 yd from caster (inside 30.0 yd radius)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20.0,
+            "expected": 20.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets places ally2 20.0 yd from caster (inside 30.0 yd radius)."
+          },
+          {
+            "actors": [
+              "ally3"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 28.5,
+            "expected": 28.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets places ally3 28.5 yd from caster (inside 30.0 yd radius)."
+          },
+          {
+            "actors": [
+              "ally4"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 31.5,
+            "expected": 31.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets places ally4 31.5 yd from caster (outside 30.0 yd radius)."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807219,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "Regression for Dark Matter 806382 AoE heal count with 3 inside + 1 outside (Cultist ADR 0023): Spell.dbc 807219 is TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ALLY (30.0 yd). On the 1000 ms tick of 807124 (read at 1500 ms), ally (10 yd), ally2 (20 yd), and ally3 (28.5 yd) each receive exactly 1 heal (0 before learning 806382, 1 after), while outer ally4 (31.5 yd) receives 0."
     }
   ],
   "player_observations": [],

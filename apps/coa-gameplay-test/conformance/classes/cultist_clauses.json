@@ -5110,7 +5110,9 @@
       {
         "claim": "within $807219a1 yds",
         "labels": [
-          "806382 behaviour_metric_delta radius"
+          "806382 behaviour_metric_delta radius",
+          "806382 behaviour_metric_delta heal_once_2_allies",
+          "806382 behaviour_metric_delta heal_once_3_allies"
         ]
       },
       {

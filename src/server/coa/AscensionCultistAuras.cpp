@@ -227,8 +227,7 @@ class aura_ascension_cultist_lifecycle : public AuraScript
             PreventDefaultAction();
             Spell* channel = player->GetCurrentSpell(CURRENT_CHANNELED_SPELL);
             if (channel && channel->GetSpellInfo()->Id == 804275 && channel->IsChannelActive())
-                for (Unit* ally : Allies(player, player, Radius(807219)))
-                    Cast(player, ally, 807219);
+                Cast(player, player, 807219);
             else
                 GetAura()->Remove();
         }

@@ -153,9 +153,10 @@ void ApplyContracts(SpellInfo* info)
     if (id == 680579)
         dummy(1);
     if (id == 680574)
-        for (auto& effect : info->Effects)
-            if (effect.ApplyAuraName == SPELL_AURA_MOD_BLOCK_CRIT_CHANCE)
-                effect.TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    {
+        info->Effects[0].Effect = 0;
+        info->Effects[1].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CASTER);
+    }
     if (id == 807883 || id == 681476 || id == 567529)
         info->DurationEntry = sSpellDurationStore.LookupEntry(21);
     if (id == 520345)
