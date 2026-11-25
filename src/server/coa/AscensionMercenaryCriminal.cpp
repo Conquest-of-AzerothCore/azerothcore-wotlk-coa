@@ -24,6 +24,7 @@
 namespace
 {
 constexpr uint32 SPELL_CRIMINAL = 9930873;
+constexpr uint32 SPELL_HOMEBOUND_PORTAL = 93187;
 constexpr int32 CRIMINAL_HIT_DURATION = 3 * MINUTE * IN_MILLISECONDS;
 constexpr int32 CRIMINAL_KILL_DURATION = 8 * MINUTE * IN_MILLISECONDS;
 constexpr char NoRetreatMessage[] = "You cannot escape while the No Retreat debuff is active!";
@@ -138,6 +139,9 @@ bool IsCriminal(Player const* player)
 
 bool TravelsCasterAway(Spell const* spell)
 {
+    if (spell->GetSpellInfo()->Id == SPELL_HOMEBOUND_PORTAL)
+        return true;
+
     Unit const* caster = spell->GetCaster();
     for (SpellEffectInfo const& effect : spell->GetSpellInfo()->Effects)
         if (effect.Effect == SPELL_EFFECT_TELEPORT_UNITS &&

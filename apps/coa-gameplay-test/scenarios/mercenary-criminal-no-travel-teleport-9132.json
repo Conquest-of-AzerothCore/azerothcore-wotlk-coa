@@ -9,10 +9,11 @@
     "as in original Ascension footage the PR author reviewed on 2026-11-25, the player is told 'You cannot escape",
     "while the No Retreat debuff is active!' (SMSG_NOTIFICATION) for every refused teleport; an accepted Call To",
     "Arms 804723 summon and a group member's Portal to Stormwind (gameobject 176296, Portal Effect 17334 cast by",
-    "its user on itself) do not move it; Blink 1953 (a leap, not a fixed-destination teleport) is cast without a",
-    "failure. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
+    "its user on itself) and CoA's Homebound Portal (item 97758, gameobject 80775, spell 93187: a dummy effect",
+    "that teleports to the owner's hearth) do not move it; Blink 1953 (a leap, not a fixed-destination teleport)",
+    "is cast without a failure. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
   ],
-  "timeout_ms": 150000,
+  "timeout_ms": 180000,
   "players": [
     {
       "id": "g",
@@ -321,6 +322,74 @@
       "opcode": 459,
       "row": 544567129,
       "relative_to": "before_portal",
+      "min": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "g",
+      "item": 97758,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "The Guardian places a Homebound Portal beside the Criminal",
+      "actor": "g",
+      "item": 97758,
+      "spell": 93186,
+      "destination": {
+        "x": -5803.16,
+        "y": -3897.4,
+        "z": -95.32
+      }
+    },
+    {
+      "action": "wait",
+      "label": "Let the 15 second cast finish and the portal appear",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Homebound Portal stands within reach",
+      "actor": "mage",
+      "metric": "nearby_gameobject_count",
+      "entry": 80775,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_homebound"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The Criminal steps through the Homebound Portal",
+      "actor": "mage",
+      "entry": 80775,
+      "owner": "g"
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong Homebound transfer time to land",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Homebound Portal does not send the Criminal to the owner's hearth",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the Criminal is told why",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "relative_to": "before_homebound",
       "min": 1
     },
     {
