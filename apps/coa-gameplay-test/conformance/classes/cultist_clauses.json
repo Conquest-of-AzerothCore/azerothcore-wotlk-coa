@@ -2519,10 +2519,12 @@
     "spell": 572103,
     "clause": "If your target runs out of range, the tentacle will seek a new target.",
     "labels": [
-      "572103 behaviour_metric_delta retarget_out_of_range"
+      "572103 behaviour_metric_delta retarget_out_of_range",
+      "572103 behaviour_metric_delta search_inside_15yd",
+      "572103 behaviour_metric_delta search_beyond_15yd"
     ],
     "kind": "claim",
-    "reason": "Proved after server fix (owner ruling O-20, 2026-11-25, Cultist ADR 0034): npc_ascension_cultist_summon reads Thoughtseize (806596, RangeIndex 11 = 15.0 yd) via GetMaxRange(false, me) for both target retention and replacement search on entry 501464; counted pair 20261125-124949 / 20261125-125018 (build a17a35612e2e, 0 flips, clear LOS, dummy alive) kept dummy in control (9.88 / 6.73 yd, area1 806596 = 0) and retargeted area1 in both near (22.13 / 25.76 yd, area1 = 1) and far (50.03 / 52.50 yd, area1 = 1) arms."
+    "reason": "Proved after server fix (owner ruling O-20, 2026-11-25, Cultist ADR 0034): npc_ascension_cultist_summon reads Thoughtseize (806596, RangeIndex 11 = 15.0 yd) via GetMaxRange(false, me) for both target retention and replacement search on entry 501464 (17.025 yd c2c against Harvest Golem 36). Counted pair 20261125-132735 / 20261125-132804 (build a17a35612e2e, 14/14 ok, 0 flips): retarget_out_of_range (control -10.0 yd, near -22.5 yd, far -50.0 yd, clear LOS, dummy alive) kept dummy in control (9.52 / 9.86 yd, area1 = 0) and retargeted area1 in near (22.25 / 19.62 yd, area1 = 1) and far (52.70 / 50.73 yd, area1 = 1); search_inside_15yd (area1 at 14.5 yd, [6.5..16.5] yd from 501464) took area1 (0 -> 1); search_beyond_15yd (area1 at 26.0 yd, [18.0..28.0] yd from 501464, strictly outside 17.025 yd and inside old 32.025 yd) did not take area1 (0 -> 0)."
   },
   {
     "spell": 572103,

@@ -31342,9 +31342,9 @@
       "secondary_dx": 7.0,
       "secondary_dy": -2.0,
       "control_move_dx": 0.0,
-      "control_move_dy": -9.0,
+      "control_move_dy": -10.0,
       "near_move_dx": 0.0,
-      "near_move_dy": -22.0,
+      "near_move_dy": -22.5,
       "move_dx": 0.0,
       "move_dy": -50.0,
       "max_range_yd": 15.0,
@@ -31356,7 +31356,155 @@
       "expire_wait_ms": 3000,
       "cast_power": 2000,
       "dummy_entry": 36,
-      "observe_source": "Spell.dbc (/srv/coa/server-data/dbc) fixes RangeIndex 11 (SpellRange[11] = 15.0 yd, Fifteen yards) on both Tentacle of N'Zoth 572103 and Thoughtseize 806596 (AttributesEx = SPELL_ATTR1_IS_CHANNELED | SPELL_ATTR1_TRACK_TARGET_IN_CHANNEL). Under owner ruling O-20 (2026-11-25, Cultist ADR 0034), AscensionCultistSummons.cpp reads Thoughtseize's runtime GetMaxRange(false, me) (15.0 yd) for both dropping the current target and scanning replacement enemies on entry 501464 via IsWithinDistInMap / Nearby (effective 17.025 yd center-to-center with 0.75 + 1.275 yd combat reach). Tests against the 15.0 yd DBC range along the verified clear-LOS south (-y) axis with Sprint 11305 applied symmetrically: control moves dummy -9 yd (4..14 yd <= 15 yd, area1 stays 0), near treatment moves dummy -22 yd (> 15 yd + combat reach, < 40 yd, area1 receives 806596), far treatment moves dummy -50 yd (> 40 yd, area1 receives 806596), requiring primary alive == 1 and line_of_sight == true at every check (ADR 1313). Reference search 2026-11-25: ev2.md Q-cu-32 has 3 live tentacles in 1 log (67, Hyrax, 2026-07-12) with 4 ticks per 8 s Thoughtseize and matching 15 yd tooltip, nothing found on retargeting distance."
+      "observe_source": "Spell.dbc (/srv/coa/server-data/dbc) fixes RangeIndex 11 (SpellRange[11] = 15.0 yd, Fifteen yards) on both Tentacle of N'Zoth 572103 and Thoughtseize 806596 (AttributesEx = SPELL_ATTR1_IS_CHANNELED | SPELL_ATTR1_TRACK_TARGET_IN_CHANNEL). Under owner ruling O-20 (2026-11-25, Cultist ADR 0034), AscensionCultistSummons.cpp reads Thoughtseize's runtime GetMaxRange(false, me) (15.0 yd) for both dropping the current target and scanning replacement enemies on entry 501464 via IsWithinDistInMap / Nearby (recomputed effective center-to-center boundary against Harvest Golem 36: 15.0 + 0.75 [DEFAULT_COMBAT_REACH 1.5 * DisplayScale 0.5 on display 28813] + 1.275 [creature_model_info 367] = 17.025 yd). Because 572103 (TARGET_DEST_TARGET_RANDOM, SpellRadius[8] = 5.0 yd, Spell.cpp:1791-1796) spawns 501464 randomly within a 5.0 yd disk around dummy, any dummy-relative move_point has +-5.0 yd placement uncertainty relative to 501464. Tests along the verified clear-LOS south (-y) axis with Sprint 11305 applied symmetrically at the tightest non-flaky bracket allowed by the 5.0 yd spawn disk: control moves dummy -10.0 yd ([5.0..15.0] yd <= 15.0 yd, area1 stays 0), near treatment moves dummy -22.5 yd ([17.5..27.5] yd > 17.025 yd, < 40 yd, area1 receives 806596), far treatment moves dummy -50.0 yd (> 40 yd, area1 receives 806596), requiring primary alive == 1 and line_of_sight == true at every check (ADR 1313). Paired with search_inside_15yd and search_beyond_15yd for the 15 yd replacement search radius. Reference search 2026-11-25: ev2.md Q-cu-32 has 3 live tentacles in 1 log (67, Hyrax, 2026-07-12) with 4 ticks per 8 s Thoughtseize and matching 15 yd tooltip, nothing found on retargeting distance."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (replacement search takes an engaged enemy inside the 15 yd data radius)",
+      "kind": "metric_delta",
+      "variant": "search_inside_15yd",
+      "label_suffix": "search_inside_15yd",
+      "quote": "If your target runs out of range, the tentacle will seek a new target.",
+      "trigger_spell": 572103,
+      "gate_timing": "start",
+      "target": "dummy",
+      "measure_actor": "area1",
+      "cast_power": 2000,
+      "learn": [
+        573028
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        14.5
+      ],
+      "after_target_health": 240,
+      "engage_and_select": {
+        "spell": 573028,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "alive",
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Primary dummy (500,000 HP) stays alive in control so command remains valid, and dies (240 HP, killed by Thoughtseize 806596 tick 2 at 4000 ms after surviving tick 1 for the 3200 ms engage cast) before the 6000 ms retarget pulse in treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 501464
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tentacle of N'Zoth 501464 remains alive through the 6000 ms retarget pulse in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3600,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "Control entry for the 15 yd replacement search radius (owner ruling O-20, Cultist ADR 0034; paired with search_beyond_15yd). Both phases cast 572103 on dummy at (3.0, 0.0) and engage stationary area1 (Harvest Golem 36, combat_reach 1.275 yd) at (14.5, 0.0) (11.5 yd from dummy -> [6.5..16.5] yd from 501464 across its 5.0 yd SpellRadius[8] spawn disk, strictly < 17.025 yd = 15.0 + 0.75 + 1.275 yd) with instant zero-damage Grasp of Zek'voz 573028 (30 yd range, void_on_cast_failure verifies combat engagement). In control, dummy stays alive (500,000 HP) so command stays valid and area1 stays at Thoughtseize 806596 == 0. In treatment, after_target_health sets dummy to 240 HP (survives tick 1 <= 201 for the 3200 ms engage cast, killed by tick 2 >= 264 at 4000 ms; precondition 823764 prevents resists) while select_after selects dead dummy, forcing Target() (AscensionCultistSummons.cpp:242) to scan Nearby(me, searchRange) at 6000 ms: area1 inside the 15 yd radius receives 806596 == 1. Reference search 2026-11-25: see retarget_out_of_range."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (replacement search ignores an engaged enemy beyond 15 yd and inside old 30 yd)",
+      "kind": "metric_delta",
+      "variant": "search_beyond_15yd",
+      "label_suffix": "search_beyond_15yd",
+      "quote": "If your target runs out of range, the tentacle will seek a new target.",
+      "trigger_spell": 572103,
+      "gate_timing": "start",
+      "target": "dummy",
+      "measure_actor": "area1",
+      "cast_power": 2000,
+      "learn": [
+        573028
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        26.0
+      ],
+      "after_target_health": 240,
+      "engage_and_select": {
+        "spell": 573028,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "alive",
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Primary dummy (500,000 HP) stays alive in control and dies (240 HP, killed by Thoughtseize 806596 tick 2 at 4000 ms) before the 6000 ms retarget pulse in treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 501464
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tentacle of N'Zoth 501464 remains alive through the 6000 ms retarget pulse in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3600,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "Search-radius regression for owner ruling O-20 (Cultist ADR 0034; paired with search_inside_15yd control). Identical layout to search_inside_15yd except stationary area1 (Harvest Golem 36, combat_reach 1.275 yd) stands at (26.0, 0.0) (23.0 yd from dummy -> [18.0..28.0] yd from 501464 across its 5.0 yd SpellRadius[8] spawn disk: strictly > 17.025 yd = 15.0 + 0.75 + 1.275 yd new search radius and strictly < 32.025 yd = 30.0 + 0.75 + 1.275 yd old hardcoded Nearby(me, 30) radius, and inside 573028's 30 yd cast range). When dummy dies at 4000 ms with select_after = dummy (dead), Target() falls through to Nearby(me, searchRange) (AscensionCultistSummons.cpp:242) at 6000 ms: on the fixed 15 yd server area1 is not taken (Thoughtseize 806596 == 0 in both phases), whereas a server using the old 30 yd search radius afflicts area1 (1) and alerts. Reference search 2026-11-25: see retarget_out_of_range."
     },
     {
       "spell": 92131,
