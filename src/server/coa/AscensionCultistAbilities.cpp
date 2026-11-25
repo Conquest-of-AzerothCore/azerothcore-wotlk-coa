@@ -39,6 +39,33 @@ void Finish(Player* player, Spell* spell)
             if (Aura* aura = player->GetAura(id); aura && generation == aura->GetScriptValue(Insanity))
                 aura->Remove();
 }
+void DeflectMeleeAbility(Spell* spell, SpellInfo const* info)
+{
+    if (!info || info->DmgClass != SPELL_DAMAGE_CLASS_MELEE || info->IsPositive() ||
+        info->HasAttribute(SPELL_ATTR3_ALWAYS_HIT))
+        return;
+    Unit* attacker = spell->GetOriginalCaster() ? spell->GetOriginalCaster() : spell->GetCaster();
+    if (!attacker)
+        return;
+    for (TargetInfo& target : *spell->GetUniqueTargetInfo())
+    {
+        if (target.missCondition != SPELL_MISS_NONE || target.targetGUID == attacker->GetGUID())
+            continue;
+        Unit* victim = ObjectAccessor::GetUnit(*attacker, target.targetGUID);
+        Player* cultist = Owner(victim);
+        if (!cultist || victim != cultist || !cultist->IsAlive() || attacker->IsFriendlyTo(cultist))
+            continue;
+        if (cultist->HasUnitState(UNIT_STATE_STUNNED) ||
+            (!cultist->HasInArc(M_PI, attacker) && !cultist->HasIgnoreHitDirectionAura()))
+            continue;
+        int32 chance = 0;
+        for (AuraEffect const* effect : cultist->GetAuraEffectsByType(SPELL_AURA_DEFLECT_SPELLS))
+            if (effect->GetId() == 525065)
+                chance += effect->GetAmount();
+        if (chance > 0 && roll_chance_i(std::clamp(chance, 0, 100)))
+            target.missCondition = SPELL_MISS_DEFLECT;
+    }
+}
 class cultist_spells : public AllSpellScript
 {
 public:
@@ -59,6 +86,7 @@ public:
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
+        DeflectMeleeAbility(spell, info);
         Player* player = Owner(caster);
         if (!player || caster != player || info->SpellFamilyName != 31 || spell->IsTriggered())
             return;
