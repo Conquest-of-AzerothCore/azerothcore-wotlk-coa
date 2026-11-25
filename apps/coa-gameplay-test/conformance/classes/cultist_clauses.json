@@ -480,13 +480,15 @@
       {
         "claim": "your critical strike chance is increased by $560947s1%",
         "labels": [
-          "300300 effect_value 560947e0 #3"
+          "300300 behaviour_metric_delta dispel_crit",
+          "300300 behaviour_metric_delta dispel_expire_control"
         ]
       },
       {
         "claim": "for $560947d",
         "labels": [
-          "300300 spell_duration 560947 #4"
+          "300300 behaviour_metric_delta dispel_crit",
+          "300300 behaviour_metric_delta dispel_crit_duration"
         ]
       }
     ]
@@ -1902,13 +1904,16 @@
       {
         "claim": "your critical strike chance is increased by $560947s1%",
         "labels": [
-          "525049 behaviour_metric_delta dispel_crit"
+          "525049 behaviour_metric_delta dispel_crit",
+          "525049 behaviour_metric_delta dispel_crit_pct",
+          "525049 behaviour_metric_delta dispel_expire_control"
         ]
       },
       {
         "claim": "for $560947d",
         "labels": [
-          "525049 behaviour_metric_delta dispel_crit"
+          "525049 behaviour_metric_delta dispel_crit",
+          "525049 behaviour_metric_delta dispel_crit_duration"
         ]
       }
     ]
@@ -3630,7 +3635,12 @@
     "spell": 706181,
     "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
     "labels": [
-      "706181 behaviour_metric_delta absorb"
+      "706181 behaviour_metric_delta absorb",
+      "706181 behaviour_metric_delta absorb_ritual",
+      "706181 behaviour_metric_delta absorb_dark_veil",
+      "706181 behaviour_metric_delta absorb_dark_veil_ally",
+      "706181 behaviour_metric_delta absorb_dreadnought",
+      "704889 behaviour_metric_delta darkward_absorb"
     ],
     "kind": "claim"
   },
@@ -4893,14 +4903,18 @@
   {
     "spell": 806897,
     "clause": "While above 60 Insanity,",
-    "labels": [],
+    "labels": [
+      "806897 behaviour_metric_delta above_60",
+      "806897 behaviour_metric_delta at_60"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806897,
     "clause": "deals $573315s2% more damage.",
     "labels": [
-      "806897 effect_value 573315e1 #1"
+      "806897 behaviour_metric_delta above_60",
+      "806897 behaviour_metric_delta damage_base"
     ],
     "kind": "claim"
   },

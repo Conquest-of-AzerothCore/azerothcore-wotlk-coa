@@ -906,6 +906,732 @@
       "observe_source": "Mind Rot 300300 (passive, ProcChance 25 = $h; AscensionCultistEvents.cpp:82 checks dealt && (periodic || (info && info->IsChanneled())) && Chance(player, id) and :165 casts 560943). Trigger: Psychic Suppression 800432 (channeled AttributesEx 0x4, GCD 1500 ms, RecoveryTime 90000 ms reset before each cast by flat_chance_rate, 17% of 1512 BaseMana = 257 mana, cast_power 2000 <= 2297 MaxMana; Duration 5000 ms, Effect[0] aura 3 periodic Shadow damage, EffectAmplitude 500 ms, no START_PERIODIC_AT_APPLY -> 10 ticks per cast inside 5500 ms). Unlearned control: 2 cycles x 10 ticks x 5 parts x 8 streams = 800 trials (>= 50), expects 0 procs. Treatment: 47 cycles x 10 ticks x 5 parts x 8 streams = 18800 trials (>= 18576 flip-proof trials for 25% with G-19 +-2 pt band over 5 parts, residual edge-crossing failure <= 0.1% per pair). Reference search 2026-11-24: coabuildhub spells_master_index.json entry 300300 matches verbatim; ~/Projects/coa-log-history/coa-history not present."
     },
     {
+      "spell": 300300,
+      "name": "Mind Rot (dispelling Mind Rot 560943 increases crit chance by 30%)",
+      "kind": "metric_delta",
+      "variant": "dispel_crit",
+      "label_suffix": "dispel_crit",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.@s:560714:0@",
+      "trigger_spell": 502220,
+      "gate_spell": 300300,
+      "target": "dummy",
+      "target_entry": 6,
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 2200,
+      "after_trigger_casts": [
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700,
+          "in_before": true
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700,
+          "in_before": true
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700,
+          "in_before": true
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700,
+          "in_before": true
+        }
+      ],
+      "target_casts": [
+        988
+      ],
+      "enemy_cast_wait_ms": 500,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803060,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10060,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          32182,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 30,
+      "expected_gain": 30,
+      "tolerance": 0.01,
+      "wait_ms": 2800,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560947
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Owner ruling O-12 Q-cu-2 (Cultist ADR 0011): dispelling Mind Rot 560943 grants Mind Rot 560947 to the Cultist caster (0 before learn, 1 after learn)"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Dispel Magic 988 dispelled Mind Rot 560943 (Dispel 1 Magic) from Kobold Vermin 6 dummy after all periodic/channeled ticks finished"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-12 Q-cu-2 (Cultist ADR 0011): Mind Rot 300300 (@s:560714:0@) states 'If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.' (560947 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT +30%, DurationIndex 28 = 5000 ms). Darkwither 502220 (15000 ms, 5 ticks) plus five hasted Psychic Suppression 800432 channels (803060 +30%, 10060 +20%, 32182 +30% -> 2.028x spell haste, 2465 ms / 10 ticks each; all channels and Darkwither finish by 15000 ms before the 15200 ms Dispel Magic 988 cast, putting 40 periodic/channeled ticks inside the final 10000 ms window with proc miss rate 0.75^40 = 1.0e-5; omits void_on_cast_failure per DONT_REPORT 27). Dummy casts Dispel Magic 988 (dispelling 560943, confirmed 0 by ally_arm), granting +30.0 spell_crit_chance and aura 560947 (0 -> 1) to caster. Reference search 2026-11-24: coabuildhub 300300 matches verbatim; coa-history 560947: 0 events."
+    },
+    {
+      "spell": 300300,
+      "name": "Mind Rot (dispel crit buff 560947 lasts 5000 ms)",
+      "kind": "metric_delta",
+      "variant": "dispel_crit_duration",
+      "label_suffix": "dispel_crit_duration",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.@s:560714:0@",
+      "trigger_spell": 502220,
+      "gate_spell": 300300,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 6,
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 2200,
+      "after_trigger_casts": [
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        }
+      ],
+      "target_casts": [
+        988
+      ],
+      "enemy_cast_wait_ms": 4600,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803060,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10060,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          32182,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560947
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2800,
+      "expiry_wait_ms": 600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19700,
+          20200
+        ],
+        "expired": [
+          20300,
+          20800
+        ]
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Dispel Magic 988 dispelled Mind Rot 560943 after Darkwither 502220 and all five 800432 channels finished"
+          }
+        ]
+      },
+      "observe_source": "Duration proof for Mind Rot dispel buff 560947 (DurationIndex 28 = 5000 ms, $560947d; Cultist ADR 0011) on 300300: Darkwither 502220 (t=0..15000 ms) plus five 2.028x-hasted Psychic Suppression 800432 channels (finishing ~14865 ms; 40 ticks in final 10 s, miss rate 1.0e-5; omits void_on_cast_failure per DONT_REPORT 27) apply 560943, then instant Dispel Magic 988 at ~15250 ms dispels 560943 with zero remaining ticks and grants 560947 (expires ~20250 ms). Reads 560947 absent before cast (0), present at ~19850 ms (~4600 ms > 0.9 * 5000 after dispel: 1), and gone at ~20450 ms (~5200 ms < 1.1 * 5000 after dispel: 0). Paired with dispel_crit (learned contrast). Reference search 2026-11-24: coabuildhub 300300 matches ('for 5 seconds')."
+    },
+    {
+      "spell": 300300,
+      "name": "Mind Rot (control: natural expiry of 560943 does not grant 560947)",
+      "kind": "metric_delta",
+      "variant": "dispel_expire_control",
+      "label_suffix": "dispel_expire_control",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.@s:560714:0@",
+      "trigger_spell": 502220,
+      "gate_spell": 300300,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 6,
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 2200,
+      "after_trigger_casts": [
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        },
+        {
+          "spell": 800432,
+          "target": "dummy",
+          "delay_ms": 2700
+        }
+      ],
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803060,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          10060,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          32182,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 560947
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 13500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 28,
+            "tolerance": 27,
+            "source": "Confirms Mind Rot 300300 procced and applied 560943 at least once (28 +/- 27 = [1, 55])"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 (10000 ms duration, last possible proc <= 15000 ms) finished expiring naturally by 25900 ms"
+          }
+        ]
+      },
+      "observe_source": "Negative non-dispel expiry control for Mind Rot 300300 (owner ruling O-12 Q-cu-2, Cultist ADR 0011): identical Darkwither 502220 + five 2.028x-hasted Psychic Suppression 800432 setup (40 ticks in final 10 s, miss rate 1.0e-5; omits void_on_cast_failure per DONT_REPORT 27) applying 560943 to Kobold Vermin 6 (confirmed >= 1 cast by ally_arm spell_cast_count 560943 in [1, 55]), with NO dispel cast; waits 13500 ms past the last channel start (~25900 ms > 25000 ms) so 560943 expires by AURA_REMOVE_BY_EXPIRE (confirmed 0 by ally_arm). aura_apply_count of 560947 on caster stays 0 -> 0. Reference search 2026-11-24: coabuildhub 300300 matches ('If this effect is dispelled')."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (dispelling Mind Rot 560943 grants 560947 crit buff)",
+      "kind": "metric_delta",
+      "variant": "dispel_crit",
+      "label_suffix": "dispel_crit",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "target_casts": [
+        527,
+        527
+      ],
+      "enemy_cast_wait_ms": 500,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560947
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Kobold Vermin 6 dummy's two Dispel Magic 527 casts dispelled Mind Rot 560943 (Dispel 1 Magic) from the dummy"
+          }
+        ]
+      },
+      "observe_source": "Eldritch Screams 525049 / Mind Rot tooltip (@s:560714:0@): 'If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.' (560947 Effect[0] aura 290 MOD_CRIT_PCT +30%, DurationIndex 28 = 5000 ms; owner ruling O-12 Q-cu-2, Cultist ADR 0011). Corrupt Mind 560109 applies 560943 to Kobold Vermin 6 (wait 2200 ms), then dummy casts Dispel Magic 527 twice on itself (removing 560109 and 560943, confirmed 0 by ally_arm). Reads 560947 on caster: expected 0 before learn, 1 after learn. Reference search 2026-11-24: coa-history 560947: 0 events; coabuildhub spells_master_index.json 525049 matches verbatim."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (dispelling Mind Rot 560943 increases crit chance by 30%)",
+      "kind": "metric_delta",
+      "variant": "dispel_crit_pct",
+      "label_suffix": "dispel_crit_pct",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "target_casts": [
+        988
+      ],
+      "enemy_cast_wait_ms": 500,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 30,
+      "expected_gain": 30,
+      "tolerance": 0.01,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Dispel Magic 988 dispelled Mind Rot 560943 (and Corrupt Mind 560109) from the dummy"
+          }
+        ]
+      },
+      "observe_source": "Magnitude proof for Mind Rot dispel buff 560947 ($560947s1% = 30%, Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 29 + DieSides 1; owner ruling O-12 Q-cu-2, Cultist ADR 0011) on Eldritch Screams 525049: Corrupt Mind 560109 applies 560943 to Kobold Vermin 6 (wait 2200 ms), then dummy casts Dispel Magic 988 (dispels 2 Magic debuffs in one instant cast, removing both 560109 and 560943). Reads caster spell_crit_chance gain: 0 before learning 525049, +30.0 after learning 525049. Reference search 2026-11-24: coabuildhub 525049 matches ('by 30%')."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot dispel crit buff 560947 lasts 5000 ms)",
+      "kind": "metric_delta",
+      "variant": "dispel_crit_duration",
+      "label_suffix": "dispel_crit_duration",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "target_casts": [
+        988
+      ],
+      "enemy_cast_wait_ms": 4550,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560947
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2200,
+      "expiry_wait_ms": 650,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          6650,
+          7000
+        ],
+        "expired": [
+          7300,
+          7650
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Dispel Magic 988 dispelled Mind Rot 560943 at ~2200 ms"
+          }
+        ]
+      },
+      "observe_source": "Duration proof for Mind Rot dispel buff 560947 (DurationIndex 28 = 5000 ms, $560947d; Cultist ADR 0011) on Eldritch Screams 525049: Corrupt Mind 560109 lands ~1630 ms, instant Dispel Magic 988 at 2200 ms dispels both 560109 and 560943 and grants 560947 (expires ~7200 ms). Reads 560947 absent before cast (0), present at ~6750 ms (~4550 ms > 0.9 * 5000 after dispel: 1), and gone at ~7400 ms (~5200 ms < 1.1 * 5000 after dispel: 0). Paired with dispel_crit (learned contrast). Reference search 2026-11-24: coabuildhub 525049 matches ('for 5 seconds')."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (control: natural expiry of 560943 does not grant 560947)",
+      "kind": "metric_delta",
+      "variant": "dispel_expire_control",
+      "label_suffix": "dispel_expire_control",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          560947,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 560947
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 12200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Corrupt Mind 560109 applied Mind Rot 560943 once to Kobold Vermin 6"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 (lands ~1630 ms, 10000 ms duration) naturally expired by 12200 ms"
+          }
+        ]
+      },
+      "observe_source": "Negative non-dispel expiry control for Eldritch Screams 525049 (owner ruling O-12 Q-cu-2, Cultist ADR 0011): Corrupt Mind 560109 applies Mind Rot 560943 to Kobold Vermin 6 (confirmed by dummy aura_apply_count 560943 == 1), and NO dispel is cast; after 12200 ms, 560943 has naturally expired (AURA_REMOVE_BY_EXPIRE, confirmed 0 by ally_arm), and aura_apply_count of 560947 on caster remains 0 -> 0. Reference search 2026-11-24: coabuildhub 525049 matches ('If this effect is dispelled')."
+    },
+    {
       "spell": 301241,
       "name": "Ungodly Blessing (curse duration)",
       "kind": "duration_ratio",
@@ -1682,6 +2408,138 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Triggered Obliteration Beam 805573 Effect[0] has TargetA 53 (TARGET_DEST_TARGET_ENEMY), TargetB 16 (TARGET_UNIT_DEST_AREA_ENEMY), EffectRadiusIndex 14 (SpellRadius.dbc 14 = 8.0 yd). Primary dummy stands at 3 yd; area_dummies places area1..area3 at 5, 7, 9 yd (2, 4, 6 yd from dummy, inside 8 yd) and area4 at 20 yd (17 yd from dummy, well outside 8 yd + 1.275 yd reach). area_sum sums spell_damage_count of 805573 across all 5 dummies: 0 in uncast control, 4 after one real cast of 806897 (primary + 3 nearby struck, far dummy untouched). Reference search 2026-11-24: coabuildhub 805572 matches verbatim; coa-history records 1879 hits across 159 casts (~11.8 hits/cast in AoE pulls)."
+    },
+    {
+      "spell": 806897,
+      "name": "Obliteration Beam (+20% Shadow damage above 60 Insanity)",
+      "kind": "metric_delta",
+      "variant": "above_60",
+      "label_suffix": "above_60",
+      "quote": "While above 60 Insanity, deals $573315s2% more damage.",
+      "trigger_spell": 806897,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 958,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 573315,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 573315
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Refresh() (AscensionCultist.cpp:288) grants 60 Insanity Aura 573315 when Insanity 500706 > 60 (61 stacks after 1000 ms settle)"
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling O-12 Q-cu-6 (Cultist ADR 0012): Obliteration Beam 806897 tooltip states 'While above 60 Insanity, deals $573315s2% more damage.' ($573315s2 = 20; 573315 Effect[1] aura 108 SPELLMOD_DAMAGE +20%, SpellClassMask set to flag96(131072, 0, 0) in AscensionCultist::ApplyContracts matching triggered 805573). With Insanity 500706 at 61 stacks (expire_ms 1000 lets Refresh grant 573315; before_trigger_reads and ally_arm confirm aura 573315 == 1 at the cast), 805573 deals floor(713 * 1.12 * 1.20) = 958 Shadow damage (0 in uncast before; paired with at_60 control = 798 and damage_base = 798). Reference search 2026-11-24: coabuildhub 805572 matches verbatim ('While above 60 Insanity, deals 20% more damage.'); coa-history records 159 casts of 806897 and 1879 hits of 805573."
+    },
+    {
+      "spell": 806897,
+      "name": "Obliteration Beam (control: no +20% bonus at 60 Insanity threshold)",
+      "kind": "metric_delta",
+      "variant": "at_60",
+      "label_suffix": "at_60",
+      "quote": "While above 60 Insanity,",
+      "trigger_spell": 806897,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 798,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 573315,
+          "expected": 0,
+          "actor": "caster"
+        }
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold boundary control for Obliteration Beam 806897 ('While above 60 Insanity', Cultist ADR 0012): identical to above_60 except Insanity 500706 is set to 60 stacks (not > 60, AscensionCultist.cpp:288). before_trigger_reads confirms aura 573315 == 0 right before the cast, and 805573 deals unboosted floor(713 * 1.12) = 798 Shadow damage (0 in uncast before). Reference search 2026-11-24: coabuildhub 805572 matches verbatim."
     },
     {
       "spell": 680607,
@@ -2806,6 +3664,251 @@
       "void_on_cast_failure": true,
       "phase_since": true,
       "observe_source": "706181 Effect[0] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, MiscValue 127, BasePoints 19 + 1 = 20 ($s1; Spell.dbc); Effect[1] is aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 BasePoints 19 (+20%, class mask includes 578115). Tooltip promises +20% absorption effectiveness once: Void Shield 578115 (776..830 at SP 0) struck by Light of the Naaru 41394 (1100 Holy) must absorb [931, 996] after a real learn of 706181 (control 776..830); a double-dip (1.44x) would exceed 996 and alert. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Forbidden Ritual absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_ritual",
+      "label_suffix": "absorb_ritual",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 706181,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1032,
+      "expected": 1238,
+      "tolerance": 47,
+      "after_at_least": 1183,
+      "after_at_most": 1293,
+      "wait_ms": 1500,
+      "expire_ms": 11000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 300,
+        "after_trigger_ms": 3500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): AscensionCultist::ApplyContracts neutralizes Darkward 706181 Effect[1] (SPELLMOD_ALL_EFFECTS +20%) so Effect[0] (aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +20%) applies once. Forbidden Ritual 502273 ([986..1078] at SP 0, 3000 ms cast) struck at 3500 ms by 2x Light of the Naaru 41394 (2200 Holy > 1.44x max 1552) absorbs [986..1078] before learn and [1183..1293] (+20% once) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Dark Veil caster absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_dark_veil",
+      "label_suffix": "absorb_dark_veil",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 520345,
+      "gate_spell": 706181,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 92559,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 969,
+      "expected": 1162,
+      "tolerance": 2,
+      "after_at_least": 1161,
+      "after_at_most": 1164,
+      "wait_ms": 150,
+      "expire_ms": 5000,
+      "strike": {
+        "spell": 92559,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Dark Veil 520345 -> 520346 Effect[1] (caster shield, SpellFamilyFlags[2] 67108864, 875 + 0.25 * 376 AP = 969 on 1st tick at 1500 ms) previously double-dipped 706181 Effect[0] + Effect[1] to 1394. With Effect[1] dummied, 2x Void Zone 92559 (1954 Physical > 1394) at 1500 ms absorbs 969 before learn and floor(969 * 1.20) = 1162 (+20% once) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Dark Veil ally absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_dark_veil_ally",
+      "label_suffix": "absorb_dark_veil_ally",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 520345,
+      "gate_spell": 706181,
+      "target": "ally",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          10000,
+          10000
+        ],
+        "ally_strikes": true
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 9015,
+      "expected": 9208,
+      "tolerance": 3,
+      "after_at_least": 9205,
+      "after_at_most": 9211,
+      "wait_ms": 150,
+      "expire_ms": 5000,
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 2,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Dark Veil 520345 -> 520346 Effect[0] on grouped ally also scales from caster's aura 317 (SpellAuraEffects.cpp:645 target = caster). Against 2x Void Zone 92559 (1954 Physical on level-60 Cultist ally starting at 10000 HP), unlearned 520346 absorbs 969 (ally health 10000 - 1954 + 969 = 9015) and learned 706181 absorbs 1162 (+20% once, ally health 10000 - 1954 + 1162 = 9208; 1.44x double-dip would leave 9440). Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Dreadnought absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_dreadnought",
+      "label_suffix": "absorb_dreadnought",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 567552,
+      "gate_spell": 706181,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 2641,
+      "expected": 3169,
+      "tolerance": 2,
+      "after_at_least": 3167,
+      "after_at_most": 3171,
+      "wait_ms": 1500,
+      "expire_ms": 13000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 4,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Dreadnought 567552 (SpellFamilyFlags[2] 8192, reached only by 706181 Effect[0] aura 317) absorbs 2116 + 3*104 STA + 3*71 INT = 2641 at level 60 reference stats (precondition fixture: 80 Insanity 500706 + 680604 marker). Struck by 4x Light of the Naaru 41394 (4400 Holy > 3169), spell_absorb_total reads 2641 before learn and floor(2641 * 1.20) = 3169 (+20% preserved) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (Darkward 706181 increases shield absorb by +20%)",
+      "kind": "metric_delta",
+      "variant": "darkward_absorb",
+      "label_suffix": "darkward_absorb",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 706181,
+      "learn": [
+        704889
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1.0,
+      "expected": 1.2,
+      "tolerance": 0.01,
+      "after_at_least": 1.19,
+      "after_at_most": 1.21,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Twilight Guardian 704889 -> Copy 850002 (SpellFamilyName 31, SpellFamilyFlags [0, 0, 0], reached only by Darkward 706181 Effect[0] aura 317 at SpellAuraEffects.cpp:639-657) shields for 100% of Twilight Shieldtoss 572141 damage (for_entry(704889) equips Dreadnought 2534 + 2129 shield). Struck by 2x Light of the Naaru 41394 (2200 Holy > max shield) in both phases, ratio_to_metric (increments) divides absorbed damage by 572141 damage dealt: 1.00 before learning 706181 and 1.20 (+20% preserved) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
     },
     {
       "spell": 706189,

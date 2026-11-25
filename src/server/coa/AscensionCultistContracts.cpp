@@ -182,6 +182,12 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_1].Effect = 0;
         info->Effects[EFFECT_2].Effect = 0;
     }
+    if (id == 560943)
+        info->Effects[0].MiscValue = SPELL_SCHOOL_MASK_ALL;
+    if (id == 573315)
+        info->Effects[1].SpellClassMask = flag96(131072, 0, 0);
+    if (id == 706181)
+        dummy(1);
     if (id == 680576)
     {
         info->Effects[1].ApplyAuraName = SPELL_AURA_MOD_DECREASE_SPEED;
@@ -262,7 +268,7 @@ public:
     cultist_scaling() : UnitScript("cultist_scaling", true,
         {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
          UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_MODIFY_HEAL_RECEIVED,
-         UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_ON_DAMAGE}) { }
+         UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_ON_DAMAGE, UNITHOOK_ON_AURA_REMOVE}) { }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
         Player* player = Owner(caster);
@@ -350,6 +356,12 @@ public:
             AddPct(damage, Amount(681326));
         if (player->HasAura(Herald) && player->HasAura(300287))
             AddPct(damage, Amount(300287, 1));
+    }
+    void OnAuraRemove(Unit*, AuraApplication* application, AuraRemoveMode mode) override
+    {
+        if (mode == AURA_REMOVE_BY_ENEMY_SPELL && application && application->GetBase()->GetId() == 560943)
+            if (Player* player = Owner(application->GetBase()->GetCaster()))
+                Cast(player, player, 560947);
     }
 };
 }
