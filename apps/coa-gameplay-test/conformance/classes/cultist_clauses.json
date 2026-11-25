@@ -2655,9 +2655,13 @@
     "spell": 572103,
     "clause": "If your target runs out of range, the tentacle will seek a new target.",
     "labels": [
-      "572103 behaviour_metric_delta retarget_out_of_range"
+      "572103 behaviour_metric_delta retarget_out_of_range",
+      "572103 behaviour_metric_delta retarget_short_delay",
+      "572103 behaviour_metric_delta search_inside_15yd",
+      "572103 behaviour_metric_delta search_beyond_15yd"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Proved after server fixes (owner rulings O-20 and O-22, 2026-11-25, Cultist ADRs 0034 and 0036): npc_ascension_cultist_summon reads Thoughtseize (806596, RangeIndex 11 = 15.0 yd) via GetMaxRange(false, me) for target retention and replacement search on entry 501464 (17.025 yd c2c against Harvest Golem 36), removes owner's Thoughtseize immediately on UpdateAI when an afflicted target leaves range before seeking a replacement, and enforces single-target exclusivity. Counted pair 20261125-144748 / 20261125-144817 (build 539312883947, 15/15 ok, 0 flips): retarget_out_of_range (end 6800 ms) and retarget_short_delay (end 3300 ms, before 6000 ms pulse) kept dummy in control (area1 = 0, raw dummy = 1) and retargeted area1 in near and far out-of-range arms (area1 = 1, raw dummy = 0); search_inside_15yd (0 -> 1) and search_beyond_15yd (0 -> 0) pinned the 15 yd search radius. Supporting gameplay scenario evidence (counted pair 20261125-142643 / 20261125-142712, build 539312883947, VERIFY ALL: PASSED, 3/3 passed in both runs): apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-retarget-clears-primary.json (primary removal, zero simultaneous dual-target carry, 4/0 control ticks vs 0/3 treatment ticks), apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-no-other-target.json (out-of-range removal with no other target while 501464 stays alive), and apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-two-cultists-owner-isolation.json (owner-keyed isolation between two Cultists on a shared target)."
   },
   {
     "spell": 572103,

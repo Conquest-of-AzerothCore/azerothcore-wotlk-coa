@@ -175,21 +175,45 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             return 0;
         return std::min<uint32>(std::max<uint32>(lastDiff * 2, amplitude / 10), amplitude / 2);
     }
+    void RemoveThoughtseize(Unit* target, int32 graceMs = 0)
+    {
+        if (!target)
+            return;
+        if (Aura* aura = target->GetAura(Thoughtseize, owner))
+            if (graceMs <= 0 || aura->GetDuration() > graceMs)
+                aura->Remove();
+    }
     void ClearThoughtseize(int32 graceMs = 0)
     {
         for (ObjectGuid guid : afflicted)
-            if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
-                if (Aura* aura = target->GetAura(Thoughtseize, owner))
-                    if (graceMs <= 0 || aura->GetDuration() > graceMs)
-                        aura->Remove();
+            RemoveThoughtseize(ObjectAccessor::GetUnit(*me, guid), graceMs);
         afflicted.clear();
+    }
+    float ThoughtseizeRange() const
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(Thoughtseize);
+        return info ? info->GetMaxRange(false, me) : 0.0f;
     }
     void ApplyThoughtseize(Player* player)
     {
         if (!player)
             return;
-        if (Unit* target = Target(player))
+        bool nzoth = me->GetEntry() == 501464;
+        float range = nzoth ? ThoughtseizeRange() : 0.0f;
+        Unit* target = nzoth ? Target(player, range, range) : Target(player);
+        if (nzoth)
+            for (auto it = afflicted.begin(); it != afflicted.end();)
+                if (!target || *it != target->GetGUID())
+                {
+                    RemoveThoughtseize(ObjectAccessor::GetUnit(*me, *it));
+                    it = afflicted.erase(it);
+                }
+                else
+                    ++it;
+        if (target)
         {
+            if (nzoth)
+                command = target->GetGUID();
             Face(target);
             if (!target->HasAura(Thoughtseize, owner))
             {
@@ -198,6 +222,27 @@ struct npc_ascension_cultist_summon : public ScriptedAI
                 afflicted.insert(target->GetGUID());
             }
         }
+    }
+    void UpdateThoughtseize(Player* player)
+    {
+        if (afflicted.empty())
+            return;
+        float range = ThoughtseizeRange();
+        bool lost = false;
+        for (auto it = afflicted.begin(); it != afflicted.end();)
+        {
+            Unit* unit = ObjectAccessor::GetUnit(*me, *it);
+            if (!unit || !unit->IsAlive() || !me->IsWithinDistInMap(unit, range))
+            {
+                RemoveThoughtseize(unit);
+                it = afflicted.erase(it);
+                lost = true;
+            }
+            else
+                ++it;
+        }
+        if (lost)
+            ApplyThoughtseize(player);
     }
     bool Expired() const
     {
@@ -217,13 +262,13 @@ struct npc_ascension_cultist_summon : public ScriptedAI
     {
         ClearThoughtseize();
     }
-    Unit* Target(Player* player)
+    Unit* Target(Player* player, float keepRange = 40.0f, float searchRange = 30.0f)
     {
-        auto valid = [this, player](Unit* unit, bool commanded = false)
+        auto valid = [this, player, keepRange](Unit* unit, bool commanded = false)
         {
             return unit && unit->IsAlive() && player->IsValidAttackTarget(unit) &&
                 (commanded || player->IsInCombatWith(unit)) &&
-                me->IsWithinDistInMap(unit, 40) && me->IsWithinLOSInMap(unit);
+                me->IsWithinDistInMap(unit, keepRange) && me->IsWithinLOSInMap(unit);
         };
         Unit* target = ObjectAccessor::GetUnit(*me, command);
         if (valid(target, true))
@@ -232,7 +277,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             return target;
         if (target = player->GetSelectedUnit(); valid(target))
             return target;
-        for (Unit* enemy : Nearby(me, 30))
+        for (Unit* enemy : Nearby(me, searchRange))
             if (valid(enemy))
                 return enemy;
         return nullptr;
@@ -326,6 +371,8 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         uint8 pvp = player->GetByteValue(UNIT_FIELD_BYTES_2, 1);
         if (me->GetByteValue(UNIT_FIELD_BYTES_2, 1) != pvp)
             me->SetByteValue(UNIT_FIELD_BYTES_2, 1, pvp);
+        if (me->GetEntry() == 501464)
+            UpdateThoughtseize(player);
         timers.Update(diff);
         if (!timers.ExecuteEvent())
             return;
@@ -346,6 +393,11 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         }
         if (entry == 500464 && me->GetExactDist2d(player) > 2)
             me->NearTeleportTo(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation());
+        if (entry == 501464)
+        {
+            ApplyThoughtseize(player);
+            return;
+        }
         Unit* target = Target(player);
         if (!target)
             return;
@@ -360,7 +412,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         }
         else if (entry == CthunTentacle && !me->HasUnitState(UNIT_STATE_CASTING))
             me->CastSpell(target, MentalAssault, false);
-        else if (entry == 501464 || entry == 500464)
+        else if (entry == 500464)
             ApplyThoughtseize(player);
         else if (entry == 397771)
         {

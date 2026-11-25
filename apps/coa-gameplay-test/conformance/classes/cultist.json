@@ -7872,7 +7872,7 @@
       "critical": false,
       "trials": 10,
       "void_on_cast_failure": true,
-      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 owner ruling Q-cu-10 / O-12, Cultist ADR 0005) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (AscensionCultistAbilities.cpp:228-234 checks GetScriptHealingIncludingOverheal() to grant 705107, expected ratio 2.0, +100% inside G-19 [95%, 105%]). Paired with heal_to_dmg (damaged target). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc — owner ruling Q-cu-10 / O-12, Cultist ADR 0005) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (AscensionCultistAbilities.cpp:228-234 checks GetScriptHealingIncludingOverheal() to grant 705107, expected ratio 2.0, +100% inside G-19 [95%, 105%]). Paired with heal_to_dmg (damaged target). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 704880,
@@ -12913,7 +12913,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert \u2014 no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert — no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
     },
     {
       "spell": 502122,
@@ -29898,6 +29898,43 @@
         500110,
         500110,
         500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
         500110
       ],
       "setup_target": "dummy",
@@ -29938,7 +29975,10 @@
       "after_at_least": 1,
       "wait_ms": 13000,
       "expire_ms": 500,
-      "observe_source": "Complements 706911 portal_rate (15% spawn rate): 48 casts of Gaze of C'Thun 500110 with spell pen 823764 (precondition fixture; P(0 portals) = 0.85^48 = 0.041% per run, 0.082% <= 0.1% per pair) produce 0 portal damage hits before learning 706911 and >= 1 owned_creature_damage_count(533030) after learning 706911 (AscensionCultistSummons.cpp:290-297), with owned_creature_count(533030) == 0 at wait_ms 13000 confirming portals disappear after casting. void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) on unused ally effect 520335. Uniform 1-of-3 spell pick distribution is tracked separately in tool-queue.md. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim."
+      "observe_source": "Complements 706911 portal_rate (15% ProcChance, Spell.dbc): 85 effective casts of Gaze of C'Thun 500110 (84 setup_casts + 1 trigger_spell) with spell pen 823764 (precondition fixture) and refill_power_after_setup_casts {'power': 0} restoring mana to cast_power after every setup cast (500110 costs 15% of base mana, Spell.dbc ManaCostPercentage = 15; without refill, 76/96 casts failed SPELL_FAILED_NO_POWER leaving only 10 effective casts and P(0) = 0.85^10 = 19.69% per run). At p = 0.15 from Spell.dbc ProcChance, 85 casts give P(0 portals) = 0.85^85 = 1.001e-6 (0.00010%) per run and 1 - (1 - 0.85^85)^2 = 2.003e-6 (0.00020%) per pair (vs 0.85^48 = 0.041% / 0.082% per pair and 0.85^60 = 0.0058% / 0.0116% per pair). Produces 0 portal damage hits before learning 706911 and >= 1 owned_creature_damage_count(533030) after learning 706911 (AscensionCultistSummons.cpp:290-297), with owned_creature_count(533030) == 0 at wait_ms 13000 confirming portals disappear after casting. void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) on unused ally effect 520335. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim.",
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     },
     {
       "spell": 706911,
@@ -31342,9 +31382,9 @@
       "secondary_dx": 7.0,
       "secondary_dy": -2.0,
       "control_move_dx": 0.0,
-      "control_move_dy": -9.0,
+      "control_move_dy": -10.0,
       "near_move_dx": 0.0,
-      "near_move_dy": -22.0,
+      "near_move_dy": -22.5,
       "move_dx": 0.0,
       "move_dy": -50.0,
       "max_range_yd": 15.0,
@@ -31356,7 +31396,185 @@
       "expire_wait_ms": 3000,
       "cast_power": 2000,
       "dummy_entry": 36,
-      "observe_source": "Spell.dbc (/srv/coa/server-data/dbc) fixes RangeIndex 11 (SpellRange[11] = 15.0 yd, Fifteen yards) on both Tentacle of N'Zoth 572103 and Thoughtseize 806596 (AttributesEx = SPELL_ATTR1_IS_CHANNELED | SPELL_ATTR1_TRACK_TARGET_IN_CHANNEL; Spell.cpp:3473-3514 enforces GetMaxRange() + 1.5 yd channel tolerance). Server code (AscensionCultistSummons.cpp:187-201,220-239) instead calls player->AddAura(Thoughtseize, target) and checks hardcoded 40 yd (line 226) / Nearby(me, 30) (line 235) without removing 806596 from dummy. Tests against the 15.0 yd DBC range along the verified clear-LOS south (-y) axis with Sprint 11305 applied symmetrically: control moves dummy -9 yd (inside 15 yd, area1 stays 0), near treatment moves dummy -22 yd (just beyond 15 yd + 1.5 yd channel tolerance, < 40 yd), far treatment moves dummy -50 yd (> 40 yd), requiring primary alive == 1 and line_of_sight == true at every check (ADR 1313). Reference search 2026-11-25: ev2.md Q-cu-32 has 3 live tentacles in 1 log (67, Hyrax, 2026-07-12) with 4 ticks per 8 s Thoughtseize and matching 15 yd tooltip, nothing found on retargeting distance."
+      "observe_source": "Spell.dbc (/srv/coa/server-data/dbc) fixes RangeIndex 11 (SpellRange[11] = 15.0 yd, Fifteen yards) on both Tentacle of N'Zoth 572103 and Thoughtseize 806596 (AttributesEx = SPELL_ATTR1_IS_CHANNELED | SPELL_ATTR1_TRACK_TARGET_IN_CHANNEL). Under owner rulings O-20 and O-22 (2026-11-25, Cultist ADRs 0034 and 0036), AscensionCultistSummons.cpp reads Thoughtseize's runtime GetMaxRange(false, me) (15.0 yd) for both dropping the current target and scanning replacement enemies on entry 501464 via IsWithinDistInMap / Nearby (recomputed effective center-to-center boundary against Harvest Golem 36: 15.0 + 0.75 [DEFAULT_COMBAT_REACH 1.5 * DisplayScale 0.5 on display 28813] + 1.275 [creature_model_info 367] = 17.025 yd) and removes Thoughtseize 806596 from the previous target on the first UpdateAI tick once out of range before seeking a replacement. Because 572103 (TARGET_DEST_TARGET_RANDOM, SpellRadius[8] = 5.0 yd, Spell.cpp:1791-1796) spawns 501464 randomly within a 5.0 yd disk around dummy, any dummy-relative move_point has +-5.0 yd placement uncertainty relative to 501464. Tests along the verified clear-LOS south (-y) axis with Sprint 11305 applied symmetrically at the tightest non-flaky bracket allowed by the 5.0 yd spawn disk: control moves dummy -10.0 yd ([5.0..15.0] yd <= 15.0 yd, area1 stays 0 and raw primary_aura stays 1), near treatment moves dummy -22.5 yd ([17.5..27.5] yd > 17.025 yd, < 40 yd, area1 receives 806596 and raw primary_aura reads 0), far treatment moves dummy -50.0 yd (> 40 yd, area1 receives 806596 and raw primary_aura reads 0), requiring primary alive == 1 and line_of_sight == true at every check (ADR 1313). Paired with retarget_short_delay, search_inside_15yd, and search_beyond_15yd. Reference search 2026-11-25: ev2.md Q-cu-32 has 3 live tentacles in 1 log (67, Hyrax, 2026-07-12) with 4 ticks per 8 s Thoughtseize and matching 15 yd tooltip, nothing found on retargeting distance or out-of-range channel break."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (retargets within short delay after primary leaves 15 yd, before 6000 ms pulse)",
+      "kind": "summon_retarget_out_of_range",
+      "variant": "retarget_short_delay",
+      "label_suffix": "retarget_short_delay",
+      "quote": "If your target runs out of range, the tentacle will seek a new target.",
+      "entry": 501464,
+      "effect_aura": 806596,
+      "primary_dx": 0.0,
+      "primary_dy": -2.0,
+      "secondary_dx": 7.0,
+      "secondary_dy": -2.0,
+      "control_move_dx": 0.0,
+      "control_move_dy": -10.0,
+      "near_move_dx": 0.0,
+      "near_move_dy": -22.5,
+      "move_dx": 0.0,
+      "move_dy": -50.0,
+      "max_range_yd": 15.0,
+      "secondary_max_range_yd": 15.0,
+      "speed_aura": 11305,
+      "initial_wait_ms": 300,
+      "pre_pulse_wait_ms": 2500,
+      "post_pulse_wait_ms": 500,
+      "expire_wait_ms": 6000,
+      "cast_power": 2000,
+      "dummy_entry": 36,
+      "observe_source": "Short-delay retarget regression for owner ruling O-22 (2026-11-25, Cultist ADR 0036). Reuses the verified clear-LOS south (-y) layout of retarget_out_of_range (control -10.0 yd, near -22.5 yd, far -50.0 yd, area1 at (7.0, -2.0), Sprint 11305) with pre_pulse_wait_ms 2500 and post_pulse_wait_ms 500 (end snapshot at 3300 ms, 2700 ms before the 6000 ms Pulse, and expire_wait_ms 6000 for clean 8000 ms despawn cleanup). Proves 501464 retargets to area1 within 500 ms of dummy being confirmed out of range (before the 6000 ms Pulse; a 6000 ms pulse-only server alerts with area1 == 0 at 3300 ms) while control keeps area1 == 0; raw end snapshots also record primary_aura == 1 in control and primary_aura == 0 in both out-of-range arms (note: summon_retarget_out_of_range.py does not yet judge primary_aura == 0, no-other-target, or per-target tick counts). Reference search 2026-11-25: see retarget_out_of_range."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (replacement search takes an engaged enemy inside the 15 yd data radius)",
+      "kind": "metric_delta",
+      "variant": "search_inside_15yd",
+      "label_suffix": "search_inside_15yd",
+      "quote": "If your target runs out of range, the tentacle will seek a new target.",
+      "trigger_spell": 572103,
+      "gate_timing": "start",
+      "target": "dummy",
+      "measure_actor": "area1",
+      "cast_power": 2000,
+      "learn": [
+        573028
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        14.5
+      ],
+      "after_target_health": 240,
+      "engage_and_select": {
+        "spell": 573028,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "alive",
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Primary dummy (500,000 HP) stays alive in control so command remains valid, and dies (240 HP, killed by Thoughtseize 806596 tick 2 at 4000 ms after surviving tick 1 for the 3200 ms engage cast) before the 6000 ms retarget pulse in treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 501464
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tentacle of N'Zoth 501464 remains alive through the 6000 ms retarget pulse in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3600,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "Control entry for the 15 yd replacement search radius (owner ruling O-20, Cultist ADR 0034; paired with search_beyond_15yd). Both phases cast 572103 on dummy at (3.0, 0.0) and engage stationary area1 (Harvest Golem 36, combat_reach 1.275 yd) at (14.5, 0.0) (11.5 yd from dummy -> [6.5..16.5] yd from 501464 across its 5.0 yd SpellRadius[8] spawn disk, strictly < 17.025 yd = 15.0 + 0.75 + 1.275 yd) with instant zero-damage Grasp of Zek'voz 573028 (30 yd range, void_on_cast_failure verifies combat engagement). In control, dummy stays alive (500,000 HP) so command stays valid and area1 stays at Thoughtseize 806596 == 0. In treatment, after_target_health sets dummy to 240 HP (survives tick 1 <= 201 for the 3200 ms engage cast, killed by tick 2 >= 264 at 4000 ms; precondition 823764 prevents resists) while select_after selects dead dummy, forcing Target() (AscensionCultistSummons.cpp:242) to scan Nearby(me, searchRange) at 6000 ms: area1 inside the 15 yd radius receives 806596 == 1. Reference search 2026-11-25: see retarget_out_of_range."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (replacement search ignores an engaged enemy beyond 15 yd and inside old 30 yd)",
+      "kind": "metric_delta",
+      "variant": "search_beyond_15yd",
+      "label_suffix": "search_beyond_15yd",
+      "quote": "If your target runs out of range, the tentacle will seek a new target.",
+      "trigger_spell": 572103,
+      "gate_timing": "start",
+      "target": "dummy",
+      "measure_actor": "area1",
+      "cast_power": 2000,
+      "learn": [
+        573028
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": [
+        26.0
+      ],
+      "after_target_health": 240,
+      "engage_and_select": {
+        "spell": 573028,
+        "gap_ms": 1600,
+        "select_before": "area1",
+        "select_after": "dummy"
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "alive",
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Primary dummy (500,000 HP) stays alive in control and dies (240 HP, killed by Thoughtseize 806596 tick 2 at 4000 ms) before the 6000 ms retarget pulse in treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 501464
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tentacle of N'Zoth 501464 remains alive through the 6000 ms retarget pulse in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3600,
+      "expire_ms": 3000,
+      "void_on_cast_failure": true,
+      "observe_source": "Search-radius regression for owner ruling O-20 (Cultist ADR 0034; paired with search_inside_15yd control). Identical layout to search_inside_15yd except stationary area1 (Harvest Golem 36, combat_reach 1.275 yd) stands at (26.0, 0.0) (23.0 yd from dummy -> [18.0..28.0] yd from 501464 across its 5.0 yd SpellRadius[8] spawn disk: strictly > 17.025 yd = 15.0 + 0.75 + 1.275 yd new search radius and strictly < 32.025 yd = 30.0 + 0.75 + 1.275 yd old hardcoded Nearby(me, 30) radius, and inside 573028's 30 yd cast range). When dummy dies at 4000 ms with select_after = dummy (dead), Target() falls through to Nearby(me, searchRange) (AscensionCultistSummons.cpp:242) at 6000 ms: on the fixed 15 yd server area1 is not taken (Thoughtseize 806596 == 0 in both phases), whereas a server using the old 30 yd search radius afflicts area1 (1) and alerts. Reference search 2026-11-25: see retarget_out_of_range."
     },
     {
       "spell": 92131,
@@ -35233,7 +35451,7 @@
           }
         ]
       },
-      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (second outcome of 'Damage dealt may end this effect.' \u2014 proving not every damaging hit ends it): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and verify aura 560109 PRESENT == 1 via after_setup_stacks right before trigger. Control deals no damage (1); treatment lands one unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage, confirmed 0 -> 1 via ally_arm, below the stock 1048 cap at SpellAuraEffects.cpp:548-562,7245-7253) and 560109 remains active (1). Paired with damage_breaks (large hit ends 560109: 1 -> 0). No break chance is asserted. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (second outcome of 'Damage dealt may end this effect.' — proving not every damaging hit ends it): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and verify aura 560109 PRESENT == 1 via after_setup_stacks right before trigger. Control deals no damage (1); treatment lands one unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage, confirmed 0 -> 1 via ally_arm, below the stock 1048 cap at SpellAuraEffects.cpp:548-562,7245-7253) and 560109 remains active (1). Paired with damage_breaks (large hit ends 560109: 1 -> 0). No break chance is asserted. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
     },
     {
       "spell": 255275,
@@ -36612,46 +36830,54 @@
       "label_suffix": "tentacle_crit_damage",
       "quote": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
       "expected": 1.1,
-      "observe_spell": 804999,
+      "observe_spell": 802046,
       "cast_spell": 500110,
-      "caster_entry": 50272,
-      "warmup": [
-        801153
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044,
+        704879
       ],
-      "control": {},
+      "warmup": [
+        802044
+      ],
+      "warmup_power": 2000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ]
+      },
       "treatment": {
         "learn": [
           802728
+        ],
+        "auras": [
+          [
+            500706,
+            0
+          ]
         ]
       },
       "critical": true,
-      "trials": 6,
+      "trials": 10,
       "cast_power": 2000,
-      "cast_wait_ms": 2000,
-      "owned_auras": [
-        [
-          823764,
-          1,
-          50272
-        ]
-      ],
-      "expected_source": "802728 Effect[1] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190, EffectApplyAreaAura) aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS MiscValue 127 (all schools), BasePoints 9 + DieSides 1 = +10% ($s1 = 10; Unit.cpp:10690-10703 multiplies total critical damage by 1.10; Spell.dbc). Tentacle of C'Thun (warmup 801153 -> entry 50272, 30 s duration) casts Shadow bolt 804999 (1.5 s cadence via Mental Assault 801151; AscensionCultistData.h:113 + Contracts.cpp:287 adds 0.08 * caster SP) while caster engages dummy with 500110. fixture spell_power 50000 adds +4000 flat damage per hit so base roll variance is <0.3%; 6 trials * 2000 ms = 12 s < 30 s lifetime. Precondition target_auras on dummy: Vulnerable 213 (aura 197 +10000% crit taken) forces every 804999 to crit in both arms; cast_unit_auras 823764 on caster (read through the owner by GetEffectiveResistChance, matching Necromancer minion precedent) and owned_auras 823764 on 50272 remove partial resists. Expected critical damage ratio 1.10 (excludes 1.0 and 1.20). Reference search 2026-11-25: coa-history 802728: 0 events; coabuildhub 802728 matches verbatim.",
-      "warmup_power": 2000,
+      "cast_wait_ms": 200,
       "target_auras": [
         [
           213,
           1
         ]
       ],
-      "fixture": {
-        "spell_power": 50000
-      },
       "cast_unit_auras": [
         [
           823764,
           1
         ]
-      ]
+      ],
+      "expected_source": "802728 Effect[1] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190, EffectApplyAreaAura) aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS MiscValue 127 (all schools including Physical), BasePoints 9 + DieSides 1 = +10% ($s1 = 10; Unit.cpp:10675-10715 multiplies total melee-class spell critical damage by 1.10; Spell.dbc). Uses synchronously commanded Tentacle of Y'shaarj (warmup 802044 -> entry 50096, slam 802046 Physical DmgClass 2 BasePoints 0 DieSides 1 + 1.0 * Stamina, zero roll variance; fires strictly once per Gaze of C'Thun 500110 via Command -> DoAction(1) with zero autonomous periodic ticks after its initial 100 ms summon slam, eliminating the 1-tick total/count read tearing observed against autonomous 50272's 1500 ms channel). Warmup 802044 waits 1600 ms before the baseline read so any initial summon slam completes before marks[0] and 802728's area aura (UPDATE_TARGET_MAP_INTERVAL 500 ms) applies to 50096 before trial 1. Precondition Eternal Grasp R2 704879 (learned in both arms; duration +50% only, 30000 ms -> 45000 ms, no damage or crit effect) keeps 50096 alive through the 20-trial pilot (20 * 1800 ms + 1600 ms + 2000 ms = 39600 ms < 45000 ms). Precondition target_auras Vulnerable 213 (aura 197 +10000% crit taken) forces every 802046 slam to crit in both arms; cast_unit_auras 823764 prevents 500110 full resist; Insanity 500706 is cleared to 0 each trial. Expected critical damage ratio 1.10 (excludes 1.0 and 1.20). Reference search 2026-11-25: coa-history 802728: 0 events; coabuildhub 802728 matches verbatim."
     },
     {
       "spell": 807128,
