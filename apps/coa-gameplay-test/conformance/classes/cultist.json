@@ -44318,6 +44318,29 @@
       "portals": 6,
       "parts": 2,
       "observe_source": "Apocalyptic Skies 301200 (AscensionCultistAbilities.cpp:149-152) deterministically summons Void Portal 533030 (12000 ms lifetime) on Wrath of the Black Empire 504904; AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all non-channeled, AttributesEx & 0x44 == 0) and calls DespawnOrUnsummon(5000ms). 6 portals/part x 2 parts = 12 portals/run (24/pair); each trial fixtures Insanity 60 + 680601 + 823764, casts 504904, verifies 1 portal alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime). Control arm before learning 301200 reads 0 spawns (ADR 1296)."
+    },
+    {
+      "spell": 300300,
+      "name": "Mind Rot (debuff 560943 lasts 10 sec on target)",
+      "kind": "last_application_expiry",
+      "variant": "mind_rot_duration",
+      "label_suffix": "mind_rot_duration",
+      "quote": "for $560943d.",
+      "quote_spell": 560714,
+      "gate_spell": 300300,
+      "trigger_spell": 806039,
+      "aura": 560943,
+      "expected_ms": 10000,
+      "control_window_ms": 500,
+      "window_ms": 20000,
+      "poll_ms": 50,
+      "caster": false,
+      "trigger_power": 2000,
+      "feed": {
+        "every_ms": 3500,
+        "stop_target": "dummy"
+      },
+      "observe_source": "Mind Rot 300300 (@s:560714:0@): 'for $560943d.' (560943 DurationIndex -> 10000 ms, Spell.dbc; AscensionCultistEvents.cpp:82,165 procs 560943 on target at 25% raw Chance() on periodic or channeled damage). Trigger Black Prayer 806039 (instant, 0 CD, 9000 ms DoT ticking every 3000 ms) is fed via cast_until_aura with stop_target: 'dummy' (every_ms 3500, 27-cast cap -> residual cap risk <= 0.05%/run; ADR 1297) until 560943 lands on dummy; window_ms 20000 covers up to 6000 ms remaining DoT ticks plus the 10000 ms debuff duration from its last application. Control arm before learning 300300 reads 0 applications of 560943."
     }
   ],
   "player_observations": [],

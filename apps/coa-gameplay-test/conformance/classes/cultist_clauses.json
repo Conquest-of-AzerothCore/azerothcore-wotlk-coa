@@ -476,19 +476,10 @@
       {
         "claim": "for $560943d",
         "labels": [
-          "300300 spell_duration 560943 #2"
+          "300300 behaviour_metric_delta mind_rot_duration"
         ]
       }
-    ],
-    "tool_gap": {
-      "reason": "Claim 1 ('for $560943d'): 300300 applies 560943 at 25% raw Chance() on periodic/channeled damage, and last_application_expiry feed (cast_until_aura, CoAGameplayTest.cpp:7590, last_application_expiry.py:87,185) stops only on an aura on the caster, never on the dummy, while repeat cannot guarantee a proc within 10000 ms at <=0.1% residual failure. Claim 0 ('Increases the chance for allies to hit ... by $560943s1%') is now measured by live alert 300300 behaviour_metric_delta mind_rot_hit (runs 20261125-064448 and 20261125-064610: 560943 aura 0 -> 1 confirmed, spell_hit_bonus_taken Shadow 502182 measured 0 before and 0 after against +3 tooltip; fix pending on fix/coa-cultist-conformance-fixes-2).",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 300300,
@@ -2406,11 +2397,15 @@
     ],
     "kind": "claim",
     "tool_gap": {
-      "reason": "No existing conformance kind proves the +25% duration that Teachings of Mythrax 561035 adds to Presence of N'Zoth 803037 and Presence of Y'Shaarj 803035. Attempted with last_application_expiry `feed` (the kind built for a grant that only a rolled proc earns; the Cultist Chance() rolls the raw ProcChance with roll_chance_f, AscensionCultist.cpp:105-115, so forced_roll cannot raise it): the kind learns one `gate_spell` after its control arm and sizes the feed loop from that spell's ProcChance (kinds/last_application_expiry.py:112-117), but the gate of this claim would be 561035 (ProcChance 100, Effect[0] aura 108 ADD_PCT_MODIFIER BP 24) and generation refuses it: '561035 last_application_expiry feed needs a gate spell 561035 with a proc chance between 0 and 100%' (prove run 2026-11-25, entry aura 500707 on the caster, expected 25000 ms). With the rolled Presence 803037 (ProcChance 20) as the gate the talent 561035 would be unlearned in both arms, so the duration read would be the base one; the kind has no option to learn or cast a second spell (561035) beside the gate, and the Presence must also be an active aura on the caster (AscensionCultistEvents.cpp:103-105 needs player->HasAura(803037)). The proc has no ICD (Chance() is called without a cooldown for 803037/803035), so the roll is repeatable; only the two-spell set-up is missing. The Y'Shaarj half (curse 805180 on the target, ModifiedDuration(807632)) has the same limit.",
+      "reason": "No existing conformance kind proves the +25% duration that Teachings of Mythrax 561035 adds to Presence of N'Zoth 803037 (8000 -> 10000 ms on caster 500707 / summon 500464) and Presence of Y'Shaarj 803035 (12000 -> 15000 ms on target 805180). Re-tried with last_application_expiry feed.stop_target='dummy' (ADR 1297): generation still refuses with '561035 last_application_expiry feed needs a gate spell 561035 with a proc chance between 0 and 100%'. Remaining gap beyond stop_target: (1) 561035 (ProcChance 100, ADD_PCT_MODIFIER BP 24) does not roll the proc \u2014 the active Presence stance (803035/803037, ProcChance 20, must be cast as an active aura on the caster in both arms) rolls it, so feed sizing needs a separate proc_spell / active stance beside the learned modifier 561035; and (2) 561035 extends an existing base duration rather than gating 0 -> 1 aura application, whereas last_application_expiry's control arm alerts on any application without the gate. Needs a two-duration rolled-feed contrast comparing base duration (without 561035) against +25% duration (with 561035).",
       "attempts": [
         {
           "agent": "cu-h3c",
           "report": ".agents/plans/cu-h3c/report.md"
+        },
+        {
+          "agent": "cu-tb1",
+          "report": ".agents/plans/cu-tb1/report.md"
         }
       ]
     }
