@@ -1530,6 +1530,7 @@ public:
     [[nodiscard]] uint32 GetQuestSlotTime(uint16 slot)    const { return m_questLogSlots[slot].Time; }
     [[nodiscard]] bool HasOverflowQuests() const { return m_questLogSlots.HasOverflow(); }
     [[nodiscard]] bool IsQuestLogExtended() const { return m_questLogExtended; }
+    [[nodiscard]] uint16 GetClientQuestLogSlots() const { return m_questLogExtended ? MAX_QUEST_LOG_SIZE : NATIVE_QUEST_LOG_SIZE; }
     void SetQuestLogExtended(bool extended, uint8 clientMaxSlots = MAX_QUEST_LOG_SIZE);
     void MarkQuestSlotExtendedDirty(uint16 slot);
     void FlushQuestLogExtended();
@@ -2911,6 +2912,7 @@ protected:
     bool m_questLogExtended = false;
     uint8 m_questLogExtendedClientSlots = MAX_QUEST_LOG_SIZE;
     uint64 m_questLogExtendedDirty = 0;
+    uint16 m_questLogExtendedCapacity = 0;   // Quests.LogSize at the last snapshot; a reload that changes it resends one
     void MirrorQuestSlot(uint16 slot);
     [[nodiscard]] uint8 QuestLogExtendedSize() const;
     uint16 MoveQuestToNativeLog(uint16 slot);

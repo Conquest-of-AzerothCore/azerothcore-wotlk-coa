@@ -2011,7 +2011,16 @@ void Player::MarkQuestSlotExtendedDirty(uint16 slot)
 
 void Player::FlushQuestLogExtended()
 {
-    if (!m_questLogExtended || !m_questLogExtendedDirty)
+    if (!m_questLogExtended)
+        return;
+
+    if (GetQuestLogCapacity() != m_questLogExtendedCapacity)
+    {
+        SendQuestLogExtendedSnapshot();
+        return;
+    }
+
+    if (!m_questLogExtendedDirty)
         return;
 
     std::vector<QuestLogExtended::Entry> entries;
@@ -2040,6 +2049,7 @@ void Player::SendQuestLogExtendedSnapshot()
         return;
 
     m_questLogExtendedDirty = 0;
+    m_questLogExtendedCapacity = GetQuestLogCapacity();
     WorldPacket data = QuestLogExtended::BuildState(QuestLogExtended::Snapshot(m_questLogSlots,
         [this](uint32 questId) { return ExtendedQuestLevelAndXP(this, questId); }), QuestLogExtendedSize(), true);
     SendDirectMessage(&data);

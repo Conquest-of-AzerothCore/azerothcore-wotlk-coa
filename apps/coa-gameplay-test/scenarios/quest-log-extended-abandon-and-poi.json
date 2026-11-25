@@ -1,0 +1,483 @@
+{
+  "schema": 1,
+  "name": "Quest log: a client that announces 0x8F6 abandons slot 40 and queries POIs for 30 quests",
+  "contract": [
+    "A client that sent HELLO (0x8F6) addresses quest log slots up to 63: CMSG_QUESTLOG_REMOVE_QUEST (404) for slot 40 abandons the 41st quest (475).",
+    "CMSG_QUEST_POI_QUERY (483) may name more than 25 quests for such a client: a query for 30 quests is answered with SMSG_QUEST_POI_QUERY_RESPONSE (484)."
+  ],
+  "timeout_ms": 120000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 318",
+      "actor": "hero",
+      "quest": 318,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 319",
+      "actor": "hero",
+      "quest": 319,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 415",
+      "actor": "hero",
+      "quest": 415,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 419",
+      "actor": "hero",
+      "quest": 419,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 421",
+      "actor": "hero",
+      "quest": 421,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 428",
+      "actor": "hero",
+      "quest": 428,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 432",
+      "actor": "hero",
+      "quest": 432,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 433",
+      "actor": "hero",
+      "quest": 433,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 436",
+      "actor": "hero",
+      "quest": 436,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 438",
+      "actor": "hero",
+      "quest": 438,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 448",
+      "actor": "hero",
+      "quest": 448,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 454",
+      "actor": "hero",
+      "quest": 454,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 456",
+      "actor": "hero",
+      "quest": 456,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 457",
+      "actor": "hero",
+      "quest": 457,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 458",
+      "actor": "hero",
+      "quest": 458,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 475",
+      "actor": "hero",
+      "quest": 475,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the 41st quest is in slot 40",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 475,
+      "equals": 40
+    },
+    {
+      "action": "client_packet",
+      "label": "The client announces the extended quest log (0x8F6, version 1, 64 slots)",
+      "actor": "hero",
+      "opcode": 2294,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 64
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The server answers with the 0x8F7 snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Abandon slot 40 (CMSG_QUESTLOG_REMOVE_QUEST)",
+      "actor": "hero",
+      "opcode": 404,
+      "fields": [
+        {
+          "u8": 40
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "The slot-40 quest is abandoned",
+      "actor": "hero",
+      "metric": "quest_status",
+      "quest": 475,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The slot-40 quest left the log",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 475,
+      "equals": -1
+    },
+    {
+      "action": "client_packet",
+      "label": "Query POIs for 30 quests (CMSG_QUEST_POI_QUERY)",
+      "actor": "hero",
+      "opcode": 483,
+      "fields": [
+        {
+          "u32": 30
+        },
+        {
+          "u32": 5
+        },
+        {
+          "u32": 12
+        },
+        {
+          "u32": 13
+        },
+        {
+          "u32": 14
+        },
+        {
+          "u32": 35
+        },
+        {
+          "u32": 37
+        },
+        {
+          "u32": 39
+        },
+        {
+          "u32": 40
+        },
+        {
+          "u32": 52
+        },
+        {
+          "u32": 85
+        },
+        {
+          "u32": 109
+        },
+        {
+          "u32": 111
+        },
+        {
+          "u32": 152
+        },
+        {
+          "u32": 163
+        },
+        {
+          "u32": 170
+        },
+        {
+          "u32": 182
+        },
+        {
+          "u32": 183
+        },
+        {
+          "u32": 217
+        },
+        {
+          "u32": 224
+        },
+        {
+          "u32": 237
+        },
+        {
+          "u32": 239
+        },
+        {
+          "u32": 250
+        },
+        {
+          "u32": 255
+        },
+        {
+          "u32": 263
+        },
+        {
+          "u32": 302
+        },
+        {
+          "u32": 318
+        },
+        {
+          "u32": 319
+        },
+        {
+          "u32": 415
+        },
+        {
+          "u32": 419
+        },
+        {
+          "u32": 421
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "The POI query is answered",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 484,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}
