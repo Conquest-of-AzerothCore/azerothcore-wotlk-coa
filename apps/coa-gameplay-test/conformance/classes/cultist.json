@@ -29214,6 +29214,826 @@
       "refill_power_after_setup_casts": {
         "power": 0
       }
+    },
+    {
+      "spell": 300753,
+      "name": "Blade of the Depths (Forbidden Ritual ready before 60 sec base cooldown while Herald of the Depths is active)",
+      "kind": "metric_delta",
+      "variant": "cd_faster",
+      "label_suffix": "cd_faster",
+      "quote": "While Herald of the Depths is active, your Forbidden Ritual will cooldown faster.",
+      "trigger_spell": 502273,
+      "gate_spell": 300753,
+      "learn": [
+        520326
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 520326,
+          "target": "caster",
+          "delay_ms": 3500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502273,
+          "target": "caster",
+          "delay_ms": 54500,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Herald of the Depths 520326 is cast once in control (1) and once in treatment (cumulative 2)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 502273
+            },
+            "before_expected": 1,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Forbidden Ritual 502273 lands once in control (2nd cast refused at 55 s < 60 s base CD) and twice in treatment (cumulative 3; 2nd cast succeeds at 55 s)"
+          }
+        ]
+      },
+      "observe_source": "Direction-only proof (tooltip states no rate/amount): 502273 Forbidden Ritual has 3000 ms cast time and 60000 ms CategoryRecoveryTime (Spell.dbc); 300753 periodically triggers 301184 every 2000 ms, which calls Reduce(player, 800105, 2000) while Herald 520326 is active (AscensionCultistAbilities.cpp:437-442). Both phases cast 502273, cast Herald 520326 3500 ms later (after the 3000 ms cast completes), and attempt a 2nd 502273 54500 ms later (55 s after the 1st cast finished, 5 s before the 60 s base cooldown). Control (300753 unlearned): refused with SPELL_FAILED_NOT_READY (67). Treatment (300753 learned): succeeds (0), proving Forbidden Ritual cools down faster without asserting a figure. Paired with herald_gate (without Herald active, 2nd cast is still refused). Reference search 2026-11-25: coa-history 300753: 0 events in 186 logs (passive; 502273: 354 casts); coabuildhub 300753 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 300753,
+      "name": "Blade of the Depths (Herald of the Depths gate: no early readiness without Herald active)",
+      "kind": "metric_delta",
+      "variant": "herald_gate",
+      "label_suffix": "herald_gate",
+      "quote": "While Herald of the Depths is active, your Forbidden Ritual will cooldown faster.",
+      "trigger_spell": 502273,
+      "gate_spell": 300753,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 502273,
+          "target": "caster",
+          "delay_ms": 58000,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Herald of the Depths 520326 is absent in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 502273
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Only 1 Forbidden Ritual 502273 lands per phase when Herald is absent (2nd cast refused at 55 s < 60 s base CD)"
+          }
+        ]
+      },
+      "observe_source": "Condition-off arm for 300753 Blade of the Depths: same 58000 ms wait (55 s after 3000 ms cast finish, 5 s inside 60000 ms CategoryRecoveryTime) without Herald of the Depths 520326 active (verified absent by precondition). Both control (300753 unlearned) and treatment (300753 learned) refuse the 2nd cast of 502273 with SPELL_FAILED_NOT_READY (67), proving the cooldown acceleration is gated on Herald of the Depths. Reference search 2026-11-25: coa-history 300753: 0 events; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 574147,
+      "name": "Void Power (healing power rises with main-hand weapon damage via attack power arms)",
+      "kind": "metric_delta",
+      "variant": "healing_power_ap_arms",
+      "label_suffix": "healing_power_ap_arms",
+      "quote": "Your healing power is increased based on your main-hand weapon damage.",
+      "trigger_spell": 60235,
+      "gate_spell": 574147,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "healing_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 190,
+      "tolerance": 0.5,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "attack_power_arms": {
+        "aura": 35785,
+        "wait_ms": 1000,
+        "source": "Attack Power 980 35785 (Spell.dbc Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER +980, DurationIndex 21): raises Heretic War Staff 2535 main-hand UNIT_FIELD_MINDAMAGE/MAXDAMAGE by 980/14*3.3 = +231, reflected in 574147 on the 500 ms OnPlayerUpdate Refresh(player)"
+      },
+      "observe_source": "Direction-only proof (ADR 1284 attack_power_arms; tooltip states no coefficient): 574147 Effect[0] is SPELL_AURA_MOD_HEALING_DONE (all schools, AscensionCultistContracts.cpp:143-147), updated on Refresh(player) (500 ms OnPlayerUpdate, AscensionCultist.cpp:291-292,364-368) to int32((UNIT_FIELD_MINDAMAGE + UNIT_FIELD_MAXDAMAGE) / 2). Heretic weapon set (2535 War Staff, 84.53-119.41, 3.3 s): raising attack power by +980 via fixture aura 35785 raises main-hand weapon damage (UNIT_FIELD_MINDAMAGE/MAXDAMAGE = weapon + AP/14*3.3) by +231. Judged on Shadow healing_power (school 5; other schools by school mask ALL in data): positive learned gain at base AP (low arm) and strictly larger learned gain at +980 AP (high arm), no coefficient or before value asserted. Note: varying the equipped main-hand weapon itself at constant AP is not exercised here because weapon sets are frozen per spec. Reference search 2026-11-25: coa-history 574147: 0 events in 186 logs (passive); coabuildhub 574147 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 680579,
+      "name": "Dreadful (no flat critical strike rating at 0 parry and 0 dodge rating)",
+      "kind": "metric_delta",
+      "variant": "crit_rating_zero",
+      "label_suffix": "crit_rating_zero",
+      "quote": "Increases your critical strike rating based on your parry and dodge rating.",
+      "trigger_spell": 60235,
+      "gate_spell": 680579,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 8
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 2
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Base dodge rating (CR_DODGE=2) is 0"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 3
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Base parry rating (CR_PARRY=3) is 0"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 9
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ranged crit rating (9) also stays 0 at 0 dodge and 0 parry"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 10
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Spell crit rating (10) also stays 0 at 0 dodge and 0 parry"
+          }
+        ]
+      },
+      "observe_source": "Direction-only zero-input arm for 680579 Dreadful (Templar Improved Benediction precedent: scaling with both stats without asserting a coefficient; AscensionCultist.cpp:295-302 applies helper 681476 aura 189 misc 1792 = CR_CRIT_MELEE|RANGED|SPELL with amount CR_DODGE + CR_PARRY on 500 ms Refresh). At 0 dodge rating and 0 parry rating (verified by preconditions), learning 680579 adds 0 melee/ranged/spell critical strike rating, ruling out a flat bonus independent of dodge and parry rating. Paired with crit_rating_dodge and crit_rating_parry. Reference search 2026-11-25: coa-history 680579: 0 events in 186 logs (passive); coabuildhub 680579 is an older rework (block rating, G-9); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680579,
+      "name": "Dreadful (critical strike rating rises with dodge rating)",
+      "kind": "metric_delta",
+      "variant": "crit_rating_dodge",
+      "label_suffix": "crit_rating_dodge",
+      "quote": "Increases your critical strike rating based on your parry and dodge rating.",
+      "trigger_spell": 60235,
+      "gate_spell": 680579,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          18062,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 8
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 2
+            },
+            "before_expected": 96,
+            "expected": 96,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Fixture aura 18062 (Spell.dbc aura 189 misc 4, bp 95+1 = +96 dodge rating, dur 21) sets CR_DODGE to 96 in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 3
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "CR_PARRY remains 0 in both phases so only dodge rating drives the gain"
+          }
+        ]
+      },
+      "observe_source": "Direction-only dodge arm for 680579 Dreadful (no coefficient asserted; after_at_least 1 proves positive integer rating gain). Precondition fixture: caster aura 18062 (+96 dodge rating, CR_DODGE == 96, CR_PARRY == 0 verified in both phases). Control (680579 unlearned): melee crit rating (8) reads 0. Treatment (680579 learned, 1000 ms wait past 500 ms Refresh): melee crit rating reads >= 1 (actual code sets CR_DODGE + CR_PARRY = 96; coefficient unasserted). Paired with crit_rating_zero and crit_rating_parry. Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 680579,
+      "name": "Dreadful (critical strike rating rises with parry rating)",
+      "kind": "metric_delta",
+      "variant": "crit_rating_parry",
+      "label_suffix": "crit_rating_parry",
+      "quote": "Increases your critical strike rating based on your parry and dodge rating.",
+      "trigger_spell": 60235,
+      "gate_spell": 680579,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          13668,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 8
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 3
+            },
+            "before_expected": 60,
+            "expected": 60,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "Fixture aura 13668 (Spell.dbc aura 189 misc 8, bp 59+1 = +60 parry rating, dur 21) sets CR_PARRY to 60 in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 2
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "precondition": true,
+            "source": "CR_DODGE remains 0 in both phases so only parry rating drives the gain"
+          }
+        ]
+      },
+      "observe_source": "Direction-only parry arm for 680579 Dreadful (no coefficient asserted; after_at_least 1 proves positive integer rating gain). Precondition fixture: caster aura 13668 (+60 parry rating, CR_PARRY == 60, CR_DODGE == 0 verified in both phases). Control (680579 unlearned): melee crit rating (8) reads 0. Treatment (680579 learned, 1000 ms wait past 500 ms Refresh): melee crit rating reads >= 1 (actual code sets CR_DODGE + CR_PARRY = 60; coefficient unasserted). Paired with crit_rating_zero and crit_rating_dodge. Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 680579,
+      "name": "Dreadful (5 crits cut Dreadnought 45s CD by 10s: refused at 34.4s)",
+      "kind": "metric_delta",
+      "variant": "dreadnought_cd_held",
+      "label_suffix": "dreadnought_cd_held",
+      "quote": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
+      "trigger_spell": 800416,
+      "gate_spell": 680579,
+      "learn": [
+        567524,
+        800416
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        567524
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 567524,
+          "target": "caster",
+          "delay_ms": 24400,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 567524
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "Exactly 5 forced Horrorbolt 800416 crits land in control (5) and 5 in treatment (cumulative 10)"
+          }
+        ]
+      },
+      "observe_source": "680579 Dreadful ($/1000;681475s1 = 2 sec per crit, Spell.dbc 681475 e0 bp=-2001+1; AscensionCultistEvents.cpp:95,215-218). Dreadnought 567524 CategoryRecoveryTime = 45000 ms; 5 forced Horrorbolt 502182 crits (force_crit spell, spell pen 823764, spell_hit_rating 10000; verified 5 crits/phase via ally_arm) reduce the 45 s cooldown by 10 s to 35 s (10% off 10 s cut is [34 s, 36 s]). Attempting a 2nd 567524 at 34.4 s (200 + 8000 + 26200 = 34400 ms > 34000 ms) is refused with SPELL_FAILED_NOT_READY (67) in both control and treatment, ruling out a cut >= 11 s. Paired with dreadnought_cd_ready (35.6 s). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 680579,
+      "name": "Dreadful (5 crits cut Dreadnought 45s CD by 10s: succeeds at 35.6s)",
+      "kind": "metric_delta",
+      "variant": "dreadnought_cd_ready",
+      "label_suffix": "dreadnought_cd_ready",
+      "quote": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
+      "trigger_spell": 800416,
+      "gate_spell": 680579,
+      "learn": [
+        567524,
+        800416
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        567524
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 567524,
+          "target": "caster",
+          "delay_ms": 25600,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 567524
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 5,
+            "expected": 10,
+            "tolerance": 0,
+            "source": "Exactly 5 forced Horrorbolt 800416 crits land in control (5) and 5 in treatment (cumulative 10)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 567524
+            },
+            "before_expected": 1,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Dreadnought 567524 applies once in control (2nd refused) and twice in treatment (cumulative 3)"
+          }
+        ]
+      },
+      "observe_source": "Upper bracket for 680579 Dreadful on Dreadnought 567524 (45 s - 5 x 2 s = 35 s): attempting a 2nd 567524 at 35.6 s (200 + 8000 + 27400 = 35600 ms < 36000 ms) is refused with SPELL_FAILED_NOT_READY (67) in control (680579 unlearned) and succeeds (0) in treatment (680579 learned), bracketing the 10 s reduction inside [34.4 s, 35.6 s] (excluding 10% off 10 s on both sides). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 680579,
+      "name": "Dreadful (5 crits cut Dreadfall 25s CD by 10s: refused at 14.4s)",
+      "kind": "metric_delta",
+      "variant": "dreadfall_cd_held",
+      "label_suffix": "dreadfall_cd_held",
+      "quote": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
+      "trigger_spell": 806175,
+      "gate_spell": 680579,
+      "learn": [
+        800416
+      ],
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2200,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 806175,
+          "target": "dummy",
+          "delay_ms": 5900,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 806175
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 4,
+            "expected": 8,
+            "tolerance": 0,
+            "source": "4 forced Horrorbolt 800416 crits per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 807815,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "1 forced Dreadfall dash hit 807815 crit per phase (total 5 crits per phase = 10 s CD cut)"
+          }
+        ]
+      },
+      "observe_source": "Lower bracket for 680579 Dreadful on Dreadfall 806175 (RecoveryTime 25000 ms, RangeIndex 94 = 8-40 yd; 1 forced Dreadfall dash hit 807815 crit + 4 forced Horrorbolt 800416 crits = 5 crits cut 10 s to 15 s, 10% off 10 s is [14 s, 16 s]; relocate dx=-13 keeps >= 13 yd range before each 806175). Attempting 2nd 806175 at 14.4 s (refused 67 in both phases). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs.",
+      "relocate_before_trigger": {
+        "dx": -13
+      }
+    },
+    {
+      "spell": 680579,
+      "name": "Dreadful (5 crits cut Dreadfall 25s CD by 10s: succeeds at 15.6s)",
+      "kind": "metric_delta",
+      "variant": "dreadfall_cd_ready",
+      "label_suffix": "dreadfall_cd_ready",
+      "quote": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
+      "trigger_spell": 806175,
+      "gate_spell": 680579,
+      "learn": [
+        800416
+      ],
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "measure_actor": "caster",
+      "force_crit": "spell",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2200,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2100,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 806175,
+          "target": "dummy",
+          "delay_ms": 7100,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 806175
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 4,
+            "expected": 8,
+            "tolerance": 0,
+            "source": "4 forced Horrorbolt 800416 crits per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 807815,
+              "target": "dummy",
+              "critical": true
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "1 forced Dreadfall dash hit 807815 crit per phase (total 5 crits per phase = 10 s CD cut)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 806175
+            },
+            "before_expected": 1,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Dreadfall 806175 casts once in control (2nd refused) and twice in treatment (cumulative 3)"
+          }
+        ]
+      },
+      "observe_source": "Upper bracket for 680579 Dreadful on Dreadfall 806175 (RecoveryTime 25000 ms, RangeIndex 94 = 8-40 yd; 1 forced Dreadfall dash hit 807815 crit + 4 forced Horrorbolt 800416 crits = 5 crits cut 10 s to 15 s, 10% off 10 s is [14 s, 16 s]; relocate dx=-13 keeps >= 13 yd range before each 806175). Attempting 2nd 806175 at 15.6 s (refused 67 in control, succeeds 0 in treatment). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs.",
+      "relocate_before_trigger": {
+        "dx": -13
+      }
     }
   ],
   "player_observations": [],

@@ -597,8 +597,12 @@
   {
     "spell": 300753,
     "clause": "While Herald of the Depths is active, your Forbidden Ritual will cooldown faster.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300753 behaviour_metric_delta cd_faster",
+      "300753 behaviour_metric_delta herald_gate"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof (no rate invented). Forbidden Ritual 502273 (3 s cast, 60 s CategoryRecoveryTime) attempted again 55 s after 1st cast finishes with Herald of the Depths 520326 active: refused SPELL_FAILED_NOT_READY (67) without 300753 and succeeds (0, 2nd cast lands) with 300753. Condition-off arm (herald_gate, Herald absent): refused (67) in both phases."
   },
   {
     "spell": 301008,
@@ -1541,7 +1545,7 @@
         "labels": []
       }
     ],
-    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) — no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
+    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) \u2014 no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
   },
   {
     "spell": 524877,
@@ -2191,8 +2195,11 @@
   {
     "spell": 574147,
     "clause": "Your healing power is increased based on your main-hand weapon damage.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "574147 behaviour_metric_delta healing_power_ap_arms"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof via attack_power_arms (ADR 1284, no coefficient invented). Shadow healing_power (other schools by ALL mask) reads 0 -> 190 at AP 376 and 0 -> 421 at AP 1356 (+980 AP fixture 35785 raises Heretic War Staff 2535 UNIT_FIELD_MINDAMAGE/MAXDAMAGE by +231)."
   },
   {
     "spell": 574318,
@@ -2593,16 +2600,25 @@
   {
     "spell": 680579,
     "clause": "Increases your critical strike rating based on your parry and dodge rating.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "680579 behaviour_metric_delta crit_rating_zero",
+      "680579 behaviour_metric_delta crit_rating_dodge",
+      "680579 behaviour_metric_delta crit_rating_parry"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof (Templar Improved Benediction precedent, no coefficient invented). At 0 dodge & 0 parry rating: crit rating 0 -> 0 (rules out flat bonus); with +96 dodge rating fixture 18062: 0 -> 96 (>= 1); with +60 parry rating fixture 13668: 0 -> 60 (>= 1)."
   },
   {
     "spell": 680579,
     "clause": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
     "labels": [
-      "680579 effect_value 681475e0 #0"
+      "680579 behaviour_metric_delta dreadnought_cd_held",
+      "680579 behaviour_metric_delta dreadnought_cd_ready",
+      "680579 behaviour_metric_delta dreadfall_cd_held",
+      "680579 behaviour_metric_delta dreadfall_cd_ready"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): $/1000;681475s1 = 2 sec per crit. 5 forced crits cut 10 s (10% off 10 s = +-1 s): Dreadnought 567524 (45 s -> 35 s) refused (67) at 34.4 s in both phases and succeeds (0) at 35.6 s in treatment only; Dreadfall 806175 (25 s -> 15 s; 1 dash 807815 crit + 4 Horrorbolt 800416 crits) refused (67) at 14.4 s in both phases and succeeds (0) at 15.6 s in treatment only."
   },
   {
     "spell": 680581,
