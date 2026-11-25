@@ -986,17 +986,17 @@
       {
         "claim": "$n attacks",
         "labels": [
-          "301262 behaviour_metric_delta initial_charges"
+          "301262 behaviour_metric_delta initial_charges",
+          "301262 behaviour_metric_delta swing_charges"
         ]
       },
       {
         "claim": "or $n attacks",
         "labels": [
-          "301262 effect_value #3"
+          "301262 behaviour_metric_delta swing_charges"
         ]
       }
-    ],
-    "reason": "Claim '$n attacks' proves the initial charge count 10 against 9/11 at runtime via aura_charges (301262 behaviour_metric_delta initial_charges, readback / data evidence class in coverage.py:454). Split claim 'or $n attacks' (appended at end) is a tool gap for proving Saronite Blessing 600327 actually ends on the 10th auto-attack before its 15000 ms duration: attack_swings waits un-hasted reference intervals without exact per-swing counting, Heretic staff 2535 (3300 ms / 2640 ms hasted) delivers <= 6 swings in 15000 ms, melee crits refresh 600327 back to 10 charges, fed_charge_casts is cast-time-only, and block_charge_strikes is block-only."
+    ]
   },
   {
     "spell": 301315,
