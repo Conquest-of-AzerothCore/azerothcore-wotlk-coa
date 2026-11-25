@@ -92,6 +92,12 @@ namespace CoAPetBattles::Follow
         return found == _followers.end() ? 0 : found->second.species;
     }
 
+    bool Registry::Out(uint64_t character) const
+    {
+        auto const found = _followers.find(character);
+        return found != _followers.end() && found->second.handle != 0;
+    }
+
     bool Registry::IsFollower(uint64_t handle) const
     {
         for (auto const& [character, entry] : _followers)

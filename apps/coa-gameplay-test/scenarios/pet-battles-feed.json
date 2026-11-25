@@ -1,0 +1,111 @@
+{
+  "schema": 1,
+  "name": "Pet battles: feeding a damaged pet consumes the food and heals it over time",
+  "contract": [
+    "Phase 5. A level-5 Timber Wolf at 50 health eats Dalaran Sharp (item 414, required level 5, a food item):",
+    "the item is consumed and the well-fed heal raises the journal health within seconds (10% of max every 2 s",
+    "for 20 s)."
+  ],
+  "timeout_ms": 120000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 69 5"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle health 69 50"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".additem 414 1"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the food is in the bags",
+      "actor": "gm",
+      "metric": "item_count",
+      "item": 414,
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbj|feed|69,414"
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the food was eaten",
+      "actor": "gm",
+      "metric": "item_count",
+      "item": 414,
+      "equals": 0
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle journal"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the health has risen",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": " hp 50/",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the pet is listed",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "69 Timber Wolf L5",
+      "equals": 1
+    }
+  ]
+}

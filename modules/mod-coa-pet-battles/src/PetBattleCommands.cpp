@@ -83,6 +83,7 @@ namespace
                 { "send", HandleSend, SEC_GAMEMASTER, Console::No },
                 { "state", HandleState, SEC_GAMEMASTER, Console::No },
                 { "wild", HandleWild, SEC_GAMEMASTER, Console::No },
+                { "follower", HandleFollower, SEC_GAMEMASTER, Console::No },
                 { "challenge", HandleChallenge, SEC_GAMEMASTER, Console::No },
             };
             static ChatCommandTable commands =
@@ -312,6 +313,21 @@ namespace
                 std::to_string(sWildPets->Count()));
             for (std::string const& line : lines)
                 handler->SendSysMessage(line);
+            return true;
+        }
+
+        static bool HandleFollower(ChatHandler* handler)
+        {
+            Player* player = handler->getSelectedPlayerOrSelf();
+            if (!player)
+                return false;
+            uint64_t const character = player->GetGUID().GetCounter();
+            uint32_t const species = sPetBattles->Followers().Follower(character);
+            if (!species)
+                handler->SendSysMessage("Follower: none");
+            else
+                handler->SendSysMessage("Follower: " + std::to_string(species) + " " +
+                    (sPetBattles->Followers().Out(character) ? "out" : "hidden"));
             return true;
         }
 

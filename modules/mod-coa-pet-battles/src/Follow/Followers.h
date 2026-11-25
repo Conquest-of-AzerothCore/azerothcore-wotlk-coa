@@ -36,6 +36,7 @@ namespace CoAPetBattles::Follow
         void Logout(uint64_t character);
         void Suppress(uint64_t character, bool on);
         uint32_t Follower(uint64_t character) const;
+        bool Out(uint64_t character) const;
         bool IsFollower(uint64_t handle) const;
         void Tick();
 
