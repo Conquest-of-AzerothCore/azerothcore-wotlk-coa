@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AccountScript.h"
 #include "AscensionCompatOpcodes.h"
 #include "Player.h"
 #include "PlayerScript.h"
@@ -14,7 +15,13 @@
 namespace
 {
     std::mutex PendingHelloMutex;
-    std::unordered_map<uint32, uint8> PendingHellos;
+    struct PendingHello
+    {
+        WorldSession const* Session;
+        uint8 ClientMaxSlots;
+    };
+
+    std::unordered_map<uint32, PendingHello> PendingHellos;
     std::atomic<bool> HasPendingHellos{ false };
 
     bool HandleHello(WorldSession* session, WorldPacket const& packet)
@@ -24,25 +31,28 @@ namespace
             return true;
 
         std::lock_guard<std::mutex> lock(PendingHelloMutex);
-        PendingHellos[session->GetAccountId()] = hello->ClientMaxSlots;
+        PendingHellos[session->GetAccountId()] = { session, hello->ClientMaxSlots };
         HasPendingHellos.store(true, std::memory_order_release);
         return true;
     }
 
-    std::optional<uint8> TakePendingHello(uint32 accountId)
+    std::optional<uint8> TakePendingHello(WorldSession const* session)
     {
         if (!HasPendingHellos.load(std::memory_order_acquire))
             return std::nullopt;
 
         std::lock_guard<std::mutex> lock(PendingHelloMutex);
-        auto const found = PendingHellos.find(accountId);
+        auto const found = PendingHellos.find(session->GetAccountId());
         if (found == PendingHellos.end())
             return std::nullopt;
 
-        uint8 const clientMaxSlots = found->second;
+        PendingHello const pending = found->second;
         PendingHellos.erase(found);
         HasPendingHellos.store(!PendingHellos.empty(), std::memory_order_release);
-        return clientMaxSlots;
+        if (pending.Session != session)
+            return std::nullopt;
+
+        return pending.ClientMaxSlots;
     }
 
     void ForgetPendingHello(uint32 accountId)
@@ -78,11 +88,25 @@ namespace
             if (!session || !player->IsInWorld())
                 return;
 
-            if (std::optional<uint8> const clientMaxSlots = TakePendingHello(session->GetAccountId()))
+            if (std::optional<uint8> const clientMaxSlots = TakePendingHello(session))
             {
                 player->SetQuestLogExtended(true, *clientMaxSlots);
                 player->SendQuestLogExtendedSnapshot();
             }
+        }
+    };
+
+    class AscensionQuestLogExtendedAccount final : public AccountScript
+    {
+    public:
+        AscensionQuestLogExtendedAccount()
+            : AccountScript("ascension_quest_log_extended_account", {ACCOUNTHOOK_ON_ACCOUNT_LOGIN})
+        {
+        }
+
+        void OnAccountLogin(uint32 accountId) override
+        {
+            ForgetPendingHello(accountId);
         }
     };
 }
@@ -91,4 +115,5 @@ void AddSC_AscensionQuestLogExtended()
 {
     AscensionCompatOpcodes::Claim(QuestLogExtended::HelloOpcode, &HandleHello);
     new AscensionQuestLogExtendedPlayer();
+    new AscensionQuestLogExtendedAccount();
 }
