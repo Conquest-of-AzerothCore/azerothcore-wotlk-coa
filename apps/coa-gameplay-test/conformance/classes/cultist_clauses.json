@@ -350,7 +350,7 @@
       "300286 behaviour_metric_delta gaze_consume_5stacks"
     ],
     "kind": "claim",
-    "reason": "Heal formula behaviour proven (owner ruling O-15 / Q-cu-11, Cultist ADR 0018: 364/365 base, 1204/1205 at +2000 SP, 608/609 at 5 stacks). Stack-retention part is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-17 (Q-cu-12, 2026-11-25, Cultist ADR 0033): server keeps re-applying 1 stack of Void-Touched 301982 via MarkVoidTouched immediately after Gaze of C'Thun consumes stacks, matching archived live logs (4,452 immediate re-applications of 5,095 in 29 logs, 10+ players), with client tooltip text unchanged (kept deviation from literal \"all stacks are consumed\"); gaze_consume_base ally_arm guards the ruled 1-stack retention."
+    "reason": "Heal formula behaviour proven (owner ruling O-15 / Q-cu-11, Cultist ADR 0018: 364/365 base, 1204/1205 at +2000 SP, 608/609 at 5 stacks). Stack-retention part is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-17 (Q-cu-12, 2026-11-25, Cultist ADR 0031): server keeps re-applying 1 stack of Void-Touched 301982 via MarkVoidTouched immediately after Gaze of C'Thun consumes stacks, matching archived live logs (4,452 immediate re-applications of 5,095 in 29 logs, 10+ players), with client tooltip text unchanged (kept deviation from literal \"all stacks are consumed\"); gaze_consume_base ally_arm guards the ruled 1-stack retention."
   },
   {
     "spell": 300287,

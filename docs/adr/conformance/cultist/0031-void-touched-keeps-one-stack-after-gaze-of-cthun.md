@@ -1,4 +1,4 @@
-# 0033. Owner ruling Q-cu-12 (O-17): Void-Touched keeps one stack after Gaze of C'Thun
+# 0031. Owner ruling Q-cu-12 (O-17): Void-Touched keeps one stack after Gaze of C'Thun
 
 - Status: accepted (owner ruling Cultist Q-cu-12 / O-17, 2026-11-25)
 - Date: 2026-11-25
@@ -44,7 +44,7 @@ tooltip text unchanged. No server C++, SQL, or DBC change is made for `Q-cu-12`.
   logs and 10+ players).
 - In `apps/coa-gameplay-test/conformance/classes/cultist_clauses.json`, `Row[32]` (`300286`) keeps `kind: "claim"` and
   records Status 2 (*Conformant by a recorded rule or owner ruling*) under owner ruling `O-17` (`Q-cu-12`, 2026-11-25,
-  Cultist ADR 0033) for the stack-retention part, alongside the proven heal formula (Cultist ADR 0018).
+  Cultist ADR 0031) for the stack-retention part, alongside the proven heal formula (Cultist ADR 0018).
 - In `apps/coa-gameplay-test/conformance/classes/cultist.json`, `300286 gaze_consume_base` expects `1` stack of `301982`
   in its `ally_arm` (control `0` without `300286`, tolerance `0`) with `O-17` / `Q-cu-12` cited in `source` and
   `observe_source`, guarding the ruled behaviour; the temporary `300286 gaze_heal_base` split is removed.
