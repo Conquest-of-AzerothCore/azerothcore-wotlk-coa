@@ -2108,14 +2108,20 @@
     "spell": 572064,
     "clause": "Void Shield now applies to an additional nearby ally but its duration is reduced by $s3%.",
     "labels": [
-      "572064 effect_value e2 #0"
+      "572064 behaviour_metric_delta extra_ally",
+      "572064 behaviour_metric_delta duration_reduced",
+      "572064 behaviour_metric_delta duration_bracket"
     ],
     "kind": "claim"
   },
   {
     "spell": 572064,
     "clause": "Killing an opponent that yields experience or honor removes Wracked Mind from you.",
-    "labels": [],
+    "labels": [
+      "572064 behaviour_metric_delta kill_removes",
+      "572064 behaviour_metric_delta kill_no_talent",
+      "572064 behaviour_metric_delta kill_non_xp_critter"
+    ],
     "kind": "claim"
   },
   {

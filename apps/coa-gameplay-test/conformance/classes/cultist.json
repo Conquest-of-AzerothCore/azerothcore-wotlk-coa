@@ -6778,7 +6778,7 @@
       "critical": false,
       "trials": 10,
       "void_on_cast_failure": true,
-      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc — no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 704880,
@@ -11884,7 +11884,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert \u2014 no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert — no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
     },
     {
       "spell": 502122,
@@ -29214,6 +29214,267 @@
       "refill_power_after_setup_casts": {
         "power": 0
       }
+    },
+    {
+      "spell": 572064,
+      "name": "Split Mind (Void Shield applies to an additional nearby ally)",
+      "kind": "metric_delta",
+      "variant": "extra_ally",
+      "label_suffix": "extra_ally",
+      "quote": "Void Shield now applies to an additional nearby ally but its duration is reduced by $s3%.",
+      "trigger_spell": 578115,
+      "gate_spell": 572064,
+      "target": "ally",
+      "measure_actor": "ally2",
+      "cast_power": 2000,
+      "wait_ms": 1000,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 578115
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Void Shield 578115 is cast on the primary grouped ally in both phases and holds its aura there"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "Split Mind 572064 (AscensionCultistAbilities.cpp:493-504, spell_ascension_cultist_shield::After): casting Void Shield 578115 on grouped ally spreads 578115 to one additional grouped ally within 15 yd (ally2) who lacks Wracked Mind 805801. Control (before learning 572064): 578115 applies to ally (1) and not ally2 (0). Wait 31000 ms lets both 578115 (30000 ms) and 805801 (15000 ms) expire naturally on ally before learning 572064. Treatment: 578115 applies to both ally (1) and ally2 (1). Reference search 2026-11-25: coa-history 572064: 0 events (578115: 7999 applies in 24 logs); coabuildhub spells_master_index.json 572064 matches verbatim."
+    },
+    {
+      "spell": 572064,
+      "name": "Split Mind (Void Shield duration reduced by 30%: 30 s vs 21 s at 22.5 s)",
+      "kind": "metric_delta",
+      "variant": "duration_reduced",
+      "label_suffix": "duration_reduced",
+      "quote": "Void Shield now applies to an additional nearby ally but its duration is reduced by $s3%.",
+      "trigger_spell": 578115,
+      "gate_spell": 572064,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          578115,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          805801,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 22500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          22300,
+          22900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Split Mind 572064 Effect[2] SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DURATION (misc 1) bp -31 + die 1 = -30% ($s3 = 30, Spell.dbc) on Void Shield 578115 (DurationIndex 9 = 30000 ms -> 21000 ms). Learned contrast at 22500 ms (between 21000 ms + 7% and 30000 ms - 25%): unlearned Void Shield is still held (1), learned Void Shield has expired (0). phase_auras clears 578115 and 805801 before each phase so Wracked Mind does not block the treatment recast. Paired with duration_bracket. Reference search 2026-11-25: see extra_ally."
+    },
+    {
+      "spell": 572064,
+      "name": "Split Mind (Void Shield duration bracketed at 21 s within +-10%)",
+      "kind": "metric_delta",
+      "variant": "duration_bracket",
+      "label_suffix": "duration_bracket",
+      "quote": "Void Shield now applies to an additional nearby ally but its duration is reduced by $s3%.",
+      "trigger_spell": 578115,
+      "gate_spell": 572064,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          578115,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          805801,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 19500,
+      "expiry_wait_ms": 3000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19300,
+          19900
+        ],
+        "expired": [
+          22300,
+          22900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Split Mind 572064 duration bracket on Void Shield 578115 (30000 ms * (1 - 0.30) = 21000 ms, +-10% band [18900..23100] ms): 0 before cast, held (1) at [19300..19900] ms (> 18900 ms) and gone (0) at [22300..22900] ms (< 23100 ms), excluding 10% shorter (18900 ms) and 10% longer (23100 ms). Paired with duration_reduced. Reference search 2026-11-25: see extra_ally."
+    },
+    {
+      "spell": 572064,
+      "name": "Split Mind (killing an XP-yielding enemy removes Wracked Mind)",
+      "kind": "metric_delta",
+      "variant": "kill_removes",
+      "label_suffix": "kill_removes",
+      "quote": "Killing an opponent that yields experience or honor removes Wracked Mind from you.",
+      "trigger_spell": 60235,
+      "gate_timing": "start",
+      "target": "caster",
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "phase_auras": [
+        [
+          805801,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 805801
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "observe_source": "Split Mind 572064 (AscensionCultistEvents.cpp:92,209-212): PROC_FLAG_KILL checks player->isHonorOrXPTarget(target) (Player.cpp:13720-13737: above gray level, not totem/critter/pet/NO_XP) and removes Wracked Mind 805801 (Duration 15000 ms). Corpse fixture (ADR 0493): Kobold Vermin 6 at class level 60, 100 health, 5 yd away, killed in the treatment phase only by Void Zone 92559 (1000 Physical damage). Precondition fixture (G-21 point 6): Wracked Mind 805801 set on caster at the start of each phase (duration 15000 ms >> 2000 ms phase wait); harmless trigger cast Greatness 60235 on caster in both phases. Control (before, no kill): 805801 stays 1. Treatment (XP-yielding kill with 572064 learned): 805801 removed (0). Paired with kill_no_talent and kill_non_xp_critter. Reference search 2026-11-25: coa-history 572064: 0 events; coabuildhub spells_master_index.json 572064 matches verbatim."
+    },
+    {
+      "spell": 572064,
+      "name": "Split Mind (XP-yielding kill without talent keeps Wracked Mind)",
+      "kind": "metric_delta",
+      "variant": "kill_no_talent",
+      "label_suffix": "kill_no_talent",
+      "quote": "Killing an opponent that yields experience or honor removes Wracked Mind from you.",
+      "trigger_spell": 60235,
+      "gate_spell": 92559,
+      "target": "caster",
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "phase_auras": [
+        [
+          805801,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 805801
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "Talent-absence control for Split Mind 572064 kill_removes: identical Kobold Vermin 6 kill by Void Zone 92559 with gate_spell 92559 so 572064 is never learned; Wracked Mind 805801 stays present (1 -> 1). Reference search 2026-11-25: see kill_removes."
+    },
+    {
+      "spell": 572064,
+      "name": "Split Mind (killing a non-XP critter keeps Wracked Mind)",
+      "kind": "metric_delta",
+      "variant": "kill_non_xp_critter",
+      "label_suffix": "kill_non_xp_critter",
+      "quote": "Killing an opponent that yields experience or honor removes Wracked Mind from you.",
+      "trigger_spell": 60235,
+      "gate_timing": "start",
+      "target": "caster",
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "corpse": {
+        "entry": 721,
+        "health": 100,
+        "distance": 5
+      },
+      "phase_auras": [
+        [
+          805801,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 805801
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "observe_source": "XP-target control for Split Mind 572064 kill_removes: identical setup with 572064 learned, killing Rabbit 721 (creature_template type 8 = CREATURE_TYPE_CRITTER, faction 31; Player::isHonorOrXPTarget returns false at Player.cpp:13733); Wracked Mind 805801 is NOT removed (1 -> 1). Reference search 2026-11-25: see kill_removes."
     }
   ],
   "player_observations": [],
