@@ -255,7 +255,8 @@
       "action": "cast",
       "label": "CONTROL: without Criminal the Mage teleports to Stormwind",
       "actor": "mage",
-      "spell": 3561
+      "spell": 3561,
+      "ignore_gcd": true
     },
     {
       "action": "assert",
