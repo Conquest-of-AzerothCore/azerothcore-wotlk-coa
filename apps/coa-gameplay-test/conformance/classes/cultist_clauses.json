@@ -2938,22 +2938,9 @@
     "spell": 680574,
     "clause": "Your successful blocks now have a $s2% chance to critically block for twice the normal amount.",
     "labels": [
-      "680574 effect_value e1 #0"
+      "680574 behaviour_metric_delta crit_block_rate_base"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind counts Shadowy Symbiosis 680574 clause 1 (\"Your successful blocks now have a $s2% chance to critically block for twice the normal amount.\") as behaviour evidence under no-tool-code-changes: (1) metric_delta critical_block_chance (crit_block_base measures 0 -> 20.0 ok) is a READBACK metric (coverage.py:461) that does not match coverage.py:524 STATE_PROMISES[\"critical_block_chance\"] = r\"critical block\" against \"critically block\", requires a zero-gain partner in PARTNERED_CONTRASTS (coverage.py:570,757-765), and does not test \"for twice the normal amount\"; (2) Unit::isBlockCritical (Unit.cpp:3721) uses roll_chance_i (not forceable by forced_roll) and no pooled crit_blocked combat-event metric/kind exists to sample a 20% critical-block rate directly (~19,386 blocked strikes). Nearest kind: metric_delta critical_block_chance or a pooled blocked-strike critical-block rate kind.",
-      "attempts": [
-        {
-          "agent": "cu-h2",
-          "report": ".agents/plans/cu-h2/report.md"
-        },
-        {
-          "agent": "cu-h2b",
-          "report": ".agents/plans/cu-h2b/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 680574,
@@ -2961,7 +2948,9 @@
     "labels": [
       "680574 behaviour_metric_delta crit_block_at_59",
       "680574 behaviour_metric_delta crit_block_at_60",
-      "680574 behaviour_metric_delta crit_block_above_60"
+      "680574 behaviour_metric_delta crit_block_above_60",
+      "680574 behaviour_metric_delta crit_block_rate_at_60",
+      "680574 behaviour_metric_delta crit_block_rate_above_60"
     ],
     "kind": "claim"
   },
