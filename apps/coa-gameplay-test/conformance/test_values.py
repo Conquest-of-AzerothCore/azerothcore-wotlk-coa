@@ -1215,7 +1215,8 @@ class BaseManaPowerCostTest(unittest.TestCase):
         self.assertEqual(pc_health.rule, 'ManaCost 0 + 10% of base_health 1418 divisor 1')
 
     def test_invalid_base_mana_power_cost_config_is_refused(self):
-        from values import BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_health_for_power_cost, base_mana_for_power_cost
+        from values import (BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_health_for_power_cost,
+                            base_mana_for_power_cost)
         for bad in (
                 {BASE_MANA_POWER_COST_KEY: 1},
                 {BASE_MANA_POWER_COST_KEY: True},

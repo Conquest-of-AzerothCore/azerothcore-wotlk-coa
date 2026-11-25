@@ -19156,13 +19156,19 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:68-70, 215; Cultist ADR 0020) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) when a magic spell (DmgClass == SPELL_DAMAGE_CLASS_MAGIC) is deflected. Precondition fixture 43689 (+20% Hit Chance, aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, set to +100% via phase_aura_amounts on dummy) removes the 3.99% equal-level spell-miss roll (Unit.cpp:3995-4053) without setting SPELL_ATTR7_NO_ATTACK_MISS so deflection runs at Unit.cpp:4094-4100. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t~500-509 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected magic cast applies 525066 present in game_time [3220, 3450] (>= 2711 ms > 2700 ms = 0.9*3000) and gone in game_time [3650, 3790] (<= 3290 ms < 3300 ms = 1.1*3000), strictly excluding durations 10% off on both sides. Paired with no_silence_on_melee_deflect proving deflected melee abilities do not silence.",
+      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:68-70, 212; Cultist ADR 0020) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, DmgClass 1 Shadow, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9, SPELL_ATTR0_CU_BINARY_SPELL at SpellMgr.cpp:3933) when a magic spell (DmgClass == SPELL_DAMAGE_CLASS_MAGIC) is deflected. Precondition fixtures: 43689 (+20% Hit Chance, aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, set to +100% via phase_aura_amounts on dummy) removes the 3.99% equal-level spell-miss roll on 2653 (Unit.cpp:3995-4053 -> 0% miss) without setting SPELL_ATTR7_NO_ATTACK_MISS so deflection runs at Unit.cpp:4094-4100 (9999/10000 deflect; residual 1e-4 leak when irand(1, 10000) == 10000), and 823764 (beeg spellpen, aura 123 -9999 target resistance on caster) removes the level-60 dummy's 12% linear monster resistance (CoA.MonsterResistance.Enable = 1, 60 / 5 = 12%) that otherwise binary-resisted triggered 525066 in 1199/10000 = 11.99% of runs (Unit.cpp:4079-4091; cause of classend3 Run 1 alert 0). Residual flip probability: 1e-4 (0.01%) per run. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t~500-509 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected magic cast applies 525066 present in game_time [3220, 3450] (>= 2711 ms > 2700 ms = 0.9*3000) and gone in game_time [3650, 3790] (<= 3290 ms < 3300 ms = 1.1*3000), strictly excluding durations 10% off on both sides. Paired with no_silence_on_melee_deflect proving deflected melee abilities do not silence.",
       "phase_auras": [
         [
           43689,
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "phase_aura_amounts": [
@@ -47099,6 +47105,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "phase_aura_amounts": [
@@ -47125,7 +47137,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Melee non-silence arm for Twisted Seal 525065 (Cultist ADR 0020; AscensionCultistEvents.cpp:68-70): Description[enUS] states \"Casters whose magic is deflected are silenced for $525066d.\" Precondition fixture 43689 (+20% Hit Chance, aura 333, overridden to +100% via phase_aura_amounts on dummy) removes melee miss; Night Slaughter 23583 (DmgClass 2 SPELL_DAMAGE_CLASS_MELEE, SPELL_ATTR0_NO_ACTIVE_DEFENSE, 0 mana, instant) skips dodge/parry/block (Unit.cpp:3800) so DeflectMeleeAbility deflects it with 100% chance (roll_chance_i(100), proved 10/10 in deflect_melee_ability). Without 525065 (before control) 525066 is 0; under 525065 the deflected melee ability does not apply 525066 (reads 0 on dummy at ~2000 ms, 1500 ms after the deflected cast, inside 525066's 3000 ms duration; pre-fix code read 1 and alerted). Paired with silence_on_deflect proving deflected magic spell 2653 applies 525066 for 3 sec."
+      "observe_source": "Melee non-silence arm for Twisted Seal 525065 (Cultist ADR 0020; AscensionCultistEvents.cpp:68-70): Description[enUS] states \"Casters whose magic is deflected are silenced for $525066d.\" Precondition fixtures: 43689 (+20% Hit Chance, aura 333, overridden to +100% via phase_aura_amounts on dummy) removes melee miss, and 823764 (beeg spellpen, aura 123 -9999 target resistance on caster) removes the level-60 dummy's 12% binary Shadow resist so any regression that erroneously casts 525066 on melee deflect cannot be masked by a resist; Night Slaughter 23583 (DmgClass 2 SPELL_DAMAGE_CLASS_MELEE, SPELL_ATTR0_NO_ACTIVE_DEFENSE, 0 mana, instant) skips dodge/parry/block (Unit.cpp:3800) so DeflectMeleeAbility deflects it with 100% chance (roll_chance_i(100), proved 10/10 in deflect_melee_ability). Without 525065 (before control) 525066 is 0; under 525065 the deflected melee ability does not apply 525066 (reads 0 on dummy at ~2000 ms, 1500 ms after the deflected cast, inside 525066's 3000 ms duration; pre-fix code read 1 and alerted). Paired with silence_on_deflect proving deflected magic spell 2653 applies 525066 for 3 sec."
     },
     {
       "spell": 680600,
@@ -48952,6 +48964,10 @@
     "power": 0,
     "value": 1512,
     "source": "player_class_stats class 25 level 60 BaseMana 1512, read in the world database of the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable = 0); set before every cast of a scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
+  },
+  "base_health": {
+    "value": 1418,
+    "source": "player_class_stats class 25 level 60 BaseHP 1418 (rev_20260903_01_live_class_baseline.sql level 1 BaseHP 65 + player_class_stats.sql fallback_class 2 level 60 BaseHP 1381 - level 1 BaseHP 28 via rev_20260912_00_custom_class_stat_progression.sql, CoA.ClassLevelSixtyStats.Enable = 0; confirmed by level-60 max health 2278 minus 860 Stamina bonus = 1418)"
   },
   "value_ally_casts": [
     {
