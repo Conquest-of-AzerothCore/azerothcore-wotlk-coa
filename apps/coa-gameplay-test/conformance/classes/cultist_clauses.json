@@ -2484,7 +2484,11 @@
   {
     "spell": 680574,
     "clause": "This effect is doubled while above 60 Insanity.",
-    "labels": [],
+    "labels": [
+      "680574 behaviour_metric_delta crit_block_at_59",
+      "680574 behaviour_metric_delta crit_block_at_60",
+      "680574 behaviour_metric_delta crit_block_above_60"
+    ],
     "kind": "claim"
   },
   {

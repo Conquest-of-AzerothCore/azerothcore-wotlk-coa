@@ -23488,6 +23488,174 @@
       "expire_ms": 1000,
       "void_on_cast_failure": true,
       "observe_source": "572846 Entropic Slam (rank of 804152, SkillLineAbility Cultist) Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG +98 (${$m1+0} = 98), Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE 130% ($s2 = 130), Shadow school 32, DmgClass 2 (Spell.dbc). Godblade 2H Axe 2531 (90.86..127.3, normalized 3.3 s), +20000 AP (total AP 20376 -> W = 4893.7743..4930.2143), Cultist tuning 887013 (+12%), non-crit (16255 -100), no resist (823764). Tooltip per-hit mean (1.30 * W + 98) * 1.12 = 7261.6 (range [7235.1..7288.2], std 15.32); 8-hit sum mean = 58093 (std 43.33), band [57953..58233] (+-140 = +-3.23 sigma, < 0.12% false-alert when fixed; excludes 0 flat 57215, 2x flat 58971, 100% weapon 44687). Control reads 500706 == 0, 680603 == 0; treatment sets 500706=90 via after_auras, waits 1000 ms for Refresh, reads exact 500706 == 90 and 680603 == 1 (after_setup_stacks), lands 8 hits of 572846 (verified by ally_arm count == 8). Server defect note: Effect[0] (121) precedes Effect[1] (31) and AscensionCultistContracts.cpp never sets AscensionFlatAfterWeaponPercent on 804152, so SpellEffects.cpp:4732-4748 multiplies +98 by 130% (+32.93/hit -> 8-hit mean 58357, +264 = +6.09 sigma above tooltip mean, alerting deterministically). Reference search 2026-11-25: coa-history 572846: 5366 hits in 12 logs; coabuildhub spells_master_index.json 572846 matches verbatim."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+20% critical block chance at 59 Insanity below threshold)",
+      "kind": "metric_delta",
+      "variant": "crit_block_at_59",
+      "label_suffix": "crit_block_at_59",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          59,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 59
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Below-60 arm at 59 Insanity (500706=59, 680603=0, 573315=0 read in both phases): neither 680603 (>=60) nor stacks > 60 doubling applies, so critical_block_chance moves 0 -> 20 (+-0.05), contrasting with 60 Insanity (alerts at 40 vs 20) and 61 Insanity (alerts at 60 vs 40). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+20% critical block chance at 60 Insanity boundary)",
+      "kind": "metric_delta",
+      "variant": "crit_block_at_60",
+      "label_suffix": "crit_block_at_60",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Boundary arm at 60 Insanity (500706=60 and 680603=1 read in both phases): stacks > 60 is false, so critical_block_chance moves 0 -> 20 (not doubled 40). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+40% doubled critical block chance at 61 Insanity)",
+      "kind": "metric_delta",
+      "variant": "crit_block_above_60",
+      "label_suffix": "crit_block_above_60",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 40,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-60 arm at 61 Insanity (500706=61 and 680603=1 read in both phases; 1000 ms wait lets Refresh double 680574 Effect[1] to 40 at AscensionCultist.cpp:289): critical_block_chance moves 0 -> 40 (+-0.05). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
     }
   ],
   "player_observations": [],
