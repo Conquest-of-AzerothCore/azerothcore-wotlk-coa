@@ -4,9 +4,9 @@
   "contract": [
     "Issue #9132 and the PR author's ruling (2026-11-25): free-for-all PvP areas such as the Gurubashi Arena are",
     "excluded from Criminal: Blood On Your Hands 9930873. A High-Risk Human Mercenary and a Human without a",
-    "ruleset stand at Short John Mithril's spawn point (creature 14508, -13184.5, 332.671, 40.3307), which first",
-    "has to give the Human the native free-for-all flag; the Mercenary strikes first and gets no Criminal. Dodge",
-    "and parry are zeroed on the Human so the hits land."
+    "ruleset stand on the arena floor at game_tele 86 'BattleRing' (-13210.4, 294.518, 21.8575; area 2177 Battle",
+    "Ring carries AREA_FLAG_ARENA), which first has to give the Human the native free-for-all flag; the Mercenary",
+    "strikes first and gets no Criminal. Dodge and parry are zeroed on the Human so the hits land."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -75,18 +75,18 @@
       "action": "teleport",
       "actor": "mercenary",
       "map": 0,
-      "x": -13186.5,
-      "y": 332.671,
-      "z": 40.3307,
+      "x": -13212.4,
+      "y": 294.518,
+      "z": 21.8575,
       "o": 0
     },
     {
       "action": "teleport",
       "actor": "brawler",
       "map": 0,
-      "x": -13184.5,
-      "y": 332.671,
-      "z": 40.3307,
+      "x": -13210.4,
+      "y": 294.518,
+      "z": 21.8575,
       "o": 3.14159
     },
     {

@@ -230,10 +230,10 @@
     },
     {
       "action": "client_packet",
-      "label": "The Criminal accepts the summon (CMSG_SUMMON_RESPONSE)",
+      "label": "The Criminal accepts the summon, and the packet hook drops the accept (CMSG_SUMMON_RESPONSE)",
       "actor": "mage",
       "opcode": 684,
-      "consumed": false,
+      "consumed": true,
       "fields": [
         {
           "actor_guid": "g"
