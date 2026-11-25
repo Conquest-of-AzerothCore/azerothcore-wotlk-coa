@@ -28266,6 +28266,508 @@
         ]
       },
       "observe_source": "Duration-refresh proof for 704889 (AscensionCultistAbilities.cpp:296 Copy reapplies 850002, refreshing its 8000 ms timer): treatment casts 572141, waits 4000 ms, resets CD and casts a second 572141 (both hits confirmed via ally_arm count 0 -> 2). At 7500 ms after the second cast (11500 ms after the first, 3.5 sec past the first shield's unrefreshed 8000 ms expiry), 850002 is still present (1, > 7200 ms from cast 2); 1100 ms later (8600 ms after cast 2, < 8800 ms), 850002 is gone (0). Reference search 2026-11-25: coa-history spell 704889 has 0 events (passive), 850002 has 0 events, 572141 Twilight Shieldtoss has 4 casts / 4 SPELL_DAMAGE events in 1 log; coabuildhub spells_master_index.json 704889 holds an older text ('The first instance of damage dealt by Twilight Shieldtoss now shields you for 100% of the damage dealt for 8 sec.'; installed server Spell.dbc governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (void zone lasts 5 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
+      "trigger_spell": 800430,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800430,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4650,
+      "expiry_wait_ms": 650,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4850
+        ],
+        "expired": [
+          5200,
+          5480
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "800430 DurationIndex 28 = 5000 ms ($d = 5 sec, SpellDuration.dbc), instant cast, Effect[1] persistent area aura (radius 10 yd). Reads dynobj aura 800430 absent on dummy before cast (0), present (1) at [4550..4850] ms (> 4500 = 0.9*5000), and gone (0) at [5200..5480] ms (< 5500 = 1.1*5000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (slows enemies while inside the void zone, direction only)",
+      "kind": "metric_delta",
+      "variant": "slows_inside",
+      "label_suffix": "slows_inside",
+      "quote": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
+      "trigger_spell": 800430,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.0,
+      "expected_gain": -0.5,
+      "tolerance": 0.49,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAuras.cpp:240-247: every 250 ms dynobj tick inside 800430 (10 yd radius) casts 802788 (SPELL_AURA_MOD_DECREASE_SPEED, 600 ms). The tooltip states no slow percentage, so no figure is invented (direction only, Felsworn 800203 drain_spirit precedent): dummy run_speed_rate reads its uncast baseline (>= 0.5; stock dummy 36 is 1.14286) before and strictly lower 800 ms after casting 800430 at dummy (after - before in [-0.99, -0.01], excluding no slow). Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (slow increases closer to the center of the void zone: 3 yd vs 8 yd, direction only)",
+      "kind": "metric_delta",
+      "variant": "slow_gradient",
+      "label_suffix": "slow_gradient",
+      "quote": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
+      "trigger_spell": 804056,
+      "gate_spell": 60235,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "dummy_distance": 13,
+      "learn": [
+        800430
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "relocate_before_trigger": {
+        "dx": 5
+      },
+      "after_trigger_casts": [
+        {
+          "spell": 800430,
+          "target": "dummy",
+          "destination_unit": "caster",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.25,
+      "expected": -0.25,
+      "expected_gain": -0.5,
+      "tolerance": 0.49,
+      "wait_ms": 800,
+      "expire_ms": 5800,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 8.0,
+            "expected": 3.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "Caster relocates +5 yd before each phase (x0+5 then x0+10) while dummy stands at x0+13, placing dummy 8 yd (before) vs 3 yd (after) from the void zone centered at caster"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800430,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dummy is inside the 10 yd Entropic Singularity void zone in both arms (8 yd and 3 yd)"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAuras.cpp:240-246 computes slow = -int32(clamp(80*(1 - distance/range), 0, 80)) inside 800430's 10 yd dynobj. The tooltip gives no formula or endpoint figure, so only direction is asserted (Felsworn 800203 drain_spirit precedent). Dummy stands at x0+13; relocate_before_trigger (+5 yd) places caster (and 800430 destination_unit) at x0+5 (8 yd from dummy) in before and x0+10 (3 yd from dummy) in after (both distances proven via precondition distance_2d arm, and dummy inside 800430 in both via aura arm). Dummy's run_speed_rate at 3 yd must be strictly below its run_speed_rate at 8 yd (after - before in [-0.99, -0.01]; a uniform slow gives 0 and alerts). Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (generates 10 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity_gain",
+      "label_suffix": "insanity_gain",
+      "quote": "Generates 10 Insanity",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCustomResourceData.h:284 ({25, 560109, 560109, 500706, 10, ResourceMutation::AuraStacks}): casting Corrupt Mind 560109 (1500 ms cast, 23 yd/s projectile at 3 yd -> ~1630 ms, Kobold Vermin 6 because stock dummy 36 is Fear-immune) raises Insanity 500706 from 0 (uncast control) to 10. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (fears creature target in place for 40 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Corrupt the mind of an enemy and spread madness, fearing them in place for $d (8 sec vs players),",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 39600,
+      "expiry_wait_ms": 3200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          39200,
+          40100
+        ],
+        "expired": [
+          42400,
+          43400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "560109 DurationIndex 64 = 40000 ms ($d = 40 sec, SpellDuration.dbc), Effect[0] aura 26 MOD_ROOT + Effect[1] aura 7 MOD_FEAR, 1500 ms cast + ~130 ms flight at 3 yd -> lands ~1630 ms, expires ~41630 ms (Kobold Vermin 6). Reads 0 before cast, 1 at ~39600 ms (~38000 ms after apply, > 36000 = 0.9*40000) and 0 at ~42800 ms (~41200 ms after apply, < 44000 = 1.1*40000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (8 sec duration vs enemy player)",
+      "kind": "metric_delta",
+      "variant": "player_duration",
+      "label_suffix": "player_duration",
+      "quote": "Corrupt the mind of an enemy and spread madness, fearing them in place for $d (8 sec vs players),",
+      "trigger_spell": 560109,
+      "target": "enemy",
+      "enemy_player_race": 2,
+      "measure_actor": "enemy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9100,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          8900,
+          9350
+        ],
+        "expired": [
+          9900,
+          10450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "560109 tooltip states '(8 sec vs players)'. Cast at enemy player (race 2, 1500 ms cast + ~130 ms flight -> lands ~1630 ms, expected 8000 ms expiry ~9630 ms): reads 0 before cast, 1 at ~9100 ms (~7470 ms after apply, > 7200 = 0.9*8000) and 0 at ~10100 ms (~8470 ms after apply, < 8800 = 1.1*8000). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (bounces to up to 2 nearby enemies: 3 of 5 in-range enemies feared)",
+      "kind": "metric_delta",
+      "variant": "bounce_cap",
+      "label_suffix": "bounce_cap",
+      "quote": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them@s:560714:0@][].",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0
+      ],
+      "area_sum": true,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "560109 EffectChainTarget[0..1] = 3, MaxAffectedTargets = 3, Radius 8 yd (Spell.dbc): primary enemy plus up to 2 nearby enemies = 3 total. Five Kobold Vermin (entry 6) stand within 2 yd of primary (dummy at 3 yd, area1..4 at 3.5..5.0 yd): area_sum of aura 560109 reads 0 before cast and exactly 3 after cast (leaving 2 in-range enemies unaffected). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (with Eldritch Screams 525049, applies Mind Rot 560943 to nearby enemies)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_branch",
+      "label_suffix": "mind_rot_branch",
+      "quote": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them@s:560714:0@][].",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "area_dummies": [
+        5
+      ],
+      "measure_actor": "area1",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560943
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:301-304: Corrupt Mind 560109 applies Mind Rot 560943 to target dummy and nearby enemies within 10 yd when 525049 is known"
+          }
+        ]
+      },
+      "observe_source": "Conditional $?s525049 branch of 560109 tooltip (AscensionCultistAbilities.cpp:301-304): casting 560109 at Kobold Vermin 6 (area1 at 5 yd = 2 yd away) applies Mind Rot 560943 to neither without 525049 (0) and to both after learning 525049 (1). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (damage dealt ends the effect)",
+      "kind": "metric_delta",
+      "variant": "broken",
+      "label_suffix": "broken",
+      "quote": "Damage dealt may end this effect.",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "learn": [
+        500712
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500712,
+          "target": "dummy",
+          "delay_ms": 2200,
+          "in_before": false,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 500712,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Ancient Curse 500712 (+20000 SP, ~31000 Shadow damage) lands on the feared dummy after Corrupt Mind applies"
+          }
+        ]
+      },
+      "observe_source": "Follows Felsworn 805235 broken/unbroken precedent: Corrupt Mind 560109 is cast at Kobold Vermin 6 (lands at ~1630 ms, 40000 ms duration), then instant Ancient Curse 500712 at +20000 SP (~31000 Shadow damage, confirmed landed via ally_arm) hits the dummy at 2200 ms; aura 560109 is read 1000 ms later (~3200 ms). Paired with unbroken control arm (same timing without damage reads 1). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (control: without damage the effect stays)",
+      "kind": "metric_delta",
+      "variant": "unbroken",
+      "label_suffix": "unbroken",
+      "quote": "Damage dealt may end this effect.",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3100,
+          3400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm of 560109 broken: same timing (~3200 ms after cast of 560109 at Kobold Vermin 6) with no damage dealt, confirming 560109 stays active (1). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
     }
   ],
   "player_observations": [],

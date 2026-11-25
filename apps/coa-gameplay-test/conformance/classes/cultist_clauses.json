@@ -1878,7 +1878,9 @@
   {
     "spell": 560109,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "560109 behaviour_metric_delta insanity_gain"
+    ],
     "kind": "claim"
   },
   {
@@ -1889,25 +1891,43 @@
       {
         "claim": "for $d",
         "labels": [
-          "560109 aura_duration_ms #0"
+          "560109 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "8 sec vs players",
-        "labels": []
+        "labels": [
+          "560109 behaviour_metric_delta player_duration"
+        ]
       }
     ]
   },
   {
     "spell": 560109,
     "clause": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them][].",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "bouncing to up to 2 nearby enemies",
+        "labels": [
+          "560109 behaviour_metric_delta bounce_cap"
+        ]
+      },
+      {
+        "claim": "and applying Mind Rot to them",
+        "labels": [
+          "560109 behaviour_metric_delta mind_rot_branch"
+        ]
+      }
+    ]
   },
   {
     "spell": 560109,
     "clause": "Damage dealt may end this effect.",
-    "labels": [],
+    "labels": [
+      "560109 behaviour_metric_delta broken",
+      "560109 behaviour_metric_delta unbroken"
+    ],
     "kind": "claim"
   },
   {
@@ -3704,15 +3724,28 @@
   {
     "spell": 800430,
     "clause": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
-    "labels": [
-      "800430 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Create a void zone for $d at target location",
+        "labels": [
+          "800430 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "that slows enemies' movement speed while inside.",
+        "labels": [
+          "800430 behaviour_metric_delta slows_inside"
+        ]
+      }
+    ]
   },
   {
     "spell": 800430,
     "clause": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
-    "labels": [],
+    "labels": [
+      "800430 behaviour_metric_delta slow_gradient"
+    ],
     "kind": "claim"
   },
   {
