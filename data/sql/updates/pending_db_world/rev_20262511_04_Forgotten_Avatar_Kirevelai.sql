@@ -1,0 +1,32 @@
+INSERT INTO `creature_template` (`entry`, `difficulty_entry_1`, `difficulty_entry_2`, `difficulty_entry_3`, `KillCredit1`, `KillCredit2`, `name`, `subname`, `IconName`, `gossip_menu_id`, `minlevel`, `maxlevel`, `exp`, `faction`, `npcflag`, `speed_walk`, `speed_run`, `speed_swim`, `speed_flight`, `detection_range`, `rank`, `dmgschool`, `DamageModifier`, `BaseAttackTime`, `RangeAttackTime`, `BaseVariance`, `RangeVariance`, `unit_class`, `unit_flags`, `unit_flags2`, `dynamicflags`, `family`, `type`, `type_flags`, `lootid`, `pickpocketloot`, `skinloot`, `PetSpellDataId`, `VehicleId`, `mingold`, `maxgold`, `AIName`, `MovementType`, `HoverHeight`, `HealthModifier`, `ManaModifier`, `ArmorModifier`, `ExperienceModifier`, `RacialLeader`, `movementId`, `RegenHealth`, `CreatureImmunitiesId`, `flags_extra`, `ScriptName`, `VerifiedBuild`) VALUES
+(501008, 0, 0, 0, 0, 0, 'Kire''velai', '', '', 0, 60, 60, 0, 14, 0, 1, 1.14286, 1, 1, 20, 1, 0, 2.2, 2000, 2000, 1, 1, 8, 0, 2048, 0, 0, 7, 0, 501008, 0, 0, 0, 0, 1409, 2312, 'SmartAI', 0, 1, 10, 3, 1, 1, 0, 0, 1, 0, 0, '', 0) ON DUPLICATE KEY UPDATE `difficulty_entry_1` = VALUES(`difficulty_entry_1`), `difficulty_entry_2` = VALUES(`difficulty_entry_2`), `difficulty_entry_3` = VALUES(`difficulty_entry_3`), `KillCredit1` = VALUES(`KillCredit1`), `KillCredit2` = VALUES(`KillCredit2`), `name` = VALUES(`name`), `subname` = VALUES(`subname`), `IconName` = VALUES(`IconName`), `gossip_menu_id` = VALUES(`gossip_menu_id`), `minlevel` = VALUES(`minlevel`), `maxlevel` = VALUES(`maxlevel`), `exp` = VALUES(`exp`), `faction` = VALUES(`faction`), `npcflag` = VALUES(`npcflag`), `speed_walk` = VALUES(`speed_walk`), `speed_run` = VALUES(`speed_run`), `speed_swim` = VALUES(`speed_swim`), `speed_flight` = VALUES(`speed_flight`), `detection_range` = VALUES(`detection_range`), `rank` = VALUES(`rank`), `dmgschool` = VALUES(`dmgschool`), `DamageModifier` = VALUES(`DamageModifier`), `BaseAttackTime` = VALUES(`BaseAttackTime`), `RangeAttackTime` = VALUES(`RangeAttackTime`), `BaseVariance` = VALUES(`BaseVariance`), `RangeVariance` = VALUES(`RangeVariance`), `unit_class` = VALUES(`unit_class`), `unit_flags` = VALUES(`unit_flags`), `unit_flags2` = VALUES(`unit_flags2`), `dynamicflags` = VALUES(`dynamicflags`), `family` = VALUES(`family`), `type` = VALUES(`type`), `type_flags` = VALUES(`type_flags`), `lootid` = VALUES(`lootid`), `pickpocketloot` = VALUES(`pickpocketloot`), `skinloot` = VALUES(`skinloot`), `PetSpellDataId` = VALUES(`PetSpellDataId`), `VehicleId` = VALUES(`VehicleId`), `mingold` = VALUES(`mingold`), `maxgold` = VALUES(`maxgold`), `AIName` = VALUES(`AIName`), `MovementType` = VALUES(`MovementType`), `HoverHeight` = VALUES(`HoverHeight`), `HealthModifier` = VALUES(`HealthModifier`), `ManaModifier` = VALUES(`ManaModifier`), `ArmorModifier` = VALUES(`ArmorModifier`), `ExperienceModifier` = VALUES(`ExperienceModifier`), `RacialLeader` = VALUES(`RacialLeader`), `movementId` = VALUES(`movementId`), `RegenHealth` = VALUES(`RegenHealth`), `CreatureImmunitiesId` = VALUES(`CreatureImmunitiesId`), `flags_extra` = VALUES(`flags_extra`), `ScriptName` = VALUES(`ScriptName`), `VerifiedBuild` = VALUES(`VerifiedBuild`);
+
+DELETE FROM `creature_template_model` WHERE `CreatureID` = 501008;
+INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, `Probability`, `VerifiedBuild`) VALUES
+(501008, 0, 11815, 1, 1, 0);
+
+DELETE FROM `creature_template_addon` WHERE `entry` = 501008;
+INSERT INTO `creature_template_addon` (`entry`, `path_id`, `mount`, `bytes1`, `bytes2`, `emote`, `visibilityDistanceType`, `auras`) VALUES
+(501008, 0, 0, 0, 1, 0, 0, '92432');
+
+DELETE FROM `creature_loot_template` WHERE `Entry` = 501008;
+INSERT INTO `creature_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES
+(501008, 1, 1000360, 0, 0, 1, 5, 1, 1, 'Kire''velai - World Loot Level 60');
+
+DELETE FROM `creature_text` WHERE `CreatureID` = 501008;
+INSERT INTO `creature_text` (`CreatureID`, `GroupID`, `ID`, `Text`, `Type`, `Language`, `Probability`, `Emote`, `Duration`, `Sound`, `BroadcastTextId`, `TextRange`, `comment`) VALUES
+(501008, 0, 0, 'You should have stayed forgotten.', 12, 0, 100, 0, 3000, 0, 0, 0, 'Kire''velai - On Aggro'),
+(501008, 1, 0, 'The shadow... remembers...', 12, 0, 100, 0, 3000, 0, 0, 0, 'Kire''velai - On Death');
+
+DELETE FROM `smart_scripts` WHERE `entryorguid` = 501008 AND `source_type` = 0;
+INSERT INTO `smart_scripts` (`entryorguid`, `source_type`, `id`, `link`, `event_type`, `event_phase_mask`, `event_chance`, `event_flags`, `event_param1`, `event_param2`, `event_param3`, `event_param4`, `event_param5`, `event_param6`, `action_type`, `action_param1`, `action_param2`, `action_param3`, `action_param4`, `action_param5`, `action_param6`, `target_type`, `target_param1`, `target_param2`, `target_param3`, `target_param4`, `target_x`, `target_y`, `target_z`, `target_o`, `comment`) VALUES
+(501008, 0, 0, 1, 4, 0, 100, 0, 0, 0, 0, 0, 0, 0, 92, 0, 355073, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Kire''velai - On Aggro - Interrupt Void Channeling Visual 1'),
+(501008, 0, 1, 0, 61, 0, 100, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Kire''velai - On Aggro - Say Line 0'),
+(501008, 0, 2, 0, 1, 0, 100, 0, 1000, 1000, 5000, 5000, 0, 0, 11, 355073, 32, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Kire''velai - Out of Combat - Channel Void Channeling Visual 1 (Aura Not Present)'),
+(501008, 0, 3, 0, 0, 0, 100, 0, 0, 0, 2500, 3500, 0, 0, 11, 354507, 1088, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 'Kire''velai - In Combat - Cast Eldritch Blast'),
+(501008, 0, 4, 0, 6, 0, 100, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Kire''velai - On Death - Say Line 1'),
+(501008, 0, 5, 0, 1, 0, 100, 0, 0, 0, 5000, 5000, 0, 0, 3, 0, 11815, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 'Kire''velai - Out of Combat - Morph to Female Model 11815');
+
+DELETE FROM `creature` WHERE `guid` = 12101038;
+INSERT INTO `creature` (`guid`, `id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `equipment_id`, `position_x`, `position_y`, `position_z`, `orientation`, `spawntimesecs`, `wander_distance`, `currentwaypoint`, `curhealth`, `curmana`, `MovementType`, `npcflag`, `unit_flags`, `dynamicflags`, `ScriptName`, `VerifiedBuild`, `CreateObject`, `Comment`) VALUES
+(12101038, 501008, 0, 0, 0, 1, 1, 0, -10956.8305, -1655.8936, 184.11, 5.758234, 300, 0, 0, 1, 0, 0, 0, 0, 0, '', NULL, 0, 'Kire''velai (Forgotten Avatar final guardian)');
