@@ -193,7 +193,8 @@ def cycle_steps(spec: AvoidedChargeRestoreSpec, mana: list[dict], labels: dict) 
     for _ in range(spec.spend_charges):
         steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.charge_spell, 'target': TARGET,
                       'ignore_gcd': True})
-    steps += [fixture_health_step(CASTER, 100),
+    steps += [{'action': 'stop_attack', 'actor': CASTER},
+              fixture_health_step(CASTER, 100),
               {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': spec.dodge, 'parry': spec.parry},
               measurement(labels['charges_before'], CASTER, 'spell_charges', spell=spec.charge_spell),
               {'action': 'wait', 'ms': spec.window_ms},
