@@ -61,8 +61,10 @@ A rank whose
 record names a `CasterAuraSpell` gets that aura as a one-stack fixture (`set_aura`) right before the cast: without it
 the server refuses the cast with `SPELL_FAILED_CASTER_AURASTATE` (22, `Spell.cpp:5930`). Templar: Oath Chain 704576
 for Righteous Upheaval, Blade of Faith, Righteous Tempest and Reckoning; Recently Parried or Dodged 681170, a dummy
-aura, for Sacred Swing. Two diagnostic measurements ride along without an `Expectation`: `<rank> cast_failure` and
-`<rank> aura_present`.
+aura, for Sacred Swing. A class file's `cast_auras` (`{spell, auras, reason}`) sets additional precondition auras on
+the caster right before each cast in both value and hit scenarios; each element of `auras` is either a positive spell
+id (1 stack) or a `[spell, stacks]` pair for stack-counted backing resources (ADR 1319). Two diagnostic measurements
+ride along without an `Expectation`: `<rank> cast_failure` and `<rank> aura_present`.
 The remaining aura duration is read in the cast step's own tick: measured 12 to 15 ms below the record on instants.
 `cooldown_ms` is the remaining cooldown, measured 6 ms below the record right after the cast.
 A rank whose record names a `TargetAuraState` gets a health fixture on its hostile target before the cast

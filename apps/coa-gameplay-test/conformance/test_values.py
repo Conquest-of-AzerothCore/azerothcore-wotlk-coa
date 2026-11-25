@@ -1216,5 +1216,22 @@ class BaseManaPowerCostTest(unittest.TestCase):
                 base_mana_for_power_cost(bad)
 
 
+class CastAuraStacksTest(unittest.TestCase):
+    def test_cast_aura_steps_supports_plain_ids_and_spell_stack_pairs(self):
+        from values import cast_aura_steps
+        class_file = {'cast_auras': [{'spell': 572846, 'auras': [[500706, 70], 680603]}]}
+        self.assertEqual(cast_aura_steps(class_file, 572846), [
+            {'action': 'set_aura', 'actor': CASTER, 'spell': 500706, 'stacks': 70},
+            {'action': 'set_aura', 'actor': CASTER, 'spell': 680603, 'stacks': 1},
+        ])
+        self.assertEqual(cast_aura_steps(class_file, 999999), [])
+
+    def test_invalid_cast_aura_entries_are_refused(self):
+        from values import cast_aura_steps
+        for bad in (0, True, [500706], [500706, 0], [500706, True], [True, 5], [500706, 70, 1], '500706'):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                cast_aura_steps({'cast_auras': [{'spell': 572846, 'auras': [bad]}]}, 572846)
+
+
 if __name__ == '__main__':
     unittest.main()

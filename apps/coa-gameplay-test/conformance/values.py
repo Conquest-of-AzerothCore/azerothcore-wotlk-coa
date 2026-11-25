@@ -310,9 +310,24 @@ def required_aura_steps(facts: RankFacts) -> list[dict]:
     return [{'action': 'set_aura', 'actor': CASTER, 'spell': facts.caster_aura_spell, 'stacks': 1}]
 
 
+def cast_aura_entry(aura) -> tuple[int, int]:
+    if type(aura) is int and aura > 0:
+        return aura, 1
+    if (isinstance(aura, list) and len(aura) == 2
+            and type(aura[0]) is int and aura[0] > 0
+            and type(aura[1]) is int and aura[1] > 0):
+        return aura[0], aura[1]
+    raise ValueError(f'cast_auras entry must be a positive spell id or [spell, positive_stacks], not {aura!r}')
+
+
 def cast_aura_steps(class_file: dict, spell: int) -> list[dict]:
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1}
-            for entry in class_file.get('cast_auras', []) if entry['spell'] == spell for aura in entry['auras']]
+    steps = []
+    for entry in class_file.get('cast_auras', []):
+        if entry['spell'] == spell:
+            for aura in entry['auras']:
+                aura_spell, stacks = cast_aura_entry(aura)
+                steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': aura_spell, 'stacks': stacks})
+    return steps
 
 
 def value_ally_cast(class_file: dict, rank_id: int) -> tuple[int, ...] | None:
