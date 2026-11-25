@@ -214,8 +214,9 @@ def fixtures(class_file: dict, spec, value: dict, scenario: dict):
                   measure_stat(names['input']['unrelated'], value['input']),
                   *cast_block, {**reading, 'label': names['reads']['unrelated']},
                   set_aura(unrelated['aura'], 0)]
-        scenario['steps'] = (steps[:start_idx] + prefix_reads + steps[start_idx:after_idx + 1]
-                             + extra + steps[after_idx + 1:])
+        scenario['steps'] = [step for step in (steps[:start_idx] + prefix_reads + steps[start_idx:after_idx + 1]
+                                               + extra + steps[after_idx + 1:])
+                             if step.get('label') != before_label]
 
     waited = sum(step['ms'] for step in scenario['steps'] if step['action'] == 'wait')
     if waited > METRIC_DELTA_UNTIMED_WAIT_MS:

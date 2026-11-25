@@ -86,6 +86,7 @@ class StatArmsTests(unittest.TestCase):
         self.assertEqual(a_exp.displayed, 'direction')
         casts = [step for step in a_valid['steps'] if step['action'] == 'cast' and step.get('spell') == 572103]
         self.assertEqual(len(casts), 4)
+        self.assertFalse(any(step.get('label') == a_exp.model['before_label'] for step in a_valid['steps']))
         self.assertIn('Stat arms (active_recast, D-38)', a_valid['contract'])
 
     def judge_passive(self, ctrl_out=(0.0, 0.0, 0.0, 0.0), lrn_out=(0.0, 20.0, 40.0, 0.0),
@@ -111,13 +112,13 @@ class StatArmsTests(unittest.TestCase):
         fake = FakeRun(found, cast_failures=cast_failures or {})
         return judge_behaviour(base_verdict(exp), fake, exp)
 
-    def judge_active(self, before=0.0, out=(850.0, 1183.0, 1516.0, 850.0),
+    def judge_active(self, out=(850.0, 1183.0, 1516.0, 850.0),
                      inputs=(104.0, 204.0, 304.0, 104.0), unrel=(75.0, 1075.0),
                      drop=None, cast_failures=None):
         _, [exp] = built_active()
         rec = exp.model['stat_arms']
         found = {
-            rec['before_label']: before, rec['after_label']: out[0],
+            rec['after_label']: out[0],
             rec['reads']['levels'][0]: out[1], rec['reads']['levels'][1]: out[2],
             rec['reads']['unrelated']: out[3],
             rec['input']['levels'][0]: inputs[0], rec['input']['levels'][1]: inputs[1],
