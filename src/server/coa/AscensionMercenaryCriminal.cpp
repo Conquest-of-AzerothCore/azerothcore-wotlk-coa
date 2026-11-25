@@ -1,14 +1,18 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionMercenary.h"
+#include "BattlegroundMgr.h"
+#include "BattlegroundQueue.h"
 #include "DBCStores.h"
 #include "DataMap.h"
+#include "Group.h"
+#include "LFGMgr.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
-#include "SpellAuras.h"
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellInfo.h"
 #include "WorldSession.h"
 #include <array>
@@ -137,6 +141,49 @@ bool SummonedByPlayer(Player const* player, Unit const* summoner)
     return other && other != player && other->GetSession()->GetSecurity() == SEC_PLAYER;
 }
 
+bool GroupHasCriminal(Player* player)
+{
+    if (IsCriminal(player))
+        return true;
+    if (Group* group = player->GetGroup())
+        for (GroupReference* member = group->GetFirstMember(); member; member = member->next())
+            if (IsCriminal(member->GetSource()))
+                return true;
+    return false;
+}
+
+void LeaveEveryQueue(Player* player)
+{
+    for (uint8 slot = 0; slot < PLAYER_MAX_BATTLEGROUND_QUEUES; ++slot)
+    {
+        BattlegroundQueueTypeId const queue = player->GetBattlegroundQueueTypeId(slot);
+        if (queue == BATTLEGROUND_QUEUE_NONE)
+            continue;
+
+        sBattlegroundMgr->GetBattlegroundQueue(queue).RemovePlayer(player->GetGUID(), true);
+        player->RemoveBattlegroundQueueId(queue);
+        if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BattlegroundMgr::BGTemplateId(queue)))
+        {
+            WorldPacket data;
+            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, slot, STATUS_NONE, 0, 0, 0, TEAM_NEUTRAL);
+            player->SendDirectMessage(&data);
+        }
+    }
+
+    Group* group = player->GetGroup();
+    sLFGMgr->LeaveAllLfgQueues(player->GetGUID(), true, group ? group->GetGUID() : ObjectGuid::Empty);
+}
+
+void TurnCriminal(Player* player)
+{
+    SetOutlawed(player, true);
+    if (!player->IsInWorld())
+        return;
+    if (player->GetTradeData())
+        player->TradeCancel(true);
+    LeaveEveryQueue(player);
+}
+
 class ascension_mercenary_criminal_acts : public UnitScript
 {
 public:
@@ -172,7 +219,7 @@ public:
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
         if (Player* player = unit->ToPlayer(); player && aura->GetId() == SPELL_CRIMINAL)
-            SetOutlawed(player, true);
+            TurnCriminal(player);
     }
 
     void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
@@ -209,6 +256,45 @@ public:
 
     bool OnPlayerCanLfgTeleport(Player* player) override { return !IsCriminal(player); }
 };
+class ascension_mercenary_criminal_outcast : public PlayerScript
+{
+public:
+    ascension_mercenary_criminal_outcast()
+        : PlayerScript("ascension_mercenary_criminal_outcast",
+                       {PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_JOIN_IN_BATTLEGROUND_QUEUE,
+                        PLAYERHOOK_CAN_JOIN_IN_ARENA_QUEUE, PLAYERHOOK_CAN_JOIN_LFG}) { }
+
+    bool OnPlayerCanInitTrade(Player* player, Player* target) override
+    {
+        return !IsCriminal(player) && !IsCriminal(target);
+    }
+
+    bool OnPlayerCanJoinInBattlegroundQueue(Player* player, ObjectGuid, BattlegroundTypeId, uint8,
+                                            GroupJoinBattlegroundResult& err) override
+    {
+        return Admit(player, err);
+    }
+
+    bool OnPlayerCanJoinInArenaQueue(Player* player, ObjectGuid, uint8, BattlegroundTypeId, uint8, uint8,
+                                     GroupJoinBattlegroundResult& err) override
+    {
+        return Admit(player, err);
+    }
+
+    bool OnPlayerCanJoinLfg(Player* player, uint8, std::set<uint32>&, std::string const&) override
+    {
+        return !GroupHasCriminal(player);
+    }
+
+private:
+    static bool Admit(Player* player, GroupJoinBattlegroundResult& err)
+    {
+        if (!GroupHasCriminal(player))
+            return true;
+        err = ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
+        return false;
+    }
+};
 }
 
 void AddSC_AscensionMercenaryCriminal()
@@ -217,4 +303,5 @@ void AddSC_AscensionMercenaryCriminal()
     new ascension_mercenary_criminal_outlaw();
     new ascension_mercenary_criminal_no_retreat_spells();
     new ascension_mercenary_criminal_no_retreat();
+    new ascension_mercenary_criminal_outcast();
 }

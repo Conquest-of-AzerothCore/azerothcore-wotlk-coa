@@ -1,0 +1,347 @@
+{
+  "schema": 1,
+  "name": "Criminal: Blood On Your Hands cancels and refuses trades and takes its bearer out of every queue (#9132)",
+  "contract": [
+    "Issue #9132. The 9930873 tooltip says its bearer cannot trade with other players while active, and the PR",
+    "author's ruling (2026-11-25) removes the player from battleground and Dungeon Finder queues as soon as the",
+    "debuff lands. An open trade is cancelled for both sides (SMSG_TRADE_STATUS 3), no trade request to or from",
+    "the Criminal arrives, a queued player gets a Warsong Gulch STATUS_NONE status and leaves the Dungeon Finder",
+    "queue, and rejoining either queue is refused while Criminal lasts."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "trader",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "other",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "queuer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "trader",
+      "metric": "server_packets",
+      "opcode": 288,
+      "save_as": "trader_open"
+    },
+    {
+      "action": "snapshot",
+      "actor": "other",
+      "metric": "server_packets",
+      "opcode": 288,
+      "save_as": "other_open"
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: two law-abiding Humans start a trade (CMSG_INITIATE_TRADE)",
+      "actor": "trader",
+      "opcode": 278,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "other"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the request reaches the other Human",
+      "actor": "other",
+      "metric": "server_packet_u32",
+      "opcode": 288,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "label": "The trading Human becomes a Criminal",
+      "actor": "trader",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the open trade is cancelled for the Criminal",
+      "actor": "trader",
+      "metric": "server_packet_u32",
+      "opcode": 288,
+      "index": 0,
+      "equals": 3,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and for the other Human",
+      "actor": "other",
+      "metric": "server_packet_u32",
+      "opcode": 288,
+      "index": 0,
+      "equals": 3
+    },
+    {
+      "action": "snapshot",
+      "actor": "other",
+      "metric": "server_packets",
+      "opcode": 288,
+      "save_as": "other_from_criminal"
+    },
+    {
+      "action": "client_packet",
+      "label": "The Criminal asks to trade",
+      "actor": "trader",
+      "opcode": 278,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "other"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong trade request time to arrive",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Criminal cannot start a trade",
+      "actor": "other",
+      "metric": "server_packets",
+      "opcode": 288,
+      "relative_to": "other_from_criminal",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "trader",
+      "metric": "server_packets",
+      "opcode": 288,
+      "save_as": "criminal_from_other"
+    },
+    {
+      "action": "client_packet",
+      "label": "The other Human asks the Criminal to trade",
+      "actor": "other",
+      "opcode": 278,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "trader"
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong trade request time to arrive",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nobody can start a trade with a Criminal",
+      "actor": "trader",
+      "metric": "server_packets",
+      "opcode": 288,
+      "relative_to": "criminal_from_other",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "queuer",
+      "metric": "server_packets",
+      "opcode": 724,
+      "save_as": "bg_status"
+    },
+    {
+      "action": "client_packet",
+      "label": "A Human joins the Warsong Gulch queue (CMSG_BATTLEMASTER_JOIN)",
+      "actor": "queuer",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Human is told it is queued",
+      "actor": "queuer",
+      "metric": "server_packets",
+      "opcode": 724,
+      "relative_to": "bg_status",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the status names a battleground",
+      "actor": "queuer",
+      "metric": "server_packet_u32",
+      "opcode": 724,
+      "index": 1,
+      "min": 1
+    },
+    {
+      "action": "lfg_join",
+      "label": "The Human also queues for a random dungeon",
+      "actor": "queuer",
+      "dungeons": [
+        258
+      ],
+      "roles": 8
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Human is in the Dungeon Finder queue",
+      "actor": "queuer",
+      "metric": "lfg_state",
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "actor": "queuer",
+      "metric": "server_packets",
+      "opcode": 724,
+      "save_as": "bg_left"
+    },
+    {
+      "action": "set_aura",
+      "label": "The queued Human becomes a Criminal",
+      "actor": "queuer",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Criminal is taken out of the Warsong Gulch queue",
+      "actor": "queuer",
+      "metric": "server_packets",
+      "opcode": 724,
+      "relative_to": "bg_left",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with a status naming no battleground (STATUS_NONE)",
+      "actor": "queuer",
+      "metric": "server_packet_u32",
+      "opcode": 724,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and out of the Dungeon Finder queue",
+      "actor": "queuer",
+      "metric": "lfg_state",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "queuer",
+      "metric": "server_packets",
+      "opcode": 744,
+      "save_as": "bg_refused"
+    },
+    {
+      "action": "client_packet",
+      "label": "The Criminal tries to queue for Warsong Gulch again",
+      "actor": "queuer",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the join is refused (SMSG_GROUP_JOINED_BATTLEGROUND)",
+      "actor": "queuer",
+      "metric": "server_packets",
+      "opcode": 744,
+      "relative_to": "bg_refused",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "with ERR_GROUP_JOIN_BATTLEGROUND_FAIL",
+      "actor": "queuer",
+      "metric": "server_packet_u32",
+      "opcode": 744,
+      "index": 0,
+      "equals": 0
+    },
+    {
+      "action": "lfg_join",
+      "label": "The Criminal tries the Dungeon Finder again",
+      "actor": "queuer",
+      "dungeons": [
+        258
+      ],
+      "roles": 8
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong queue time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a Criminal cannot queue for a dungeon",
+      "actor": "queuer",
+      "metric": "lfg_state",
+      "equals": 0
+    }
+  ]
+}
