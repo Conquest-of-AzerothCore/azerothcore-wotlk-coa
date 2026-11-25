@@ -10,7 +10,7 @@
     "Rune of Descension Pouch (12,500) 509872 pays 12500 Rune of Descension 375250: one row with that count.",
     "The Ethereal Tool Dispenser 8263501 with a Runed Arcanite Rod 16207 becomes Ethereal Tool Dispenser I 8263502: one reward row with the old dispenser as cost item and source 9 (tool dispenser).",
     "Buying the Necromancer Class Bundle 2615021 through the custom store (0x06BB) with a Conquest of Azeroth Class Bundle 2499003 writes one store_buy row with the bundle token as cost and source 11 (class bundle store).",
-    "Reaching 150 Callboard points with four elite Callboard quests (18034, 18036, 18104, 18109: 25 each) and the world boss quest 170015 (50) pays an unequipped level 60 character the Adventurer's Cache 1397886: one reward row with source 7 (Call Board).",
+    "Reaching 150 Callboard points pays an unequipped level 60 character the Adventurer's Cache 1397886: one reward row with source 7 (Call Board). The points come from five Callboard quests of five different contracts, so each contract is used once and the daily contract limit (CoA.CallboardContracts.DailyCompletions = 1, missed days banked until the weekly reset) never refuses one, whatever the weekday: 18034 (25), 18036 (25), 18018 (20), Duel! 80651 (20) and Heroic Dungeon Diving 81245 (15), plus the world boss quest 170015 (50): 155 points.",
     "With full bags the Callboard Cache's gear piece is mailed: its cache_open row is written in the mail's transaction, so it exists before any character save."
   ],
   "timeout_ms": 120000,
@@ -291,22 +291,32 @@
     {
       "action": "prepare_quest",
       "actor": "points",
-      "quest": 18104
+      "quest": 18018
     },
     {
       "action": "reward_quest",
       "actor": "points",
-      "quest": 18104
+      "quest": 18018
     },
     {
       "action": "prepare_quest",
       "actor": "points",
-      "quest": 18109
+      "quest": 80651
     },
     {
       "action": "reward_quest",
       "actor": "points",
-      "quest": 18109
+      "quest": 80651
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "points",
+      "quest": 81245
+    },
+    {
+      "action": "reward_quest",
+      "actor": "points",
+      "quest": 81245
     },
     {
       "action": "prepare_quest",
@@ -320,7 +330,7 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: 150 points pay the Adventurer's Cache",
+      "label": "CONTROL: 155 points (150 or more) pay the Adventurer's Cache",
       "actor": "points",
       "metric": "item_count",
       "item": 1397886,
