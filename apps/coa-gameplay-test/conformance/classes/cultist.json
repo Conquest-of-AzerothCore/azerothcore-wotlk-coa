@@ -47879,6 +47879,63 @@
       "wait_ms": 200,
       "expire_ms": 3000,
       "observe_source": "Spell.dbc 706926 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 and AscensionCultist.cpp:238-255 filter Allies(player, player, 40) by ally->HasAura(804153, player->GetGUID()), sort ascending by health pct, and heal allies.front() via 500773 for CalculatePct(damage, 50). Proves reach on grouped allies, lowest-health selection among >=2 Black Blood allies (paired with reverse arm swapping ally/ally2 health), and Black Blood gating against lower-health ally3 (10% HP, no 804153). Three main-hand swings (Heretic staff 3300 ms -> 9900 ms + 200 ms < 12000 ms 804153 duration), regeneration disabled: 0 heals before learning 706926, 2..5 heals on ally2 (30% HP) at ratio 0.50 +- 0.01, 0 heals on ally (70% HP), ally3 (10% HP, no 804153), and caster. Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+    },
+    {
+      "spell": 561035,
+      "name": "Teachings of Mythrax (Presence of N'Zoth duration 8s -> 10s)",
+      "kind": "last_application_expiry",
+      "variant": "nzoth_duration",
+      "label_suffix": "nzoth_duration",
+      "quote": "Increases the duration of Presence of N'Zoth and Presence of Y'Shaarj by $s1%.",
+      "gate_spell": 561035,
+      "trigger_spell": 92559,
+      "aura": 500707,
+      "control_expected_ms": 8000,
+      "expected_ms": 10000,
+      "control_window_ms": 10000,
+      "window_ms": 12500,
+      "poll_ms": 50,
+      "caster": true,
+      "base_learn": [
+        803037
+      ],
+      "base_casts": [
+        803037
+      ],
+      "feed": {
+        "every_ms": 1700,
+        "proc_spell": 803037
+      },
+      "observe_source": "Spell.dbc 561035 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 24 + DieSides 1 = +25% ($s1), EffectSpellClassMask[0] 134217728 (SpellFamilyName 31). Presence of N'Zoth 803037 (active stance, ProcChance 20) triggers Eldritch Tentacle 500707 (SpellFamilyFlags[0] 134217728, DurationIndex 31 = 8000 ms, SpellDuration.dbc) on caster with ModifiedDuration(player, 500707) (AscensionCultistEvents.cpp:27-33,254-260): 8000 ms base (control) -> 10000 ms (+25% with 561035). Two-duration rolled-feed contrast (ADR 1308) casts 92559 Void Zone (0 ms, instant damage, no DoT) up to 38 times/arm (0.083% pair union bound cap risk) with 803037 active in both arms, proving 500707 expires inside 8000 +- 400 ms before learning 561035 and inside 10000 +- 500 ms after learning 561035."
+    },
+    {
+      "spell": 561035,
+      "name": "Teachings of Mythrax (Presence of Y'Shaarj duration 12s -> 15s)",
+      "kind": "last_application_expiry",
+      "variant": "yshaarj_duration",
+      "label_suffix": "yshaarj_duration",
+      "quote": "Increases the duration of Presence of N'Zoth and Presence of Y'Shaarj by $s1%.",
+      "gate_spell": 561035,
+      "trigger_spell": 92559,
+      "aura": 805180,
+      "control_expected_ms": 12000,
+      "expected_ms": 15000,
+      "control_window_ms": 14500,
+      "window_ms": 17500,
+      "poll_ms": 50,
+      "caster": false,
+      "base_learn": [
+        803035
+      ],
+      "base_casts": [
+        803035
+      ],
+      "feed": {
+        "every_ms": 1700,
+        "proc_spell": 803035,
+        "stop_target": "dummy"
+      },
+      "observe_source": "Spell.dbc 561035 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 24 + DieSides 1 = +25% ($s1), EffectSpellClassMask[0] 134217728 (SpellFamilyName 31). Presence of Y'Shaarj 803035 (active stance, ProcChance 20) triggers Despoiled Ground 805180 (Effect[0] PERSISTENT_AREA_AURA) on dummy with SPELLVALUE_AURA_DURATION = ModifiedDuration(player, 807632) (807632 SpellFamilyFlags[0] 134217728, DurationIndex 29 = 12000 ms, SpellDuration.dbc; AscensionCultistEvents.cpp:27-33,100-102,249-253; SpellEffects.cpp:2892-2899): 12000 ms base (control) -> 15000 ms (+25% with 561035). Two-duration rolled-feed contrast (ADR 1308) with stop_target='dummy' (ADR 1297) casts 92559 Void Zone up to 38 times/arm (0.083% pair union bound cap risk) with 803035 active in both arms, proving 805180 expires inside 12000 +- 600 ms before learning 561035 and inside 15000 +- 750 ms after learning 561035."
     }
   ],
   "player_observations": [],

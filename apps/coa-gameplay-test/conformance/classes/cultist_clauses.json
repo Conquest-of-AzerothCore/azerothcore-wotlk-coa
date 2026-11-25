@@ -2398,22 +2398,10 @@
     "spell": 561035,
     "clause": "Increases the duration of Presence of N'Zoth and Presence of Y'Shaarj by $s1%.",
     "labels": [
-      "561035 effect_value e0 #0"
+      "561035 behaviour_metric_delta nzoth_duration",
+      "561035 behaviour_metric_delta yshaarj_duration"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind proves the +25% duration that Teachings of Mythrax 561035 adds to Presence of N'Zoth 803037 (8000 -> 10000 ms on caster 500707 / summon 500464) and Presence of Y'Shaarj 803035 (12000 -> 15000 ms on target 805180). Re-tried with last_application_expiry feed.stop_target='dummy' (ADR 1297): generation still refuses with '561035 last_application_expiry feed needs a gate spell 561035 with a proc chance between 0 and 100%'. Remaining gap beyond stop_target: (1) 561035 (ProcChance 100, ADD_PCT_MODIFIER BP 24) does not roll the proc \u2014 the active Presence stance (803035/803037, ProcChance 20, must be cast as an active aura on the caster in both arms) rolls it, so feed sizing needs a separate proc_spell / active stance beside the learned modifier 561035; and (2) 561035 extends an existing base duration rather than gating 0 -> 1 aura application, whereas last_application_expiry's control arm alerts on any application without the gate. Needs a two-duration rolled-feed contrast comparing base duration (without 561035) against +25% duration (with 561035).",
-      "attempts": [
-        {
-          "agent": "cu-h3c",
-          "report": ".agents/plans/cu-h3c/report.md"
-        },
-        {
-          "agent": "cu-tb1",
-          "report": ".agents/plans/cu-tb1/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 561335,
