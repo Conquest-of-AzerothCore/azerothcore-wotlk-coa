@@ -29,6 +29,10 @@ ALLY_CASTS_KEY = 'value_ally_casts'
 HONOUR_MIN_RANGE_KEY = 'honour_min_range'
 BASE_MANA_POWER_COST_KEY = 'base_mana_power_cost'
 BASE_HEALTH_KEY = 'base_health'
+PERCENT_POWER_COST_CONTRACT = (
+    ' Percentage power_cost multiplies ManaCostPercentage by server create mana/health from the class file '
+    '(the same server table SpellInfo::CalcPowerCost reads), proving the percentage is applied in '
+    'CalcPowerCost rather than that the base mana/health table value is right or that power was spent in a cast.')
 ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
@@ -875,12 +879,16 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                GENERIC + 'tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")')
 
     cast_steps: list[dict] = []
+    percent_cost_checked = False
     if not facts.passive:
         label = f'{rank_id} power_cost'
         measured.append(measurement(label, CASTER, 'spell_power_cost', spell=rank_id))
-        expectations.append(power_cost_expectation(label, spell.spell_id, rank_id, facts,
-                                                   base_mana_for_power_cost(class_file),
-                                                   base_health_for_power_cost(class_file)))
+        power_cost = power_cost_expectation(label, spell.spell_id, rank_id, facts,
+                                            base_mana_for_power_cost(class_file),
+                                            base_health_for_power_cost(class_file))
+        expectations.append(power_cost)
+        percent_cost_checked = (not facts.mana_cost_per_level and bool(facts.mana_cost_percentage)
+                                and not power_cost.rule.startswith(UNREADABLE))
         if facts.recast_ms > 0:
             label = f'{rank_id} cooldown_ms'
             after_cast.append(measurement(label, CASTER, 'cooldown_ms', spell=rank_id))
@@ -934,7 +942,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spell.name} {rank_id}',
-        'contract': 'No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.',
+        'contract': ('No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.'
+                     + (PERCENT_POWER_COST_CONTRACT if percent_cost_checked else '')),
         'players': [player_fixture(class_file)],
         'steps': learn + sampled + cast_steps + after_cast + ally_grant_proofs}
     summon_target = summon_reads and is_hostile(facts_of(records, summon_carrier['summon']))

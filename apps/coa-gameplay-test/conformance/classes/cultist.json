@@ -48963,11 +48963,11 @@
   "base_mana": {
     "power": 0,
     "value": 1512,
-    "source": "player_class_stats class 25 level 60 BaseMana 1512, read in the world database of the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable = 0); set before every cast of a scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
+    "source": "Server create mana (GetCreateMana()): player_class_stats class 25 level 60 BaseMana 1512 in the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable = 0; Paladin fallback compatibility curve, vs 1814 in ascension_class_stats). Under base_mana_power_cost, proves ManaCostPercentage is applied in SpellInfo::CalcPowerCost, not that the base mana table value is right or that mana was spent in a cast."
   },
   "base_health": {
     "value": 1418,
-    "source": "player_class_stats class 25 level 60 BaseHP 1418 (rev_20260903_01_live_class_baseline.sql level 1 BaseHP 65 + player_class_stats.sql fallback_class 2 level 60 BaseHP 1381 - level 1 BaseHP 28 via rev_20260912_00_custom_class_stat_progression.sql, CoA.ClassLevelSixtyStats.Enable = 0; confirmed by level-60 max health 2278 minus 860 Stamina bonus = 1418)"
+    "source": "Server create health (GetCreateHealth()): player_class_stats class 25 level 60 BaseHP 1418 (rev_20260903_01_live_class_baseline.sql level 1 BaseHP 65 + player_class_stats.sql fallback_class 2 level 60 BaseHP 1381 - level 1 BaseHP 28 via rev_20260912_00_custom_class_stat_progression.sql, CoA.ClassLevelSixtyStats.Enable = 0; vs 3502 in ascension_class_stats; confirmed by L60 max health 2278 - 860 Stamina bonus = 1418). Under base_mana_power_cost, proves ManaCostPercentage is applied in SpellInfo::CalcPowerCost, not that the base health table value is right or that health was spent in a cast."
   },
   "value_ally_casts": [
     {

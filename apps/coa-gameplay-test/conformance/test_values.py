@@ -1196,23 +1196,28 @@ class BaseManaPowerCostTest(unittest.TestCase):
         with_opt = {**without, BASE_MANA_POWER_COST_KEY: True}
         with_health = {**with_opt, BASE_HEALTH_KEY: {'value': 1418}}
         without_opt_with_health = {**without, BASE_HEALTH_KEY: {'value': 1418}}
-        _, exp_plain, _ = value_scenario(without, self.dreadfall, DREADFALL)
-        _, exp_opt, _ = value_scenario(with_opt, self.dreadfall, DREADFALL)
+        sc_plain, exp_plain, _ = value_scenario(without, self.dreadfall, DREADFALL)
+        sc_opt, exp_opt, _ = value_scenario(with_opt, self.dreadfall, DREADFALL)
         pc_plain = next(item for item in exp_plain if item.check == 'power_cost')
         pc_opt = next(item for item in exp_opt if item.check == 'power_cost')
         self.assertTrue(pc_plain.rule.startswith(UNREADABLE))
+        self.assertNotIn('server create mana/health', sc_plain['contract'])
         self.assertEqual(pc_opt.displayed, '181')
         self.assertEqual(pc_opt.rule, 'ManaCost 0 + 12% of base_mana 1512 divisor 1')
-        _, exp_health_no_key, _ = value_scenario(with_opt, self.voidborne, VOIDBORNE)
+        self.assertIn('server create mana/health', sc_opt['contract'])
+        self.assertIn('CalcPowerCost', sc_opt['contract'])
+        sc_health_no_key, exp_health_no_key, _ = value_scenario(with_opt, self.voidborne, VOIDBORNE)
         pc_health_no_key = next(item for item in exp_health_no_key if item.check == 'power_cost')
         self.assertTrue(pc_health_no_key.rule.startswith(UNREADABLE))
+        self.assertNotIn('server create mana/health', sc_health_no_key['contract'])
         _, exp_health_no_opt, _ = value_scenario(without_opt_with_health, self.voidborne, VOIDBORNE)
         pc_health_no_opt = next(item for item in exp_health_no_opt if item.check == 'power_cost')
         self.assertTrue(pc_health_no_opt.rule.startswith(UNREADABLE))
-        _, exp_health, _ = value_scenario(with_health, self.voidborne, VOIDBORNE)
+        sc_health, exp_health, _ = value_scenario(with_health, self.voidborne, VOIDBORNE)
         pc_health = next(item for item in exp_health if item.check == 'power_cost')
         self.assertEqual(pc_health.displayed, '141')
         self.assertEqual(pc_health.rule, 'ManaCost 0 + 10% of base_health 1418 divisor 1')
+        self.assertIn('server create mana/health', sc_health['contract'])
 
     def test_invalid_base_mana_power_cost_config_is_refused(self):
         from values import (BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_health_for_power_cost,
