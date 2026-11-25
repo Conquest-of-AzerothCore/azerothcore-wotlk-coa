@@ -1,15 +1,16 @@
 {
   "schema": 1,
-  "name": "Mercenary for Hire!: a first strike on a same-faction innocent gives Criminal for 2, a kill for 8 minutes",
+  "name": "Mercenary for Hire!: a first strike on a same-faction innocent gives Criminal for 3, a kill for 8 minutes",
   "contract": [
-    "Issue #9132: a Mercenary who killed their own faction got no visible debuff. Mercenary for Hire! 9930874 used",
-    "to cast 9930862 Criminal - Visual, an empty aura without an icon; 9930873 Criminal: Blood On Your Hands is the",
-    "visible debuff and triggers that visual itself. The PR author's ruling (2026-11-25): hitting a non-Mercenary",
-    "player who did not attack first gives 2 minutes, killing one gives 8 minutes, and Criminal time never exceeds",
-    "8 minutes; a further hit tops the timer up to 2 minutes when less is left. The tooltip names the Mercenary's",
-    "own faction, so a Horde War Mode player hit by an Alliance Mercenary gives nothing. Two War Mode Humans and a",
-    "High-Risk Human Mercenary pick their rulesets in Stormwind and fight in Elwynn Forest with a War Mode Orc.",
-    "Dodge and parry are zeroed on the victims so every timed hit lands; all victims stand in front of the Mercenary."
+    "Issue #9132: a Mercenary who killed their own faction got no visible debuff. Mercenary for Hire! 9930874",
+    "used to cast 9930862 Criminal - Visual, an empty aura without an icon; 9930873 Criminal: Blood On Your Hands",
+    "is the visible debuff and triggers that visual itself. The PR author's rulings (2026-11-25, the hit duration",
+    "after reviewing original Ascension footage): hitting a non-Mercenary player who did not attack first gives 3",
+    "minutes, killing one gives 8 minutes, and Criminal time never exceeds 8 minutes; a further hit tops the",
+    "timer up to 3 minutes when less is left. The tooltip names the Mercenary's own faction, so a Horde War Mode",
+    "player hit by an Alliance Mercenary gives nothing. Two War Mode Humans and a High-Risk Human Mercenary pick",
+    "their rulesets in Stormwind and fight in Elwynn Forest with a War Mode Orc. Dodge and parry are zeroed on",
+    "the victims so every timed hit lands; all victims stand in front of the Mercenary."
   ],
   "timeout_ms": 240000,
   "players": [
@@ -291,12 +292,12 @@
     },
     {
       "action": "assert",
-      "label": "A hit gives 2 minutes of Criminal",
+      "label": "A hit gives 3 minutes of Criminal",
       "actor": "mercenary",
       "metric": "aura_duration_ms",
       "spell": 9930873,
-      "min": 115000,
-      "max": 120000
+      "min": 175000,
+      "max": 180000
     },
     {
       "action": "wait",
@@ -309,8 +310,8 @@
       "actor": "mercenary",
       "metric": "aura_duration_ms",
       "spell": 9930873,
-      "min": 85000,
-      "max": 91000
+      "min": 145000,
+      "max": 151000
     },
     {
       "action": "snapshot",
@@ -339,12 +340,12 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: a further hit tops the timer up to 2 minutes without adding to it",
+      "label": "DISCRIMINATING: a further hit tops the timer up to 3 minutes without adding to it",
       "actor": "mercenary",
       "metric": "aura_duration_ms",
       "spell": 9930873,
-      "min": 110000,
-      "max": 120000
+      "min": 170000,
+      "max": 180000
     },
     {
       "action": "set_health",

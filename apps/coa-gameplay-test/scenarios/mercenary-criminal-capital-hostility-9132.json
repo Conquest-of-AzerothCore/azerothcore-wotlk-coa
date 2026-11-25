@@ -2,15 +2,15 @@
   "schema": 1,
   "name": "Criminal: Blood On Your Hands makes the player's own capital factions hostile until it ends (#9132)",
   "contract": [
-    "Issue #9132 and the PR author's ruling (2026-11-25): guards and friendly NPCs are hostile only to a player with",
-    "9930873 Criminal: Blood On Your Hands, whose tooltip says the player is attacked by their own faction. While",
-    "it lasts the server forces hostile reactions toward the Faction.dbc reputation factions whose parent is the",
-    "player's team: Stormwind, Ironforge, Darnassus, Gnomeregan Exiles and Exodar for the Alliance. A Stormwind",
-    "City Guard fixture (entry 68, faction template 11) turns hostile in both directions, the client is sent five",
-    "forced reactions, hostility survives a relog, and removal or the natural expiry of a Mercenary's 2 minute",
-    "Criminal makes the guard friendly again."
+    "Issue #9132 and the PR author's ruling (2026-11-25): guards and friendly NPCs are hostile only to a player",
+    "with 9930873 Criminal: Blood On Your Hands, whose tooltip says the player is attacked by their own faction.",
+    "While it lasts the server forces hostile reactions toward the Faction.dbc reputation factions whose parent",
+    "is the player's team: Stormwind, Ironforge, Darnassus, Gnomeregan Exiles and Exodar for the Alliance. A",
+    "Stormwind City Guard fixture (entry 68, faction template 11) turns hostile in both directions, the client is",
+    "sent five forced reactions, hostility survives a relog, and removal or the natural expiry of a Mercenary's 3",
+    "minute Criminal makes the guard friendly again."
   ],
-  "timeout_ms": 300000,
+  "timeout_ms": 360000,
   "players": [
     {
       "id": "human",
@@ -280,7 +280,7 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the Mercenary becomes a Criminal for 2 minutes",
+      "label": "SETUP: the Mercenary becomes a Criminal for 3 minutes",
       "actor": "mercenary",
       "metric": "aura",
       "spell": 9930873,
@@ -302,8 +302,8 @@
     },
     {
       "action": "wait",
-      "label": "Let the 2 minutes of Criminal run out",
-      "ms": 125000
+      "label": "Let the 3 minutes of Criminal run out",
+      "ms": 185000
     },
     {
       "action": "assert",

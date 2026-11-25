@@ -22,7 +22,7 @@
 namespace
 {
 constexpr uint32 SPELL_CRIMINAL = 9930873;
-constexpr int32 CRIMINAL_HIT_DURATION = 2 * MINUTE * IN_MILLISECONDS;
+constexpr int32 CRIMINAL_HIT_DURATION = 3 * MINUTE * IN_MILLISECONDS;
 constexpr int32 CRIMINAL_KILL_DURATION = 8 * MINUTE * IN_MILLISECONDS;
 constexpr char const* AggressionKey = "ascension_mercenary_criminal_aggression";
 
