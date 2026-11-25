@@ -189,6 +189,20 @@ void LeaveBattlegroundQueue(Player* player, uint8 slot, BattlegroundQueueTypeId 
         sBattlegroundMgr->ScheduleQueueUpdate(0, 0, queueType, type, bracket->GetBracketId());
 }
 
+void LeaveDungeonFinder(Player* player)
+{
+    switch (sLFGMgr->GetState(player->GetGUID()))
+    {
+        case lfg::LFG_STATE_QUEUED:
+        case lfg::LFG_STATE_ROLECHECK:
+        case lfg::LFG_STATE_PROPOSAL:
+            sLFGMgr->LeaveLfg(player->GetGUID());
+            break;
+        default:
+            break;
+    }
+}
+
 void LeaveEveryQueue(Player* player)
 {
     for (uint8 slot = 0; slot < PLAYER_MAX_BATTLEGROUND_QUEUES; ++slot)
@@ -196,8 +210,7 @@ void LeaveEveryQueue(Player* player)
             queue != BATTLEGROUND_QUEUE_NONE)
             LeaveBattlegroundQueue(player, slot, queue);
 
-    Group* group = player->GetGroup();
-    sLFGMgr->LeaveAllLfgQueues(player->GetGUID(), true, group ? group->GetGUID() : ObjectGuid::Empty);
+    LeaveDungeonFinder(player);
 }
 
 void TurnCriminal(Player* player)

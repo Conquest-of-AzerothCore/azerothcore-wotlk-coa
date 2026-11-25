@@ -6,8 +6,9 @@
     "author's ruling (2026-11-25) removes the player from battleground and Dungeon Finder queues as soon as the",
     "debuff lands. An open trade is cancelled for both sides (SMSG_TRADE_STATUS 3), no trade request to or from",
     "the Criminal arrives, a queued player gets a Warsong Gulch STATUS_NONE status and leaves the Dungeon Finder",
-    "queue, and rejoining either queue is refused while Criminal lasts.",
-    "The core refuses a Dungeon Finder join while queued for a battleground, so a second Human uses it."
+    "queue, and rejoining either queue is refused while Criminal lasts. The core refuses a Dungeon Finder join",
+    "while queued for a battleground, so a second Human uses it. A group member who turns Criminal during the",
+    "Dungeon Finder role check ends it for the whole group."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -31,6 +32,18 @@
     },
     {
       "id": "seeker",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "member",
       "race": 1,
       "class": 1,
       "level": 60
@@ -363,6 +376,50 @@
       "action": "assert",
       "label": "DISCRIMINATING: a Criminal cannot queue for a dungeon",
       "actor": "seeker",
+      "metric": "lfg_state",
+      "equals": 0
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "member"
+    },
+    {
+      "action": "lfg_join",
+      "label": "A group leader queues the group for a random dungeon",
+      "actor": "leader",
+      "dungeons": [
+        258
+      ],
+      "roles": 9
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the member is asked to pick a role",
+      "actor": "member",
+      "metric": "lfg_state",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "The member becomes a Criminal during the role check",
+      "actor": "member",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the role check ends for the member",
+      "actor": "member",
+      "metric": "lfg_state",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and for the leader, so the group is not queued",
+      "actor": "leader",
       "metric": "lfg_state",
       "equals": 0
     }
