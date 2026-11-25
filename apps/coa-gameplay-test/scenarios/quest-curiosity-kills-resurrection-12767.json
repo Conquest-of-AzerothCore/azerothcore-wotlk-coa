@@ -50,10 +50,12 @@
       "complete": false
     },
     {
-      "action": "add_item",
-      "label": "SETUP: hold the Bottle of Poison (355220)",
+      "action": "assert",
+      "label": "SETUP: accepting Curiosity Kills grants the Bottle of Poison (355220)",
       "actor": "p",
-      "item": 355220
+      "metric": "item_count",
+      "item": 355220,
+      "equals": 1
     },
     {
       "action": "use_item",
