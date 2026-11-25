@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Stockade: Dextren Ward's Bladestorm hits its 4 yd circle and he roars after it (#7318)",
+  "contract": "#7318: Dextren Ward's (1663) Bladestorm (2102554) triggers Whirlwind 2102555 every second with a 2 yd radius (radius index 7), while its visual draws a circle of about 4 yd (tester screenshot). For a creature caster the search adds no hitbox, so players inside the circle took no damage. coa_dungeon_spell_radius (new, read by CoADungeonBossSpellReach) sets the whirlwind to 4 yd (radius index 26). His Bellowing Roar (2102761) used the same 5-8 s / 20-22 s timer as Bladestorm, so the fear landed during the spin; it now follows each Bladestorm 6.5 s after it starts (the spin lasts 6 s).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Dextren's Bladestorm whirlwind (2102555) hits 4 yards around him",
+      "actor": "p",
+      "metric": "spell_effect_radius",
+      "spell": 2102555,
+      "effect": 0,
+      "equals": 4
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 34,
+      "x": 174.7,
+      "y": 93.9,
+      "z": -33.9
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Stormwind Stockade on Heroic",
+      "actor": "p",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 1663,
+      "as": "dextren",
+      "distance": 3
+    },
+    {
+      "action": "attack",
+      "actor": "p",
+      "target": "dextren"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dextren starts Bladestorm 5-8 s into the fight",
+      "actor": "dextren",
+      "metric": "spell_cast_count",
+      "spell": 2102554,
+      "equals": 1,
+      "within_ms": 9000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no Bellowing Roar while he spins",
+      "actor": "dextren",
+      "metric": "spell_cast_count",
+      "spell": 2102761,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "still no Bellowing Roar 4.5 s into the Bladestorm",
+      "actor": "dextren",
+      "metric": "spell_cast_count",
+      "spell": 2102761,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bellowing Roar once the Bladestorm is over",
+      "actor": "dextren",
+      "metric": "spell_cast_count",
+      "spell": 2102761,
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}

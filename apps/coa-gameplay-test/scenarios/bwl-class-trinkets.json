@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Blackwing Lair trinkets use CoA attacks and specialization roles",
+  "contract": [
+    "Normal Arcane Infused Gem arms on item use. A Tinker Scrap Shot consumes it and hits both nearby enemies.",
+    "Rune of Metamorphosis works without a shapeshift on four raid difficulties and chooses the active spec role.",
+    "The caster starts without spell power stacks, gains one on a direct hit, and loses it when the rune expires."
+  ],
+  "timeout_ms": 100000,
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 60, "ranged_hit_rating": 10000, "spell_hit_rating": 10000},
+    {"id": "ranger", "race": 1, "class": 21, "level": 60},
+    {"id": "pyro", "race": 1, "class": 24, "level": 60, "spell_hit_rating": 10000},
+    {"id": "healer", "race": 1, "class": 20, "level": 60},
+    {"id": "tank", "race": 1, "class": 20, "level": 60}
+  ],
+  "creatures": [
+    {
+      "id": "shot_target",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15,
+      "faction": 7
+    },
+    {"id": "nearby", "owner": "tinker", "entry": 36, "level": 60, "health": 1000000, "distance": 18, "faction": 7},
+    {
+      "id": "spell_target",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 15,
+      "faction": 7
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 4000},
+    {"action": "learn", "actor": "tinker", "spell": 500549},
+    {"action": "specialization", "actor": "ranger", "id": 28},
+    {"action": "specialization", "actor": "pyro", "id": 38},
+    {"action": "specialization", "actor": "healer", "id": 25},
+    {"action": "specialization", "actor": "tank", "id": 99},
+    {"action": "learn", "actor": "pyro", "spell": 803950},
+    {"action": "add_item", "actor": "tinker", "item": 19336},
+    {"action": "equip", "actor": "tinker", "item": 19336, "slot": 12},
+    {"action": "add_item", "actor": "ranger", "item": 19340},
+    {"action": "equip", "actor": "ranger", "item": 19340, "slot": 12},
+    {"action": "add_item", "actor": "pyro", "item": 319340},
+    {"action": "equip", "actor": "pyro", "item": 319340, "slot": 12},
+    {"action": "add_item", "actor": "healer", "item": 1319340},
+    {"action": "equip", "actor": "healer", "item": 1319340, "slot": 12},
+    {"action": "add_item", "actor": "tank", "item": 219340},
+    {"action": "equip", "actor": "tank", "item": 219340, "slot": 12},
+    {"action": "wait", "label": "Wait for trinket equip cooldowns", "ms": 31000},
+    {"action": "use_item", "actor": "tinker", "item": 19336, "spell": 909584},
+    {"action": "assert", "actor": "tinker", "metric": "aura", "spell": 909584, "equals": 1, "within_ms": 2000},
+    {"action": "cast", "actor": "tinker", "spell": 500549, "target": "shot_target"},
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 909588,
+      "target": "shot_target",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 909588,
+      "target": "nearby",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {"action": "assert", "actor": "tinker", "metric": "aura", "spell": 909584, "equals": 0},
+    {"action": "use_item", "actor": "tank", "item": 219340, "spell": 966348},
+    {"action": "assert", "actor": "tank", "metric": "aura", "spell": 966361, "equals": 1, "within_ms": 2000},
+    {"action": "use_item", "actor": "healer", "item": 1319340, "spell": 966348},
+    {"action": "assert", "actor": "healer", "metric": "aura", "spell": 966353, "equals": 1, "within_ms": 2000},
+    {"action": "use_item", "actor": "ranger", "item": 19340, "spell": 966348},
+    {"action": "assert", "actor": "ranger", "metric": "aura", "spell": 966350, "equals": 1, "within_ms": 2000},
+    {"action": "use_item", "actor": "pyro", "item": 319340, "spell": 966348},
+    {"action": "assert", "actor": "pyro", "metric": "aura", "spell": 966351, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "actor": "pyro", "metric": "aura", "spell": 966352, "equals": 0},
+    {"action": "cast", "actor": "pyro", "spell": 803950, "target": "spell_target"},
+    {"action": "assert", "actor": "pyro", "metric": "aura_stacks", "spell": 966352, "equals": 1, "within_ms": 5000},
+    {"action": "assert", "actor": "pyro", "metric": "aura", "spell": 966351, "equals": 0, "within_ms": 32000},
+    {"action": "assert", "actor": "pyro", "metric": "aura", "spell": 966352, "equals": 0}
+  ]
+}

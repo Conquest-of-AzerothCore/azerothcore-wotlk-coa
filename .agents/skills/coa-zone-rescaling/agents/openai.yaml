@@ -1,0 +1,4 @@
+interface:
+  display_name: "CoA Zone Rescaling"
+  short_description: "Plan repeatable level-60 outdoor zone conversions"
+  default_prompt: "Use $coa-zone-rescaling to plan a level-60 outdoor zone conversion and identify missing inputs."

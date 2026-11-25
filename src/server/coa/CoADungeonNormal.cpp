@@ -3,6 +3,7 @@
  */
 
 #include "CoADungeonNormal.h"
+#include "CoADungeonRescale.h"
 #include "Config.h"
 #include "Creature.h"
 #include "DBCStores.h"
@@ -43,7 +44,7 @@ namespace
     Creature const* NormalDungeonCreature(WorldObject const* object)
     {
         Creature const* creature = object ? object->ToCreature() : nullptr;
-        if (!Enabled || !creature || creature->IsCharmedOwnedByPlayerOrPlayer())
+        if (!Enabled || !creature || DungeonRescale::Owns(creature) || creature->IsCharmedOwnedByPlayerOrPlayer())
             return nullptr;
         Map const* map = creature->FindMap();
         if (!map || !map->IsNonRaidDungeon() || map->GetDifficulty() != DUNGEON_DIFFICULTY_NORMAL)

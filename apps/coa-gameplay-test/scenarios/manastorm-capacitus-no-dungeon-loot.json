@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Manastorm Mechanar: Capacitus drops no dungeon loot",
+  "contract": [
+    "Endgame segment 915 uses the native Mechano-Lord Capacitus spawn at normal dungeon difficulty.",
+    "Manastorm sets its loot mode to zero on registration. The native respawn callback runs BossAI::Reset on the",
+    "next update. After that callback, a direct player kill should still award no ordinary corpse items or gold."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "runner", "race": 5, "class": 23, "level": 60, "security": 2}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "command", "actor": "runner", "command": ".manastorm segment test 915"},
+    {
+      "action": "assert", "actor": "runner", "metric": "private_instance",
+      "equals": 1, "within_ms": 10000
+    },
+    {"action": "set_phase", "actor": "runner", "value": 1},
+    {
+      "action": "assert", "actor": "runner", "metric": "nearby_creature_count",
+      "entry": 19219, "min": 1, "within_ms": 3000
+    },
+    {"action": "wait", "label": "Allow the native boss reset to run", "ms": 1000},
+    {"action": "attack_nearby", "actor": "runner", "entry": 19219, "kill": true},
+    {"action": "loot_nearby", "actor": "runner", "entry": 19219},
+    {"action": "assert", "actor": "runner", "metric": "loot_count", "equals": 0},
+    {"action": "assert", "actor": "runner", "metric": "loot_gold", "equals": 0}
+  ]
+}

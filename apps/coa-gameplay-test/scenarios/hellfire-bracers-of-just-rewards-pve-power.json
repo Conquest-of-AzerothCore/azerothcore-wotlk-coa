@@ -1,0 +1,29 @@
+{
+  "schema": 1,
+  "name": "Mythic Bracers of Just Rewards contribute their converted PvE Power",
+  "contract": "Mythic Bracers of Just Rewards (10020577) have 20 PvE Power in the Hellfire fixed budget. Equipping the bracers adds 1% creature damage and reduces incoming creature damage by 1%. This checks server combat independently of the client character sheet.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "k", "race": 1, "class": 1, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e", "owner": "k", "entry": 36, "level": 60, "health": 500000, "distance": 15 }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "Without PvE Power the player deals the base damage", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1000 },
+    { "action": "assert", "label": "Without PvE Power the creature deals the base damage", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 1000 },
+    { "action": "set_skill", "actor": "k", "skill": 293, "value": 1, "maximum": 1 },
+    { "action": "add_item", "actor": "k", "item": 10020577, "count": 1 },
+    { "action": "equip", "actor": "k", "item": 10020577, "slot": 8 },
+    { "action": "assert", "label": "PvE Power +20 raises damage dealt to the creature by 1%", "actor": "k", "metric": "script_melee_damage_dealt", "target": "e", "equals": 1010 },
+    { "action": "assert", "label": "PvE Power +20 lowers damage taken from the creature by 1%", "actor": "k", "metric": "script_melee_damage_taken", "target": "e", "equals": 990 }
+  ]
+}

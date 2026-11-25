@@ -1,0 +1,47 @@
+{
+  "schema": 1,
+  "name": "Felstrider's Chaos Rush stacks raise Energy regeneration (#12996)",
+  "contract": [
+    "Felstrider 707513 (Felsworn) tooltips: your Chaos Rush (or Fel Torpedo) now increases your Energy",
+    "regeneration by $525042s1% (10%) for $525042d (5 sec), stacking $525042u (2) times. #12996 reports no",
+    "increase. 525042 is native SPELL_AURA_MOD_POWER_REGEN_PERCENT for Energy with EffectBasePoints 9 and",
+    "DieSides 1, the same aura type that already delivers Demonborn's bonus, and the Felsworn cast hook applies",
+    "it for every non-triggered Chaos Rush. Expected: two Chaos Rush casts leave two stacks worth +10% each, and",
+    "over a 4 second window the talented Felsworn regenerates about 20% more Energy than an untalented control."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "control", "race": 1, "class": 14, "level": 80},
+    {"id": "strider", "race": 1, "class": 14, "level": 80}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "strider", "spell": 707513},
+    {"action": "learn", "actor": "strider", "spell": 500028},
+    {"action": "cast", "label": "First Chaos Rush", "actor": "strider", "spell": 500028},
+    {
+      "action": "assert", "label": "SETUP: the first Chaos Rush is accepted", "actor": "strider",
+      "metric": "cast_failure", "spell": 500028, "equals": 0
+    },
+    {"action": "wait", "label": "Let the dash and the global cooldown finish", "ms": 1600},
+    {"action": "reset_cooldown", "actor": "strider", "spell": 500028},
+    {"action": "cast", "label": "Second Chaos Rush", "actor": "strider", "spell": 500028},
+    {
+      "action": "assert", "label": "#12996: Chaos Rush stacks Felstrider twice", "actor": "strider",
+      "metric": "aura_stacks", "spell": 525042, "equals": 2, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "#12996: each stack is worth +10% Energy regeneration", "actor": "strider",
+      "metric": "aura_amount", "spell": 525042, "effect": 0, "min": 10
+    },
+    {"action": "set_power", "actor": "control", "power": 3, "value": 0},
+    {"action": "set_power", "actor": "strider", "power": 3, "value": 0},
+    {"action": "wait", "label": "Let Energy regenerate while Felstrider lasts", "ms": 4000},
+    {"action": "snapshot", "actor": "control", "metric": "power", "power": 3, "save_as": "control_energy"},
+    {
+      "action": "assert", "label": "#12996: Felstrider regenerates about 20% more Energy", "actor": "strider",
+      "metric": "power", "power": 3, "ratio_to": "control_energy", "min": 1.12, "max": 1.3
+    }
+  ]
+}

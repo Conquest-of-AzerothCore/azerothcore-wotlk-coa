@@ -49,6 +49,7 @@
 #include "SpellScriptLoader.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+#include "zg_coa_leash.h"
 
 #include <list>
 
@@ -135,7 +136,10 @@ namespace
 
     struct boss_venoxis_coa : public BossAI
     {
-        boss_venoxis_coa(Creature* creature) : BossAI(creature, DATA_VENOXIS) { }
+        boss_venoxis_coa(Creature* creature) : BossAI(creature, DATA_VENOXIS)
+        {
+            SetBoundary(coa_zg::LeashFor(DATA_VENOXIS));
+        }
 
         void Reset() override
         {

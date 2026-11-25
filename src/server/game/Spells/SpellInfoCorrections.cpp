@@ -76,6 +76,21 @@ void SpellMgr::LoadSpellInfoCorrections()
 {
     uint32 oldMSTime = getMSTime();
 
+    ApplySpellFix({ 2110641 }, [](SpellInfo* spellInfo)
+    {
+        spellInfo->AttributesEx3 &= ~SPELL_ATTR3_ONLY_ON_PLAYER;
+    });
+
+    // Custom balance: Thunderous +150% -> +50% critical damage.
+    ApplySpellFix({ 804827 }, [](SpellInfo* spellInfo)
+    {
+        if (spellInfo->Effects[EFFECT_0].ApplyAuraName != SPELL_AURA_MOD_CRIT_DAMAGE_BONUS)
+            return;
+
+        spellInfo->Effects[EFFECT_0].BasePoints = 49;
+        spellInfo->Effects[EFFECT_0].DieSides = 1;
+    });
+
     // Arm of Thorim's hostile stun helper needs both mechanic fields for
     // diminishing returns, trinket removal and spell/effect immunity checks.
     ApplySpellFix({ 570339 }, [](SpellInfo* spellInfo)

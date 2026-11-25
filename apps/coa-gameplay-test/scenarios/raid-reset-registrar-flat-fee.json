@@ -1,0 +1,439 @@
+{
+  "schema": 2,
+  "name": "Raid Registrar: one flat fee for personal and bot-raid resets",
+  "contract": [
+    "With CoA.RaidReset.CostGold=10, personal and six-character raid resets each cost exactly 100000 copper.",
+    "Actual Molten Core entry establishes instance bindings. The town NPC clears them through native gossip.",
+    "A repeat request with no remaining raid bindings is free; bot purses are unchanged."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8826.9,
+    "y": 632.397,
+    "z": 93.8
+  },
+  "players": [
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "bot1",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "bot": true
+    },
+    {
+      "id": "bot2",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "bot": true
+    },
+    {
+      "id": "bot3",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "bot": true
+    },
+    {
+      "id": "bot4",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "bot": true
+    },
+    {
+      "id": "bot5",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "bot": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "money",
+      "actor": "leader",
+      "copper": 300000
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 409,
+      "x": 1091.89,
+      "y": -466.985,
+      "z": -105.084,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon",
+      "actor": "leader",
+      "entry": 9990501,
+      "as": "registrar",
+      "distance": 2,
+      "unowned": true
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "leader",
+      "target": "registrar"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "leader",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "gossip_options",
+      "equals": 2,
+      "label": "Reset with a binding requires explicit confirmation"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "leader",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "carried_money",
+      "equals": 200000,
+      "label": "One personal reset costs 10 gold"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "leader",
+      "target": "registrar"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "leader",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "carried_money",
+      "equals": 200000,
+      "label": "An empty repeat request charges nothing"
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "bot1"
+    },
+    {
+      "action": "money",
+      "actor": "bot1",
+      "copper": 500000
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "bot2"
+    },
+    {
+      "action": "money",
+      "actor": "bot2",
+      "copper": 500000
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "bot3"
+    },
+    {
+      "action": "money",
+      "actor": "bot3",
+      "copper": 500000
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "bot4"
+    },
+    {
+      "action": "money",
+      "actor": "bot4",
+      "copper": 500000
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "bot5"
+    },
+    {
+      "action": "money",
+      "actor": "bot5",
+      "copper": 500000
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 409,
+      "x": 1091.89,
+      "y": -466.985,
+      "z": -105.084,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot1",
+      "map": 409,
+      "x": 1091.89,
+      "y": -466.985,
+      "z": -105.084,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot2",
+      "map": 409,
+      "x": 1091.89,
+      "y": -466.985,
+      "z": -105.084,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot3",
+      "map": 409,
+      "x": 1091.89,
+      "y": -466.985,
+      "z": -105.084,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot4",
+      "map": 409,
+      "x": 1091.89,
+      "y": -466.985,
+      "z": -105.084,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot5",
+      "map": 409,
+      "x": 1091.89,
+      "y": -466.985,
+      "z": -105.084,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "leader",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot1",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot2",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot3",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot4",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "teleport",
+      "actor": "bot5",
+      "map": 0,
+      "x": -8826.9,
+      "y": 632.397,
+      "z": 93.8,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "leader",
+      "target": "registrar"
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "gossip_options",
+      "equals": 2,
+      "label": "Raid leaders can choose a bot-raid reset"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "leader",
+      "option": 1
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "gossip_options",
+      "equals": 2
+    },
+    {
+      "action": "gossip_select",
+      "actor": "leader",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "carried_money",
+      "equals": 100000,
+      "label": "The leader pays one 10g fee for all six characters"
+    },
+    {
+      "action": "assert",
+      "actor": "bot1",
+      "metric": "carried_money",
+      "equals": 500000,
+      "label": "Bots are not charged"
+    },
+    {
+      "action": "assert",
+      "actor": "bot2",
+      "metric": "carried_money",
+      "equals": 500000,
+      "label": "Bots are not charged"
+    },
+    {
+      "action": "assert",
+      "actor": "bot3",
+      "metric": "carried_money",
+      "equals": 500000,
+      "label": "Bots are not charged"
+    },
+    {
+      "action": "assert",
+      "actor": "bot4",
+      "metric": "carried_money",
+      "equals": 500000,
+      "label": "Bots are not charged"
+    },
+    {
+      "action": "assert",
+      "actor": "bot5",
+      "metric": "carried_money",
+      "equals": 500000,
+      "label": "Bots are not charged"
+    },
+    {
+      "action": "gossip_hello",
+      "actor": "leader",
+      "target": "registrar"
+    },
+    {
+      "action": "gossip_select",
+      "actor": "leader",
+      "option": 1
+    },
+    {
+      "action": "assert",
+      "actor": "leader",
+      "metric": "carried_money",
+      "equals": 100000,
+      "label": "Empty raid reset requests charge nothing"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "schema": 1,
+  "name": "Path to Ascension: Techbot does not count as a world boss, Azuregos does (#11478)",
+  "contract": "Take Down a World Boss (tutorial 36, achievement 87235) reads 'Slay any World Boss.'. Techbot 6231 has rank 3 since rev_20261008_71_vanilla_dungeon_boss_rank.sql but no boss type flag (type_flags 0x80000000), and stands in Dun Morogh (map 0, spawn 10996). Every world boss (Azuregos 6109/64601, Kazzak 12397/18728, the Nightmare dragons 14887-14890, Doomwalker 17711, the world boss map bosses on maps 880-890) has rank 3 and the boss type flag 4. Killing Techbot in the open world leaves tutorial 36 unverified; killing an unowned Azuregos 6109 on the same map verifies it.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "p", "race": 7, "class": 1, "level": 30 }
+  ],
+  "location": { "map": 0, "x": -4925.46, "y": 827.751, "z": 247.47, "o": 0 },
+  "steps": [
+    { "action": "wait", "label": "Let the player finish logging in", "ms": 2000 },
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "assert", "label": "Take Down a World Boss is not verified before any kill",
+      "actor": "p", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 36, "equals": 0 },
+    { "action": "attack_nearby", "label": "Kill the Techbot world spawn", "actor": "p", "entry": 6231, "kill": true },
+    { "action": "wait", "label": "Let the kill reward run", "ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: killing Techbot does not verify Take Down a World Boss",
+      "actor": "p", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 36, "equals": 0 },
+    { "action": "assert", "label": "and does not award achievement 87235",
+      "actor": "p", "metric": "has_achievement", "achievement": 87235, "equals": 0 },
+    { "action": "summon", "label": "Bring an unowned Azuregos into the open world", "actor": "p", "as": "azuregos",
+      "entry": 6109, "distance": 8, "unowned": true },
+    { "action": "attack_nearby", "label": "Kill Azuregos", "actor": "p", "entry": 6109, "kill": true },
+    { "action": "assert", "label": "Killing a real world boss verifies Take Down a World Boss",
+      "actor": "p", "metric": "player_setting", "source": "core.ascension.tutorial_verified", "index": 36, "equals": 1,
+      "within_ms": 3000 }
+  ]
+}

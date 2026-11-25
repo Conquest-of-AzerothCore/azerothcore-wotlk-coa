@@ -264,7 +264,7 @@ void Map::LoadGridsInRange(Position const& center, float radius)
 bool Map::AddPlayerToMap(Player* player)
 {
     if (IsScriptedPrivateInstance() &&
-        !IsScriptedPrivateMember(player->GetGUID()))
+        !CanEnterScriptedPrivate(player))
     {
         return false;
     }
@@ -740,6 +740,11 @@ struct ResetNotifier
 
 void Map::RemovePlayerFromMap(Player* player, bool remove)
 {
+    // An observer's private state only admits it to this copy. Leaving ends it, so a later
+    // teleport to the same map id takes the ordinary route again.
+    if (player->IsScriptedPrivateObserverOf(GetId(), GetInstanceId()))
+        player->ClearScriptedPrivateInstance();
+
     UpdatePlayerZoneStats(player->GetZoneId(), MAP_INVALID_ZONE);
 
     player->GetThreatMgr().RemoveMeFromThreatLists(); // pussywizard: multithreading crashfix
@@ -2018,14 +2023,24 @@ bool Map::IsScriptedPrivateInstance() const
         !_scriptedPrivateOwner.IsEmpty();
 }
 
+bool Map::CanEnterScriptedPrivate(Player const* player) const
+{
+    if (!player)
+        return false;
+
+    if (IsScriptedPrivateMember(player->GetGUID()))
+        return true;
+
+    return player->IsGameMaster() &&
+        player->IsScriptedPrivateObserverOf(GetId(), GetInstanceId());
+}
+
 Map::EnterState Map::CannotEnter(
     Player* player,
     bool /*loginCheck*/)
 {
     if (IsScriptedPrivateInstance() &&
-        (!player ||
-         !IsScriptedPrivateMember(
-             player->GetGUID())))
+        !CanEnterScriptedPrivate(player))
     {
         return CANNOT_ENTER_INSTANCE_BIND_MISMATCH;
     }
@@ -2111,7 +2126,7 @@ bool InstanceMap::AddPlayerToMap(Player* player)
     if (m_resetAfterUnload) // this instance has been reset, it's not meant to be used anymore
         return false;
 
-    if (IsScriptedPrivateInstance() && !IsScriptedPrivateMember(player->GetGUID()))
+    if (IsScriptedPrivateInstance() && !CanEnterScriptedPrivate(player))
         return false;
 
     if (IsDungeon() && !IsScriptedPrivateInstance())

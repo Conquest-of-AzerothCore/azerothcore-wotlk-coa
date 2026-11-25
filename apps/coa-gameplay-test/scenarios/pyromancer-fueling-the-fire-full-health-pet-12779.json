@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Fueling the Fire erupts when Ember Touch hits a full-health Phoenix (#12779)",
+  "contract": [
+    "#12779, #12781, #12177: Fueling the Fire 806747 reads 'Using Ember Touch on your Roaring Pyre or Phoenix",
+    "will cause them to erupt in flames, healing $806749i allies within $806749a1 yds', with no condition on the",
+    "pet's health. The eruption used to follow only an effective heal, so Ember Touch 800818 on a Phoenix at full",
+    "health healed 0 and nothing erupted, exactly as #12781 describes. The Phoenix is summoned at full health and",
+    "left there, so Ember Touch overheals it completely (asserted: its 800818 heal log shows no effective",
+    "healing); a grouped ally at 1 health beside it must still take a native heal log and effective healing from",
+    "806749. Ember Touch costs one Ember 807533 (ResourceCostRules, class 24). Asserted: before the cast the ally",
+    "has no 806749 heal, and within 3 s after Ember Touch on the full-health Phoenix it has at least one heal log",
+    "and effective healing."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 24,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 12,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "The ally joins the Pyromancer's group",
+      "actor": "p",
+      "target": "ally"
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800796
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 800818
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 806747
+    },
+    {
+      "action": "cast",
+      "label": "Summon the Phoenix",
+      "actor": "p",
+      "spell": 800796,
+      "destination": {
+        "x": -8914.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "label": "The Pyromancer owns one Phoenix",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "The Phoenix settles beside its owner",
+      "ms": 4000
+    },
+    {
+      "action": "set_power",
+      "label": "Ember Touch costs 653 mana",
+      "actor": "p",
+      "value": 3000
+    },
+    {
+      "action": "set_aura",
+      "label": "Ember Touch costs one Ember 807533",
+      "actor": "p",
+      "spell": 807533,
+      "stacks": 1
+    },
+    {
+      "action": "set_health",
+      "label": "The ally is wounded",
+      "actor": "ally",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "Before the cast the ally has no Fueling the Fire heal",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 806749,
+      "target": "ally",
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Ember Touch on the full-health Phoenix",
+      "actor": "p",
+      "spell": 800818,
+      "target_owned_entry": 50258
+    },
+    {
+      "action": "assert",
+      "label": "Ember Touch lands on the Phoenix",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 800818,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The Phoenix was at full health, so Ember Touch healed it for nothing",
+      "actor": "p",
+      "metric": "spell_effective_heal_total",
+      "spell": 800818,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "#12779: the full-health Phoenix erupts and heals the ally",
+      "actor": "p",
+      "metric": "spell_heal_count",
+      "spell": 806749,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "#12779: the ally receives effective healing",
+      "actor": "p",
+      "metric": "spell_effective_heal_total",
+      "spell": 806749,
+      "target": "ally",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -8,7 +8,7 @@
     "Mythic hero and an Ascended hero each fight Hakkar on his altar (he evades off it) and a second Ascended hero",
     "fights Jin'do, each in a fresh instance, all under .cheat god so the fight lasts. Ascended Delusions of Jin'do",
     "(2118512) moves its target to phase 3 and back to phase 1, so Jin'do's hero joins phase 1 (an exclusive run)",
-    "at the instance entrance (areatrigger 3928), where no creature stands within 90 yd. When the Mythic Hakkar",
+    "inside his leash line, 57 yd from the world Jin'do, with the trash within 50 yd killed. When the Mythic Hakkar",
     "berserks at 10 minutes the Ascended bosses have no berserk (the old script gave Ascended Hakkar 26662 then,",
     "Jin'do never); 14 minutes 40 seconds in they still have none, and by 15 minutes both carry 2100213."
   ],
@@ -90,10 +90,10 @@
       "action": "teleport",
       "actor": "jindo_hero",
       "map": 309,
-      "x": -11916.1,
-      "y": -1230.53,
-      "z": 92.5334,
-      "o": 4.71867,
+      "x": -11568.8,
+      "y": -1255.72,
+      "z": 77.6191,
+      "o": 0.71,
       "ignore_access": true
     },
     {
@@ -145,6 +145,33 @@
       "label": "Jin'do's hero survives the whole fight",
       "actor": "jindo_hero",
       "command": ".cheat god on"
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Clear the Withered Mistresses around Jin'do's hero",
+      "actor": "jindo_hero",
+      "entry": 14825,
+      "radius": 50,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Clear the Atal'ai Mistresses around Jin'do's hero",
+      "actor": "jindo_hero",
+      "entry": 14882,
+      "radius": 50,
+      "kill": true,
+      "all": true
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Clear the Voodoo Slaves around Jin'do's hero",
+      "actor": "jindo_hero",
+      "entry": 14883,
+      "radius": 50,
+      "kill": true,
+      "all": true
     },
     {
       "action": "summon",

@@ -1,0 +1,310 @@
+{
+ "schema": 1,
+ "name": "Wisdomball Q8 The Echo of Apprentice Delwyn: each of Delwyn's notes is its own page, given once",
+ "contract": [
+  "Q8 9417108 asks for Delwyn's Notes, Page 1-5 (items 9417329-9417333, one each); the notes are GO 9417204, spawns",
+  "9417004-9417008 = page 1-5. Inspecting a note (spell 256702) gives its page and despawns the note for 60 s.",
+  "A note whose page the player already has gives nothing and stays. Q8 has one POI per page + the turn-in (6).",
+  "DISCRIMINATING: the same note used again after its respawn gives no second page and is still there; the next note",
+  "gives the next page; abandoning Q8 takes the pages."
+ ],
+ "timeout_ms": 240000,
+ "location": {
+  "map": 0,
+  "x": -8996.0,
+  "y": 853.5,
+  "z": 29.62,
+  "o": 3.8
+ },
+ "players": [
+  {
+   "id": "p",
+   "race": 1,
+   "class": 1,
+   "level": 30,
+   "security": 2
+  }
+ ],
+ "steps": [
+  {
+   "action": "set_phase",
+   "label": "world phase 1 (the crater phases come from the questline's own script)",
+   "actor": "p",
+   "value": 1
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: A Guardian's Shortcut complete",
+   "actor": "p",
+   "quest": 9417105
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: A Guardian's Shortcut turned in",
+   "actor": "p",
+   "quest": 9417105
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: The Rim of the Crater complete",
+   "actor": "p",
+   "quest": 9417106
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: The Rim of the Crater turned in",
+   "actor": "p",
+   "quest": 9417106
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: Thieves at the Seal complete",
+   "actor": "p",
+   "quest": 9417107
+  },
+  {
+   "action": "reward_quest",
+   "label": "SETUP: Thieves at the Seal turned in (Act II crater phase)",
+   "actor": "p",
+   "quest": 9417107
+  },
+  {
+   "action": "command",
+   "label": "SETUP: The Echo of Apprentice Delwyn (Q8) in progress, without its pages (prepare_quest would hand them out)",
+   "actor": "p",
+   "command": ".quest add 9417108"
+  },
+  {
+   "action": "assert",
+   "label": "Q8 is in progress",
+   "actor": "p",
+   "metric": "quest_status",
+   "quest": 9417108,
+   "equals": 3,
+   "within_ms": 3000
+  },
+  {
+   "action": "teleport",
+   "label": "to the first note (guid 9417004)",
+   "actor": "p",
+   "map": 4418,
+   "x": 86.0,
+   "y": 457.0,
+   "z": 43.6,
+   "o": 2.0,
+   "ignore_access": true
+  },
+  {
+   "action": "assert",
+   "label": "on map 4418",
+   "actor": "p",
+   "metric": "map_id",
+   "equals": 4418,
+   "within_ms": 15000
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "client_packet",
+   "label": "ask for Q8's POIs",
+   "actor": "p",
+   "opcode": 483,
+   "fields": [
+    {
+     "u32": 1
+    },
+    {
+     "u32": 9417108
+    }
+   ],
+   "consumed": false
+  },
+  {
+   "action": "assert",
+   "label": "Q8 has 6 POIs (5 pages + turn-in)",
+   "actor": "p",
+   "metric": "server_packet_u32",
+   "opcode": 484,
+   "row": 1,
+   "index": 2,
+   "equals": 6,
+   "within_ms": 3000
+  },
+  {
+   "action": "teleport",
+   "label": "to the first note (guid 9417004)",
+   "actor": "p",
+   "map": 4418,
+   "x": 85.7,
+   "y": 460.7,
+   "z": 43.9,
+   "o": 3.9
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "use_nearby_gameobject",
+   "label": "inspect it",
+   "actor": "p",
+   "entry": 9417204
+  },
+  {
+   "action": "assert",
+   "label": "Inspecting is cast",
+   "actor": "p",
+   "metric": "casting",
+   "equals": 1,
+   "within_ms": 800
+  },
+  {
+   "action": "wait",
+   "ms": 4500
+  },
+  {
+   "action": "assert",
+   "label": "the first note gave Page 1",
+   "actor": "p",
+   "metric": "item_count",
+   "item": 9417329,
+   "equals": 1,
+   "within_ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "and not Page 2",
+   "actor": "p",
+   "metric": "item_count",
+   "item": 9417330,
+   "equals": 0
+  },
+  {
+   "action": "wait",
+   "ms": 62000
+  },
+  {
+   "action": "assert",
+   "label": "the note is back after 60 s",
+   "actor": "p",
+   "metric": "nearby_gameobject_flags",
+   "entry": 9417204,
+   "min": 0,
+   "within_ms": 5000
+  },
+  {
+   "action": "teleport",
+   "label": "back at the first note",
+   "actor": "p",
+   "map": 4418,
+   "x": 85.7,
+   "y": 460.7,
+   "z": 43.9,
+   "o": 3.9
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "use_nearby_gameobject",
+   "label": "inspect it",
+   "actor": "p",
+   "entry": 9417204
+  },
+  {
+   "action": "assert",
+   "label": "Inspecting is cast",
+   "actor": "p",
+   "metric": "casting",
+   "equals": 1,
+   "within_ms": 800
+  },
+  {
+   "action": "wait",
+   "ms": 4500
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: still one Page 1",
+   "actor": "p",
+   "metric": "item_count",
+   "item": 9417329,
+   "equals": 1
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: the note stayed (it only despawns when it gives a page)",
+   "actor": "p",
+   "metric": "nearby_gameobject_flags",
+   "entry": 9417204,
+   "min": 0
+  },
+  {
+   "action": "teleport",
+   "label": "to the second note (guid 9417005)",
+   "actor": "p",
+   "map": 4418,
+   "x": 78.7,
+   "y": 423.3,
+   "z": 43.5,
+   "o": 3.9
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "use_nearby_gameobject",
+   "label": "inspect it",
+   "actor": "p",
+   "entry": 9417204
+  },
+  {
+   "action": "assert",
+   "label": "Inspecting is cast",
+   "actor": "p",
+   "metric": "casting",
+   "equals": 1,
+   "within_ms": 800
+  },
+  {
+   "action": "wait",
+   "ms": 4500
+  },
+  {
+   "action": "assert",
+   "label": "the second note gave Page 2",
+   "actor": "p",
+   "metric": "item_count",
+   "item": 9417330,
+   "equals": 1,
+   "within_ms": 3000
+  },
+  {
+   "action": "quest_abandon",
+   "label": "abandon Q8",
+   "actor": "p",
+   "quest": 9417108
+  },
+  {
+   "action": "assert",
+   "label": "abandoning took Page 1",
+   "actor": "p",
+   "metric": "item_count",
+   "item": 9417329,
+   "equals": 0,
+   "within_ms": 3000
+  },
+  {
+   "action": "assert",
+   "label": "abandoning took Page 2",
+   "actor": "p",
+   "metric": "item_count",
+   "item": 9417330,
+   "equals": 0
+  }
+ ]
+}

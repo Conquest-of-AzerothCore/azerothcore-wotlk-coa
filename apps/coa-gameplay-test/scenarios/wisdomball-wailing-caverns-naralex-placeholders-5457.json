@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "The Wondrous Wisdomball does not offer the unobtainable Wailing Caverns quests Waking Naralex and When Dreams Turn to Nightmares (#5457)",
+  "contract": "Quests 999 'When Dreams Turn to Nightmares' and 1500 'Waking Naralex' carry QuestSortID 718 (Wailing Caverns) but have no starter, no ender, no text and no objective in the world data or in the captured client quest cache. The ball lists every quest tagged with a dungeon area, so before #8548 it handed both out (#5457: players held them, their bots could not take them). CompletesWithoutPlayerAction now withholds any quest without a player objective, so the ball must offer neither, and a forced accept of either is refused. Leaders of the Fang (914, required item 9738, Horde) stays offered to this Blood Elf as a control.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "raider", "race": 10, "class": 13, "level": 80 }
+  ],
+  "location": {
+    "map": 43,
+    "x": -163.49,
+    "y": 132.9,
+    "z": -73.66,
+    "o": 5.83,
+    "ignore_access": true
+  },
+  "steps": [
+    { "action": "wait", "label": "Let Wailing Caverns settle", "ms": 8000 },
+    { "action": "add_item", "label": "Obtain the companion, as a purchase would", "actor": "raider", "item": 101169, "count": 1 },
+    { "action": "use_item", "label": "Using the item teaches its summon", "actor": "raider", "item": 101169, "spell": 55884 },
+    {
+      "action": "assert",
+      "label": "The summon is learned",
+      "actor": "raider", "metric": "knows_spell", "spell": 83050, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Summon the ball in Wailing Caverns", "actor": "raider", "spell": 83050 },
+    { "action": "wait", "label": "Let the summon land", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "The ball is out",
+      "actor": "raider", "metric": "owned_creature_count", "entry": 79025, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "An ordinary Wailing Caverns quest with an objective is offered",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 914, "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "When Dreams Turn to Nightmares is not offered",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 999, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Waking Naralex is not offered",
+      "actor": "raider", "metric": "ball_offers_quest", "quest": 1500, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Try to take When Dreams Turn to Nightmares anyway", "actor": "raider", "quest": 999, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "It never enters the log",
+      "actor": "raider", "metric": "quest_status", "quest": 999, "equals": 0
+    },
+    { "action": "quest_accept", "label": "Try to take Waking Naralex anyway", "actor": "raider", "quest": 1500, "entry": 79025 },
+    {
+      "action": "assert",
+      "label": "It never enters the log either",
+      "actor": "raider", "metric": "quest_status", "quest": 1500, "equals": 0
+    }
+  ]
+}

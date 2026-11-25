@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "Atmospheric Pressure raises enemies' chance to be hit, not the caster's (#13072)",
+  "contract": [
+    "Atmospheric Pressure 803565 (Stormbringer) tooltips: destabilize the air around you, increasing the chance",
+    "for enemies to be struck by spells by $s1% (3%). #13072 reports that the aura lands on the Stormbringer",
+    "instead and makes them easier to hit. Effect0 is SPELL_EFFECT_APPLY_AREA_AURA_ENEMY of",
+    "SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE (all schools, EffectBasePoints 2, DieSides 1); the enemy area",
+    "search never includes the caster, which keeps the aura only for its non-area Effect1 (Static on damage",
+    "taken). Since #10243 the caster's copy is a visible buff, so the stance button lights, and enemies do not",
+    "show the icon. Expected: a nearby enemy takes +3% to be hit by spells and the Stormbringer takes no such",
+    "bonus."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "storm", "race": 1, "class": 16, "level": 80}
+  ],
+  "creatures": [
+    {"id": "enemy", "owner": "storm", "entry": 36, "level": 80, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "storm", "spell": 803565},
+    {"action": "learn", "actor": "storm", "spell": 804020},
+    {"action": "set_power", "actor": "storm", "value": 2500},
+    {
+      "action": "assert", "label": "SETUP: no incoming spell hit bonus on the enemy yet", "actor": "enemy",
+      "metric": "spell_hit_bonus_taken", "spell": 804020, "equals": 0
+    },
+    {"action": "cast", "actor": "storm", "spell": 803565},
+    {
+      "action": "assert", "label": "SETUP: Atmospheric Pressure is active on the Stormbringer", "actor": "storm",
+      "metric": "aura", "spell": 803565, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "SETUP: the nearby enemy receives Atmospheric Pressure", "actor": "enemy",
+      "metric": "aura", "spell": 803565, "caster": "storm", "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "#13072: the enemy is 3% easier to hit with spells", "actor": "enemy",
+      "metric": "spell_hit_bonus_taken", "spell": 804020, "equals": 3
+    },
+    {
+      "action": "assert", "label": "#13072: the Stormbringer is not easier to hit with spells", "actor": "storm",
+      "metric": "spell_hit_bonus_taken", "spell": 804020, "equals": 0
+    }
+  ]
+}

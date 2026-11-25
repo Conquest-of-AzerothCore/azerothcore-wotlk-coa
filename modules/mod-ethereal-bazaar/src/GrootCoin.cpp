@@ -1,7 +1,6 @@
 #include "GrootCoin.h"
 #include "GrootCoinInternal.h"
 
-#include "AscensionClientSpellPatches.h"
 #include "Chat.h"
 #include "Configuration/Config.h"
 #include "CryptoRandom.h"
@@ -62,9 +61,6 @@ namespace GrootCoin
             else if (client->ClassID != coin->Class || client->SubclassID != coin->SubClass
                 || client->DisplayInfoID != coin->DisplayInfoID || client->InventoryType != coin->InventoryType)
                 Fail(Acore::StringFormat("item_dbc {} does not match item_template.", COIN_ITEM));
-
-            if (!Ascension::ClientItemPatches::Instance().Contains(COIN_ITEM))
-                Fail(Acore::StringFormat("item {} is not registered for the client item patch stream.", COIN_ITEM));
         }
 
         void ValidateTokenTemplate()
@@ -189,9 +185,8 @@ namespace GrootCoin
             AwardsAvailable() ? "enabled" : "disabled", ExchangeAvailable() ? "enabled" : "disabled");
         handler->PSendSysMessage("Config: GrootCoin.Enable={} GrootCoin.ExchangeEnable={} TokensPerCoin={} MaxAward={}.",
             settings.enable ? 1 : 0, settings.exchangeEnable ? 1 : 0, settings.tokensPerCoin, settings.maxAward);
-        handler->PSendSysMessage("Items: coin {} (display {}), Bazaar Token {}. Client item patch registered: {}.",
-            COIN_ITEM, COIN_DISPLAY, BAZAAR_TOKEN_ITEM,
-            Ascension::ClientItemPatches::Instance().Contains(COIN_ITEM) ? "yes" : "no");
+        handler->PSendSysMessage("Items: coin {} (display {}), Bazaar Token {}.",
+            COIN_ITEM, COIN_DISPLAY, BAZAAR_TOKEN_ITEM);
         handler->PSendSysMessage("External awards (groot_coin_award_queue): {}, polled every {} s.",
             ShouldPollQueue(AwardsAvailable(), settings.externalAwardsEnable) ? "on" : "off", settings.queuePollSeconds);
         handler->PSendSysMessage("Pending: {} award(s) ({} from the queue).", Internal::PendingAwards(),

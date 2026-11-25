@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Whirling Advance describes its native charges and recharge at every rank (#4918)",
-  "contract": "The installed SpellCharges.dbc links every Whirling Advance rank to category 662. SpellChargesCategory.dbc defines that category as two charges with a 6000 ms serial recharge. Spell.dbc has no ordinary cooldown and none of the six descriptions mentions charges or recharge. Rank one and rank six are trained with native learnSpell fixtures; ordinary untriggered casts must consume both charges, remain empty before six seconds, then recover one charge and finally both without fixtures. SMSG_PATCH_SPELL must carry the missing charge and recharge information for all six ranks while preserving the damage formula and root restriction. Runeshroud is a positive control for the shared text stream. These observations cover server delivery; graphical client rendering is not available.",
+  "contract": "The installed SpellCharges.dbc links every Whirling Advance rank to category 662. SpellChargesCategory.dbc defines that category as two charges with a 6000 ms serial recharge. Spell.dbc has no ordinary cooldown and none of the six descriptions mentions charges or recharge. Rank one and rank six are trained with native learnSpell fixtures; ordinary untriggered casts must consume both charges, remain empty before six seconds, then recover one charge and finally both without fixtures. The client's spell rows must carry the missing charge and recharge information for all six ranks while preserving the damage formula and root restriction. Runeshroud is a positive control for the client's spell rows. These observations cover the server and the client's spell data; graphical client rendering is not available.",
   "timeout_ms": 90000,
   "players": [
     {
@@ -45,7 +45,7 @@
     {
       "action": "wait",
       "ms": 7000,
-      "label": "Allow normal class grants and login text stream to settle"
+      "label": "Allow normal class grants to settle"
     },
     {
       "action": "learn",
@@ -270,193 +270,155 @@
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500639,
+      "metric": "client_spell_row_contains",
+      "spell": 500639,
       "text": "Requires Runeshroud",
       "equals": 1,
-      "within_ms": 5000,
-      "label": "The shared description stream is captured"
+      "label": "CONTROL: the client's Runeshroud row 500639 is read"
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500919,
+      "metric": "client_spell_row_contains",
+      "spell": 500919,
       "text": "2 charges. 6 sec recharge.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500919,
+      "metric": "client_spell_row_contains",
+      "spell": 500919,
       "text": "${$m1+0+$AP*.15}",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500919,
+      "metric": "client_spell_row_contains",
+      "spell": 500919,
       "text": "Not usable while rooted.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504912,
+      "metric": "client_spell_row_contains",
+      "spell": 504912,
       "text": "2 charges. 6 sec recharge.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504912,
+      "metric": "client_spell_row_contains",
+      "spell": 504912,
       "text": "${$m1+0+$AP*.15}",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504912,
+      "metric": "client_spell_row_contains",
+      "spell": 504912,
       "text": "Not usable while rooted.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504913,
+      "metric": "client_spell_row_contains",
+      "spell": 504913,
       "text": "2 charges. 6 sec recharge.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504913,
+      "metric": "client_spell_row_contains",
+      "spell": 504913,
       "text": "${$m1+0+$AP*.15}",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504913,
+      "metric": "client_spell_row_contains",
+      "spell": 504913,
       "text": "Not usable while rooted.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504914,
+      "metric": "client_spell_row_contains",
+      "spell": 504914,
       "text": "2 charges. 6 sec recharge.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504914,
+      "metric": "client_spell_row_contains",
+      "spell": 504914,
       "text": "${$m1+0+$AP*.15}",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504914,
+      "metric": "client_spell_row_contains",
+      "spell": 504914,
       "text": "Not usable while rooted.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504915,
+      "metric": "client_spell_row_contains",
+      "spell": 504915,
       "text": "2 charges. 6 sec recharge.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504915,
+      "metric": "client_spell_row_contains",
+      "spell": 504915,
       "text": "${$m1+0+$AP*.15}",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504915,
+      "metric": "client_spell_row_contains",
+      "spell": 504915,
       "text": "Not usable while rooted.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504916,
+      "metric": "client_spell_row_contains",
+      "spell": 504916,
       "text": "2 charges. 6 sec recharge.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504916,
+      "metric": "client_spell_row_contains",
+      "spell": 504916,
       "text": "${$m1+0+$AP*.15}",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "low",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504916,
+      "metric": "client_spell_row_contains",
+      "spell": 504916,
       "text": "Not usable while rooted.",
-      "equals": 1,
-      "within_ms": 1000
+      "equals": 1
     }
   ]
 }

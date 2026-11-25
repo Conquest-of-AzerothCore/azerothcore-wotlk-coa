@@ -8,7 +8,7 @@
     "SMSG_ASCENSION_AURA_AMOUNT sends 0 for the other and the text reads 'take 0% increased'. Its damage line used",
     "Dawnfall's own empty effect 2 amount with an SP*0.12 term, while the struck Solar Flare 807175 deals",
     "$807175m2+$807175ppl2 plus 0.26 spell power (its own description and the Sun Cleric coefficient table).",
-    "The tooltip is streamed through coa_client_spell_description with the static $s1/$s3 values and Solar Flare's",
+    "The tooltip is published through coa_client_spell_description with the static $s1/$s3 values and Solar Flare's",
     "formula, and the native description is kept. Rendered client text is outside the harness."
   ],
   "timeout_ms": 60000,
@@ -17,13 +17,13 @@
   ],
   "steps": [
     { "action": "wait", "ms": 7000 },
-    { "action": "assert", "label": "The existing description stream is captured", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 500639, "text": "Requires Runeshroud", "equals": 1, "within_ms": 5000 },
-    { "action": "assert", "label": "The Dawnfall row is emitted", "actor": "cleric", "metric": "server_packets", "opcode": 2346, "row": 806118, "min": 1 },
-    { "action": "assert", "label": "Enemies see the static damage-taken value", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "Enemies inside take $s1% increased damage from the Sun Cleric", "equals": 1 },
-    { "action": "assert", "label": "Allies see the static healing value", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "Allies inside take $s3% increased healing from all sources.", "equals": 1 },
-    { "action": "assert", "label": "The damage line uses Solar Flare's formula", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "${$807175m2+$807175ppl2+$SP*0.26} Holyfire Damage", "equals": 1 },
-    { "action": "assert", "label": "No live effect 1 amount remains", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "${$w1}", "equals": 0 },
-    { "action": "assert", "label": "No live effect 3 amount remains", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "${$w3}", "equals": 0 },
-    { "action": "assert", "label": "The native description is kept", "actor": "cleric", "metric": "server_packet_contains", "opcode": 2346, "row": 806118, "text": "Bring down the light of An'she down at the target location for $d.", "equals": 1 }
+    { "action": "assert", "label": "CONTROL: the client's Runeshroud row 500639 is read", "actor": "cleric", "metric": "client_spell_row_contains", "spell": 500639, "text": "Requires Runeshroud", "equals": 1 },
+    { "action": "assert", "label": "The client has the Dawnfall row", "actor": "cleric", "metric": "client_spell_row_u32", "spell": 806118, "index": 0, "equals": 806118 },
+    { "action": "assert", "label": "Enemies see the static damage-taken value", "actor": "cleric", "metric": "client_spell_row_contains", "spell": 806118, "text": "Enemies inside take $s1% increased damage from the Sun Cleric", "equals": 1 },
+    { "action": "assert", "label": "Allies see the static healing value", "actor": "cleric", "metric": "client_spell_row_contains", "spell": 806118, "text": "Allies inside take $s3% increased healing from all sources.", "equals": 1 },
+    { "action": "assert", "label": "The damage line uses Solar Flare's formula", "actor": "cleric", "metric": "client_spell_row_contains", "spell": 806118, "text": "${$807175m2+$807175ppl2+$SP*0.26} Holyfire Damage", "equals": 1 },
+    { "action": "assert", "label": "No live effect 1 amount remains", "actor": "cleric", "metric": "client_spell_row_contains", "spell": 806118, "text": "${$w1}", "equals": 0 },
+    { "action": "assert", "label": "No live effect 3 amount remains", "actor": "cleric", "metric": "client_spell_row_contains", "spell": 806118, "text": "${$w3}", "equals": 0 },
+    { "action": "assert", "label": "The native description is kept", "actor": "cleric", "metric": "client_spell_row_contains", "spell": 806118, "text": "Bring down the light of An'she down at the target location for $d.", "equals": 1 }
   ]
 }

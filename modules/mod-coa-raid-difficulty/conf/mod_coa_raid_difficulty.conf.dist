@@ -1,0 +1,17 @@
+[worldserver]
+
+########################################
+# mod-coa-raid-difficulty
+########################################
+
+#
+#    CoaRaidDifficulty.BotMemberWeight
+#        Description: Experimental. Raid boss health follows the number of players in the
+#                     instance (coa_boss_flex, clamped to 10..25). For that health only, a bot
+#                     counts as this share of a player; real players always count 1. Loot and
+#                     item counts keep the plain number of members.
+#                     Example: 1 player + 19 bots at 0.3 = 6.7, clamped to the minimum of 10.
+#        Default:     0.3
+#                     1.0 - every bot counts as a full player (previous behaviour)
+
+CoaRaidDifficulty.BotMemberWeight = 0.3

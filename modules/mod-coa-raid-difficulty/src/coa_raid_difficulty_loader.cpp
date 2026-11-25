@@ -54,6 +54,7 @@ void AddCoaWorldBossScripts();
 void AddCoaEmeraldDragonScripts();
 void AddCoaCustomWorldBossScripts();
 void AddCoaSacrificialChainsScripts();
+void AddCoaZulGurubCheckpoints();
 
 void Addmod_coa_raid_difficultyScripts()
 {
@@ -102,4 +103,5 @@ void Addmod_coa_raid_difficultyScripts()
     AddCoaEmeraldDragonScripts();
     AddCoaCustomWorldBossScripts();
     AddCoaSacrificialChainsScripts();
+    AddCoaZulGurubCheckpoints();
 }

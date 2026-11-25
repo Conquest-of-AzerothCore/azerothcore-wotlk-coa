@@ -89,6 +89,7 @@
 #include "Spell.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+#include "zg_coa_leash.h"
 
 #include <algorithm>
 #include <array>
@@ -207,7 +208,10 @@ namespace
 
     struct boss_marli_coa : public BossAI
     {
-        boss_marli_coa(Creature* creature) : BossAI(creature, DATA_MARLI) { }
+        boss_marli_coa(Creature* creature) : BossAI(creature, DATA_MARLI)
+        {
+            SetBoundary(coa_zg::LeashFor(DATA_MARLI));
+        }
 
         void Reset() override
         {

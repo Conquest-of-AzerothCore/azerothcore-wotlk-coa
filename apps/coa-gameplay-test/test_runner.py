@@ -1089,6 +1089,20 @@ class RunnerTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         run.validate(scenario)
 
+    def test_pet_autocast_via(self):
+        for via, valid in ((None, True), ('autocast', True), ('set_action', True), ('opcode', False), (1, False)):
+            step = {'action': 'pet_autocast', 'actor': 'caster', 'spell': 806016, 'enabled': False}
+            if via is not None:
+                step['via'] = via
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].append(step)
+            with self.subTest(via=via):
+                if valid:
+                    self.assertIs(run.validate(scenario), scenario)
+                else:
+                    with self.assertRaises(ValueError):
+                        run.validate(scenario)
+
     def with_role(self, **fields):
         scenario = copy.deepcopy(self.scenario)
         scenario['players'][0].update(fields)
@@ -2004,6 +2018,42 @@ class RunnerTests(unittest.TestCase):
                      'AC_ASCENSION_MANASTORM_ENABLE': '1', 'PATH': '/usr/bin'}
         environment = run.server_environment({'Updates.EnableDatabases': 7, 'LogsDir': '/run'}, inherited)
         self.assertEqual(environment, {'AC_ASCENSION_MANASTORM_ENABLE': '1', 'PATH': '/usr/bin'})
+
+    def test_module_directory_is_reserved_and_its_environment_override_is_removed(self):
+        self.assertIn('Modules.ConfigDirectory', run.reserved_settings())
+        inherited = {'AC_MODULES_CONFIG_DIRECTORY': '/installed/modules', 'PATH': '/usr/bin'}
+        environment = run.server_environment({'Modules.ConfigDirectory': '/test/modules'}, inherited)
+        self.assertEqual(environment, {'PATH': '/usr/bin'})
+
+    def test_playerbots_database_is_discovered_reserved_copied_and_redirected(self):
+        with tempfile.TemporaryDirectory() as temporary, patch.dict(os.environ, {}, clear=True):
+            directory = Path(temporary)
+            (directory / 'playerbots.conf').write_text(
+                'PlayerbotsDatabaseInfo = "127.0.0.1;3306;fixture;fixture;source_playerbots"\n'
+                'AiPlayerbot.CommandServerPort = 8888\nAiPlayerbot.Enabled = 1\n')
+            config = {key: f'127.0.0.1;3306;fixture;fixture;source_{role}'
+                      for role, key in run.DATABASE_SETTINGS.items()}
+            connections = run.source_connections(config, module_config_dir=directory)
+            self.assertEqual(connections['playerbots'].database, 'source_playerbots')
+            database = run.Databases('mysql', 'mysqldump', directory, connections, '012345abcdef')
+            with patch.object(database, 'sql'), patch.object(database, 'copy') as copy_tables, \
+                    patch('sys.stdout', new=io.StringIO()):
+                database.prepare(roles=('playerbots',))
+            copy_tables.assert_called_once_with('playerbots', schema_only=False)
+            overrides = run.harness_overrides(connections, database.names, directory, directory, directory,
+                                               '012345abcdef', '012345abcdef', {})
+            target = run.Connection.parse(overrides['PlayerbotsDatabaseInfo'])
+            self.assertEqual(target.database, 'coa_test_012345abcdef_playerbots')
+            self.assertNotEqual(target.database, connections['playerbots'].database)
+            self.assertIn('PlayerbotsDatabaseInfo', run.reserved_settings())
+            self.assertEqual(overrides['AiPlayerbot.CommandServerPort'], 0)
+            environment = run.server_environment(overrides,
+                {'AC_PLAYERBOTS_DATABASE_INFO': 'production', 'PATH': '/usr/bin'})
+            self.assertEqual(environment, {'PATH': '/usr/bin'})
+            staged = run.stage_modules(directory, directory / 'staged', run.reserved_settings())
+            self.assertEqual(run.read_config(staged[0]), {'AiPlayerbot.Enabled': '1'})
+            self.assertIn('PlayerbotsDatabaseInfo', run.read_config(directory / 'playerbots.conf'))
+            database.remove_credentials()
 
     def test_source_settings_follow_server_environment_precedence(self):
         config = {'DataDir': '.'}

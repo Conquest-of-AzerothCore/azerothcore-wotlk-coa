@@ -25,6 +25,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <fstream>
+#include <filesystem>
 #include <locale>
 #include <mutex>
 #include <unordered_map>
@@ -729,6 +730,12 @@ std::string const ConfigMgr::GetConfigPath()
 #endif
 }
 
+static std::string ModuleConfigPath()
+{
+    std::string const directory = sConfigMgr->GetOption<std::string>("Modules.ConfigDirectory", "", false);
+    return directory.empty() ? (std::filesystem::path(sConfigMgr->GetConfigPath()) / "modules").string() : directory;
+}
+
 void ConfigMgr::Configure(std::string const& initFileName, std::vector<std::string> args, std::string_view modulesConfigList /*= {}*/, ConfigPolicy policy /*= {}*/)
 {
     _filename = initFileName;
@@ -780,11 +787,12 @@ bool ConfigMgr::LoadModulesConfigs(bool isReload /*= false*/, bool isNeedPrintIn
     }
 
     // Start loading module configs
-    std::string const& moduleConfigPath = GetConfigPath() + "modules/";
+    std::string const moduleConfigPath = ModuleConfigPath();
 
     for (auto const& fileName : _additonalFiles)
     {
-        bool isExistConfig = LoadAdditionalFile(moduleConfigPath + fileName, false, isReload);
+        bool isExistConfig = LoadAdditionalFile((std::filesystem::path(moduleConfigPath) / fileName).string(),
+            false, isReload);
 
         if (isExistConfig)
             _moduleConfigFiles.emplace_back(fileName);

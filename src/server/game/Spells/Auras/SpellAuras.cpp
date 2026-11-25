@@ -1501,7 +1501,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                     if (aurEff)
                     {
                         uint32 spellId = 0;
-                        switch (aurEff->GetId())
+                        switch (sSpellMgr->GetSpellTwinSource(aurEff->GetId()))
                         {
                             // Ebon Plague
                             case 51161:
@@ -1526,7 +1526,9 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                             default:
                                 LOG_ERROR("spells.aura", "Aura::HandleAuraSpecificMods: Unknown rank of Crypt Fever/Ebon Plague ({}) found", aurEff->GetId());
                         }
-                        caster->CastSpell(target, spellId, true, 0, GetEffect(0));
+                        if (spellId)
+                            caster->CastSpell(target, sSpellMgr->GetSpellTwinFor(spellId, aurEff->GetId()), true, 0,
+                                GetEffect(0));
                     }
                 }
                 // Unholy blight
@@ -1741,7 +1743,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         }
                     }
                 }
-                switch (GetId())
+                switch (sSpellMgr->GetSpellTwinSource(GetId()))
                 {
                     case 47788: // Guardian Spirit
                     {
@@ -1754,7 +1756,7 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
                         // Glyph of Guardian Spirit
                         if (AuraEffect* aurEff = player->GetAuraEffectOfRankedSpellOrTwin(63231, 0))
                         {
-                            if (!player->HasSpellCooldown(47788))
+                            if (!player->HasSpellCooldown(GetId()))
                                 break;
 
                             player->AddSpellCooldown(GetSpellInfo()->Id, 0, aurEff->GetAmount()*IN_MILLISECONDS);
@@ -1887,19 +1889,20 @@ void Aura::HandleAuraSpecificMods(AuraApplication const* aurApp, Unit* caster, b
             }
             break;
         case SPELLFAMILY_HUNTER:
-            switch (GetId())
+            switch (sSpellMgr->GetSpellTwinSource(GetId()) == 19574 ? 19574 : GetId())
             {
                 case 19574: // Bestial Wrath
                     // The Beast Within cast on owner if talent present
                     if (Unit* owner = target->GetOwner())
                     {
                         // Search talent
-                        if (owner->HasAura(34692))
+                        if (owner->HasAuraOrTwin(34692))
                         {
+                            uint32 const beastWithin = sSpellMgr->GetSpellTwinFor(34471, GetId());
                             if (apply)
-                                owner->CastSpell(owner, 34471, true, 0, GetEffect(0));
+                                owner->CastSpell(owner, beastWithin, true, 0, GetEffect(0));
                             else
-                                owner->RemoveAurasDueToSpell(34471);
+                                owner->RemoveAurasDueToSpell(beastWithin);
                         }
                     }
                     break;
@@ -2922,6 +2925,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyGroupedUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo()->Effects[effIndex].Effect == SPELL_EFFECT_APPLY_AREA_AURA_RAID);
                             Acore::UnitListSearcher<Acore::AnyGroupedUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
@@ -2930,6 +2937,10 @@ void UnitAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* caster)
                             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetUnitOwner(), GetUnitOwner(), radius);
                             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetUnitOwner(), targetList, u_check);
                             Cell::VisitObjects(GetUnitOwner(), searcher, radius);
+                            targetList.remove_if([this](Unit* target)
+                            {
+                                return !sScriptMgr->CanUnitAssist(GetUnitOwner(), target, GetSpellInfo());
+                            });
                             break;
                         }
                     case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
@@ -3030,6 +3041,10 @@ void DynObjAura::FillTargetMap(std::map<Unit*, uint8>& targets, Unit* /*caster*/
             Acore::AnyFriendlyUnitInObjectRangeCheck u_check(GetDynobjOwner(), dynObjOwnerCaster, radius);
             Acore::UnitListSearcher<Acore::AnyFriendlyUnitInObjectRangeCheck> searcher(GetDynobjOwner(), targetList, u_check);
             Cell::VisitObjects(GetDynobjOwner(), searcher, radius);
+            targetList.remove_if([this, dynObjOwnerCaster](Unit* target)
+            {
+                return dynObjOwnerCaster && !sScriptMgr->CanUnitAssist(dynObjOwnerCaster, target, GetSpellInfo());
+            });
         }
         // pussywizard: TARGET_DEST_DYNOBJ_NONE is supposed to search for both friendly and unfriendly targets, so for any unit
         // what about EffectImplicitTargetA?

@@ -10,6 +10,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import re
@@ -31,6 +32,9 @@ BASE_ARCHIVES = ("common", "common-2", "expansion", "lichking")
 LOCALE_ARCHIVES = ("locale", "speech", "expansion-locale", "expansion-speech", "lichking-locale", "lichking-speech")
 LOCALE_DIRECTORY = re.compile(r"[a-z]{2}[A-Z]{2}\Z")
 PROCESS_OPTIONS = {"creationflags": subprocess.CREATE_NO_WINDOW} if os.name == "nt" else {}
+SERVER_ONLY_ROWS = ("spell_dbc",)
+SPELL_TEXT_TABLE = "coa_client_spell_description"
+MYSQL_ESCAPES = {"0": "\0", "n": "\n", "t": "\t", "\\": "\\"}
 
 
 class Table:
@@ -326,6 +330,155 @@ def extract(data_directory, output, mpq, replacements=None, log=print, original=
     return manifest
 
 
+class MySql:
+
+    def __init__(self, executable, database, defaults_file=None):
+        self.executable = str(executable)
+        self.database = database
+        self.defaults_file = defaults_file
+
+    def rows(self, query):
+        arguments = [self.executable]
+        if self.defaults_file:
+            arguments.append(f"--defaults-extra-file={self.defaults_file}")
+        arguments += ["--batch", "--skip-column-names", "--default-character-set=utf8mb4", "-e", query, self.database]
+        completed = subprocess.run(arguments, capture_output=True, **PROCESS_OPTIONS)
+        if completed.returncode:
+            raise RuntimeError("mysql failed: " + completed.stderr.decode("utf-8", "replace").strip())
+        lines = completed.stdout.decode("utf-8").replace("\r\n", "\n").split("\n")
+        return [[mysql_value(value) for value in line.split("\t")] for line in lines if line]
+
+    def tables(self):
+        return {row[0] for row in self.rows("SHOW TABLES")}
+
+
+def mysql_value(value):
+    if value == "NULL":
+        return None
+    return re.sub(r"\\(.)", lambda match: MYSQL_ESCAPES.get(match.group(1), match.group(1)), value)
+
+
+def same_value(kind, expected, actual):
+    if expected is None or (kind == "s" and expected == ""):
+        return True
+    if kind == "s":
+        return expected.encode("utf-8") == actual
+    if kind == "f":
+        return math.isclose(float(expected), actual, rel_tol=1e-5, abs_tol=1e-6)
+    return (int(float(expected)) - actual) % (1 << 32) == 0
+
+
+def override_drift(table, fmt, rows):
+    fmt = file_format(table, fmt) if table else fmt
+    report = {"rows": len(rows), "differs": [], "absent": [], "layout": layout_problems(table, fmt) if table else []}
+    if report["layout"]:
+        return report
+    key = next(i for i, kind in enumerate(fmt) if kind in "nd")
+    client = values(table, fmt) if table else {}
+    used = [(position, kind) for position, kind in enumerate(fmt) if kind not in "xX"]
+    for row in rows:
+        if len(row) != len(fmt):
+            raise ValueError(f"{len(row)} columns, the format has {len(fmt)}")
+        identifier = int(row[key])
+        actual = client.get(identifier)
+        if actual is None:
+            report["absent"].append(identifier)
+        elif not all(same_value(kind, row[position], actual[index]) for index, (position, kind) in enumerate(used)):
+            report["differs"].append(identifier)
+    report["differs"].sort()
+    report["absent"].sort()
+    return report
+
+
+def spell_text_fields(fmt):
+    start = fmt.index("s")
+    length = len(fmt[start:]) - len(fmt[start:].lstrip("s"))
+    return start + 2 * (length + 1), start + 3 * (length + 1)
+
+
+def spell_texts(table, fmt):
+    description, tooltip = spell_text_fields(fmt)
+    texts = {}
+    for row in range(table.rows):
+        start = HEADER.size + row * table.record_size
+        identifier, = struct.unpack_from("<I", table.data, start)
+        offsets = struct.unpack_from("<I", table.data, start + 4 * description)[0], \
+            struct.unpack_from("<I", table.data, start + 4 * tooltip)[0]
+        texts[identifier] = tuple(table.string(offset) for offset in offsets)
+    return texts
+
+
+def spell_text_drift(table, fmt, rows):
+    client = spell_texts(table, fmt) if table else {}
+    report = {"rows": len(rows), "differs": [], "absent": []}
+    for identifier, *texts in rows:
+        actual = client.get(int(identifier))
+        if actual is None:
+            report["absent"].append(int(identifier))
+        elif any(text and text.encode("utf-8") != value for text, value in zip(texts, actual)):
+            report["differs"].append(int(identifier))
+    report["differs"].sort()
+    report["absent"].sort()
+    return report
+
+
+def drift(client_directory, database, server_directory=None, server_only=SERVER_ONLY_ROWS, root=ROOT):
+    files = {name.lower(): path for name, path in dbc_files(client_directory).items()}
+    tables = database.tables()
+    stores = core_stores(root)
+    report = {"server": [], "overrides": {}, "spellText": None}
+    if server_directory:
+        report["server"] = [entry for entry in diff(server_directory, client_directory, root) if entry["core"]]
+    for file, fmt, sql_table in stores:
+        if not sql_table.endswith("_dbc") or sql_table not in tables:
+            continue
+        rows = database.rows(f"SELECT * FROM `{sql_table}`")
+        if not rows:
+            continue
+        path = files.get(file.lower())
+        try:
+            entry = override_drift(Table.read(path) if path else None, fmt, rows)
+        except ValueError as error:
+            entry = {"rows": len(rows), "differs": [], "absent": [], "layout": [str(error)]}
+        entry.update(file=file, serverOnly=sql_table in server_only)
+        report["overrides"][sql_table] = entry
+    if SPELL_TEXT_TABLE in tables:
+        spell = next((fmt for file, fmt, _ in stores if file.lower() == "spell.dbc"), None)
+        path = files.get("spell.dbc")
+        if spell:
+            rows = database.rows(f"SELECT ID, Description, ToolTip FROM `{SPELL_TEXT_TABLE}`")
+            report["spellText"] = spell_text_drift(Table.read(path) if path else None, spell, rows)
+    return report
+
+
+def drift_failures(report):
+    failures = len(report["server"])
+    for entry in report["overrides"].values():
+        failures += len(entry["layout"]) + len(entry["differs"]) + (0 if entry["serverOnly"] else len(entry["absent"]))
+    if report["spellText"]:
+        failures += len(report["spellText"]["differs"]) + len(report["spellText"]["absent"])
+    return failures
+
+
+def print_drift(report, ids):
+    if report["server"]:
+        print("Server DataDir/dbc differs from the client:")
+        print_diff(report["server"], ids)
+    named = dict(report["overrides"])
+    if report["spellText"]:
+        named[SPELL_TEXT_TABLE] = dict(report["spellText"], file="Spell.dbc", serverOnly=False, layout=[])
+    for name, entry in sorted(named.items()):
+        problems = entry["layout"] + [f"{len(entry[kind])} {kind}" for kind in ("differs", "absent") if entry[kind]]
+        if not problems:
+            continue
+        note = " (server-side rows, not a failure)" if entry["serverOnly"] and not entry["differs"] else ""
+        print(f"{name} -> {entry['file']}: {entry['rows']} rows, " + ", ".join(problems) + note)
+        if ids:
+            for kind in ("differs", "absent"):
+                if entry[kind]:
+                    print(f"  {kind}: " + " ".join(map(str, entry[kind])))
+
+
 def parse_replacements(items):
     result = {}
     for item in items or []:
@@ -370,8 +523,26 @@ def main(argv=None):
     command.add_argument("new", type=Path)
     command.add_argument("--ids", action="store_true", help="list the added, removed and changed IDs")
 
+    command = commands.add_parser("drift", help="check that a client set agrees with the server's tables and data")
+    command.add_argument("client", type=Path, help="a set written by extract from the shipped client")
+    command.add_argument("--server-dbc", type=Path, help="the worldserver's DataDir/dbc")
+    command.add_argument("--mysql", required=True, type=Path, help="mysql client executable")
+    command.add_argument("--database", default="acore_world")
+    command.add_argument("--defaults-file", type=Path, help="mysql option file with the connection settings")
+    command.add_argument("--json", type=Path, help="also write the full report as JSON")
+    command.add_argument("--ids", action="store_true", help="list the differing and absent IDs")
+
     arguments = parser.parse_args(argv)
     try:
+        if arguments.command == "drift":
+            report = drift(arguments.client, MySql(arguments.mysql, arguments.database, arguments.defaults_file),
+                           arguments.server_dbc)
+            if arguments.json:
+                arguments.json.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+            print_drift(report, arguments.ids)
+            failures = drift_failures(report)
+            print(f"{len(report['overrides'])} override tables checked, {failures} drifting rows or tables")
+            return 1 if failures else 0
         if arguments.command == "extract":
             manifest = extract(arguments.client_data, arguments.output, MpqCli(arguments.mpqcli),
                                parse_replacements(arguments.archive), original=arguments.original)

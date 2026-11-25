@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "name": "Venomancer mounting drops Vizier Form and Wasp Form (#12826)",
+  "contract": [
+    "#12826: mounting in Vizier Form 800912 kept the form up. Spider, Beetle and Weaver forms carry the native",
+    "mount interrupt flag and #6281 asserts the mount drops them; the maintainer ruled that every Venomancer form",
+    "drops on mount. Vizier Form and Wasp Form 805141 lacked the flag. Venomwing Form 520307 already drops on any",
+    "cast. Each form is learned and cast, the Brown Horse 458 is cast while in it, and once mounted the form must",
+    "be gone. Native dismount separates the two cases. Vizier Form is taught by its specialization passive",
+    "504798, which the fixture learns first. Wasp Form is a flying form (SPELL_ATTR4_ONLY_FLYING_AREAS) and fails",
+    "with SPELL_FAILED_INCORRECT_AREA where flying is not allowed, so the fixture stands in Hellfire Peninsula",
+    "with 300 riding skill."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 29,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 33388
+    },
+    {
+      "action": "set_skill",
+      "actor": "p",
+      "skill": 762,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 458
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 504798,
+      "label": "The Vizier Form specialization passive grants the form"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Vizier Form specialization teaches Vizier Form",
+      "actor": "p",
+      "metric": "knows_spell",
+      "spell": 800912,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 800912,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Vizier Form is active",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 800912,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 458,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "label": "the mount cast is accepted while in the form",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 458,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player is mounted",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "#12826: Vizier Form is dropped by the mount",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 800912,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "learn",
+      "actor": "p",
+      "spell": 805141
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 805141,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Wasp Form is active",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805141,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 458,
+      "target": "p"
+    },
+    {
+      "action": "assert",
+      "label": "the mount cast is accepted while in the form",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 458,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player is mounted",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 458,
+      "equals": 1,
+      "within_ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "#12826: Wasp Form is dropped by the mount",
+      "actor": "p",
+      "metric": "aura",
+      "spell": 805141,
+      "equals": 0
+    },
+    {
+      "action": "cancel_mount",
+      "actor": "p"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": -211.237,
+    "y": 4278.54,
+    "z": 86.5678,
+    "o": 4.59776
+  }
+}

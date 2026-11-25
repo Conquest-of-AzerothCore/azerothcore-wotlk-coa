@@ -391,7 +391,8 @@ runs such a case exclusively because the setting is process-global. Optional
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
 `AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional `chat_log: true`
 turns `CoA.ChatLog.Enable` on for that case and back to the configured state when it ends, and is likewise run
-exclusively. Optional
+exclusively. Optional `battleground_kill_xp: true` turns `Battleground.GiveXPForKills` on for that case in the same
+way, and is likewise run exclusively. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
 the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops
@@ -536,6 +537,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `lfg_set_roles` | Player `actor` in a group, `roles` mask: native `CMSG_LFG_SET_ROLES` answer to the group role check. |
 | `lfg_accept` | Player `actor`: native `CMSG_LFG_PROPOSAL_RESULT` acceptance of the last Dungeon Finder proposal the actor received. |
 | `lfg_final_credit` | Player `actor` in a Dungeon Finder dungeon: credits the final encounter of the group's assigned dungeon, as `encounter_credit` does for that boss, when the proposal chose the dungeon. |
+| `end_battleground` | Player `actor` in a battleground in progress, `winner` (`alliance`, `horde` or `draw`): ends the match through native `EndBattleground` for that side, as a score or timer end would; `draw` ends it with no winner. |
 | `encounter_credit` | Player `actor` in a dungeon, creature `entry`: credits that dungeon boss kill to the actor's map through the native encounter update, as a boss death does, including the Dungeon Finder completion it triggers. |
 | `encounter_start` | Player `actor`, `boss_entry`, optional `radius` (yards, default 100, maximum 200): finds the nearest living creature of that entry in the actor's phase and starts recording its [encounter timeline](#encounter-timelines). It fails at once with `encounter_start found no creature <entry> within <radius> yards` when none is in range. A scenario has at most one; the case runs exclusively because the recorder is process-global. |
 | `leave_group` | Player `actor`: native `CMSG_GROUP_DISBAND` leave request; fails if the player stays grouped. |
@@ -929,6 +931,8 @@ for the actor and reports the percentage of fills holding an item of at least `q
 10000 times for the actor and reports the percentage of fills holding `item`.
 `creature_loot_item_rate` requires `entry` (a creature loot id) and `item`, fills that template `rolls` times
 (default 10000) for the actor and reports the percentage of fills holding `item`.
+`fishing_loot_item_rate` requires `entry` (a fishing loot area or zone id) and `item`, fills that template `rolls` times
+(default 10000) for the actor and reports the percentage of fills holding `item`.
 `forced_loot_count` requires `item`, adds it directly through `Loot::AddItem` with the actor as loot owner
 (bypassing any loot table), and reports how many uncollected copies survive that call; a gate inside `AddItem`
 that rejects the item for that actor reports zero.
@@ -1001,7 +1005,11 @@ when none was sent; the client refuses a cast without that aura before the reque
 `client_removals_keeping_buttons_for` counts its removed notices ending in a zero byte, which Extensions.dll
 answers without clearing the spell's action buttons. `client_spell_row_restored` returns 1 when the last two
 `SMSG_PATCH_SPELL` rows for `spell` are the same row, first with `SPELL_ATTR0_DO_NOT_DISPLAY` and then without.
-The model reads attributes only from rows the server sent, not from the client's own tables.
+Each player starts with the Spell rows the client MPQs carry for the server's spell patches (the rows the server
+would send for `spell`), and `SMSG_PATCH_SPELL` rows the server sends replace them. `client_spell_row_contains`
+requires `spell` and `text` and returns 1 when the client's current row for `spell` contains `text`, 0 when not,
+or -1 without a row; `client_spell_row_u32` requires `spell` and `index` and returns that dword of the row (the
+`SMSG_PATCH_SPELL` layout, ID at 0), or -1.
 `temporary_spell_replacement` requires `spell` and returns the spell ID currently standing in for it on the
 player's bars. `Player::GetTemporarySpellReplacement` returns the queried spell itself when nothing replaces
 it, so the unreplaced reading is that spell's own ID, never zero. It reads server-side state, not what the
@@ -1197,6 +1205,10 @@ before a player update, then leaves subsequent assertions to verify the queued c
 It tests dispatch and deferral, not a real socket, packet delivery, or every possible concurrent schedule.
 
 `view_level` takes a player `actor` and unit `target` and queries the target-relative combat level.
+`level_for_target` and `reward_level_for_target` take the same arguments and return the level the actor rolls
+against the target and the level its rewards use; `defense_skill_for_target` returns the actor's defense skill against
+the target and `weapon_skill_for_target` its weapon skill (optional `hand` 0 main, 1 off, 2 ranged, default 0).
+`honor_points` takes a player `actor` and returns its honor points.
 `sent_level`, `sent_max_health` and `sent_faction` (the faction template) use the same fields and observe
 values-only object updates emitted to the socketless session. They return zero until the corresponding field has been observed; they do not
 force updates or inspect client rendering. `sent_free_for_all_pvp` takes the same `actor` and `target` and returns 1
@@ -1218,6 +1230,9 @@ selection holds it, otherwise 0.
 loot rule lets the actor roll Need on that item at the actor's position, otherwise 0. Outside a Dungeon Finder
 group or its dungeon every item returns 1.
 `in_arena` takes a player `actor` and returns 1 while that player is inside an arena match.
+`arena_points` takes a player `actor` and returns the arena points the player holds.
+`battleground_status` takes a player `actor` and returns the native status of the player's battleground
+(1 waiting for the queue, 2 preparation, 3 in progress, 4 ended and waiting to close), or -1 outside one.
 `battleground_team` takes a player `actor` and returns the side that player fights for inside a battleground or
 arena (0 Alliance, 1 Horde), or -1 outside one. `team` returns the player's current team (0 Alliance, 1 Horde),
 which a cross-faction battleground replaces while the player is inside it. `name_query_race` returns the race the
@@ -1433,8 +1448,8 @@ template's) sets the hover anim tier; it is a swimmer when its movement allows s
 its template has no display or is a transport (types 11 and 15). A creature's displays are the spawn's model and
 every template model; a gameobject's is its template display. A display is `client` when its id is a record of
 `CreatureDisplayInfo.dbc` or `GameObjectDisplayInfo.dbc` under `DataDir/dbc` (the client set the server
-enforces), `server_only` when only the server store has it (a row of the `*_dbc` world tables, streamed to clients
-by the display patch service), and `missing` otherwise.
+enforces), `server_only` when only the server store has it (a row of the `*_dbc` world tables, which the client
+MPQs carry), and `missing` otherwise.
 
 Known limits: a spawn on the wrong floor layer (a cave spawn placed on the terrain above the cave) stands on
 ground and reads as grounded; a wrong but existing model needs an external reference; positions changed at
@@ -1524,7 +1539,8 @@ client rendering.
 with a base amount of 1000 and requires `spell`; `periodic: true` selects the native HoT path.
 
 `stealth_detection` reads native general stealth detection. `can_detect` requires `target` and invokes
-the observer's native `CanSeeOrDetect` check; neither metric covers client rendering.
+the observer's native `CanSeeOrDetect` check; `pet: true` makes the actor's pet the observer and `owned_entry` the
+actor's creature of that entry. Neither metric covers client rendering.
 
 `school_prohibited` reads a creature's native school lockout (`Creature::IsSpellProhibited`) for `school_mask`
 (1-127): 1 while an interrupt keeps that school locked, 0 otherwise.

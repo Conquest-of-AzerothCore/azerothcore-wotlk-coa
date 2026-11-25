@@ -1,0 +1,43 @@
+-- Boss and boss-form damage budgets from the level-60 Hellfire conversion.
+-- Normal and Heroic are doubled. Mythic is tripled. Absolute values make reapplication safe.
+UPDATE `coa_dungeon_rescale_budget` AS `budget`
+JOIN (
+    SELECT 540 AS `map_id`, 0 AS `difficulty`, 16807 AS `entry`, 2 AS `melee`, 2 AS `spell`
+    UNION ALL SELECT 540, 1, 16807, 3.103448276, 3
+    UNION ALL SELECT 540, 2, 16807, 6.206896552, 6
+    UNION ALL SELECT 540, 0, 16808, 2, 2
+    UNION ALL SELECT 540, 1, 16808, 1.058823529, 3
+    UNION ALL SELECT 540, 2, 16808, 2.117647059, 6
+    UNION ALL SELECT 540, 0, 16809, 2, 2
+    UNION ALL SELECT 540, 1, 16809, 1.292307692, 3
+    UNION ALL SELECT 540, 2, 16809, 2.584615385, 6
+    UNION ALL SELECT 540, 0, 20923, 2, 2
+    UNION ALL SELECT 540, 1, 20923, 3, 3
+    UNION ALL SELECT 540, 2, 20923, 6, 6
+    UNION ALL SELECT 542, 0, 17377, 2, 2
+    UNION ALL SELECT 542, 1, 17377, 1.285714286, 3
+    UNION ALL SELECT 542, 2, 17377, 2.571428571, 6
+    UNION ALL SELECT 542, 0, 17380, 2, 2
+    UNION ALL SELECT 542, 1, 17380, 0.94, 3
+    UNION ALL SELECT 542, 2, 17380, 1.88, 6
+    UNION ALL SELECT 542, 0, 17381, 2, 2
+    UNION ALL SELECT 542, 1, 17381, 1.8, 3
+    UNION ALL SELECT 542, 2, 17381, 3.6, 6
+    UNION ALL SELECT 543, 0, 17306, 2, 2
+    UNION ALL SELECT 543, 1, 17306, 0.9, 3
+    UNION ALL SELECT 543, 2, 17306, 1.8, 6
+    UNION ALL SELECT 543, 0, 17307, 2, 2
+    UNION ALL SELECT 543, 1, 17307, 3, 3
+    UNION ALL SELECT 543, 2, 17307, 6, 6
+    UNION ALL SELECT 543, 0, 17308, 2, 2
+    UNION ALL SELECT 543, 1, 17308, 2.625, 3
+    UNION ALL SELECT 543, 2, 17308, 5.25, 6
+    UNION ALL SELECT 543, 0, 17536, 2, 2
+    UNION ALL SELECT 543, 1, 17536, 1.095, 3
+    UNION ALL SELECT 543, 2, 17536, 2.19, 6
+    UNION ALL SELECT 543, 0, 17537, 2, 2
+    UNION ALL SELECT 543, 1, 17537, 1.9875, 3
+    UNION ALL SELECT 543, 2, 17537, 3.975, 6
+) AS `damage` USING (`map_id`, `difficulty`, `entry`)
+SET `budget`.`melee_multiplier` = `damage`.`melee`,
+    `budget`.`spell_multiplier` = `damage`.`spell`;
