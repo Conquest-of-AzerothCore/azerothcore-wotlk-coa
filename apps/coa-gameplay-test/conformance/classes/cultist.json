@@ -21209,6 +21209,182 @@
       "expire_ms": 1600,
       "void_on_cast_failure": true,
       "observe_source": "Dreadnought weapon set (2534 + 2129; Eldritch Shock 808036 has EquippedItemClass -1). 680575 Effect[1] aura 107 SPELLMOD_JUMP_TARGETS (MiscValue 17) bp=2+1=+3 on SpellFamilyFlags[2] 524288 (808043 Eldritch Shock Damage, base EffectChainTarget 0 -> 0 + 3 = 3 total targets = primary + 2 additional enemies, Spell.cpp:1930-1944). Both phases set 500706=20 and confirm 500706 and 680601 present via before_trigger_reads across 5 dummies (dummy at 3 yd + 4 area_dummies at 3.5..5.0 yd): control without 680575 strikes 1 enemy (before_expected 1); treatment with 680575 strikes 3 enemies (cumulative 4, expected_gain 3, leaving 2 in-range dummies untouched). Reference search 2026-11-25: coa-history 680575 0 events (passive; 567524 Dreadnought 1 cast, 808036 Eldritch Shock 2 casts, 572141 4 casts); coabuildhub spells_master_index.json 680575 matches clause 1 ('While Dreadnought is active, your Twilight Shieldtoss has a -3 sec reduced cooldown.'); streamed coa_client_spell_description rev_20261007_58_void_augmentation_tooltip.sql matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 560091,
+      "name": "Eldritch Bastion R1 (+15% armor contribution from shield 2129)",
+      "kind": "metric_delta",
+      "variant": "shield_armor",
+      "label_suffix": "shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 804056,
+      "gate_spell": 560091,
+      "target": "caster",
+      "cast_power": 2000,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 182,
+      "expected": 189,
+      "expected_gain": 7,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 560091 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 (armor) MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), bp=14+1=+15% ($s1=15; SpellInfo.cpp:388-391, StatSystem.cpp:390). ItemAddon.dbc field 43 gives item 2129 Reborn armor = 48; Cultist level-60 base armor = Agility 67*2 (134) + shield 48 = 182. 15% of 48 = 7.2 -> int(182 + 7.2) = 189, gain +7 (tol 0.5 excludes 6 = 12.5% and 8 = 16.7%, i.e. 10% off 15%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+    },
+    {
+      "spell": 560091,
+      "name": "Eldritch Bastion R1 (no armor gain without a shield equipped)",
+      "kind": "metric_delta",
+      "variant": "no_shield_armor",
+      "label_suffix": "no_shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 578263,
+      "gate_spell": 560091,
+      "target": "dummy",
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 134,
+      "expected": 134,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "No-shield control arm: trigger_spell 578263 Netherstrike (2H weapon required; dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield in slot 16). Base armor is Agility 67*2 = 134 (48 shield armor absent); learning 560091 adds 0 armor (134 -> 134 +- 0.5), proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+    },
+    {
+      "spell": 560091,
+      "name": "Eldritch Bastion R1 (5% chance on Shadow damage to reset Twilight Shieldtoss CD)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+      "talent": 560091,
+      "trigger_spell": 806830,
+      "reset_spell": 572141,
+      "chance_pct": 5,
+      "control_casts": 50,
+      "casts": 1500,
+      "parts": 4,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89)"
+        },
+        {
+          "spell": 680602,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680602 (40 Insanity helper marker) required by Hammer of Twilight 806830 (Spell.dbc)"
+        },
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: removes Shadow full resists on Hammer of Twilight 806830 so every cast lands Shadow damage"
+        }
+      ],
+      "observe_source": "Dreadnought weapon set (2534 Rondel dagger satisfies 806830 EquippedItemSubClassMask 173555; 2129 shield equipped via for_entry). $h = 5 (560091 Spell.dbc ProcChance 5; AscensionCultistEvents.cpp:90,200 checks dealt && Shadow && Chance(player, 560091) via roll_chance_f and calls Reduce(player, 524876, INT32_MAX) -> RemoveSpellCooldown(572141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (SchoolMask 32 Shadow, 0 mana, instant, 1500 ms GCD). Control: 50 casts x 4 parts = 200 hits unlearned (0 resets). Treatment: 4 pooled parts x 1500 casts = 6000 damaging Shadow hits (>= 5755 needed for residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 5%). Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+    },
+    {
+      "spell": 561336,
+      "name": "Eldritch Bastion R2 (+30% armor contribution from shield 2129)",
+      "kind": "metric_delta",
+      "variant": "shield_armor",
+      "label_suffix": "shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 804056,
+      "gate_spell": 561336,
+      "target": "caster",
+      "cast_power": 2000,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 182,
+      "expected": 196,
+      "expected_gain": 14,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 561336 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 MiscValueB 64, bp=29+1=+30% ($s1=30; SpellInfo.cpp:388-391, StatSystem.cpp:390). Item 2129 Reborn armor = 48 (ItemAddon.dbc field 43); base armor 134 + 48 = 182; 30% of 48 = 14.4 -> int(182 + 14.4) = 196, gain +14 (tol 0.5 excludes 13 = 27.1% and 15 = 31.3%, strictly inside +-10% of 30%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+    },
+    {
+      "spell": 561336,
+      "name": "Eldritch Bastion R2 (no armor gain without a shield equipped)",
+      "kind": "metric_delta",
+      "variant": "no_shield_armor",
+      "label_suffix": "no_shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 578263,
+      "gate_spell": 561336,
+      "target": "dummy",
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 134,
+      "expected": 134,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "No-shield control arm: trigger_spell 578263 (dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield). Armor remains 134 -> 134 (+-0.5) before and after learning 561336, proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+    },
+    {
+      "spell": 561336,
+      "name": "Eldritch Bastion R2 (10% chance on Shadow damage to reset Twilight Shieldtoss CD)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+      "talent": 561336,
+      "trigger_spell": 806830,
+      "reset_spell": 572141,
+      "chance_pct": 10,
+      "control_casts": 50,
+      "casts": 1800,
+      "parts": 7,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89)"
+        },
+        {
+          "spell": 680602,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680602 (40 Insanity helper marker) required by Hammer of Twilight 806830 (Spell.dbc)"
+        },
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: removes Shadow full resists on Hammer of Twilight 806830 so every cast lands Shadow damage"
+        }
+      ],
+      "observe_source": "Dreadnought weapon set (2534 Rondel dagger satisfies 806830; 2129 shield equipped via for_entry). $h = 10 (561336 Spell.dbc ProcChance 10; AscensionCultistEvents.cpp:90,200 checks dealt && Shadow && Chance(player, 561336) via roll_chance_f and calls Reduce(player, 524876, INT32_MAX) -> RemoveSpellCooldown(572141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (SchoolMask 32 Shadow, 0 mana, instant, 1500 ms GCD). Control: 50 casts x 7 parts = 350 hits unlearned (0 resets). Treatment: 7 pooled parts x 1800 casts = 12600 damaging Shadow hits (>= 10905 needed for residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 10%). Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
     }
   ],
   "player_observations": [],

@@ -1800,7 +1800,8 @@
     "spell": 560091,
     "clause": "Increases your Armor contribution from your shield by $s1%",
     "labels": [
-      "560091 effect_value e0 #0"
+      "560091 behaviour_metric_delta shield_armor",
+      "560091 behaviour_metric_delta no_shield_armor"
     ],
     "kind": "claim"
   },
@@ -1808,7 +1809,7 @@
     "spell": 560091,
     "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
     "labels": [
-      "560091 effect_value #1"
+      "560091 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim"
   },
@@ -2019,7 +2020,8 @@
     "spell": 561336,
     "clause": "Increases your Armor contribution from your shield by $s1%",
     "labels": [
-      "561336 effect_value e0 #0"
+      "561336 behaviour_metric_delta shield_armor",
+      "561336 behaviour_metric_delta no_shield_armor"
     ],
     "kind": "claim"
   },
@@ -2027,7 +2029,7 @@
     "spell": 561336,
     "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
     "labels": [
-      "561336 effect_value #1"
+      "561336 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim"
   },
