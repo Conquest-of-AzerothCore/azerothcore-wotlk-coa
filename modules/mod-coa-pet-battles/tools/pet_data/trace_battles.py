@@ -17,7 +17,11 @@ GM, PLAYER = 3, 0
 REQUIRED = (
     'refuse_combat', 'refuse_dead', 'refuse_no_pets', 'auto_team', 'forfeit', 'watchdog', 'moved', 'died', 'map',
     'logout', 'restart', 'account', 'bot', 'capture_added', 'capture_replaced', 'capture_released', 'journal',
+    'feed', 'follower', 'prime', 'clean',
 )
+REQUIRED_WORLD = ('cue cast', 'cue effect', 'cue emote', 'cue face', 'cue lunge', 'cue back', 'cue health',
+                  'cue crate', 'cue uncrate', 'prime', 'follow spawn', 'follow despawn', 'item take')
+FOODS = {414: 5, 1326: 1}
 REQUIRED_OUT = ('pbt|begin', 'pbt|st', 'pbt|own', 'pbt|abil', 'pbt|in', 'pbt|tag', 'pbt|info', 'pbt|eabil',
                 'pbt|turn|go', 'pbt|turn|force', 'pbt|turn|lock', 'pbt|turn|stun', 'pbt|act', 'pbt|hp', 'pbt|fnt', 'pbt|msg', 'pbt|weather', 'pbt|stip',
                 'pbt|end|win', 'pbt|end|loss', 'pbt|end|interrupted', 'pbt|xp', 'pbt|done', 'pbt|got', 'pbj|pet',
@@ -35,6 +39,7 @@ class Recorder:
                                              for species, rows in world['displays'].items()}),
             'modelInfo': self.lua.table_from({species: self.lua.table_from(info)
                                               for species, info in world['model_info'].items()}),
+            'foods': self.lua.table_from(FOODS),
         })
         chunk = self.lua.eval('function(source, scripts, roll, world) '
                               'return assert(loadstring(source, "@trace_battles.lua"))(scripts, roll, world) end')
@@ -317,6 +322,88 @@ def build_sessions(upstream, world, seed, battles):
         return setup
     add('journal', journal, 17)
 
+    def feed(recorder, rng):
+        player = recorder.player(7)
+        owned = team_of(recorder, player, rng, pool, level=5)
+        spare = [species for species in pool if species not in owned]
+        unowned, extra = spare[0], spare[1]
+        player.state.items = recorder.lua.table_from({414: 2, 1326: 1, 159: 1})
+        setup = Setup(recorder, [player])
+        recorder.M.Message(player, f'pbt|start|{enemies_text(rng, pool, 1, 5)}')
+        recorder.M.Message(player, f'pbj|feed|{owned[0]},414')
+        recorder.pump(recorder.M.clock + 3000)
+        recorder.M.Message(player, 'pbt|quit')
+        recorder.settle()
+        recorder.M.Store.SetHp(player.GetGUIDLow(), owned[0], 100)
+        recorder.M.Note(player, f'sethp {owned[0]} 100')
+        recorder.grant(player, extra, 5)
+        recorder.M.Note(player, f'grant {extra} 5')
+        for text in (f'pbj|feed|{unowned},414', f'pbj|feed|{owned[0]},159', f'pbj|feed|{owned[0]},1326',
+                     f'pbj|feed|{extra},414', f'pbj|feed|{owned[0]},414', 'pbj|feed|x'):
+            recorder.M.Message(player, text)
+        recorder.pump(recorder.M.clock + 5000)
+        recorder.M.Message(player, f'pbt|start|{enemies_text(rng, pool, 1, 5)}')
+        recorder.pump(recorder.M.clock + 3000)
+        recorder.M.Message(player, 'pbt|quit')
+        recorder.settle()
+        recorder.M.Message(player, f'pbj|feed|{owned[1]},414')
+        recorder.M.Message(player, f'pbj|feed|{owned[1]},414')
+        recorder.settle()
+        return setup
+    add('feed', feed, 18)
+
+    def follower(recorder, rng):
+        player = recorder.player(7)
+        owned = team_of(recorder, player, rng, pool)
+        unowned = next(species for species in pool if species not in owned)
+        setup = Setup(recorder, [player])
+        recorder.M.Message(player, f'pbj|summon|{unowned}')
+        recorder.M.Message(player, f'pbj|summon|{owned[0]}')
+        recorder.pump(recorder.M.clock + 4100)
+        recorder.M.Message(player, 'pbj|dismiss')
+        recorder.M.Message(player, f'pbj|summon|{owned[1]}')
+        recorder.pump(recorder.M.clock + 2100)
+        rows = recorder.journal(player)
+        recorder.M.Logout(player)
+        kept = len(recorder.M.out)
+        for row in rows:
+            recorder.M.Store.AddPet(player, row['species'], row['level'],
+                                    recorder.lua.table_from([row['a1'], row['a2'], row['a3']]), row['quality'],
+                                    row['display'])
+        for index in range(len(recorder.M.out), kept, -1):
+            recorder.M.out[index] = None
+        recorder.M.Login(player)
+        recorder.pump(recorder.M.clock + 2100)
+        recorder.M.Message(player, 'pbj|dismiss')
+        recorder.settle()
+        return setup
+    add('follower', follower, 19)
+
+    def prime(recorder, rng):
+        player = recorder.player(7)
+        team_of(recorder, player, rng, pool)
+        setup = Setup(recorder, [player])
+        recorder.M.Message(player, 'pbj|prime')
+        recorder.pump(recorder.M.clock + 2000)
+        recorder.M.Message(player, 'pbj|prime')
+        recorder.pump(recorder.M.clock + 5000)
+        recorder.M.Message(player, 'pbj|prime')
+        recorder.settle()
+        return setup
+    add('prime', prime, 20)
+
+    def clean(recorder, rng):
+        player = recorder.player(7)
+        team_of(recorder, player, rng, pool)
+        setup = Setup(recorder, [player])
+        recorder.M.Message(player, 'pbt|clean')
+        recorder.M.Message(player, f'pbt|start|{enemies_text(rng, pool, 1, 8)}')
+        play(recorder, player, random_policy(random.Random(rng.random())), stop=lambda turns: turns >= 1)
+        recorder.M.Message(player, 'pbt|clean')
+        recorder.settle()
+        return setup
+    add('clean', clean, 21)
+
     for index in range(battles):
         size = 1 if index % 3 == 0 else 3
         add(f'battle_{index + 1}', battle(size, team_level=None), 100 + index)
@@ -327,6 +414,8 @@ class Setup:
     def __init__(self, recorder, players):
         self.players = [(player.GetGUIDLow(), int(player.state.account), int(player.state.rank),
                          1 if player.state.bot else 0, recorder.journal(player)) for player in players]
+        self.items = {player.GetGUIDLow(): sorted((int(k), int(v)) for k, v in player.state['items'].items())
+                      for player in players}
         self.teams = {}
         recorder.M.Reset()
         recorder.rolls.clear()
@@ -341,8 +430,10 @@ def journal_line(tag, low, row):
 
 def write_session(number, name, recorder, setup):
     lines = [f'SESSION\t{number}\t{name}']
+    lines += [f'FOOD\t{item}\t{level}' for item, level in sorted(FOODS.items())]
     for low, account, rank, bot, journal in setup.players:
         lines.append(f'PLAYER\tp{low}\t{account}\t{rank}\t{bot}')
+        lines += [f'ITEM\tp{low}\t{item}\t{count}' for item, count in setup.items[low]]
         lines += [journal_line('JOURNAL', low, row) for row in journal]
     lines += [f'ROLL_F\t{value!r}' if lo == 'F' else f'ROLL\t{lo}\t{hi}\t{value}'
               for lo, hi, value in recorder.rolls]
@@ -411,6 +502,8 @@ def coverage_failures(text):
     outs = [line.split('\t', 2)[2].split(' ', 1)[1] for line in text.splitlines() if line.startswith('OUT\t')]
     failures += [f'no {kind} message' for kind in REQUIRED_OUT if not any(out.startswith(kind) for out in outs)]
     failures += [f'TOOLONG record: {line[:80]}' for line in text.splitlines() if line.startswith('TOOLONG\t')]
+    worlds = [line.split('\t', 2)[2] for line in text.splitlines() if line.startswith('WORLD\t')]
+    failures += [f'no WORLD {kind}' for kind in REQUIRED_WORLD if not any(w.startswith(kind) for w in worlds)]
     return failures
 
 

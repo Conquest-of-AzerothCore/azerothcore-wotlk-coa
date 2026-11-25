@@ -10,7 +10,8 @@ import trace_battles
 
 SESSIONS = HERE.parents[1] / 'tests' / 'fixtures' / 'sessions.txt'
 WORLD = HERE.parents[1] / 'tests' / 'fixtures' / 'battle_world.txt'
-TAGS = {'SESSION', 'PLAYER', 'JOURNAL', 'ROLL', 'IN', 'OUT', 'WORLD', 'JOURNAL_AFTER', 'END'}
+TAGS = {'SESSION', 'PLAYER', 'JOURNAL', 'ROLL', 'ROLL_F', 'IN', 'OUT', 'WORLD', 'JOURNAL_AFTER', 'END', 'FOOD',
+        'ITEM'}
 
 
 def sessions():
@@ -58,18 +59,22 @@ class SessionFixtureTest(unittest.TestCase):
 
     def test_stand_ins_are_gone_when_a_session_ends(self):
         for session in sessions():
-            alive = 0
+            alive = followers = 0
             for fields in session['lines']:
                 if fields[0] == 'WORLD':
-                    alive += 1 if fields[2].startswith('spawn ') else -1
+                    kind = fields[2].split(' ')[0]
+                    alive += {'spawn': 1, 'despawn': -1}.get(kind, 0)
+                    if kind == 'follow':
+                        followers += 1 if fields[2].startswith('follow spawn') else -1
             self.assertEqual(alive, 0, session['name'])
+            self.assertEqual(followers, 0, session['name'])
 
     def test_world_rows_cover_every_session_species(self):
         world = trace_battles.read_world(WORLD)
         self.assertTrue(world['displays'])
         for session in sessions():
             for fields in session['lines']:
-                if fields[0] == 'WORLD':
+                if fields[0] == 'WORLD' and fields[2].split(' ')[0] in ('spawn', 'despawn'):
                     self.assertIn(int(fields[2].split(' ')[1]), world['displays'], session['name'])
 
 
