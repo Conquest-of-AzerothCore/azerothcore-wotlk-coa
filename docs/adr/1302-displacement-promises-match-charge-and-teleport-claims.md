@@ -50,6 +50,9 @@ Total finished-class rows reclassified: **0**. Generated scenarios of every fini
 
 - Opt-in audit promise widening only; zero generated scenario changes and zero finished-class reclassifications.
 - Closes Cultist Dreadfall 806175 row 409[2] (`charge_displacement`, leaving the separate supported `pass_through` alert
-  on row 409[0] uncounted) and Dark Veil 520345 row 133 (`teleport_holds` and `teleport_broken_control`).
+  on row 409[0] uncounted).
+- Closes the tool gap on Cultist Dark Veil 520345 row 133 (`teleport_holds` and `teleport_broken_control`), surfacing an
+  uncounted server alert on `teleport_broken_control` (tick #5 at 5000 ms re-applies `520346` right before
+  `AURA_REMOVE_BY_EXPIRE`, so the caster still teleports after the shield is broken; claim stays unproven until fixed).
 - `metric_delta_options/test_displacement.py` verifies promise matching for `"charge"`, `"teleport"`, and non-movement
   refusal.

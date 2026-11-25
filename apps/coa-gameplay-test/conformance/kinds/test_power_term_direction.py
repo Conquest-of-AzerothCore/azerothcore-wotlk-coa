@@ -309,7 +309,8 @@ class PowerTermDirectionAbsorbTests(unittest.TestCase):
 
 DEFENSE_ENTRY = {**ENTRY, 'name': 'Void Strikes (Blade of the Empire defense rating term direction)',
                  'spell': 680609, 'talent': 680609,
-                 'quote': 'Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.',
+                 'quote': ('Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your '
+                           'defense rating.'),
                  'cast_spell': 502122, 'power_metric': 'defense_rating', 'power_aura': 24774,
                  'power_aura_source': 'Increased Defense 24774, aura 189 misc 2, +180 defense rating, seeded',
                  'casts': 12, 'cast_wait_ms': 1600, 'power_settle_ms': 3000, 'restore_charges': True,

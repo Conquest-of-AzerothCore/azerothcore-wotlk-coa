@@ -251,21 +251,23 @@ def avoided_charge_restore_scenario(class_file: dict,
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour avoided charge restore',
         'contract': (f'Avoided-swing spell-charge restore rate for {spec.spell} on {spec.charge_spell} '
-                     f'(max_charges={spec.max_charges}, spend_charges={spec.spend_charges}, window_ms={spec.window_ms}, '
-                     f'expected={spec.expected_pct:g}%, G-20 band +-{rate_band(rate) * 100:g} pts). '
+                     f'(max_charges={spec.max_charges}, spend_charges={spec.spend_charges}, '
+                     f'window_ms={spec.window_ms}, expected={spec.expected_pct:g}%, '
+                     f'G-20 band +-{rate_band(rate) * 100:g} pts). '
                      f'{proc_avoided.trial_rule(avoided)}. Each cycle resets {spec.charge_spell} charges, spends '
                      f'{spec.spend_charges} charge(s) at dummy ({spec.dummy_distance:g} yd) with ignore_gcd, reads '
                      f'spell_charges before and after one {spec.window_ms} ms avoided-swing window, and reads '
-                     f'cumulative avoided swings. Control runs {spec.control_cycles} cycles/part before {spec.spell} is '
-                     f'learned (must restore 0 charges over >= {min_ctrl} pooled avoided swings); treatment runs '
+                     f'cumulative avoided swings. Control runs {spec.control_cycles} cycles/part before {spec.spell} '
+                     f'is learned (must restore 0 charges over >= {min_ctrl} pooled avoided swings); treatment runs '
                      f'{spec.treatment_cycles} cycles/part after a real learn (>= {min_treat} pooled avoided swings '
                      f'across {spec.parts} part(s)). Any window with avoided swings > open charge slots voids the run '
                      f'as unmeasured so charge capping cannot bias the rate. Residual per counted pair of {PAIR_RUNS} '
-                     f'runs (exact binomial at minimum sample): conformant false-fail {ff_pair:.1e}, control false-pass '
-                     f'{fp_ctrl_pair:.1e}, treatment false-pass at 0% {fp_treat_pair:.1e} (target <= '
+                     f'runs (exact binomial at minimum sample): conformant false-fail {ff_pair:.1e}, control '
+                     f'false-pass {fp_ctrl_pair:.1e}, treatment false-pass at 0% {fp_treat_pair:.1e} (target <= '
                      f'{spec.residual:.1e}).'),
         'players': [player_fixture(class_file)],
-        'creatures': [creature_fixture(class_file, spec.dummy_distance), *proc_avoided.striker_fixtures(class_file, avoided)],
+        'creatures': [creature_fixture(class_file, spec.dummy_distance),
+                      *proc_avoided.striker_fixtures(class_file, avoided)],
         'steps': steps}
     model = {
         'kind': KIND, 'metric': METRIC, 'quote': entry.quote, 'prefix': prefix,
@@ -392,8 +394,9 @@ def avoided_charge_restore_verdict(base: Verdict, runs: list[Run], model: dict) 
         miss_note = f'; miss share {miss_share:.4f} (no-miss rate {no_miss_rate:.4f} vs low {low:.4f})'
         if no_miss_rate >= low:
             return replace(base, status='alert', measured=measured, expected=expected, low=low, high=high,
-                           detail=detail, explanation=f'control 0/{ctrl["trials"]}; treatment {treat["restores"]}/'
-                                                      f'{treat["trials"]}: {why}{miss_note} (misses not proven counted)')
+                           detail=detail, explanation=(f'control 0/{ctrl["trials"]}; treatment {treat["restores"]}/'
+                                                       f'{treat["trials"]}: {why}{miss_note} '
+                                                       f'(misses not proven counted)'))
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=high, detail=detail,
                    explanation=f'control 0/{ctrl["trials"]}; treatment {treat["restores"]}/{treat["trials"]} '
                                f'({measured:.4f} against {expected:.4f}): {why}{miss_note}'

@@ -105,6 +105,12 @@ class AvoidedChargeRestoreTests(unittest.TestCase):
         runs_low_miss = [seeded_run(model, treat_swings=2, treat_restores_seq=[1, 1, 0, 1, 1], miss_every=0)] * 250
         self.assertEqual(avoided_charge_restore_verdict(base_verdict(exp), runs_low_miss, model).status, 'unmeasured')
 
+        seq_39 = [1] * 39 + [0] * 11
+        runs_unproven_miss = [seeded_run(model, treat_swings=2, treat_restores_seq=seq_39, miss_every=13)] * 250
+        unproven_miss_verdict = avoided_charge_restore_verdict(base_verdict(exp), runs_unproven_miss, model)
+        self.assertEqual(unproven_miss_verdict.status, 'alert')
+        self.assertIn('misses not proven counted', unproven_miss_verdict.explanation)
+
     def test_unmeasured_on_capping_risk_guard_failure_imbalance_or_missing_read(self):
         _, [exp] = build_entry(control_cycles=30, treatment_cycles=50)
         model = {**exp.model, 'min_control_trials': 50, 'min_treatment_trials': 100}

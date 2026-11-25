@@ -19,5 +19,5 @@ Witch Hunter: Vault 500085 `strafe_left` (90), `vault_backward` (180) and `vault
 speed); Night Walker 789256 `vault_range` (Vault 15 yd without it, 18 with it, the D-9 start point).
 
 Cultist (ADR 1302, provisional): Dreadfall 806175 `charge_displacement` (charges forward toward dummy at 15 yd) and
-Dark Veil 520345 `teleport_holds` / `teleport_broken_control` (teleports to grouped ally at channel expiry only when the
-shield holds).
+Dark Veil 520345 `teleport_holds` / `teleport_broken_control` (tool gap closed; `teleport_broken_control` currently
+alerts on a confirmed server defect where tick #5 re-applies 520346 before expiry, leaving row 133 uncounted).
