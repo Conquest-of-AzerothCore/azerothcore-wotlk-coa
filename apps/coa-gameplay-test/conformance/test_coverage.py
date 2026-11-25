@@ -572,6 +572,66 @@ class EvidenceStatusTest(unittest.TestCase):
         learned = [replace(verdicts[0], detail={'metric': 'armor', 'contrast': LEARNED_CONTRAST})]
         self.assertEqual(evidence_of(clauses, learned)[0], [BEHAVIOUR])
 
+    def test_primary_attributes_promise_requires_all_five_stat_exact_reads(self):
+        names = ('strength', 'agility', 'stamina', 'intellect', 'spirit')
+        labels = [f'1 behaviour_metric_delta {name}' for name in names]
+        clause = claim('Increases all primary attributes by $s1%.', *labels)
+        verdicts = [replace(judged(label, BEHAVIOUR_METRIC_DELTA, 'stat_exact', contrast=LEARNED_CONTRAST),
+                            detail={'metric': 'stat_exact', 'contrast': LEARNED_CONTRAST, 'stat': stat})
+                    for stat, label in enumerate(labels)]
+        self.assertEqual(evidence_of([clause], verdicts)[0], [BEHAVIOUR])
+        missing_spirit = claim('Increases all primary attributes by $s1%.', *labels[:4])
+        self.assertEqual(evidence_of([missing_spirit], verdicts[:4])[0], [DATA])
+        duplicate_stat = [*verdicts[:4], replace(verdicts[4], detail={'metric': 'stat_exact',
+                                                                      'contrast': LEARNED_CONTRAST, 'stat': 0})]
+        self.assertEqual(evidence_of([clause], duplicate_stat)[0], [DATA])
+        unstamped = [replace(verdict, detail={'metric': 'stat_exact', 'contrast': LEARNED_CONTRAST})
+                     for verdict in verdicts]
+        self.assertEqual(evidence_of([clause], unstamped)[0], [DATA])
+        condition_only = [*verdicts[:4], replace(verdicts[4], detail={'metric': 'stat_exact',
+                                                                      'contrast': CONDITION_CONTRAST, 'stat': 4})]
+        self.assertEqual(evidence_of([clause], condition_only)[0], [DATA])
+        wrong_sentence = claim('Increases your spell power by $s1%.', *labels)
+        self.assertEqual(evidence_of([wrong_sentence], verdicts)[0], [DATA])
+        rounded_stat = [replace(verdict, detail={'metric': 'stat', 'contrast': LEARNED_CONTRAST, 'stat': stat})
+                        for stat, verdict in enumerate(verdicts)]
+        self.assertEqual(evidence_of([clause], rounded_stat)[0], [DATA])
+        alerted = [*verdicts[:4], replace(verdicts[4], status='alert')]
+        self.assertEqual(evidence_of([clause], alerted)[0], [UNPROVEN])
+        unmeasured = [*verdicts[:4], replace(verdicts[4], status='unmeasured')]
+        self.assertEqual(evidence_of([clause], unmeasured)[0], [UNPROVEN])
+        split_row = {'spell': 1, 'clause': 'Increases all primary attributes by $s1% and armor.', 'kind': 'claim',
+                     'claims': [{'claim': 'Increases all primary attributes by $s1%', 'labels': labels[:4]},
+                                {'claim': 'and armor', 'labels': [labels[4]]}]}
+        self.assertEqual(clause_coverage([split_row], verdicts, BUILD).claim_evidence, [[DATA, DATA]])
+
+    def test_stat_exact_stamps_stat_only_when_quote_names_primary_attributes(self):
+        from behaviours import behaviour_scenario
+        from compare import judge_behaviour
+        from profile import DBC_DIR, load_fixture_class_file
+        from test_behaviours import FakeRun, base_verdict
+        if not DBC_DIR.is_dir():
+            self.skipTest(f'server DBC set not found at {DBC_DIR}')
+        templar = load_fixture_class_file(19)
+        base_stat = next(entry for entry in templar['behaviours']
+                         if entry.get('spell') == 300923 and entry.get('metric') == 'stat')
+        single = {**base_stat, 'metric': 'stat_exact'}
+        _, [single_exp] = behaviour_scenario(templar, single)
+        self.assertNotIn('stat', single_exp.model)
+        primary = {**single, 'quote': 'Increases all primary attributes by $s1%.'}
+        with mock.patch('behaviours.behaviour_entry') as mocked:
+            from behaviours import BehaviourEntry
+            mocked.return_value = BehaviourEntry(single['spell'], single['name'],
+                                                 'Increases all primary attributes by $s1%.', 'metric_delta',
+                                                 'Increases all primary attributes by $s1%.', single['expected'])
+            _, [primary_exp] = behaviour_scenario(templar, primary)
+        self.assertEqual(primary_exp.model['stat'], single['fields']['stat'])
+        run_values = {primary_exp.model['before_label']: float(single['before_expected']),
+                      primary_exp.model['after_label']: float(single['expected'])}
+        verdict = judge_behaviour(base_verdict(primary_exp), FakeRun(run_values), primary_exp)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.detail['stat'], single['fields']['stat'])
+
     def test_a_condition_contrast_proves_a_condition_claim_only(self):
         verdicts = [judged('1 behaviour_metric_delta', BEHAVIOUR_METRIC_DELTA, 'owned_creature_crit_chance',
                            contrast=CONDITION_CONTRAST)]

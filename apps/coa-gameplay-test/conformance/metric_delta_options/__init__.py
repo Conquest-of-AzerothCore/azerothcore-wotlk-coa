@@ -44,6 +44,12 @@ def option_phase_steps(spec, after: bool) -> list[dict]:
             for step in module.phase_steps(spec, present[module.NAME], after)]
 
 
+def option_attack_phase_steps(spec, after: bool) -> list[dict]:
+    present = dict(spec.options)
+    return [step for module in option_modules() if module.NAME in present and hasattr(module, 'attack_phase_steps')
+            for step in module.attack_phase_steps(spec, present[module.NAME], after)]
+
+
 def option_model(spec) -> dict:
     present = dict(spec.options)
     return {key: value for module in option_modules() if module.NAME in present and hasattr(module, 'model')

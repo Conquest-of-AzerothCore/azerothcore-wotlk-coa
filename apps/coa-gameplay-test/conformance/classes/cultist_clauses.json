@@ -2018,18 +2018,12 @@
       },
       {
         "claim": "heal the lowest health ally affected by Black Blood",
-        "labels": []
+        "labels": [
+          "525307 behaviour_metric_delta lowest_ally_a",
+          "525307 behaviour_metric_delta lowest_ally_b"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "No existing conformance kind can prove Shadow Pennant 525307 reach on grouped allies and lowest-health selection among >=2 Black Blood allies (with a reverse arm) during melee auto-attacks: (1) 525307 is a passive triggered only by melee auto-attack damage (AscensionCultistEvents.cpp:109-110,266-276) targeting Allies(player, player, 40) filtered by ally->HasAura(804153, player->GetGUID()) and sorted by health pct (AscensionCultist.cpp:245-249, includes caster); (2) in metric_delta with attack_swings (behaviours.py:2103-2129), phase_auras only allows caster/dummy/striker (behaviours.py:1800), ally_arm.ally_casts is forbidden with attack_swings (ally_arm.py:334-335), setup_casts requires gate_cast (which cannot cast passive 525307, and attack_setup_cast_steps casts only at caster, behaviours.py:1819, while 804153 is TARGET_UNIT_TARGET_ALLY per AscensionCultistContracts.cpp:138 and 502241 Malevolence requires an enemy target), and option_phase_steps is never called in attack_swings (ally_arm.ally_health is neither emitted nor per-ally distinct); (3) no other existing kind combines melee auto-attacks against a dummy with grouped allies carrying a caster-applied aura at distinct per-ally health percentages. Nearest kind: metric_delta with attack_swings and ally_arm (needs ally phase_auras or setup casts before swings plus distinct per-ally health fixtures).",
-      "attempts": [
-        {
-          "agent": "cu-g7c",
-          "report": ".agents/plans/cu-g7c/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 527268,
@@ -3956,18 +3950,12 @@
       },
       {
         "claim": "heal the lowest health ally affected by Black Blood",
-        "labels": []
+        "labels": [
+          "706926 behaviour_metric_delta lowest_ally_a",
+          "706926 behaviour_metric_delta lowest_ally_b"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "No existing conformance kind can prove Shadow Pennant 706926 reach on grouped allies and lowest-health selection among >=2 Black Blood allies (with a reverse arm) during melee auto-attacks: (1) 706926 is a passive triggered only by melee auto-attack damage (AscensionCultistEvents.cpp:109-110,266-276) targeting Allies(player, player, 40) filtered by ally->HasAura(804153, player->GetGUID()) and sorted by health pct (AscensionCultist.cpp:245-249, includes caster); (2) in metric_delta with attack_swings (behaviours.py:2103-2129), phase_auras only allows caster/dummy/striker (behaviours.py:1800), ally_arm.ally_casts is forbidden with attack_swings (ally_arm.py:334-335), setup_casts requires gate_cast (which cannot cast passive 706926, and attack_setup_cast_steps casts only at caster, behaviours.py:1819, while 804153 is TARGET_UNIT_TARGET_ALLY per AscensionCultistContracts.cpp:138 and 502241 Malevolence requires an enemy target), and option_phase_steps is never called in attack_swings (ally_arm.ally_health is neither emitted nor per-ally distinct); (3) no other existing kind combines melee auto-attacks against a dummy with grouped allies carrying a caster-applied aura at distinct per-ally health percentages. Nearest kind: metric_delta with attack_swings and ally_arm (needs ally phase_auras or setup casts before swings plus distinct per-ally health fixtures).",
-      "attempts": [
-        {
-          "agent": "cu-g7c",
-          "report": ".agents/plans/cu-g7c/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 706928,
@@ -4044,42 +4032,18 @@
   {
     "spell": 707753,
     "clause": "While above 40 Insanity,",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind measures a two-rate proc-chance increase above a non-zero control baseline (AscensionCultist.cpp:109-110 raises Dark Revelation 300313/706245 proc chance by +10% from 6%->16% / 20%->30% when Insanity 500706 > 40): procs.py:354 rejects 707753 (EffectMiscValue[0]=23 SPELLMOD_EFFECT3, not 18 SPELLMOD_CHANCE_OF_SUCCESS); cooldown_reset_rate.py:213-221 accepts only a single talent (no prerequisite learn list) and hard-alerts on any control-arm reset; flat_chance_rate.py:27 EVENT_METRICS admits only spell_cast_count, owned_creature_summon_count, and owned_creature_spell_cast_count whereas 300313/706245 cast no spell (only SMSG_CLEAR_COOLDOWN and direct Insanity Resource()). Nearest kind: cooldown_reset_rate (needs base_learn + non-zero control baseline rate contrast) or flat_chance_rate (needs spell_cooldown_clear_count / aura_stacks event metric).",
-      "attempts": [
-        {
-          "agent": "cu-h1",
-          "report": ".agents/plans/cu-h1/report.md"
-        },
-        {
-          "agent": "cu-h1b",
-          "report": ".agents/plans/cu-h1b/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "707753 behaviour_metric_delta threshold_40"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 707753,
     "clause": "your chance to trigger Dark Revelation is now increased by $s1%.",
     "labels": [
-      "707753 effect_value e0 #0"
+      "707753 behaviour_metric_delta above_40_learned"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind measures a two-rate proc-chance increase above a non-zero control baseline (AscensionCultist.cpp:109-110 raises Dark Revelation 300313/706245 proc chance by +10% from 6%->16% / 20%->30% when Insanity 500706 > 40): procs.py:354 rejects 707753 (EffectMiscValue[0]=23 SPELLMOD_EFFECT3, not 18 SPELLMOD_CHANCE_OF_SUCCESS); cooldown_reset_rate.py:213-221 accepts only a single talent (no prerequisite learn list) and hard-alerts on any control-arm reset; flat_chance_rate.py:27 EVENT_METRICS admits only spell_cast_count, owned_creature_summon_count, and owned_creature_spell_cast_count whereas 300313/706245 cast no spell (only SMSG_CLEAR_COOLDOWN and direct Insanity Resource()). Nearest kind: cooldown_reset_rate (needs base_learn + non-zero control baseline rate contrast) or flat_chance_rate (needs spell_cooldown_clear_count / aura_stacks event metric).",
-      "attempts": [
-        {
-          "agent": "cu-h1",
-          "report": ".agents/plans/cu-h1/report.md"
-        },
-        {
-          "agent": "cu-h1b",
-          "report": ".agents/plans/cu-h1b/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 707781,
