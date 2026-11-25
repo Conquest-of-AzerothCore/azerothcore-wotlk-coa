@@ -638,7 +638,7 @@ Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`,
 `owned_creature_remaining_ms`, `charm_entry`, `charm_distance`, `charm_aura_stacks`, `owned_creature_sent_faction`,
 `controls_self`, `charmed`, `private_instance`, `dynamic_object`, `dynamic_object_count`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `dynamic_object_radius`, `dynamic_object_size`, `distance`,
-`spell_proc_count`, `spell_proc_chance`,
+`spell_proc_count`, `spell_proc_chance`, `spell_proc_cooldown_ms`,
 `aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
 `carried_aura_count` (how many of the `spells` list the unit carries, optionally only from `caster`; for an
 effect that picks one of several auras at random),
@@ -886,7 +886,9 @@ snapshot it on one unit and assert another `relative_to` it to show that two uni
 These two count metrics accept each other's snapshots with `relative_to`. Subtract an engraving aura's proc count
 from its payload's total cast count to isolate a talent that casts the same payload without aura attribution.
 `spell_proc_chance` requires `spell` and reads the loaded `spell_proc` Chance, after a zero is replaced by the DBC
-ProcChance. `aura_proc_rate` requires `spell` (an aura on the actor), `target` and `type_mask` (proc flags), and runs
+ProcChance. `spell_proc_cooldown_ms` requires `spell` and reads the loaded `spell_proc` Cooldown, the internal
+cooldown each aura carries between procs.
+`aura_proc_rate` requires `spell` (an aura on the actor), `target` and `type_mask` (proc flags), and runs
 the aura's full proc decision, database filters, conditions, script CheckProc and the native chance roll, `trials`
 times (default 40000) on one synthetic event. It reports the percentage that would proc, without running the proc.
 The event deals 1000 damage, or 1000 effective healing with `heal`, from the actor to `target`, or from `target` to
