@@ -179,7 +179,7 @@
     "spell": 300272,
     "clause": "Increases the chance to trigger Presences by $s1%.",
     "labels": [
-      "300272 effect_value e0 #0"
+      "300272 behaviour_metric_delta presence_proc"
     ],
     "kind": "claim"
   },
@@ -3554,7 +3554,7 @@
     "spell": 803283,
     "clause": "Increases the chance to trigger your Presences by $s1%",
     "labels": [
-      "803283 effect_value e0 #0"
+      "803283 behaviour_metric_delta presence_proc"
     ],
     "kind": "claim"
   },
