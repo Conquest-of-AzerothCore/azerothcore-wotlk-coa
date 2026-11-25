@@ -365,6 +365,12 @@ namespace CoAPetBattles::Battle
         uint32_t Follower(uint64_t character) override { return sPetBattles->Followers().Follower(character); }
         void Suppress(uint64_t character, bool on) override { sPetBattles->Followers().Suppress(character, on); }
 
+        void Refused(uint64_t character, std::string const& command) override
+        {
+            LOG_INFO("module", "Pet battle: character {} sent '{}', which is not offered; the turn is sent again",
+                character, command.substr(0, 40));
+        }
+
         uint32_t SweepStandIns(uint64_t character, float yards) override
         {
             Player* player = Find(character);

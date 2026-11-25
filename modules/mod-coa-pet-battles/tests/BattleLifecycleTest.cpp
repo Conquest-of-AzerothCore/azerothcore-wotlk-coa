@@ -134,8 +134,9 @@ TEST(CoAPetBattlesLifecycle, RefusedAbilityAfterASwapGivesTheTurnBack)
     arena.Start();
     arena.RunFor(3000);
     ASSERT_TRUE(arena.world.SentStartingWith("pbt|turn|go;"));
+    ASSERT_TRUE(arena.world.SentStartingWith("pbt|st|P,3,1,"));
     arena.world.sent.clear();
-    arena.battles.Message(7, "pbt", "cmd", "S2");
+    arena.battles.Message(7, "pbt", "cmd", "S3");
     arena.RunFor(15000);
     ASSERT_TRUE(arena.world.SentStartingWith("pbt|turn|go;"));
     arena.world.sent.clear();
@@ -145,7 +146,7 @@ TEST(CoAPetBattlesLifecycle, RefusedAbilityAfterASwapGivesTheTurnBack)
     EXPECT_FALSE(arena.world.SentStartingWith("pbt|act|"));
     arena.battles.Message(7, "pbt", "cmd", "A1");
     arena.RunFor(5000);
-    EXPECT_TRUE(arena.world.SentStartingWith("pbt|act|P,2,"));
+    EXPECT_TRUE(arena.world.SentStartingWith("pbt|act|P,3,"));
 }
 
 TEST(CoAPetBattlesLifecycle, RefusedCommandIsReported)
@@ -153,7 +154,7 @@ TEST(CoAPetBattlesLifecycle, RefusedCommandIsReported)
     Arena arena(NewCatalog(), 1);
     arena.Start();
     arena.RunFor(3000);
-    arena.battles.Message(7, "pbt", "cmd", "S2");
+    arena.battles.Message(7, "pbt", "cmd", "S3");
     arena.RunFor(15000);
     arena.battles.Message(7, "pbt", "cmd", "A3");
     EXPECT_EQ(arena.world.refused, std::vector<std::string> { "A3" });

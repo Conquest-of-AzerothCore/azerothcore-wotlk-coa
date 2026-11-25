@@ -317,8 +317,9 @@ namespace CoAPetBattles::Battle
                 return;
             }
             bool const trap = !force && Engine::CanTrap(_eng);
-            Send("turn", std::string(force ? "force" : "go") + ";" + N(pet.cd[0]) + "," + N(pet.cd[1]) + "," +
-                N(pet.cd[2]) + ";" + (trap ? "1" : "0"));
+            _turn = std::string(force ? "force" : "go") + ";" + N(pet.cd[0]) + "," + N(pet.cd[1]) + "," +
+                N(pet.cd[2]) + ";" + (trap ? "1" : "0");
+            Send("turn", _turn);
         }
 
         void PlayRound(Engine::RoundResult result)
@@ -710,7 +711,12 @@ namespace CoAPetBattles::Battle
                 return;
             std::optional<std::string> const command = Legal(payload);
             if (!command)
+            {
+                _world.Refused(_character, payload);
+                if (!_turn.empty())
+                    Send("turn", _turn);
                 return;
+            }
             _waiting = false;
             std::string const enemy = Engine::AI(_eng, Side::E);
             PlayRound(Engine::Round(_eng, *command, enemy));
@@ -766,6 +772,7 @@ namespace CoAPetBattles::Battle
         double _enemyLevel;
         bool _over = false;
         bool _waiting = false;
+        std::string _turn;
         uint32_t _lastAct = 0;
         std::array<uint64_t, 2> _handles { 0, 0 };
         std::array<uint64_t, 2> _spawnOrder { 0, 0 };
