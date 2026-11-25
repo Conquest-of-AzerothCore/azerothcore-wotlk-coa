@@ -19877,6 +19877,11 @@
           "spell": 680603,
           "actor": "caster",
           "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
         }
       ],
       "shield_after_learn": {
@@ -19893,7 +19898,7 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read via shield_after_learn in both phases). 680555 Effect[0] aura 150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT bp=24+1=25% ($s1=25); AscensionCultist.cpp:279-280 sets 25% when 500706 <= 60. Level-60 Cultist base block value (Player.cpp:5614): (1 shield + 108*0.5 Str - 10) = 45; +25% = int(45*1.25) = 56, gain +11 (tol 0.5 excludes 10 = 22.2% and 12 = 26.7%). 500706=0 and 680603=0 read in both arms. Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read via shield_after_learn in both phases). 680555 Effect[0] aura 150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT bp=24+1=25% ($s1=25); AscensionCultist.cpp:279-280 sets 25% when 500706 <= 60. Level-60 Cultist base block value (Player.cpp:5614): (1 shield + 108*0.5 Str - 10) = 45; +25% = int(45*1.25) = 56, gain +11 (tol 0.5 excludes 10 = 22.2% and 12 = 26.7%). 500706=0, 680603=0, and 573315=0 (>60 marker, AscensionCultist.cpp:288) read in both arms. Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
     },
     {
       "spell": 680555,
@@ -19929,6 +19934,11 @@
           "spell": 680603,
           "actor": "caster",
           "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
         }
       ],
       "shield_after_learn": {
@@ -19945,7 +19955,7 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Boundary arm at exactly 60 Insanity (500706=60 and 680603=1 read via after_setup_stacks in both phases): stacks > 60 is false so 680555 stays +25% (45 -> 56, gain +11 +- 0.5, excluding doubled +50% = +22). Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Boundary arm at exactly 60 Insanity (500706=60, 680603=1, and 573315=0 (>60 marker, AscensionCultist.cpp:288) read via after_setup_stacks in both phases): stacks > 60 is false so 680555 stays +25% (45 -> 56, gain +11 +- 0.5, excluding doubled +50% = +22). Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
     },
     {
       "spell": 680555,
@@ -19981,6 +19991,11 @@
           "spell": 680603,
           "actor": "caster",
           "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 1
         }
       ],
       "shield_after_learn": {
@@ -19997,7 +20012,7 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-60 arm at 61 Insanity (500706=61 and 680603=1 read via after_setup_stacks in both phases; 1000 ms wait lets Refresh double 680555 to +50% at AscensionCultist.cpp:279-280): int(45*1.50) = 67, gain +22 (tol 0.5 excludes 21 = 46.7%, 23 = 51.1%, and undoubled +11). Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-60 arm at 61 Insanity (500706=61, 680603=1, and 573315=1 (>60 marker, AscensionCultist.cpp:288) read via after_setup_stacks in both phases; 1000 ms wait lets Refresh double 680555 to +50% at AscensionCultist.cpp:279-280): int(45*1.50) = 67, gain +22 (tol 0.5 excludes 21 = 46.7%, 23 = 51.1%, and undoubled +11). Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
     },
     {
       "spell": 680558,
@@ -20161,7 +20176,25 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-40 arm at 41 Insanity (500706=41 and 680602=1 read in both phases; after_auras_present confirms helper 680608 present in after phase). 680608 Effect[0] aura 107 SPELLMOD_EFFECT1 (+10) raises 680558 Effect[0] aura 51 from 0 to +10% (SpellAuraEffects.cpp:969-972), giving +5% + 10% = +15% total block_chance (5 -> 20, gain +15.0 +- 0.05). Reference search 2026-11-25: coa-history 680558/680608 0 events (passive/helper); coabuildhub spells_master_index.json 680558 matches verbatim ('block chance by 5%, plus an additional 10% while above 40 Insanity.'); installed Spell.dbc governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-40 arm at 41 Insanity (500706=41 and 680602=1 read in both phases; ally_arm confirms helper 680608 absent (0) in control and present (1) in treatment alongside after_auras_present). 680608 Effect[0] aura 107 SPELLMOD_EFFECT1 (+10) raises 680558 Effect[0] aura 51 from 0 to +10% (SpellAuraEffects.cpp:969-972), giving +5% + 10% = +15% total block_chance (5 -> 20, gain +15.0 +- 0.05). Reference search 2026-11-25: coa-history 680558/680608 0 events (passive/helper); coabuildhub spells_master_index.json 680558 matches verbatim ('block chance by 5%, plus an additional 10% while above 40 Insanity.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680608
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:143 {680558, 680608, 40}: threshold helper 680608 reads 0 in control (680558 unlearned) and 1 in treatment (680558 learned) at 41 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 680570,
@@ -20192,7 +20225,7 @@
     },
     {
       "spell": 680570,
-      "name": "Void Tolerance (Abyssal Ward grants 100% critical block, doubling blocked damage reduction)",
+      "name": "Void Tolerance (Abyssal Ward grants 100% critical block across 75 blocked strikes, doubling blocked damage reduction)",
       "kind": "metric_delta",
       "variant": "crit_block_damage",
       "label_suffix": "crit_block_damage",
@@ -20234,8 +20267,8 @@
         "spell": 998374,
         "health": 100000,
         "max_health": 100000,
-        "count": 1,
-        "wait_ms": 200,
+        "count": 75,
+        "wait_ms": 50,
         "after_trigger_ms": 200
       },
       "caster_avoidance": {
@@ -20260,18 +20293,36 @@
         "caster": "striker",
         "target": "caster"
       },
-      "before_expected": 100,
-      "expected": 157.5,
-      "expected_gain": 57.5,
-      "tolerance": 5.0,
+      "before_expected": 18100,
+      "expected": 33069.5,
+      "expected_gain": 14969.5,
+      "tolerance": 112.0,
       "wait_ms": 500,
       "expire_ms": 11000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 680570 triggers 680571 (aura 253 SPELL_AURA_MOD_BLOCK_CRIT_CHANCE bp=99+1=+100%) on Abyssal Ward 804670 cast (AscensionCultistAbilities.cpp:194-195). Passive striker casts 998374 (DmgClass 2 Physical [300..309], NO_ATTACK_MISS; 16255=-100 prevents crits) 200 ms after 804670 with caster_avoidance block=100 (verified 1 blocked / 0 unblocked per phase). Under 804670 (-50%) and 174 armor (-2.873%), incoming pre-block damage is [145..150]. Control (before learning 680570): normal block subtracts 1x block value (45) -> [100..105]. Treatment (with 680570 -> 680571 +100% crit block, Unit.cpp:1769-1770): critical block subtracts 2x block value (90) -> gain [55..60] (57.5 +- 5.0, strictly excluding normal block 102.5 and 50% crit block). Reference search 2026-11-25: coa-history 680570/680571 0 events (passive/proc; 804670 Abyssal Ward 53 casts in 19 logs); coabuildhub spells_master_index.json 680570 is an older rework ('Reduces the cooldown of Abyssal Ward by -30 sec', G-9); installed server Spell.dbc (680570 +10% block, 680571 +100% crit block for 10 sec on Abyssal Ward) governs."
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 680570 triggers 680571 (aura 253 SPELL_AURA_MOD_BLOCK_CRIT_CHANCE bp=99+1=+100%, 10000 ms) on Abyssal Ward 804670 cast (AscensionCultistAbilities.cpp:194-195); ally_arm confirms 680571 absent (0) in control and present (1) in treatment, and after_auras_present reconfirms 680571 in treatment. Striker in front at 3 yd casts 998374 (DmgClass 2 Physical [300..309], 0 CD, NO_ATTACK_MISS; 16255=-100 prevents crits) N=75 times at 50 ms spacing (200 + 3750 + 500 = 4450 ms < 10000 ms 680571 duration) with caster_avoidance block=100 (verified 75 blocked / 0 unblocked in control, 150 blocked / 0 unblocked cumulative in treatment). Armor 182 = 2*63 Agi (126) + 8 Cultist starter cloth (2000057/2000058/2000059, rev_1787754600000000000.sql:317-319,408-410) + 48 shield 2129 (ItemAddon.dbc field 43): ClassicPlusCombat::ArmorConstant(60) = 5500 gives mitigation 182/5682 = 3.2031% (Unit.cpp:2552-2559, ceil). Abyssal Ward 804670 5 stacks decay -10%/hit across strikes 1..5 (mults 0.5, 0.6, 0.7, 0.8, 0.9), then 70 full strikes at 1.0: control normal block (-45/hit) mean 18345 (before_expected floor 18100); treatment 100% critical block (-90/hit, Unit.cpp:1769-1770) expected_gain 14969.5 +- 112.0 (sd 24.47, 4.58 sigma, false-fail 4.6e-6/run). Residual false-pass probability per pair (2 runs): at p=0.90 (10% off 100%) P(pass|p=0.90)^2 = 0.01993^2 = 0.000397 (0.040% <= 0.1%); at p=0.50, 2.11e-37. Reference search 2026-11-25: coa-history 680570/680571 0 events (804670 53 casts in 19 logs); coabuildhub 680570 is an older rework (G-9); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680571
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:194-195: 680571 (+100% crit block) is absent (0) in control (680570 unlearned) and present (1) in treatment (680570 learned) after 804670 cast"
+          }
+        ]
+      }
     },
     {
       "spell": 680570,
-      "name": "Void Tolerance (no critical block without casting Abyssal Ward)",
+      "name": "Void Tolerance (no critical block across 75 blocked strikes without casting Abyssal Ward)",
       "kind": "metric_delta",
       "variant": "crit_block_no_ward",
       "label_suffix": "crit_block_no_ward",
@@ -20307,8 +20358,8 @@
         "spell": 998374,
         "health": 100000,
         "max_health": 100000,
-        "count": 1,
-        "wait_ms": 200,
+        "count": 75,
+        "wait_ms": 50,
         "after_trigger_ms": 200
       },
       "caster_avoidance": {
@@ -20327,14 +20378,32 @@
         "caster": "striker",
         "target": "caster"
       },
-      "before_expected": 245,
-      "expected": 495.5,
-      "expected_gain": 250.5,
-      "tolerance": 6.0,
+      "before_expected": 18600,
+      "expected": 37387.5,
+      "expected_gain": 18787.5,
+      "tolerance": 112.0,
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Condition-off arm for 680570: casts neutral 804056 instead of Abyssal Ward 804670. Without 804670, 680571 is not applied even after learning 680570, so blocked 998374 ([300..309] * 0.9713 = [291..300] minus 1x block value 45 = [246..255]) deals 250.5 +- 6.0 (excluding crit block [201..210]). Reference search 2026-11-25: coa-history 680570/680571 0 events (passive/proc; 804670 Abyssal Ward 53 casts in 19 logs); coabuildhub spells_master_index.json 680570 is an older rework ('Reduces the cooldown of Abyssal Ward by -30 sec', G-9); installed server Spell.dbc (680570 +10% block, 680571 +100% crit block for 10 sec on Abyssal Ward) governs."
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). Condition-off arm for 680570: casts neutral 804056 instead of Abyssal Ward 804670; ally_arm confirms 680571 stays absent (0) in both control and treatment. Striker in front at 3 yd casts 998374 ([300..309], 16255=-100 no crit) N=75 times at 50 ms spacing with caster_avoidance block=100 (verified 75 blocked / 0 unblocked in control, 150 blocked / 0 unblocked cumulative in treatment). At 182 armor (2*63 Agi + 8 starter cloth + 48 shield; ClassicPlusCombat::ArmorConstant(60)=5500 -> -3.2031%, ceil), each normal block (-45) deals [246..255] (mean 250.5): 75 strikes mean 18787.5 +- 112.0 (sd 24.87, 4.50 sigma, before_expected floor 18600). Residual false-pass probability per pair (2 runs) at 10% spurious critical block (p=0.10): P(pass|p=0.10)^2 = 0.02003^2 = 0.000401 (0.040% <= 0.1%). Reference search 2026-11-25: coa-history 680570/680571 0 events (804670 53 casts in 19 logs); coabuildhub 680570 is an older rework (G-9); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680571
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:194-195: without casting Abyssal Ward 804670, 680571 remains absent (0) in both control and treatment"
+          }
+        ]
+      }
     },
     {
       "spell": 680570,
@@ -20405,6 +20474,11 @@
           "spell": 680603,
           "actor": "caster",
           "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
         }
       ],
       "shield_after_learn": {
@@ -20421,6 +20495,62 @@
       "expire_ms": 1000,
       "void_on_cast_failure": true,
       "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 680574 Effect[1] aura 253 SPELL_AURA_MOD_BLOCK_CRIT_CHANCE bp=19+1=20% ($s2=20, AscensionCultistContracts.cpp:155-158, AscensionCultist.cpp:289). 500706=0 and 680603=0 read in both arms: critical_block_chance (Unit::isBlockCritical total, CoAGameplayTest.cpp:5229) moves 0 -> 20 (+-0.05). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+20% critical block chance at 59 Insanity below threshold)",
+      "kind": "metric_delta",
+      "variant": "crit_block_at_59",
+      "label_suffix": "crit_block_at_59",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          59,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 59
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Below-60 arm at 59 Insanity (500706=59, 680603=0, 573315=0 read in both phases): neither 680603 (>=60) nor stacks > 60 doubling applies, so critical_block_chance moves 0 -> 20 (+-0.05), contrasting with 60 Insanity (alerts at 40 vs 20) and 61 Insanity (alerts at 60 vs 40). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
     },
     {
       "spell": 680574,
@@ -20456,6 +20586,11 @@
           "spell": 680603,
           "actor": "caster",
           "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
         }
       ],
       "shield_after_learn": {
@@ -20505,6 +20640,11 @@
         },
         {
           "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
           "actor": "caster",
           "stacks": 1
         }
@@ -20590,7 +20730,25 @@
       "expected": 3,
       "wait_ms": 800,
       "expire_ms": 9000,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 560502 grants helper 630891 (-25% CD aura 108 MiscValue 11 on 572141/500110) when 500706 > 60 (AscensionCultistData.h:142). 500706=61 and 680603=1 read in both arms; after_auras_present confirms 630891 in treatment. 572141 base CD 8000 ms -> -25% = 6000 ms (cut 2000 ms). Second attempt at 6150 ms (reset_cooldown false): refused in control (1 cast), accepted in treatment (1 + 2 = 3 casts), excluding 10% under the 2000 ms cut (6200 ms). Paired with shieldtoss_early and shieldtoss_at_60. Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 560502 grants helper 630891 (-25% CD aura 108 MiscValue 11 on 572141/500110) when 500706 > 60 (AscensionCultistData.h:142). 500706=61 and 680603=1 read in both arms; ally_arm confirms helper 630891 absent (0) in control and present (1) in treatment alongside after_auras_present. 572141 base CD 8000 ms -> -25% = 6000 ms (cut 2000 ms). Second attempt at 6150 ms (reset_cooldown false): refused in control (1 cast), accepted in treatment (1 + 2 = 3 casts), excluding 10% under the 2000 ms cut (6200 ms). Paired with shieldtoss_early and shieldtoss_at_60. Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 560502,
@@ -20658,7 +20816,25 @@
       "expected": 2,
       "wait_ms": 800,
       "expire_ms": 9000,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Lower-bound bracket for 560502 on 572141 (8000 -> 6000 ms) at 61 Insanity (500706=61, 680603=1, 630891 verified): second attempt at 5850 ms is refused in both control (1) and treatment (1 + 1 = 2), excluding 10% over the 2000 ms cut (5800 ms) and full CD removal. Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Lower-bound bracket for 560502 on 572141 (8000 -> 6000 ms) at 61 Insanity (500706=61, 680603=1, 630891 read 0 in control and 1 in treatment via ally_arm + after_auras_present): second attempt at 5850 ms is refused in both control (1) and treatment (1 + 1 = 2), excluding 10% over the 2000 ms cut (5800 ms) and full CD removal. Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 560502,
@@ -20793,7 +20969,25 @@
       "expected": 3,
       "wait_ms": 800,
       "expire_ms": 11000,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 500110 Gaze of C'Thun base CD 10000 ms -> -25% = 7500 ms (cut 2500 ms). At 61 Insanity (500706=61, 680603=1, 630891 verified), second attempt at 7700 ms is refused in control (1) and succeeds in treatment (1 + 2 = 3), excluding 10% under the 2500 ms cut (7750 ms). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 500110 Gaze of C'Thun base CD 10000 ms -> -25% = 7500 ms (cut 2500 ms). At 61 Insanity (500706=61, 680603=1, 630891 read 0 in control and 1 in treatment via ally_arm + after_auras_present), second attempt at 7700 ms is refused in control (1) and succeeds in treatment (1 + 2 = 3), excluding 10% under the 2500 ms cut (7750 ms). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 560502,
@@ -20861,7 +21055,25 @@
       "expected": 2,
       "wait_ms": 800,
       "expire_ms": 11000,
-      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Lower-bound bracket for 560502 on 500110 (10000 -> 7500 ms) at 61 Insanity (500706=61, 680603=1, 630891 verified): second attempt at 7300 ms is refused in both control (1) and treatment (1 + 1 = 2), excluding 10% over the 2500 ms cut (7250 ms). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs."
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Lower-bound bracket for 560502 on 500110 (10000 -> 7500 ms) at 61 Insanity (500706=61, 680603=1, 630891 read 0 in control and 1 in treatment via ally_arm + after_auras_present): second attempt at 7300 ms is refused in both control (1) and treatment (1 + 1 = 2), excluding 10% over the 2500 ms cut (7250 ms). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 560502,
@@ -21235,7 +21447,7 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 560091 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 (armor) MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), bp=14+1=+15% ($s1=15; SpellInfo.cpp:388-391, StatSystem.cpp:390). ItemAddon.dbc field 43 gives item 2129 Reborn armor = 48; Cultist level-60 base armor = Agility 67*2 (134) + shield 48 = 182. 15% of 48 = 7.2 -> int(182 + 7.2) = 189, gain +7 (tol 0.5 excludes 6 = 12.5% and 8 = 16.7%, i.e. 10% off 15%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 560091 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 (armor) MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), bp=14+1=+15% ($s1=15; SpellInfo.cpp:388-391, StatSystem.cpp:390). ItemAddon.dbc field 43 gives item 2129 Reborn armor = 48; base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410) + shield 48 = 182. 15% of 48 = 7.2 -> int(182 + 7.2) = 189, gain +7 (tol 0.5 excludes 6 = 12.5% and 8 = 16.7%, i.e. 10% off 15%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
     },
     {
       "spell": 560091,
@@ -21261,7 +21473,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "No-shield control arm: trigger_spell 578263 Netherstrike (2H weapon required; dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield in slot 16). Base armor is Agility 67*2 = 134 (48 shield armor absent); learning 560091 adds 0 armor (134 -> 134 +- 0.5), proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+      "observe_source": "No-shield control arm: trigger_spell 578263 Netherstrike (2H weapon required; dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield in slot 16). With no shield equipped (48 shield armor absent), base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410); learning 560091 adds 0 armor (134 -> 134 +- 0.5), proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
     },
     {
       "spell": 560091,
@@ -21323,7 +21535,7 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 561336 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 MiscValueB 64, bp=29+1=+30% ($s1=30; SpellInfo.cpp:388-391, StatSystem.cpp:390). Item 2129 Reborn armor = 48 (ItemAddon.dbc field 43); base armor 134 + 48 = 182; 30% of 48 = 14.4 -> int(182 + 14.4) = 196, gain +14 (tol 0.5 excludes 13 = 27.1% and 15 = 31.3%, strictly inside +-10% of 30%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 561336 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 MiscValueB 64, bp=29+1=+30% ($s1=30; SpellInfo.cpp:388-391, StatSystem.cpp:390). Item 2129 Reborn armor = 48 (ItemAddon.dbc field 43); base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410) + shield 48 = 182; 30% of 48 = 14.4 -> int(182 + 14.4) = 196, gain +14 (tol 0.5 excludes 13 = 27.1% and 15 = 31.3%, strictly inside +-10% of 30%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
     },
     {
       "spell": 561336,
@@ -21349,7 +21561,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "No-shield control arm: trigger_spell 578263 (dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield). Armor remains 134 -> 134 (+-0.5) before and after learning 561336, proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+      "observe_source": "No-shield control arm: trigger_spell 578263 (dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield). Armor (base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410)) remains 134 -> 134 (+-0.5) before and after learning 561336, proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
     },
     {
       "spell": 561336,
