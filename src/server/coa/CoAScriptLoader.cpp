@@ -23,6 +23,7 @@ void AddAscensionTravelPermitScripts();
 void AddSC_AscensionRulesets();
 void AddSC_AscensionTrainerProficiency();
 void AddSC_AscensionMercenary();
+void AddSC_AscensionMercenaryCriminal();
 void AddSC_AscensionHighRisk();
 void AddSC_AscensionHonorableCombat();
 void AddSC_AscensionFelCommutation();
@@ -878,6 +879,7 @@ void AddCoAScripts()
     AddSC_AscensionRulesets();
     AddSC_AscensionTrainerProficiency();
     AddSC_AscensionMercenary();
+    AddSC_AscensionMercenaryCriminal();
     AddSC_AscensionHighRisk();
     AddSC_AscensionHonorableCombat();
     AddSC_AscensionFelCommutation();

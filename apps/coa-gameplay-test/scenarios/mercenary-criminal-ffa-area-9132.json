@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: striking a same-faction player in the Gurubashi Arena gives no Criminal (#9132)",
+  "contract": [
+    "Issue #9132 and the PR author's ruling (2026-11-25): free-for-all PvP areas such as the Gurubashi Arena are",
+    "excluded from Criminal: Blood On Your Hands 9930873. A High-Risk Human Mercenary and a Human without a",
+    "ruleset stand on the arena floor at game_tele 86 'BattleRing' (-13210.4, 294.518, 21.8575; area 2177 Battle",
+    "Ring carries AREA_FLAG_ARENA), which first has to give the Human the native free-for-all flag; the Mercenary",
+    "strikes first and gets no Criminal. Dodge and parry are zeroed on the Human so the hits land."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 600,
+      "expertise_rating": 600
+    },
+    {
+      "id": "brawler",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary-to-be is in High-Risk",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and takes up Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 0,
+      "x": -13212.4,
+      "y": 294.518,
+      "z": 21.8575,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "brawler",
+      "map": 0,
+      "x": -13210.4,
+      "y": 294.518,
+      "z": 21.8575,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive at the Gurubashi Arena",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Gurubashi Arena puts the other Human in free-for-all PvP",
+      "actor": "brawler",
+      "metric": "free_for_all_pvp",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_health",
+      "actor": "mercenary",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "brawler",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "brawler",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "mercenary",
+      "metric": "melee_damage_count",
+      "save_as": "arena_swings"
+    },
+    {
+      "action": "attack",
+      "label": "The Mercenary strikes the same-faction Human first",
+      "actor": "mercenary",
+      "target": "brawler"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary's hits land",
+      "actor": "mercenary",
+      "metric": "melee_damage_count",
+      "relative_to": "arena_swings",
+      "min": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mercenary"
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong Criminal application time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: fighting in a free-for-all area gives no Criminal",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 0
+    }
+  ]
+}

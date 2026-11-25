@@ -1,0 +1,486 @@
+{
+  "schema": 1,
+  "name": "Criminal: Blood On Your Hands refuses travel teleports and summons but not Blink (#9132)",
+  "contract": [
+    "Issue #9132. The 9930873 tooltip says its bearer cannot retreat using teleport spells or hearthstones, and",
+    "the PR author's ruling (2026-11-25) blocks every travel teleport, vanity items included, while combat",
+    "movement stays. Hearthstone 8690 (SPELL_EFFECT_TELEPORT_UNITS to the home bind) and Teleport: Stormwind 3561",
+    "(to a spell_target_position) fail silently (SPELL_FAILED_DONT_REPORT, 27) and leave the Criminal in place;",
+    "as in original Ascension footage the PR author reviewed on 2026-11-25, the player is told 'You cannot escape",
+    "while the No Retreat debuff is active!' (SMSG_NOTIFICATION) for every refused teleport; an accepted Call To",
+    "Arms 804723 summon and a group member's Portal to Stormwind (gameobject 176296, Portal Effect 17334 cast by",
+    "its user on itself) and CoA's Homebound Portal (item 97758, gameobject 80775, spell 93187: a dummy effect",
+    "that teleports to the owner's hearth) do not move it (the same summon, accepted again once Criminal is",
+    "lifted, does); Blink 1953 (a leap, not a fixed-destination teleport) is cast without a failure. Once",
+    "Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": -5805.16,
+    "y": -3899.4,
+    "z": -95.32,
+    "o": 3.2
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "g",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3899.4,
+      "z": -95.32,
+      "o": 3.2
+    },
+    {
+      "action": "teleport",
+      "actor": "mage",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3839.4,
+      "z": -95.32,
+      "o": 3.2
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 8690
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 3561
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 1953
+    },
+    {
+      "action": "add_item",
+      "actor": "mage",
+      "item": 17031,
+      "count": 2
+    },
+    {
+      "action": "set_aura",
+      "label": "The Mage becomes a Criminal",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "position_x",
+      "save_as": "start_x"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "position_y",
+      "save_as": "start_y"
+    },
+    {
+      "action": "cast",
+      "label": "The Criminal tries its Hearthstone",
+      "actor": "mage",
+      "spell": 8690
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Hearthstone is refused",
+      "actor": "mage",
+      "metric": "cast_failure",
+      "spell": 8690,
+      "equals": 27,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "with the No Retreat message",
+      "actor": "mage",
+      "metric": "server_packet_contains",
+      "opcode": 459,
+      "row": 544567129,
+      "text": "You cannot escape while the No Retreat debuff is active!",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_teleport"
+    },
+    {
+      "action": "cast",
+      "label": "The Criminal tries Teleport: Stormwind",
+      "actor": "mage",
+      "spell": 3561
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the teleport is refused",
+      "actor": "mage",
+      "metric": "cast_failure",
+      "spell": 3561,
+      "equals": 27,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "with its own No Retreat message",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "relative_to": "before_teleport",
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "label": "Wait out both cast times in case a cast went through anyway",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "The Criminal is still in Thousand Needles",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "at its starting spot",
+      "actor": "mage",
+      "metric": "position_y",
+      "relative_to": "start_y",
+      "min": -2,
+      "max": 2
+    },
+    {
+      "action": "group",
+      "actor": "g",
+      "target": "mage"
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 804723
+    },
+    {
+      "action": "client_packet",
+      "label": "Select the Criminal (CMSG_SET_SELECTION)",
+      "actor": "g",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "mage"
+        }
+      ]
+    },
+    {
+      "action": "cast",
+      "label": "A Guardian group member summons the Criminal",
+      "actor": "g",
+      "spell": 804723
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the summon cast completes",
+      "actor": "g",
+      "metric": "spell_cast_count",
+      "spell": 804723,
+      "min": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_summon"
+    },
+    {
+      "action": "client_packet",
+      "label": "The Criminal accepts the summon, and the packet hook drops the accept (CMSG_SUMMON_RESPONSE)",
+      "actor": "mage",
+      "opcode": 684,
+      "consumed": true,
+      "fields": [
+        {
+          "actor_guid": "g"
+        },
+        {
+          "u8": 1
+        }
+      ],
+      "early": false
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong summon time to land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the accepted summon does not move the Criminal",
+      "actor": "mage",
+      "metric": "distance",
+      "target": "g",
+      "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "and the Criminal is told why",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "relative_to": "before_summon",
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "CONTROL: Criminal is lifted for a moment",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: the same pending summon is accepted again, through to the core handler",
+      "actor": "mage",
+      "opcode": 684,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "g"
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a law-abiding player is moved to the summoner, so the summon was offered",
+      "actor": "mage",
+      "metric": "distance",
+      "target": "g",
+      "max": 5,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "The Mage is a Criminal again",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "The Guardian opens a Portal to Stormwind beside itself",
+      "actor": "g",
+      "entry": 176296
+    },
+    {
+      "action": "teleport",
+      "actor": "mage",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3897.4,
+      "z": -95.32,
+      "o": 3.2
+    },
+    {
+      "action": "wait",
+      "label": "Let the Criminal arrive at the portal",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_portal"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The Criminal steps into its group member's portal",
+      "actor": "mage",
+      "entry": 176296,
+      "owner": "g"
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong portal teleport time to land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the portal does not take the Criminal away",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the Criminal is told why",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "relative_to": "before_portal",
+      "min": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "g",
+      "item": 97758,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "label": "The Guardian places a Homebound Portal beside the Criminal",
+      "actor": "g",
+      "item": 97758,
+      "spell": 93186,
+      "destination": {
+        "x": -5803.16,
+        "y": -3897.4,
+        "z": -95.32
+      }
+    },
+    {
+      "action": "wait",
+      "label": "Let the 15 second cast finish and the portal appear",
+      "ms": 16000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Homebound Portal stands within reach",
+      "actor": "mage",
+      "metric": "nearby_gameobject_count",
+      "entry": 80775,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_homebound"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The Criminal steps through the Homebound Portal",
+      "actor": "mage",
+      "entry": 80775,
+      "owner": "g"
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong Homebound transfer time to land",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Homebound Portal does not send the Criminal to the owner's hearth",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the Criminal is told why",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "relative_to": "before_homebound",
+      "min": 1
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the Criminal blinks forward",
+      "actor": "mage",
+      "spell": 1953
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blink is not refused",
+      "actor": "mage",
+      "metric": "cast_failure",
+      "spell": 1953,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and it is cast",
+      "actor": "mage",
+      "metric": "spell_cast_count",
+      "spell": 1953,
+      "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Criminal is removed",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "mage",
+      "spell": 3561
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: without Criminal the Mage teleports to Stormwind",
+      "actor": "mage",
+      "spell": 3561,
+      "ignore_gcd": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the teleport lands at its Stormwind target",
+      "actor": "mage",
+      "metric": "position_x",
+      "min": -9008.5,
+      "max": -8998.5,
+      "within_ms": 15000
+    }
+  ]
+}
