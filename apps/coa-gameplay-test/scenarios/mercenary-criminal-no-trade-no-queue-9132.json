@@ -6,7 +6,8 @@
     "author's ruling (2026-11-25) removes the player from battleground and Dungeon Finder queues as soon as the",
     "debuff lands. An open trade is cancelled for both sides (SMSG_TRADE_STATUS 3), no trade request to or from",
     "the Criminal arrives, a queued player gets a Warsong Gulch STATUS_NONE status and leaves the Dungeon Finder",
-    "queue, and rejoining either queue is refused while Criminal lasts."
+    "queue, and rejoining either queue is refused while Criminal lasts.",
+    "The core refuses a Dungeon Finder join while queued for a battleground, so a second Human uses it."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -24,6 +25,12 @@
     },
     {
       "id": "queuer",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "seeker",
       "race": 1,
       "class": 1,
       "level": 60
@@ -222,8 +229,8 @@
     },
     {
       "action": "lfg_join",
-      "label": "The Human also queues for a random dungeon",
-      "actor": "queuer",
+      "label": "Another Human queues for a random dungeon",
+      "actor": "seeker",
       "dungeons": [
         258
       ],
@@ -231,8 +238,8 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the Human is in the Dungeon Finder queue",
-      "actor": "queuer",
+      "label": "SETUP: that Human is in the Dungeon Finder queue",
+      "actor": "seeker",
       "metric": "lfg_state",
       "equals": 2,
       "within_ms": 5000
@@ -249,6 +256,13 @@
       "action": "set_aura",
       "label": "The queued Human becomes a Criminal",
       "actor": "queuer",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "and so does the Dungeon Finder Human",
+      "actor": "seeker",
       "spell": 9930873,
       "stacks": 1
     },
@@ -276,7 +290,7 @@
     {
       "action": "assert",
       "label": "DISCRIMINATING: and out of the Dungeon Finder queue",
-      "actor": "queuer",
+      "actor": "seeker",
       "metric": "lfg_state",
       "equals": 0,
       "within_ms": 2000
@@ -334,7 +348,7 @@
     {
       "action": "lfg_join",
       "label": "The Criminal tries the Dungeon Finder again",
-      "actor": "queuer",
+      "actor": "seeker",
       "dungeons": [
         258
       ],
@@ -348,7 +362,7 @@
     {
       "action": "assert",
       "label": "DISCRIMINATING: a Criminal cannot queue for a dungeon",
-      "actor": "queuer",
+      "actor": "seeker",
       "metric": "lfg_state",
       "equals": 0
     }

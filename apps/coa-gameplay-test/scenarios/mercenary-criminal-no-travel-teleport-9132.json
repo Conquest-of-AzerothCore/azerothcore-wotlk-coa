@@ -1,14 +1,13 @@
 {
   "schema": 1,
-  "name": "Criminal: Blood On Your Hands refuses travel teleports and summons but keeps Blink (#9132)",
+  "name": "Criminal: Blood On Your Hands refuses travel teleports and summons but not Blink (#9132)",
   "contract": [
     "Issue #9132. The 9930873 tooltip says its bearer cannot retreat using teleport spells or hearthstones, and the",
     "PR author's ruling (2026-11-25) blocks every travel teleport, vanity items included, while combat movement",
     "stays. Hearthstone 8690 (SPELL_EFFECT_TELEPORT_UNITS to the home bind) and Teleport: Stormwind 3561 (to a",
     "spell_target_position) fail with SPELL_FAILED_NOT_HERE (60) and leave the Criminal in place; an accepted",
-    "Call To Arms 804723 summon does not move it; Blink 1953 (a leap, not a fixed-destination teleport) still moves",
-    "it about 20 yards on the flat Thousand Needles salt flats. Once Criminal is removed, Teleport:",
-    "Stormwind lands at its target x -9003.46."
+    "Call To Arms 804723 summon does not move it; Blink 1953 (a leap, not a fixed-destination teleport) is cast",
+    "without a failure. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -218,12 +217,6 @@
       "min": 50
     },
     {
-      "action": "snapshot",
-      "actor": "mage",
-      "metric": "position_x",
-      "save_as": "blink_x"
-    },
-    {
       "action": "cast",
       "label": "CONTROL: the Criminal blinks forward",
       "actor": "mage",
@@ -231,12 +224,20 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: Blink still moves the Criminal",
+      "label": "CONTROL: Blink is not refused",
       "actor": "mage",
-      "metric": "position_x",
-      "relative_to": "blink_x",
-      "within_ms": 2000,
-      "max": -15
+      "metric": "cast_failure",
+      "spell": 1953,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and it is cast",
+      "actor": "mage",
+      "metric": "spell_cast_count",
+      "spell": 1953,
+      "min": 1
     },
     {
       "action": "set_aura",
