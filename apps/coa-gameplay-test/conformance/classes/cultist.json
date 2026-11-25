@@ -30251,6 +30251,62 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE at caster_level 50 (ADR 1291, G-32): floor(5 + 0.5 * (50 - 31)) = +14 arcane resistance (school 6) vs 0 control, paired with +19 at level 60 (res_arcane). Reference search 2026-11-25: see res_holy."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (teaches active spell 520326)",
+      "kind": "metric_delta",
+      "variant": "teaches_herald",
+      "label_suffix": "teaches_herald",
+      "quote": "Teaches you Herald of the Depths.",
+      "trigger_spell": 60235,
+      "gate_spell": 92131,
+      "target": "caster",
+      "cast_in_before": false,
+      "specialization": 40,
+      "unlearn_after_specialization": [
+        92131,
+        520326
+      ],
+      "metric": "knows_spell",
+      "fields": {
+        "spell": 520326
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Herald of the Depths 92131 (level-10 automatic passive of specialization 40 Heretic, AscensionTaughtAbilityData.h:35 {25, 40, 10, 92131, 520326}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1082-1104) teaches active spell Herald of the Depths 520326 when 92131 is learned in specialization 40. Switches to spec 40 (specialization 40, ADR 1102), then unlearns auto-learned [92131, 520326] via unlearn_after_specialization (ADR 1292) so control arm reads knows_spell(520326) == 0; real learn of 92131 between phases teaches 520326 (after == 1). Self-contained entry with no dependency on other 92131 entries. Reference search 2026-11-25: coa-history 520326: active form casts present; coabuildhub spells_master_index.json 92131 matches verbatim ('Teaches you Herald of the Depths.')."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (teaches active spell 567524)",
+      "kind": "metric_delta",
+      "variant": "teaches_dreadnought",
+      "label_suffix": "teaches_dreadnought",
+      "quote": "Teaches you Dreadnought.",
+      "trigger_spell": 60235,
+      "gate_spell": 680750,
+      "target": "caster",
+      "cast_in_before": false,
+      "specialization": 96,
+      "unlearn_after_specialization": [
+        680750,
+        567524
+      ],
+      "metric": "knows_spell",
+      "fields": {
+        "spell": 567524
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Dreadnought 680750 (level-10 automatic passive of specialization 96 Dreadnought, AscensionTaughtAbilityData.h:36 {25, 96, 10, 680750, 567524}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1082-1104) teaches active spell Dreadnought 567524 when 680750 is learned in specialization 96. Switches to spec 96 (specialization 96, ADR 1102), then unlearns auto-learned [680750, 567524] via unlearn_after_specialization (ADR 1292) so control arm reads knows_spell(567524) == 0; real learn of 680750 between phases teaches 567524 (after == 1). Self-contained entry with no dependency on other 680750 entries. Reference search 2026-11-25: coabuildhub spells_master_index.json 680750 matches verbatim ('Teaches you Dreadnought.')."
     }
   ],
   "player_observations": [],

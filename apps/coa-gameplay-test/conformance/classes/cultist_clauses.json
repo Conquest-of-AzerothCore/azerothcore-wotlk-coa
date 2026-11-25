@@ -67,7 +67,9 @@
   {
     "spell": 92131,
     "clause": "Teaches you Herald of the Depths.",
-    "labels": [],
+    "labels": [
+      "92131 behaviour_metric_delta teaches_herald"
+    ],
     "kind": "claim"
   },
   {
@@ -2738,7 +2740,9 @@
   {
     "spell": 680750,
     "clause": "Teaches you Dreadnought.",
-    "labels": [],
+    "labels": [
+      "680750 behaviour_metric_delta teaches_dreadnought"
+    ],
     "kind": "claim"
   },
   {
