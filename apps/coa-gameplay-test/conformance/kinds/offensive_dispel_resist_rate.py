@@ -49,6 +49,7 @@ class OffensiveDispelResistSpec:
     trials: int | None = None
     control_trials: int | None = None
     buff_source: str = ''
+    gate_auras: tuple[tuple[int, int], ...] = ()
 
 
 def clamped_survive_rate(resist_pct: float) -> float:
@@ -198,8 +199,24 @@ def arm_risk(spec: OffensiveDispelResistSpec) -> dict:
             'false_pass_pair': fp, 'max_false_pass_pair': max(fp.values())}
 
 
+def parse_gate_auras(spell: int, raw) -> tuple[tuple[int, int], ...]:
+    if raw is None:
+        return ()
+    if not isinstance(raw, list):
+        raise ValueError(f'{spell} {KIND} gate_auras must be a list of [spell, stacks] pairs, not {raw!r}')
+    parsed: list[tuple[int, int]] = []
+    for item in raw:
+        if not isinstance(item, list) or len(item) != 2 or any(type(v) is not int for v in item) \
+                or item[0] <= 0 or item[1] < 0:
+            raise ValueError(f'{spell} {KIND} gate_auras item must be [positive_spell_id, non_negative_stacks], '
+                             f'not {item!r}')
+        parsed.append((item[0], item[1]))
+    return tuple(parsed)
+
+
 def offensive_dispel_resist_spec(entry: dict) -> OffensiveDispelResistSpec:
     spell = int(entry['spell'])
+    gate_auras = parse_gate_auras(spell, entry.get('gate_auras'))
     spec = OffensiveDispelResistSpec(
         spell, entry['name'], entry['quote'], entry['label_suffix'], int(entry['buff_spell']),
         float(entry['treatment_resist_pct']), float(entry.get('control_resist_pct', 0.0)),
@@ -211,7 +228,10 @@ def offensive_dispel_resist_spec(entry: dict) -> OffensiveDispelResistSpec:
         int(entry.get('parts', 1)), float(entry.get('residual', DEFAULT_RESIDUAL)),
         None if entry.get('trials') is None else int(entry['trials']),
         None if entry.get('control_trials') is None else int(entry['control_trials']),
-        str(entry.get('buff_source', '')))
+        str(entry.get('buff_source', '')),
+        gate_auras)
+    if spec.gate_auras and spec.gate_cast is None:
+        raise ValueError(f'{spell} {KIND} gate_auras requires gate_cast')
     if spec.target not in TARGETS:
         raise ValueError(f'{spell} {KIND} target must be one of {TARGETS}, not {spec.target!r}')
     if spec.parts < 1 or not 0 < spec.residual < 1 or spec.gate_settle_ms < 0:
@@ -276,6 +296,8 @@ def arm_steps(records: Records, spec: OffensiveDispelResistSpec, arm: str, count
                 steps.append({'action': 'wait', 'label': f'{KIND} gate off settle', 'ms': spec.gate_settle_ms})
         else:
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.gate_cast})
+            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                      for aura, stacks in spec.gate_auras]
             steps += required_aura_steps(facts_of(records, spec.gate_cast))
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.gate_cast, 'target': CASTER})
             if spec.gate_settle_ms:

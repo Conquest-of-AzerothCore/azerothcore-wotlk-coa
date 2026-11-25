@@ -93,11 +93,28 @@
       "citation": "2026-08-31 19:18:56.205, spell 806830 Hammer of Twilight, Ascension combat log, private archive"
     }
   ],
-  "disabled_foreign_effects": [],
+  "disabled_foreign_effects": [
+    {
+      "spell": 806769,
+      "effect": 0,
+      "reason": "AscensionCultistContracts.cpp:234-235 clears info->Effects[0].Effect = 0 for Blessing of Yogg-Saron 806769 at load time; the -5 s Herald of the Depths duration cut is delivered by AscensionCultistAbilities.cpp:153-154 (OnCalcMaxDuration reading Amount(806769)) and proven by ledger row 425 (807128 behaviour_metric_delta duration_held and duration_gone)."
+    }
+  ],
   "foreign_aura_grants": [],
   "effect_overrides": [],
   "item_armor_subclass_effects": [],
-  "unmodelled_effects": [],
+  "unmodelled_effects": [
+    {
+      "spell": 802728,
+      "effect": 0,
+      "reason": "Spell.dbc 802728 Effect[0] is 190 (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, aura 290 SPELL_AURA_MOD_CRIT_PCT +10%), applied only to controlled summons via UnitAura::FillTargetMap and never to the caster; passives.py has no summon-carrier probe. Behaviour-proven by ledger row 371 claim 0 (802728 behaviour_metric_delta tentacle_crit_chance)."
+    },
+    {
+      "spell": 802728,
+      "effect": 1,
+      "reason": "Spell.dbc 802728 Effect[1] is 190 (SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS +10%), applied only to controlled summons via UnitAura::FillTargetMap and never to the caster; CoAGameplayTest.cpp:5890-5891 spell_critical_damage reads the player only and no owned_creature_spell_critical_damage metric exists. Behaviour-proven by ledger row 371 claim 1 (802728 behaviour_hit_ratio tentacle_crit_damage)."
+    }
+  ],
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
@@ -5028,7 +5045,7 @@
           ],
           [
             500706,
-            0
+            40
           ]
         ]
       },
@@ -5043,14 +5060,14 @@
           ],
           [
             500706,
-            0
+            40
           ]
         ]
       },
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "301315 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 0 (SPELLMOD_DAMAGE), EffectBasePoints[1] 14 + EffectDieSides[1] 1 = +15% ($s2 = 15), EffectSpellClassMask[5] 524288 = SpellFamilyFlags[2] 524288 of Eldritch Shock damage 808043 (triggered by casting Eldritch Shock 808036 on enemy; Spell.dbc). Precondition fixtures: 823764 (spellpen), 500706 cleared to 0, +20000 SP. Mean non-critical 808043 hit rises by +15% (G-19 band +13% to +17%) after a real learn of 301315 over the unlearned control. Reference search 2026-11-24: coa-history spell 301315: 0 events in 186 logs (positive control 808036 Eldritch Shock: 2 casts); coabuildhub spells_master_index.json entry 301315 is an older state; installed Spell.dbc governs (G-9)."
+      "observe_source": "301315 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 0 (SPELLMOD_DAMAGE), EffectBasePoints[1] 14 + EffectDieSides[1] 1 = +15% ($s2 = 15), EffectSpellClassMask[5] 524288 = SpellFamilyFlags[2] 524288 of Eldritch Shock damage 808043 (triggered by casting Eldritch Shock 808036 on enemy; Spell.dbc). Precondition fixtures: 823764 (spellpen), 500706 held at 40, +20000 SP. Mean non-critical 808043 hit rises by +15% (G-19 band +13% to +17%) after a real learn of 301315 over the unlearned control. Reference search 2026-11-24: coa-history spell 301315: 0 events in 186 logs (positive control 808036 Eldritch Shock: 2 casts); coabuildhub spells_master_index.json entry 301315 is an older state; installed Spell.dbc governs (G-9)."
     },
     {
       "spell": 300304,
@@ -7872,7 +7889,7 @@
       "critical": false,
       "trials": 10,
       "void_on_cast_failure": true,
-      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc — owner ruling Q-cu-10 / O-12, Cultist ADR 0005) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (AscensionCultistAbilities.cpp:228-234 checks GetScriptHealingIncludingOverheal() to grant 705107, expected ratio 2.0, +100% inside G-19 [95%, 105%]). Paired with heal_to_dmg (damaged target). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 owner ruling Q-cu-10 / O-12, Cultist ADR 0005) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (AscensionCultistAbilities.cpp:228-234 checks GetScriptHealingIncludingOverheal() to grant 705107, expected ratio 2.0, +100% inside G-19 [95%, 105%]). Paired with heal_to_dmg (damaged target). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 704880,
@@ -12913,7 +12930,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert — no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert \u2014 no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
     },
     {
       "spell": 502122,
@@ -13436,7 +13453,7 @@
       },
       "critical": true,
       "force_crit": "melee",
-      "trials": 40,
+      "trials": 120,
       "void_on_cast_failure": true,
       "expected_source": "$s1 = 25 (801539 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 15 SPELLMOD_CRIT_DAMAGE_BONUS, EffectBasePoints 24 + EffectDieSides 1 = +25%; AttributesEx2 includes ALLOW_WHILE_NOT_SHAPESHIFTED 0x80000; Spell.dbc). Netherstrike 578263 (DmgClass 2 melee, SchoolMask 32 Shadow, TargetAuraState 13 <35% HP, Godblade 2531 Great Axe 90.86-127.3 normalized 3.3): Unit.cpp:1755-1761 applies SPELLMOD_CRIT_DAMAGE_BONUS to the crit bonus above base (100% -> 125%, total crit 2.0x -> 2.25x, ratio 2.25 / 2.0 = 1.125 = +12.5%; G-19 band +10.5% to +14.5% excludes 0% and 2x +25%). Both arms hold dummy at 30% HP with 823764 (no partial resist) and force melee crits; treatment learns 801539 for real. Reference search 2026-11-24: coa-history (186 logs) has 502122 (8145 casts in 14 logs), 578263 (256 casts in 3 logs), 805115 (22 casts in 6 logs), and 0 events for passives 582856/300275/801539; coabuildhub spells_master_index.json matches 300275, 801539, 805115 verbatim (no entries for 502122/582856); installed server Spell.dbc governs."
     },
@@ -18335,7 +18352,8 @@
           ]
         }
       ],
-      "observe_source": "804670 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN -10% per stack ($s2 = 10), 5 stacks on cast, proc 807692 removes 1 stack per attack received (Spell.dbc). Over 2 strikes of Void Zone 92559 (977 Physical after armor, DmgClass 0, neither misses nor crits) under one 804670 cast: strike 1 takes 50% (489), strike 2 takes 60% (586), total 1075 (mean 537.5) vs control 1954 (mean 977), ratio 0.55015 vs expected 0.55 (excludes 0.50 no-decay and 0.60 double-decay under the G-19 band +-2.25 pts). Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+      "observe_source": "804670 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN -10% per stack ($s2 = 10), 5 stacks on cast, proc 807692 removes 1 stack per attack received (Spell.dbc). Over 2 strikes of Void Zone 92559 (977 Physical after armor, DmgClass 0, striker_spell_hit true removes the 4% natural MagicSpellHitResult miss chance and DmgClass 0 never crits) under one 804670 cast: strike 1 takes 50% (489), strike 2 takes 60% (586), total 1075 (mean 537.5) vs control 1954 (mean 977), ratio 0.55015 vs expected 0.55 (excludes 0.50 no-decay and 0.60 double-decay under the G-19 band +-2.25 pts). Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.').",
+      "striker_spell_hit": true
     },
     {
       "spell": 804670,
@@ -26688,7 +26706,7 @@
       "phase_auras": [
         [
           500706,
-          80,
+          95,
           "caster",
           "caster"
         ],
@@ -26765,7 +26783,7 @@
       "phase_auras": [
         [
           500706,
-          80,
+          95,
           "caster",
           "caster"
         ],
@@ -27000,7 +27018,9 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "No-shield control arm: trigger_spell 578263 Netherstrike (2H weapon required; dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield in slot 16). With no shield equipped (48 shield armor absent), base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410); learning 560091 adds 0 armor (134 -> 134 +- 0.5), proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+      "observe_source": "No-shield control arm: trigger_spell 578263 Netherstrike (2H weapon required; dummy held at 30%/25% HP with disable_regeneration and caster_health_from 100 / caster_health_pct 99 giving 1000 ms Unit::Update settle for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield in slot 16). With no shield equipped (48 shield armor absent), base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410); learning 560091 adds 0 armor (134 -> 134 +- 0.5), proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs.",
+      "caster_health_from": 100,
+      "caster_health_pct": 99
     },
     {
       "spell": 560091,
@@ -27088,7 +27108,9 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "No-shield control arm: trigger_spell 578263 (dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield). Armor (base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410)) remains 134 -> 134 (+-0.5) before and after learning 561336, proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+      "observe_source": "No-shield control arm: trigger_spell 578263 (dummy held at 30%/25% HP with disable_regeneration and caster_health_from 100 / caster_health_pct 99 giving 1000 ms Unit::Update settle for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield). Armor (base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410)) remains 134 -> 134 (+-0.5) before and after learning 561336, proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs.",
+      "caster_health_from": 100,
+      "caster_health_pct": 99
     },
     {
       "spell": 561336,
@@ -27164,6 +27186,12 @@
               "spell": 520326,
               "equals": 1
             }
+          ],
+          "auras": [
+            [
+              500706,
+              95
+            ]
           ]
         },
         {
@@ -27184,6 +27212,12 @@
               "spell": 520326,
               "equals": 1
             }
+          ],
+          "auras": [
+            [
+              500706,
+              95
+            ]
           ]
         }
       ],
@@ -27236,6 +27270,12 @@
               "spell": 520326,
               "equals": 1
             }
+          ],
+          "auras": [
+            [
+              500706,
+              95
+            ]
           ]
         }
       ],
@@ -31105,9 +31145,9 @@
               "periodic": true
             },
             "before_expected": 0,
-            "expected": 5,
-            "tolerance": 0,
-            "source": "500464 applies 806596 (8000 ms, amplitude 2000 ms) at +100 ms (4 ticks at 2.1, 4.1, 6.1, 8.1 s) and re-applies on the 2000 ms presence pulse at 8.1 s (5th tick at 10.1 s); floor((12000 - 100) / 2000) = 5 ticks"
+            "expected": 4.5,
+            "tolerance": 0.5,
+            "source": "500464 applies 806596 (8000 ms, amplitude 2000 ms) at +100 ms (4 ticks at 2.1, 4.1, 6.1, 8.1 s) and pulses every 2000 ms (5th pulse at exact t = 8100 ms expiry tie, AscensionCultistSummons.cpp:167,218,381): dummy-first order re-applies at 8.1 s for a 5th tick at 10.1 s (5 ticks), whereas 500464-first order sees HasAura true at 8.1 s and re-applies at 10.1 s with despawn at 12.0 s before a 12.1 s tick (4 ticks); 4.5 +- 0.5 accepts {4, 5} only"
           }
         ]
       },
@@ -31133,7 +31173,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Regression for Cultist ADR 0016 (Important #1): Presence of N'Zoth 803037 (forced_roll 803037 via SPELLMOD_CHANCE_OF_SUCCESS on instant Blade of the Empire 502122; 803037 ignores Thoughtseize ticks so only 1 creature 500464 spawns) with Eternal Grasp R2 704879 (+50% SPELLMOD_DURATION on 500707 DurationIndex 31 = 8000 ms -> 12000 ms). Creature 500464 pulses every 2000 ms from +100 ms, delivering 4 ticks of the first Thoughtseize 806596 (2.1, 4.1, 6.1, 8.1 s), re-applying a fresh 8000 ms 806596 at 8.1 s (5th tick at 10.1 s; expected tick count floor((12000 - 100) / 2000) = 5), and despawning at 12000 ms when the re-applied 806596 still has ~4100 ms remaining (> ExpiryGrace() = 200 ms, 10% of 806596's 2000 ms amplitude). Uncast control reads 0; at 11500 ms ([11300..11800] ms) 500464 is alive (1), 806596 is active (1), and 5 ticks have landed; at 12700 ms ([12400..13000] ms, 700 ms after despawn) 806596 is gone (0), whereas skipping ClearThoughtseize on natural expiry left 806596 active until 16100 ms. Precondition fixture 823764 prevents full resist."
+      "observe_source": "Regression for Cultist ADR 0016 (Important #1): Presence of N'Zoth 803037 (forced_roll 803037 via SPELLMOD_CHANCE_OF_SUCCESS on instant Blade of the Empire 502122; 803037 ignores Thoughtseize ticks so only 1 creature 500464 spawns) with Eternal Grasp R2 704879 (+50% SPELLMOD_DURATION on 500707 DurationIndex 31 = 8000 ms -> 12000 ms). Creature 500464 pulses every 2000 ms from +100 ms, delivering 4 ticks of the first Thoughtseize 806596 (2.1, 4.1, 6.1, 8.1 s), re-applying a fresh 8000 ms 806596 at 8.1 s or 10.1 s depending on exact t=8100 ms tick order between dummy expiry and 500464 pulse (5 ticks if dummy updates first, 4 ticks if 500464 updates first; expected 4.5 +- 0.5 accepts {4, 5} only), and despawning at 12000 ms when the re-applied 806596 still has ~4100 ms remaining (> ExpiryGrace() = 200 ms, 10% of 806596's 2000 ms amplitude). Uncast control reads 0; at 11500 ms ([11300..11800] ms) 500464 is alive (1), 806596 is active (1), and 4 or 5 ticks have landed (4.5 +- 0.5); at 12700 ms ([12400..13000] ms, 700 ms after despawn) 806596 is gone (0), whereas skipping ClearThoughtseize on natural expiry left 806596 active until 16100 ms. Precondition fixture 823764 prevents full resist."
     },
     {
       "spell": 572103,
@@ -35451,7 +35491,7 @@
           }
         ]
       },
-      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (second outcome of 'Damage dealt may end this effect.' — proving not every damaging hit ends it): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and verify aura 560109 PRESENT == 1 via after_setup_stacks right before trigger. Control deals no damage (1); treatment lands one unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage, confirmed 0 -> 1 via ally_arm, below the stock 1048 cap at SpellAuraEffects.cpp:548-562,7245-7253) and 560109 remains active (1). Paired with damage_breaks (large hit ends 560109: 1 -> 0). No break chance is asserted. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (second outcome of 'Damage dealt may end this effect.' \u2014 proving not every damaging hit ends it): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and verify aura 560109 PRESENT == 1 via after_setup_stacks right before trigger. Control deals no damage (1); treatment lands one unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage, confirmed 0 -> 1 via ally_arm, below the stock 1048 cap at SpellAuraEffects.cpp:548-562,7245-7253) and 560109 remains active (1). Paired with damage_breaks (large hit ends 560109: 1 -> 0). No break chance is asserted. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
     },
     {
       "spell": 255275,
@@ -45993,7 +46033,13 @@
       ],
       "gate_cast": 520326,
       "parts": 15,
-      "observe_source": "Forbidden Resilience 300287 Effect[0] BasePoints 24 + DieSides 1 = +25 ($s1 = 25; Spell.dbc); AscensionCultistContracts.cpp:110-111 sets SPELL_AURA_MOD_DISPEL_RESIST +25, gated on Herald of the Depths 520326 in AscensionCultist.cpp:294 and AscensionCultistAuras.cpp:137-138. Aura::CalcDispelChance (SpellAuras.cpp:1153-1178): 0% survive before learning 300287 with Herald active, 25% survive after real learn with Herald active, and 0% survive in gate_off with 300287 learned and Herald removed (pooled over 15 parts so every part finishes well within Herald's 20 s duration, residual <= 0.1% per pair)."
+      "observe_source": "Forbidden Resilience 300287 Effect[0] BasePoints 24 + DieSides 1 = +25 ($s1 = 25; Spell.dbc); AscensionCultistContracts.cpp:110-111 sets SPELL_AURA_MOD_DISPEL_RESIST +25, gated on Herald of the Depths 520326 in AscensionCultist.cpp:294 and AscensionCultistAuras.cpp:137-138. Aura::CalcDispelChance (SpellAuras.cpp:1153-1178): 0% survive before learning 300287 with Herald active, 25% survive after real learn with Herald active, and 0% survive in gate_off with 300287 learned and Herald removed (pooled over 15 parts so every part finishes well within Herald's 20 s duration, residual <= 0.1% per pair).",
+      "gate_auras": [
+        [
+          500706,
+          95
+        ]
+      ]
     },
     {
       "spell": 525060,
@@ -48875,5 +48921,16 @@
     "power": 0,
     "value": 1512,
     "source": "player_class_stats class 25 level 60 BaseMana 1512, read in the world database of the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable = 0); set before every cast of a scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
-  }
+  },
+  "value_ally_casts": [
+    {
+      "spell": 500751
+    },
+    {
+      "spell": 520345
+    },
+    {
+      "spell": 704476
+    }
+  ]
 }

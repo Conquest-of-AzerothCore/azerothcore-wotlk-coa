@@ -22,6 +22,7 @@ EFFECTS = range(3)
 HOSTILE_TARGETS = frozenset({2, 6, 15, 16, 24})
 SELF_TARGETS = frozenset({0, 1})
 FRIEND_TARGETS = frozenset({21})
+RAID_TARGETS = frozenset({57})
 RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 ALLY_CASTS_KEY = 'value_ally_casts'
@@ -197,6 +198,12 @@ def targets_ally(facts: RankFacts) -> bool:
                for effect in EFFECTS)
 
 
+def targets_raid(facts: RankFacts) -> bool:
+    return any(facts.effects[effect] and (facts.target_a[effect] in RAID_TARGETS
+                                          or facts.target_b[effect] in RAID_TARGETS)
+               for effect in EFFECTS)
+
+
 def targets_resurrect(facts: RankFacts) -> bool:
     return any(facts.effects[effect] in RESURRECT_EFFECTS for effect in EFFECTS)
 
@@ -223,8 +230,12 @@ def gap_closer_expectation(rank_id: int, spell_id: int, label: str, target_kind:
     return steps, expectation
 
 
-def aura_carrier(facts: RankFacts, effect: int) -> dict:
-    if facts.target_a[effect] in SELF_TARGETS or not is_hostile(facts):
+def aura_carrier(facts: RankFacts, effect: int, ally_cast: bool = False) -> dict:
+    if facts.target_a[effect] in SELF_TARGETS:
+        return {'actor': CASTER, 'caster': CASTER}
+    if ally_cast and facts.target_a[effect] in FRIEND_TARGETS | RAID_TARGETS:
+        return {'actor': ALLY, 'caster': CASTER}
+    if not is_hostile(facts):
         return {'actor': CASTER, 'caster': CASTER}
     return {'actor': TARGET, 'caster': CASTER}
 
@@ -589,6 +600,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                  calc_amount_hooks_measurement(label, spell_id, effect)]
                 + effect_modifier_measurements(records, label, spell_id, effect))
 
+    ally_cast = value_ally_cast(class_file, rank_id)
     summon_carrier = summon_aura_carrier(class_file, rank_id)
     summon_reads = False
 
@@ -600,7 +612,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         if carried_by_summon(carrier_effect):
             summon_reads = True
             return summon_aura_measurement(label, metric, rank_id, summon_carrier)
-        return measurement(label, metric=metric, spell=rank_id, **aura_carrier(facts, carrier_effect), **fields)
+        return measurement(label, metric=metric, spell=rank_id,
+                           **aura_carrier(facts, carrier_effect, ally_cast is not None), **fields)
 
     def summon_gap(carrier_effect: int, metric: str) -> str:
         return summon_aura_gap(metric) if carried_by_summon(carrier_effect) else ''
@@ -792,7 +805,6 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         expect(label, 'effect_value', None, '',
                GENERIC + 'tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")')
 
-    ally_cast = value_ally_cast(class_file, rank_id)
     cast_steps: list[dict] = []
     if not facts.passive:
         label = f'{rank_id} power_cost'
@@ -814,6 +826,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps.append({'action': 'die', 'actor': ALLY})
             cast['target'] = ALLY
         elif ally_cast is not None:
+            if targets_raid(facts):
+                cast_steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
             cast_steps += ally_setup_steps(records, ally_cast)
             cast['target'] = ALLY
         cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
