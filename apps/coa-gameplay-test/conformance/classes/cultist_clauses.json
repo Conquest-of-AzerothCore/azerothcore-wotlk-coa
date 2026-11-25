@@ -2091,10 +2091,13 @@
       },
       {
         "claim": "and now health per point of Intellect by $s1%.",
-        "labels": []
+        "labels": [
+          "560080 behaviour_metric_delta health_base",
+          "560080 behaviour_metric_delta health_int"
+        ]
       }
     ],
-    "reason": "Alert & owner question (tooltip wording '$s1%' = 200% vs server aura 328 +2/Int): Spell.dbc 560080 Effect[0]/Effect[1] are aura 328 (SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT) with BasePoints 199+1=200. Server StatSystem.cpp:80,96 adds CalculatePct(Intellect, 200) = +2 mana and +2 health per point of Intellect (measured in cu-t10/prove-b1: mana +142 at 71 Int [2297->2439], +742 at 371 Int [6797->7539]; health +142 at 71 Int [2278->2420], +742 at 371 Int [2278->3020]), matching coabuildhub's older wording ('You now gain an additional 2 mana per point of Intellect.'), whereas the Spell.dbc tooltip renders 'by 200%' (+200% of base 15 mana/Int would be +1570/+10570 mana, and base health/Int is 0). Needs owner ruling (likely client text fix to 'by 2', analogous to Q-cu-4 Malignant Armor)."
+    "reason": "Proven per owner ruling Cultist Q-cu-24 / O-16 (2026-11-25) and Cultist ADR 0021: 560080 applies +200% to Cultist mana from Intellect (15->45/Int above 20, 1->3/Int for first 20; +1570 at 71 Int, +10570 at 371 Int) and 0.25 * 3 = 0.75 health per Intellect (+53 at 71 Int, +278 at 371 Int) with 0 health from Intellect without the talent."
   },
   {
     "spell": 560091,
@@ -2417,10 +2420,13 @@
       },
       {
         "claim": "and now health per point of Intellect by $s1%.",
-        "labels": []
+        "labels": [
+          "561335 behaviour_metric_delta health_base",
+          "561335 behaviour_metric_delta health_int"
+        ]
       }
     ],
-    "reason": "Alert & owner question (tooltip wording '$s1%' = 400% vs server aura 328 +4/Int): Spell.dbc 561335 Effect[0]/Effect[1] are aura 328 with BasePoints 399+1=400. Server StatSystem.cpp:80,96 adds CalculatePct(Intellect, 400) = +4 mana and +4 health per point of Intellect (measured in cu-t10/prove-b1: mana +284 at 71 Int [2297->2581], +1484 at 371 Int [6797->8281]; health +284 at 71 Int [2278->2562], +1484 at 371 Int [2278->3762]), whereas Spell.dbc tooltip renders 'by 400%' (+400% of base 15 mana/Int would be +3140/+21140 mana, and base health/Int is 0). Needs owner ruling analogous to 560080 and Q-cu-4."
+    "reason": "Proven per owner ruling Cultist Q-cu-24 / O-16 (2026-11-25) and Cultist ADR 0021: 561335 applies +400% to Cultist mana from Intellect (15->75/Int above 20, 1->5/Int for first 20; +3140 at 71 Int, +21140 at 371 Int) and 0.25 * 5 = 1.25 health per Intellect (+88 at 71 Int, +463 at 371 Int) with 0 health from Intellect without the talent."
   },
   {
     "spell": 561336,
