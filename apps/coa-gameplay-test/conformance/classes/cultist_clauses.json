@@ -1883,10 +1883,21 @@
   {
     "spell": 560080,
     "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
-    "labels": [
-      "560080 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the amount of mana",
+        "labels": [
+          "560080 behaviour_metric_delta mana_base",
+          "560080 behaviour_metric_delta mana_int"
+        ]
+      },
+      {
+        "claim": "and now health per point of Intellect by $s1%.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Alert & owner question (tooltip wording '$s1%' = 200% vs server aura 328 +2/Int): Spell.dbc 560080 Effect[0]/Effect[1] are aura 328 (SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT) with BasePoints 199+1=200. Server StatSystem.cpp:80,96 adds CalculatePct(Intellect, 200) = +2 mana and +2 health per point of Intellect (measured in cu-t10/prove-b1: mana +142 at 71 Int [2297->2439], +742 at 371 Int [6797->7539]; health +142 at 71 Int [2278->2420], +742 at 371 Int [2278->3020]), matching coabuildhub's older wording ('You now gain an additional 2 mana per point of Intellect.'), whereas the Spell.dbc tooltip renders 'by 200%' (+200% of base 15 mana/Int would be +1570/+10570 mana, and base health/Int is 0). Needs owner ruling (likely client text fix to 'by 2', analogous to Q-cu-4 Malignant Armor)."
   },
   {
     "spell": 560091,
@@ -2103,10 +2114,21 @@
   {
     "spell": 561335,
     "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
-    "labels": [
-      "561335 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the amount of mana",
+        "labels": [
+          "561335 behaviour_metric_delta mana_base",
+          "561335 behaviour_metric_delta mana_int"
+        ]
+      },
+      {
+        "claim": "and now health per point of Intellect by $s1%.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Alert & owner question (tooltip wording '$s1%' = 400% vs server aura 328 +4/Int): Spell.dbc 561335 Effect[0]/Effect[1] are aura 328 with BasePoints 399+1=400. Server StatSystem.cpp:80,96 adds CalculatePct(Intellect, 400) = +4 mana and +4 health per point of Intellect (measured in cu-t10/prove-b1: mana +284 at 71 Int [2297->2581], +1484 at 371 Int [6797->8281]; health +284 at 71 Int [2278->2562], +1484 at 371 Int [2278->3762]), whereas Spell.dbc tooltip renders 'by 400%' (+400% of base 15 mana/Int would be +3140/+21140 mana, and base health/Int is 0). Needs owner ruling analogous to 560080 and Q-cu-4."
   },
   {
     "spell": 561336,
@@ -3304,10 +3326,27 @@
   {
     "spell": 706190,
     "clause": "Increases your maximum mana, your movement speed, and mounted movement speed by $s1%.",
-    "labels": [
-      "706190 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your maximum mana,",
+        "labels": [
+          "706190 behaviour_metric_delta max_mana"
+        ]
+      },
+      {
+        "claim": "your movement speed,",
+        "labels": [
+          "706190 behaviour_metric_delta run_speed"
+        ]
+      },
+      {
+        "claim": "and mounted movement speed by $s1%.",
+        "labels": [
+          "706190 behaviour_metric_delta mounted_speed"
+        ]
+      }
+    ]
   },
   {
     "spell": 706245,
