@@ -56,6 +56,12 @@ def read_retail(directory):
     }
 
 
+def check_sources(generated, present):
+    missing = sorted(entry for entry, _ in generated.tables['coa_pet_standin'] if entry not in present)
+    if missing:
+        raise ValueError(f'source creatures missing from creature_template: {missing[:20]}')
+
+
 def taken_entries(defaults, entries):
     out = subprocess.run(['mysql', f'--defaults-extra-file={defaults}', '-N', '-B', 'acore_world', '-e',
                           'SELECT entry FROM creature_template WHERE entry IN (' + id_list(entries) + ')'],
@@ -75,6 +81,8 @@ def main():
     taken = taken_entries(args.mysql_defaults, [entry for _, entry in generated.tables['coa_pet_standin']])
     if taken:
         raise SystemExit(f'stand-in entries already in creature_template: {taken[:10]}')
+    check_sources(generated, set(taken_entries(args.mysql_defaults,
+                                               [species for species, _ in generated.tables['coa_pet_standin']])))
     header = ('-- CoA companions as battle pets: modules/mod-coa-pet-battles/tools/pet_data/companion_species.py\n'
               '-- retail: wago.tools DB2 CSVs BattlePetSpecies, BattlePetSpeciesXAbility, BattlePetAbility, Creature '
               f'fetched {args.retail_date}; BattlePetSpeciesState, BattlePetState fetched {args.state_date}')

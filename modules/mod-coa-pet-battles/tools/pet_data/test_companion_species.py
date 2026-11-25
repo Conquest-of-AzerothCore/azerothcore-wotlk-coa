@@ -233,6 +233,16 @@ class SqlTest(unittest.TestCase):
         self.assertIn('ON DUPLICATE KEY UPDATE', insert)
 
 
+class SourceCreatureTest(unittest.TestCase):
+    def test_missing_source_creatures_are_refused(self):
+        generated = companion_species.generate([row(1, 60000, 'Zork', '5 picked', 'Beast'),
+                                                row(2, 60002, 'Zork B', '5 picked', 'Beast')],
+                                               make_tables(), make_retail())
+        with self.assertRaisesRegex(ValueError, r'source creatures missing from creature_template: \[60002\]'):
+            companion_species.check_sources(generated, {60000})
+        companion_species.check_sources(generated, {60000, 60002})
+
+
 class GeneratedFileTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
