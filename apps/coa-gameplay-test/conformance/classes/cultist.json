@@ -30486,6 +30486,561 @@
         ]
       },
       "observe_source": "560301 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK misc 65 = (1<<6)|(1<<0) grants SPELL_AURA_MOD_DECREASE_SPEED + SPELL_AURA_MOD_ROOT immunity (SpellInfo.cpp:2752-2757), removing existing snares and roots on cast. Dummy applies Frostbolt 116 (snare -40%) and Frost Nova 122 (root) as precondition fixtures in both phases. Control (uncast): both auras present (1), rooted=1, run_speed_rate=0.6. Treatment (560301 cast): both auras removed (0), rooted=0, run_speed_rate=1.0. Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (avoiding an attack generates 3 Insanity)",
+      "kind": "metric_delta",
+      "variant": "avoid_insanity",
+      "label_suffix": "avoid_insanity",
+      "quote": "Avoiding an attack now generates $520773q2 Insanity.",
+      "trigger_spell": 804056,
+      "gate_spell": 706182,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "706182 Inner Darkness (AscensionCultistEvents.cpp:63,229): avoiding an enemy melee strike (dodge/parry/miss) grants 3 Insanity (500706; $520773q2 = 3, Spell.dbc 520773 Effect[1] MiscValue 3). Both phases reset 500706 to 0, set caster_avoidance dodge=100, take 1 melee strike of 2118233, and cast neutral self-cast 804056. Control (before learning 706182): 500706 stacks = 0. Treatment (after learning 706182): 500706 stacks = 3. Reference search 2026-11-25: coa-history 706182/804711: 0 events (passive/replacement); coabuildhub matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (transforms Abyssal Ward 804670 into Black Ward 804711)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804056,
+      "gate_spell": 706182,
+      "learn": [
+        804670
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "metric": "temporary_spell_replacement",
+      "fields": {
+        "spell": 804670
+      },
+      "before_expected": 804670,
+      "expected": 804711,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultist.cpp:311-324: with 706182 Inner Darkness and 804670 Abyssal Ward known, Refresh learns 804711 Black Ward and sets temporary spell replacement of 804670 -> 804711. Control (before learning 706182): temporary_spell_replacement(804670) reads 804670. Treatment (after learning 706182 + 1000 ms settle): reads 804711. Paired with charges_before_recharge and charges_after_recharge proving 2 charges (vs 1) and 60 sec recharge (30 sec less than Abyssal Ward 90 sec CD). Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward 2 charges spent, 3rd refused before 60 sec recharge)",
+      "kind": "metric_delta",
+      "variant": "charges_before_recharge",
+      "label_suffix": "charges_before_recharge",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804711,
+      "learn": [
+        804670
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 804711,
+          "target": "caster",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 804711,
+          "target": "caster",
+          "delay_ms": 53400,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 804711,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 1000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 804711
+            },
+            "before_expected": 0,
+            "expected": 67,
+            "tolerance": 0,
+            "source": "3rd cast of Black Ward 804711 at 55000 ms (after 2 charges spent at 0 and 1600 ms, inside 60000 ms recharge) fails SPELL_FAILED_NOT_READY (67)"
+          }
+        ]
+      },
+      "observe_source": "804711 Black Ward has SpellCharges.dbc -> SpellChargesCategory 555 (MaxCharges=2, RecoveryTime=60000 ms), vs Abyssal Ward 804670 (1 charge, 90000 ms CD). After learning 706182 (with 804670 known + 1000 ms settle so Refresh learns 804711), casts 804711 at t=0 and t=1600 ms (22% mana = 332 each; 2000 mana covers 3 casts) and attempts a 3rd cast at t=55000 ms (> 54000 ms = 0.9*60000, < 60000 ms) with reset_cooldown=false: exactly 2 applications land (control=0) and 3rd cast fails SPELL_FAILED_NOT_READY (67). Paired with charges_after_recharge (3rd cast at 63000 ms succeeds). Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward 3rd cast succeeds after 60 sec recharge)",
+      "kind": "metric_delta",
+      "variant": "charges_after_recharge",
+      "label_suffix": "charges_after_recharge",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804711,
+      "learn": [
+        804670
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 804711,
+          "target": "caster",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 804711,
+          "target": "caster",
+          "delay_ms": 61400,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 804711,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 1000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 804711
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "3rd cast of Black Ward 804711 at 63000 ms (> 60000 ms recharge, < 66000 ms = 1.1*60000) succeeds with NO_CAST_FAILURE (0)"
+          }
+        ]
+      },
+      "observe_source": "804711 Black Ward SpellChargesCategory 555 (MaxCharges=2, RecoveryTime=60000 ms). Casts 804711 at t=0, t=1600 ms, and t=63000 ms (> 60000 ms, < 66000 ms = 1.1*60000) with reset_cooldown=false: all 3 applications land (control=0) and cast_failure reads 0. Together with charges_before_recharge (refused at 55000 ms), brackets recharge in [55000, 63000] ms, excluding 10% off on both sides. Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward reduces initial damage taken by 50%)",
+      "kind": "metric_delta",
+      "variant": "damage_reduction",
+      "label_suffix": "damage_reduction",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804056,
+      "learn": [
+        804670,
+        706182,
+        804711
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "setup_casts": [
+        804711
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "after_trigger_ms": 300
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1100,
+      "expected": 1650,
+      "expected_gain": 550,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "804711 Black Ward StackAmount 5 ($u = 5), Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN -10% per stack ($m2 = -10, ${-($u*$m2)} = 50%), EffectMiscValue[1] 127 (all schools). Light of the Naaru 41394 (1100 Holy, deterministic, 0 Holy resistance): control (no 804711) takes 1100; treatment (804711 cast via setup_only_after, 1 charge spent) takes 550 (-50% exact, cumulative 1650, expected_gain 550 within 2). Note: taken_hit (10 trials) exhausted 804711's 2 charges because taken_hit resets cooldown rather than charges; single-cast metric_delta on deterministic 41394 avoids charge exhaustion. Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804711,
+      "learn": [
+        804670
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_settle_ms": 1000,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 804711,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10400,
+          10900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804711 Black Ward DurationIndex 1 = 10000 ms ($d = 10 sec, SpellDuration.dbc). Reads aura 804711 absent before cast (0), present (1) at 9200 ms (game_time [9100, 9600] > 9000 ms = 0.9*10000), and gone (0) at 10800 ms (game_time [10400, 10900] < 11000 ms = 1.1*10000), excluding 10% off on both sides. Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward holds after 4 attacks with 1 stack remaining)",
+      "kind": "metric_delta",
+      "variant": "four_attacks_hold",
+      "label_suffix": "four_attacks_hold",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804711,
+      "learn": [
+        804670
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 4,
+        "wait_ms": 200,
+        "after_trigger_ms": 500
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804711,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "804711 Black Ward StackAmount 5 ($u = 5), Effect[0] aura 42 proc triggers 807692 Effect[0] 176 removing 1 stack per attack received (Spell.dbc). Without casting 804711 (control), aura_stacks reads 0; after casting 804711 and taking 4 strikes of Light of the Naaru 41394 (1100 Holy), 1 stack remains. Paired with five_attacks_remove. Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward removed after 5 attacks)",
+      "kind": "metric_delta",
+      "variant": "five_attacks_remove",
+      "label_suffix": "five_attacks_remove",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804056,
+      "learn": [
+        804670,
+        706182,
+        804711
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        804711
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 500,
+      "after_setup_stacks": [
+        {
+          "spell": 804711,
+          "actor": "caster",
+          "stacks": 5
+        }
+      ],
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 5,
+        "wait_ms": 200
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804711,
+        "caster": "caster"
+      },
+      "before_expected": 5,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "804711 Black Ward StackAmount 5 ($u = 5), Effect[0] aura 42 proc triggers 807692 removing 1 stack per attack received (Spell.dbc). Both phases cast 804711 as setup_casts (after_setup_stacks confirms 5 stacks in both phases); before phase takes no strikes and reads 5 stacks; after phase takes 5 strikes of Light of the Naaru 41394 and reads 0 stacks (aura removed). Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward 2nd attack takes 10% less reduction: 50% then 40%)",
+      "kind": "metric_delta",
+      "variant": "decay_step",
+      "label_suffix": "decay_step",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804056,
+      "learn": [
+        804670,
+        706182,
+        804711
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "setup_casts": [
+        804711
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 200,
+        "after_trigger_ms": 300
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 2200,
+      "expected": 3410,
+      "expected_gain": 1210,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "804711 Black Ward Effect[1] aura 87 -10% per stack ($s2 = 10), 5 stacks on cast, proc 807692 removes 1 stack per attack received. Over 2 strikes of deterministic Light of the Naaru 41394 (1100 Holy each): control (no 804711) takes 2200; treatment (804711 cast once via setup_only_after) takes 550 (-50%) + 660 (-40%) = 1210 (cumulative 3410, expected_gain 1210 within 2; excludes no-decay 1100 and double-decay 1320 by 110 damage). Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward usable while stunned)",
+      "kind": "metric_delta",
+      "variant": "usable_while_stunned",
+      "label_suffix": "usable_while_stunned",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804711,
+      "learn": [
+        804670,
+        582591
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "setup_casts": [
+        582591
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 200,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          56,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804711,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 1000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 582591
+            },
+            "before_expected": 108,
+            "expected": 108,
+            "tolerance": 0,
+            "source": "Control spell Embrace the Void 582591 (AttributesEx5=0) is refused with SPELL_FAILED_STUNNED (108) in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 56
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Stun 56 remains present on caster in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 804711
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Black Ward 804711 goes through with NO_CAST_FAILURE (0) while stunned"
+          }
+        ]
+      },
+      "observe_source": "804711 Black Ward AttributesEx5 = 8 (SPELL_ATTR5_ALLOW_WHILE_STUNNED, Spell.dbc); control spell Embrace the Void 582591 has AttributesEx5 = 0. Dummy applies fixture Stun 56 in both phases. Control spell 582591 fails with SPELL_FAILED_STUNNED (108) while stun 56 is present (1) in both phases; after learning 706182 (granting 804711), casting 804711 while stunned succeeds (cast_failure=0) and applies aura 804711 (0 -> 1). Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward scales with Shroud of Pride 805126)",
+      "kind": "metric_delta",
+      "variant": "scales_shroud_of_pride",
+      "label_suffix": "scales_shroud_of_pride",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804711,
+      "gate_spell": 805126,
+      "learn": [
+        804670,
+        706182,
+        804711
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804711,
+        "caster": "caster"
+      },
+      "before_expected": 5,
+      "expected": 8,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAbilities.cpp:190-193: both Abyssal Ward 804670 and Black Ward 804711 scale with Shroud of Pride 805126 (+3 stacks, 5 -> 8). Control (before learning 805126): casting 804711 grants 5 stacks. Treatment (after learning 805126): casting 804711 grants 8 stacks. Paired with scales_void_tolerance to verify both Cultist Abyssal Ward modifiers scale Black Ward. Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 706182,
+      "name": "Inner Darkness (Black Ward scales with Void Tolerance 680570)",
+      "kind": "metric_delta",
+      "variant": "scales_void_tolerance",
+      "label_suffix": "scales_void_tolerance",
+      "quote": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+      "trigger_spell": 804711,
+      "gate_spell": 680570,
+      "learn": [
+        804670,
+        706182,
+        804711
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 680571,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAbilities.cpp:190-195: both Abyssal Ward 804670 and Black Ward 804711 trigger Void Tolerance 680571 (+100% critical block for 10 sec) when Void Tolerance 680570 is known. Control (before learning 680570): casting 804711 leaves 680571 absent (0). Treatment (after learning 680570): casting 804711 grants 680571 (1). Paired with scales_shroud_of_pride. Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
     }
   ],
   "player_observations": [],

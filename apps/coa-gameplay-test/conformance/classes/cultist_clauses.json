@@ -3252,26 +3252,36 @@
     "spell": 706182,
     "clause": "Avoiding an attack now generates $520773q2 Insanity.",
     "labels": [
-      "706182 effect_value #4"
+      "706182 behaviour_metric_delta avoid_insanity"
     ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta transform",
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "2 Charges,",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "60 sec recharge",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
     "kind": "claim"
   },
   {
@@ -3282,19 +3292,20 @@
       {
         "claim": "reducing your damage taken by ${-($u*$m2)}%",
         "labels": [
-          "706182 effect_value 804711e1 #0"
+          "706182 behaviour_metric_delta damage_reduction"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "706182 spell_duration 804711 #1"
+          "706182 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "$u attacks",
         "labels": [
-          "706182 max_stacks 804711 #2"
+          "706182 behaviour_metric_delta four_attacks_hold",
+          "706182 behaviour_metric_delta five_attacks_remove"
         ]
       }
     ]
@@ -3303,20 +3314,25 @@
     "spell": 706182,
     "clause": "For the duration, each attack received will decrease the value by $s2%.",
     "labels": [
-      "706182 effect_value 804711e1 #3"
+      "706182 behaviour_metric_delta decay_step"
     ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "Usable while stunned.",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta usable_while_stunned"
+    ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "Scales with modifiers to Abyssal Ward.",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta scales_shroud_of_pride",
+      "706182 behaviour_metric_delta scales_void_tolerance"
+    ],
     "kind": "claim"
   },
   {
