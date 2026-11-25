@@ -1,0 +1,92 @@
+{
+  "schema": 1,
+  "name": "Silver and Golden Mark of War spell descriptions name Runes of Descension (#12608, #12609)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "Silver Mark of War (1201002, spell 413116) and Golden Mark of War (1201003, spell 413117) still read",
+    "'Runes of Ascension' in the client's Spell.dbc. Server Spell.dbc already reads 'Runes of Descension',",
+    "but AscensionCompat only streams Spell.dbc descriptions via SMSG_PATCH_SPELL (opcode 2346) when the",
+    "spell is listed in coa_client_spell_description. Both rows must stream with 'Runes of Descension' and",
+    "without 'Ascension'. Row 500639 (Runeshroud) is the positive control that the stream is captured.",
+    "Rendered client text is outside the harness."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    { "id": "hero", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the login spell patch stream settle", "ms": 7000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shared description table still streams row 500639",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: spell 413116 (Silver Mark of War) is streamed",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 413116,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Spell 413116 carries Runes of Descension",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 413116,
+      "text": "Awards 250 Runes of Descension.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Spell 413116 no longer mentions Ascension",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 413116,
+      "text": "Ascension",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: spell 413117 (Golden Mark of War) is streamed",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 413117,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Spell 413117 carries Runes of Descension",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 413117,
+      "text": "Awards 1000 Runes of Descension.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Spell 413117 no longer mentions Ascension",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 413117,
+      "text": "Ascension",
+      "equals": 0
+    }
+  ]
+}
