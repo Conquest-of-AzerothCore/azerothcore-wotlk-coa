@@ -846,15 +846,17 @@ class AllyAttackAndStrikeTests(unittest.TestCase):
 class AllyArmAttackSwingsAndPerAllyHealthTests(unittest.TestCase):
     PER_HEALTH = {'ally': [3000, 10000], 'ally2': [7000, 10000], 'ally3': [1000, 10000]}
     AURAS = [[527023, 1, 'ally', 'caster'], [527023, 1, 'ally2', 'caster']]
-    PRECOND = {'actors': ['ally'], 'metric': 'aura', 'fields': {'spell': 527023}, 'before_expected': 1,
-               'expected': 1, 'tolerance': 0, 'source': 'seeded precondition aura on ally', 'precondition': True}
+    AURA_PRESENT = {'actors': ['ally'], 'metric': 'aura', 'fields': {'spell': 527023}, 'before_expected': 1,
+                    'expected': 1, 'tolerance': 0, 'source': 'seeded aura on ally'}
+    MAX_HP_PRECOND = {'actors': ['ally'], 'metric': 'max_health', 'before_expected': 10000, 'expected': 10000,
+                      'tolerance': 0, 'source': 'seeded max health on ally', 'precondition': True}
     OTHER_ZERO = {'actors': ['caster'], 'metric': 'spell_heal_count', 'fields': {'spell': 527023, 'target': 'ally2'},
                   'before_expected': 0, 'expected': 0, 'tolerance': 0, 'source': 'higher-health ally gets 0 heals'}
 
     def swing_entry(self, **ally_opts) -> dict:
         base = {**parry_entry(), 'disable_regeneration': True, 'wait_ms': 200,
                 'ally_arm': {'allies': 3, 'ally_health': self.PER_HEALTH, 'ally_auras': self.AURAS,
-                             'arms': [self.PRECOND, self.OTHER_ZERO], **ally_opts}}
+                             'arms': [self.AURA_PRESENT, self.MAX_HP_PRECOND, self.OTHER_ZERO], **ally_opts}}
         return base
 
     def test_per_ally_health_and_ally_auras_run_before_both_attack_swing_phases(self):
@@ -899,12 +901,17 @@ class AllyArmAttackSwingsAndPerAllyHealthTests(unittest.TestCase):
         ok_values = {model['before_label']: float(model['before_expected']),
                      model['after_label']: float(model['expected']),
                      arms[0]['before'][0]: 1.0, arms[0]['after'][0]: 1.0,
-                     arms[1]['before'][0]: 0.0, arms[1]['after'][0]: 0.0}
+                     arms[1]['before'][0]: 10000.0, arms[1]['after'][0]: 10000.0,
+                     arms[2]['before'][0]: 0.0, arms[2]['after'][0]: 0.0}
         self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(ok_values), expectation).status, 'ok')
-        mutant = {**ok_values, arms[1]['after'][0]: 2.0}
-        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(mutant), expectation).status, 'alert')
-        missing_aura = {**ok_values, arms[0]['after'][0]: 0.0}
-        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(missing_aura), expectation).status,
+        mutant_wrong_ally = {**ok_values, arms[2]['after'][0]: 2.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(mutant_wrong_ally), expectation).status,
+                         'alert')
+        mutant_missing_aura = {**ok_values, arms[0]['after'][0]: 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(mutant_missing_aura), expectation).status,
+                         'alert')
+        off_precond = {**ok_values, arms[1]['after'][0]: 9000.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(off_precond), expectation).status,
                          'unmeasured')
 
     def test_plain_attack_swings_without_new_keys_stays_unchanged(self):
