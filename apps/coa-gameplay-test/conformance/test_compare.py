@@ -993,7 +993,7 @@ class CompareTest(unittest.TestCase):
         self.assertEqual((verdicts[label].status, verdicts[label].low), ('ok', 19925.0))
 
     def test_aura_duration_includes_map_update_carry_in_when_max_step_is_below_10_ms(self):
-        label = '1001 aura_duration_ms #1'
+        label = '1001 aura_duration_ms #0'
 
         def judge(expected_ms, actual_ms, max_step='1'):
             self.fresh()
