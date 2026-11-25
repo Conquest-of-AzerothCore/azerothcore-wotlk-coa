@@ -16,7 +16,7 @@
 namespace
 {
 using namespace AscensionCultist;
-constexpr uint32 selected[] = {502133, 301186, 561288, 301259, 806250, 255070, 681794};
+constexpr uint32 selected[] = {502133, 301186, 561288, 301259, 806250, 255070, 681794, 300605};
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -28,6 +28,7 @@ bool Select(uint32 id, SpellInfo const* info)
         case 806250: return Named(info, 805116);
         case 255070: return info->Id == 504719;
         case 681794: return info->Id == 680576;
+        case 300605: return Named(info, 805572);
         default: return false;
     }
 }
@@ -37,6 +38,33 @@ void Finish(Player* player, Spell* spell)
         if (uint64 generation = spell->GetScriptValue(id))
             if (Aura* aura = player->GetAura(id); aura && generation == aura->GetScriptValue(Insanity))
                 aura->Remove();
+}
+void DeflectMeleeAbility(Spell* spell, SpellInfo const* info)
+{
+    if (!info || info->DmgClass != SPELL_DAMAGE_CLASS_MELEE || info->IsPositive() ||
+        info->HasAttribute(SPELL_ATTR3_ALWAYS_HIT))
+        return;
+    Unit* attacker = spell->GetOriginalCaster() ? spell->GetOriginalCaster() : spell->GetCaster();
+    if (!attacker)
+        return;
+    for (TargetInfo& target : *spell->GetUniqueTargetInfo())
+    {
+        if (target.missCondition != SPELL_MISS_NONE || target.targetGUID == attacker->GetGUID())
+            continue;
+        Unit* victim = ObjectAccessor::GetUnit(*attacker, target.targetGUID);
+        Player* cultist = Owner(victim);
+        if (!cultist || victim != cultist || !cultist->IsAlive() || attacker->IsFriendlyTo(cultist))
+            continue;
+        if (cultist->HasUnitState(UNIT_STATE_STUNNED) ||
+            (!cultist->HasInArc(M_PI, attacker) && !cultist->HasIgnoreHitDirectionAura()))
+            continue;
+        int32 chance = 0;
+        for (AuraEffect const* effect : cultist->GetAuraEffectsByType(SPELL_AURA_DEFLECT_SPELLS))
+            if (effect->GetId() == 525065)
+                chance += effect->GetAmount();
+        if (chance > 0 && roll_chance_i(std::clamp(chance, 0, 100)))
+            target.missCondition = SPELL_MISS_DEFLECT;
+    }
 }
 class cultist_spells : public AllSpellScript
 {
@@ -58,6 +86,7 @@ public:
     }
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
+        DeflectMeleeAbility(spell, info);
         Player* player = Owner(caster);
         if (!player || caster != player || info->SpellFamilyName != 31 || spell->IsTriggered())
             return;
@@ -67,7 +96,7 @@ public:
                 if (Aura* marks = ally->GetAura(301982, player->GetGUID()))
                 {
                     uint32 stacks = marks->GetStackAmount();
-                    float amount = Amount(301983, 0, player) +
+                    float amount = Amount(301983, 0) +
                         .35f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW);
                     Copy(player, ally, 301983, uint32(std::max(0.0f, amount)));
                     if (Aura* remaining = ally->GetAura(301982, player->GetGUID());

@@ -12000,7 +12000,15 @@
       "wait_ms": 500,
       "expire_ms": 2000,
       "void_on_cast_failure": true,
-      "observe_source": "Consumption check for Abyssal Destruction 300605 ('your next Obliteration Beam'): after 1 Darkwither 502220 tick grants 1 stack of 300605 (setup_wait_ms 3500), casting Obliteration Beam 806897 should consume 300605 (reading 0 at 500 ms, before Darkwither's 2nd tick at 6000 ms). Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches ('your next Obliteration Beam')."
+      "observe_source": "Consumption check for Abyssal Destruction 300605 (Cultist ADR 0019, O-15 / Q-cu-14; \"your next Obliteration Beam\"): cast_in_before false (unlearned control reads 0); in treatment, 1 Darkwither 502220 tick grants 1 stack of 300605 verified by after_setup_stacks (300605 == 1 on caster after setup_wait_ms 3500, before casting 806897), and casting Obliteration Beam 806897 consumes 300605 (reading 0 at 500 ms, before Darkwither's 2nd tick at 6000 ms). Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches (\"your next Obliteration Beam\").",
+      "cast_in_before": false,
+      "after_setup_stacks": [
+        {
+          "spell": 300605,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ]
     },
     {
       "spell": 300308,
@@ -17099,9 +17107,9 @@
               "caster": "caster"
             },
             "before_expected": 0,
-            "expected": 0,
+            "expected": 1,
             "tolerance": 0,
-            "source": "Tooltip promises \"all stacks are consumed\" when Gaze of CThun 500110 is cast."
+            "source": "Owner ruling Cultist O-17 (Q-cu-12, 2026-11-25, Cultist ADR 0033): server keeps MarkVoidTouched re-applying 1 stack of Void-Touched 301982 immediately after Gaze of CThun 500110 consumes stacks, matching archived live logs (4,452 immediate re-applications of 5,095 in 29 logs, 10+ players); kept deviation from literal tooltip \"all stacks are consumed\", client text unchanged."
           }
         ],
         "ally_casts": [
@@ -17119,7 +17127,7 @@
       "after_at_most": 365,
       "wait_ms": 1000,
       "expire_ms": 11000,
-      "observe_source": "Ledger clause 32 (Gaze of CThun 500110 consumes Void-Touched 301982 to heal allies via 301983 for ${$301983m1+$301983ppl1+$BH*0.35}, increased by stacks). Spell.dbc 301983 BasePoints 99 + DieSides 1 = 100, PPL 4.75, BaseLevel 17, MaxLevel 0 -> at level 60: 100 + floor(43 * 4.75) = 304; 301982 Effect[0] aura 283 (+20% healing received per stack on 301983 mask 1048576): 1 stack = 304 * 1.20 = 364.8 ([364..365]). Both phases cast instant direct heal Eldritch Shock 808036 at grouped ally (2000/20000 health) then Gaze of CThun 500110 at dummy: before learning 300286 (control) 0 stacks of 301982 and 0 heals of 301983; after real learn of 300286, 1 stack of 301982 is earned and consumed by Gaze 500110 (checking 301983 heal [364..365] and that 301982 stacks return to 0). Note: void_on_cast_failure is omitted because 500110 Gaze of CThun's internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub 300286 matches verbatim.",
+      "observe_source": "Ledger clause 32 (Gaze of CThun 500110 consumes Void-Touched 301982 to heal allies via 301983 for ${$301983m1+$301983ppl1+$BH*0.35}, increased by stacks). Heal formula (Cultist ADR 0018, O-15 / Q-cu-11): Spell.dbc 301983 BasePoints 99 + DieSides 1 = 100, PPL 4.75, BaseLevel 17, MaxLevel 0 -> at level 60: 100 + floor(43 * 4.75) = 304; 301982 Effect[0] aura 283 (+20% healing received per stack on 301983 mask 1048576): 1 stack = 304 * 1.20 = 364.8 ([364..365]). Stack retention (Cultist ADR 0033, owner ruling O-17 / Q-cu-12, 2026-11-25): server keeps MarkVoidTouched re-applying 1 stack of 301982 immediately after consumption as on live (4,452 of 5,095 in 29 logs, 10+ players), client text unchanged (kept deviation from literal \"all stacks are consumed\"). Both phases cast instant direct heal Eldritch Shock 808036 at grouped ally (2000/20000 health) then Gaze of CThun 500110 at dummy: before learning 300286 (control) 0 stacks of 301982 and 0 heals of 301983; after real learn of 300286, 1 stack of 301982 is earned, Gaze 500110 heals [364..365], and ally holds 1 re-applied stack of 301982. Note: void_on_cast_failure is omitted because 500110 internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub 300286 matches verbatim.",
       "gate_spell": 300286,
       "learn": [
         808036
@@ -19106,7 +19114,22 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:67, 199) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) at the deflected attacker. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t~500-509 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected cast applies 525066 present in game_time [3220, 3450] (>= 2711 ms > 2700 ms = 0.9*3000 even with 9 ms tick jitter on lead_ms) and gone in game_time [3650, 3790] (<= 3290 ms < 3300 ms = 1.1*3000), strictly excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:68-70, 215; Cultist ADR 0020) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) when a magic spell (DmgClass == SPELL_DAMAGE_CLASS_MAGIC) is deflected. Precondition fixture 43689 (+20% Hit Chance, aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, set to +100% via phase_aura_amounts on dummy) removes the 3.99% equal-level spell-miss roll (Unit.cpp:3995-4053) without setting SPELL_ATTR7_NO_ATTACK_MISS so deflection runs at Unit.cpp:4094-4100. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t~500-509 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected magic cast applies 525066 present in game_time [3220, 3450] (>= 2711 ms > 2700 ms = 0.9*3000) and gone in game_time [3650, 3790] (<= 3290 ms < 3300 ms = 1.1*3000), strictly excluding durations 10% off on both sides. Paired with no_silence_on_melee_deflect proving deflected melee abilities do not silence.",
+      "phase_auras": [
+        [
+          43689,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          43689,
+          0,
+          100
+        ]
+      ]
     },
     {
       "spell": 520345,
@@ -45947,6 +45970,193 @@
       "expire_ms": 7000,
       "void_on_cast_failure": true,
       "observe_source": "Regression for Dark Matter 806382 AoE heal count with 3 inside + 1 outside (Cultist ADR 0013): Spell.dbc 807219 is TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ALLY (30.0 yd). On the 1000 ms tick of 807124 (read at 1500 ms), ally (10 yd), ally2 (20 yd), and ally3 (28.5 yd) each receive exactly 1 heal (0 before learning 806382, 1 after), while outer ally4 (31.5 yd) receives 0."
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (casting Obliteration Beam consumes 10 stacks of 300605)",
+      "kind": "metric_delta",
+      "variant": "oblit_consumes_10stacks",
+      "label_suffix": "oblit_consumes_10stacks",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 806897,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        800432
+      ],
+      "setup_wait_ms": 5500,
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300605
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Owner ruling Q-cu-14 (2026-11-25, Cultist ADR 0019): 10-stack consumption check for Abyssal Destruction 300605. cast_in_before false (unlearned control reads 0); in treatment, Psychic Suppression 800432 delivers 10 channeled ticks granting 10 stacks of 300605 verified by after_setup_stacks (300605 == 10 on caster after setup_wait_ms 5500, before casting 806897; proven +50% on 806897 in oblit_damage_10stacks); casting Obliteration Beam 806897 consumes all stacks of 300605 (0 after cast). void_on_cast_failure omitted because 800432 internal sub-aura casts emit benign DONT_REPORT (27).",
+      "cast_in_before": false,
+      "after_setup_stacks": [
+        {
+          "spell": 300605,
+          "actor": "caster",
+          "stacks": 10
+        }
+      ]
+    },
+    {
+      "spell": 560080,
+      "name": "Boon of Y'shaarj R1 (health per Intellect at base 71 Int = 0.75/Int)",
+      "kind": "metric_delta",
+      "variant": "health_base",
+      "label_suffix": "health_base",
+      "quote": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 560080,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 2278,
+      "expected": 2331,
+      "expected_gain": 53,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Owner ruling Q-cu-24 / O-16 (2026-11-25): Boon of Y'shaarj R1 (560080, +200%) grants 0.25 * 3 = 0.75 max health per point of Intellect (0 without the talent). At 71 base Intellect: floor(71 * 0.75) = +53 health (2278 -> 2331)."
+    },
+    {
+      "spell": 560080,
+      "name": "Boon of Y'shaarj R1 (health per Intellect at +300 Int = 371 Int = 0.75/Int)",
+      "kind": "metric_delta",
+      "variant": "health_int",
+      "label_suffix": "health_int",
+      "quote": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+      "trigger_spell": 60234,
+      "gate_spell": 560080,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 2278,
+      "expected": 2556,
+      "expected_gain": 278,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Owner ruling Q-cu-24 / O-16 (2026-11-25): at 371 Intellect (71 + 300 from Greatness 60234), unlearned control stays 2278 (0 health from Intellect without the talent) and R1 560080 adds floor(371 * 0.75) = +278 health (2278 -> 2556, slope +225/+300 = +0.75 HP/Int)."
+    },
+    {
+      "spell": 561335,
+      "name": "Boon of Y'shaarj R2 (health per Intellect at base 71 Int = 1.25/Int)",
+      "kind": "metric_delta",
+      "variant": "health_base",
+      "label_suffix": "health_base",
+      "quote": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 561335,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 2278,
+      "expected": 2366,
+      "expected_gain": 88,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Owner ruling Q-cu-24 / O-16 (2026-11-25): Boon of Y'shaarj R2 (561335, +400%) grants 0.25 * 5 = 1.25 max health per point of Intellect (0 without the talent). At 71 base Intellect: floor(71 * 1.25) = +88 health (2278 -> 2366)."
+    },
+    {
+      "spell": 561335,
+      "name": "Boon of Y'shaarj R2 (health per Intellect at +300 Int = 371 Int = 1.25/Int)",
+      "kind": "metric_delta",
+      "variant": "health_int",
+      "label_suffix": "health_int",
+      "quote": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+      "trigger_spell": 60234,
+      "gate_spell": 561335,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 2278,
+      "expected": 2741,
+      "expected_gain": 463,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Owner ruling Q-cu-24 / O-16 (2026-11-25): at 371 Intellect (71 + 300 from Greatness 60234), unlearned control stays 2278 (0 health from Intellect without the talent) and R2 561335 adds floor(371 * 1.25) = +463 health (2278 -> 2741, slope +375/+300 = +1.25 HP/Int)."
+    },
+    {
+      "spell": 525065,
+      "name": "Twisted Seal (deflected melee ability does not silence attacker)",
+      "kind": "metric_delta",
+      "variant": "no_silence_on_melee_deflect",
+      "label_suffix": "no_silence_on_melee_deflect",
+      "quote": "Casters whose magic is deflected are silenced for $525066d.",
+      "trigger_spell": 525065,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "select_dummy": true,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          43689,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          43689,
+          0,
+          100
+        ]
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 23583,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 525066,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Melee non-silence arm for Twisted Seal 525065 (Cultist ADR 0020; AscensionCultistEvents.cpp:68-70): Description[enUS] states \"Casters whose magic is deflected are silenced for $525066d.\" Precondition fixture 43689 (+20% Hit Chance, aura 333, overridden to +100% via phase_aura_amounts on dummy) removes melee miss; Night Slaughter 23583 (DmgClass 2 SPELL_DAMAGE_CLASS_MELEE, SPELL_ATTR0_NO_ACTIVE_DEFENSE, 0 mana, instant) skips dodge/parry/block (Unit.cpp:3800) so DeflectMeleeAbility deflects it with 100% chance (roll_chance_i(100), proved 10/10 in deflect_melee_ability). Without 525065 (before control) 525066 is 0; under 525065 the deflected melee ability does not apply 525066 (reads 0 on dummy at ~2000 ms, 1500 ms after the deflected cast, inside 525066's 3000 ms duration; pre-fix code read 1 and alerted). Paired with silence_on_deflect proving deflected magic spell 2653 applies 525066 for 3 sec."
     }
   ],
   "player_observations": [],
