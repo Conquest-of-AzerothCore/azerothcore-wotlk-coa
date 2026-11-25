@@ -30,6 +30,7 @@
     "mercenary-battleground-team-faction": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "mercenary-war-mode-battleground": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "mercenary-criminal-no-trade-no-queue-9132": "Joins the process-global Warsong Gulch queue shared with other cases",
+    "mercenary-criminal-group-arena-queues-9132": "Joins the process-global arena queue shared with other cases",
     "high-risk-challenge-survives-battleground": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "battleground-wide-bracket-boundary": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "battleground-wide-bracket-group-boundary": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
