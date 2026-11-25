@@ -1845,19 +1845,20 @@
     "spell": 560002,
     "clause": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
     "labels": [
-      "560002 effect_value #1"
+      "560002 behaviour_metric_delta res_holy",
+      "560002 behaviour_metric_delta res_fire",
+      "560002 behaviour_metric_delta res_nature",
+      "560002 behaviour_metric_delta res_frost",
+      "560002 behaviour_metric_delta res_shadow",
+      "560002 behaviour_metric_delta res_arcane",
+      "560002 behaviour_metric_delta res_holy_l50",
+      "560002 behaviour_metric_delta res_fire_l50",
+      "560002 behaviour_metric_delta res_nature_l50",
+      "560002 behaviour_metric_delta res_frost_l50",
+      "560002 behaviour_metric_delta res_shadow_l50",
+      "560002 behaviour_metric_delta res_arcane_l50"
     ],
-    "kind": "claim",
-    "reason": "Tool gap (uncounted): level-60 resistance +19 across all 6 magic schools (floor(5 + 0.5 * (60 - 31)), Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel = SpellLevel = 31, MaxLevel 0, SkillLineAbility 23039) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level arm (e.g. level 50 expecting floor(5 + 0.5 * (50 - 31)) = +14). No existing conformance kind/option sets a single caster level for a passive metric_delta resistance check: phase_caster_level requires two distinct levels per phase for cast buffs while Player::GiveLevel (Player.cpp:2623-2728 / StatSystem.cpp:344-369) does not recalculate already-applied passive aura amounts; hit_ratio.level only measures hits; shifted_control.caster_level only measures dummy spell_resist_chance. Because the amount and 'scaling with level' share one combined claim row, the claim stays uncounted until metric_delta supports a single caster_level option.",
-    "tool_gap": {
-      "reason": "Level-60 resistance (+19 across all 6 magic schools) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level passive arm (e.g. level 50 -> +14). No existing metric_delta option sets a single caster_level for a passive resistance check: phase_caster_level (phase_caster_level.py:8,17) requires two distinct levels with cast_in_before:true, and Player::GiveLevel does not recalculate already-applied passive auras. Nearest kind: metric_delta with a single-level caster_level option.",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 560080,
