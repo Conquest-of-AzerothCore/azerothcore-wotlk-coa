@@ -33,6 +33,8 @@ In `Player::GetManaBonusFromIntellect()` (`StatSystem.cpp:421-429`), the engine 
 Intellect points (`baseInt`) and `15` mana for each point above 20 (`moreInt * 15.0f`). Applying `+200%` / `+400%` directly
 to `GetManaBonusFromIntellect()` scales the first 20 points proportionally (`1 -> 3` at Rank 1, `1 -> 5` at Rank 2) and
 points above 20 to `45` / `75`, yielding exact `+1570` / `+10570` (Rank 1) and `+3140` / `+21140` (Rank 2) at 71 / 371 Int.
+The bonus multiplies the whole Intellect mana bonus, including the first 20 Intellect points that give 1 mana each
+(3 / 5 mana with the talent); reported to the owner on 2026-11-25.
 
 ## Options
 
@@ -57,10 +59,11 @@ effect belongs to `560080` or `561335` on `STAT_INTELLECT`. No shared engine, SQ
   standard mana per Intellect, and other classes' aura-328 spells (verified with `runemaster-wizardry`, `20261125-090952`)
   are untouched.
 - Pre-existing handwritten scenario `apps/coa-gameplay-test/scenarios/cultist-boon-of-yshaarj.json` (written for #965 under
-  the old `+2/+4` flat model) asserts Rank 2 / Rank 1 max_health delta ratio in `[1.9, 2.1]`; under O-16 at level 40 (`50`
-  Int), Rank 1 grants `+37` HP and Rank 2 grants `+62` HP (ratio `1.6757`, matching `1.25 / 0.75 = 1.6667`), so that
-  scenario requires a follow-up update outside this task's file limits.
-- Regressions (counted pair `prove-2` `20261125-090640` / `20261125-090726`, build `3732deaa8812`):
+  the old `+2/+4` flat model) was updated from `[1.9, 2.1]` to the O-16 `5/3` ratio `[1.60, 1.75]` (`1.25 / 0.75 = 1.6667`)
+  and passed (`20261125-093947`: level-40 Cultist `50` Int measured R1 mana `+940`, R1 health `+37`, R2 health `+62`,
+  ratio `1.6757`).
+- Regressions (counted pair `cu-rfix42-prove` `20261125-094043` / `20261125-094117`, build `0a0822d00f1f`, 0 flips; also
+  confirmed in `prove-2` `20261125-090640` / `20261125-090726`):
   - `560080`: `mana_base` `+1570` / `+1570` (`2297 -> 3867`, `ok/ok`), `mana_int` `+10570` / `+10570` (`6797 -> 17367`,
     `ok/ok`), `health_base` `+53` / `+53` (`2278 -> 2331`, `ok/ok`), `health_int` `+278` / `+278` (`2278 -> 2556`, `ok/ok`).
   - `561335`: `mana_base` `+3140` / `+3140` (`2297 -> 5437`, `ok/ok`), `mana_int` `+21140` / `+21140` (`6797 -> 27937`,
