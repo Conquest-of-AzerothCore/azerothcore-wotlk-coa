@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "name": "Pet battles: a CoA companion is a battle pet with an explicit stand-in",
+  "contract": [
+    "Phase 6 of the pet battle port. Learning a CoA companion spell (Albino River Calf, spell 926133, creature",
+    "123380) adds species 123380 to the account's journal at level 1. It can battle (the simulator runs its kit) and",
+    "it follows the player as its explicit stand-in creature 9851140, since 123380 is beyond the 9800000 + species",
+    "range."
+  ],
+  "timeout_ms": 60000,
+  "vanity_ownership": { "unlock_all": false },
+  "location": { "map": 0, "x": -8914.0, "y": -133.0, "z": 80.6 },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_phase", "label": "followers appear in the normal world phase", "actor": "gm", "value": 1 },
+    { "action": "assert", "label": "CONTROL: no stand-in is out before the summon", "actor": "gm",
+      "metric": "nearby_creature_count", "entry": 9851140, "equals": 0 },
+    { "action": "command", "actor": "gm", "command": ".learn 926133" },
+    { "action": "wait", "ms": 500 },
+    { "action": "command", "actor": "gm", "command": ".petbattle journal" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "Albino River Calf joins the journal at level 1", "actor": "gm",
+      "metric": "system_message_contains", "text": "123380 Albino River Calf L1 q1", "equals": 1 },
+    { "action": "command", "actor": "gm", "command": ".petbattle sim 123380 69 25 4127" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the companion battles with its kit", "actor": "gm",
+      "metric": "system_message_contains", "text": "[Pet sim] Albino River Calf (25 rare) vs", "equals": 1 },
+    { "action": "command", "actor": "gm", "command": ".petbattle send pbj|summon|123380" },
+    { "action": "wait", "ms": 3000 },
+    { "action": "command", "actor": "gm", "command": ".petbattle follower" },
+    { "action": "wait", "ms": 300 },
+    { "action": "assert", "label": "the companion is the follower", "actor": "gm",
+      "metric": "system_message_contains", "text": "Follower: 123380 out", "equals": 1 },
+    { "action": "assert", "label": "the follower is the explicit stand-in creature", "actor": "gm",
+      "metric": "nearby_creature_count", "entry": 9851140, "equals": 1 },
+    { "action": "command", "actor": "gm", "command": ".petbattle send pbj|dismiss" },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "dismissing removes the stand-in", "actor": "gm",
+      "metric": "nearby_creature_count", "entry": 9851140, "equals": 0 }
+  ]
+}

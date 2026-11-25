@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Pet battles: .petbattle sim runs a whole battle for a GM and refuses players and bad input",
+  "contract": [
+    "Phase 2 of the pet battle port. On a worldserver that applied the pet battle pending SQL, a GM's",
+    ".petbattle sim <speciesA> <speciesB> [level] [seed] prints a header naming both pets, the level and the",
+    "seed, round lines, and a result line. A player without GM security is refused, as are an unknown species",
+    "and a level outside 1-25. The same command also runs from the server console."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    { "id": "gm", "race": 1, "class": 1, "level": 60, "security": 2 },
+    { "id": "player", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 1000 },
+    { "action": "snapshot", "actor": "gm", "metric": "system_messages", "save_as": "before_sim" },
+    { "action": "command", "actor": "gm", "command": ".petbattle sim 299 69 25 4127" },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "the header names both pets, the level and the seed", "actor": "gm",
+      "metric": "system_message_contains", "text": "[Pet sim] Young Wolf (25 rare) vs Timber Wolf (25 rare), seed 4127",
+      "equals": 1 },
+    { "action": "assert", "label": "round lines follow", "actor": "gm", "metric": "system_message_contains",
+      "text": "R1 ", "equals": 1 },
+    { "action": "assert", "label": "the battle prints more than a header", "actor": "gm",
+      "metric": "system_messages", "relative_to": "before_sim", "min": 4 },
+    { "action": "command", "actor": "player", "command": ".petbattle sim 299 69 25 4127", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle sim 1 299", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle sim 299 69 0", "rejected": true },
+    { "action": "command", "actor": "gm", "command": ".petbattle sim 299 69 26", "rejected": true },
+    { "action": "console", "command": "petbattle sim 299 69 25 4127" }
+  ]
+}

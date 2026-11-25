@@ -1,0 +1,62 @@
+[worldserver]
+
+# Loads the pet battle data tables (coa_pet_*) at startup. 0 disables the module.
+CoAPetBattles.Enable = 1
+
+# Highest battle pet level.
+CoAPetBattles.MaxLevel = 25
+
+# Relative chance of a wild pet being poor, common, uncommon or rare: four whole numbers.
+CoAPetBattles.QualityWeights = "55 28 13 4"
+
+# A wild pet can be captured at or below this fraction of its maximum health.
+CoAPetBattles.CaptureHealth = 0.35
+
+# Pets regain RegenPercent of their maximum health every RegenSeconds, also while offline.
+CoAPetBattles.RegenPercent = 1
+CoAPetBattles.RegenSeconds = 10
+
+# A fed pet regains FedPercent of its maximum health every FedStepSeconds for FedSeconds.
+CoAPetBattles.FedPercent = 10
+CoAPetBattles.FedStepSeconds = 2
+CoAPetBattles.FedSeconds = 20
+
+# Experience reduction per level the defeated pet is below the winning pet.
+CoAPetBattles.XpStep = 0.20
+
+# Wild pets: small pets that appear around players in the mapped zones. 0 turns them off.
+CoAPetBattles.Wild.Enable = 1
+
+# How often wild pets are placed and retired, and how often the addon's minimap positions are sent (milliseconds).
+CoAPetBattles.Wild.TickMs = 5000
+CoAPetBattles.Wild.BlipMs = 1000
+
+# Real creatures within Search yards of a player seed wild pets; at most MaxArea pets of different species stand
+# within Spacing yards of a player, and one species at most once within Spacing yards.
+CoAPetBattles.Wild.Search = 60
+CoAPetBattles.Wild.Spacing = 90
+CoAPetBattles.Wild.MaxArea = 3
+
+# After a battle the species stays away from that spot for CooldownSeconds. An untouched wild pet leaves after
+# LifetimeSeconds, or once nobody has been within Leave yards for AwayGraceSeconds.
+CoAPetBattles.Wild.CooldownSeconds = 90
+CoAPetBattles.Wild.LifetimeSeconds = 600
+CoAPetBattles.Wild.Leave = 90
+CoAPetBattles.Wild.AwayGraceSeconds = 60
+
+# A player whose last search found nothing is searched again after moving MoveRescan yards or RescanIdleSeconds.
+CoAPetBattles.Wild.MoveRescan = 25
+CoAPetBattles.Wild.RescanIdleSeconds = 45
+
+# Players challenge a wild pet within TalkRange yards. Wild pets up to SoloMaxLevel fight alone.
+CoAPetBattles.Wild.TalkRange = 12
+CoAPetBattles.Wild.SoloMaxLevel = 2
+
+# Placement: a random spot SpotMin to SpotMax yards from the seeding creature on ground within MaxHeightDifference
+# yards of its height, up to Tries attempts, otherwise FallbackDistance yards away. Wild pets wander Wander yards.
+CoAPetBattles.Wild.SpotMin = 5
+CoAPetBattles.Wild.SpotMax = 50
+CoAPetBattles.Wild.MaxHeightDifference = 2.5
+CoAPetBattles.Wild.Tries = 8
+CoAPetBattles.Wild.FallbackDistance = 3
+CoAPetBattles.Wild.Wander = 3

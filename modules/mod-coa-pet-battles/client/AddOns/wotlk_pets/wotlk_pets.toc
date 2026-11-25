@@ -1,0 +1,10 @@
+## Interface: 30300
+## Title: Pet Journal
+## Notes: Your battle pets, their abilities and your teams. /pets
+## Dependencies: AcoreLib
+## SavedVariables: WotlkPetsDB
+Pets.lua
+PetDex.lua
+ZoneLevels.lua
+MapLevels.lua
+WildBlips.lua

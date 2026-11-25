@@ -1,0 +1,154 @@
+{
+  "schema": 1,
+  "name": "Pet battles: a summoned pet follows the character and comes back after a relog",
+  "contract": [
+    "Phase 5. pbj|summon|69 (an owned Timber Wolf) makes it the follower: it appears within a 2 s tick and is",
+    "reported out; pbj|dismiss removes it; a summoned follower is saved (coa_pet_follower) and comes back after",
+    "a relog. Followers only show in the normal world phase, so the scenario enters phase 1."
+  ],
+  "timeout_ms": 120000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "label": "followers appear in the normal world phase",
+      "actor": "gm",
+      "value": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 69 5"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbj|summon|69"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle follower"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the follower is out",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Follower: 69 out",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbj|dismiss"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle follower"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "dismissed",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Follower: none",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbj|summon|69"
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "relog",
+      "actor": "gm"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_phase",
+      "label": "followers appear in the normal world phase",
+      "actor": "gm",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle follower"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "restored after the relog",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Follower: 69 out",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbj|dismiss"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    }
+  ]
+}

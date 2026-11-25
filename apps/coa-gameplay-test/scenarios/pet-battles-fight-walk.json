@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Pet battles: walking more than 40 yards away ends the battle",
+  "contract": [
+    "Phase 4a, upstream rule: a battle ends as interrupted when the player moves more than 40 yards from where it",
+    "started; the five-second watchdog notices it and both stand-ins are removed."
+  ],
+  "timeout_ms": 150000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 69 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 299 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 7380 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle fight 7380@1"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle state"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the battle runs with both stand-ins beside the player",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Pet battle: active, stand-ins 2",
+      "equals": 1
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 15
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 15
+    },
+    {
+      "action": "relocate",
+      "actor": "gm",
+      "dx": 15
+    },
+    {
+      "action": "wait",
+      "ms": 7000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle state"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the battle is over and both stand-ins are gone",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Pet battle: none, stand-ins 0",
+      "equals": 1
+    }
+  ]
+}

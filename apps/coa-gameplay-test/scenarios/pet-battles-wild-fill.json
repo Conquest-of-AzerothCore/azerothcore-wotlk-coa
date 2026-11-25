@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Pet battles: wild pets fill the area around a player",
+  "contract": [
+    "Phase 4b. North of Goldshire, Elwynn zone 12 (-9178.4, 37.5, 78.0; production spawns, read-only), the",
+    "lowest wild species within 40 yards are Defias Cutpurse 94, Young Wolf 299 and Mangy Wolf 525, before the",
+    "critters Cow 2442 and Cat 6368. After the first ticks the area is filled to the cap of 3 wild pets of",
+    "different species, spawned stand-ins. The GM starts at the abbey, turns GM mode on (Defias are hostile;",
+    "a player in combat is not searched) and teleports there. Northshire itself is CoA zone 10138, which",
+    "coa_pet_zone does not map."
+  ],
+  "timeout_ms": 180000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "wild pets live in the normal world phase",
+      "actor": "gm",
+      "value": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".gm on"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "teleport",
+      "actor": "gm",
+      "map": 0,
+      "x": -9178.4,
+      "y": 37.5,
+      "z": 78.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle wild"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "three wild pets around the player",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Wild pets near you: 3 of ",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "they are spawned stand-ins",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": " spawned ",
+      "equals": 1
+    }
+  ]
+}

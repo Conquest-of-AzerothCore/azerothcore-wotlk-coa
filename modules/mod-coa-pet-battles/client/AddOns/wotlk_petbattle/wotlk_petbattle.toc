@@ -1,0 +1,6 @@
+## Interface: 30300
+## Title: Pet Battle
+## Dependencies: AcoreLib
+## SavedVariables: WotlkPbMusicOff
+## Notes: Open-world pet battles: retail-style battle bars. Debug start: /pbtest
+Battle.lua

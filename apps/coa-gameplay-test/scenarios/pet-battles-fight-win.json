@@ -1,0 +1,295 @@
+{
+  "schema": 1,
+  "name": "Pet battles: a won battle gives the pet that fought XP and removes the stand-ins",
+  "contract": [
+    "Phase 4a. Three level-5 pets (Timber Wolf 69, Young Wolf 299, Siamese Cat 7380; the team fill takes them by",
+    "species) fight one level-1 Siamese Cat through the addon command pbt|cmd|A1. The level-1 enemy cannot beat",
+    "three level-5 pets, so the battle is won within the 20 commands. Timber Wolf fought: a level-1 win is worth",
+    "coa_pet_xp's 50 XP at 20% (four levels below), 10 XP toward level 5's 4 x 70 = 280. Both stand-ins appear",
+    "while the battle runs and are removed after it."
+  ],
+  "timeout_ms": 150000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 69 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 299 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 7380 5"
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle fight 7380@1"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle state"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the battle runs with both stand-ins beside the player",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Pet battle: active, stand-ins 2",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|cmd|A1"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle state"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the battle is over and both stand-ins are gone",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Pet battle: none, stand-ins 0",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle journal"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "Timber Wolf earned 10 XP",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "69 Timber Wolf L5 q1 xp 10/280",
+      "equals": 1
+    }
+  ]
+}

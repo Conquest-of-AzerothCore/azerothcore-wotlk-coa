@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "Pet battles: challenging a wild pet starts a battle and consumes it",
+  "contract": [
+    "Phase 4b. After the area fills, .petbattle challenge takes the menu path for the nearest wild pet (the GM is",
+    "moved beside it first). An Elwynn pet is level 1-2, so it fights alone; the battle starts with both",
+    "stand-ins. The scenarios enter the normal world phase (wild pets live there) and so run alone."
+  ],
+  "timeout_ms": 180000,
+  "vanity_ownership": {
+    "unlock_all": false
+  },
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "gm",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "wild pets live in the normal world phase",
+      "actor": "gm",
+      "value": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".gm on"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "teleport",
+      "actor": "gm",
+      "map": 0,
+      "x": -9178.4,
+      "y": 37.5,
+      "z": 78.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 69 5"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 299 5"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle grant 7380 5"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle wild"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the area is full",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Wild pets near you: 3 of ",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle challenge"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle state"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "the battle runs",
+      "actor": "gm",
+      "metric": "system_message_contains",
+      "text": "Pet battle: active, stand-ins 2",
+      "equals": 1
+    },
+    {
+      "action": "command",
+      "actor": "gm",
+      "command": ".petbattle send pbt|quit"
+    },
+    {
+      "action": "wait",
+      "ms": 2500
+    }
+  ]
+}
