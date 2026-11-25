@@ -22,7 +22,8 @@ namespace
     class LiveWorld : public CoAPetBattles::Battle::World
     {
     public:
-        explicit LiveWorld(Scheduler& scheduler, Engine::Catalog const& catalog) : _scheduler(scheduler)
+        LiveWorld(Scheduler& scheduler, Engine::Catalog const& catalog, uint8_t secondLevel = 10)
+            : _scheduler(scheduler)
         {
             std::vector<uint32_t> const species = catalog.SpeciesIds();
             std::vector<Store::OwnedPet> pets;
@@ -30,7 +31,7 @@ namespace
             {
                 Store::OwnedPet pet;
                 pet.species = species[i];
-                pet.level = 10;
+                pet.level = i == 1 ? secondLevel : 10;
                 pets.push_back(pet);
             }
             enemy = species[3];
@@ -90,6 +91,15 @@ namespace
         uint32_t Follower(uint64_t) override { return 0; }
         void Suppress(uint64_t, bool) override { }
         uint32_t SweepStandIns(uint64_t, float) override { return 0; }
+        void Refused(uint64_t, std::string const& command) override { refused.push_back(command); }
+
+        std::vector<std::string> refused;
+
+        bool SentStartingWith(std::string const& prefix) const
+        {
+            return std::any_of(sent.begin(), sent.end(),
+                [&prefix](std::string const& line) { return line.rfind(prefix, 0) == 0; });
+        }
 
         bool Sent(std::string const& text) const
         {
@@ -102,8 +112,8 @@ namespace
 
     struct Arena
     {
-        explicit Arena(std::shared_ptr<Engine::Catalog const> catalog = NewCatalog())
-            : rng(7), world(scheduler, *catalog),
+        explicit Arena(std::shared_ptr<Engine::Catalog const> catalog = NewCatalog(), uint8_t secondLevel = 10)
+            : rng(7), world(scheduler, *catalog, secondLevel),
               battles(catalog, LifecycleData(), nullptr, world, scheduler, rng)
         {
         }
@@ -116,6 +126,37 @@ namespace
         LiveWorld world;
         Battles battles;
     };
+}
+
+TEST(CoAPetBattlesLifecycle, RefusedAbilityAfterASwapGivesTheTurnBack)
+{
+    Arena arena(NewCatalog(), 1);
+    arena.Start();
+    arena.RunFor(3000);
+    ASSERT_TRUE(arena.world.SentStartingWith("pbt|turn|go;"));
+    arena.world.sent.clear();
+    arena.battles.Message(7, "pbt", "cmd", "S2");
+    arena.RunFor(15000);
+    ASSERT_TRUE(arena.world.SentStartingWith("pbt|turn|go;"));
+    arena.world.sent.clear();
+    arena.battles.Message(7, "pbt", "cmd", "A3");
+    arena.RunFor(100);
+    EXPECT_TRUE(arena.world.SentStartingWith("pbt|turn|go;"));
+    EXPECT_FALSE(arena.world.SentStartingWith("pbt|act|"));
+    arena.battles.Message(7, "pbt", "cmd", "A1");
+    arena.RunFor(5000);
+    EXPECT_TRUE(arena.world.SentStartingWith("pbt|act|P,2,"));
+}
+
+TEST(CoAPetBattlesLifecycle, RefusedCommandIsReported)
+{
+    Arena arena(NewCatalog(), 1);
+    arena.Start();
+    arena.RunFor(3000);
+    arena.battles.Message(7, "pbt", "cmd", "S2");
+    arena.RunFor(15000);
+    arena.battles.Message(7, "pbt", "cmd", "A3");
+    EXPECT_EQ(arena.world.refused, std::vector<std::string> { "A3" });
 }
 
 TEST(CoAPetBattlesLifecycle, RestartRightAfterAnEndKeepsTheNewStandIns)
