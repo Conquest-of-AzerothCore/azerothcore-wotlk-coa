@@ -271,13 +271,18 @@ class RunnerTests(unittest.TestCase):
                 'entry': 533030, 'save_as': 'total'}
         self.assert_step_validates(step)
         self.assert_step_validates({**step, 'triggered': False})
-        self.assert_step_validates({**step, 'spell': 500110, 'triggered': False})
-        for change in ({'actor': 'target'}, {'entry': 0}, {'spell': 0}, {'triggered': 0}, {'triggered': 'false'}):
+        self.assert_step_validates({**step, 'cumulative': True})
+        self.assert_step_validates({**step, 'spell': 500110, 'triggered': False, 'cumulative': True})
+        for change in ({'actor': 'target'}, {'entry': 0}, {'spell': 0}, {'triggered': 0}, {'triggered': 'false'},
+                       {'cumulative': 1}, {'cumulative': 'true'}):
             self.assert_step_rejected({**step, **change})
         self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
         self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster',
                                    'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
                                    'triggered': False, 'save_as': 'bad'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster',
+                                   'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
+                                   'cumulative': True, 'save_as': 'bad'})
 
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}

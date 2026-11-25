@@ -44209,7 +44209,7 @@
       "feed": {
         "every_ms": 1700
       },
-      "observe_source": "Depths of Madness 706911 (15% ProcChance, AscensionCultistEvents.cpp:98,230-232) summons Void Portal 533030 (12000 ms lifetime); AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all three AttributesEx & 0x44 == 0, non-channeled) and schedules DespawnOrUnsummon(5000ms). Feed cast_until_owned_creature (every_ms 1700, 63 casts/portal cap, pair cap-hit risk 0.086% <= 0.1%) isolates 3 portals/part x 4 parts = 12 portals/run (24/pair); each is read alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime). Control arm runs unlearned feed and reads 0 spawns (ADR 1296)."
+      "observe_source": "Depths of Madness 706911 (15% ProcChance, AscensionCultistEvents.cpp:98,230-232) summons Void Portal 533030 (12000 ms lifetime); AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all three AttributesEx & 0x44 == 0, non-channeled) and schedules DespawnOrUnsummon(5000ms). Feed cast_until_owned_creature (every_ms 1700, 63 casts/portal cap, pair cap-hit risk 0.086% <= 0.1%) isolates 3 portals/part x 4 parts = 12 portals/run (24/pair); each is read alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime) with post-despawn cumulative direct-cast delta == 1 across its full lifetime. Control arm runs unlearned feed and reads 0 spawns (ADR 1296)."
     },
     {
       "spell": 301068,
@@ -44267,7 +44267,7 @@
       "lifetime_ms": 12000,
       "portals": 6,
       "parts": 2,
-      "observe_source": "Sunderer of Realities 301068 (@s:301988:0@; AscensionCultistAbilities.cpp:149-154) deterministically summons Void Portal 533030 (12000 ms lifetime) on the 2nd Wrath of the Black Empire 504904 within 301067; AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all non-channeled, AttributesEx & 0x44 == 0) and calls DespawnOrUnsummon(5000ms). 6 portals/part x 2 parts = 12 portals/run (24/pair); each trial cancels 301067, fixtures Insanity 60 + 680601 + 823764, casts setup 504904 then trigger 504904, verifies 1 portal alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime). Control arm before learning 301068 reads 0 spawns (ADR 1296)."
+      "observe_source": "Sunderer of Realities 301068 (@s:301988:0@; AscensionCultistAbilities.cpp:149-154) deterministically summons Void Portal 533030 (12000 ms lifetime) on the 2nd Wrath of the Black Empire 504904 within 301067; AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all non-channeled, AttributesEx & 0x44 == 0) and calls DespawnOrUnsummon(5000ms). 6 portals/part x 2 parts = 12 portals/run (24/pair); each trial cancels 301067, fixtures Insanity 60 + 680601 + 823764, casts setup 504904 then trigger 504904, verifies 1 portal alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime) with post-despawn cumulative direct-cast delta == 1 across its full lifetime. Control arm before learning 301068 reads 0 spawns (ADR 1296)."
     },
     {
       "spell": 301200,
@@ -44317,7 +44317,7 @@
       "lifetime_ms": 12000,
       "portals": 6,
       "parts": 2,
-      "observe_source": "Apocalyptic Skies 301200 (AscensionCultistAbilities.cpp:149-152) deterministically summons Void Portal 533030 (12000 ms lifetime) on Wrath of the Black Empire 504904; AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all non-channeled, AttributesEx & 0x44 == 0) and calls DespawnOrUnsummon(5000ms). 6 portals/part x 2 parts = 12 portals/run (24/pair); each trial fixtures Insanity 60 + 680601 + 823764, casts 504904, verifies 1 portal alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime). Control arm before learning 301200 reads 0 spawns (ADR 1296)."
+      "observe_source": "Apocalyptic Skies 301200 (AscensionCultistAbilities.cpp:149-152) deterministically summons Void Portal 533030 (12000 ms lifetime) on Wrath of the Black Empire 504904; AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all non-channeled, AttributesEx & 0x44 == 0) and calls DespawnOrUnsummon(5000ms). 6 portals/part x 2 parts = 12 portals/run (24/pair); each trial fixtures Insanity 60 + 680601 + 823764, casts 504904, verifies 1 portal alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime) with post-despawn cumulative direct-cast delta == 1 across its full lifetime. Control arm before learning 301200 reads 0 spawns (ADR 1296)."
     },
     {
       "spell": 300300,

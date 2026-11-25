@@ -255,13 +255,23 @@ def portal_single_cast_scenario(class_file: dict, spec: PortalSingleCastSpec) ->
     trials_model = []
     for index in range(1, spec.portals + 1):
         pre = trial_label(prefix, index, 'pre')
+        pre_total = trial_label(prefix, index, 'pre_total')
+        pre_spells = {str(allowed): trial_label(prefix, index, f'pre_spell_{allowed}')
+                      for allowed in spec.allowed_spells}
         spawned = trial_label(prefix, index, 'spawned')
         alive = trial_label(prefix, index, 'alive')
         total = trial_label(prefix, index, 'total')
         spells = {str(allowed): trial_label(prefix, index, f'spell_{allowed}') for allowed in spec.allowed_spells}
         after_direct = trial_label(prefix, index, 'after_direct')
         after_channeled = trial_label(prefix, index, 'after_channeled') if read_channeled else None
-        steps.append(measurement(pre, CASTER, 'owned_creature_count', entry=spec.entry))
+        post_total = trial_label(prefix, index, 'post_total')
+        post_spells = {str(allowed): trial_label(prefix, index, f'post_spell_{allowed}')
+                       for allowed in spec.allowed_spells}
+        steps += [measurement(pre, CASTER, 'owned_creature_count', entry=spec.entry),
+                  measurement(pre_total, CASTER, METRIC, entry=spec.entry, triggered=False, cumulative=True)]
+        for allowed in spec.allowed_spells:
+            steps.append(measurement(pre_spells[str(allowed)], CASTER, METRIC, entry=spec.entry,
+                                     spell=allowed, triggered=False, cumulative=True))
         if spec.feed is not None:
             steps += feed_trigger(f'trial {index}', max_casts)
         else:
@@ -280,8 +290,13 @@ def portal_single_cast_scenario(class_file: dict, spec: PortalSingleCastSpec) ->
             steps += [{'action': 'wait', 'label': f'trial {index} channeled despawn',
                        'ms': spec.channeled_despawn_check_ms - spec.direct_despawn_check_ms},
                       measurement(after_channeled, CASTER, 'owned_creature_count', entry=spec.entry)]
-        row = {'pre': pre, 'spawned': spawned, 'alive': alive, 'total': total, 'spells': spells,
-               'after_direct': after_direct}
+        steps.append(measurement(post_total, CASTER, METRIC, entry=spec.entry, triggered=False, cumulative=True))
+        for allowed in spec.allowed_spells:
+            steps.append(measurement(post_spells[str(allowed)], CASTER, METRIC, entry=spec.entry,
+                                     spell=allowed, triggered=False, cumulative=True))
+        row = {'pre': pre, 'pre_total': pre_total, 'pre_spells': pre_spells, 'spawned': spawned, 'alive': alive,
+               'total': total, 'spells': spells, 'after_direct': after_direct, 'post_total': post_total,
+               'post_spells': post_spells}
         if after_channeled is not None:
             row['after_channeled'] = after_channeled
         trials_model.append(row)
@@ -303,11 +318,13 @@ def portal_single_cast_scenario(class_file: dict, spec: PortalSingleCastSpec) ->
     contract = (f'Per-summon single cast and post-cast despawn for creature {spec.entry}: control runs before '
                 f'{spec.gate_spell} is learned (expects 0 summons and 0 living {spec.entry}). Treatment learns '
                 f'{spec.gate_spell} and observes {spec.portals} portal(s)/part across {spec.parts} part(s) '
-                f'({spec.portals * spec.parts} portals/run, {PAIR_RUNS * spec.parts * spec.portals} per pair).{feed_note} '
+                f'({spec.portals * spec.parts} portals/run, '
+                f'{PAIR_RUNS * spec.parts * spec.portals} per pair).{feed_note} '
                 f'Each portal is checked 0 before trigger, 1 on spawn, 1 alive at +{spec.cast_read_ms} ms with '
                 f'{METRIC}(triggered=false) == 1 and summed allowed spells {list(spec.allowed_spells)} == 1 '
                 f'(channeled in DBC: {list(channeled)}), then absent after cast ({despawn_branch}) strictly before '
-                f'summon lifetime {spec.lifetime_ms} ms.')
+                f'summon lifetime {spec.lifetime_ms} ms, with post-despawn cumulative entry-scoped '
+                f'{METRIC}(triggered=false, cumulative=true) delta == 1 across the whole lifetime.')
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour portal single cast',
@@ -347,8 +364,9 @@ def judge_single_run(run: Run, model: dict) -> tuple[str, dict[int, int], int, s
     spell_totals = {spell: 0 for spell in allowed}
     observed = 0
     for index, trial in enumerate(model['trials'], 1):
-        required_labels = [trial['pre'], trial['spawned'], trial['alive'], trial['total'],
-                           trial['after_direct'], *trial['spells'].values()]
+        required_labels = [trial['pre'], trial['pre_total'], *trial['pre_spells'].values(),
+                           trial['spawned'], trial['alive'], trial['total'], trial['after_direct'],
+                           *trial['spells'].values(), trial['post_total'], *trial['post_spells'].values()]
         if 'after_channeled' in trial:
             required_labels.append(trial['after_channeled'])
         for label in required_labels:
@@ -356,41 +374,70 @@ def judge_single_run(run: Run, model: dict) -> tuple[str, dict[int, int], int, s
                 return 'unmeasured', spell_totals, observed, missing_measurement(run, label)
         pre = run.values[trial['pre']]
         if pre != 0:
-            return 'unmeasured', spell_totals, observed, f'trial {index}: {pre:g} creature(s) already present before trigger'
+            return ('unmeasured', spell_totals, observed,
+                    f'trial {index}: {pre:g} creature(s) already present before trigger')
         spawned = run.values[trial['spawned']]
         if spawned == 0:
             if model.get('feed'):
-                return 'unmeasured', spell_totals, observed, f'trial {index}: feed reached cap without spawning entry {model["entry"]}'
-            return 'alert', spell_totals, observed, f'trial {index}: expected spawn of entry {model["entry"]} did not appear'
+                return ('unmeasured', spell_totals, observed,
+                        f'trial {index}: feed reached cap without spawning entry {model["entry"]}')
+            return ('alert', spell_totals, observed,
+                    f'trial {index}: expected spawn of entry {model["entry"]} did not appear')
         if spawned != 1:
-            return 'alert', spell_totals, observed, f'trial {index}: spawned {spawned:g} creatures of entry {model["entry"]}, expected 1'
+            return ('alert', spell_totals, observed,
+                    f'trial {index}: spawned {spawned:g} creatures of entry {model["entry"]}, expected 1')
         alive = run.values[trial['alive']]
         if alive != 1:
-            return 'alert', spell_totals, observed, (f'trial {index}: read {alive:g} living creature(s) at '
-                                                     f'+{model["cast_read_ms"]} ms, expected 1')
+            return ('alert', spell_totals, observed,
+                    f'trial {index}: read {alive:g} living creature(s) at '
+                    f'+{model["cast_read_ms"]} ms, expected 1')
         total = run.values[trial['total']]
         counts = {spell: run.values[trial['spells'][str(spell)]] for spell in allowed}
         allowed_sum = sum(counts.values())
         if total != 1 or allowed_sum != 1 or any(count not in (0, 1) for count in counts.values()):
-            return 'alert', spell_totals, observed, (f'trial {index}: total direct casts={total:g}, '
-                                                     f'allowed={counts} (sum={allowed_sum:g}), expected exactly 1 cast in {allowed}')
+            return ('alert', spell_totals, observed,
+                    f'trial {index}: total direct casts={total:g}, allowed={counts} '
+                    f'(sum={allowed_sum:g}), expected exactly 1 cast in {allowed}')
         chosen = next(spell for spell, count in counts.items() if count == 1)
         if chosen in channeled:
             if 'after_channeled' not in trial:
-                return 'unmeasured', spell_totals, observed, f'trial {index}: channeled spell {chosen} has no channeled despawn read'
+                return ('unmeasured', spell_totals, observed,
+                        f'trial {index}: channeled spell {chosen} has no channeled despawn read')
             after = run.values[trial['after_channeled']]
             check_ms = model['channeled_despawn_check_ms']
             if after != 0:
-                return 'alert', spell_totals, observed, (f'trial {index}: portal still alive ({after:g}) at '
-                                                         f'+{check_ms} ms after channeled spell {chosen} '
-                                                         f'(lifetime {model["lifetime_ms"]} ms)')
+                return ('alert', spell_totals, observed,
+                        f'trial {index}: portal still alive ({after:g}) at '
+                        f'+{check_ms} ms after channeled spell {chosen} '
+                        f'(lifetime {model["lifetime_ms"]} ms)')
         else:
             after = run.values[trial['after_direct']]
             check_ms = model['direct_despawn_check_ms']
             if after != 0:
-                return 'alert', spell_totals, observed, (f'trial {index}: portal still alive ({after:g}) at '
-                                                         f'+{check_ms} ms after direct spell {chosen} '
-                                                         f'(lifetime {model["lifetime_ms"]} ms)')
+                return ('alert', spell_totals, observed,
+                        f'trial {index}: portal still alive ({after:g}) at '
+                        f'+{check_ms} ms after direct spell {chosen} '
+                        f'(lifetime {model["lifetime_ms"]} ms)')
+            if 'after_channeled' in trial and run.values[trial['after_channeled']] != 0:
+                late_after = run.values[trial['after_channeled']]
+                return ('alert', spell_totals, observed,
+                        f'trial {index}: portal present ({late_after:g}) at '
+                        f'+{model["channeled_despawn_check_ms"]} ms after direct spell {chosen}')
+        post_total_delta = run.values[trial['post_total']] - run.values[trial['pre_total']]
+        post_counts = {spell: run.values[trial['post_spells'][str(spell)]] - run.values[trial['pre_spells'][str(spell)]]
+                       for spell in allowed}
+        post_allowed_sum = sum(post_counts.values())
+        if post_total_delta < 0 or any(count < 0 for count in post_counts.values()):
+            return ('unmeasured', spell_totals, observed,
+                    f'trial {index}: cumulative direct cast counter decreased '
+                    f'(total_delta={post_total_delta:g}, allowed_delta={post_counts})')
+        if (post_total_delta != 1 or post_allowed_sum != 1
+                or any(count not in (0, 1) for count in post_counts.values())
+                or post_counts[chosen] != 1):
+            return ('alert', spell_totals, observed,
+                    f'trial {index}: full-lifetime direct casts delta={post_total_delta:g}, '
+                    f'allowed_delta={post_counts} (sum={post_allowed_sum:g}), '
+                    f'expected exactly 1 cast of {chosen} across whole lifetime')
         spell_totals[chosen] += 1
         observed += 1
     return 'ok', spell_totals, observed, ''

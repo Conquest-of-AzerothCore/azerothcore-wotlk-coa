@@ -745,6 +745,8 @@ public:
         _counts.clear();
         _casts.clear();
         _directCasts.clear();
+        _ownedEntryCasts.clear();
+        _ownedEntryDirectCasts.clear();
         _enabled = true;
     }
 
@@ -768,6 +770,20 @@ public:
             ++_casts[{ owner, spell }];
             if (!triggered)
                 ++_directCasts[{ owner, spell }];
+            if (Creature const* creature = unit->ToCreature())
+            {
+                ObjectGuid creatureOwner = creature->GetOwnerGUID();
+                if (creatureOwner.IsEmpty() && creature->IsSummon())
+                    creatureOwner = creature->ToTempSummon()->GetSummonerGUID();
+                if (creatureOwner.IsEmpty())
+                    creatureOwner = creature->GetCreatorGUID();
+                if (!creatureOwner.IsEmpty())
+                {
+                    ++_ownedEntryCasts[{ creatureOwner, creature->GetEntry(), spell }];
+                    if (!triggered)
+                        ++_ownedEntryDirectCasts[{ creatureOwner, creature->GetEntry(), spell }];
+                }
+            }
         }
     }
 
@@ -793,12 +809,36 @@ public:
         return total;
     }
 
+    static uint32 OwnedEntryCastCount(ObjectGuid owner, uint32 entry, uint32 spell, bool includeTriggered)
+    {
+        auto const& map = includeTriggered ? _ownedEntryCasts : _ownedEntryDirectCasts;
+        if (spell)
+        {
+            auto itr = map.find({ owner, entry, spell });
+            return itr == map.end() ? 0 : itr->second;
+        }
+        uint32 total = 0;
+        for (auto const& [key, count] : map)
+            if (std::get<0>(key) == owner && std::get<1>(key) == entry)
+                total += count;
+        return total;
+    }
+
     static void Forget(std::set<Owner> const& owners)
     {
         auto const owned = [&owners](auto const& entry) { return owners.contains(entry.first.first); };
         std::erase_if(_counts, owned);
         std::erase_if(_casts, owned);
         std::erase_if(_directCasts, owned);
+        std::set<ObjectGuid> ownerGuids;
+        for (Owner const& owner : owners)
+            ownerGuids.insert(std::get<ObjectGuid>(owner));
+        auto const ownedEntry = [&ownerGuids](auto const& entry)
+        {
+            return ownerGuids.contains(std::get<0>(entry.first));
+        };
+        std::erase_if(_ownedEntryCasts, ownedEntry);
+        std::erase_if(_ownedEntryDirectCasts, ownedEntry);
     }
 
 private:
@@ -806,12 +846,16 @@ private:
     static std::map<std::pair<Owner, uint32>, uint32> _counts;
     static std::map<std::pair<Owner, uint32>, uint32> _casts;
     static std::map<std::pair<Owner, uint32>, uint32> _directCasts;
+    static std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> _ownedEntryCasts;
+    static std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> _ownedEntryDirectCasts;
 };
 
 bool ProcCounter::_enabled = false;
 std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_counts;
 std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_casts;
 std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_directCasts;
+std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> ProcCounter::_ownedEntryCasts;
+std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> ProcCounter::_ownedEntryDirectCasts;
 
 class AuraApplyCounter
 {
@@ -6159,10 +6203,14 @@ private:
         if (metric == "owned_creature_total_cast_count")
         {
             Require(!spell || sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature cast spell");
-            Creature* creature = GetOwnedCreature(player, step.get<uint32>("entry"));
+            uint32 const entry = step.get<uint32>("entry");
+            bool const includeTriggered = step.get<bool>("triggered", true);
+            if (step.get<bool>("cumulative", false))
+                return ProcCounter::OwnedEntryCastCount(player->GetGUID(), entry, spell, includeTriggered);
+            Creature* creature = GetOwnedCreature(player, entry);
             if (!creature)
                 return -1.0;
-            return ProcCounter::TotalCastCount(creature, spell, step.get<bool>("triggered", true));
+            return ProcCounter::TotalCastCount(creature, spell, includeTriggered);
         }
         if (metric == "owned_creature_aura_max_duration_ms")
         {

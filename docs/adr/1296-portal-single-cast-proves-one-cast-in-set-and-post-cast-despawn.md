@@ -33,10 +33,12 @@ and healing comes from those spells, but left two properties as tool gaps:
 
 1. **Opt-in harness read `owned_creature_total_cast_count`** (`CoAGameplayTest.cpp`, `run.py`):
    - `ProcCounter` tracks non-triggered casts in `_directCasts` alongside existing `_casts` (leaving `CastCount` and
-     `owned_creature_spell_cast_count` unchanged).
-   - `owned_creature_total_cast_count` takes `entry`, optional `spell`, and optional boolean `triggered` (default `true`;
-     `false` reads `_directCasts`). Returns `-1.0` when no living owned creature of `entry` is present so void feed caps
-     and premature-despawn alerts complete cleanly for the judge.
+     `owned_creature_spell_cast_count` unchanged), plus cumulative entry-scoped counts in `_ownedEntryCasts` and
+     `_ownedEntryDirectCasts` keyed by `(ownerGuid, creatureEntry, spell)`.
+   - `owned_creature_total_cast_count` takes `entry`, optional `spell`, optional boolean `triggered` (default `true`;
+     `false` reads non-triggered casts), and optional boolean `cumulative` (default `false`). When `cumulative` is
+     `false`, it reads the living owned creature of `entry` and returns `-1.0` when absent; when `cumulative` is
+     `true`, it reads the entry-scoped cumulative counter so cast counts remain readable after despawn.
 2. **Opt-in harness action `cast_until_owned_creature`** (`CoAGameplayTest.cpp`, `run.py`):
    - Mirrors `cast_until_aura`, submitting the same cast path every `every_ms` up to `max_casts` while
      `GetOwnedCreature(player, entry) == nullptr`, and completing immediately on the first world update where the summon
@@ -46,11 +48,16 @@ and healing comes from those spells, but left two properties as tool gaps:
      `coverage.py`).
    - Runs an unlearned control arm (alerts on any spawn), then observes at least `6` independent portals per run
      (pooled across `parts`; refuses smaller samples).
-   - For each portal: verifies `0` before trigger, `1` on spawn, `1` alive at `cast_read_ms`,
-     `owned_creature_total_cast_count(triggered=false) == 1`, summed allowed-spell direct casts `== 1`, and `0` living
-     creatures at `direct_despawn_check_ms` (or `channeled_despawn_check_ms` if the chosen spell carries
-     `SPELL_ATTR1_IS_CHANNELED | SPELL_ATTR1_IS_SELF_CHANNELED` in `Spell.dbc`), both required to be at least `500 ms`
-     below `lifetime_ms`.
+   - For each portal: reads `0` living creatures and the pre-trigger cumulative cast baseline before triggering, checks
+     `1` on spawn, `1` alive at `cast_read_ms` with `owned_creature_total_cast_count(triggered=false) == 1` and summed
+     allowed-spell direct casts `== 1`, checks `0` living creatures at `direct_despawn_check_ms` (or
+     `channeled_despawn_check_ms` if the chosen spell carries
+     `SPELL_ATTR1_IS_CHANNELED | SPELL_ATTR1_IS_SELF_CHANNELED` in `Spell.dbc`, both required to be at least `500 ms`
+     below `lifetime_ms`), and finally checks the post-despawn cumulative delta (`post - pre == 1` for total, allowed
+     sum, and chosen spell) after despawn is confirmed, leaving `0 ms` of the portal's lifetime unobserved for extra
+     direct casts.
+   - Because `triggered=false` intentionally ignores `spell->IsTriggered()` sub-effects, extra triggered casts are
+     outside `_directCasts` and should be covered by companion damage/healing spell-set checks where needed.
    - In `Spell.dbc`, `500110`, `800416`, and `805572` all have `AttributesEx & 0x44 == 0` (`IsChanneled() == false`), so
      all three follow the `5000 ms` despawn branch (checked absent at `6200 ms`, `5800 ms` before the `12000 ms`
      lifetime); the kind also supports and tests the `10000 ms` channeled branch (`10800 ms < 12000 ms`).

@@ -285,7 +285,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster',
                  'chat_type', 'chat_text', 'chat_target', 'chat_channel', 'chat_subject', 'chat_emote', 'chat_name',
                  'chat_target_name', *CHAT_LOG_FLAGS,
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
-                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered'} \
+                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered', 'cumulative'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -1223,6 +1223,10 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(metric == 'owned_creature_total_cast_count',
                         f'{where}: triggered applies to owned_creature_total_cast_count')
                 require(type(step['triggered']) is bool, f'{where}: triggered must be boolean')
+            if 'cumulative' in step:
+                require(metric == 'owned_creature_total_cast_count',
+                        f'{where}: cumulative applies to owned_creature_total_cast_count')
+                require(type(step['cumulative']) is bool, f'{where}: cumulative must be boolean')
             if metric in {'spell_damage_done', 'spell_damage_taken'} and 'base' in step:
                 number(step['base'], f'{where}.base', 0, 2**32 - 1, True)
             if 'stacks' in step:

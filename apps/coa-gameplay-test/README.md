@@ -1177,8 +1177,10 @@ each (a read only, ADR 0652).
 harness cast counter), and `game_time_ms` reads the server's game time in milliseconds (reads only, ADR 0485).
 `owned_creature_total_cast_count` counts the casts of a living owned creature of `entry` in its map instance across all
 spells (or of one optional `spell`), with optional boolean `triggered` (default `true`; `false` counts only
-non-triggered casts so triggered sub-effects do not inflate a single cast); returns `-1` when no living owned creature
-of `entry` is present (read only, ADR 1296).
+non-triggered casts so triggered sub-effects do not inflate a single cast) and optional boolean `cumulative` (default
+`false`; `true` reads the cumulative count across all summons of `entry` owned by `actor`, remaining readable after
+despawn); returns `-1` when `cumulative` is `false` and no living owned creature of `entry` is present (read only,
+ADR 1296).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
 (`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
 `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,

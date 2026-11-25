@@ -50,10 +50,15 @@ def seeded_runs(model: dict, chosen_cycle: list[int], overrides: dict | None = N
     idx = 0
     for part in range(parts):
         values = {model['control']['count']: 0.0, model['control']['summons']: 0.0}
+        cum_total = 0.0
+        cum_spells = {spell: 0.0 for spell in allowed}
         for trial in model['trials']:
             chosen = chosen_cycle[idx % len(chosen_cycle)]
             idx += 1
             values[trial['pre']] = 0.0
+            values[trial['pre_total']] = cum_total
+            for spell in allowed:
+                values[trial['pre_spells'][str(spell)]] = cum_spells[spell]
             values[trial['spawned']] = 1.0
             values[trial['alive']] = 1.0
             values[trial['total']] = 1.0
@@ -62,6 +67,11 @@ def seeded_runs(model: dict, chosen_cycle: list[int], overrides: dict | None = N
             values[trial['after_direct']] = 1.0 if chosen in channeled else 0.0
             if 'after_channeled' in trial:
                 values[trial['after_channeled']] = 0.0
+            cum_total += 1.0
+            cum_spells[chosen] += 1.0
+            values[trial['post_total']] = cum_total
+            for spell in allowed:
+                values[trial['post_spells'][str(spell)]] = cum_spells[spell]
         if overrides and part in overrides:
             values.update(overrides[part])
         runs.append(FakeRun(values))
@@ -86,8 +96,11 @@ class PortalSingleCastTests(unittest.TestCase):
                     self.assertEqual(len(loops), 1 + entry['portals'])
                 self.assertEqual('after_channeled' in exp.model['trials'][0], expect_channeled)
                 totals = [step for step in steps if step.get('metric') == METRIC]
-                self.assertEqual(len(totals), entry['portals'] * (1 + len(entry['allowed_spells'])))
+                per_trial = 3 * (1 + len(entry['allowed_spells']))
+                self.assertEqual(len(totals), entry['portals'] * per_trial)
                 self.assertTrue(all(step.get('triggered') is False for step in totals))
+                cumulative = [step for step in totals if step.get('cumulative') is True]
+                self.assertEqual(len(cumulative), entry['portals'] * 2 * (1 + len(entry['allowed_spells'])))
 
     def test_evidence_class_is_event_and_counts_as_behaviour(self):
         self.assertNotIn(METRIC, METRIC_EVIDENCE)
@@ -129,6 +142,30 @@ class PortalSingleCastTests(unittest.TestCase):
                                  {1: {exp.model['trials'][2]['after_direct']: 1.0}})
         self.assertEqual(portal_single_cast_verdict(base_verdict(exp), no_despawn, exp.model).status, 'alert')
 
+    def test_mutant_second_cast_between_cast_read_and_despawn_alerts(self):
+        _, [exp] = scenario_of(APOCALYPTIC_ENTRY)
+        t0 = exp.model['trials'][0]
+        for override in (
+                {0: {t0['post_total']: 2.0, t0['post_spells']['500110']: 2.0}},
+                {0: {t0['post_total']: 2.0, t0['post_spells']['800416']: 1.0}},
+                {0: {t0['post_total']: 2.0}}):
+            with self.subTest(branch='direct', override=override):
+                runs = seeded_runs(exp.model, [500110, 800416, 805572], override)
+                verdict = portal_single_cast_verdict(base_verdict(exp), runs, exp.model)
+                self.assertEqual(verdict.status, 'alert')
+                self.assertIn('full-lifetime', verdict.explanation)
+
+        _, [chan_exp] = scenario_of(CHANNELED_ENTRY)
+        ct = chan_exp.model['trials'][2]
+        for override in (
+                {0: {ct['post_total']: 4.0, ct['post_spells']['800432']: 2.0}},
+                {0: {ct['post_total']: 4.0}}):
+            with self.subTest(branch='channeled', override=override):
+                runs = seeded_runs(chan_exp.model, [500110, 800416, 800432], override)
+                verdict = portal_single_cast_verdict(base_verdict(chan_exp), runs, chan_exp.model)
+                self.assertEqual(verdict.status, 'alert')
+                self.assertIn('full-lifetime', verdict.explanation)
+
     def test_alerts_on_double_cast_zero_cast_control_leak_missing_spawn_or_channeled_lingering(self):
         _, [exp] = scenario_of(APOCALYPTIC_ENTRY)
         t0 = exp.model['trials'][0]
@@ -151,12 +188,24 @@ class PortalSingleCastTests(unittest.TestCase):
         ct = chan_exp.model['trials'][2]
         lingering = seeded_runs(chan_exp.model, [500110, 800416, 800432], {0: {ct['after_channeled']: 1.0}})
         self.assertEqual(portal_single_cast_verdict(base_verdict(chan_exp), lingering, chan_exp.model).status, 'alert')
+        direct_late = seeded_runs(chan_exp.model, [500110, 800416, 800432],
+                                  {0: {chan_exp.model['trials'][0]['after_channeled']: 1.0}})
+        self.assertEqual(portal_single_cast_verdict(base_verdict(chan_exp), direct_late, chan_exp.model).status,
+                         'alert')
 
     def test_unmeasured_on_missing_read_feed_cap_leftover_or_missing_part(self):
         _, [exp] = scenario_of(APOCALYPTIC_ENTRY)
         runs = seeded_runs(exp.model, [500110, 800416, 805572])
         runs[0].values.pop(trial_label(exp.label, 1, 'total'))
         self.assertEqual(portal_single_cast_verdict(base_verdict(exp), runs, exp.model).status, 'unmeasured')
+
+        missing_post = seeded_runs(exp.model, [500110, 800416, 805572])
+        missing_post[0].values.pop(trial_label(exp.label, 1, 'post_total'))
+        self.assertEqual(portal_single_cast_verdict(base_verdict(exp), missing_post, exp.model).status, 'unmeasured')
+
+        decreased = seeded_runs(exp.model, [500110, 800416, 805572],
+                                {0: {exp.model['trials'][1]['post_total']: 0.0}})
+        self.assertEqual(portal_single_cast_verdict(base_verdict(exp), decreased, exp.model).status, 'unmeasured')
 
         leftover = seeded_runs(exp.model, [500110, 800416, 805572], {0: {exp.model['trials'][1]['pre']: 1.0}})
         self.assertEqual(portal_single_cast_verdict(base_verdict(exp), leftover, exp.model).status, 'unmeasured')
