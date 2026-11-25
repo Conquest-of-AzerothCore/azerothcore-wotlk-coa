@@ -5221,7 +5221,7 @@
           ]
         }
       ],
-      "observe_source": "804670 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN -10% per stack ($s2 = 10), 5 stacks on cast, proc 807692 removes 1 stack per attack received (Spell.dbc). Over 2 strikes of Void Zone 92559 (1000 Physical, DmgClass 0, neither misses nor crits) under one 804670 cast: strike 1 takes 50% (550), strike 2 takes 60% (660), total 1210 vs control 2200, ratio 0.55 (excludes 0.50 no-decay and 0.60 double-decay under the G-19 band +-2.25 pts). Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
+      "observe_source": "804670 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN -10% per stack ($s2 = 10), 5 stacks on cast, proc 807692 removes 1 stack per attack received (Spell.dbc). Over 2 strikes of Void Zone 92559 (977 Physical after armor, DmgClass 0, neither misses nor crits) under one 804670 cast: strike 1 takes 50% (489), strike 2 takes 60% (586), total 1075 (mean 537.5) vs control 1954 (mean 977), ratio 0.55015 vs expected 0.55 (excludes 0.50 no-decay and 0.60 double-decay under the G-19 band +-2.25 pts). Reference search 2026-11-24: coa-history spell 804670: 53 casts and 53 aura applied in 19 logs, 101 aura removed dose in 17 logs; coabuildhub spells_master_index.json entry 804670 matches installed Spell.dbc ('reducing your damage taken by 50% for 10 seconds or 5 attacks. For the duration, each attack received will decrease the value by -10%. Usable while stunned.')."
     },
     {
       "spell": 804670,
@@ -5667,7 +5667,7 @@
           }
         ]
       },
-      "observe_source": "582591 Embrace the Void Absorb handler (AscensionCultistAuras.cpp:261-275): sets absorb amount = covered - health + 1 when covered >= health so caster survives at 1 HP. Before phase (cast_in_before false, no strike) reads 100/10000 health, alive 1; after phase casts 582591 (setup_only_after, after_setup_stacks confirms 1 stack), then takes lethal Void Zone 92559 (977 Physical at 100/10000 health) and survives at 1 HP (alive 1 vs control 0). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc.",
+      "observe_source": "582591 Embrace the Void Absorb handler (AscensionCultistAuras.cpp:261-275): sets absorb amount = covered - health + 1 when covered >= health so caster survives at 1 HP. Before phase (cast_in_before false, no strike) reads 100/10000 health, alive 1; after phase casts trigger_spell 582591 (void_on_cast_failure true), then takes lethal Void Zone 92559 via after_trigger_strike (977 Physical at 100/10000 health) and survives at 1 HP (alive 1 vs control 0). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc.",
       "after_trigger_strike": {
         "spell": 92559,
         "delay_ms": 500,
@@ -5677,10 +5677,10 @@
     },
     {
       "spell": 582591,
-      "name": "Embrace the Void (holds below 100% of 1500 max health)",
+      "name": "Embrace the Void (holds below 100% of 2000 max health: 97.7%)",
       "kind": "metric_delta",
-      "variant": "cap_1500_holds",
-      "label_suffix": "cap_1500_holds",
+      "variant": "cap_2000_holds",
+      "label_suffix": "cap_2000_holds",
       "quote": "or until you take damage equal to a maximum of 100% of your total health.",
       "trigger_spell": 804056,
       "target": "caster",
@@ -5688,8 +5688,8 @@
       "cast_in_before": false,
       "disable_regeneration": true,
       "caster_health": [
-        1500,
-        1500
+        2000,
+        2000
       ],
       "setup_casts": [
         582591
@@ -5707,9 +5707,9 @@
       "cast_power": 2000,
       "strike": {
         "spell": 92559,
-        "health": 1500,
-        "max_health": 1500,
-        "count": 1,
+        "health": 2000,
+        "max_health": 2000,
+        "count": 2,
         "wait_ms": 300
       },
       "metric": "aura",
@@ -5722,14 +5722,14 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [1500, 1500] set before setup_casts 582591 (stat arm 1), 1x Void Zone 92559 (977 < 1500) keeps aura 582591 present (0 before -> 1 after). Paired with cap_1500_breaks, cap_2500_holds, cap_2500_breaks. Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274; tooltip '100% of your total health'). With caster_health [2000, 2000] set before setup_casts 582591 (max-health arm 1), 2x Void Zone 92559 (2x977 = 1954 = 97.7% < 100%) keeps aura 582591 present (0 before -> 1 after), excluding any cap <= 97.7% (including -10% = 90%). Paired with cap_1900_breaks, cap_3000_holds, cap_2850_breaks to bracket 100% within (97.7%, 102.84%] at two max-health levels. Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
     },
     {
       "spell": 582591,
-      "name": "Embrace the Void (ends above 100% of 1500 max health)",
+      "name": "Embrace the Void (ends above 100% of 1900 max health: 102.8%)",
       "kind": "metric_delta",
-      "variant": "cap_1500_breaks",
-      "label_suffix": "cap_1500_breaks",
+      "variant": "cap_1900_breaks",
+      "label_suffix": "cap_1900_breaks",
       "quote": "or until you take damage equal to a maximum of 100% of your total health.",
       "trigger_spell": 804056,
       "target": "caster",
@@ -5737,8 +5737,8 @@
       "cast_in_before": false,
       "disable_regeneration": true,
       "caster_health": [
-        1500,
-        1500
+        1900,
+        1900
       ],
       "setup_casts": [
         582591
@@ -5756,8 +5756,8 @@
       "cast_power": 2000,
       "strike": {
         "spell": 92559,
-        "health": 1500,
-        "max_health": 1500,
+        "health": 1900,
+        "max_health": 1900,
         "count": 2,
         "wait_ms": 300
       },
@@ -5771,14 +5771,14 @@
       "wait_ms": 500,
       "expire_ms": 7000,
       "void_on_cast_failure": true,
-      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [1500, 1500] set before setup_casts 582591 in both phases (after_setup_stacks confirms 1 stack), before phase takes 0 strikes (aura 1); after phase takes 2x Void Zone 92559 (1954 > 1500), exhausting the 100% max-health cap and ending 582591 immediately (aura 0). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274; tooltip '100% of your total health'). With caster_health [1900, 1900] set before setup_casts 582591 in both phases (after_setup_stacks confirms 1 stack), before phase takes 0 strikes (aura 1); after phase takes 2x Void Zone 92559 (2x977 = 1954 = 102.84% > 100%), exhausting the cap and ending 582591 immediately (aura 0), excluding any cap >= 102.84% (including +10% = 110%). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
     },
     {
       "spell": 582591,
-      "name": "Embrace the Void (holds below 100% of 2500 max health)",
+      "name": "Embrace the Void (holds below 100% of 3000 max health: 97.7%)",
       "kind": "metric_delta",
-      "variant": "cap_2500_holds",
-      "label_suffix": "cap_2500_holds",
+      "variant": "cap_3000_holds",
+      "label_suffix": "cap_3000_holds",
       "quote": "or until you take damage equal to a maximum of 100% of your total health.",
       "trigger_spell": 804056,
       "target": "caster",
@@ -5786,8 +5786,8 @@
       "cast_in_before": false,
       "disable_regeneration": true,
       "caster_health": [
-        2500,
-        2500
+        3000,
+        3000
       ],
       "setup_casts": [
         582591
@@ -5805,9 +5805,9 @@
       "cast_power": 2000,
       "strike": {
         "spell": 92559,
-        "health": 2500,
-        "max_health": 2500,
-        "count": 2,
+        "health": 3000,
+        "max_health": 3000,
+        "count": 3,
         "wait_ms": 300
       },
       "metric": "aura",
@@ -5820,14 +5820,14 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [2500, 2500] (stat arm 2), the same 2x Void Zone 92559 (1954 < 2500) that broke max_health 1500 now holds (aura 0 before -> 1 after), proving the cap scales with total health. Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274; tooltip '100% of your total health'). With caster_health [3000, 3000] (max-health arm 2), 3x Void Zone 92559 (3x977 = 2931 = 97.7% < 100%) holds (aura 0 before -> 1 after), proving the cap scales with total health and excluding any cap <= 97.7% (-10% = 90%). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
     },
     {
       "spell": 582591,
-      "name": "Embrace the Void (ends above 100% of 2500 max health)",
+      "name": "Embrace the Void (ends above 100% of 2850 max health: 102.8%)",
       "kind": "metric_delta",
-      "variant": "cap_2500_breaks",
-      "label_suffix": "cap_2500_breaks",
+      "variant": "cap_2850_breaks",
+      "label_suffix": "cap_2850_breaks",
       "quote": "or until you take damage equal to a maximum of 100% of your total health.",
       "trigger_spell": 804056,
       "target": "caster",
@@ -5835,8 +5835,8 @@
       "cast_in_before": false,
       "disable_regeneration": true,
       "caster_health": [
-        2500,
-        2500
+        2850,
+        2850
       ],
       "setup_casts": [
         582591
@@ -5854,8 +5854,8 @@
       "cast_power": 2000,
       "strike": {
         "spell": 92559,
-        "health": 2500,
-        "max_health": 2500,
+        "health": 2850,
+        "max_health": 2850,
         "count": 3,
         "wait_ms": 300
       },
@@ -5869,7 +5869,7 @@
       "wait_ms": 500,
       "expire_ms": 7000,
       "void_on_cast_failure": true,
-      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274). With caster_health [2500, 2500] (stat arm 2), 3x Void Zone 92559 (2931 > 2500) exhausts the 100% max-health cap and ends 582591 immediately (aura 1 -> 0). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
+      "observe_source": "582591 budget = player->GetMaxHealth() (AscensionCultistAuras.cpp:119, 266-274; tooltip '100% of your total health'). With caster_health [2850, 2850] (max-health arm 2), 3x Void Zone 92559 (3x977 = 2931 = 102.84% > 100%) exhausts the 100% max-health cap and ends 582591 immediately (aura 1 -> 0), excluding any cap >= 102.84% (+10% = 110%). Reference search 2026-11-24: coa-history spell 582591: 18 casts and 18 aura applied/removed in 11 logs, 680769: 4 heals in 1 log; coabuildhub spells_master_index.json entry 582591 matches installed Spell.dbc."
     },
     {
       "spell": 525065,
@@ -5919,7 +5919,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "525065 Effect[2] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE (Spell.dbc). Auto-attacks dummy for 2 swing intervals before (control, >=1 swing) and after casting 525065 (gate_cast: true): gain is 0 swings under 525065. Paired with no_attack_applied confirming 525065 is held during the no-swing phase. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+      "observe_source": "525065 Effect[2] aura 60 SPELL_AURA_MOD_PACIFY_SILENCE (Spell.dbc). Auto-attacks dummy for 1 swing interval (3600 ms < 5000 ms duration of 525065) before (control, >=1 swing) and after casting 525065 (gate_cast: true): gain is 0 swings under 525065. Paired with no_attack_applied confirming 525065 is held during the no-swing phase. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
     },
     {
       "spell": 525065,
@@ -6009,21 +6009,21 @@
       "before_expected": 0,
       "expected": 1,
       "wait_ms": 1750,
-      "expiry_wait_ms": 500,
+      "expiry_wait_ms": 480,
       "after_expiry_expected": 0,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          3150,
+          3220,
           3450
         ],
         "expired": [
           3650,
-          3950
+          3790
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:67, 199) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) at the deflected attacker. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t=500 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected cast applies 525066 present at t=3250 ms (~2750 ms after cast > 2700 ms = 0.9*3000) and gone at t=3750 ms (~3250 ms after cast < 3300 ms = 1.1*3000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:67, 199) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) at the deflected attacker. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t~500-509 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected cast applies 525066 present in game_time [3220, 3450] (>= 2711 ms > 2700 ms = 0.9*3000 even with 9 ms tick jitter on lead_ms) and gone in game_time [3650, 3790] (<= 3290 ms < 3300 ms = 1.1*3000), strictly excluding durations 10% off on both sides. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
     },
     {
       "spell": 520345,
@@ -6193,7 +6193,7 @@
     },
     {
       "spell": 520345,
-      "name": "Dark Veil (stacks 5 times on both caster and ally)",
+      "name": "Dark Veil (caps at 5 stacks on caster and ally after 6th tick)",
       "kind": "metric_delta",
       "variant": "stacks",
       "label_suffix": "stacks",
@@ -6203,6 +6203,21 @@
       "measure_actor": "caster",
       "gate_timing": "start",
       "trigger_only_after": true,
+      "setup_casts": [
+        520345
+      ],
+      "setup_wait_ms": 5100,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "trigger_reset_after_setup": true,
+      "after_setup_stacks": [
+        {
+          "spell": 520346,
+          "actor": "caster",
+          "stacks": 5
+        }
+      ],
       "cast_power": 2000,
       "ally_arm": {
         "allies": 1,
@@ -6219,7 +6234,33 @@
             "before_expected": 0,
             "expected": 5,
             "tolerance": 0,
-            "source": "520346 StackAmount 5 ($520346u = 5): ally reaches 5 stacks after 5 ticks of 520345."
+            "source": "520346 StackAmount 5 ($520346u = 5): ally remains capped at 5 stacks after 6th tick of 520345."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 520346
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Confirms 6th tick of 520345 actually applied 520346 to caster (5 ticks from setup cast + 1 tick from recast)."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 520346
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Confirms 6th tick of 520345 actually applied 520346 to ally (5 ticks from setup cast + 1 tick from recast)."
           }
         ]
       },
@@ -6230,10 +6271,10 @@
       },
       "before_expected": 0,
       "expected": 5,
-      "wait_ms": 5200,
+      "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "520346 StackAmount 5 ($520346u = 5), DurationIndex 39 = 2000 ms (Spell.dbc); 520345 ticks 5 times over 5000 ms (1000..5000 ms). At 5200 ms (within 2000 ms of final tick), aura_stacks of 520346 reads 0 before and 5 after on both caster and ally. Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+      "observe_source": "520346 StackAmount 5 ($520346u = 5), DurationIndex 39 = 2000 ms (Spell.dbc); 520345 ticks 5 times over 5000 ms (1000..5000 ms). Setup cast of 520345 at ally runs 5100 ms (after_setup_stacks confirms 5 stacks on caster before recast; mana refilled and 120 s CD reset); recast trigger_spell 520345 lands tick 6 at ~6100 ms (1100 ms < 2000 ms after tick 5, so 520346 does not expire). At 1500 ms after recast, aura_apply_count confirms 6 applications landed on both caster and ally while aura_stacks stays capped at 5 on both (0 before). Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
     },
     {
       "spell": 520345,
@@ -6856,64 +6897,6 @@
     },
     {
       "spell": 524877,
-      "name": "Horrific Revelations (Horrific Revelation scales with Insanity)",
-      "kind": "metric_delta",
-      "variant": "insanity_scaling",
-      "label_suffix": "insanity_scaling",
-      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
-      "trigger_spell": 704476,
-      "gate_spell": 524877,
-      "target": "ally",
-      "measure_actor": "caster",
-      "gate_timing": "start",
-      "cast_power": 2000,
-      "ally_arm": {
-        "allies": 1,
-        "ally_health": [
-          1000,
-          10000
-        ]
-      },
-      "phase_auras": [
-        [
-          16255,
-          1,
-          "caster",
-          "caster"
-        ]
-      ],
-      "phase_aura_amounts": [
-        [
-          16255,
-          0,
-          -100
-        ]
-      ],
-      "after_auras": [
-        [
-          500706,
-          80,
-          "caster",
-          "caster"
-        ]
-      ],
-      "metric": "spell_heal_total",
-      "fields": {
-        "spell": 704473,
-        "target": "ally"
-      },
-      "phase_since": true,
-      "before_expected": 144,
-      "expected": 216,
-      "expected_ratio": 1.5,
-      "tolerance": 0.4,
-      "wait_ms": 1500,
-      "expire_ms": 16000,
-      "void_on_cast_failure": true,
-      "observe_source": "704473 tooltip states 'scaling with Insanity'. Compares tick-1 heal of 704473 with 524877 learned at 0 Insanity (before) vs 80 Insanity (after, fixture 500706 80 stacks), phase_since true, 16255 -100 crit suppression. Expects strictly higher heal at 80 Insanity (ratio in [1.10, 1.90] (strictly above 704473 DieSides 7 noise max 300/294 = 1.0204)); alerts if ratio ~1.0 (no Insanity scaling implemented). Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
-    },
-    {
-      "spell": 524877,
       "name": "Horrific Revelations (increases ally critical strike chance by 1% per stack)",
       "kind": "metric_delta",
       "variant": "crit_buff",
@@ -6942,7 +6925,7 @@
     },
     {
       "spell": 524877,
-      "name": "Horrific Revelations (stacks up to 15 times)",
+      "name": "Horrific Revelations (caps at 15 stacks after 16th tick)",
       "kind": "metric_delta",
       "variant": "max_stacks",
       "label_suffix": "max_stacks",
@@ -6951,9 +6934,34 @@
       "gate_spell": 524877,
       "target": "ally",
       "measure_actor": "ally",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "setup_casts": [
+        704476
+      ],
+      "setup_wait_ms": 15500,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "trigger_reset_after_setup": true,
       "cast_power": 2000,
       "ally_arm": {
-        "allies": 1
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 704473
+            },
+            "before_expected": 0,
+            "expected": 16,
+            "tolerance": 0,
+            "source": "Confirms 16th tick of 704476 actually applied 704473 to ally (15 ticks from setup cast + 1 tick from recast)."
+          }
+        ]
       },
       "metric": "aura_stacks",
       "fields": {
@@ -6962,10 +6970,10 @@
       },
       "before_expected": 0,
       "expected": 15,
-      "wait_ms": 15500,
-      "expire_ms": 16000,
+      "wait_ms": 1500,
+      "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "704473 StackAmount 15 ($u = 15, Spell.dbc). Over the full 15000 ms duration of Hand of Yogg-Saron 704476 (15 ticks at 1000..15000 ms), aura_stacks of 704473 on ally reads 0 before learn and 15 at 15500 ms after real learn of 524877. Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+      "observe_source": "704473 StackAmount 15 ($u = 15), DurationIndex 8 = 15000 ms (Spell.dbc). Setup cast of Hand of Yogg-Saron 704476 runs 15500 ms (15 ticks at 1000..15000 ms reaching 15 stacks; mana refilled and 120 s CD reset); recast trigger_spell 704476 lands tick 16 at ~16500 ms (1500 ms < 15000 ms after tick 15, so 704473 does not expire). At 1500 ms after recast, aura_apply_count on ally confirms 16 applications landed while aura_stacks stays capped at 15 (0 before learn). Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
     },
     {
       "spell": 524877,
