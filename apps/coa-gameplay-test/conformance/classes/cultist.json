@@ -47,7 +47,30 @@
     "skill 172": 300.0
   },
   "log_queries": {},
-  "alternate_weapons": [],
+  "alternate_weapons": [
+    {
+      "item": 2092,
+      "slot": 15,
+      "subclass": 15,
+      "min_damage": 1.1607,
+      "max_damage": 3.4821,
+      "speed_ms": 1600,
+      "inventory_type": 13,
+      "normalized_speed": 1.7,
+      "skill_line": 173
+    },
+    {
+      "item": 2209,
+      "slot": 15,
+      "subclass": 15,
+      "min_damage": 15.36,
+      "max_damage": 25.6,
+      "speed_ms": 1600,
+      "inventory_type": 13,
+      "normalized_speed": 1.7,
+      "skill_line": 173
+    }
+  ],
   "off_hand_weapons": [],
   "known_auras": [],
   "probe_auras": [],
@@ -44192,16 +44215,16 @@
       "weapon_damage_arms": {
         "weapons": [
           {
+            "item": 2092,
+            "source": "Worn Dagger (alternate_weapons, subclass 15, 1600 ms, 1.1607-3.4821)"
+          },
+          {
+            "item": 2209,
+            "source": "Kris (alternate_weapons, subclass 15, 1600 ms, 15.36-25.6)"
+          },
+          {
             "item": 2534,
-            "source": "Dreadnought Rondel (weapon_sets.Dreadnought.main_hand, 28.46-45.46)"
-          },
-          {
-            "item": 2535,
-            "source": "Heretic War Staff (weapon_sets.Heretic.main_hand, 84.53-119.41)"
-          },
-          {
-            "item": 2531,
-            "source": "Godblade Great Axe (weapon_sets.Godblade.main_hand, 90.86-127.3)"
+            "source": "Rondel (weapon_sets.Dreadnought.main_hand, subclass 15, 1600 ms, 28.46-45.46)"
           }
         ],
         "unrelated": {
@@ -44215,7 +44238,7 @@
         },
         "wait_ms": 1000
       },
-      "observe_source": "Void Power 574147 row 211 (\"Your healing power is increased based on your main-hand weapon damage.\"): unfigured direction-only claim (D-38, ADR 1299). AscensionCultist.cpp:291-292 and AscensionCultistAuras.cpp:135-136 set effect 0 (SPELL_AURA_MOD_HEALING_DONE, all schools) to int32((UNIT_FIELD_MINDAMAGE + UNIT_FIELD_MAXDAMAGE) / 2), refreshed every 500 ms. weapon_damage_arms equips three white main-hand weapons declared in weapon_sets (Dreadnought Rondel 2534, Heretic War Staff 2535, Godblade Great Axe 2531) before and after a real learn of 574147, verifying equipped_item (slot 15), strictly rising weapon_damage_min, equal attack_power across all arms (376.0, no AP confound), and invariance under an unrelated-stat control (+100 Haste Rating via 10033), judging strictly monotonic healing_power (school 5) gain with no figure asserted."
+      "observe_source": "Void Power 574147 row 211 (\"Your healing power is increased based on your main-hand weapon damage.\"): unfigured direction-only claim (D-38, ADR 1299). AscensionCultist.cpp:291-292 and AscensionCultistAuras.cpp:135-136 set effect 0 (SPELL_AURA_MOD_HEALING_DONE, all schools) to int32((UNIT_FIELD_MINDAMAGE + UNIT_FIELD_MAXDAMAGE) / 2), refreshed every 500 ms. Because Player::CalculateMinMaxDamage (StatSystem.cpp:693-728) adds unnormalized (BaseAttackTime / 1000) * AP / 14 to weapon damage, weapon_damage_arms enforces equal subclass and unhasted base speed_ms across all arms and equips three white Daggers (subclass 15, 1600 ms, 0 stats: Worn Dagger 2092 1.1607-3.4821, Kris 2209 15.36-25.6, Rondel 2534 28.46-45.46) before and after a real learn of 574147, verifying equipped_item (slot 15), strictly rising weapon_damage_min, equal attack_power across all arms (376.0, no AP/speed/subclass confound), and invariance under an unrelated-stat control (+100 Haste Rating via 10033), judging strictly monotonic healing_power (school 5) gain with no figure asserted."
     },
     {
       "spell": 706177,
@@ -44408,7 +44431,7 @@
       "wait_ms": 5600,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Dark Veil 520345 row 133 (\"At the end of the duration, if the shield holds, you teleport to them.\"): AscensionCultistAuras.cpp:164-172 calls player->NearTeleportTo(target) on 520345 AURA_REMOVE_BY_EXPIRE when both 520346 shield effects remain > 0. With grouped ally relocated 15 yd away (ally_offsets 15.0, within RangeIndex 14 30 yd) and no incoming damage, caster displacement after the 5 s channel (wait_ms 5600) moves 0 -> 15.0 +- 0.5 yd (ADR 1302), distance_2d to ally drops 15.0 -> 0.0 +- 0.5 yd, and shield 520346 remains present. Paired with teleport_broken_control."
+      "observe_source": "Dark Veil 520345 row 133 (\"At the end of the duration, if the shield holds, you teleport to them.\"): AscensionCultistAuras.cpp:164-172 calls player->NearTeleportTo(target) on 520345 AURA_REMOVE_BY_EXPIRE when both 520346 shield effects remain > 0. With grouped ally relocated 15 yd away (ally_offsets 15.0, within RangeIndex 14 60 yd) and no incoming damage, caster displacement after the 5 s channel (wait_ms 5600) moves 0 -> 15.0 +- 0.5 yd (ADR 1302), distance_2d to ally drops 15.0 -> 0.0 +- 0.5 yd, and shield 520346 remains present. Paired with teleport_broken_control."
     },
     {
       "spell": 520345,
