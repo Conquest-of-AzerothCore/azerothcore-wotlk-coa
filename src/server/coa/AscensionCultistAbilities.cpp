@@ -198,8 +198,6 @@ public:
             Cast(player, player, 500717);
         if (id == 806175)
             StartDash(player);
-        if (id == 805114 && player->HasAura(707429) && spell->GetScriptValue(Insanity) >= 80)
-            Reduce(player, id, 60000);
         if (Any(info, {808036, 808037, 808038}) && player->HasAura(560977))
             Reduce(player, id, INT32_MAX);
         Finish(player, spell);
