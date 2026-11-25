@@ -277,11 +277,10 @@
     },
     {
       "action": "client_packet",
-      "label": "CONTROL: the same pending summon is accepted again",
+      "label": "CONTROL: the same pending summon is accepted again, through to the core handler",
       "actor": "mage",
       "opcode": 684,
       "consumed": false,
-      "early": false,
       "fields": [
         {
           "actor_guid": "g"
