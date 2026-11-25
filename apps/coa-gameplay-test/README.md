@@ -1199,6 +1199,11 @@ entry `item`.
 `owned_creature_react_state` reads the same creature's `GetReactState()` (0 passive, 1 defensive, 2 aggressive).
 `owned_creature_avoided_count` counts the swings of creatures of `entry` that their victim dodged or parried, from the
 victim state of every `SMSG_ATTACKERSTATEUPDATE` the actor received.
+`melee_blocks_taken_count` and `melee_blocks_taken_total` count and sum `blocked_amount` on incoming
+`SMSG_ATTACKERSTATEUPDATE` hits carrying `HITINFO_BLOCK` for the player `actor`, with optional `block_kind`
+(`all` default, `normal` partial block equal to `GetShieldBlockValue()`, `critical` partial block equal to
+`2 * GetShieldBlockValue()`, `other` partial block with any other amount, and `full` for `VICTIMSTATE_BLOCKS` on
+`melee_blocks_taken_count` only; reads only, ADR 1310).
 `owned_creature_threat_multiplier` and `threat_multiplier` (the actor) read the threat multiplier the threat manager
 applies for `school_mask` (default Physical), `GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT)`.
 `owned_creature_spell_crit_chance` reads the owned creature's base spell crit chance (`m_baseSpellCritChance`).

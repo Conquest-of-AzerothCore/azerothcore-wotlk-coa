@@ -201,6 +201,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
     'melee_attacks_taken', 'melee_missed_taken', 'melee_attack_taken_last_ms',
+    'melee_blocks_taken_count', 'melee_blocks_taken_total',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
@@ -256,6 +257,7 @@ PLAYER_STAT_METRICS = {
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'melee_attack_count',
     'melee_attacks_taken', 'melee_missed_taken', 'melee_attack_taken_last_ms',
+    'melee_blocks_taken_count', 'melee_blocks_taken_total',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
@@ -285,7 +287,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster',
                  'chat_type', 'chat_text', 'chat_target', 'chat_channel', 'chat_subject', 'chat_emote', 'chat_name',
                  'chat_target_name', *CHAT_LOG_FLAGS,
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
-                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered', 'cumulative'} \
+                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered', 'cumulative',
+                  'block_kind'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -1446,6 +1449,12 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(metric in ('melee_attacks_taken', 'melee_attack_taken_last_ms'),
                         f'{where}: victim_state only filters melee attacks taken')
                 number(step['victim_state'], f'{where}.victim_state', 0, MAX_VICTIM_STATE, True)
+            if 'block_kind' in step:
+                require(metric in ('melee_blocks_taken_count', 'melee_blocks_taken_total'),
+                        f'{where}: block_kind only filters melee_blocks_taken metrics')
+                allowed_kinds = {'all', 'normal', 'critical', 'other', 'full'} if metric == 'melee_blocks_taken_count' \
+                    else {'all', 'normal', 'critical', 'other'}
+                require(step['block_kind'] in allowed_kinds, f'{where}: invalid block_kind')
             for key in ('glancing', 'blocked'):
                 if key in step:
                     require(metric in MELEE_OUTCOME_METRICS or (key == 'blocked' and metric in SPELL_DAMAGE_METRICS),

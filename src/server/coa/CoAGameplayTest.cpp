@@ -1180,6 +1180,13 @@ struct MeleeHitEvent
     uint64 atMs = 0;
 };
 
+struct IncomingBlockEvent
+{
+    uint32 blockedAmount = 0;
+    uint32 damage = 0;
+    uint8 victimState = 0;
+};
+
 struct MeleeOutcomes
 {
     uint32 swings = 0;
@@ -1255,6 +1262,7 @@ struct Actor
     std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
     std::map<std::pair<ObjectGuid, uint8>, uint32> meleeVictimStatesTakenFrom;
     std::map<ObjectGuid, uint32> meleeMissesTakenFrom;
+    std::vector<IncomingBlockEvent> meleeBlocksTaken;
     std::map<uint8, uint64> meleeLastTakenMsByVictimState;
     std::optional<uint64> meleeLastTakenMs;
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
@@ -1880,6 +1888,12 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             response.read_skip(size_t(subDamages) * sizeof(uint32));
         uint8 victimState = 0;
         response >> victimState;
+        uint32 unknownAttackerState = 0;
+        uint32 meleeSpellId = 0;
+        response >> unknownAttackerState >> meleeSpellId;
+        uint32 blockedAmount = 0;
+        if (hitInfo & HITINFO_BLOCK)
+            response >> blockedAmount;
         if (victim == actor.guid)
         {
             ++actor.meleeAttacksTakenFrom[attacker];
@@ -1888,6 +1902,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             actor.meleeLastTakenMs = GameNowMs();
             if (hitInfo & HITINFO_MISS)
                 ++actor.meleeMissesTakenFrom[attacker];
+            if (hitInfo & HITINFO_BLOCK)
+                actor.meleeBlocksTaken.push_back({ blockedAmount, damage, victimState });
         }
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
         outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
@@ -5346,6 +5362,36 @@ private:
             for (auto const& [attacker, count] : actor.meleeAttacksTakenFrom)
                 total += count;
             return total;
+        }
+        if (metric == "melee_blocks_taken_count" || metric == "melee_blocks_taken_total")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            std::string const kind = step.get<std::string>("block_kind", "all");
+            Require(kind == "all" || kind == "normal" || kind == "critical" || kind == "other" || kind == "full",
+                "Unknown block_kind in melee_blocks_taken metric");
+            Require(metric == "melee_blocks_taken_count" || kind != "full",
+                "block_kind full applies only to melee_blocks_taken_count");
+            uint32 const baseBlock = player->GetShieldBlockValue();
+            uint64 total = 0;
+            for (IncomingBlockEvent const& event : actor.meleeBlocksTaken)
+            {
+                bool match = false;
+                if (kind == "all")
+                    match = true;
+                else if (kind == "full")
+                    match = event.victimState == VICTIMSTATE_BLOCKS;
+                else if (kind == "normal")
+                    match = event.victimState != VICTIMSTATE_BLOCKS && baseBlock > 0 && event.blockedAmount == baseBlock;
+                else if (kind == "critical")
+                    match = event.victimState != VICTIMSTATE_BLOCKS && baseBlock > 0 &&
+                        event.blockedAmount == baseBlock * 2;
+                else
+                    match = event.victimState != VICTIMSTATE_BLOCKS &&
+                        (!baseBlock || (event.blockedAmount != baseBlock && event.blockedAmount != baseBlock * 2));
+                if (match)
+                    total += metric == "melee_blocks_taken_count" ? 1 : event.blockedAmount;
+            }
+            return double(total);
         }
         if (metric == "pet_melee_swings" || metric == "pet_melee_crits" || metric == "pet_melee_glancing" ||
             metric == "pet_melee_plain_count" || metric == "pet_melee_plain_damage" || metric == "pet_melee_damage" ||

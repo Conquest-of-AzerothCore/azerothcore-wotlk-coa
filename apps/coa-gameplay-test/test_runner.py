@@ -296,6 +296,21 @@ class RunnerTests(unittest.TestCase):
         for field in ('target', 'swings', 'timeout_ms'):
             self.assert_step_rejected({key: value for key, value in step.items() if key != field})
 
+    def test_melee_blocks_taken_metric_fields(self):
+        for metric in ('melee_blocks_taken_count', 'melee_blocks_taken_total'):
+            step = {'action': 'snapshot', 'actor': 'caster', 'metric': metric, 'save_as': 'blocks'}
+            self.assert_step_validates(step)
+            for kind in ('all', 'normal', 'critical', 'other'):
+                self.assert_step_validates({**step, 'block_kind': kind})
+            self.assert_step_rejected({**step, 'block_kind': 'bogus'})
+            self.assert_step_rejected({**step, 'actor': 'target'})
+        self.assert_step_validates({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_blocks_taken_count',
+                                    'block_kind': 'full', 'save_as': 'full'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_blocks_taken_total',
+                                   'block_kind': 'full', 'save_as': 'bad'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                   'block_kind': 'normal', 'save_as': 'bad'})
+
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
         self.assert_step_validates(step)
