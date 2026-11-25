@@ -46015,6 +46015,702 @@
         }
       ],
       "observe_source": "Spell.dbc 707753: 'While above 40 Insanity, your chance to trigger Dark Revelation is now increased by $s1%.' ($s1 = 10%, 300313 ProcChance = 6%). Pure condition contrast with both 300313 and 707753 learned before control: control sets Insanity 500706 to exact 40 stacks before every 92559 cast (6% in [4%, 8%], ruling out >= 40 or unconditional bonus), treatment sets 500706 to exact 41 stacks (16% in [14%, 18%], ruling out > 41 or missing bonus). 9 pooled parts x (1000 control + 2200 treatment) = 9000 control and 19800 treatment hits, per-arm Wilson 0.99975 (z = 3.6623), combined exact pair false-fail 3.601e-4 (0.036% <= 0.1%), false-pass at opposite rate < 1e-11 (ADR 1305). Reference search 2026-11-25: installed Spell.dbc governs."
+    },
+    {
+      "spell": 525307,
+      "name": "Shadow Pennant r2 (lowest_ally_a: heals ally at 30% over ally2 at 70% and non-Black-Blood ally3 at 10%)",
+      "kind": "metric_delta",
+      "variant": "lowest_ally_a",
+      "label_suffix": "lowest_ally_a",
+      "quote": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+      "gate_spell": 525307,
+      "trigger_spell": 500773,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "attack_swings": 3,
+      "ally_arm": {
+        "allies": 3,
+        "ally_health": {
+          "ally": [
+            3000,
+            10000
+          ],
+          "ally2": [
+            7000,
+            10000
+          ],
+          "ally3": [
+            1000,
+            10000
+          ]
+        },
+        "ally_auras": [
+          [
+            804153,
+            1,
+            "ally",
+            "caster"
+          ],
+          [
+            804153,
+            1,
+            "ally2",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "source": "Shadow Pennant 500773 healing on lowest-health Black Blood ally ally (30% HP) during 3 auto-attack swings (AscensionCultistEvents.cpp:266-276)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {
+              "hand": 0
+            },
+            "source": "Caster main-hand auto-attack damage dealt to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Higher-health Black Blood ally ally2 (70% HP) must receive 0 heals of 500773 (AscensionCultist.cpp:245-249 sorts ascending by health pct)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally3"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Lowest-health ally3 (10% HP) lacks Black Blood 804153 and must receive 0 heals of 500773 (AscensionCultistEvents.cpp:271)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster lacks Black Blood 804153 and must receive 0 heals of 500773."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally2 across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally3",
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally3 and caster do not hold Black Blood 804153 in either phase."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "floor_count": 0,
+            "source": "Spell.dbc 525307 Effect[0] BasePoints 99 + DieSides 1 = 100% ($s1); CalculatePct(damage, 100) truncates up to 1 per swing."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 5,
+      "wait_ms": 200,
+      "expire_ms": 3000,
+      "observe_source": "Spell.dbc 525307 Effect[0] aura 354 BasePoints 99 + DieSides 1 = 100% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 and AscensionCultist.cpp:238-255 filter Allies(player, player, 40) by ally->HasAura(804153, player->GetGUID()), sort ascending by health pct, and heal allies.front() via 500773 for CalculatePct(damage, 100). Proves reach on grouped allies, lowest-health selection among >=2 Black Blood allies (paired with reverse arm swapping ally/ally2 health), and Black Blood gating against lower-health ally3 (10% HP, no 804153). Three main-hand swings (Heretic staff 3300 ms -> 9900 ms + 200 ms < 12000 ms 804153 duration), regeneration disabled: 0 heals before learning 525307, 2..5 heals on ally (30% HP) at ratio 1.00 +- 0.01, 0 heals on ally2 (70% HP), ally3 (10% HP, no 804153), and caster. Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+    },
+    {
+      "spell": 525307,
+      "name": "Shadow Pennant r2 (lowest_ally_b: heals ally2 at 30% over ally at 70% and non-Black-Blood ally3 at 10%)",
+      "kind": "metric_delta",
+      "variant": "lowest_ally_b",
+      "label_suffix": "lowest_ally_b",
+      "quote": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+      "gate_spell": 525307,
+      "trigger_spell": 500773,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "attack_swings": 3,
+      "ally_arm": {
+        "allies": 3,
+        "ally_health": {
+          "ally": [
+            7000,
+            10000
+          ],
+          "ally2": [
+            3000,
+            10000
+          ],
+          "ally3": [
+            1000,
+            10000
+          ]
+        },
+        "ally_auras": [
+          [
+            804153,
+            1,
+            "ally",
+            "caster"
+          ],
+          [
+            804153,
+            1,
+            "ally2",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally2"
+            },
+            "source": "Shadow Pennant 500773 healing on lowest-health Black Blood ally ally2 (30% HP) during 3 auto-attack swings (AscensionCultistEvents.cpp:266-276)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {
+              "hand": 0
+            },
+            "source": "Caster main-hand auto-attack damage dealt to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Higher-health Black Blood ally ally (70% HP) must receive 0 heals of 500773 (AscensionCultist.cpp:245-249 sorts ascending by health pct)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally3"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Lowest-health ally3 (10% HP) lacks Black Blood 804153 and must receive 0 heals of 500773 (AscensionCultistEvents.cpp:271)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster lacks Black Blood 804153 and must receive 0 heals of 500773."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally2 across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally3",
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally3 and caster do not hold Black Blood 804153 in either phase."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "floor_count": 0,
+            "source": "Spell.dbc 525307 Effect[0] BasePoints 99 + DieSides 1 = 100% ($s1); CalculatePct(damage, 100) truncates up to 1 per swing."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 5,
+      "wait_ms": 200,
+      "expire_ms": 3000,
+      "observe_source": "Spell.dbc 525307 Effect[0] aura 354 BasePoints 99 + DieSides 1 = 100% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 and AscensionCultist.cpp:238-255 filter Allies(player, player, 40) by ally->HasAura(804153, player->GetGUID()), sort ascending by health pct, and heal allies.front() via 500773 for CalculatePct(damage, 100). Proves reach on grouped allies, lowest-health selection among >=2 Black Blood allies (paired with reverse arm swapping ally/ally2 health), and Black Blood gating against lower-health ally3 (10% HP, no 804153). Three main-hand swings (Heretic staff 3300 ms -> 9900 ms + 200 ms < 12000 ms 804153 duration), regeneration disabled: 0 heals before learning 525307, 2..5 heals on ally2 (30% HP) at ratio 1.00 +- 0.01, 0 heals on ally (70% HP), ally3 (10% HP, no 804153), and caster. Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+    },
+    {
+      "spell": 706926,
+      "name": "Shadow Pennant r1 (lowest_ally_a: heals ally at 30% over ally2 at 70% and non-Black-Blood ally3 at 10%)",
+      "kind": "metric_delta",
+      "variant": "lowest_ally_a",
+      "label_suffix": "lowest_ally_a",
+      "quote": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+      "gate_spell": 706926,
+      "trigger_spell": 500773,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "attack_swings": 3,
+      "ally_arm": {
+        "allies": 3,
+        "ally_health": {
+          "ally": [
+            3000,
+            10000
+          ],
+          "ally2": [
+            7000,
+            10000
+          ],
+          "ally3": [
+            1000,
+            10000
+          ]
+        },
+        "ally_auras": [
+          [
+            804153,
+            1,
+            "ally",
+            "caster"
+          ],
+          [
+            804153,
+            1,
+            "ally2",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "source": "Shadow Pennant 500773 healing on lowest-health Black Blood ally ally (30% HP) during 3 auto-attack swings (AscensionCultistEvents.cpp:266-276)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {
+              "hand": 0
+            },
+            "source": "Caster main-hand auto-attack damage dealt to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Higher-health Black Blood ally ally2 (70% HP) must receive 0 heals of 500773 (AscensionCultist.cpp:245-249 sorts ascending by health pct)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally3"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Lowest-health ally3 (10% HP) lacks Black Blood 804153 and must receive 0 heals of 500773 (AscensionCultistEvents.cpp:271)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster lacks Black Blood 804153 and must receive 0 heals of 500773."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally2 across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally3",
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally3 and caster do not hold Black Blood 804153 in either phase."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.5,
+            "tolerance": 0.01,
+            "floor_count": 0,
+            "source": "Spell.dbc 706926 Effect[0] BasePoints 49 + DieSides 1 = 50% ($s1); CalculatePct(damage, 50) truncates up to 1 per swing."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 5,
+      "wait_ms": 200,
+      "expire_ms": 3000,
+      "observe_source": "Spell.dbc 706926 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 and AscensionCultist.cpp:238-255 filter Allies(player, player, 40) by ally->HasAura(804153, player->GetGUID()), sort ascending by health pct, and heal allies.front() via 500773 for CalculatePct(damage, 50). Proves reach on grouped allies, lowest-health selection among >=2 Black Blood allies (paired with reverse arm swapping ally/ally2 health), and Black Blood gating against lower-health ally3 (10% HP, no 804153). Three main-hand swings (Heretic staff 3300 ms -> 9900 ms + 200 ms < 12000 ms 804153 duration), regeneration disabled: 0 heals before learning 706926, 2..5 heals on ally (30% HP) at ratio 0.50 +- 0.01, 0 heals on ally2 (70% HP), ally3 (10% HP, no 804153), and caster. Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+    },
+    {
+      "spell": 706926,
+      "name": "Shadow Pennant r1 (lowest_ally_b: heals ally2 at 30% over ally at 70% and non-Black-Blood ally3 at 10%)",
+      "kind": "metric_delta",
+      "variant": "lowest_ally_b",
+      "label_suffix": "lowest_ally_b",
+      "quote": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+      "gate_spell": 706926,
+      "trigger_spell": 500773,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "attack_swings": 3,
+      "ally_arm": {
+        "allies": 3,
+        "ally_health": {
+          "ally": [
+            7000,
+            10000
+          ],
+          "ally2": [
+            3000,
+            10000
+          ],
+          "ally3": [
+            1000,
+            10000
+          ]
+        },
+        "ally_auras": [
+          [
+            804153,
+            1,
+            "ally",
+            "caster"
+          ],
+          [
+            804153,
+            1,
+            "ally2",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally2"
+            },
+            "source": "Shadow Pennant 500773 healing on lowest-health Black Blood ally ally2 (30% HP) during 3 auto-attack swings (AscensionCultistEvents.cpp:266-276)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {
+              "hand": 0
+            },
+            "source": "Caster main-hand auto-attack damage dealt to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Higher-health Black Blood ally ally (70% HP) must receive 0 heals of 500773 (AscensionCultist.cpp:245-249 sorts ascending by health pct)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally3"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Lowest-health ally3 (10% HP) lacks Black Blood 804153 and must receive 0 heals of 500773 (AscensionCultistEvents.cpp:271)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster lacks Black Blood 804153 and must receive 0 heals of 500773."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Black Blood 804153 (12000 ms) remains active on ally2 across the 3-swing window (9900 ms + 200 ms)."
+          },
+          {
+            "actors": [
+              "ally3",
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "ally3 and caster do not hold Black Blood 804153 in either phase."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.5,
+            "tolerance": 0.01,
+            "floor_count": 0,
+            "source": "Spell.dbc 706926 Effect[0] BasePoints 49 + DieSides 1 = 50% ($s1); CalculatePct(damage, 50) truncates up to 1 per swing."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 5,
+      "wait_ms": 200,
+      "expire_ms": 3000,
+      "observe_source": "Spell.dbc 706926 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 and AscensionCultist.cpp:238-255 filter Allies(player, player, 40) by ally->HasAura(804153, player->GetGUID()), sort ascending by health pct, and heal allies.front() via 500773 for CalculatePct(damage, 50). Proves reach on grouped allies, lowest-health selection among >=2 Black Blood allies (paired with reverse arm swapping ally/ally2 health), and Black Blood gating against lower-health ally3 (10% HP, no 804153). Three main-hand swings (Heretic staff 3300 ms -> 9900 ms + 200 ms < 12000 ms 804153 duration), regeneration disabled: 0 heals before learning 706926, 2..5 heals on ally2 (30% HP) at ratio 0.50 +- 0.01, 0 heals on ally (70% HP), ally3 (10% HP, no 804153), and caster. Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
     }
   ],
   "player_observations": [],
