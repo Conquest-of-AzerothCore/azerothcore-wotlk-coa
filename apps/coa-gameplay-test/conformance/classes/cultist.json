@@ -27875,6 +27875,397 @@
         ]
       },
       "observe_source": "Unit::CanCastDuringChannel (Unit.cpp:5147-5149) allows Eldritch Shock 808036..808038 during an active channel when HasAura(560977) (Unit.cpp:4839 otherwise interrupts CURRENT_CHANNELED_SPELL when casting a generic spell). Both phases cast Satiate 804275 (6000 ms instant channel, 0 mana) and then cast Eldritch Shock 808036 at dummy 1700 ms later (past 1500 ms GCD). Control without 560977 interrupts Satiate (aura 804275 == 0, casting == 0 at 2200 ms) while 808043 lands (count 1); treatment after real learn of 560977 lands 808043 (cumulative count 2) while Satiate keeps channeling (aura 804275 == 1, casting == 1). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (shields caster for 100% of Twilight Shieldtoss damage at base SP)",
+      "kind": "metric_delta",
+      "variant": "shield_ratio_base",
+      "label_suffix": "shield_ratio_base",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 500,
+        "count": 3,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 704889 Effect[0] bp=99+die=1=100% ($s1 = 100); AscensionCultistAbilities.cpp:289-299 applies 850002 for CalculatePct(damage, 100) on every 572141 hit (572141 bounces from dummy to the hostile striker, dealing 1.0x + 0.8x = 1.8x damage across both targets). ratio_to_metric (increments: true, fields.spell 572141 across all targets) divides absorbed damage against 3x Light of the Naaru 41394 (3300 Holy) by total 572141 damage dealt: 0 before learning 704889, 1.00 +- 0.02 after. Paired with shield_ratio_sp (+20000 SP). Reference search 2026-11-25: coa-history 704889/850002 0 events, 572141 4 casts/4 hits in 1 log; coabuildhub 704889 holds older text; installed Spell.dbc governs per G-9."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (shields caster for 100% of Twilight Shieldtoss damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "shield_ratio_sp",
+      "label_suffix": "shield_ratio_sp",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 500,
+        "count": 12,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "High-damage contrast arm (+20000 SP, 572141 bounces across dummy + striker for ~10645 total damage -> ~10645 shield broken by 12x Light of the Naaru 41394 = 13200 Holy) separating 100% of damage dealt from a flat absorb: 0 before learning 704889, 1.00 +- 0.02 after. Reference search 2026-11-25: see shield_ratio_base."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (shield 850002 lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 850002
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7500,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7300,
+          7700
+        ],
+        "expired": [
+          8400,
+          8850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "850002 DurationIndex 31 = 8000 ms ($850002d, SpellDuration.dbc); 572141 speed 35 yd/s at 3 yd -> ~86 ms flight. Reads 850002 absent before cast (0), present (1) at [7300..7700] ms (~7414 ms after apply, > 7200 = 0.9*8000), and gone (0) at [8400..8850] ms (~8514 ms after apply, < 8800 = 1.1*8000). Reference search 2026-11-25: coa-history spell 704889 has 0 events (passive), 850002 has 0 events, 572141 Twilight Shieldtoss has 4 casts / 4 SPELL_DAMAGE events in 1 log; coabuildhub spells_master_index.json 704889 holds an older text ('The first instance of damage dealt by Twilight Shieldtoss now shields you for 100% of the damage dealt for 8 sec.'; installed server Spell.dbc governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (second shield adds to remaining absorb amount across two Shieldtoss hits)",
+      "kind": "metric_delta",
+      "variant": "stack_sum",
+      "label_suffix": "stack_sum",
+      "quote": "Additional shields add to the remaining absorb amount and refresh its duration.",
+      "setup_casts": [
+        572141
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "trigger_reset_after_setup": true,
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 500,
+        "count": 5,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572141,
+              "target": "dummy"
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Two Twilight Shieldtoss 572141 hits land in each phase (2 before, cumulative 4 after)"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAbilities.cpp:291-298: reads remaining amount of 850002, reapplies 850002 with newly added amount, then calls shield->ChangeAmount(added + remaining). Each phase casts 572141 twice 2000 ms apart (setup_casts + trigger_reset_after_setup + trigger_spell; both hits on dummy verified via ally_arm count 2 -> 4, plus bounces to striker). After the second cast, 5x Light of the Naaru 41394 (5500 Holy) breaks the accumulated shield: ratio_to_metric divides absorbed total by total 572141 damage across all hits of both casts, reading 0 before learning 704889 and 1.00 +- 0.02 after (replacing instead of adding would read <= 0.50). Reference search 2026-11-25: see shield_ratio_base."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (second shield at 4000 ms refreshes 850002 duration to 8 sec from the second hit)",
+      "kind": "metric_delta",
+      "variant": "stack_refresh",
+      "label_suffix": "stack_refresh",
+      "quote": "Additional shields add to the remaining absorb amount and refresh its duration.",
+      "setup_casts": [
+        572141
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 4000,
+      "trigger_reset_after_setup": true,
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 850002
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7500,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7300,
+          7700
+        ],
+        "expired": [
+          8400,
+          8850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572141,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Both Twilight Shieldtoss 572141 hits land 4000 ms apart in treatment (0 before, 2 after)"
+          }
+        ]
+      },
+      "observe_source": "Duration-refresh proof for 704889 (AscensionCultistAbilities.cpp:296 Copy reapplies 850002, refreshing its 8000 ms timer): treatment casts 572141, waits 4000 ms, resets CD and casts a second 572141 (both hits confirmed via ally_arm count 0 -> 2). At 7500 ms after the second cast (11500 ms after the first, 3.5 sec past the first shield's unrefreshed 8000 ms expiry), 850002 is still present (1, > 7200 ms from cast 2); 1100 ms later (8600 ms after cast 2, < 8800 ms), 850002 is gone (0). Reference search 2026-11-25: coa-history spell 704889 has 0 events (passive), 850002 has 0 events, 572141 Twilight Shieldtoss has 4 casts / 4 SPELL_DAMAGE events in 1 log; coabuildhub spells_master_index.json 704889 holds an older text ('The first instance of damage dealt by Twilight Shieldtoss now shields you for 100% of the damage dealt for 8 sec.'; installed server Spell.dbc governs per G-9, no pending_db_world spell_dbc or streamed description override)."
     }
   ],
   "player_observations": [],

@@ -3127,13 +3127,14 @@
       {
         "claim": "shields you for $s1% of the damage dealt",
         "labels": [
-          "704889 effect_value e0 #0"
+          "704889 behaviour_metric_delta shield_ratio_base",
+          "704889 behaviour_metric_delta shield_ratio_sp"
         ]
       },
       {
         "claim": "for $850002d",
         "labels": [
-          "704889 spell_duration 850002 #1"
+          "704889 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -3141,8 +3142,21 @@
   {
     "spell": 704889,
     "clause": "Additional shields add to the remaining absorb amount and refresh its duration.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Additional shields add to the remaining absorb amount",
+        "labels": [
+          "704889 behaviour_metric_delta stack_sum"
+        ]
+      },
+      {
+        "claim": "and refresh its duration.",
+        "labels": [
+          "704889 behaviour_metric_delta stack_refresh"
+        ]
+      }
+    ]
   },
   {
     "spell": 704895,
