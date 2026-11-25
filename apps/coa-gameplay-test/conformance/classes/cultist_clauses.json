@@ -143,28 +143,56 @@
     "spell": 255275,
     "clause": "Channel for $d,",
     "labels": [
-      "255275 aura_duration_ms #0"
+      "255275 behaviour_metric_delta channel_duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 255275,
     "clause": "heralding the end of the world on all nearby enemies, instantly removing all beneficial magic effects from them and reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "instantly removing all beneficial magic effects from them",
+        "labels": [
+          "255275 behaviour_metric_delta dispel_magic"
+        ]
+      },
+      {
+        "claim": "reducing your damage taken",
+        "labels": [
+          "255275 behaviour_metric_delta damage_taken"
+        ]
+      },
+      {
+        "claim": "and their haste",
+        "labels": [
+          "255275 behaviour_metric_delta enemy_melee_haste",
+          "255275 behaviour_metric_delta enemy_spell_haste"
+        ]
+      },
+      {
+        "claim": "and movement speed by $255276s1% while channeling.",
+        "labels": [
+          "255275 behaviour_metric_delta enemy_slow"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 255275,
+    "clause": "While channeling, nearby enemies will also be struck with Apocalyptic Skies.",
     "labels": [
-      "255275 effect_value 255276e0 #1"
+      "255275 behaviour_metric_delta apocalyptic_skies"
     ],
     "kind": "claim"
   },
   {
     "spell": 255275,
-    "clause": "While channeling, nearby enemies will also be struck with Apocalyptic Skies.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 255275,
     "clause": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
-    "labels": [],
+    "labels": [
+      "255275 behaviour_metric_delta corrupt_mind_end"
+    ],
     "kind": "claim"
   },
   {
@@ -982,10 +1010,21 @@
   {
     "spell": 301984,
     "clause": "Increases your attack power and your maximum mana by $s1%.",
-    "labels": [
-      "301984 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your attack power",
+        "labels": [
+          "301984 behaviour_metric_delta attack_power"
+        ]
+      },
+      {
+        "claim": "and your maximum mana by $s1%.",
+        "labels": [
+          "301984 behaviour_metric_delta max_mana"
+        ]
+      }
+    ]
   },
   {
     "spell": 302015,
@@ -1006,18 +1045,48 @@
   {
     "spell": 302072,
     "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
-    "labels": [
-      "302072 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration",
+        "labels": [
+          "302072 behaviour_metric_delta void_shield_held",
+          "302072 behaviour_metric_delta void_shield_gone",
+          "302072 behaviour_metric_delta forbidden_ritual_held",
+          "302072 behaviour_metric_delta forbidden_ritual_gone"
+        ]
+      },
+      {
+        "claim": "and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+        "labels": [
+          "302072 behaviour_metric_delta void_shield_absorb",
+          "302072 behaviour_metric_delta forbidden_ritual_absorb"
+        ]
+      }
+    ]
   },
   {
     "spell": 302919,
     "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
-    "labels": [
-      "302919 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration",
+        "labels": [
+          "302919 behaviour_metric_delta void_shield_held",
+          "302919 behaviour_metric_delta void_shield_gone",
+          "302919 behaviour_metric_delta forbidden_ritual_held",
+          "302919 behaviour_metric_delta forbidden_ritual_gone"
+        ]
+      },
+      {
+        "claim": "and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+        "labels": [
+          "302919 behaviour_metric_delta void_shield_absorb",
+          "302919 behaviour_metric_delta forbidden_ritual_absorb"
+        ]
+      }
+    ]
   },
   {
     "spell": 500704,
@@ -1151,14 +1220,14 @@
       {
         "claim": "absorbing ${$m1+$SP*2} damage",
         "labels": [
-          "578115 effect_value e0 #0",
-          "578115 aura_amount e0 #0"
+          "578115 behaviour_metric_delta absorb_base",
+          "578115 behaviour_metric_delta absorb_sp"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "578115 aura_duration_ms #1"
+          "578115 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -1166,38 +1235,65 @@
   {
     "spell": 578115,
     "clause": "Cannot be affected by Void Shield.",
-    "labels": [],
+    "labels": [
+      "578115 behaviour_metric_delta wracked_mind_gate"
+    ],
     "kind": "claim"
   },
   {
     "spell": 578115,
     "clause": "Lasts for $d.",
     "labels": [
-      "578115 spell_duration 805801 #2"
+      "578115 behaviour_metric_delta wracked_mind_duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 500719,
     "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
-    "labels": [
-      "500719 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Obliteration Beam by $s2%",
+        "labels": [
+          "500719 cost_gate 806897 cooldown without",
+          "500719 cost_gate 806897 cooldown with",
+          "500719 cost_gate 806897 cooldown beyond"
+        ]
+      },
+      {
+        "claim": "and it now applies Madness to all targets struck.",
+        "labels": [
+          "500719 behaviour_metric_delta applies_madness_all"
+        ]
+      }
+    ]
   },
   {
     "spell": 500719,
     "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
-    "labels": [
-      "500719 effect_value 804369e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Gaze of C'thun",
+        "labels": [
+          "500719 behaviour_metric_delta gaze_damage"
+        ]
+      },
+      {
+        "claim": "$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+        "labels": [
+          "500719 behaviour_metric_delta beam_damage_with_805606",
+          "500719 behaviour_metric_delta beam_damage_without_805606"
+        ]
+      }
+    ]
   },
   {
     "spell": 500719,
     "clause": "stacks up to $u times.",
     "labels": [
-      "500719 max_stacks 804369 #2"
+      "500719 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -1316,24 +1412,49 @@
   {
     "spell": 500767,
     "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
-    "labels": [
-      "500767 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Obliteration Beam by $s2%",
+        "labels": [
+          "500767 cost_gate 806897 cooldown without",
+          "500767 cost_gate 806897 cooldown with",
+          "500767 cost_gate 806897 cooldown beyond"
+        ]
+      },
+      {
+        "claim": "and it now applies Madness to all targets struck.",
+        "labels": [
+          "500767 behaviour_metric_delta applies_madness_all"
+        ]
+      }
+    ]
   },
   {
     "spell": 500767,
     "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
-    "labels": [
-      "500767 effect_value 804369e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Gaze of C'thun",
+        "labels": [
+          "500767 behaviour_metric_delta gaze_damage"
+        ]
+      },
+      {
+        "claim": "$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+        "labels": [
+          "500767 behaviour_metric_delta beam_damage_with_805606",
+          "500767 behaviour_metric_delta beam_damage_without_805606"
+        ]
+      }
+    ]
   },
   {
     "spell": 500767,
     "clause": "stacks up to $u times.",
     "labels": [
-      "500767 max_stacks 804369 #2"
+      "500767 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -1899,10 +2020,21 @@
   {
     "spell": 560080,
     "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
-    "labels": [
-      "560080 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the amount of mana",
+        "labels": [
+          "560080 behaviour_metric_delta mana_base",
+          "560080 behaviour_metric_delta mana_int"
+        ]
+      },
+      {
+        "claim": "and now health per point of Intellect by $s1%.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Alert & owner question (tooltip wording '$s1%' = 200% vs server aura 328 +2/Int): Spell.dbc 560080 Effect[0]/Effect[1] are aura 328 (SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT) with BasePoints 199+1=200. Server StatSystem.cpp:80,96 adds CalculatePct(Intellect, 200) = +2 mana and +2 health per point of Intellect (measured in cu-t10/prove-b1: mana +142 at 71 Int [2297->2439], +742 at 371 Int [6797->7539]; health +142 at 71 Int [2278->2420], +742 at 371 Int [2278->3020]), matching coabuildhub's older wording ('You now gain an additional 2 mana per point of Intellect.'), whereas the Spell.dbc tooltip renders 'by 200%' (+200% of base 15 mana/Int would be +1570/+10570 mana, and base health/Int is 0). Needs owner ruling (likely client text fix to 'by 2', analogous to Q-cu-4 Malignant Armor)."
   },
   {
     "spell": 560091,
@@ -2177,10 +2309,21 @@
   {
     "spell": 561335,
     "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
-    "labels": [
-      "561335 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the amount of mana",
+        "labels": [
+          "561335 behaviour_metric_delta mana_base",
+          "561335 behaviour_metric_delta mana_int"
+        ]
+      },
+      {
+        "claim": "and now health per point of Intellect by $s1%.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "reason": "Alert & owner question (tooltip wording '$s1%' = 400% vs server aura 328 +4/Int): Spell.dbc 561335 Effect[0]/Effect[1] are aura 328 with BasePoints 399+1=400. Server StatSystem.cpp:80,96 adds CalculatePct(Intellect, 400) = +4 mana and +4 health per point of Intellect (measured in cu-t10/prove-b1: mana +284 at 71 Int [2297->2581], +1484 at 371 Int [6797->8281]; health +284 at 71 Int [2278->2562], +1484 at 371 Int [2278->3762]), whereas Spell.dbc tooltip renders 'by 400%' (+400% of base 15 mana/Int would be +3140/+21140 mana, and base health/Int is 0). Needs owner ruling analogous to 560080 and Q-cu-4."
   },
   {
     "spell": 561336,
@@ -2641,12 +2784,18 @@
       {
         "claim": "for every ${($m1*$m2)*2} armor value you have",
         "labels": [
-          "680569 effect_value e0 #0"
-        ]
+          "680569 behaviour_metric_delta ap_base",
+          "680569 behaviour_metric_delta ap_armor"
+        ],
+        "reason": "Proved in play, audit classification pending (uncounted): server behaviour proved against ruled client text '2 for every 100 armor' per owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24: correct client text at class end, leave server 1 AP per 50 armor unchanged; proved at armor 182 -> +3 AP and armor 5182 -> +103 AP); audit still classes this sub-claim as data because STATE_PROMISES['attack_power'] matches 'attack power' on claims[1] only."
       },
       {
         "claim": "Increases your attack power by 2",
-        "labels": []
+        "labels": [
+          "680569 behaviour_metric_delta ap_base",
+          "680569 behaviour_metric_delta ap_armor"
+        ],
+        "reason": "Counted against ruled client text '2 for every 100 armor' per owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24: correct client text at class end, leave server 1 AP per 50 armor unchanged; proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
       }
     ]
   },
@@ -3114,24 +3263,49 @@
     "spell": 704476,
     "clause": "Tether yourself to an ally for $d,",
     "labels": [
-      "704476 aura_duration_ms #0"
+      "704476 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 704476,
     "clause": "increasing all damage they deal and reducing all damage they take by $s3%.",
-    "labels": [
-      "704476 effect_value e2 #1",
-      "704476 aura_amount e2 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing all damage they deal",
+        "labels": [
+          "704476 behaviour_metric_delta ally_damage_dealt"
+        ]
+      },
+      {
+        "claim": "and reducing all damage they take by $s3%.",
+        "labels": [
+          "704476 behaviour_metric_delta ally_damage_taken"
+        ]
+      }
+    ]
   },
   {
     "spell": 704476,
     "clause": "$?s524877[\n\nEvery $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Every $t1 sec while active, you trigger a Horrific Revelation on the target",
+        "labels": [
+          "704476 behaviour_metric_delta without_524877",
+          "704476 behaviour_metric_delta with_524877_period_early",
+          "704476 behaviour_metric_delta with_524877_period_late"
+        ]
+      },
+      {
+        "claim": "and generate 5 Insanity.",
+        "labels": [
+          "704476 behaviour_metric_delta with_524877_insanity"
+        ]
+      }
+    ]
   },
   {
     "spell": 704527,
@@ -3470,10 +3644,27 @@
   {
     "spell": 706190,
     "clause": "Increases your maximum mana, your movement speed, and mounted movement speed by $s1%.",
-    "labels": [
-      "706190 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your maximum mana,",
+        "labels": [
+          "706190 behaviour_metric_delta max_mana"
+        ]
+      },
+      {
+        "claim": "your movement speed,",
+        "labels": [
+          "706190 behaviour_metric_delta run_speed"
+        ]
+      },
+      {
+        "claim": "and mounted movement speed by $s1%.",
+        "labels": [
+          "706190 behaviour_metric_delta mounted_speed"
+        ]
+      }
+    ]
   },
   {
     "spell": 706245,
@@ -3962,7 +4153,9 @@
   {
     "spell": 502220,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "502220 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
@@ -3973,13 +4166,13 @@
       {
         "claim": "dealing $o1 Shadow damage",
         "labels": [
-          "502220 effect_value #0"
+          "502220 behaviour_metric_delta damage_base"
         ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "502220 aura_duration_ms #1"
+          "502220 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -3988,7 +4181,7 @@
     "spell": 502220,
     "clause": "Each instance of damage reduces their periodic healing taken by $706913s1%,",
     "labels": [
-      "502220 effect_value 706913e0 #2"
+      "502220 behaviour_metric_delta hot_reduction"
     ],
     "kind": "claim"
   },
@@ -3996,7 +4189,8 @@
     "spell": 502220,
     "clause": "stacking up to $?s301317[8][$706913u] times.",
     "labels": [
-      "502220 max_stacks 706913 #3"
+      "502220 behaviour_metric_delta stack_cap_base",
+      "502220 behaviour_metric_delta stack_cap_301317"
     ],
     "kind": "claim"
   },
@@ -4071,13 +4265,15 @@
       {
         "claim": "increases your critical strike and dodge chance by $572613s1%",
         "labels": [
-          "802043 effect_value 572613e0 #0"
+          "802043 behaviour_metric_delta crit_gain",
+          "802043 behaviour_metric_delta dodge_gain"
         ]
       },
       {
         "claim": "for $572613d",
         "labels": [
-          "802043 spell_duration 572613 #1"
+          "802043 behaviour_metric_delta duration_held",
+          "802043 behaviour_metric_delta duration_gone"
         ]
       }
     ]
@@ -4086,7 +4282,7 @@
     "spell": 802043,
     "clause": "stacking up to $572613u times.",
     "labels": [
-      "802043 max_stacks 572613 #2"
+      "802043 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -4200,10 +4396,21 @@
   {
     "spell": 802728,
     "clause": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
-    "labels": [
-      "802728 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance",
+        "labels": [
+          "802728 behaviour_metric_delta tentacle_crit_chance"
+        ]
+      },
+      {
+        "claim": "and critical damage of your Tentacles by $s1%.",
+        "labels": [
+          "802728 behaviour_hit_ratio tentacle_crit_damage"
+        ]
+      }
+    ]
   },
   {
     "spell": 803236,
@@ -4812,23 +5019,55 @@
   {
     "spell": 807128,
     "clause": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
-    "labels": [
-      "807128 effect_value 806769e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "you now transform into a Faceless Monstrosity,",
+        "labels": [
+          "807128 behaviour_metric_delta transform",
+          "807128 behaviour_metric_delta transform_form_gate"
+        ]
+      },
+      {
+        "claim": "increasing your critical healing",
+        "labels": [
+          "807128 behaviour_metric_delta crit_healing",
+          "807128 behaviour_metric_delta crit_healing_without_herald",
+          "807128 behaviour_metric_delta crit_healing_after_expiry"
+        ]
+      },
+      {
+        "claim": "and critical strike chance by $806769s2%,",
+        "labels": [
+          "807128 behaviour_metric_delta crit_chance",
+          "807128 behaviour_metric_delta crit_chance_form_gate"
+        ]
+      }
+    ]
   },
   {
     "spell": 807128,
     "clause": "but reducing its duration by $/1000;806769s1 sec.",
     "labels": [
-      "807128 effect_value 806769e0 #1"
+      "807128 behaviour_metric_delta duration_held",
+      "807128 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
   {
     "spell": 807128,
     "clause": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
-    "labels": [],
+    "labels": [
+      "807128 behaviour_metric_delta immune_fear",
+      "807128 behaviour_metric_delta immune_fear_form_gate",
+      "807128 behaviour_metric_delta immune_fear_after_expiry",
+      "807128 behaviour_metric_delta immune_horrify",
+      "807128 behaviour_metric_delta immune_horrify_form_gate",
+      "807128 behaviour_metric_delta immune_horrify_after_expiry",
+      "807128 behaviour_metric_delta immune_polymorph",
+      "807128 behaviour_metric_delta immune_polymorph_form_gate",
+      "807128 behaviour_metric_delta immune_polymorph_after_expiry"
+    ],
     "kind": "claim"
   },
   {
