@@ -239,7 +239,7 @@ def summon_retarget_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     missing = next((lbl for lbl in all_labels if run.values.get(lbl) is None), None)
     if missing is not None:
         return replace(base, status='unmeasured', explanation=missing_measurement(run, missing))
-    failures = failure_reasons(run, {int(model['trigger_spell'])})
+    failures = failure_reasons(run, int(model['trigger_spell']))
     if failures:
         return replace(base, status='unmeasured',
                        explanation=f'trigger cast refused ({describe_failures(failures)})')
