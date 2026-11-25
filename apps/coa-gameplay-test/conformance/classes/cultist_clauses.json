@@ -2053,13 +2053,30 @@
   {
     "spell": 560977,
     "clause": "Removes the cooldown of Eldritch Shock and guarantees it to critically strike when used with at least 60 Insanity.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the cooldown of Eldritch Shock",
+        "labels": [
+          "560977 behaviour_metric_delta no_cooldown"
+        ]
+      },
+      {
+        "claim": "and guarantees it to critically strike when used with at least 60 Insanity.",
+        "labels": [
+          "560977 behaviour_metric_delta crit_at_60",
+          "560977 behaviour_metric_delta crit_below_60",
+          "560977 behaviour_metric_delta crit_heal_at_60"
+        ]
+      }
+    ]
   },
   {
     "spell": 560977,
     "clause": "Eldritch Shock can now be cast while channeling.",
-    "labels": [],
+    "labels": [
+      "560977 behaviour_metric_delta cast_while_channeling"
+    ],
     "kind": "claim"
   },
   {

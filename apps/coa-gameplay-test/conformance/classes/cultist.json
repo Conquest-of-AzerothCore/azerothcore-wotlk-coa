@@ -27421,6 +27421,460 @@
       "observe_source": "AscensionCultistAuras.cpp:181-182: on Remove of Dreadnought 567524 (20000 ms duration), Resource(player, Insanity, -100, true) depletes Insanity 500706 to 0. Both phases set 500706=70 and cast Darkwither 502220 at dummy (entering combat so out-of-combat Sanity 500727 decay does not tick, and raising Insanity 70 -> 80, verified with 680604=1 via after_setup_stacks). Control reads 500706 == 80 (567524 == 0); treatment casts 567524 and reads 500706 == 80 (567524 == 1) at 19200 ms while active, then 500706 == 0 at 20800 ms after expiry. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql).",
       "gate_timing": "start",
       "trigger_only_after": true
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (removes the 8 sec cooldown of Eldritch Shock: second cast at 1700 ms succeeds)",
+      "kind": "metric_delta",
+      "variant": "no_cooldown",
+      "label_suffix": "no_cooldown",
+      "quote": "Removes the cooldown of Eldritch Shock",
+      "trigger_spell": 808036,
+      "gate_spell": 560977,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 808036,
+          "target": "dummy",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 808036
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_gain": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "observe_source": "Eldritch Shock 808036 has CategoryRecoveryTime 8000 ms and StartRecoveryTime (GCD) 1500 ms (Spell.dbc); AscensionCultistAbilities.cpp:203-204 calls Reduce(player, id, INT32_MAX) -> RemoveSpellCooldown(id, true) when player->HasAura(560977). Follows ADR 0238 (real second cast right after GCD against a refused control; GCD limit 1500 ms stated): both phases confirm Insanity 500706 == 60 (680601/680603 == 1) via after_setup_stacks (enough for two 20-Insanity casts), cast 808036 at dummy, and attempt a second 808036 at 1700 ms without cooldown reset. Control without 560977 is refused (1 cast); treatment after real learn of 560977 succeeds on both casts (cumulative 3, gain 2). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (guarantees Eldritch Shock damage 808043 to critically strike at 60 Insanity)",
+      "kind": "metric_delta",
+      "variant": "crit_at_60",
+      "label_suffix": "crit_at_60",
+      "quote": "and guarantees it to critically strike when used with at least 60 Insanity.",
+      "trigger_spell": 808036,
+      "gate_spell": 560977,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808043,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 808043,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Eldritch Shock damage 808043 lands once in control and once in treatment (cumulative 2)"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAbilities.cpp:97-99: OnSpellCritChance sets chance = 100 for 808043..808045 / 808050..808052 when player->HasAura(560977) and pre-cast Insanity >= 60. Both phases set 16255 to -100 spell crit (precondition fixture eliminating natural crits), 823764 (spellpen), and 500706=60 (confirmed with 680603=1 via after_setup_stacks): 808043 lands in both phases (unfiltered count 1 -> 2), with 0 crits without 560977 and 1 crit after real learn of 560977. Paired with crit_below_60 (59 Insanity) and crit_heal_at_60. Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (boundary: Eldritch Shock does not guaranteed-crit at 59 Insanity)",
+      "kind": "metric_delta",
+      "variant": "crit_below_60",
+      "label_suffix": "crit_below_60",
+      "quote": "and guarantees it to critically strike when used with at least 60 Insanity.",
+      "trigger_spell": 808036,
+      "gate_spell": 560977,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          500706,
+          59,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 59
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808043,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 808043,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Eldritch Shock damage 808043 lands once in control and once in treatment (cumulative 2)"
+          }
+        ]
+      },
+      "observe_source": "Boundary control for 560977 ('at least 60 Insanity'): identical to crit_at_60 except Insanity 500706 == 59 (680603 == 0 confirmed via after_setup_stacks). With -100% spell crit fixture 16255, 808043 lands in both phases (1 -> 2) with 0 critical strikes before and 0 after learning 560977. Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (guarantees Eldritch Shock heal 808050 to critically strike at 60 Insanity)",
+      "kind": "metric_delta",
+      "variant": "crit_heal_at_60",
+      "label_suffix": "crit_heal_at_60",
+      "quote": "and guarantees it to critically strike when used with at least 60 Insanity.",
+      "trigger_spell": 808036,
+      "gate_spell": 560977,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health_pct": 50,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 808050,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 808050,
+              "target": "caster"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Eldritch Shock heal 808050 lands once in control and once in treatment (cumulative 2)"
+          }
+        ]
+      },
+      "observe_source": "Friendly-target check for 560977 crit guarantee: AscensionCultistAbilities.cpp:97-99 covers heal sub-spells 808050..808052 as well as damage 808043..808045. With 16255 at -100 spell crit and 500706=60 (680603=1 confirmed via after_setup_stacks), casting 808036 on caster produces 0 crits before and 1 crit after learning 560977 (unfiltered heals 1 -> 2). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (Eldritch Shock can be cast while channeling Satiate without interrupting it)",
+      "kind": "metric_delta",
+      "variant": "cast_while_channeling",
+      "label_suffix": "cast_while_channeling",
+      "quote": "Eldritch Shock can now be cast while channeling.",
+      "trigger_spell": 804275,
+      "gate_spell": 560977,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "learn": [
+        808036
+      ],
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          804275,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 808036,
+          "target": "dummy",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808043,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "casting",
+            "fields": {},
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Unit::IsNonMeleeSpellCast: casting 808036 without 560977 interrupts Satiate (0), whereas with 560977 Satiate continues channeling (1)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804275
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Satiate 804275 channel aura is broken in control (0) and remains active after casting 808036 in treatment (1) (Unit.cpp:4839,5148)"
+          }
+        ]
+      },
+      "observe_source": "Unit::CanCastDuringChannel (Unit.cpp:5147-5149) allows Eldritch Shock 808036..808038 during an active channel when HasAura(560977) (Unit.cpp:4839 otherwise interrupts CURRENT_CHANNELED_SPELL when casting a generic spell). Both phases cast Satiate 804275 (6000 ms instant channel, 0 mana) and then cast Eldritch Shock 808036 at dummy 1700 ms later (past 1500 ms GCD). Control without 560977 interrupts Satiate (aura 804275 == 0, casting == 0 at 2200 ms) while 808043 lands (count 1); treatment after real learn of 560977 lands 808043 (cumulative count 2) while Satiate keeps channeling (aura 804275 == 1, casting == 1). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
     }
   ],
   "player_observations": [],
