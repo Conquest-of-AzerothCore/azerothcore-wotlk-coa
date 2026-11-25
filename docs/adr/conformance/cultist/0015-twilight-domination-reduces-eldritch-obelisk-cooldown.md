@@ -66,11 +66,21 @@ Live combat-log search (`ev2.md`): 0 events for `520405`/`520872`/`560321` in 18
   subsequent Gaze-commanded slams past the 500 ms `UpdateTargetMap` interval.
 - No other class is reached. Reached Cultist spells (`560321`, `706187`, `520405` `obelisk_effectiveness`) were rerun
   in `prove-B` (`20261125-091156` / `20261125-091226`, build `51e7b949bb5a`) with 0 readings moved.
-- Regressions (`prove-B2`, runs `20261125-091327` and `20261125-091401`, build `51e7b949bb5a`, 3/3 ok, 0 flips):
-  - `520405 obelisk_cd`: `175988 -> 173988 ms` (`-2000 ms` exact in both runs; control unlearned `175988 ms`, 1 slam/phase),
-  - `520405 obelisk_cd_gaze`: `172979 -> 168979 ms` (`-4000 ms` exact in both runs across summon slam + Gaze slam at
-    `+3000 ms`, proving no double-proc after `UpdateTargetMap`; control unlearned `172979 ms`, 2 slams/phase),
+- Regressions (`cu-fix41-rfix-primary`, runs `20261125-095634` and `20261125-095706`, build `9c723b19bf36`, 21/21 ok,
+  0 flips; converted from `cooldown_ms` readbacks to behaviour-classed `cast_failure` + `after_trigger_casts`
+  brackets matching Cultist `680579` / `300280`):
+  - `520405 obelisk_cd`: 1 slam (`50096`, `1 -> 2` cumulative), re-cast `560321` at `178.3 s` refused (`67`) in control
+    and succeeds (`0`, `spell_cast_count 1 -> 3`) in treatment (ok/ok),
+  - `520405 obelisk_cd_held`: 1 slam, re-cast `560321` at `177.7 s` refused (`67`) in both phases, ruling out an
+    over-cut `>= 2.3 s` (ok/ok),
+  - `520405 obelisk_cd_gaze`: 2 slams across `3000 ms` (`> 500 ms` `UpdateTargetMap`), re-cast `560321` at `176.3 s`
+    refused (`67`) in control and succeeds (`0`, `spell_cast_count 1 -> 3`) in treatment (ok/ok),
+  - `520405 obelisk_cd_gaze_held`: 2 slams across `3000 ms`, re-cast `560321` at `175.5 s` refused (`67`) in both
+    phases, ruling out a double-proc (`-6 s` -> `174.0 s`) after `UpdateTargetMap` (ok/ok),
+  - `520405 obelisk_cd_thoughtseize`: Tentacle of N'Zoth (`572103`) delivers 4 `Thoughtseize` (`806596`) periodic ticks
+    per phase (`4 -> 8` cumulative, `-8 s` -> `172.0 s`), re-cast `560321` at `172.5 s` refused (`67`) in control and
+    succeeds (`0`, `spell_cast_count 1 -> 3`) in treatment, proving the player-attributed `AscensionCultistEvents.cpp:85,185`
+    path at runtime (ok/ok),
   - `520405 obelisk_effectiveness`: `1.4 -> 1.5` (ok/ok).
 - Ledger row `520405` (`"Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec."`)
-  updated to `["520405 behaviour_metric_delta obelisk_cd", "520405 behaviour_metric_delta obelisk_cd_gaze"]`. Note:
-  `coverage.py` classifies `cooldown_ms` as `data` (`prove-B2/fragment.json`: `"evidence": "data"`).
+  updated to the five cast-gate labels above; `cu-fix41-rfix-primary/fragment.json` audits row 141 as `behaviour`.

@@ -10,6 +10,7 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
 #include "Totem.h"
@@ -44,7 +45,8 @@ void Summon(Player* player, uint32 entry, Position const& position, uint32 durat
     if (oldGod)
         if (Creature* existing = ObjectAccessor::GetCreature(*player, State(player).tentacle);
             existing && existing->GetEntry() == 501464)
-            existing->AI()->DoAction(4);
+            if (CreatureAI* ai = existing->AI())
+                ai->DoAction(4);
     TempSummon* summon = player->GetMap()->SummonCreature(entry, position,
         entry == 50263 ? nullptr : sSummonPropertiesStore.LookupEntry(oldGod ? 63 : 61), duration,
         entry == 50263 ? nullptr : player, spellId);
@@ -69,7 +71,8 @@ void Summon(Player* player, uint32 entry, Position const& position, uint32 durat
     else if (target)
         summon->AI()->SetGUID(target->GetGUID());
     if (entry == 501464)
-        summon->AI()->DoAction(3);
+        if (CreatureAI* ai = summon->AI())
+            ai->DoAction(3);
 }
 void Command(Player* player, Unit* target, bool blast)
 {
@@ -164,11 +167,21 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         timers.ScheduleEvent(Pulse, 100ms);
     }
     void SetGUID(ObjectGuid const& guid, int32 = 0) override { command = guid; }
-    void ClearThoughtseize()
+    uint32 ExpiryGrace() const
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(Thoughtseize);
+        uint32 amplitude = info ? info->Effects[EFFECT_1].Amplitude : 0;
+        if (!amplitude)
+            return 0;
+        return std::min<uint32>(std::max<uint32>(lastDiff * 2, amplitude / 10), amplitude / 2);
+    }
+    void ClearThoughtseize(int32 graceMs = 0)
     {
         for (ObjectGuid guid : afflicted)
             if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
-                target->RemoveAurasDueToSpell(Thoughtseize, owner);
+                if (Aura* aura = target->GetAura(Thoughtseize, owner))
+                    if (graceMs <= 0 || aura->GetDuration() > graceMs)
+                        aura->Remove();
         afflicted.clear();
     }
     void ApplyThoughtseize(Player* player)
@@ -186,14 +199,14 @@ struct npc_ascension_cultist_summon : public ScriptedAI
             }
         }
     }
-    bool Expired()
+    bool Expired() const
     {
         if (!me->IsAlive())
             return false;
         Player* player = ObjectAccessor::GetPlayer(*me, owner);
         if (!player || !player->IsAlive() || !me->IsWithinDistInMap(player, 100) || !me->InSamePhase(player))
             return false;
-        uint32 threshold = std::max<uint32>(lastDiff * 2, 200);
+        uint32 threshold = ExpiryGrace();
         if (Totem* totem = me->ToTotem())
             return totem->GetTotemDuration() <= threshold;
         if (TempSummon* summon = me->ToTempSummon())
@@ -378,8 +391,7 @@ public:
     {
         if (creature->GetEntry() == 501464 || creature->GetEntry() == 500464)
             if (auto* ai = dynamic_cast<npc_ascension_cultist_summon*>(creature->AI()))
-                if (!ai->Expired())
-                    ai->ClearThoughtseize();
+                ai->ClearThoughtseize(ai->Expired() ? int32(ai->ExpiryGrace()) : 0);
     }
 };
 class cultist_summon_damage : public UnitScript

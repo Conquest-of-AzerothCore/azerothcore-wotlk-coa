@@ -1670,7 +1670,10 @@
     "clause": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
     "labels": [
       "520405 behaviour_metric_delta obelisk_cd",
-      "520405 behaviour_metric_delta obelisk_cd_gaze"
+      "520405 behaviour_metric_delta obelisk_cd_held",
+      "520405 behaviour_metric_delta obelisk_cd_gaze",
+      "520405 behaviour_metric_delta obelisk_cd_gaze_held",
+      "520405 behaviour_metric_delta obelisk_cd_thoughtseize"
     ],
     "kind": "claim"
   },
@@ -2506,7 +2509,8 @@
         "claim": "for $806596d",
         "labels": [
           "572103 behaviour_metric_delta duration",
-          "572103 behaviour_metric_delta duration_contrast"
+          "572103 behaviour_metric_delta duration_contrast",
+          "572103 behaviour_metric_delta presence_eternal_grasp_expiry"
         ]
       }
     ]

@@ -68,10 +68,12 @@ No shared engine, DBC, SQL, or client text changes.
   with 0 readings moved, and catalog scenario `apps/coa-gameplay-test/scenarios/cultist-eternal-grasp.json` passed
   (`VERIFY ALL: PASSED`, `20261125-092230`).
 - Regressions (`prove-D`, runs `20261125-092133` and `20261125-092203`, build `df6b57891a53`, 18/18 ok, 0 flips):
-  - `704878 tentacle_duration`: unlearned control `0` at `35009 ms`; learned `1` at `35009 ms` (window `34800..35600 ms`)
-    and `0` at `40018 ms` (window `39800..40600 ms`) in both runs (ok/ok),
-  - `704879 tentacle_duration`: unlearned control `0` at `42009 ms`; learned `1` at `42009 ms` (window `41800..42600 ms`)
-    and `0` at `48018 ms` (window `47800..48600 ms`) in both runs (ok/ok).
+  - `704878 tentacle_duration`: uncast control `0` (`gate_timing: "start"`, `trigger_only_after: true`, `704878` learned
+    at start; unextended 30 s baseline proven separately by `802044 duration`); after casting `802044`, `1` at `35009 ms`
+    (window `34800..35600 ms`) and `0` at `40018 ms` (window `39800..40600 ms`) in both runs (ok/ok),
+  - `704879 tentacle_duration`: uncast control `0` (`gate_timing: "start"`, `trigger_only_after: true`, `704879` learned
+    at start; unextended 30 s baseline proven separately by `802044 duration`); after casting `802044`, `1` at `42009 ms`
+    (window `41800..42600 ms`) and `0` at `48018 ms` (window `47800..48600 ms`) in both runs (ok/ok).
 - Ledger rows `704878` and `704879` updated from `effect_value e0 #0` to
   `["704878 behaviour_metric_delta tentacle_duration"]` and `["704879 behaviour_metric_delta tentacle_duration"]`
   (audited `behaviour` in `prove-D/audit.json`).

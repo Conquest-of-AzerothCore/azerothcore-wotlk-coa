@@ -49,8 +49,15 @@ Live evidence (`ev2.md`): 3 summons of `572103` in live log 67 each delivered 4 
 
 - Apply `Thoughtseize` (`806596`) immediately on summon (`t = 0 ms`) via `DoAction(3)` from `Summon()` for `501464`,
   explicitly clear `Thoughtseize` on early Old God tentacle replacement and owner death/out-of-range/phase-mismatch, keep
-  unconditional `ClearThoughtseize()` in `JustDied`, and skip `ClearThoughtseize()` in `OnCreatureRemoveWorld` only when
-  the summon leaves the world due to natural timed expiry (`Expired()`).
+  unconditional `ClearThoughtseize()` in `JustDied`, and in `OnCreatureRemoveWorld` pass a remaining-duration grace
+  threshold derived from `Thoughtseize`'s DBC periodic amplitude (`Effect[1].Amplitude = 2000 ms`) when `Expired()` holds,
+  removing any `Thoughtseize` aura with remaining duration strictly greater than that margin while passing `0` on
+  non-natural removal.
+- Skip `ClearThoughtseize()` unconditionally whenever `Expired()` holds. Rejected: on an extended `500464` (Presence of
+  N'Zoth `803037` -> `500707` extended from `8000 ms` to `10000 ms` / `12000 ms` by Eternal Grasp `704878`/`704879` or
+  Teachings of Mythrax `561035`, pulsing every `2000 ms`, which re-applies a fresh `8000 ms` `806596` at `8100 ms`) or
+  on `501464` after target re-acquisition at `6000 ms`, skipping removal leaves `4–6 s` of silence and periodic damage on
+  the enemy after the tentacle has despawned.
 - Extend `501464`'s summon lifetime beyond 8000 ms (e.g. +200 ms). Rejected: contradicts the 8 sec duration in
   `Spell.dbc`, shifts `duration` checks, and would interact with Eternal Grasp duration scaling.
 - Only remove the 100 ms pulse delay without guarding `OnCreatureRemoveWorld`. Rejected: leaves a same-tick (`t = 8000 ms`)
@@ -60,31 +67,46 @@ Live evidence (`ev2.md`): 3 summons of `572103` in live log 67 each delivered 4 
 
 In `src/server/coa/AscensionCultistSummons.cpp`:
 
-1. Include `"Totem.h"` so `Expired()` can read `Totem::GetTotemDuration()` (for `501464`) and `TempSummon::GetTimer()`
-   (for `500464`).
+1. Include `"SpellAuras.h"` and `"Totem.h"` so `Expired() const` can read `Totem::GetTotemDuration()` (for `501464`) and
+   `TempSummon::GetTimer()` (for `500464`) and `ClearThoughtseize(int32 graceMs = 0)` can inspect `Aura::GetDuration()`.
 2. Extract `npc_ascension_cultist_summon::ApplyThoughtseize(Player*)` and invoke it immediately from `Summon()` via
-   `DoAction(3)` right after `SetGUID` for `entry == 501464`, scheduling the next `Pulse` at `6000 ms`.
+   null-checked `DoAction(3)` right after `SetGUID` for `entry == 501464`, scheduling the next `Pulse` at `6000 ms`.
 3. Track `lastDiff` in `UpdateAI`, call `ClearThoughtseize()` before `DespawnOrUnsummon()` on owner death/range/phase
-   loss, and clear an existing `501464`'s `Thoughtseize` via `DoAction(4)` inside `Summon()` before replacing it with a
-   new Old God tentacle.
-4. Add `npc_ascension_cultist_summon::Expired() const` (true only when alive, owner alive/within 100 yd/same phase, and
-   remaining duration `<= std::max<uint32>(lastDiff * 2, 200)`), and gate `cultist_summon_lifecycle::OnCreatureRemoveWorld`
-   on `!ai->Expired()`. `JustDied` continues to call `ClearThoughtseize()` unconditionally.
+   loss, and clear an existing `501464`'s `Thoughtseize` via null-checked `DoAction(4)` inside `Summon()` before replacing
+   it with a new Old God tentacle.
+4. Derive the same-tick natural-expiry margin from `Thoughtseize` (`806596`)'s `Spell.dbc` periodic amplitude
+   (`Effect[1].Amplitude = 2000 ms`) in `ExpiryGrace() const`:
+   `std::min<uint32>(std::max<uint32>(lastDiff * 2, amplitude / 10), amplitude / 2)` (`200 ms` at normal server ticks,
+   hard-capped strictly below half a periodic interval at `1000 ms`).
+5. Add `npc_ascension_cultist_summon::Expired() const` (true only when alive, owner alive/within 100 yd/same phase, and
+   remaining summon lifetime `<= ExpiryGrace()`). Change `ClearThoughtseize(int32 graceMs = 0)` to remove each afflicted
+   target's `Thoughtseize` aura whenever `graceMs <= 0 || aura->GetDuration() > graceMs`. In
+   `cultist_summon_lifecycle::OnCreatureRemoveWorld`, always call
+   `ai->ClearThoughtseize(ai->Expired() ? int32(ai->ExpiryGrace()) : 0)`. `JustDied` continues to call
+   `ClearThoughtseize()` (`graceMs = 0`) unconditionally.
 
 No shared engine, DBC, SQL, or client text changes.
 
 ## Consequences
 
-- `Tentacle of N'Zoth` (`572103`) now applies `Thoughtseize` (`806596`) at `t = 0 ms` and delivers all 4 periodic damage
+- `Tentacle of N'Zoth` (`572103`) applies `Thoughtseize` (`806596`) at `t = 0 ms` and delivers all 4 periodic damage
   ticks while keeping the 8 sec silence duration and immediate silence removal when the tentacle dies, is replaced by
   another Old God tentacle, or loses its owner.
-- No other class is reached. Reached Cultist spells (`802044` 7/7 checks, including `replaces_nzoth`, and Presence of
-  N'Zoth catalog scenario `apps/coa-gameplay-test/scenarios/cultist-presence-of-nzoth-back-tentacle-8638.json`) were
-  rerun with 0 readings moved (`cultist-presence-of-nzoth-back-tentacle-8638.json`: `VERIFY ALL: PASSED`,
-  `20261125-091750`).
-- Regressions (`prove-C`, runs `20261125-091639` and `20261125-091709`, build `98a7e36003c4`, 16/16 ok, 0 flips):
-  - `572103 damage_base`: `532.0` / `528.0` (4 ticks both runs, band `[520..546]`, control uncast `0`, ok/ok),
-  - `572103 damage_sp`: `3884.0` / `3884.0` (4 ticks both runs, band `[3875..3910]`, control uncast `0`, ok/ok),
-  - `572103 silence`, `tick_period` (`2005.0` / `2005.5 ms`), `duration` (`7509` / `8418 ms`), `duration_contrast`,
-    `max_one`, `replaces_yshaarj`, `stamina_health_arms`: all ok/ok.
-- Ledger row `572103` alert `reason` removed; `prove-C/fragment.json` audits all 3 claims of row `572103` as `behaviour`.
+- When either `501464` (e.g., after re-acquiring a target at `6000 ms`) or an extended `500464` (Presence of N'Zoth with
+  Eternal Grasp `704878`/`704879` or Teachings of Mythrax `561035`) expires naturally while a freshly re-applied
+  `Thoughtseize` still has `> ExpiryGrace()` remaining (`~4100–6100 ms`), `OnCreatureRemoveWorld` removes that
+  `Thoughtseize` immediately so the silence and DoT never outlast the tentacle.
+- No other class is reached.
+- Regressions (`cu-fix41-rfix-primary`, runs `20261125-095634` and `20261125-095706`, build `9c723b19bf36`, 21/21 ok,
+  0 flips):
+  - `572103 damage_base`: `528.0` / `524.0` (4 ticks both runs, band `[520..546]`, control uncast `0`, ok/ok),
+  - `572103 damage_sp`: `3884.0` / `3892.0` (4 ticks both runs, band `[3875..3910]`, control uncast `0`, ok/ok),
+  - `572103 presence_eternal_grasp_expiry`: Presence of N'Zoth (`803037`, `forced_roll`, triggered by instant `502122`)
+    with Eternal Grasp R2 (`704879`, `+50%` -> `500707` `8000 ms` -> `12000 ms`): uncast control `0`; at `11509 ms`
+    (window `11300..11800 ms`) `owned_creature_count(500464) == 1`, `aura(806596) == 1`, `spell_damage_count(806596) == 5`
+    (`floor((12000 - 100) / 2000) = 5` ticks); at `12724 ms` (window `12400..13000 ms`, `724 ms` after despawn)
+    `aura(806596) == 0` in both runs (ok/ok),
+  - `572103 silence`, `tick_period` (`2006.0` / `2006.0 ms`), `duration`, `duration_contrast`, `max_one`,
+    `replaces_yshaarj`, `stamina_health_arms`: all ok/ok.
+- Ledger row `572103` alert `reason` removed and `presence_eternal_grasp_expiry` added to the `for $806596d` claim;
+  `cu-fix41-rfix-primary/fragment.json` audits all 3 claims of row `572103` as `behaviour`.
