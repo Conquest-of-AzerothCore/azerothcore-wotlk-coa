@@ -665,10 +665,14 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 - Time (`cooldown_ms`, `aura_duration_ms`, ruling R8): `expected - W <= measured <= expected`. W bounds the game
   time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
   its `elapsed_ms` plus the run's `max_step_ms`; the `cast time` wait of a cast-time spell counts only its 500 ms
-  margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes; plus a map-update carry-in
-  term `max(0, 10 - max_step_ms)` when at least one step follows the cast (`MapMgr::i_timer[3]` accumulates world
-  ticks up to `CONFIG_INTERVAL_MAPUPDATE = 10 ms` before calling `map->Update`, so a carry-in from ticks prior to
-  the cast can flush a 10 ms map update during the first post-cast tick when `max_step_ms < 10`, ADR 1317).
+  margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes. When a class file opts in
+  with `"aura_duration_map_update_carry_in": true` (ADR 1317), `aura_duration_ms` checks (never `cooldown_ms`, which
+  reads `GameTime::GetSystemTime()` rather than `MapMgr::i_timer[3]`) add a `9 ms` (`MAP_UPDATE_INTERVAL_MS - 1`)
+  map-update carry-in when `max_step_ms < 10`, at least one step follows the cast (`position > cast`), and
+  `W_step + 9 < 0.01 * expected` (`MapMgr::i_timer[3]` accumulates world ticks up to `CONFIG_INTERVAL_MAPUPDATE =
+  10 ms` before calling `map->Update`, so a pre-cast carry-in of up to `9 ms` can flush a map update on the first
+  post-cast tick when `max_step_ms < 10`; the `1%` cap ensures carry-in never allows a duration short by `1%` or by
+  one tick period to pass). With the key absent or `false`, judging is unchanged for every check.
   `CoAGameplayTest::Tick` runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is
   the game time from its start to its completion, and `max_step_ms` is the largest update diff of the run
   (`docs/coa/verification.md`, fidelity limits: at most 25 ms in a wait, 10 ms while polling). Measured on

@@ -95,6 +95,9 @@ RELATIVE_TOLERANCE = 0.005
 TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
 MAP_UPDATE_INTERVAL_MS = 10.0
+MAP_UPDATE_CARRY_IN_MS = MAP_UPDATE_INTERVAL_MS - 1.0
+CARRY_IN_MAX_RELATIVE = 0.01
+AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY = 'aura_duration_map_update_carry_in'
 MINIMUM_BETWEEN_PARTS = 10
 ARMOR_PROBE_DAMAGE = 1000.0
 MAGNITUDE_RATIO_TOLERANCE = 0.05
@@ -570,8 +573,17 @@ def judge_gap_closer_distance(base: Verdict, measured: float, expected: float, r
                    explanation=f'{rule}; measured <= NOMINAL_MELEE_RANGE + {GAP_CLOSER_MARGIN_YD:g} yd margin')
 
 
+def aura_duration_map_update_carry_in(class_file: dict | None) -> bool:
+    if not class_file or AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY not in class_file:
+        return False
+    enabled = class_file[AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY]
+    if type(enabled) is not bool:
+        raise ValueError(f'{AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY} must be a boolean')
+    return enabled
+
+
 def map_update_carry_in_ms(max_step_ms: float) -> float:
-    return max(0.0, MAP_UPDATE_INTERVAL_MS - max_step_ms)
+    return MAP_UPDATE_CARRY_IN_MS if max_step_ms < MAP_UPDATE_INTERVAL_MS else 0.0
 
 
 def elapsed_bound(run: Run, label: str) -> float | None:
@@ -579,24 +591,36 @@ def elapsed_bound(run: Run, label: str) -> float | None:
     if position is None or run.max_step_ms is None:
         return None
     cast = max((index for index in range(position) if run.steps[index].get('action') == 'cast'), default=position)
-    step_window = sum(CAST_MARGIN_MS + run.max_step_ms if step.get('label') == CAST_WAIT_LABEL
-                      else number(step.get('elapsed_ms', 0), 'elapsed_ms') + run.max_step_ms
-                      for step in run.steps[cast + 1:position + 1])
-    carry_in = map_update_carry_in_ms(run.max_step_ms) if position > cast else 0.0
-    return step_window + carry_in
+    return sum(CAST_MARGIN_MS + run.max_step_ms if step.get('label') == CAST_WAIT_LABEL
+               else number(step.get('elapsed_ms', 0), 'elapsed_ms') + run.max_step_ms
+               for step in run.steps[cast + 1:position + 1])
 
 
-def judge_time(base: Verdict, run: Run, measured: float, expected: float, why: str) -> Verdict:
+def aura_carry_in_ms(run: Run, label: str, step_window: float, expected: float) -> float:
+    position = next((index for index, step in enumerate(run.steps) if step.get('label') == label), None)
+    if position is None or run.max_step_ms is None:
+        return 0.0
+    cast = max((index for index in range(position) if run.steps[index].get('action') == 'cast'), default=position)
+    if position <= cast:
+        return 0.0
+    carry_in = map_update_carry_in_ms(run.max_step_ms)
+    if carry_in <= 0.0 or step_window + carry_in >= CARRY_IN_MAX_RELATIVE * abs(expected):
+        return 0.0
+    return carry_in
+
+
+def judge_time(base: Verdict, run: Run, measured: float, expected: float, why: str, *, carry_in: bool = False) -> Verdict:
     window = elapsed_bound(run, base.label)
     if window is None:
         return replace(base, measured=measured, expected=expected,
                        explanation=f'{why}; no step timing in {run.key} bounds the time elapsed since the cast')
-    low = expected - window
+    applied_carry = aura_carry_in_ms(run, base.label, window, expected) if carry_in else 0.0
+    total_window = window + applied_carry
+    low = expected - total_window
     status = 'ok' if low - FLOAT_EPSILON <= measured <= expected + FLOAT_EPSILON else 'alert'
-    carry_in = map_update_carry_in_ms(run.max_step_ms)
-    carry_note = f' plus {carry_in:g} ms map-update carry-in' if carry_in > 0 else ''
+    carry_note = f' plus {applied_carry:g} ms map-update carry-in' if applied_carry > 0 else ''
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=expected,
-                   explanation=f'{why}; expected - W <= measured <= expected, W = {window:g} ms elapsed since the '
+                   explanation=f'{why}; expected - W <= measured <= expected, W = {total_window:g} ms elapsed since the '
                                f'cast step (step elapsed_ms plus max_step_ms {run.max_step_ms:g} per step{carry_note})')
 
 
@@ -932,11 +956,12 @@ def token_drift(expectation: Expectation, tokens: Tokens | None) -> str | None:
 
 
 def judge_token(base: Verdict, expectation: Expectation, run: Run, measured: float, tokens: Tokens,
-                tooltips: TooltipSource, name: str) -> Verdict:
+                tooltips: TooltipSource, name: str, class_file: dict | None = None) -> Verdict:
     index = int(ORDINAL.search(expectation.label).group(1))
     token = tokens.readout.values[index]
     if expectation.check == 'aura_duration_ms':
-        return judge_time(base, run, measured, token.value, f'{token.text} read with the measured stats')
+        return judge_time(base, run, measured, token.value, f'{token.text} read with the measured stats',
+                          carry_in=aura_duration_map_update_carry_in(class_file))
     if expectation.check == 'max_stacks':
         return exact(base, measured, token.value, f'{token.text} read from StackAmount')
     if expectation.check == 'effect_radius':
@@ -5956,7 +5981,8 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
     if check == GAP_CLOSER_DISTANCE:
         return judge_gap_closer_distance(base, measured, float(expectation.displayed), rule)
     if check in TOKEN_CHECKS and rule.startswith(READ_RULE):
-        verdict = judge_token(base, expectation, run, measured, tokens, tooltips, entry['spell_name'])
+        verdict = judge_token(base, expectation, run, measured, tokens, tooltips, entry['spell_name'],
+                              manifest['class_file'])
         if check == 'effect_value':
             return calc_amount_verdict(replace(verdict, detail={**(verdict.detail or {}), 'scope': EFFECT_VALUE_SCOPE}),
                                        run, expectation)

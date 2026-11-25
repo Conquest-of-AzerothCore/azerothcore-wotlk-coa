@@ -48981,5 +48981,6 @@
     }
   ],
   "honour_min_range": true,
-  "base_mana_power_cost": true
+  "base_mana_power_cost": true,
+  "aura_duration_map_update_carry_in": true
 }
