@@ -1,4 +1,4 @@
-# 0013. Darkward applies its 20% absorption bonus once
+# 0009. Darkward applies its 20% absorption bonus once
 
 - Status: accepted (provisional number, numbered at merge; owner ruling O-12 Q-cu-7, 2026-11-24)
 - Date: 2026-11-25

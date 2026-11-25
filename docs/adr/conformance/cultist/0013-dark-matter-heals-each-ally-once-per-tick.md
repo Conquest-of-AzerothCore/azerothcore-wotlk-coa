@@ -1,4 +1,4 @@
-# 0023. Dark Matter heals each ally once per tick
+# 0013. Dark Matter heals each ally once per tick
 
 - Status: accepted (provisional number, numbered at merge)
 - Date: 2026-11-25

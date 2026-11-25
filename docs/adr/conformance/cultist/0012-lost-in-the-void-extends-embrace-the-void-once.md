@@ -1,4 +1,4 @@
-# 0022. Lost in the Void extends Embrace the Void once
+# 0012. Lost in the Void extends Embrace the Void once
 
 - Status: accepted (provisional number, numbered at merge)
 - Date: 2026-11-25

@@ -1,4 +1,4 @@
-# 0021. Overwhelming Void reduces Mass Nightmare's cooldown once
+# 0011. Overwhelming Void reduces Mass Nightmare's cooldown once
 
 - Status: accepted (provisional number, numbered at merge)
 - Date: 2026-11-25
