@@ -26024,6 +26024,1403 @@
         }
       ],
       "observe_source": "Dreadnought weapon set (2534 Rondel dagger satisfies 806830; 2129 shield equipped via for_entry). $h = 10 (561336 Spell.dbc ProcChance 10; AscensionCultistEvents.cpp:90,200 checks dealt && Shadow && Chance(player, 561336) via roll_chance_f and calls Reduce(player, 524876, INT32_MAX) -> RemoveSpellCooldown(572141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (SchoolMask 32 Shadow, 0 mana, instant, 1500 ms GCD). Control: 50 casts x 7 parts = 350 hits unlearned (0 resets). Treatment: 7 pooled parts x 1800 casts = 12600 damaging Shadow hits (>= 10905 needed for residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 10%). Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (reaching 100 Insanity no longer triggers Total Madness 803061/803060)",
+      "kind": "metric_delta",
+      "variant": "madness_suppressed",
+      "label_suffix": "madness_suppressed",
+      "quote": "Reaching 100 Insanity no longer causes Total Madness.",
+      "trigger_spell": 502220,
+      "gate_spell": 92131,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          803061,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          803060,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          90,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 803061,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803061
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 803060
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultist.cpp:218-220: reaching 100 Insanity casts Insane 803060 (which triggers Total Madness 803061) when 92131 is absent, and suppresses it when 92131 is known"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Darkwither 502220 (+10 Insanity, AscensionCustomResourceData.h:282) drives Insanity 500706 from 90 to 100 in both arms"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultist.cpp:218-220 checks !player->HasSpell(92131) before casting Insane 803060 (triggering Total Madness 803061) when Insanity 500706 rises from <100 to 100. Both phases clear 803061/803060 first, set Insanity 500706 to 90 (precondition fixture) plus 823764 (spellpen), cast neutral 804056 + 1700 ms wait (past GCD, < 10000 ms 500727 decay) confirming 500706 == 90 and 803061 == 0 via after_setup_stacks, then cast Darkwither 502220 (+10 Insanity) at dummy. Control (before learning 92131) reaches 100 Insanity and receives 803060 == 1 and 803061 == 1; treatment (after real learn of 92131) reaches 100 Insanity with 803060 == 0 and 803061 == 0. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (transforms caster into display 280072)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 520326,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        520326
+      ],
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "display_id",
+      "fields": {},
+      "before_expected": 49,
+      "expected": 280072,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520326 Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 250042 (Spell.dbc, AscensionCultistContracts.cpp:121); rev_20261031_99_cultist_herald_caster_display.sql sets creature_template_model 250042 -> CreatureDisplayID 280072. Reference Human Male display_id reads 49 in the uncast control phase and 280072 500 ms after one real cast of 520326 (Insanity 500706=80 and threshold 680604=1 precondition fixtures read before trigger). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 520326,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        520326
+      ],
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520326
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520326 DurationIndex 18 = 20000 ms ($d = 20 sec, SpellDuration.dbc), instant cast. Reads aura 520326 absent before cast (0), present (1) at [18800..19600] ms (> 18000 = 0.9*20000) and gone (0) at [20400..21400] ms (< 22000 = 1.1*20000), excluding 10% off on both sides. Insanity 500706=80 and 680604=1 precondition fixtures read via before_trigger_reads. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+15% Shadow spell damage done)",
+      "kind": "hit_ratio",
+      "variant": "damage_shadow",
+      "label_suffix": "damage_shadow",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "expected": 1.15,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        520326
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 520326,
+            "target": "caster",
+            "power": 0
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "520326 Effect[2] bp=14+1=15 ($s3 = 15%); AscensionCultistContracts.cpp:304,316 multiplies Cultist spell damage by 1 + Amount(Herald, 2)/100 = 1.15 when aura 520326 is active. Both arms set Insanity 500706=80, 680604=1, 823764=1 (spellpen) and +20000 SP precondition fixtures; treatment casts Herald 520326 for real before Horrorbolt 502182. Expected non-critical ratio 1.15 (G-19 band 1.13..1.17). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+15% Physical melee damage done)",
+      "kind": "hit_ratio",
+      "variant": "damage_melee",
+      "label_suffix": "damage_melee",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "expected": 1.15,
+      "metric": "melee_damage_total",
+      "swing_hand": 0,
+      "observe_spell": 0,
+      "learn": [
+        520326
+      ],
+      "refresh": true,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 520326,
+            "target": "caster",
+            "power": 0
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Physical-school check for 520326 'increasing damage ... by $s3%' (ADR 0287 'tout inclus'); AscensionCultistContracts.cpp:335-336 AddPct(damage, Amount(Herald, 2)) adds +15% to melee swings while Herald 520326 is active. Both arms refresh Insanity 500706=80 and 680604=1 at +20000 AP; treatment casts Herald 520326 for real. Expected non-critical melee ratio 1.15 (G-19 band 1.13..1.17). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+15% healing done)",
+      "kind": "hit_ratio",
+      "variant": "healing_done",
+      "label_suffix": "healing_done",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "expected": 1.15,
+      "metric": "spell_heal_total",
+      "observe_spell": 574325,
+      "target": "caster",
+      "learn": [
+        574325,
+        520326
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 520326,
+            "target": "caster",
+            "power": 0
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "520326 Effect[2] bp=14+1=15 ($s3 = 15%); AscensionCultistContracts.cpp:304,330 multiplies Cultist healing done by 1 + Amount(Herald, 2)/100 = 1.15 while aura 520326 is active. Both arms set Insanity 500706=80, 680604=1 and +20000 SP; treatment casts Herald 520326 for real before Eldritch Mending 574325 on caster. Expected non-critical heal ratio 1.15 (G-19 band 1.13..1.17). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% absorption base duration on Forbidden Ritual 502273) (contrast without Herald)",
+      "kind": "metric_delta",
+      "variant": "absorb_duration_contrast",
+      "label_suffix": "absorb_duration_contrast",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 502273,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        502273
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          502273,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 22200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          21800,
+          22600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) with SpellClassMask (0x2, 0x20008000, 0x44000) matching Forbidden Ritual 502273 (0x40000, absorb aura 69, cast 3000 ms, base duration 10000 ms -> 20000 ms under Herald). Control casts 502273 without Herald (already expired at 22200 ms = 19200 ms after cast finish -> 0); treatment casts Herald 520326 (gcd 0) then 502273, reading 1 at 19200 ms after cast finish (> 18000 = 0.9*20000) and 0 at 20800 ms (< 22000 = 1.1*20000). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% absorption base duration on Forbidden Ritual 502273) (expiry bracket)",
+      "kind": "metric_delta",
+      "variant": "absorb_duration_expiry",
+      "label_suffix": "absorb_duration_expiry",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 502273,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        502273
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          502273,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 22200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          21800,
+          22600
+        ],
+        "expired": [
+          23400,
+          24400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) with SpellClassMask (0x2, 0x20008000, 0x44000) matching Forbidden Ritual 502273 (0x40000, absorb aura 69, cast 3000 ms, base duration 10000 ms -> 20000 ms under Herald). Control casts 502273 without Herald (already expired at 22200 ms = 19200 ms after cast finish -> 0); treatment casts Herald 520326 (gcd 0) then 502273, reading 1 at 19200 ms after cast finish (> 18000 = 0.9*20000) and 0 at 20800 ms (< 22000 = 1.1*20000). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% HoT base duration on Black Blood 804153) (contrast without Herald)",
+      "kind": "metric_delta",
+      "variant": "hot_duration_contrast",
+      "label_suffix": "hot_duration_contrast",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 500714,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        500714
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804153,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804153
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 24500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          24100,
+          24900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) with SpellClassMask (0x2, 0x20008000, 0x44000) matching Black Blood 804153 (0x8000, HoT aura 8, base duration 12000 ms -> 24000 ms under Herald), applied to caster by Malevolence 500714 (cast 1500 ms) on dummy. Control casts 500714 without Herald (expired at 24500 ms = 23000 ms after cast finish -> 0); treatment casts Herald 520326 then 500714, reading 1 at 23000 ms after cast finish (> 21600 = 0.9*24000) and 0 at 25000 ms (< 26400 = 1.1*24000). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% HoT base duration on Black Blood 804153) (expiry bracket)",
+      "kind": "metric_delta",
+      "variant": "hot_duration_expiry",
+      "label_suffix": "hot_duration_expiry",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 500714,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        500714
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804153,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804153
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 24500,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          24100,
+          24900
+        ],
+        "expired": [
+          26000,
+          27100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) with SpellClassMask (0x2, 0x20008000, 0x44000) matching Black Blood 804153 (0x8000, HoT aura 8, base duration 12000 ms -> 24000 ms under Herald), applied to caster by Malevolence 500714 (cast 1500 ms) on dummy. Control casts 500714 without Herald (expired at 24500 ms = 23000 ms after cast finish -> 0); treatment casts Herald 520326 then 500714, reading 1 at 23000 ms after cast finish (> 21600 = 0.9*24000) and 0 at 25000 ms (< 26400 = 1.1*24000). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (reduces Insanity to 0 upon expiration)",
+      "kind": "metric_delta",
+      "variant": "insanity_zero",
+      "label_suffix": "insanity_zero",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 520326,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        502220
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          70,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 70,
+      "expected": 80,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald 520326 is absent in before and still active at 19200 ms right before expiry"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAuras.cpp:181-182: on Remove of Herald 520326 (20000 ms duration), Resource(player, Insanity, -100, true) clears Insanity 500706 to 0. Both phases set 500706=70 and cast Darkwither 502220 at dummy (entering combat so out-of-combat Sanity 500727 decay does not tick, and raising Insanity 70 -> 80, verified with 680604=1 via after_setup_stacks). Control (uncast) reads 500706 == 80 (520326 == 0); treatment casts 520326 and reads 500706 == 80 (520326 == 1) at 19200 ms while active, then 500706 == 0 at 20800 ms after expiry. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (reaching 100 Insanity no longer triggers Total Madness 803061/803060)",
+      "kind": "metric_delta",
+      "variant": "madness_suppressed",
+      "label_suffix": "madness_suppressed",
+      "quote": "Reaching 100 Insanity no longer causes Total Madness.",
+      "trigger_spell": 502220,
+      "gate_spell": 680750,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          803061,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          803060,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          90,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 803061,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803061
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 803060
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultist.cpp:218-220: reaching 100 Insanity casts Insane 803060 (triggering Total Madness 803061) when 680750 is absent, and suppresses it when 680750 is known"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Darkwither 502220 (+10 Insanity) drives Insanity 500706 from 90 to 100 in both arms"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultist.cpp:218-220 checks !player->HasSpell(680750) before casting Insane 803060 (triggering Total Madness 803061) when Insanity 500706 rises from <100 to 100. Identical arm design to 92131 madness_suppressed: control without 680750 reads 803060 == 1, 803061 == 1 at 100 Insanity; treatment after real learn of 680750 reads 803060 == 0, 803061 == 0 at 100 Insanity. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (absorbs 691 at base Stamina 104 and Intellect 71)",
+      "kind": "metric_delta",
+      "variant": "absorb_base",
+      "label_suffix": "absorb_base",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        567524
+      ],
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 691,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "567524 Dreadnought Rank 1 (taught by 680750) Effect[1] aura 69 SPELL_AURA_SCHOOL_ABSORB bp=149+die=1=150, per_lvl=2.0, BaseLevel=10, MaxLevel=18 -> 150 + int32(8*2.0) = 166; AscensionCultistData.h:84 adds 3.0*STA + 3.0*INT. At Cultist reference stats (STA 104, INT 71): 166 + 3*104 + 3*71 = 691 absorbed against 2x Light of the Naaru 41394 (2200 Holy). Paired with absorb_sta (+165 STA) and absorb_int (+300 INT). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (absorb scales +3*STA: 1186 at +165 Stamina)",
+      "kind": "metric_delta",
+      "variant": "absorb_sta",
+      "label_suffix": "absorb_sta",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        567524
+      ],
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          72590,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1186,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Stamina scaling arm for 567524 Dreadnought Rank 1: Fortitude 72590 (+165 STA, precondition fixture) raises STA 104 -> 269 (INT stays 71) -> 166 + 3*269 + 3*71 = 1186 (+495 = +3*165 over absorb_base 691), absorbed against 2x Light of the Naaru 41394 (2200 Holy). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (absorb scales +3*INT: 1591 at +300 Intellect)",
+      "kind": "metric_delta",
+      "variant": "absorb_int",
+      "label_suffix": "absorb_int",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        567524
+      ],
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          60234,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1591,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Intellect scaling arm for 567524 Dreadnought Rank 1: Greatness 60234 (+300 INT, precondition fixture) raises INT 71 -> 371 (STA stays 104) -> 166 + 3*104 + 3*371 = 1591 (+900 = +3*300 over absorb_base 691), absorbed against 2x Light of the Naaru 41394 (2200 Holy). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (protects movement speed from going below 80% under a 30% slow)",
+      "kind": "metric_delta",
+      "variant": "min_speed",
+      "label_suffix": "min_speed",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        567524
+      ],
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          573028,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.7,
+      "expected": 0.8,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "567524 Effect[2] triggers 567525 whose Effect[1] is aura 305 SPELL_AURA_MOD_MINIMUM_SPEED bp=79+1=80% ($567525s2 = 80; Spell.dbc). Both phases set Grasp of Zek'voz 573028 (-30% slow, 10000 ms, precondition fixture) on caster: uncast control reads run_speed_rate 0.70; 500 ms after real cast of 567524, run_speed_rate rises to the 0.80 minimum floor within 0.005 (excludes 0.70 and 1.00). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        567524
+      ],
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 567524
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "567524 DurationIndex 18 = 20000 ms ($d = 20 sec, SpellDuration.dbc), instant cast. Reads aura 567524 absent before cast (0), present (1) at [18800..19600] ms (> 18000 = 0.9*20000) and gone (0) at [20400..21400] ms (< 22000 = 1.1*20000), excluding 10% off on both sides. Note: triggered companion 567525 has DurationIndex 8 = 15000 ms in Spell.dbc (recorded as observation). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (depletes all Insanity upon expiration)",
+      "kind": "metric_delta",
+      "variant": "insanity_zero",
+      "label_suffix": "insanity_zero",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "learn": [
+        567524,
+        502220
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          70,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 70,
+      "expected": 80,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567524
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dreadnought 567524 is absent in before and still active at 19200 ms right before expiry"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAuras.cpp:181-182: on Remove of Dreadnought 567524 (20000 ms duration), Resource(player, Insanity, -100, true) depletes Insanity 500706 to 0. Both phases set 500706=70 and cast Darkwither 502220 at dummy (entering combat so out-of-combat Sanity 500727 decay does not tick, and raising Insanity 70 -> 80, verified with 680604=1 via after_setup_stacks). Control reads 500706 == 80 (567524 == 0); treatment casts 567524 and reads 500706 == 80 (567524 == 1) at 19200 ms while active, then 500706 == 0 at 20800 ms after expiry. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql).",
+      "gate_timing": "start",
+      "trigger_only_after": true
     }
   ],
   "player_observations": [],

@@ -61,43 +61,82 @@
   {
     "spell": 92131,
     "clause": "Reaching 100 Insanity no longer causes Total Madness.",
-    "labels": [],
+    "labels": [
+      "92131 behaviour_metric_delta madness_suppressed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 92131,
     "clause": "Teaches you Herald of the Depths.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Automatic Level 10 specialization passive 92131 teaches 520326 via SynchronizeTaughtAbilities (AscensionTaughtAbilityData.h:35, SpecId=40, RequiredLevel=10). Nearest existing option metric_delta specialization (ORDER 26) switches to spec 40 at level 60 during before, which runs SynchronizeAutomaticTalents + SynchronizeTaughtAbilities and auto-learns both 92131 and 520326 before the control read (knows_spell reads 1 in before); unlearn_before runs at ORDER 20 (before specialization) and cannot clear them after the spec switch. Smallest extension: Python-only opt-in unlearn_after_specialization (ORDER > 26) or between-phase specialization switch on metric_delta.",
+      "attempts": [
+        {
+          "agent": "cu-t1",
+          "report": ".agents/plans/cu-t1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 92131,
     "clause": "Transform into a Herald of the Depths for $d,",
     "labels": [
-      "92131 spell_duration 520326 #0"
+      "92131 behaviour_metric_delta transform",
+      "92131 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 92131,
     "clause": "increasing damage and healing done by $s3%",
-    "labels": [
-      "92131 effect_value 520326e2 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing damage ... by $s3%",
+        "labels": [
+          "92131 behaviour_hit_ratio damage_shadow",
+          "92131 behaviour_hit_ratio damage_melee"
+        ]
+      },
+      {
+        "claim": "and healing done by $s3%",
+        "labels": [
+          "92131 behaviour_hit_ratio healing_done"
+        ]
+      }
+    ]
   },
   {
     "spell": 92131,
     "clause": "and the base duration of absorption and healing over time effects by $s2%.",
-    "labels": [
-      "92131 effect_value 520326e1 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and the base duration of absorption ... by $s2%.",
+        "labels": [
+          "92131 behaviour_metric_delta absorb_duration_contrast",
+          "92131 behaviour_metric_delta absorb_duration_expiry"
+        ]
+      },
+      {
+        "claim": "and healing over time effects by $s2%.",
+        "labels": [
+          "92131 behaviour_metric_delta hot_duration_contrast",
+          "92131 behaviour_metric_delta hot_duration_expiry"
+        ]
+      }
+    ]
   },
   {
     "spell": 92131,
     "clause": "At the end of the duration, your Insanity is reduced to 0.",
-    "labels": [],
+    "labels": [
+      "92131 behaviour_metric_delta insanity_zero"
+    ],
     "kind": "claim"
   },
   {
@@ -1535,7 +1574,7 @@
         "labels": []
       }
     ],
-    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) — no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
+    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) \u2014 no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
   },
   {
     "spell": 524877,
@@ -2625,20 +2664,33 @@
   {
     "spell": 680750,
     "clause": "Reaching 100 Insanity no longer causes Total Madness.",
-    "labels": [],
+    "labels": [
+      "680750 behaviour_metric_delta madness_suppressed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 680750,
     "clause": "Teaches you Dreadnought.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Automatic Level 10 specialization passive 680750 teaches 567524 via SynchronizeTaughtAbilities (AscensionTaughtAbilityData.h:36, SpecId=96, RequiredLevel=10). Same ORDER gap as 92131: specialization (ORDER 26) auto-learns 680750 + 567524 at level 60 before the control read, while unlearn_before runs at ORDER 20. Smallest extension: Python-only opt-in unlearn_after_specialization (ORDER > 26) or between-phase specialization switch on metric_delta.",
+      "attempts": [
+        {
+          "agent": "cu-t1",
+          "report": ".agents/plans/cu-t1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680750,
     "clause": "Absorbs ${$m2+0+$STA*3+$INT*3} damage, scaling with Intellect and Stamina.",
     "labels": [
-      "680750 effect_value 567524e1 #0"
+      "680750 behaviour_metric_delta absorb_base",
+      "680750 behaviour_metric_delta absorb_sta",
+      "680750 behaviour_metric_delta absorb_int"
     ],
     "kind": "claim"
   },
@@ -2646,7 +2698,7 @@
     "spell": 680750,
     "clause": "Protects movement speed from going below $567525s2% of normal speed.",
     "labels": [
-      "680750 effect_value 567525e1 #1"
+      "680750 behaviour_metric_delta min_speed"
     ],
     "kind": "claim"
   },
@@ -2654,14 +2706,16 @@
     "spell": 680750,
     "clause": "Lasts $d.",
     "labels": [
-      "680750 spell_duration 567524 #2"
+      "680750 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 680750,
     "clause": "Depletes all Insanity upon expiration.",
-    "labels": [],
+    "labels": [
+      "680750 behaviour_metric_delta insanity_zero"
+    ],
     "kind": "claim"
   },
   {
