@@ -8,7 +8,9 @@
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
+#include "Spell.h"
 #include "SpellInfo.h"
+#include "WorldSession.h"
 #include <array>
 #include <unordered_set>
 #include <vector>
@@ -115,6 +117,26 @@ void SetOutlawed(Player* player, bool outlawed)
         player->GetReputationMgr().SendForceReactions();
 }
 
+bool IsCriminal(Player const* player)
+{
+    return player && player->HasAura(SPELL_CRIMINAL);
+}
+
+bool TravelsCasterAway(SpellInfo const* info)
+{
+    for (SpellEffectInfo const& effect : info->Effects)
+        if (effect.Effect == SPELL_EFFECT_TELEPORT_UNITS && effect.TargetA.GetTarget() == TARGET_UNIT_CASTER &&
+            (effect.TargetB.GetTarget() == TARGET_DEST_DB || effect.TargetB.GetTarget() == TARGET_DEST_HOME))
+            return true;
+    return false;
+}
+
+bool SummonedByPlayer(Player const* player, Unit const* summoner)
+{
+    Player const* other = summoner ? summoner->ToPlayer() : nullptr;
+    return other && other != player && other->GetSession()->GetSecurity() == SEC_PLAYER;
+}
+
 class ascension_mercenary_criminal_acts : public UnitScript
 {
 public:
@@ -159,10 +181,40 @@ public:
             SetOutlawed(player, false);
     }
 };
+class ascension_mercenary_criminal_no_retreat_spells : public AllSpellScript
+{
+public:
+    ascension_mercenary_criminal_no_retreat_spells()
+        : AllSpellScript("ascension_mercenary_criminal_no_retreat_spells", {ALLSPELLHOOK_ON_SPELL_CHECK_CAST}) { }
+
+    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    {
+        if (result == SPELL_CAST_OK && IsCriminal(spell->GetCaster()->ToPlayer()) &&
+            TravelsCasterAway(spell->GetSpellInfo()))
+            result = SPELL_FAILED_NOT_HERE;
+    }
+};
+
+class ascension_mercenary_criminal_no_retreat : public PlayerScript
+{
+public:
+    ascension_mercenary_criminal_no_retreat()
+        : PlayerScript("ascension_mercenary_criminal_no_retreat",
+                       {PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_CAN_LFG_TELEPORT}) { }
+
+    bool OnPlayerBeforeTeleport(Player* player, uint32, float, float, float, float, uint32, Unit* target) override
+    {
+        return !IsCriminal(player) || !SummonedByPlayer(player, target);
+    }
+
+    bool OnPlayerCanLfgTeleport(Player* player) override { return !IsCriminal(player); }
+};
 }
 
 void AddSC_AscensionMercenaryCriminal()
 {
     new ascension_mercenary_criminal_acts();
     new ascension_mercenary_criminal_outlaw();
+    new ascension_mercenary_criminal_no_retreat_spells();
+    new ascension_mercenary_criminal_no_retreat();
 }

@@ -1,0 +1,268 @@
+{
+  "schema": 1,
+  "name": "Criminal: Blood On Your Hands refuses travel teleports and summons but keeps Blink (#9132)",
+  "contract": [
+    "Issue #9132. The 9930873 tooltip says its bearer cannot retreat using teleport spells or hearthstones, and the",
+    "PR author's ruling (2026-11-25) blocks every travel teleport, vanity items included, while combat movement",
+    "stays. Hearthstone 8690 (SPELL_EFFECT_TELEPORT_UNITS to the home bind) and Teleport: Stormwind 3561 (to a",
+    "spell_target_position) fail with SPELL_FAILED_NOT_HERE (60) and leave the Criminal in place; an accepted",
+    "Call To Arms 804723 summon does not move it; Blink 1953 (a leap, not a fixed-destination teleport) still moves",
+    "it about 20 yards. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "g",
+      "race": 1,
+      "class": 18,
+      "level": 60
+    },
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "g",
+      "map": 0,
+      "x": -8917.41,
+      "y": -115.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "mage",
+      "map": 0,
+      "x": -8917.41,
+      "y": -55.853,
+      "z": 82.3711,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive",
+      "ms": 2000
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 8690
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 3561
+    },
+    {
+      "action": "learn",
+      "actor": "mage",
+      "spell": 1953
+    },
+    {
+      "action": "add_item",
+      "actor": "mage",
+      "item": 17031,
+      "count": 2
+    },
+    {
+      "action": "set_aura",
+      "label": "The Mage becomes a Criminal",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "position_x",
+      "save_as": "start_x"
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "position_y",
+      "save_as": "start_y"
+    },
+    {
+      "action": "cast",
+      "label": "The Criminal tries its Hearthstone",
+      "actor": "mage",
+      "spell": 8690
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Hearthstone is refused",
+      "actor": "mage",
+      "metric": "cast_failure",
+      "spell": 8690,
+      "equals": 60,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "The Criminal tries Teleport: Stormwind",
+      "actor": "mage",
+      "spell": 3561
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the teleport is refused",
+      "actor": "mage",
+      "metric": "cast_failure",
+      "spell": 3561,
+      "equals": 60,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Wait out both cast times in case a cast went through anyway",
+      "ms": 11000
+    },
+    {
+      "action": "assert",
+      "label": "The Criminal is still in Elwynn Forest",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "at its starting spot",
+      "actor": "mage",
+      "metric": "position_y",
+      "relative_to": "start_y",
+      "min": -2,
+      "max": 2
+    },
+    {
+      "action": "group",
+      "actor": "g",
+      "target": "mage"
+    },
+    {
+      "action": "learn",
+      "actor": "g",
+      "spell": 804723
+    },
+    {
+      "action": "client_packet",
+      "label": "Select the Criminal (CMSG_SET_SELECTION)",
+      "actor": "g",
+      "opcode": 317,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "mage"
+        }
+      ]
+    },
+    {
+      "action": "cast",
+      "label": "A Guardian group member summons the Criminal",
+      "actor": "g",
+      "spell": 804723
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the summon cast completes",
+      "actor": "g",
+      "metric": "spell_cast_count",
+      "spell": 804723,
+      "min": 1,
+      "within_ms": 7000
+    },
+    {
+      "action": "client_packet",
+      "label": "The Criminal accepts the summon (CMSG_SUMMON_RESPONSE)",
+      "actor": "mage",
+      "opcode": 684,
+      "consumed": false,
+      "fields": [
+        {
+          "actor_guid": "g"
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong summon time to land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the accepted summon does not move the Criminal",
+      "actor": "mage",
+      "metric": "distance",
+      "target": "g",
+      "min": 50
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "position_x",
+      "save_as": "blink_x"
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: the Criminal blinks forward",
+      "actor": "mage",
+      "spell": 1953
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blink still moves the Criminal",
+      "actor": "mage",
+      "metric": "position_x",
+      "relative_to": "blink_x",
+      "min": 15,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Criminal is removed",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 0
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "mage",
+      "spell": 3561
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: without Criminal the Mage teleports to Stormwind",
+      "actor": "mage",
+      "spell": 3561
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the teleport lands at its Stormwind target",
+      "actor": "mage",
+      "metric": "position_x",
+      "min": -9008.5,
+      "max": -8998.5,
+      "within_ms": 15000
+    }
+  ]
+}
