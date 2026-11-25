@@ -1,0 +1,97 @@
+{
+  "schema": 1,
+  "name": "Valiance gives each Sun Cleric its own first-auto-attack extra attack on a shared target (owner ruling O-21)",
+  "contract": "Valiance 680643 reads 'Increases your melee attack speed by $s1% and your first auto attack on a target hits twice.' Its Effect[1] aura 42 PROC_TRIGGER_SPELL casts 681472 (Effect[0] 19 ADD_EXTRA_ATTACKS on the caster, Effect[1] 183 delayed trigger of 681531 after 200 ms); 681531 is an enemy DUMMY debuff of 600000 ms, cast by the Sun Cleric (SpellEffects.cpp EffectAscensionTriggerSpellDelayed casts from m_caster). Owner ruling O-21 makes the marker per caster (Sun Cleric ADR 0024): the class contracts clear 681472's ExcludeTargetAuraSpell 681531, which SpellInfo::CheckTarget checked without a caster, give 681531 SPELL_ATTR3_DOT_STACKING_RULE so the markers of two casters coexist (Aura::CanStackWith would otherwise let the newer replace the older), and the 680643 proc condition refuses a target holding the caster's own 681531. Three level 60 Sun Clerics with the class file's Valkyr weapon set (707072, two 2529 two-handed swords) and the class file ratings (hit and expertise 10000: no miss, dodge or parry) attack one passive dummy. The first learns Valiance and attacks until its marker is on the dummy. The second learns Valiance and attacks the dummy marked by the first: it must cast its own 681472 exactly once and mark the dummy too, while the first's marker stays. Before the fix its cast was refused by the first's marker (code reading, SpellInfo.cpp:2158, not measured). The first then attacks the same dummy again and must not cast 681472 a second time. The control Sun Cleric has no Valiance: it swings at the same dummy and casts no 681472 and leaves no marker of its own.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "cleric2", "race": 1, "class": 27, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "control", "race": 1, "class": 27, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cleric", "entry": 36, "level": 60, "health": 50000000, "distance": 3, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 707072 },
+    { "action": "add_item", "actor": "cleric", "item": 2529 },
+    { "action": "equip", "actor": "cleric", "item": 2529, "slot": 15 },
+    { "action": "add_item", "actor": "cleric", "item": 2529 },
+    { "action": "equip", "actor": "cleric", "item": 2529, "slot": 16 },
+    { "action": "set_skill", "actor": "cleric", "skill": 55, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "cleric2", "spell": 707072 },
+    { "action": "add_item", "actor": "cleric2", "item": 2529 },
+    { "action": "equip", "actor": "cleric2", "item": 2529, "slot": 15 },
+    { "action": "add_item", "actor": "cleric2", "item": 2529 },
+    { "action": "equip", "actor": "cleric2", "item": 2529, "slot": 16 },
+    { "action": "set_skill", "actor": "cleric2", "skill": 55, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "control", "spell": 707072 },
+    { "action": "add_item", "actor": "control", "item": 2529 },
+    { "action": "equip", "actor": "control", "item": 2529, "slot": 15 },
+    { "action": "add_item", "actor": "control", "item": 2529 },
+    { "action": "equip", "actor": "control", "item": 2529, "slot": 16 },
+    { "action": "set_skill", "actor": "control", "skill": 55, "value": 300, "maximum": 300 },
+    { "action": "learn", "actor": "cleric", "spell": 680643 },
+    { "action": "learn", "actor": "cleric2", "spell": 680643 },
+    {
+      "action": "assert", "label": "SETUP: no Valiance marker on the dummy yet", "actor": "dummy",
+      "metric": "aura", "spell": 681531, "equals": 0
+    },
+    { "action": "attack", "label": "The first Sun Cleric attacks the dummy", "actor": "cleric", "target": "dummy" },
+    {
+      "action": "assert", "label": "SETUP: the first Sun Cleric's marker lands on the dummy", "actor": "dummy",
+      "metric": "aura", "spell": 681531, "caster": "cleric", "equals": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "SETUP: the second Sun Cleric has no marker on the dummy yet", "actor": "dummy",
+      "metric": "aura", "spell": 681531, "caster": "cleric2", "equals": 0
+    },
+    { "action": "attack", "label": "The second Sun Cleric attacks the marked dummy", "actor": "cleric2", "target": "dummy" },
+    { "action": "wait", "label": "three Valkyr swing intervals", "ms": 7500 },
+    { "action": "stop_attack", "actor": "cleric" },
+    { "action": "stop_attack", "actor": "cleric2" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the second Sun Cleric gets its own extra attack on the marked dummy",
+      "actor": "cleric2", "metric": "spell_cast_count", "spell": 681472, "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the second Sun Cleric marks the dummy too", "actor": "dummy",
+      "metric": "aura", "spell": 681531, "caster": "cleric2", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the first Sun Cleric's marker stays beside the second", "actor": "dummy",
+      "metric": "aura", "spell": 681531, "caster": "cleric", "equals": 1
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the first Sun Cleric got one extra attack over all its swings",
+      "actor": "cleric", "metric": "spell_cast_count", "spell": 681472, "equals": 1
+    },
+    { "action": "snapshot", "actor": "cleric", "metric": "melee_attack_count", "save_as": "swings_before_reattack" },
+    { "action": "attack", "label": "The first Sun Cleric attacks the same dummy again", "actor": "cleric", "target": "dummy" },
+    { "action": "wait", "label": "three Valkyr swing intervals", "ms": 7500 },
+    { "action": "stop_attack", "actor": "cleric" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: one Sun Cleric gets one extra attack per target, not one per attack",
+      "actor": "cleric", "metric": "spell_cast_count", "spell": 681472, "equals": 1
+    },
+    {
+      "action": "assert", "label": "SETUP: the first Sun Cleric swung again", "actor": "cleric",
+      "metric": "melee_attack_count", "relative_to": "swings_before_reattack", "min": 2
+    },
+    { "action": "attack", "label": "CONTROL: a Sun Cleric without Valiance attacks the dummy", "actor": "control", "target": "dummy" },
+    { "action": "wait", "label": "three Valkyr swing intervals", "ms": 7500 },
+    { "action": "stop_attack", "actor": "control" },
+    {
+      "action": "assert", "label": "CONTROL: the Sun Cleric without Valiance swung", "actor": "control",
+      "metric": "melee_attack_count", "min": 2
+    },
+    {
+      "action": "assert", "label": "CONTROL: no extra attack without Valiance", "actor": "control",
+      "metric": "spell_cast_count", "spell": 681472, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: no marker of its own without Valiance", "actor": "dummy",
+      "metric": "aura", "spell": 681531, "caster": "control", "equals": 0
+    }
+  ]
+}

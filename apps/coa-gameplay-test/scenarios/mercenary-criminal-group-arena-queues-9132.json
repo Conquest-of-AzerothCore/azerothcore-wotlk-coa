@@ -1,0 +1,260 @@
+{
+  "schema": 1,
+  "name": "Criminal: Blood On Your Hands keeps its group out of every queue and its bearer out of arenas (#9132)",
+  "contract": [
+    "Issue #9132 and the PR author's ruling (2026-11-25): a Criminal cannot join battleground, arena or Dungeon",
+    "Finder queues. A group with a Criminal member starts no Dungeon Finder role check and its Warsong Gulch",
+    "group join gets SMSG_GROUP_JOINED_BATTLEGROUND with ERR_GROUP_JOIN_BATTLEGROUND_FAIL (0); a lone Criminal's",
+    "1v1 arena join gets the same, while a law-abiding Human's identical arena join is queued",
+    "(SMSG_BATTLEFIELD_STATUS). A law-abiding leader who queues alone is still queued: only group joins check",
+    "every member."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "leader",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "member",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "loner",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "outlaw",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "leader",
+      "target": "member"
+    },
+    {
+      "action": "set_aura",
+      "label": "A group member is a Criminal",
+      "actor": "member",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "lfg_join",
+      "label": "The leader tries to queue the group for a random dungeon",
+      "actor": "leader",
+      "dungeons": [
+        258
+      ],
+      "roles": 9
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong role check time to start",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a group with a Criminal starts no role check",
+      "actor": "member",
+      "metric": "lfg_state",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and the leader is not queued",
+      "actor": "leader",
+      "metric": "lfg_state",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "leader",
+      "metric": "server_packets",
+      "opcode": 744,
+      "row": 0,
+      "save_as": "group_bg"
+    },
+    {
+      "action": "client_packet",
+      "label": "The leader queues the group for Warsong Gulch (CMSG_BATTLEMASTER_JOIN as a group)",
+      "actor": "leader",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the group join is refused with ERR_GROUP_JOIN_BATTLEGROUND_FAIL",
+      "actor": "leader",
+      "metric": "server_packets",
+      "opcode": 744,
+      "row": 0,
+      "relative_to": "group_bg",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "leader",
+      "metric": "server_packets",
+      "opcode": 724,
+      "row": 0,
+      "save_as": "solo_bg"
+    },
+    {
+      "action": "client_packet",
+      "label": "The law-abiding leader queues alone for Warsong Gulch",
+      "actor": "leader",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a solo join is judged on the player alone, so it is queued",
+      "actor": "leader",
+      "metric": "server_packets",
+      "opcode": 724,
+      "row": 0,
+      "relative_to": "solo_bg",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "loner",
+      "metric": "server_packets",
+      "opcode": 724,
+      "row": 0,
+      "save_as": "arena_control"
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: a law-abiding Human joins the 1v1 arena queue (CMSG_BATTLEMASTER_JOIN_ARENA)",
+      "actor": "loner",
+      "opcode": 856,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u8": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: and is told it is queued",
+      "actor": "loner",
+      "metric": "server_packets",
+      "opcode": 724,
+      "row": 0,
+      "relative_to": "arena_control",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Another Human is a Criminal",
+      "actor": "outlaw",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "outlaw",
+      "metric": "server_packets",
+      "opcode": 744,
+      "row": 0,
+      "save_as": "arena_refused"
+    },
+    {
+      "action": "client_packet",
+      "label": "The Criminal tries the same 1v1 arena queue",
+      "actor": "outlaw",
+      "opcode": 856,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u8": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the arena join is refused with ERR_GROUP_JOIN_BATTLEGROUND_FAIL",
+      "actor": "outlaw",
+      "metric": "server_packets",
+      "opcode": 744,
+      "row": 0,
+      "relative_to": "arena_refused",
+      "min": 1,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -52,6 +52,10 @@ A JSON array. Each entry is one clause:
   clause that continues a sentence ("increasing by $s1% every ...") is promised the state its subject clause names
   ("critical strike chance"). A source that is not an earlier clause of the spell is refused. Witch Hunter: Slayer's
   Mark 804068.
+- `state_promise` (optional, on a declared claim, ADR 1283): a metric of the closed map `CLAIM_STATE_PROMISES`
+  (`coverage.py`; only `casting`, which adds `channel\w*`). For that claim only, the metric's promise words gain the
+  mapped words. Refused on a clause, for a metric outside the map, or when the claim's own words do not say the
+  mapped words. Felsworn: Carve 800206 "you can channel while moving".
 
 ### Stated claims
 
@@ -293,8 +297,17 @@ not in the table fails the whole run (`EvidenceError`, no default):
   row's contrast, whatever the claim words say (ADR 0616), unless the metric also has a `STATE_PROMISES` row: then the
   clause or its row must use those words. A readback metric has such a row only to gate its contrast proof, as
   `spell_done_crit_chance` does with the crit words (ADR 0691), and `spell_taken_crit_chance`, the target-side
-  chance with the attacker's conditional rules, the same way (ADR 0800). A `behaviour_group_stack_cap` state read
-  is behaviour for a no-stack clause ("does not stack", `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
+  chance with the attacker's conditional rules, the same way (ADR 0800). `spell_done_crit_chance_scripted`, the done
+  chance passed through the CoA crit hook (`ScriptMgr::OnSpellCritChance`), takes the same row and crit words plus a
+  partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1188): its learned verdict is behaviour only when the ledger row's
+  conformant learned verdicts of the metric hold a non-zero expected gain and, unless every row of the spell joined is
+  a plain unconditional stat sentence (`coverage.PLAIN_CRIT_SENTENCE`), also a zero gain. That the zero arm's fixture
+  breaks the condition, and that each condition has an arm, is a review check; the tool does not see it.
+  `critical_block_chance` (the engine's `SPELL_AURA_MOD_BLOCK_CRIT_CHANCE` total, ADR 1193) is a readback with the learned
+  contrast, the words "critical block" and the same partner gate; its text is never a plain crit sentence, so the zero
+  arm is always required. A
+  `behaviour_group_stack_cap` state read is behaviour for a no-stack clause ("does not stack",
+  `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
   value after the spell alone and after the similar spell too, and only equal readings (`compare.STACKED_SAME`,
   ADR 0446) prove the clause. A `setup_only_after` condition contrast (a state read without and with the condition
   set up, the talent known in both phases) is behaviour for a claim that states that condition: its words start with

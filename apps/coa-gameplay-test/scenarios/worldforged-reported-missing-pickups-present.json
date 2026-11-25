@@ -1,0 +1,24 @@
+{
+  "schema": 1,
+  "name": "Worldforged pickups reported missing stand grounded at their recorded spots (#9203, #6520, #9099)",
+  "contract": "Each pickup stands at its recorded LootCollector spot, on the ground. Radiant Helmet (520704, guid 6940923) was raised 2 yd onto the editor-checked Coldridge Valley spot by rev_20261108_95 (#11703, #11535). Spare Hunting Boots (254194, guid 6940692, Lavasilk Footpads) stands at the CoA-realm Burning Steppes pin 47.0, 71.0, not at the free-pick pin near 44, 70 that #6520 named. Nightsong Waraxe (515425, guid 6941991) stands 2.1 yd from its Ashenvale pin at 83.5, 63.7, 478 yd from where #9099 searched; it sat 1.31 yd under the slope until rev_20261124_9099 raised it to the ground.",
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -5888.99, "y": 478.71, "z": 536.4, "o": 0 },
+  "players": [ { "id": "p", "race": 1, "class": 1, "level": 60 } ],
+  "steps": [
+    { "action": "set_phase", "actor": "p", "value": 1 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the Radiant Helmet stands at its Coldridge Valley spot (#9203)", "actor": "p", "metric": "nearby_gameobject_count", "entry": 520704, "equals": 1 },
+    { "action": "assert", "label": "the Radiant Helmet is on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940923, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+
+    { "action": "teleport", "actor": "p", "map": 0, "x": -8416.9, "y": -1642.6, "z": 237.8, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Lavasilk Footpads pickup stands at the CoA-realm Burning Steppes pin (#6520)", "actor": "p", "metric": "nearby_gameobject_count", "entry": 254194, "equals": 1 },
+    { "action": "assert", "label": "the Lavasilk Footpads pickup is on the ground", "actor": "p", "metric": "spawn_ground_gap", "guid": 6940692, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 },
+
+    { "action": "teleport", "actor": "p", "map": 1, "x": 2217.1, "y": -3118.6, "z": 122.8, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "the Nightsong Waraxe stands at its Ashenvale pin (#9099)", "actor": "p", "metric": "nearby_gameobject_count", "entry": 515425, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: the Nightsong Waraxe is on the ground, not 1.31 yd under the slope", "actor": "p", "metric": "spawn_ground_gap", "guid": 6941991, "spawn_type": "gameobject", "min": -0.5, "max": 0.5 }
+  ]
+}

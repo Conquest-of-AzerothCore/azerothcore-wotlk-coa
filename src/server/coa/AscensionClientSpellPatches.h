@@ -97,6 +97,7 @@ namespace Ascension
     };
 
     using ClientSpellPatches = ClientPatches<struct SpellPatchTag>;
+    using ClientItemPatches = ClientPatches<struct ItemPatchTag>;
 }
 
 #endif

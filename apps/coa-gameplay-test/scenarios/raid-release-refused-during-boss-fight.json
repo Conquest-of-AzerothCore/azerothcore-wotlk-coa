@@ -1,0 +1,222 @@
+{
+  "schema": 1,
+  "name": "Raid release: Release Spirit is refused while a raid boss fight goes on",
+  "contract": [
+    "Tester (ZG, 2026-11-24): after a death in a raid boss fight, Release Spirit resurrects the player at once near",
+    "the fight, where the boss's zone pulse pulls them back in and kills them again. During a raid boss fight the",
+    "server now refuses Release with an on-screen message and the player stays dead on the corpse, whether they died",
+    "during the fight or before the pull. Outside a boss fight Release still resurrects at once. Gahz'ranka's",
+    "encounter state (8) stands in for any ZG boss fight; a summoned cobra keeps the watcher in combat."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "watcher",
+      "race": 4,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "fallen",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "late",
+      "race": 4,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "Group the players so all enter the same instance",
+      "actor": "watcher",
+      "target": "fallen"
+    },
+    {
+      "action": "group",
+      "actor": "watcher",
+      "target": "late"
+    },
+    {
+      "action": "teleport",
+      "actor": "watcher",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true,
+      "label": "Jin'do's arena in Zul'Gurub"
+    },
+    {
+      "action": "wait",
+      "label": "Let the watcher create the instance first",
+      "ms": 2000
+    },
+    {
+      "action": "teleport",
+      "actor": "fallen",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "teleport",
+      "actor": "late",
+      "map": 309,
+      "x": -11518.0,
+      "y": -1275.5,
+      "z": 79.66,
+      "o": 0.0,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "label": "Let the transfers finish",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: all three players share the instance",
+      "actor": "late",
+      "metric": "map_id",
+      "equals": 309
+    },
+    {
+      "action": "set_health",
+      "actor": "watcher",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "die",
+      "label": "CONTROL: a death with no boss fight",
+      "actor": "fallen"
+    },
+    {
+      "action": "release_spirit",
+      "actor": "fallen"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: outside a boss fight Release resurrects at once",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "die",
+      "label": "Late dies before the pull",
+      "actor": "late"
+    },
+    {
+      "action": "summon",
+      "actor": "watcher",
+      "entry": 11373,
+      "as": "cobra",
+      "distance": 6
+    },
+    {
+      "action": "attack",
+      "label": "Pull a cobra to keep the watcher in combat",
+      "actor": "watcher",
+      "target": "cobra"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the watcher fights",
+      "actor": "watcher",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "stop_attack",
+      "label": "Keep the cobra alive so the watcher stays in combat",
+      "actor": "watcher"
+    },
+    {
+      "action": "command",
+      "label": "Gahz'ranka's fight starts",
+      "actor": "watcher",
+      "command": ".instance setbossstate 8 1"
+    },
+    {
+      "action": "die",
+      "label": "Fallen dies during the fight",
+      "actor": "fallen"
+    },
+    {
+      "action": "release_spirit",
+      "label": "DISCRIMINATING: Release during the fight is refused",
+      "actor": "fallen",
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "label": "The player is told why",
+      "actor": "fallen",
+      "metric": "notification_contains",
+      "text": "You cannot release your spirit during a boss fight.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "release_spirit",
+      "label": "DISCRIMINATING: a player who died before the pull cannot release during it either",
+      "actor": "late",
+      "refused": true
+    },
+    {
+      "action": "assert",
+      "actor": "late",
+      "metric": "notification_contains",
+      "text": "You cannot release your spirit during a boss fight.",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both stay dead while the fight goes on",
+      "actor": "fallen",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "late",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the fight is still going",
+      "actor": "watcher",
+      "metric": "combat",
+      "equals": 1
+    }
+  ]
+}

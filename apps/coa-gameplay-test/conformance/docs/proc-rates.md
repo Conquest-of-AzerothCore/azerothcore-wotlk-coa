@@ -27,12 +27,23 @@ A `procs` entry of the class file describes one proc aura:
 | | other spells; a trial is one landed hit (`spell_damage_count` on the dummy) of any listed spell, the baseline |
 | | hits of each taken out; needs `trigger_spells_source` (which strikes roll the proc, and the residual failure |
 | | probability), written into the scenario contract, and no `trial_readings` (ADR 0684) |
+| `trigger_lands_no_hit` | with `trigger_spells`, for a trigger that deals no damage of its own (a periodic aura whose |
+| | ticks are another spell): the trials are the landed hits of the added spells, any landed hit of the trigger |
+| | alerts, and a baseline arm without a landed hit is not judged. The text must cite the code line (`File.cpp:N`) |
+| | where the handler rolls once per landed hit of the added spell; a handler that rolls per cast or per aura |
+| | application must not use it (ADR 1185) |
+| `critical_trials` | `{"rating", "source"}` (rating `melee` or `spell`) for a `cast` trigger whose proc rolls only on a critical |
+| | hit: the trials count the critical landed hits only (`critical: true`), the rating fixture forces crits, and a |
+| | control arm in part 1, with the passive learned, casts the trigger under 34640 (crit chance effects 0 and 1 set |
+| | to -100000) until a crit-blind roll would show with under 0.05% probability: no critical hit and enough |
+| | non-critical hits (else `unmeasured`), no event (else `alert`). `source` cites the crit condition (ADR 1250) |
 | `readings_question` | the log evidence that tells the readings apart without counting, for `questions.md` |
 | `handler` | the code that rolls a proc without a `spell_proc` or `spell_script_names` row |
 | `dbc` | `ProcChance`, `ProcFlags`, `ProcCharges` of the aura and of the spell of the chance token |
 | `spell_proc` | the `spell_proc` row of each spell, `{}` without one |
 | `internal_cooldown_ms` | the `spell_proc` `Cooldown`, the internal cooldown between procs |
 | `base_mana_per_attempt` | `true` sets the caster's mana to the class file's `base_mana` before every attempt of a `cast` trigger that costs a percentage of base mana (`hits.base_mana_steps`), the baseline casts included; refused for a trigger without such a cost (ADR 0700) |
+| `trial` | `"effective_heal"` for a `cast` trigger at the ally whose handler rolls on an effective heal: the trials are the trigger's heals on the ally (`spell_heal_count`, target ally), the ally set to 1 health of a 2000000000 maximum before every cast and the caster left at full health; an overheal on the ally or an effective heal of the caster by the trigger, read at the end of each part, makes the rate unmeasured; a chain heal trigger is accepted only with it (ADR 1192) |
 | `control_weapon` | the name of a class-file weapon set with a one-handed main hand, for an `attack` trigger whose own |
 | | set wields a two-handed one: part 1 first swings that main hand with the aura learned, then re-equips the own |
 | | weapon; any event in the control hits alerts, fewer landed hits than the baseline attempts are not judged (ADR 0751) |
@@ -42,6 +53,10 @@ A `procs` entry of the class file describes one proc aura:
 | | roll out of the trials (Blade Sermon 572548: Oath Chain at its cap, so Vindication grants no Oath: Vindication) |
 | | or, with `"target": "dummy"`, a state the trigger needs on the dummy (Soulfreeze 572023: Ice Lock 22856, a |
 | | Frost stun without interrupt flags, keeps the dummy Frozen through the damage, ADR 0491) |
+| | or, for an `avoided` trigger (ADR 1261, provisional), set on the caster before every swing interval and every |
+| | engage, for a condition the handler needs while strikers swing (Demonic Fortitude 805245: Demonic Will 800209) |
+| | or, for a `taken_hit` trigger with `aura_stacks` events only (ADR 1279, provisional), set on the caster before |
+| | every strike (Demonic Fortitude 805245 damage taken: Felfury 800058 at 0, Demonic Will 800209 held) |
 | `applied_by` | `{"spell", "source"}`: the aura is not learned but granted by a cast of `spell` (an Oath), so the |
 | | scenario sets it (`set_aura`, 1 stack) instead of learning it, and the chance is the aura's own `$<aura>s1` |
 | | percent token in the tooltip of `spell`, which `tooltip` then copies (ADR 0151) |
@@ -379,6 +394,31 @@ approximation at the measured trials. Wilson coverage is nominal, not exact: the
 approximate (close at the thousands of trials these entries use). Shadow Rage 804192: 0.001 per pair, 5 points,
 110 parts.
 
+`sized_attempts` (ADR 1254) writes the attempts a `residual_target` needs when they exceed the band sizing; it is
+refused below that default or without `residual_target`. The parts come from the scenario budget as usual. Chaotic
+681376: 13377 attempts for `min_detectable` 4.
+
+### Aura stack events (ADR 1254)
+
+`event_metric: "aura_stacks"` on a cast trigger counts changes of a stack aura (`stack_aura`) that no spell cast marks.
+`attempt_auras` sets it to `stack_set` before each cast (a precondition fixture, named in its `source`);
+`stack_per_cast` is the signed change a completed cast makes without a proc, from the server's resource rules. The
+stacks are read after each cast and after the drain (reset before it); events = sum of the reads - `stack_set` x
+windows - `stack_per_cast` x completed casts, `events_per_proc` per proc. The `baseline` arm is required and must read
+no event. Azzinoth's Battery 705137 (2, -2, 2 per proc), Illidari Magi 560639 (1, +1, 1 per proc).
+
+On an `avoided` trigger (ADR 1261, provisional) `stack_per_cast` must be 0 and `stack_cap` names the aura's stack cap
+(its `StackAmount`): `attempt_auras` sets the aura before every swing interval, the stacks are read after every
+interval and after the drain, and the baseline swing intervals read the same way. A read at `stack_cap` makes the part
+`unmeasured` (a capped gain is not read); it never passes. Demonic Fortitude 805245 (0, 0, cap 6, 1 per proc, Demonic
+Will 800209 held as its condition).
+
+On a `taken_hit` trigger (ADR 1279, provisional) the same constraints hold (`stack_per_cast` 0, a whole `stack_cap`
+above `stack_set`): `attempt_auras` sets the aura before every strike of the striker, the stacks are read after every
+strike interval and after the drain, the baseline strikes before the passive is learned read the same way, and the
+trials stay the striker's landed hits on the caster. A read at `stack_cap` voids the part. Demonic Fortitude 805245
+damage taken leg (0, 0, cap 6, 1 per proc, Light of the Naaru 41394 from creature 36, Demonic Will 800209 held).
+
 ### Summon procs (ADR 0351)
 
 A proc whose event is a creature the code spawns directly (no spell event; Unrelenting Army 705747/707880, Muck
@@ -424,6 +464,14 @@ handler must accept off-hand swings only. Absent or `0`, the main hand stays the
 Off The Dusk 681329 (10%) and 681488 (20%), each proc counted by its single Replenishment 1257670 cast (claims 214.0,
 228.0).
 
+### Both-hand trials of an attack proc (ADR 1197)
+
+`trial_hand: "both"` on an `attack` proc without `most_procs_per_trigger` counts the trials and attempts of both hands
+together (`melee_damage_count` and `melee_attack_count` with no hand, the harness's sum of both) and spaces the plan
+by the combined swing rate, `main * off // (main + off)`, the off hand read from the entry's weapon set (required). It
+is the trial for a handler that rolls on every auto attack, either hand: Sun Cleric Sunsworn 802935 with two
+2529 swords.
+
 ### Avoided-swing trials (ADR 0900)
 
 `{"action": "avoided", "striker_entry": <entry>, "swing_ms": <ms>, "dodge": <pct>, "parry": <pct>, "strikers": <n>}`
@@ -443,6 +491,12 @@ blocked (state 5) swings since the engage must be 0: these asserts come before t
 source fails the part instead of being judged. Trials per attempt are the striker count; `trials_per_attempt`,
 `trial_readings` and an internal cooldown are refused. The label is `<aura> proc_rate avoided` and the key ends in
 `avoided`; an avoided entry does not rename a sibling entry of the same aura.
+
+`count_misses: true` in the trigger (ADR 1210, provisional; mentor D-175) adds the swings that missed the caster (`melee_missed_taken`, read beside the dodged and parried swings and held in the baseline) to the trials, for a handler that rolls on a miss as well. Each counted part must then read as many attacks taken (`melee_attacks_taken`) as dodged, parried and missed swings, the guards having ruled out landed and blocked ones; otherwise the rate is `unmeasured` (void). Absent, the trials are the dodged and parried swings only.
+
+`learn: [<spell>, ...]` in the trigger (ADR 1261, provisional) lists precondition spells the caster learns before the engage in every part, for an avoidance the reference character lacks (Vengeance Is Mine 804822: Nether Disciple 560576 lets the caster parry, so a parry 100 entry reads the parry leg). The spells must be distinct positive ids other than the passive. An entry with a learn list is its own roll: its label ends in `learn <spell>` (`804822 proc_rate avoided learn 560576`) and it does not rename the entry without one. Absent, nothing changes.
+
+`miss_exclusion: {"min_share": s}` (ADR 1229, provisional; mentor D-252, D-253) needs `count_misses`. It reads the miss share m of the counted parts: under `s` the rate is `unmeasured`, otherwise expected x (1 - m), the rate of a server that ignores misses, must lie below the Wilson interval or the verdict is `alert`. Absent, nothing changes.
 
 ### Caster streams (ADR 1048, provisional)
 

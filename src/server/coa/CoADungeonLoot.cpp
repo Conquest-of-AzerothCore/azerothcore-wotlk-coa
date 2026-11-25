@@ -195,7 +195,7 @@ namespace
             if (IsBossGear(loot.items[i]))
                 rolled.push_back(i);
 
-        if (rolled.size() == 1)
+        if (rolled.size() == 1 || (!difficulty && !rolled.empty()))
             return;
 
         if (!rolled.empty())
@@ -266,7 +266,8 @@ public:
             return;
 
         uint8 const difficulty = DungeonLoot::Difficulty(map->GetId(), uint8(map->GetSpawnMode()), true);
-        if (!difficulty)
+        if (!difficulty && (map->GetSpawnMode() != DUNGEON_DIFFICULTY_NORMAL
+            || !DungeonLoot::Difficulty(map->GetId(), DUNGEON_DIFFICULTY_HEROIC, true)))
             return;
 
         ApplyVariants(*loot, difficulty);

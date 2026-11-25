@@ -1,0 +1,380 @@
+{
+  "schema": 1,
+  "name": "Goblin Salvage Project: the client gets an Item.dbc row for each new quest item",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1 (the default).",
+    "The 3.3.5a client draws an item's bag icon from its own Item.dbc row, not from the item query answer. Items 9707001-9707008 are new, so the client has no row for them and showed a question mark.",
+    "rev_20261023_50 adds their item_dbc rows and the core registers the ids, so the item query answer is followed by SMSG_PATCH_ITEM (2354): ID, ClassID, SubclassID, sound override, material, DisplayInfoID, InventoryType and SheatheType. Each display is one the client's ItemDisplayInfo.dbc already has.",
+    "These are data assertions on the bytes the server sends; the harness cannot see the drawn icon."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -11307.4,
+    "y": -191.2,
+    "z": 75.35,
+    "o": 1.95
+  },
+  "players": [
+    {
+      "id": "c",
+      "race": 7,
+      "class": 1,
+      "level": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "label": "The client meets Strange Piece of Scrap (9707001) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707001
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707001,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707001 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707001,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707001,
+      "within_ms": 4000,
+      "label": "with display 4486, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 4486
+    },
+    {
+      "action": "client_packet",
+      "label": "The client meets Salvaged Gearbox (9707002) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707002
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707002,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707002 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707002,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707002,
+      "within_ms": 4000,
+      "label": "with display 5199, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 5199
+    },
+    {
+      "action": "client_packet",
+      "label": "The client meets Shredder Power Core (9707003) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707003
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707003,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707003 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707003,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707003,
+      "within_ms": 4000,
+      "label": "with display 13706, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 13706
+    },
+    {
+      "action": "client_packet",
+      "label": "The client meets Volatile Fuel Canister (9707004) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707004
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707004,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707004 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707004,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707004,
+      "within_ms": 4000,
+      "label": "with display 5272, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 5272
+    },
+    {
+      "action": "client_packet",
+      "label": "The client meets Calibrated Logic Core (9707005) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707005
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707005,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707005 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707005,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707005,
+      "within_ms": 4000,
+      "label": "with display 4754, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 4754
+    },
+    {
+      "action": "client_packet",
+      "label": "The client meets Lootbot Field Remote (9707006) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707006
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707006,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707006 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707006,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707006,
+      "within_ms": 4000,
+      "label": "with display 11823, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 11823
+    },
+    {
+      "action": "client_packet",
+      "label": "The client meets Field Test Sample (9707007) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707007
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707007,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707007 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707007,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707007,
+      "within_ms": 4000,
+      "label": "with display 7758, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 7758
+    },
+    {
+      "action": "client_packet",
+      "label": "The client meets Salvage License Application (9707008) and queries it",
+      "actor": "c",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 9707008
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707008,
+      "within_ms": 4000,
+      "label": "DISCRIMINATING: the server streams the missing Item.dbc row for 9707008 once",
+      "metric": "server_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707008,
+      "within_ms": 4000,
+      "label": "as a quest item, ClassID 12",
+      "metric": "server_packet_u32",
+      "index": 1,
+      "equals": 12
+    },
+    {
+      "action": "assert",
+      "actor": "c",
+      "opcode": 2354,
+      "row": 9707008,
+      "within_ms": 4000,
+      "label": "with display 24417, an ItemDisplayInfo row the client already has",
+      "metric": "server_packet_u32",
+      "index": 5,
+      "equals": 24417
+    }
+  ]
+}

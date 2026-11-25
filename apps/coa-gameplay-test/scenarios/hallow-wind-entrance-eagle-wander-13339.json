@@ -1,0 +1,197 @@
+{
+  "schema": 1,
+  "name": "Hallow Wind Eagles at the abbey entrance stay on the bridge deck (#13339)",
+  "contract": "#13339: Hallow Wind Eagle 164195, the kill credit of Justice May be Blind, But it is Not Deaf (175345), walks on the ground, and the entrance spawn 9962114 had a 15 yd wander. The server navmesh has only the layer under the bridge at points 8-11 yd from it, so the eagle wandered below the deck, could not path back to players and reset. rev_20261123_13339_hallow_wind_entrance_eagle_wander.sql sets it to 5 yd, within which every point keeps the deck (the eagles within 60 yd of the reporter's spot now wander at most 6.7 yd). A player at the reporter's spot samples every 5 s for 60 s that no eagle is more than 7.5 yd from home. Before the fix 9962114 chose a point beyond 7.5 yd on about 75% of its moves (uniform over a 15 yd disc), so twelve samples over about six moves fail the broken tree with near certainty.",
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -6911.6,
+    "y": 1688.57,
+    "z": 318.63,
+    "o": 0.0
+  },
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "SETUP: join the world phase the eagles are in",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Hallow Wind Eagles wander around the entrance",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min": 1
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 1 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 2 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 3 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 4 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 5 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 6 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 7 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 8 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 9 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 10 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 11 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no eagle has wandered more than 7.5 yd from home (sample 12 of 12)",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 164195,
+      "min_home_distance": 7.5,
+      "equals": 0
+    }
+  ]
+}

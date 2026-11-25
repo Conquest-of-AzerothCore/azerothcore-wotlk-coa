@@ -15,7 +15,8 @@ namespace
 
 constexpr float TIER_SET_HARVEST_RADIUS = 40.0f;
 
-constexpr std::array<uint32, 7> TIER_SET_HARVEST_BONUSES = {823711, 823717, 823719, 823727, 823731, 823739, 823741};
+constexpr std::array<uint32, 8> TIER_SET_HARVEST_BONUSES = {823711, 823717, 823719, 823727, 823731, 823733, 823739,
+    823741};
 
 uint32 HarvestBuff(uint32 bonusId)
 {

@@ -6,11 +6,14 @@ import re
 import struct
 from typing import Mapping, Sequence
 
+from block_value import block_value_steps, block_value_terms
+from heal_pct import heal_pct_steps, heal_pct_term, heal_pct_text
 from classes import ClassSpell
 from custom_attr import TABLE as CUSTOM_ATTR_TABLE, custom_attributes
 from mitigation import (PHYSICAL_SCHOOL_MASK, REFERENCE_TARGET, ArmorFacts, MitigationModel, TargetProfile,
                         armor_reduction, expected_mitigation)
-from profile import (CASTER, DBC_DIR, OFF_HAND, RANGED_DAMAGE_CLASS, SETTLE_MS, WEAPON_REQUIREMENT_FIELDS, armed,
+from profile import (CASTER, DBC_DIR, OFF_HAND, RANGED_DAMAGE_CLASS, REQUIRES_OFF_HAND_ATTRIBUTE_EX3, SETTLE_MS,
+                     WEAPON_REQUIREMENT_FIELDS, armed,
                      attack_hand, base_steps,
                      caster_stats_from, known_aura_label, measurement, player_fixture, ranged_weapon_spell,
                      spec_weapon_set, unfit_reason, weapon_set_unfit_reason)
@@ -23,7 +26,7 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
                     closes_distance, dataset,
                     equip_requirement, weapon_requirement,
                     facts_of, gap_closer_expectation, gap_closer_target, is_hostile, required_aura_steps,
-                    required_target_health_steps, targets_ally)
+                    pay_power_steps, required_target_health_steps, targets_ally)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'periodic_total', 'unmodelled', GAP_CLOSER_DISTANCE)
 UNMODELLED = 'unmodelled: '
@@ -430,7 +433,7 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
                  triggered: Mapping[int, Triggered] | None = None, records: Records | None = None,
                  rank_id: int = 0, percent_before_flat: bool = False,
                  weapon_part: tuple[Distribution, float, list[str]] | None = None,
-                 taken: Sequence[Modifier] = ()) -> HitModel:
+                 percent_part: float | None = None, taken: Sequence[Modifier] = ()) -> HitModel:
     names = tuple(aura_names) or (0,) * len(spell_effects)
     kind, indexes = hit_kind(spell_effects, names, triggered, readout)
     events = 1
@@ -448,6 +451,11 @@ def expected_hit(readout: Readout, spell_effects: Sequence[int], caster: CasterS
         events = len(indexes)
     used = applicable(modifiers, kind)
     dealt = done(distribution, used)
+    if percent_part is not None:
+        if kind != 'heal':
+            raise Unmodelled(f'a percent of maximum health term adds to a heal, not to a {kind} hit')
+        dealt = summed(dealt, done({int(percent_part): 1.0}, used))
+        tooltip_mean += percent_part
     if weapon_part is not None:
         weapon_distribution, weapon_mean, weapon_texts = weapon_part
         dealt = summed(dealt, done(weapon_distribution, used))
@@ -665,7 +673,8 @@ def learned_weapon_part(readout: Readout, effects: Sequence[int], caster: Caster
 
 
 def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: TargetProfile,
-             auras: Sequence[int], learned: int | None = None, check: str = 'hit_mean') -> RankHit:
+             auras: Sequence[int], learned: int | None = None, check: str = 'hit_mean',
+             flat: Mapping[int, float] | None = None, percent_part: float | None = None) -> RankHit:
     records = records_of(class_file)
     if learned is not None:
         caster = replace(caster, known_spells=caster.known_spells | {learned})
@@ -711,6 +720,10 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
         shown = periodic_tick_readout(records, rank_id, caster, readout, indexes[0])
     modifiers = for_school(aura_modifiers(records, auras, class_file['level']), school_mask)
     rolls = {} if kind in WEAPON_KINDS else rolled_values(records, rank_id, caster, shown, indexes)
+    for index, amount in (flat or {}).items():
+        if index not in rolls:
+            raise Unmodelled(f'the block value term of {rank_id} effect {index} needs its rolled values')
+        rolls[index] = tuple(value + amount for value in rolls[index])
     percent_before_flat = rank_id in class_file.get('weapon_percent_before_flat', ())
     attacker = weapon_attacker(records, hit_spell, caster)
     weapon_part = composite if learned is None else learned_weapon_part(full_readout, facts.effects, attacker,
@@ -718,7 +731,22 @@ def rank_hit(class_file: dict, rank_id: int, caster: CasterStats, target: Target
     model = expected_hit(shown, facts.effects, attacker, weapon_profile(class_file), mitigation,
                          aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks, rolls=rolls,
                          triggered=triggered, records=records, rank_id=rank_id,
-                         percent_before_flat=percent_before_flat, weapon_part=weapon_part)
+                         percent_before_flat=percent_before_flat, weapon_part=weapon_part,
+                         percent_part=percent_part)
+    losses = {index: loss for index in indexes
+              if kind in SCRIPT_HIT_KINDS and (loss := per_level_fraction(records, rank_id, index, caster.level))}
+    if losses:
+        try:
+            engine = expected_hit(shown, facts.effects, attacker, weapon_profile(class_file), mitigation,
+                                  aura_names=facts.aura_names, modifiers=modifiers, ticks=ticks,
+                                  rolls=engine_rolls(shown, indexes, rolls, losses), triggered=triggered,
+                                  records=records, rank_id=rank_id, percent_before_flat=percent_before_flat,
+                                  weapon_part=weapon_part, percent_part=percent_part)
+        except Unmodelled:
+            return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
+        terms = ', '.join(f'effect {index} loses {loss:.6g}' for index, loss in losses.items())
+        model = replace(model, engine=replace(engine, displayed=model.displayed),
+                        engine_rule=f'{PER_LEVEL_ENGINE_RULE}: {terms}')
     return RankHit(model, readout, facts, school_mask, indexes, duration, hit_spell)
 
 
@@ -926,11 +954,69 @@ def script_normalized_value_model(class_file: dict, records: Records, facts: Ran
                     modifiers=used, displayed=(*ordered(readout, texts), f'{hand} weapon {weapon.item}', *loaded))
 
 
+STATED_HANDS = {'off': OFF_HAND}
+
+
+def stated_hand_requirement(requirement: Mapping[str, int], hand: str | None) -> Mapping[str, int]:
+    if hand is None:
+        return requirement
+    if hand not in STATED_HANDS:
+        raise Unmodelled(f'a stated hand is one of {sorted(STATED_HANDS)}, not {hand!r}')
+    return {**requirement, 'AttributesEx3': requirement.get('AttributesEx3', 0) | REQUIRES_OFF_HAND_ATTRIBUTE_EX3}
+
+
+def flat_effect_points(records: Records, hit_spell: int, effect: int) -> int:
+    if records.field('Spell', hit_spell, f'EffectDieSides[{effect}]') != 1 \
+            or records.field('Spell', hit_spell, f'EffectRealPointsPerLevel[{effect}]') != 0:
+        raise Unmodelled(f'{hit_spell} normalized weapon damage effect {effect} needs one die side and no points per '
+                         f'level')
+    return records.field('Spell', hit_spell, f'EffectBasePoints[{effect}]') + 1
+
+
+def script_flat_then_percent_model(class_file: dict, records: Records, facts: RankFacts, hit_spell: int,
+                                   readout: Readout, caster: CasterStats, target: TargetProfile,
+                                   auras: Sequence[int], hand: str | None) -> HitModel:
+    flat_effect, percent_effect = [index for index, effect in enumerate(facts.effects) if effect in WEAPON_EFFECTS]
+    school_mask = records.field('Spell', hit_spell, 'SchoolMask')
+    if not school_mask & PHYSICAL_SCHOOL_MASK or school_mask & ~PHYSICAL_SCHOOL_MASK:
+        raise Unmodelled(f'{hit_spell} normalized weapon damage then weapon percent hit is read for a physical school '
+                         f'only, not mask {school_mask}')
+    requirement = stated_hand_requirement(weapon_requirement(records, hit_spell, class_file), hand)
+    off_hand = attack_hand(requirement) == OFF_HAND
+    weapon = weapon_profile(armed(class_file, requirement, hit_spell))
+    if weapon is None:
+        raise Unmodelled(f'{hit_spell} needs the weapon stats of its hand')
+    flat = flat_effect_points(records, hit_spell, flat_effect)
+    percent, texts = fixed_value(readout, percent_effect, 'percent')
+    factor = OFF_HAND_DAMAGE_FACTOR if off_hand else 1.0
+    bonus = weapon_attacker(records, hit_spell, caster).ap / ATTACK_POWER_PER_DPS * weapon.normalized_speed
+    passed = int(float32(flat * factor))
+    roll = uniform(int(float32((weapon.min_damage + bonus) * factor)),
+                   int(float32((weapon.max_damage + bonus) * factor)))
+    used = applicable(for_school(aura_modifiers(records, auras, class_file['level']), school_mask), 'weapon')
+    hit = done(mapped(roll, lambda damage: int(float32((damage + passed) * percent / 100.0))), used)
+    landed = mitigated(hit, spell_mitigation(records, hit_spell, percent_effect, 'weapon', target, caster.level))
+    mean, sigma = moments(landed)
+    side = 'off-hand' if off_hand else 'main-hand'
+    stated = (f'{side} stated by the tooltip',) if hand is not None else ()
+    return HitModel(kind='weapon', mean=mean, sigma=sigma,
+                    tooltip_mean=(factor * ((weapon.min_damage + weapon.max_damage) / 2 + bonus) + passed)
+                    * percent / 100.0,
+                    modifiers=used, displayed=(*ordered(readout, texts), f'effect {flat_effect} flat {flat}',
+                                                f'{side} weapon {weapon.item}', *stated))
+
+
 def script_normalized_percent_model(class_file: dict, records: Records, facts: RankFacts, hit_spell: int,
                                     readout: Readout, caster: CasterStats, target: TargetProfile,
-                                    auras: Sequence[int]) -> HitModel:
+                                    auras: Sequence[int], hand: str | None = None) -> HitModel:
     weapon_effects = [index for index, effect in enumerate(facts.effects) if effect in WEAPON_EFFECTS]
     kinds = [facts.effects[index] for index in weapon_effects]
+    if kinds == [NORMALIZED_WEAPON_DMG, WEAPON_PERCENT_DAMAGE] and SCHOOL_DAMAGE not in facts.effects:
+        return script_flat_then_percent_model(class_file, records, facts, hit_spell, readout, caster, target, auras,
+                                              hand)
+    if hand is not None:
+        raise Unmodelled(f'a stated hand of {hit_spell} is read for a normalized weapon damage effect followed by a '
+                         f'weapon percent effect only')
     if kinds != [WEAPON_PERCENT_DAMAGE, NORMALIZED_WEAPON_DMG] or SCHOOL_DAMAGE in facts.effects:
         raise Unmodelled(f'a normalized weapon percent hit needs a weapon percent effect then a normalized weapon '
                          f'damage effect and no school damage effect, not effects {list(facts.effects)}')
@@ -965,10 +1051,11 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
                      weapon_only: bool = False, normalized_value: bool = False,
                      effective_school: bool = False, normalized_percent: bool = False,
                      value_rolls: bool = False, taken_auras: Sequence[int] = (),
-                     level_points: bool = False) -> HitModel:
+                     level_points: bool = False, hand: str | None = None) -> HitModel:
     records = records_of(class_file)
     facts = facts_of(records, hit_spell)
-    readout = triggered_readout(read_tooltip(records.dbc, tooltip_spell, caster), value_spell or hit_spell)
+    from tooltip_corrections import tooltip_readout
+    readout = triggered_readout(tooltip_readout(class_file, records, tooltip_spell, caster), value_spell or hit_spell)
     if hit_effect is not None:
         readout = replace(readout, values=[value for value in readout.values if value.effect_index == hit_effect])
     if level_points and (normalized_percent or normalized_value or weapon_only or value_spell is not None):
@@ -977,7 +1064,10 @@ def script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: int, caste
         if not weapon_only or normalized_value or effective_school or value_spell is not None or unresisted:
             raise Unmodelled(f'a normalized percent hit of {hit_spell} is weapon-only with no value spell, no '
                              f'unresisted read and no normalized value')
-        return script_normalized_percent_model(class_file, records, facts, hit_spell, readout, caster, target, auras)
+        return script_normalized_percent_model(class_file, records, facts, hit_spell, readout, caster, target, auras,
+                                               hand)
+    if hand is not None:
+        raise Unmodelled(f'a stated hand of {hit_spell} is a part of a normalized percent hit')
     if normalized_value:
         if value_spell is None or weapon_only:
             raise Unmodelled(f'a normalized value hit of {hit_spell} reads its points from a value spell, and is not '
@@ -1032,11 +1122,11 @@ def reference_script_hit_model(class_file: dict, tooltip_spell: int, hit_spell: 
                                weapon_only: bool = False, normalized_value: bool = False,
                                effective_school: bool = False, normalized_percent: bool = False,
                                value_rolls: bool = False, level_points: bool = False,
-                               taken_auras: Sequence[int] = ()) -> HitModel:
+                               taken_auras: Sequence[int] = (), hand: str | None = None) -> HitModel:
     return script_hit_model(class_file, tooltip_spell, hit_spell, reference_caster(class_file), REFERENCE_TARGET,
                             [*class_file.get('known_auras', []), *model_auras], value_spell, value_effect, unresisted,
                             hit_effect, weapon_only, normalized_value, effective_school,
-                            normalized_percent, value_rolls, taken_auras, level_points)
+                            normalized_percent, value_rolls, taken_auras, level_points, hand=hand)
 
 
 def measured_hit_model(class_file: dict, expectation: Expectation, measured: Mapping[str, float]) -> HitModel:
@@ -1065,12 +1155,15 @@ def measured_hit_model(class_file: dict, expectation: Expectation, measured: Map
                                     expectation.model.get('normalized_percent', False),
                                     expectation.model.get('value_rolls', False),
                                     expectation.model.get('taken_auras', []),
-                                    expectation.model.get('level_points', False))
+                                    expectation.model.get('level_points', False),
+                                    hand=expectation.model.get('hand'))
         factor = expectation.model.get('gate_multiplier', 1.0)
         return scripted if factor == 1.0 else replace(scripted, mean=scripted.mean * factor)
+    flat = block_value_terms(class_file, expectation.spell_id, measured)
+    percent_part = heal_pct_term(class_file, records_of(class_file), expectation.rank_id, measured)
     role = expectation.check if expectation.check in HIT_ROLES else 'hit_mean'
     model = rank_hit(class_file, expectation.rank_id, caster, target, auras, expectation.model.get('learned'),
-                     role).model
+                     role, flat=flat, percent_part=percent_part).model
     performed = expectation.model.get('part_casts', 1)
     multiplier = self_stack_multiplier(class_file, expectation.rank_id, performed) \
         * expectation.model.get('gate_multiplier', 1.0)
@@ -1119,8 +1212,7 @@ def cast_steps(facts: RankFacts, rank_id: int, target: str | None, interval_ms: 
     steps = []
     for _ in range(casts):
         if facts.mana_cost > 0 and not facts.mana_cost_percentage and not facts.mana_cost_per_level:
-            steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                          'value': facts.mana_cost})
+            steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
         steps += required_aura_steps(facts) + [dict(fixture) for fixture in fixtures]
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
@@ -1251,7 +1343,7 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     label = f'{rank_id} hit_mean' if label is None else label
     name = f'Conformance hit {class_file["name"]} {spell.name} {rank_id}'
     contract = 'Mean non-critical hit of the highest rank against its tooltip, its known modifiers and mitigation.'
-    learn = [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+    learn = block_value_steps(class_file, spell.spell_id) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
     if gate is not None:
         learn = learn + [{'action': 'learn', 'actor': CASTER, 'spell': gate[2]}]
     if learned is not None:
@@ -1299,6 +1391,11 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     ally = not hostile and targets_ally(hit.facts)
     target, labels = target_steps(hit.school_mask) if hostile else ([], {})
     labels.update({'total': f'{label} total', 'count': f'{label} count'})
+    percent_steps = heal_pct_steps(class_file, rank_id, ally)
+    if percent_steps:
+        if model.kind != 'heal' or dual_target_entry(class_file, rank_id) is not None:
+            raise ValueError(f'{rank_id} heal_pct_terms needs a single-target heal model, got {model.kind!r}')
+        labels['max_health'] = percent_steps[0]['label']
     weapon = weapon_profile(armed_file) if model.kind in WEAPON_KINDS or learned is not None else None
     order = ', percent of the roll before the flat bonus (ADR 0010)' if model.kind in WEAPON_KINDS else ''
     source = f' of triggered spell {hit.hit_spell} per tick' if hit.hit_spell != rank_id else ''
@@ -1314,7 +1411,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
     rule = (f'{model.kind} hit{source}{order}, integer steps modelled'
             f'{weapon_note(class_file, armed_file, records, rank_id)}{gate_note}{learned_note}{resist_note}'
             + (f'; listed in {HIT_LOCATION}: cast at map {location["map"]} ({location["x"]:g}, {location["y"]:g}, '
-               f'{location["z"]:g})' if location is not None else ''))
+               f'{location["z"]:g})' if location is not None else '')
+            + (heal_pct_text(class_file, records, rank_id) if percent_steps else ''))
     unreadable = [Expectation(f'{label} unreadable #{ordinal}', check, spell.spell_id, rank_id, None, entry,
                               UNREADABLE + entry) for ordinal, entry in enumerate(hit.readout.unreadable)]
     cast_target = TARGET if hostile else (ALLY if ally else None)
@@ -1344,7 +1442,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
                  + required_target_health_steps(hit.facts)
                  + cast_steps(hit.facts, rank_id, cast_target, interval, performed, cast_fixtures)
                  + (gap_steps if part == 0 else [])
-                 + hit_measurements(rank_id, hit.hit_spell, hostile, labels, ally, event_filter))
+                 + hit_measurements(rank_id, hit.hit_spell, hostile, labels, ally, event_filter)
+                 + percent_steps)
         if dual:
             steps += secondary_heal_measurements(hit.hit_spell, secondary_labels, dual['secondary_actor'])
         titled = name if len(shares) == 1 else f'{name} part {part + 1} of {len(shares)}'

@@ -1,11 +1,16 @@
+import json
 import struct
+import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 from classes import RANK_SLOTS, class_spells, class_type_ids, dataset, table_rows
 from hits import Unmodelled, records_of, reference_hit_model, weapon_note
+import profile
 from profile import (ATTACK_FIELDS, EQUIP_FIELDS, MAIN_HAND, OFF_HAND, RANGED, WEAPON_REQUIREMENT_FIELDS, armed,
-                     SERVER_INVENTORY_MASKS, attack_hand, base_steps, check_server_inventory_masks, check_weapon_sets,
+                     SERVER_INVENTORY_MASKS, WEAPON_SET_SPELLS, attack_hand, base_steps, check_server_inventory_masks,
+                     check_weapon_set_relearns, check_weapon_set_spells, check_weapon_sets, class_file_among,
                      for_entry, load_class_file, load_fixture_class_file, server_requirement, skill_label, unfit_reason,
                      weapon_set_unfit_reason)
 from tooltip import DataSet
@@ -39,6 +44,8 @@ TORMENTOR_RANK_6 = 501349
 OFF_HAND_TYPE_MASK = 1 << 22
 RANGED_TYPE, RANGED_RIGHT_TYPE = 15, 26
 REPAIRED_TORMENTOR_MASK = OFF_HAND_TYPE_MASK | 1 << RANGED_TYPE | 1 << RANGED_RIGHT_TYPE
+VALKYRS_GRIP = 707072
+SEEDED_SET_SPELL = 900001
 
 
 def spell(item_class=-1, subclasses=0, inventory_types=0, damage_class=0, attributes_ex3=0):
@@ -55,6 +62,15 @@ def spec_spell(class_file, name):
 
 def equips(steps):
     return [(step['item'], step['slot']) for step in steps if step['action'] == 'equip']
+
+
+def learned_before_first_equip(steps):
+    first_equip = next(index for index, step in enumerate(steps) if step['action'] in ('add_item', 'equip'))
+    return [step['spell'] for step in steps[:first_equip] if step['action'] == 'learn']
+
+
+def learned(steps):
+    return [step['spell'] for step in steps if step['action'] == 'learn']
 
 
 class WeaponSetChoiceTest(unittest.TestCase):
@@ -161,6 +177,109 @@ class WeaponSetStepsTest(unittest.TestCase):
     def test_classes_without_weapon_sets_equip_their_weapon(self):
         templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
         self.assertEqual(equips(base_steps(templar)), [(templar['weapon']['item'], 15)])
+
+
+class WeaponSetSpellsTest(unittest.TestCase):
+    def setUp(self):
+        self.plain = load_class_file(WITCH_HUNTER_CLASS_ID)
+        self.witch_hunter = {**self.plain, WEAPON_SET_SPELLS: {BLACK_KNIGHT: [VALKYRS_GRIP, SEEDED_SET_SPELL]}}
+
+    def test_the_set_spells_are_learned_after_the_settle_and_before_the_set_is_equipped(self):
+        black_knight = armed(self.witch_hunter, spell(2, TWO_HAND_MASK, damage_class=MELEE), None)
+        steps = base_steps(black_knight)
+        self.assertEqual(steps[0]['label'], 'settle')
+        self.assertEqual(learned_before_first_equip(steps), [VALKYRS_GRIP, SEEDED_SET_SPELL])
+        self.assertEqual(learned(steps), [VALKYRS_GRIP, SEEDED_SET_SPELL])
+        self.assertEqual(equips(steps), [(ZWEIHANDER, 15)])
+
+    def test_only_the_scenario_set_learns_its_spells(self):
+        self.assertEqual(learned(base_steps(self.witch_hunter)), [])
+        for name in (INQUISITION, BOLTSLINGER, HOUNDMASTER):
+            with self.subTest(set=name):
+                self.assertEqual(learned(base_steps(for_entry(self.witch_hunter, spec_spell(self.witch_hunter, name)))),
+                                 [])
+        entry = for_entry(self.witch_hunter, spec_spell(self.witch_hunter, BLACK_KNIGHT))
+        self.assertEqual(learned(base_steps(entry)), [VALKYRS_GRIP, SEEDED_SET_SPELL])
+        cast = armed(entry, spell(damage_class=MELEE), spec_spell(self.witch_hunter, INQUISITION))
+        self.assertEqual((cast['weapon_set'], learned(base_steps(cast))),
+                         (BLACK_KNIGHT, [VALKYRS_GRIP, SEEDED_SET_SPELL]))
+        switched = armed(for_entry(self.witch_hunter, spec_spell(self.witch_hunter, INQUISITION)),
+                         spell(2, TWO_HAND_MASK, damage_class=MELEE), None)
+        self.assertEqual((switched['weapon_set'], learned(base_steps(switched))),
+                         (BLACK_KNIGHT, [VALKYRS_GRIP, SEEDED_SET_SPELL]))
+
+    def test_without_the_field_the_steps_are_unchanged(self):
+        for name in self.plain['weapon_sets']:
+            with self.subTest(set=name):
+                own = for_entry(self.plain, spec_spell(self.plain, name))
+                seeded = for_entry(self.witch_hunter, spec_spell(self.witch_hunter, name))
+                expected = base_steps(own)
+                if name == BLACK_KNIGHT:
+                    expected = expected[:1] + [{'action': 'learn', 'actor': 'caster', 'spell': spell_id}
+                                               for spell_id in (VALKYRS_GRIP, SEEDED_SET_SPELL)] + expected[1:]
+                self.assertEqual(base_steps(seeded), expected)
+        templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
+        self.assertEqual(learned(base_steps(templar)), [])
+
+    def test_a_mutant_that_learns_every_set_spell_is_caught(self):
+        def leaking(class_file, name):
+            return [spell_id for spells in class_file.get(WEAPON_SET_SPELLS, {}).values() for spell_id in spells]
+        with mock.patch.object(profile, 'weapon_set_spells', leaking):
+            leaked = learned(base_steps(for_entry(self.witch_hunter, spec_spell(self.witch_hunter, INQUISITION))))
+        self.assertEqual(leaked, [VALKYRS_GRIP, SEEDED_SET_SPELL])
+        self.assertNotEqual(leaked, learned(base_steps(for_entry(self.witch_hunter,
+                                                                 spec_spell(self.witch_hunter, INQUISITION)))))
+
+    def test_a_key_that_is_not_a_set_or_a_value_that_is_not_spell_ids_is_refused(self):
+        check_weapon_set_spells(self.witch_hunter)
+        check_weapon_set_spells(self.plain)
+        for name, field in (('unknown set', {'Valkyr': [VALKYRS_GRIP]}),
+                            ('empty', {BLACK_KNIGHT: []}),
+                            ('not a list', {BLACK_KNIGHT: VALKYRS_GRIP}),
+                            ('text id', {BLACK_KNIGHT: [str(VALKYRS_GRIP)]}),
+                            ('boolean', {BLACK_KNIGHT: [True]}),
+                            ('zero', {BLACK_KNIGHT: [0]}),
+                            ('twice', {BLACK_KNIGHT: [VALKYRS_GRIP, VALKYRS_GRIP]})):
+            with self.subTest(case=name), self.assertRaisesRegex(ValueError, WEAPON_SET_SPELLS):
+                check_weapon_set_spells({**self.plain, WEAPON_SET_SPELLS: field})
+        templar = load_fixture_class_file(TEMPLAR_CLASS_ID)
+        with self.assertRaisesRegex(ValueError, 'not in weapon_sets'):
+            check_weapon_set_spells({**templar, WEAPON_SET_SPELLS: {'Valkyr': [VALKYRS_GRIP]}})
+
+    def test_loading_a_class_file_runs_the_check(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'seeded.json'
+            path.write_text(json.dumps({**self.plain, WEAPON_SET_SPELLS: {'Valkyr': [1]}}), encoding='utf-8')
+            with self.assertRaisesRegex(ValueError, 'Valkyr is not in weapon_sets'):
+                class_file_among([path], WITCH_HUNTER_CLASS_ID)
+
+    def test_a_scenario_that_learns_a_set_spell_again_while_it_is_learned_is_refused(self):
+        entry = for_entry(self.witch_hunter, spec_spell(self.witch_hunter, BLACK_KNIGHT))
+        relearn = {'action': 'learn', 'actor': 'caster', 'spell': VALKYRS_GRIP}
+        unlearn = {'action': 'unlearn', 'actor': 'caster', 'spell': VALKYRS_GRIP}
+        steps = base_steps(entry)
+        check_weapon_set_relearns(entry, 'seeded', {'steps': steps})
+        check_weapon_set_relearns(entry, 'seeded', {'steps': steps + [unlearn, relearn]})
+        with self.assertRaisesRegex(ValueError, f'seeded learns {VALKYRS_GRIP} again'):
+            check_weapon_set_relearns(entry, 'seeded', {'steps': steps + [relearn]})
+        inquisition = for_entry(self.witch_hunter, spec_spell(self.witch_hunter, INQUISITION))
+        check_weapon_set_relearns(inquisition, 'seeded', {'steps': base_steps(inquisition) + [relearn]})
+        plain = for_entry(self.plain, spec_spell(self.plain, BLACK_KNIGHT))
+        check_weapon_set_relearns(plain, 'seeded', {'steps': base_steps(plain) + [relearn, relearn]})
+
+
+class WeaponSetRelearnWriterTest(unittest.TestCase):
+    def test_the_manifest_writer_refuses_a_relearn_before_writing_the_scenario(self):
+        from conformance import ManifestWriter
+        witch_hunter = {**load_class_file(WITCH_HUNTER_CLASS_ID), WEAPON_SET_SPELLS: {BLACK_KNIGHT: [VALKYRS_GRIP]}}
+        entry = for_entry(witch_hunter, spec_spell(witch_hunter, BLACK_KNIGHT))
+        relearn = {'action': 'learn', 'actor': 'caster', 'spell': VALKYRS_GRIP}
+        with tempfile.TemporaryDirectory() as folder:
+            writer = ManifestWriter(witch_hunter, Path(folder))
+            with self.assertRaisesRegex(ValueError, f'relearn-seed learns {VALKYRS_GRIP} again'):
+                writer.add('relearn-seed', 'passive', None, VALKYRS_GRIP, [],
+                           {'steps': base_steps(entry) + [relearn]})
+            self.assertEqual((writer.entries, list(Path(folder).rglob('*'))), ([], []))
 
 
 class WeaponSetCheckTest(unittest.TestCase):
@@ -323,6 +442,27 @@ class ServerInventoryMaskDataTest(unittest.TestCase):
                 reference_hit_model(class_file, TORMENTOR_RANK_6)
             self.assertEqual(str(raised.exception),
                              f'EquippedItemInventoryTypeMask {mask} excludes the reference weapon inventory type 26')
+
+
+class OffHandGrantTests(unittest.TestCase):
+    WEAPON = {'item': 30754, 'slot': 16, 'subclass': 4, 'min_damage': 51.63, 'max_damage': 82.65, 'speed_ms': 1800,
+              'inventory_type': 13, 'normalized_speed': 2.4, 'skill_line': 54}
+
+    def test_grants_are_learned_before_the_off_hand_is_equipped(self):
+        steps = profile.off_hand_steps(30754, (707072,))
+        self.assertEqual([(step['action'], step.get('spell', step.get('item'))) for step in steps],
+                         [('learn', 707072), ('add_item', 30754), ('equip', 30754)])
+
+    def test_mutant_without_grants_the_steps_are_today_s(self):
+        self.assertEqual(profile.off_hand_steps(30754), profile.off_hand_steps(30754, ()))
+        self.assertNotIn('learn', [step['action'] for step in profile.off_hand_steps(30754)])
+
+    def test_off_hand_grants_are_a_list_of_spell_ids(self):
+        class_file = {'off_hand_weapons': [{**self.WEAPON, 'grants': [707072]}]}
+        self.assertEqual(profile.off_hand_weapon(class_file, 30754)['grants'], [707072])
+        for grants in (707072, [0], ['707072'], [True]):
+            with self.subTest(grants=grants), self.assertRaisesRegex(ValueError, 'grants'):
+                profile.off_hand_weapon({'off_hand_weapons': [{**self.WEAPON, 'grants': grants}]}, 30754)
 
 
 if __name__ == '__main__':

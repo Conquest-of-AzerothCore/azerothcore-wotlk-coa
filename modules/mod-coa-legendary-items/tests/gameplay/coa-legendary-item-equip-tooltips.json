@@ -2,10 +2,12 @@
   "schema": 1,
   "name": "CoA Legendary Items: native equip tooltips",
   "contract": [
-    "Requires CoALegendaryItems.Enable=1.",
+    "Requires CoALegendaryItems.Enable=1 and CoA.SendDisplayPatches=1.",
     "Widow Queen Seal variants for required levels 1, 22 and 60 advertise 3, 14 and 33 spell power.",
     "Single and bulk item responses attach a native equip spell and omit the power from flavor text.",
-    "The client spell rows for the tooltip spells contain the exact condition and amount with no executable effects.",
+    "Login omits unowned tooltip spells. Queries and acquisition stream only associated spells once per session.",
+    "Relog streams only owned variants. The capacity placeholder defers its tooltip until the item is queried.",
+    "Client spell patches contain the exact condition and amount with no executable effects.",
     "Equipping the level-22 seal grants only the conditional power aura at or below 35% health.",
     "Captured socketless packets establish construction, not client rendering or network delivery."
   ],
@@ -32,6 +34,49 @@
       "opcode": 1377
     },
     {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725101,
+      "equals": 0,
+      "label": "Login omits unowned legendary tooltip spells"
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725122,
+      "equals": 0,
+      "label": "Login omits unowned legendary tooltip spells"
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725160,
+      "equals": 0,
+      "label": "Login omits unowned legendary tooltip spells"
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9726360,
+      "equals": 0,
+      "label": "The capacity placeholder omits its tooltip"
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "save_as": "spells_before_9705101"
+    },
+    {
       "action": "client_packet",
       "actor": "viewer",
       "opcode": 86,
@@ -45,48 +90,59 @@
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725101,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725101,
       "index": 0,
-      "equals": 9725101
+      "equals": 9725101,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725101,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725101,
       "index": 4,
-      "equals": 64
+      "equals": 64,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725101,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725101,
       "index": 71,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725101,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725101,
       "index": 72,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725101,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725101,
       "index": 73,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_contains",
-      "spell": 9725101,
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9725101,
       "text": "Gain 3 spell power while at or below 35% health.",
       "equals": 1
     },
@@ -124,6 +180,22 @@
       "equals": 0
     },
     {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "equals": 1,
+      "relative_to": "spells_before_9705101",
+      "label": "The item response streams only its tooltip spell"
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "save_as": "spells_before_9705122"
+    },
+    {
       "action": "client_packet",
       "actor": "viewer",
       "opcode": 1563,
@@ -139,48 +211,59 @@
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725122,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725122,
       "index": 0,
-      "equals": 9725122
+      "equals": 9725122,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725122,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725122,
       "index": 4,
-      "equals": 64
+      "equals": 64,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725122,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725122,
       "index": 71,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725122,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725122,
       "index": 72,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725122,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725122,
       "index": 73,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_contains",
-      "spell": 9725122,
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9725122,
       "text": "Gain 14 spell power while at or below 35% health.",
       "equals": 1
     },
@@ -218,6 +301,22 @@
       "equals": 0
     },
     {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "equals": 1,
+      "relative_to": "spells_before_9705122",
+      "label": "The item response streams only its tooltip spell"
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "save_as": "spells_before_9705160"
+    },
+    {
       "action": "client_packet",
       "actor": "viewer",
       "opcode": 86,
@@ -231,48 +330,59 @@
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725160,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725160,
       "index": 0,
-      "equals": 9725160
+      "equals": 9725160,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725160,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725160,
       "index": 4,
-      "equals": 64
+      "equals": 64,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725160,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725160,
       "index": 71,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725160,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725160,
       "index": 72,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_u32",
-      "spell": 9725160,
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 9725160,
       "index": 73,
-      "equals": 0
+      "equals": 0,
+      "within_ms": 10000
     },
     {
       "action": "assert",
       "actor": "viewer",
-      "metric": "client_spell_row_contains",
-      "spell": 9725160,
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 9725160,
       "text": "Gain 33 spell power while at or below 35% health.",
       "equals": 1
     },
@@ -308,6 +418,22 @@
       "row": 9705160,
       "text": "Gain 33 spell power while at or below 35% health.",
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "equals": 1,
+      "relative_to": "spells_before_9705160",
+      "label": "The item response streams only its tooltip spell"
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "save_as": "spells_before_repeated_bulk"
     },
     {
       "action": "client_packet",
@@ -429,14 +555,78 @@
       "within_ms": 2000
     },
     {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "equals": 0,
+      "relative_to": "spells_before_repeated_bulk",
+      "label": "Repeated item queries do not resend tooltip spells"
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725101,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725122,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725160,
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "save_as": "spells_before_acquisition"
+    },
+    {
       "action": "add_item",
       "actor": "viewer",
       "item": 9705122
     },
     {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "equals": 0,
+      "relative_to": "spells_before_acquisition"
+    },
+    {
       "action": "add_item",
       "actor": "viewer",
       "item": 9700029
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9720029,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "equals": 1,
+      "relative_to": "spells_before_acquisition"
     },
     {
       "action": "relog",
@@ -448,6 +638,55 @@
       "opcode": 1377
     },
     {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725122,
+      "equals": 2,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9720029,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725101,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9725160,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9720129,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9726360,
+      "equals": 0
+    },
+    {
       "action": "client_packet",
       "actor": "viewer",
       "opcode": 86,
@@ -457,6 +696,16 @@
         }
       ],
       "consumed": false
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 9726360,
+      "equals": 1,
+      "label": "Querying the already streamed capacity item still delivers its tooltip",
+      "within_ms": 2000
     },
     {
       "action": "set_health",

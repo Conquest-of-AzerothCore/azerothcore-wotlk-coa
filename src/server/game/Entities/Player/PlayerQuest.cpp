@@ -1316,7 +1316,8 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg) const
 
         // not allow have daily quest if daily quest from exclusive group already recently completed
         Quest const* Nquest = sObjectMgr->GetQuestTemplate(exclude_Id);
-        if (!SatisfyQuestDay(Nquest, false) || !SatisfyQuestWeek(Nquest, false) || !SatisfyQuestSeasonal(Nquest, false))
+        if (!SatisfyQuestDay(Nquest, false, false) || !SatisfyQuestWeek(Nquest, false) ||
+            !SatisfyQuestSeasonal(Nquest, false))
         {
             if (msg)
                 SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
@@ -1416,7 +1417,7 @@ bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const
     return true;
 }
 
-bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg) const
+bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg, bool allowRepeat) const
 {
     if (!qInfo->IsDaily() && !qInfo->IsDFQuest())
         return true;
@@ -1433,7 +1434,8 @@ bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg) const
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
     {
         uint32 id = GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx);
-        if (qInfo->GetQuestId() == id)
+        if (qInfo->GetQuestId() == id &&
+            (!allowRepeat || !sScriptMgr->OnPlayerCanRepeatDailyQuest(this, qInfo)))
             return false;
 
         if (!id)

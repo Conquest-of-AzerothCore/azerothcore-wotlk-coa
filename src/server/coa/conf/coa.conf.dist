@@ -281,10 +281,16 @@ CoA.ItemScaling.Native.RebornArmor = 1
 # tree's free nodes are granted either way: the books do not sell them. Reloadable.
 CoA.AutoProgression = 0
 
-# Send the per-player client rows that the client files cannot carry: spell notice
-# and swap rows, character advancement swap entries and race-restricted quest super
-# track rows. Static client data ships in the client MPQs.
+# Stream the CreatureDisplayInfo patch rows the installed Ascension client cannot
+# resolve from its own files (custom display ids). The stream starts after the
+# client's extension handshake, with a short login fallback when it never arrives.
 CoA.SendDisplayPatches = 1
+
+# Unpatched copy of the client's CreatureDisplayInfo.dbc, used to stream exactly
+# the rows the client is missing. Empty selects DataDir/dbc_clientset; when the
+# copy is unavailable, the server's own DataDir/dbc/CreatureDisplayInfo.dbc is used,
+# so only rows added through creaturedisplayinfo_dbc are streamed.
+CoA.ClientDbcDirectory = ""
 
 # Extension range derived from the installed client's opcode dispatch table.
 # Keep these values decimal because ConfigMgr numeric values are parsed as decimal.
@@ -1187,6 +1193,9 @@ XPHotspots.Brand = ""
 
 CoA.ChatLog.Enable = 0
 CoA.ChatLog.KeepDays = 30
+# Most rows held in memory while the character database writes earlier ones. Rows beyond it are not logged,
+# and the worldserver log reports how many once a minute; chat itself is never held back.
+CoA.ChatLog.MaxPendingRows = 20000
 # Channel names, and starts of channel messages in any channel, the chat log skips (separated by spaces).
 # The defaults are the data channels and messages of addons such as LootCollector, Questie and pfQuest.
 CoA.ChatLog.IgnoreChannels = "BBLC25C KLCE25C questiecomm FSK FSK-EVT xtensionxtooltip2 ConquestFinder JohnnysAddons CoARUru ALCSync K_LFGForwarder2IIll"

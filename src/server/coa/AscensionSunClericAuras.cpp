@@ -21,6 +21,10 @@ enum SunwellSpells : uint32
     SPELL_SUNWELL_VISUAL = 560124,
     SPELL_SUN_STRIDE = 680700
 };
+enum BlightbreakerSpells : uint32
+{
+    SPELL_BLIGHTBREAKER = 707433
+};
 bool First(AuraEffect const* effect)
 {
     for (uint8 slot = 0; slot < effect->GetEffIndex(); ++slot)
@@ -98,13 +102,6 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
             GetAura()->SetCharges(id == Dawn ? GetAura()->CalcMaxCharges() : id == 301265 ? 3 : 2);
         if (id == Dawn || id == 301265 || id == 301242)
             GetAura()->SetUsingCharges(false);
-        if (id == 301266)
-        {
-            if (player->HasAura(Sunrise))
-                Reduce(player,500154,INT32_MAX);
-            if (player->HasAura(Sunset))
-                Reduce(player,806477,INT32_MAX);
-        }
         if (id == 803238)
             Refresh(player);
     }
@@ -130,7 +127,8 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
     void Period(AuraEffect const* effect, bool& periodic, int32& amplitude)
     {
         Player* player = Owner(GetCaster());
-        if (player && effect->GetEffIndex() == 0 && Named(GetSpellInfo(),300351) && player->HasAura(800602))
+        if (player && effect->GetEffIndex() == 0 && Any(GetSpellInfo(), {300351, 301345, 301817}) &&
+            player->HasAura(800602))
         {
             periodic = true;
             amplitude = std::max(1000, amplitude - std::abs(Amount(800602,1)));
@@ -156,7 +154,7 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
             State(player).blessed.Clear();
         if (id == 520647)
             target->RemoveAurasDueToSpell(560347,player->GetGUID());
-        if (id == 803238)
+        if (id == 803238 || id == 807059)
             Refresh(player);
         if (!player->IsAlive() || !player->IsInWorld())
             return;
@@ -214,13 +212,15 @@ class aura_ascension_sun_cleric_lifecycle : public AuraScript
         {
             PreventDefaultAction();
             uint32 percent = std::max(0,effect->GetAmount());
+            if (player->HasAura(300357))
+                percent *= 2;
             Copy(player,target,707522,CalculatePct(target->GetMaxHealth(),percent));
             if (target == player)
             {
                 int32 mana = Amount(805360,1);
                 if (player->HasAura(300357))
                     mana *= 2;
-                Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),mana));
+                Mana(player,CalculatePct(player->GetMaxPower(POWER_MANA),mana),805360);
             }
         }
         if (id == 300361)
@@ -331,9 +331,35 @@ class aura_ascension_rejuvenating_rays : public AuraScript
             EFFECT_1, SPELL_AURA_OBS_MOD_POWER);
     }
 };
+class aura_ascension_sun_cleric_mercy : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_sun_cleric_mercy);
+
+    void Period(AuraEffect const*, bool&, int32& amplitude)
+    {
+        Unit* caster = GetCaster();
+        Player* owner = caster ? caster->GetSpellModOwner() : nullptr;
+        AuraEffect const* blightbreaker = owner ? owner->GetAuraEffect(SPELL_BLIGHTBREAKER, EFFECT_0) : nullptr;
+        if (!blightbreaker)
+            return;
+
+        int32 modifier = blightbreaker->GetAmount();
+        if (modifier <= -100 || modifier >= 100)
+            return;
+
+        amplitude = amplitude * 100 / (100 - modifier) * 100 / (100 + modifier);
+    }
+
+    void Register() override
+    {
+        DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(aura_ascension_sun_cleric_mercy::Period,
+            EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+    }
+};
 }
 void AddSC_AscensionSunClericAuras()
 {
     RegisterSpellScript(aura_ascension_sun_cleric_lifecycle);
     RegisterSpellScript(aura_ascension_rejuvenating_rays);
+    RegisterSpellScript(aura_ascension_sun_cleric_mercy);
 }

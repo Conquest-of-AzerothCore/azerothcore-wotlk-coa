@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Alteraci Band pickup is reachable (#12449)",
+  "contract": "#12449 and #12013 reported the Worldforged Alteraci Band pickup (entry 97126, guid 6940035) inside a pillar at 492.4, -168.7, 153.366. Expected: the pickup stands at its first-pass realm point 490.779, -168.578, 159.303, within 0.8 yd of the surface below it (measured -0.75), is not under water and opens with loot from beside it.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 491.779,
+    "y": -168.578,
+    "z": 159.803,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 97126,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its restored spot",
+      "metric": "spawn_distance",
+      "x": 490.779,
+      "y": -168.578,
+      "z": 159.303,
+      "max": 0.3,
+      "guid": 6940035,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup rests on the ground (-0.8 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "min": -0.8,
+      "max": 0.35,
+      "guid": 6940035,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940035,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 97126
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

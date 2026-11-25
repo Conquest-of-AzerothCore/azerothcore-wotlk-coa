@@ -54,6 +54,40 @@ class PushbackReductionTests(unittest.TestCase):
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2790}), 'alert')
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2760}), 'alert')
 
+    def conditioned(self, **changes):
+        entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
+                     if entry['kind'] == 'pushback_reduction')
+        single = {**entry, 'repeats': 1, 'windows': [[2440, 2560], [2930, 3050], [2680, 2800]],
+                  'caster_auras': [[48263, 1]], **changes}
+        return behaviour_scenario(load_fixture_class_file(23), single)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_caster_auras_are_set_afresh_before_every_cast_of_every_phase(self):
+        scenario, [expectation] = self.conditioned()
+        run.validate(scenario)
+        steps = scenario['steps']
+        casts = cast_indices(steps, 501978)
+        self.assertEqual(len(casts), 3)
+        for index in casts:
+            self.assertEqual(steps[index - 3:index - 1],
+                             [{'action': 'set_aura', 'actor': 'caster', 'spell': 48263, 'stacks': 0},
+                              {'action': 'set_aura', 'actor': 'caster', 'spell': 48263, 'stacks': 1}])
+        self.assertEqual(sum(step['action'] == 'set_aura' for step in steps), 6)
+        self.assertIn('the same in every phase', scenario['contract'])
+        _, [plain] = self.built()
+        self.assertEqual(expectation.model, plain.model)
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_without_caster_auras_no_condition_is_set(self):
+        scenario, _ = self.built()
+        self.assertFalse(any(step['action'] == 'set_aura' for step in scenario['steps']))
+        self.assertNotIn('the same in every phase', scenario['contract'])
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_condition_aura_below_one_stack_is_refused(self):
+        with self.assertRaises(ValueError):
+            self.conditioned(caster_auras=[[48263, 0]])
+
     @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
     def test_strikes_at_different_offsets_are_invalid(self):
         self.assertEqual(self.judged({'unhit': 2495, 'hit': 2983, 'reduced': 2739},
@@ -92,7 +126,7 @@ class PushbackReductionTests(unittest.TestCase):
         stamped = replace(found, detail={**found.detail, **observed(expectation)})
         self.assertEqual(stamped.detail['metric'], 'pushback_casting')
         self.assertEqual(metric_evidence()['pushback_casting'], STATE)
-        self.assertEqual(state_promises()['casting'], r'\bcast\w*|haste|all actions')
+        self.assertEqual(state_promises()['casting'], r'\bcast\w*|haste|all actions|interrupt\w*')
         self.assertTrue(promised_state(stamped, 'and reduces your spell pushback suffered from taking damage by 50%.'))
         self.assertFalse(promised_state(stamped, 'Increases your Intellect by 5%'))
 
@@ -117,14 +151,15 @@ class PushbackLearnedReducerTests(unittest.TestCase):
 
 
 class PushbackSampledTests(unittest.TestCase):
-    def built(self):
+    def built(self, **changes):
         entry = next(entry for entry in load_fixture_class_file(23)['behaviours']
                      if entry['kind'] == 'pushback_reduction' and entry.get('repeats', 1) > 1
                      and entry.get('reducer_learn'))
+        entry = {**entry, **changes}
         return entry, behaviour_scenario(load_fixture_class_file(23), entry)
 
-    def judged(self, ends: dict) -> str:
-        entry, (_, [expectation]) = self.built()
+    def judged(self, ends: dict, **changes) -> str:
+        entry, (_, [expectation]) = self.built(**changes)
         lows = dict(zip(('unhit', 'hit', 'reduced_unhit', 'reduced'), (low for low, _ in entry['windows'])))
         values = {}
         for kind, samples in expectation.model['samples'].items():
@@ -147,3 +182,11 @@ class PushbackSampledTests(unittest.TestCase):
         self.assertEqual(len(expectation.model['samples']['hit']), entry['repeats'])
         self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2375}), 'ok')
         self.assertEqual(self.judged({'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2475}), 'alert')
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_a_condition_arm_expecting_no_reduction_alerts_on_an_unconditional_one(self):
+        unreduced = {'unhit': 2505, 'hit': 3005, 'reduced_unhit': 2125, 'reduced': 2625}
+        halved = {**unreduced, 'reduced': 2375}
+        self.assertEqual(self.judged(unreduced, expected_pct=0), 'ok')
+        self.assertEqual(self.judged(halved, expected_pct=0), 'alert')
+        self.assertEqual(self.judged(halved), 'ok')

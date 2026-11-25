@@ -43,7 +43,10 @@ Each run carries its build: the server commit parsed from `server_version` of `r
 (no verdict, listed in `report.md` under "Runs refused"); without `--build` the results must hold one build,
 otherwise `compare` stops with exit 5 and no verdict. Every verdict, alerts included, then carries `server_commit`,
 `build` (the worldserver sha256) and `runs` (the run ids it was judged from, empty for a verdict decided by rule), in
-`verdicts.json` and as the last three `alerts.tsv` columns (ADR 0118).
+`verdicts.json` and as the last three `alerts.tsv` columns (ADR 0118). `verdicts.json` also carries `selected` per
+verdict (a scenario behind the label ran, or the label is judged by rule alone; ADR 1201) and, on a linking verdict,
+`detail.linked_from` (its status before its links were resolved); a `base_roll_only` verdict carries its base-roll
+read status in `detail.base_roll_only.read_status`.
 
 `alerts.tsv`
 (default: the manifest directory) has one row per verdict that is neither `ok`, `measured`, `closed` nor
@@ -313,7 +316,8 @@ judged, and the judged runs must be on its build. The command passes `pilot.hit_
 entry is a `hit_ratio`: the pilot generates those entries at 20 trials (`generate(..., trials={label: n})`), each
 verdict's `detail.sized_trials` (the trials whose 99% half-width would be 0.8 of half the owner's band, ADR 0125)
 sizes the judged runs, never below the pilot's 20 and capped at what one scenario holds (`detail.trial_limit`;
-`capped` in the record); a label without a pilot verdict or interval keeps its class-file trials.
+`capped` in the record); an entry's `min_trials` floors the size (ADR 1255, `min_trials` in the record); a label
+without a pilot verdict or interval keeps its class-file trials.
 
 ### Server mutants and K3 consumption
 
@@ -372,13 +376,25 @@ python3 -B conformance.py aura354 --class-map CLASS-MAP.json --class 23 [--out A
 ```
 
 `audit` merges the verdicts of `--base-results` and then of each `--results` directory in order (a later directory
-replaces the labels of the earlier ones) and runs `coverage.clause_coverage` on the ledger. With no directory it runs
+replaces the labels of the earlier ones, except with a verdict whose `selected` marker is false: a label its run did
+not select keeps the earlier verdict, ADR 1201). `compare` writes `selected` true when a scenario behind the label ran
+or every manifest expectation of the label is judged from its rule alone (`closed`, `unmodelled`, `unmeasurable`,
+`generic`, `unreadable` or `ambiguous_tooltip` rules and `unmodelled` checks, pooled checks excluded); a verdict
+written before the marker counts as selected when its `runs` list is absent or not empty. After the merge, a linking
+verdict (`checked by ... "label" (status ...)`) whose referenced labels came from another layer is resolved again
+from its own status (`detail.linked_from`, or `unmodelled` for a link-closed verdict written before that field) and
+the merged statuses of those labels. A `base_roll_only` verdict whose `power_term_label` or `contrast_label` came from
+another layer is accepted or refused again from its own read (`detail.base_roll_only.read_status`, or its status for
+a verdict written before that field) and the merged verdicts of those labels. Then it runs
+`coverage.clause_coverage` on the ledger. With no directory it runs
 on no verdicts, as for a new class: every claim comes out unproven. `--manifest` stamps the observed metric of a
 generated manifest on a metric verdict that carries none (verdicts written before the metric was stamped);
 `--hooked` turns the listed labels into `not_measured`; `--build` stamps one audit build on every merged verdict,
 and without it the merged verdicts must come from one build (`coverage.require_build`). The output keeps the inputs,
-`results_replaced` and `results_added` (labels of `--results` over the base), `results_disagree` (labels whose status
-class, conformant or the status itself plus `data_only`, differs between `--results` directories), `figures`
+`results_replaced` and `results_added` (labels of `--results` over the base), `results_not_selected` (labels of
+`--results` skipped over an earlier verdict because their run did not select them; a label one directory added can
+also be listed there for a later directory), `results_disagree` (labels whose status class, conformant or the status
+itself plus `data_only`, differs between the selected verdicts of the `--results` directories), `figures`
 (`claims`, `behaviour`, `data`, `unproven`, `resolved`, `not_measured`, `tool_gaps_pending`), `no_claim_entries`,
 `statuses` (label to status) and one row per claim: `index` (the claim's position among the ledger's claims),
 `spell`, `clause`, `evidence`, `claim_evidence`, `labels`, `missing_labels`, `label_statuses`, `alert_labels` and
@@ -489,7 +505,7 @@ out; it is repeatable. Each step writes `OUT/logs/NN-<step>.log` (the commands, 
 | `scenarios_dir`, `manifest` | the generate target (needed by `generate` and `runs`); the manifest, `scenarios_dir/manifest.json` by default |
 | `source_runner`, `gameplay_runner` | command prefixes, `python3 -B tools/verify_all.py` by default; `{worktree}` is replaced, so `["coa-verify", "--worktree", "{worktree}", "--ram"]` names a guide wrapper |
 | `gameplay_db_workers`, `disk_limit_percent`, `disk_checks` | 4, 97 and `[{"name": "/", "command": ["df", "-P", "/"]}]` by default; a check's last output line carries the use percentage, so `["docker", "exec", "coa-test-mysql", "df", "-P", "/var/lib/mysql"]` checks the in-RAM MySQL |
-| `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (`apps`, `src`, `data/sql/updates`) |
+| `guard_classes`, `gate_archive_paths` | the finished classes the gate regenerates; the paths archived at the base (default `apps`, `src`, `data/sql/updates`, `data/sql/archive`, `data/sql/base`, `data/sql/custom`, `data/coa-world`, `modules`: every path the generator reads, ADR 1267) |
 | `gate_accepted` | intended changes of a guard class's generated files, `[{"class_id": 19, "added_fields": ["min_level_armor"], "why": "ADR 0658"}]`: a differing scenario file must equal the base file once the named keys are removed from the head file at any depth and differ from it as JSON (an added key, never a changed one; a formatting-only difference stops), the manifest may differ only by those keys and by the sha256 of those files; any other difference, or a declared change that no file shows, stops the gate |
 | `other_verdicts_accepted` | the "other" record verdicts the cycle may pass: `{"keys": [["label", "check", "scenario"]], "why": "..."}`, the exact keys found: a found key not listed and a listed key no longer found (stale) both stop, and both are named; without it the tally and the checkpoint stop |
 | `record` | the count of record: `name`, `status` (its status file), `stamps`, `compare` (exactly its two compare outputs), `manifest` |
@@ -562,6 +578,12 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   rule. A `$/N;` token expects N times the value it shows, except a `$/1000;sN sec` token of kind `duration_ms`,
   which the reader already gives in ms. A token of another spell reads its points, sign and rolls from that
   spell's effect (`model`).
+- Aura 227 carriers (`effect_value`, `aura_amount` of a fixed-roll effect whose `EffectApplyAuraName` is 227
+  PERIODIC_TRIGGER_SPELL_WITH_VALUE): the expected value is the token read with attack, ranged attack and spell
+  power set to 0; the carrier's amount is only the base point 0 handed to the triggered spell
+  (`SpellAuraEffects.cpp:6566`), whose hit labels carry the power term. The verdict keeps `full_value`,
+  `power_term` and `judged_amount` in `detail.trigger_with_value`; a token without a power term at the measured
+  stats is judged as before (ADR 1240, mentor D-292).
 - Counts (`max_stacks`): `measured == expected`, no tolerance.
 - Sign: the client shows `$sN`, `$mN` and `$MN` (with or without `$/N;` or a spell id) unsigned, while the
   `Spell.dbc` record is signed. The expected value of such a token takes the sign of the points it shows
@@ -610,8 +632,24 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
   error gives exactly the engine's integer set and cannot be told apart from it. A fixed (`EffectDieSides` 0 or 1)
   `effect_value` with a fractional per-level term takes the same rule instead of the `max(1, 0.5%)` band: `ok` only
   when the read is the int32 truncation of the tooltip value or, under the same model checks, of that value less
-  the lost fraction; otherwise an `alert`, labelled "not modelled" when a model check failed. A `hit_mean`,
-  `melee_mean` or `periodic_total` alert on a rank with such a term says
+  the lost fraction; otherwise an `alert`, labelled "not modelled" when a model check failed. A `hit_mean` of a
+  `school` or `heal` hit (rank or script hit) on such a term carries an engine model, the same rolls less the lost
+  fraction (ADR 1238): outside the tooltip model it is `ok` only inside the engine model's 99% interval, else an
+  alert naming the engine mean; an engine model that cannot be built (an effect read from a sibling token) leaves
+  the rank as before. A class-file `block_value_terms` entry (`{spell, effect, source}`, ADR 1239) adds the run's
+  `block_value` read to each per-roll value of that effect, in `effect_value` and in the rank hit model, for a code
+  term the tooltip names only in words (the Sun Cleric Dawnbreak chain); a missing read is `unmeasured`. A
+  class-file `heal_pct_terms` entry (`{spell, effect, source}` on the rank, ADR 1243) adds a `SPELL_EFFECT_HEAL_PCT`
+  effect to a single-target heal model: the hit scenario reads the healed unit's `max_health`
+  (`heal target max_health`), and the judge adds `floor(max_health x percent / 100)` (float, as
+  `Unit::CountPctFromMaxHealth`) under the same healing modifiers, the percent from the DBC (BasePoints + DieSides,
+  fixed values only); a missing read is reported as a missing measurement (the Sun Cleric Solar Prayer 806479). A
+  class-file `superseded_hits` entry (`{spell, reason, replaced_by}`, ADR 1243 addendum) closes a rank's generated
+  plain hit: `add_hit` writes no scenario and a `closed: no check needed: <reason>` record whose model names the
+  replacing labels (`replaced_by`, required, never the hit itself). `compare` keeps it `closed` only when every
+  replacing label is in the same comparison and `ok`; a missing or non-ok replacement makes it an `alert`. Outside
+  class 27 the entry needs a `ruling` field naming a mentor decision (`D-<number>`), else generation raises
+  `ValueError` (the Sun Cleric Justicar's Wrath 806980, D-288). A `melee_mean`, `periodic_total` or other hit alert on a rank with such a term says
   "per-level truncation, engine computation not modelled" and stays an alert. Fewer reads than the count the mean
   needs at the measured stats (`detail['reads_needed']`), or a mean of 0, give `measured`. A single read inside the
   roll range proves nothing about a constant offset smaller than the range: the fix round of the phase-2 Templar

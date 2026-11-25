@@ -1,0 +1,162 @@
+{
+  "schema": 1,
+  "name": "Bloodmail 3-piece procs on damaging melee abilities (#12204)",
+  "contract": [
+    "#12204: Bloodmail 3-piece (proc dummies 823732) never procced. Every dummy carries Spell.dbc ProcFlags 0 and",
+    "the world had no spell_proc row, so SpellMgr::LoadSpellProcs skipped it. Tooltip: \"Damaging melee abilities",
+    "have a chance\". The Valor 3-piece (823738) has the same wording and its merged row uses flags 16 (melee",
+    "abilities, no auto attacks); the same row is used. spell_proc_chance reads each loaded entry's chance, which",
+    "equals the record's ProcChance, and spell_proc_cooldown_ms reads each loaded cooldown. aura_proc_rate",
+    "replays the aura's native proc decision, including the roll, 40000 times on one synthetic event per check.",
+    "It procs on a landed melee ability (Heroic Strike 78), at the record's chance; it never procs on a landed",
+    "melee auto attack, a landed direct magic spell (Frostbolt 116). Before the repair the chance and cooldown",
+    "lookups fail with 'Spell has no proc entry' and every rate reads 0, so the discriminating checks fail",
+    "instead of flaking.",
+    "A proc's payload, Mythical Discharge Zone 823749, is applied directly: over its 5 s it pulses Mythical",
+    "Discharge Zone 823748 once a second, so the dummy 4 yards away takes exactly five pulses of Chaos damage.",
+    "The record gives a pulse 2 base points, 1 die side and 0.3125 per level above its base level 1, up to level",
+    "80: 2 + 24 + 1 = 27 at level 80, and spell_effect_value reads that value. Five pulses come to 135 before",
+    "resists; a melee class pulse can crit for double, and even four crits stay at 243, while twice the intended",
+    "damage would reach at least 270."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 823732",
+      "actor": "caster",
+      "spell": 823732,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 823732 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 823732,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 823732 loads the record's 25% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 823732,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 823732 loads no internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 823732,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee ability (Heroic Strike 78) procs 823732 at 25%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 823732,
+      "target": "dummy",
+      "trigger_spell": 78,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 23.5,
+      "max": 26.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed melee auto attack procs 823732 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 823732,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed direct magic spell (Frostbolt 116) procs 823732 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 823732,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "The 3-piece payload: Mythical Discharge Zone",
+      "actor": "caster",
+      "spell": 823749,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the 5 s zone run out",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the payload pulsed five times on the dummy",
+      "actor": "caster",
+      "metric": "spell_damage_count",
+      "spell": 823748,
+      "target": "dummy",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a pulse is the record's 27 at level 80",
+      "actor": "caster",
+      "metric": "spell_effect_value",
+      "spell": 823748,
+      "effect": 0,
+      "equals": 27
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: five pulses deal 135 before resists, up to four crits",
+      "actor": "caster",
+      "metric": "spell_damage_with_resist_total",
+      "spell": 823748,
+      "target": "dummy",
+      "min": 135,
+      "max": 243
+    }
+  ]
+}

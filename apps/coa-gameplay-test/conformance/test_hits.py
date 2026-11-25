@@ -1,4 +1,5 @@
 from dataclasses import replace
+from fractions import Fraction
 import json
 import math
 from pathlib import Path
@@ -9,6 +10,8 @@ from unittest import mock
 
 from classes import ClassSpell, class_spells
 from behaviours import STRIKER, NotModelled, behaviour_scenario
+from block_value import BLOCK_VALUE_LABEL, BLOCK_VALUE_TERMS
+from heal_pct import HEAL_PCT_LABEL, HEAL_PCT_TERMS, heal_pct_amount, heal_pct_percent
 from compare import PER_LEVEL_ROUNDING, Run, Verdict, judge_hit
 from conformance import target_gate_arms
 from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Modifier, Unmodelled, WeaponProfile,
@@ -23,10 +26,10 @@ from hits import (CLOSED, HIT_CHECKS, MAX_SCENARIO_MS, UNMODELLED, HitModel, Mod
 from custom_attr import CustomAttributes
 from mitigation import (REFERENCE_TARGET, MitigationModel, TargetProfile, armor_reduction, average_resist,
                         expected_mitigation, partial_resist_shares)
-from profile import load_class_file, load_fixture_class_file
+from profile import CASTER, load_class_file, load_fixture_class_file, measurement
 from tooltip import CasterStats, Displayed, Readout, read_tooltip, weapon_skill_spells
 from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, GAP_CLOSER_DISTANCE, NOMINAL_MELEE_RANGE_YD,
-                    TARGET, UNREADABLE, Expectation, armed_for, cast_distance, missile_wait_ms)
+                    TARGET, UNREADABLE, Expectation, armed_for, cast_distance, missile_wait_ms, value_scenario)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -46,6 +49,8 @@ HUNTER_RANGE = 114
 HEAVY_CROSSBOW = 15809
 RANGED_SLOT = 17
 SCIMITAR = 2027
+SOLAR_PRAYER = 806479
+SOLAR_PRAYER_MAX_HEALTH = 1788
 MAIN_HAND_SLOT, OFF_HAND_SLOT = 15, 16
 CROSSBOWS_SKILL_LINE = 226
 HEAVY_CROSSBOW_WEAPON = {'item': HEAVY_CROSSBOW, 'slot': RANGED_SLOT, 'subclass': 18, 'min_damage': 49.0,
@@ -1041,6 +1046,103 @@ class HitScenarioTest(unittest.TestCase):
             self.assertEqual(hit_expectation(expectations).check, 'hit_mean')
             self.assertLessEqual(scenario['timeout_ms'], MAX_SCENARIO_MS)
 
+    def test_a_rank_hit_with_a_truncated_per_level_term_is_ok_only_around_the_engine_mean(self):
+        model = reference_hit_model(self.templar, RECKONING_MAX_RANK)
+        self.assertIsNotNone(model.engine)
+        self.assertIn('effect 0 loses 0.5072', model.engine_rule)
+        self.assertLess(model.engine.mean, model.mean)
+        self.assertGreater(model.engine.mean, model.mean - 1)
+        scenario, expectations = hit_parts(self.templar, self.spells[RECKONING], RECKONING_CASTS_NEEDED)[0]
+        hit = hit_expectation(expectations)
+        measured = measured_reference(self.templar, hit)
+        judged = measured_hit_model(self.templar, hit, measured)
+        labels, count = hit.model['measurements'], 40000
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+
+        def verdict(mean):
+            found = Run(key='seeded', status='ok', message='', steps=[], max_step_ms=None,
+                        values={**measured, labels['total']: mean * count, labels['count']: count})
+            return judge_hit(base, self.templar, [(scenario, found, hit)], measured_hit_model)
+
+        engine = verdict(judged.engine.mean)
+        self.assertEqual(engine.status, 'ok')
+        self.assertIn('inside the engine model mean', engine.explanation)
+        self.assertEqual(engine.detail[PER_LEVEL_ROUNDING]['engine_mean'], judged.engine.mean)
+        mutant = verdict(judged.engine.mean - 0.06 * judged.mean)
+        self.assertEqual(mutant.status, 'alert')
+        self.assertIn('does not explain it either', mutant.explanation)
+        self.assertEqual(mutant.detail[PER_LEVEL_ROUNDING]['rule'], model.engine_rule)
+
+    def test_a_listed_block_value_raises_the_rank_hit_and_is_read_in_its_scenarios(self):
+        listed = {**self.templar, BLOCK_VALUE_TERMS: [{'spell': RECKONING, 'effect': 0, 'source': 'seeded code term'}]}
+        block_read = measurement(BLOCK_VALUE_LABEL, CASTER, BLOCK_VALUE_LABEL)
+        parts = hit_parts(listed, self.spells[RECKONING], RECKONING_CASTS_NEEDED)
+        self.assertTrue(all(block_read in scenario['steps'] for scenario, _ in parts))
+        self.assertTrue(all(block_read not in scenario['steps']
+                            for scenario, _ in hit_parts(self.templar, self.spells[RECKONING], RECKONING_CASTS_NEEDED)))
+        value, _, _ = value_scenario(listed, self.spells[RECKONING], RECKONING_MAX_RANK)
+        self.assertIn(block_read, value['steps'])
+        scenario, expectations = parts[0]
+        hit = hit_expectation(expectations)
+        measured = measured_reference(listed, hit)
+        with self.assertRaises(KeyError):
+            measured_hit_model(listed, hit, measured)
+        blocked = {**measured, BLOCK_VALUE_LABEL: 40}
+        raised = measured_hit_model(listed, hit, blocked)
+        plain = measured_hit_model(self.templar, hit, measured)
+        self.assertGreater(raised.mean, plain.mean * 1.1)
+        labels, count = hit.model['measurements'], 40000
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+
+        def verdict(mean):
+            found = Run(key='seeded', status='ok', message='', steps=[], max_step_ms=None,
+                        values={**blocked, labels['total']: mean * count, labels['count']: count})
+            return judge_hit(base, listed, [(scenario, found, hit)], measured_hit_model)
+
+        self.assertEqual(verdict(raised.mean).status, 'ok')
+        self.assertEqual(verdict(plain.mean).status, 'alert')
+
+    def test_a_listed_heal_pct_term_adds_the_read_percent_of_maximum_health_under_the_heal_modifiers(self):
+        solar = ClassSpell(SOLAR_PRAYER, 'Solar Prayer', (SOLAR_PRAYER,), SOLAR_PRAYER, 0, False)
+        listed = {**self.templar, HEAL_PCT_TERMS: [{'spell': SOLAR_PRAYER, 'effect': 0, 'source': 'seeded code term'}]}
+        read = measurement(HEAL_PCT_LABEL, CASTER, 'max_health')
+        parts = hit_parts(listed, solar, 1)
+        self.assertTrue(all(read in scenario['steps'] for scenario, _ in parts))
+        self.assertTrue(all(read not in scenario['steps'] for scenario, _ in hit_parts(self.templar, solar, 1)))
+        scenario, expectations = parts[0]
+        hit = hit_expectation(expectations)
+        self.assertEqual((hit.model['kind'], hit.model['measurements']['max_health']), ('heal', HEAL_PCT_LABEL))
+        self.assertIn('25% of the healed unit', hit.rule)
+        measured = {**self.templar['reference_stats'], f'known_aura {CLASS_TUNING_AURA}': 1}
+        with self.assertRaises(KeyError):
+            measured_hit_model(listed, hit, measured)
+        healthy = {**measured, HEAL_PCT_LABEL: SOLAR_PRAYER_MAX_HEALTH}
+        raised = measured_hit_model(listed, hit, healthy)
+        plain = measured_hit_model(self.templar, hit, measured)
+        factor = math.prod(Fraction(100 + modifier.percent, 100) for modifier in raised.modifiers)
+        self.assertEqual(raised.mean - plain.mean, math.floor(447 * factor))
+        self.assertEqual((raised.sigma, raised.displayed), (plain.sigma, plain.displayed))
+        labels, count = hit.model['measurements'], 40
+        base = Verdict(label=hit.label, status='unmeasured', measured=None, expected=None, low=None, high=None,
+                       explanation='')
+
+        def verdict(mean):
+            found = Run(key='seeded', status='ok', message='', steps=[], max_step_ms=None,
+                        values={**healthy, labels['total']: mean * count, labels['count']: count})
+            return judge_hit(base, listed, [(scenario, found, hit)], measured_hit_model)
+
+        self.assertEqual(verdict(raised.mean).status, 'ok')
+        self.assertEqual(verdict(plain.mean).status, 'alert')
+
+    def test_the_heal_pct_term_truncates_like_count_pct_from_max_health_and_needs_its_effect(self):
+        records = records_of(self.templar)
+        self.assertEqual(heal_pct_percent(records, SOLAR_PRAYER, 0), 25)
+        self.assertEqual([heal_pct_amount(health, 25) for health in (1788, 1791, 1792)], [447, 447, 448])
+        with self.assertRaises(ValueError):
+            heal_pct_percent(records, SOLAR_PRAYER, 1)
+
     def test_vindication_equips_the_one_hand_weapon(self):
         scenario, expectations = hit_scenario(self.templar, self.spells[VINDICATION], 1)
         run.validate(scenario)
@@ -1747,7 +1849,8 @@ class MeasuredHitModelRoleTest(unittest.TestCase):
     def roles(self, check: str) -> list[str]:
         roles = []
 
-        def modelled(class_file, rank_id, caster, target, auras, learned=None, role='hit_mean'):
+        def modelled(class_file, rank_id, caster, target, auras, learned=None, role='hit_mean', flat=None,
+                     percent_part=None):
             roles.append(role)
             return types.SimpleNamespace(model=self.MODEL)
 
@@ -1868,6 +1971,10 @@ class ValueSpellRollTest(unittest.TestCase):
         self.assertAlmostEqual(rolled.model['reference']['sigma'], 0.5, places=6)
         with self.assertRaises(ValueError):
             behaviour_scenario(self.witch_hunter, self.entry(value_rolls='yes'))
+
+from test_script_hit_engage import ScriptHitEngageTests  # noqa: E402,F401
+from test_script_hit_relocate import ScriptHitRelocateTests  # noqa: E402,F401
+from test_tooltip_corrections import OnlyInsertedTests, TooltipCorrectionTests  # noqa: E402,F401
 
 
 

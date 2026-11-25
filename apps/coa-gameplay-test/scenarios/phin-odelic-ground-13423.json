@@ -1,0 +1,49 @@
+{
+  "schema": 1,
+  "name": "Phin Odelic stands on the Southshore ground, not sunk to his knees (#13423)",
+  "contract": "#13423 reported Phin Odelic (entry 2711, spawn 15325) sunk to his knees in Southshore. The stock row had z 10.1443, 0.44 yd under the ground the server maps give at that spot (10.587). rev_20261124_13423 raises him onto that ground. Expected: the creature is present and stands on the ground.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -858.7,
+    "y": -544.4,
+    "z": 11.1,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Phin Odelic stands at his spot",
+      "metric": "spawn_distance",
+      "x": -859.667,
+      "y": -544.376,
+      "z": 10.587,
+      "max": 0.3,
+      "guid": 15325,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Phin Odelic stands on the ground instead of 0.44 yd under it",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.35,
+      "guid": 15325,
+      "spawn_type": "creature"
+    }
+  ]
+}

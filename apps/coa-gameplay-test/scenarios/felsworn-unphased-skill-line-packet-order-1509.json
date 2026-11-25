@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "name": "Unphased skill-line patch follows initial and learned spell packets",
+  "contract": "Issue #1509: Unphased 803645 belongs to SkillLine 53 (Infernal), while Totemic Smash 501056 stays in SkillLine 41. The client classifies spells from SkillLineAbility rows, not SMSG_INITIAL_SPELLS or SMSG_LEARNED_SPELL. The 0x0934 patch must therefore be resent after the initial spell list and after each learn announcement, including a relog after the spell was learned, so the client never files the new spell under General.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "felsworn", "race": 10, "class": 14, "level": 40 }
+  ],
+  "steps": [
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_ability", "spell": 803645, "equals": 53, "within_ms": 5000, "label": "Unphased has its authored Infernal row" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_for_spell", "spell": 501056, "equals": 41, "label": "Totemic Smash keeps its original server and client row" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_after_initial", "spell": 803645, "equals": 1, "within_ms": 5000, "label": "the Infernal row follows the first initial spell list" },
+    { "action": "wait", "ms": 6000, "label": "outlast the 5s login fallback stream so only the learn resend can satisfy the ordering assertion below" },
+    { "action": "learn", "actor": "felsworn", "spell": 803645, "label": "learn Unphased during the session" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_after_learned", "spell": 803645, "equals": 1, "within_ms": 5000, "label": "the Infernal row follows the learn announcement" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_ability", "spell": 803645, "equals": 53, "label": "the learned resend still carries the authored Infernal row" },
+    { "action": "relog", "actor": "felsworn", "label": "relog with Unphased already known" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_after_initial", "spell": 803645, "equals": 1, "within_ms": 5000, "label": "the Infernal row follows the relog initial spell list" },
+    { "action": "assert", "actor": "felsworn", "metric": "skill_line_ability", "spell": 803645, "equals": 53, "label": "the relog stream still carries the authored Infernal row" }
+  ]
+}

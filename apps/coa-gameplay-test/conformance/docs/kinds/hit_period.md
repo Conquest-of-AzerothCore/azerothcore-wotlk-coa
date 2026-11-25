@@ -13,3 +13,10 @@ start. Use it when the period needs a state a real cast makes (Spirit Eclipse 81
 `learn` (absent by default): spells learned at the start with the trigger, for a period a passive talent changes; a
 second entry without it is the control (Dark Loa's Blessing 560545 `puppets_period` and `puppets_period_control`:
 Shadow Puppets 501087 hits every 600 ms with the talent, 750 ms without).
+
+`read_at_cast` (ADR 1282, absent by default): `true` reads the dummy's hits between the start stamp and the trigger
+cast and gives that pair to the judge as its first read, for an effect that ticks at the cast instant (Fury Unleashed
+555738 `strike_period`, Fury of the Illidari 561216 `assault_period`). The window must start at 0 and end between
+2 x `expected_ms` + band and 3 x `expected_ms` - 2 x band (G-19), so it holds three ticks when the first lands at the
+cast and two (unmeasured) when it lands one period late. The model carries `first_at_cast`: the first hit must
+lie in (start, first poll], else the judge alerts, so a late first tick cannot pass when the clock overruns the window.

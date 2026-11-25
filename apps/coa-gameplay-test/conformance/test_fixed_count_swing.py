@@ -1,8 +1,12 @@
+from pathlib import Path
+import sys
 import unittest
 
 from behaviours import behaviour_scenario, fixed_target_count_spec
 from compare import Verdict, judge_behaviour
 from profile import DBC_DIR, load_fixture_class_file
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
 from values import Expectation
 

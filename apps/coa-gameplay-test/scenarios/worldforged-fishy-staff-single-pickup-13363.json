@@ -1,0 +1,48 @@
+{
+  "schema": 1,
+  "name": "A \"Fishy\" Staff has a single pickup (#13363)",
+  "contract": "#13363 reported the Worldforged A \"Fishy\" Staff pickup (entry 95947) had an in-game placement in Eastern Plaguelands from 2026-09-24; its realm location is Hillsbrad Foothills (6940856), so the stray copy goes. Expected: guid 6960026 at 1848.3, -3759.4, 159.7 on map 0 is not spawned.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 1849.3,
+    "y": -3759.4,
+    "z": 160.2,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the stray copy is not spawned",
+      "metric": "spawn_active",
+      "spawn": 6960026,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "no copy is left at the spot",
+      "metric": "nearby_gameobject_count",
+      "entry": 95947,
+      "equals": 0
+    }
+  ]
+}

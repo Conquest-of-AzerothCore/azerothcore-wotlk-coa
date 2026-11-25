@@ -1,0 +1,325 @@
+{
+  "schema": 1,
+  "name": "Criminal: Blood On Your Hands makes the player's own capital factions hostile until it ends (#9132)",
+  "contract": [
+    "Issue #9132 and the PR author's ruling (2026-11-25): guards and friendly NPCs are hostile only to a player",
+    "with 9930873 Criminal: Blood On Your Hands, whose tooltip says the player is attacked by their own faction.",
+    "While it lasts the server forces hostile reactions toward the Faction.dbc reputation factions whose parent",
+    "is the player's team: Stormwind, Ironforge, Darnassus, Gnomeregan Exiles and Exodar for the Alliance. A",
+    "Stormwind City Guard fixture (entry 68, faction template 11) turns hostile in both directions, the client is",
+    "sent five forced reactions, hostility survives a relog, and removal or the natural expiry of a Mercenary's 3",
+    "minute Criminal makes the guard friendly again."
+  ],
+  "timeout_ms": 360000,
+  "players": [
+    {
+      "id": "human",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 600,
+      "expertise_rating": 600
+    },
+    {
+      "id": "innocent",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "guard",
+      "owner": "mercenary",
+      "entry": 68,
+      "faction": 11,
+      "level": 60,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormwind lets the Humans rest",
+      "actor": "innocent",
+      "metric": "resting",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "innocent",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the innocent is in War Mode",
+      "actor": "innocent",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary-to-be is in High-Risk",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and takes up Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "human",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mercenary",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "innocent",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "innocent",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a law-abiding Human cannot attack the Stormwind City Guard",
+      "actor": "human",
+      "metric": "can_attack",
+      "target": "guard",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nor can the guard attack it",
+      "actor": "guard",
+      "metric": "can_attack",
+      "target": "human",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mercenary is not hostile to the guard either",
+      "actor": "guard",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "human",
+      "metric": "server_packets",
+      "opcode": 677,
+      "save_as": "forced_before",
+      "row": 5
+    },
+    {
+      "action": "set_aura",
+      "label": "The Human becomes a Criminal",
+      "actor": "human",
+      "spell": 9930873,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the guard can attack the Criminal",
+      "actor": "guard",
+      "metric": "can_attack",
+      "target": "human",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: and the Criminal can attack the guard",
+      "actor": "human",
+      "metric": "can_attack",
+      "target": "guard",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "They name the five Alliance capital factions (count 5)",
+      "actor": "human",
+      "metric": "server_packets",
+      "opcode": 677,
+      "relative_to": "forced_before",
+      "min": 1,
+      "row": 5
+    },
+    {
+      "action": "relog",
+      "label": "The Criminal logs out and back in",
+      "actor": "human"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Criminal debuff is still there after the relog",
+      "actor": "human",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: after the relog the guard can still attack the Criminal",
+      "actor": "guard",
+      "metric": "can_attack",
+      "target": "human",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "human",
+      "metric": "server_packets",
+      "opcode": 677,
+      "save_as": "forced_cleared",
+      "row": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Criminal is removed",
+      "actor": "human",
+      "spell": 9930873,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the guard is friendly again once Criminal ends",
+      "actor": "guard",
+      "metric": "can_attack",
+      "target": "human",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "and the Human cannot attack it",
+      "actor": "human",
+      "metric": "can_attack",
+      "target": "guard",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The forced reactions are cleared (count 0)",
+      "actor": "human",
+      "metric": "server_packets",
+      "opcode": 677,
+      "relative_to": "forced_cleared",
+      "min": 1,
+      "row": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "mercenary",
+      "metric": "melee_attack_count",
+      "save_as": "swings"
+    },
+    {
+      "action": "attack",
+      "label": "The Mercenary strikes the same-faction innocent first",
+      "actor": "mercenary",
+      "target": "innocent"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary becomes a Criminal for 3 minutes",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mercenary"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the guard can attack the Criminal Mercenary",
+      "actor": "guard",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Let the 3 minutes of Criminal run out",
+      "ms": 185000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Criminal has expired",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: expiry ends the guard's hostility too",
+      "actor": "guard",
+      "metric": "can_attack",
+      "target": "mercenary",
+      "equals": 0
+    }
+  ]
+}

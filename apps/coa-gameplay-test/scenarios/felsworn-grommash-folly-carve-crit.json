@@ -1,0 +1,2746 @@
+{
+  "schema": 1,
+  "name": "Grommash's Folly raises Carve critical strikes by 5% per channel step while Inner Demon is active",
+  "contract": [
+    "Grommash's Folly 805236: 'critical strikes with Carve deal $807427s1% increased damage, increasing up to 60% with each strike based on how long you channel.' 807427 Effect[0] is 5 per stack.",
+    "Owner ruling O-21/O-23 (Felsworn ADR 0011): +5% of the whole critical hit per Carve 800206 channel step, capped at 10 steps (+50%), only while Inner Demon 804216 is active; 60% stays unreachable.",
+    "One level 60 Felsworn with forced melee crits, attack power 20000 and one passive dummy in front. Each block channels Carve 8 times and sums the critical Carve strikes 803715 on the dummy. Control arms run before Grommash's Folly is learned, the talent arms after, with the same step count.",
+    "Expected talent/control damage: 1.50 at 10 steps and 1.05 at 1 step with Inner Demon, 1.00 at 10 steps without it (each within 0.01). The previous 3% factor gave 1.30, 1.03 and 1.30."
+  ],
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 60,
+      "melee_crit_rating": 100000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "add_item",
+      "actor": "felsworn",
+      "item": 2027
+    },
+    {
+      "action": "equip",
+      "actor": "felsworn",
+      "item": 2027,
+      "slot": 15
+    },
+    {
+      "action": "set_skill",
+      "actor": "felsworn",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "assert",
+      "label": "Grommash's Folly is not known in the control arms",
+      "actor": "felsworn",
+      "metric": "knows_spell",
+      "spell": 805236,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "control_full_total_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "control_full_count_start"
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 1: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 2: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 3: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 4: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 5: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 6: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 7: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control full trial 8: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_full_total_start",
+      "save_as": "control_full_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_full_count_start",
+      "save_as": "control_full_count"
+    },
+    {
+      "action": "assert",
+      "label": "Control, full 2500 ms channel (10 steps) with Inner Demon: at least one forced critical strike per channel",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_full_count_start",
+      "min": 8
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "control_one_total_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "control_one_count_start"
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 1: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 2: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 3: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 4: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 5: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 6: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 7: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control one trial 8: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_one_total_start",
+      "save_as": "control_one_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_one_count_start",
+      "save_as": "control_one_count"
+    },
+    {
+      "action": "assert",
+      "label": "Control, channel cancelled 375 ms in (1 step) with Inner Demon: at least one forced critical strike per channel",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_one_count_start",
+      "min": 8
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "control_plain_total_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "control_plain_count_start"
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 1: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 2: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 3: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 4: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 5: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 6: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 7: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "control plain trial 8: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_plain_total_start",
+      "save_as": "control_plain_total"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_plain_count_start",
+      "save_as": "control_plain_count"
+    },
+    {
+      "action": "assert",
+      "label": "Control, full channel (10 steps) without Inner Demon: at least one forced critical strike per channel",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "control_plain_count_start",
+      "min": 8
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 805236
+    },
+    {
+      "action": "wait",
+      "label": "Passive settles",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "felsworn",
+      "metric": "knows_spell",
+      "spell": 805236,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "talent_full_total_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "talent_full_count_start"
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 1: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 2: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 3: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 4: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 5: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 6: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 7: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent full trial 8: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talent, full 2500 ms channel (10 steps) with Inner Demon: as many critical strikes as the control",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "talent_full_count_start",
+      "ratio_to": "control_full_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Grommash's Folly: +5% per step, +50% at 10 steps with Inner Demon: critical damage over the control",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "talent_full_total_start",
+      "ratio_to": "control_full_total",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "talent_one_total_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "talent_one_count_start"
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 1: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 2: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 3: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 4: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 5: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 6: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 7: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "set_aura",
+      "label": "Inner Demon starts a fresh duration",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 1
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent one trial 8: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "One 250 ms channel step",
+      "ms": 375
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Release strike and global cooldown",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talent, channel cancelled 375 ms in (1 step) with Inner Demon: as many critical strikes as the control",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "talent_one_count_start",
+      "ratio_to": "control_one_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Grommash's Folly: +5% at 1 step with Inner Demon: critical damage over the control",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "talent_one_total_start",
+      "ratio_to": "control_one_total",
+      "min": 1.04,
+      "max": 1.06
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 804216,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "talent_plain_total_start"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "talent_plain_count_start"
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 1: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 2: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 3: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 4: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 5: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 6: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 7: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "set_aura",
+      "actor": "felsworn",
+      "spell": 800058,
+      "stacks": 4
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "cast_no_target",
+      "label": "talent plain trial 8: Carve",
+      "actor": "felsworn",
+      "spell": 800206
+    },
+    {
+      "action": "wait",
+      "label": "Full channel, release strike and global cooldown",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "The channel has ended",
+      "actor": "felsworn",
+      "metric": "aura_stacks",
+      "spell": 800206,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Talent, full channel (10 steps) without Inner Demon: as many critical strikes as the control",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "talent_plain_count_start",
+      "ratio_to": "control_plain_count",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Grommash's Folly: no Carve crit bonus without Inner Demon: critical damage over the control",
+      "actor": "felsworn",
+      "metric": "spell_damage_total",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "talent_plain_total_start",
+      "ratio_to": "control_plain_total",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "label": "Every Carve strike was a forced critical strike",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803715,
+      "target": "dummy",
+      "critical": false,
+      "equals": 0
+    }
+  ]
+}

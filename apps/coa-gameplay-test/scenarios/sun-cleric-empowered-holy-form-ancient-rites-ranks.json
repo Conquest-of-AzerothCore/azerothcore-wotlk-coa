@@ -1,0 +1,455 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Empowered Holy Form shortens every rank of Ancient Rites by 5 s",
+  "contract": "Empowered Holy Form 800602: '... reduces the tick rate of Ancient Rites by $/1000;s2 sec.' ($s2 = -5000 ms). Ancient Rites ranks 300351, 301345 and 301817 each carry Effect[0] aura 227 EffectAmplitude 15000 triggering the energize 301368; the class aura script lowers the period of every rank by 5000 ms while the caster has 800602 (Sun Cleric ADR 0016). Each arm learns Holy Form 805301 (and 800602 in the empowered arms), casts Holy Form with no rank, learns its rank, waits 500 ms and casts Holy Form again. The energize events of 301368 are counted 8 s and 10.8 s after the rank learn (one harness step per update adds a short lag to both readings, which the 2 s margin of the first absorbs): a 10 s period gives 0 then 1. Control arms, one per rank, without 800602: the 15 s period gives 0 at both readings.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "rank1",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rank1_control",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rank2",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rank2_control",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rank3",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "rank3_control",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 805301
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 800602
+    },
+    {
+      "action": "learn",
+      "actor": "rank1_control",
+      "spell": 805301
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 805301
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 800602
+    },
+    {
+      "action": "learn",
+      "actor": "rank2_control",
+      "spell": 805301
+    },
+    {
+      "action": "learn",
+      "actor": "rank3",
+      "spell": 805301
+    },
+    {
+      "action": "learn",
+      "actor": "rank3",
+      "spell": 800602
+    },
+    {
+      "action": "learn",
+      "actor": "rank3_control",
+      "spell": 805301
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank1",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank1",
+      "spell": 805301,
+      "target": "rank1"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank1_control",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank1_control",
+      "spell": 805301,
+      "target": "rank1_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank2",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank2",
+      "spell": 805301,
+      "target": "rank2"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank2_control",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank2_control",
+      "spell": 805301,
+      "target": "rank2_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank3",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank3",
+      "spell": 805301,
+      "target": "rank3"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank3_control",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank3_control",
+      "spell": 805301,
+      "target": "rank3_control"
+    },
+    {
+      "action": "wait",
+      "ms": 10300
+    },
+    {
+      "action": "assert",
+      "label": "rank1: no Ancient Rites energize before the rank is learned",
+      "actor": "rank1",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank1_control: no Ancient Rites energize before the rank is learned",
+      "actor": "rank1_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank1_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank2: no Ancient Rites energize before the rank is learned",
+      "actor": "rank2",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank2_control: no Ancient Rites energize before the rank is learned",
+      "actor": "rank2_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank2_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank3: no Ancient Rites energize before the rank is learned",
+      "actor": "rank3",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank3_control: no Ancient Rites energize before the rank is learned",
+      "actor": "rank3_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank3_control",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "rank1",
+      "spell": 300351
+    },
+    {
+      "action": "learn",
+      "actor": "rank1_control",
+      "spell": 300351
+    },
+    {
+      "action": "learn",
+      "actor": "rank2",
+      "spell": 301345
+    },
+    {
+      "action": "learn",
+      "actor": "rank2_control",
+      "spell": 301345
+    },
+    {
+      "action": "learn",
+      "actor": "rank3",
+      "spell": 301817
+    },
+    {
+      "action": "learn",
+      "actor": "rank3_control",
+      "spell": 301817
+    },
+    {
+      "action": "wait",
+      "label": "let the first effect fully expire",
+      "ms": 500
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank1",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank1",
+      "spell": 805301,
+      "target": "rank1"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank1_control",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank1_control",
+      "spell": 805301,
+      "target": "rank1_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank2",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank2",
+      "spell": 805301,
+      "target": "rank2"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank2_control",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank2_control",
+      "spell": 805301,
+      "target": "rank2_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank3",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank3",
+      "spell": 805301,
+      "target": "rank3"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "rank3_control",
+      "spell": 805301
+    },
+    {
+      "action": "cast",
+      "actor": "rank3_control",
+      "spell": 805301,
+      "target": "rank3_control"
+    },
+    {
+      "action": "wait",
+      "ms": 7500
+    },
+    {
+      "action": "assert",
+      "label": "rank1: no Ancient Rites tick by 8 s after the learn",
+      "actor": "rank1",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank1_control: no Ancient Rites tick by 8 s after the learn",
+      "actor": "rank1_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank1_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank2: no Ancient Rites tick by 8 s after the learn",
+      "actor": "rank2",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank2",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank2_control: no Ancient Rites tick by 8 s after the learn",
+      "actor": "rank2_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank2_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank3: no Ancient Rites tick by 8 s after the learn",
+      "actor": "rank3",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank3",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "rank3_control: no Ancient Rites tick by 8 s after the learn",
+      "actor": "rank3_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank3_control",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 2800
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING rank1: with Empowered Holy Form, Ancient Rites 300351 ticks by 10.8 s (10 s)",
+      "actor": "rank1",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank1",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "control rank1_control: without Empowered Holy Form, Ancient Rites 300351 keeps 15 s, no tick by 10.8 s",
+      "actor": "rank1_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank1_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING rank2: with Empowered Holy Form, Ancient Rites 301345 ticks by 10.8 s (10 s)",
+      "actor": "rank2",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank2",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "control rank2_control: without Empowered Holy Form, Ancient Rites 301345 keeps 15 s, no tick by 10.8 s",
+      "actor": "rank2_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank2_control",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING rank3: with Empowered Holy Form, Ancient Rites 301817 ticks by 10.8 s (10 s)",
+      "actor": "rank3",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank3",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "control rank3_control: without Empowered Holy Form, Ancient Rites 301817 keeps 15 s, no tick by 10.8 s",
+      "actor": "rank3_control",
+      "metric": "spell_energize_count",
+      "spell": 301368,
+      "target": "rank3_control",
+      "equals": 0
+    }
+  ]
+}

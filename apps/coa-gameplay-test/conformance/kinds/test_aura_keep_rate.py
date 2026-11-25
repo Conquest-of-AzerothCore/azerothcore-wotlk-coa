@@ -89,6 +89,37 @@ class AuraKeepRateTests(unittest.TestCase):
         verdict = keep_rate_verdict(base_verdict(expectation), [FakeRun(values)], expectation.model)
         self.assertEqual(verdict.status, 'unmeasured')
 
+    def test_aura_stacks_set_the_consumer_cost_before_every_cast(self):
+        scenario, _ = self.generated({**ENTRY, 'aura_stacks': 2})
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts), 44)
+        for index in casts:
+            self.assertEqual(steps[index - 2], {'action': 'set_aura', 'actor': 'caster', 'spell': 680539,
+                                                'stacks': 2})
+        self.assertIn('680539 is set at 2 stacks', scenario['contract'])
+
+    def test_without_aura_stacks_one_stack_is_set(self):
+        scenario, expectations = self.generated()
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        for index in casts[4:]:
+            self.assertEqual(steps[index - 2], {'action': 'set_aura', 'actor': 'caster', 'spell': 680539,
+                                                'stacks': 1})
+            self.assertNotEqual(steps[index - 3]['action'], 'set_aura')
+        self.assertNotIn('stacks, the consumer', scenario['contract'])
+        self.assertEqual((scenario, expectations), self.generated({**ENTRY, 'aura_stacks': 1}))
+
+    def test_a_talent_that_never_keeps_the_stacked_aura_alerts(self):
+        _, [expectation] = self.generated({**ENTRY, 'aura_stacks': 2})
+        never = [FakeRun(readings(0)) for _ in range(500)]
+        self.assertEqual(keep_rate_verdict(base_verdict(expectation), never, expectation.model).status, 'alert')
+
+    def test_stacks_below_one_are_refused(self):
+        with self.assertRaises(ValueError):
+            self.generated({**ENTRY, 'aura_stacks': 0})
+
     def test_the_control_spell_must_differ_from_the_consumer(self):
         with self.assertRaises(ValueError):
             self.generated({**ENTRY, 'control_spell': 802434})

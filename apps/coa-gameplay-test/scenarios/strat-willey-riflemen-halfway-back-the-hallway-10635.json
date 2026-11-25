@@ -1,0 +1,105 @@
+{
+  "schema": 1,
+  "name": "Stratholme: Cannon Master Willey's riflemen appear halfway back the hallway (#10635)",
+  "contract": "#10635: the CoA kit for Cannon Master Willey (10997) made him jump onto a guessed platform every 40-45 s and summon his three Crimson Riflemen (9780720) at random points within 6 yd of himself, so they spawned right next to him. Expected (project owner, placed in game): Willey stays where he fights, and the riflemen appear halfway back the hallway, one at 3553.79, -2951.54, 125.00 facing 0.61 and the other two 3 yd to its left and right and 1 yd further forward, on the same 40-45 s timer, and they vanish at once when Willey dies or the fight resets.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "p",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "teleport",
+      "label": "p stands where the middle rifleman belongs, halfway back the hallway",
+      "actor": "p",
+      "map": 329,
+      "x": 3553.792,
+      "y": -2951.535,
+      "z": 125.001,
+      "ignore_access": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_phase",
+      "label": "Join world phase 1, where Stratholme is spawned",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Cannon Master Willey is up the hallway",
+      "actor": "p",
+      "metric": "nearest_creature_distance",
+      "entry": 10997,
+      "min": 20,
+      "max": 40
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "p",
+      "entry": 10997,
+      "damage_pct": 1,
+      "label": "p hits Willey from the riflemen spot and pulls him"
+    },
+    {
+      "action": "assert",
+      "label": "Willey summons his three riflemen 10-14 s into the fight",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 9780720,
+      "equals": 3,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the middle rifleman appears on the marked spot, not at a random point next to Willey",
+      "actor": "p",
+      "metric": "nearest_creature_distance",
+      "entry": 9780720,
+      "max": 0.6
+    },
+    {
+      "action": "attack_nearby",
+      "label": "p kills Willey",
+      "actor": "p",
+      "entry": 10997,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: his riflemen vanish as soon as he dies",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 9780720,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

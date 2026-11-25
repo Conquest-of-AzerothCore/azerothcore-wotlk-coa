@@ -5,6 +5,7 @@ import re
 from statistics import fmean, pstdev
 from typing import Mapping, Sequence
 
+from block_value import block_value_steps
 from classes import PASSIVE_ATTRIBUTE, ClassSpell, DataSet, dataset
 from profile import (CASTER, DBC_DIR, EQUIP_FIELDS, WEAPON_REQUIREMENT_FIELDS, armed, base_steps, character_of,
                      known_aura_label, measurement, player_fixture, server_requirement, skill_target)
@@ -23,6 +24,8 @@ SELF_TARGETS = frozenset({0, 1})
 FRIEND_TARGETS = frozenset({21})
 RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
+ALLY_CASTS_KEY = 'value_ally_casts'
+ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
 SPELL_RANGE_RANGED = 2
@@ -30,6 +33,7 @@ GAP_CLOSER_MARGIN_YD = 2.0
 GAP_CLOSER_DISTANCE = 'gap_closer_distance'
 POWER_DISPLAY_DIVISOR = {0: 1, 1: 10, 2: 1, 3: 1, 4: 1000, 5: 1, 6: 10}
 MANA = 0
+HEALTH_POWER = 4294967294
 CAST_MARGIN_MS = 500
 GCD_WAIT_MS = 1600
 CAST_WAIT_LABEL = 'cast time'
@@ -257,13 +261,20 @@ def summon_aura_setup_steps(records: Records, carrier: dict) -> list[dict]:
     steps = [{'action': 'learn', 'actor': CASTER, 'spell': spell}
              for spell in [*carrier.get('learn', []), carrier['summon']]]
     if facts.mana_cost > 0 and facts.power_type != MANA:
-        steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type, 'value': facts.mana_cost})
+        steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
     cast = {'action': 'cast', 'actor': CASTER, 'spell': carrier['summon']}
     if is_hostile(facts):
         cast['target'] = TARGET
     return steps + [cast, {'action': 'assert', 'label': f'SETUP: the {carrier["entry"]} summon carries the aura read',
                            'actor': CASTER, 'metric': 'owned_creature_count', 'entry': carrier['entry'],
                            'equals': carrier.get('count', 1), 'within_ms': SUMMON_AURA_SETTLE_MS}]
+
+
+def pay_power_steps(power_type: int, cost: int, actor: str = CASTER) -> list[dict]:
+    if power_type == HEALTH_POWER:
+        return [{'action': 'assert', 'label': f'SETUP: {actor} health pays the {cost} health cost', 'actor': actor,
+                 'metric': 'health', 'min': cost + 1}]
+    return [{'action': 'set_power', 'actor': actor, 'power': power_type, 'value': cost}]
 
 
 def required_aura_steps(facts: RankFacts) -> list[dict]:
@@ -275,6 +286,31 @@ def required_aura_steps(facts: RankFacts) -> list[dict]:
 def cast_aura_steps(class_file: dict, spell: int) -> list[dict]:
     return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1}
             for entry in class_file.get('cast_auras', []) if entry['spell'] == spell for aura in entry['auras']]
+
+
+def value_ally_cast(class_file: dict, rank_id: int) -> tuple[int, ...] | None:
+    entries = [entry for entry in class_file.get(ALLY_CASTS_KEY, []) if entry['spell'] == rank_id]
+    if not entries:
+        return None
+    if len(entries) > 1:
+        raise ValueError(f'{ALLY_CASTS_KEY} lists {rank_id} more than once')
+    extra = set(entries[0]) - {'spell', 'setup_casts'}
+    setup = entries[0].get('setup_casts', [])
+    if extra or not isinstance(setup, list) or not all(isinstance(spell, int) and spell > 0 for spell in setup):
+        raise ValueError(f'{ALLY_CASTS_KEY} entry for {rank_id} takes spell and a list of setup_casts spell ids, '
+                         f'not {entries[0]!r}')
+    return tuple(setup)
+
+
+def ally_setup_steps(records: Records, setup: tuple[int, ...]) -> list[dict]:
+    from behaviours import cast_gate_power_step
+    steps = []
+    for spell in setup:
+        facts = facts_of(records, spell)
+        steps += (cast_gate_power_step(facts) + required_aura_steps(facts)
+                  + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': ALLY},
+                     {'action': 'wait', 'label': f'{spell} ally setup settle', 'ms': ALLY_SETUP_SETTLE_MS}])
+    return steps
 
 
 def required_target_health_steps(facts: RankFacts, target: str = TARGET) -> list[dict]:
@@ -419,16 +455,18 @@ def foreign_duration(rank_id: int, shown: Displayed) -> int | None:
 
 
 OVER_TICKS_REASON = 'a total over the ticks of periodic effect'
+PER_TICK_FOREIGN_TOTALS = 'per_tick_foreign_totals'
+PER_TICK_TICKS = 'ticks'
 
 
 def periodic_reason(records: Records, rank_id: int, caster: CasterStats, shown: Displayed,
-                    token: tuple[int, int] | None = None) -> str:
+                    token: tuple[int, int] | None = None, ordinal: int | None = None) -> str:
     spell, effect = token if token is not None else (rank_id, shown.effect_index)
     aura = records.field('Spell', spell, f'EffectApplyAuraName[{effect}]')
     if aura not in TICKING_AURAS or records.field('Spell', spell, f'EffectAmplitude[{effect}]') <= 0:
         return ''
     try:
-        reading = period_reading(records, rank_id, caster, shown, effect, period_spell=spell)
+        reading = period_reading(records, rank_id, caster, shown, effect, period_spell=spell, ordinal=ordinal)
     except Unreadable as error:
         return error.reason
     if reading == OVER_TICKS:
@@ -436,6 +474,17 @@ def periodic_reason(records: Records, rank_id: int, caster: CasterStats, shown: 
     if reading == MIXED_PERIOD:
         return mixed_period_reason(shown.text, effect)
     return ''
+
+
+def per_tick_foreign_totals(class_file: dict) -> frozenset[tuple[int, int]]:
+    return frozenset((entry['spell'], entry['effect']) for entry in class_file.get(PER_TICK_FOREIGN_TOTALS, []))
+
+
+def per_tick_ticks(records: Records, spell_id: int, effect: int) -> float:
+    if records.field('Spell', spell_id, f'EffectDieSides[{effect}]') not in FIXED_DIE_SIDES:
+        raise ValueError(f'{PER_TICK_FOREIGN_TOTALS} lists spell {spell_id} effect {effect}, whose points roll')
+    ticks = records.duration_ms(spell_id) / records.amplitude_ms(spell_id, effect)
+    return int(ticks) if ticks.is_integer() else ticks
 
 
 def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts) -> Expectation:
@@ -525,6 +574,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     rolled: dict[str, int] = {}
     disabled_effects = disabled_foreign_effects(class_file)
     aura_grants = foreign_aura_grants(class_file)
+    per_tick_totals = per_tick_foreign_totals(class_file)
 
     def sample_rolled(label: str, ordinal: int, text: str, spell_id: int, effect: int):
         samples = rolled_samples(dbc, records, rank_id, caster, ordinal, text, spell_id, effect)
@@ -653,8 +703,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                     ally_grant_proofs.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': rank_id})
                     ally_grant_proofs.append({'action': 'wait', 'label': 'Global cooldown', 'ms': GCD_WAIT_MS})
                     if facts.mana_cost > 0 and facts.power_type != MANA:
-                        ally_grant_proofs.append({'action': 'set_power', 'actor': CASTER,
-                                                  'power': facts.power_type, 'value': facts.mana_cost})
+                        ally_grant_proofs.extend(pay_power_steps(facts.power_type, facts.mana_cost))
                     ally_grant_proofs.append({'action': 'cast', 'actor': CASTER, 'spell': rank_id,
                                               'target': ALLY})
                     ally_grant_proofs.append(measurement(f'{rank_id} cast_failure {duration_spell} #{ordinal}',
@@ -671,9 +720,24 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         foreign, unmeasurable = foreign_effect(records, rank_id, shown, disabled_effects)
         if foreign:
             label = f'{rank_id} effect_value {foreign["effect_spell"]}e{foreign["effect"]} #{ordinal}'
-            periodic = periodic_reason(records, rank_id, caster, shown, (foreign['effect_spell'], foreign['effect']))
+            token = (foreign['effect_spell'], foreign['effect'])
+            periodic = periodic_reason(records, rank_id, caster, shown, token, ordinal)
+            if token in per_tick_totals and not periodic.startswith(OVER_TICKS_REASON):
+                raise ValueError(f'{PER_TICK_FOREIGN_TOTALS} lists spell {token[0]} effect {token[1]}, but '
+                                 f'{rank_id} token #{ordinal} {shown.text} is no total over its ticks')
+            if token in per_tick_totals:
+                ticks = per_tick_ticks(records, *token)
+                measured.extend(effect_measurements(label, *token))
+                expect(label, 'effect_value', None, shown.text,
+                       note_rule(f'read {shown.kind} per tick: the total over the {ticks:g} ticks of spell {token[0]} '
+                                 f'effect {token[1]} divided by its tick count', note),
+                       {**foreign, PER_TICK_TICKS: ticks})
+                return
             if periodic.startswith(OVER_TICKS_REASON):
                 periodic_totals.append({'label': label, 'effect': foreign['effect'], **foreign})
+                return
+            if periodic:
+                expect(label, 'effect_value', None, shown.text, note_rule(UNMEASURABLE + periodic, note), foreign)
                 return
             measured.extend(effect_measurements(label, foreign['effect_spell'], foreign['effect']))
             expect(label, 'effect_value', None, shown.text, note_rule(f'read {shown.kind}', note), foreign)
@@ -728,6 +792,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         expect(label, 'effect_value', None, '',
                GENERIC + 'tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")')
 
+    ally_cast = value_ally_cast(class_file, rank_id)
     cast_steps: list[dict] = []
     if not facts.passive:
         label = f'{rank_id} power_cost'
@@ -740,14 +805,16 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_wanted = True
     if cast_wanted:
         if facts.mana_cost > 0 and facts.power_type != MANA:
-            cast_steps.append({'action': 'set_power', 'actor': CASTER, 'power': facts.power_type,
-                               'value': facts.mana_cost})
+            cast_steps.extend(pay_power_steps(facts.power_type, facts.mana_cost))
         cast = {'action': 'cast', 'actor': CASTER, 'spell': rank_id}
         if is_hostile(facts):
             cast['target'] = TARGET
             cast_steps += required_target_health_steps(facts)
         elif targets_resurrect(facts):
             cast_steps.append({'action': 'die', 'actor': ALLY})
+            cast['target'] = ALLY
+        elif ally_cast is not None:
+            cast_steps += ally_setup_steps(records, ally_cast)
             cast['target'] = ALLY
         cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
         if summon_reads:
@@ -768,8 +835,10 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     for aura in class_file.get('known_auras', []):
         expectations.append(Expectation(
             known_aura_label(aura), 'known_aura', aura, aura, None, str(aura), 'reference profile aura'))
-    learn = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
-            + [{'action': 'learn', 'actor': CASTER, 'spell': gating} for gating in sorted(known_spells)])
+    learn = (base_steps(class_file) + block_value_steps(class_file, spell.spell_id)
+            + [{'action': 'learn', 'actor': CASTER, 'spell': rank_id}]
+            + [{'action': 'learn', 'actor': CASTER, 'spell': gating} for gating in sorted(known_spells)]
+            + [{'action': 'learn', 'actor': CASTER, 'spell': setup} for setup in ally_cast or ()])
     budget = min(MAX_SCENARIO_STEPS - len(learn) - len(measured) - len(cast_steps) - len(after_cast)
                  - len(ally_grant_proofs), READ_BUDGET_MS // READ_STEP_MS)
     sampled, samples = sampled_reads(measured, rolled, budget)
@@ -786,6 +855,6 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         placed = rank_id if is_hostile(facts) else summon_carrier['summon']
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
                                   'health': DUMMY_HEALTH, 'distance': cast_distance(records, placed)}]
-    if (targets_resurrect(facts) or needs_ally_target) and cast_wanted:
+    if (targets_resurrect(facts) or needs_ally_target or ally_cast is not None) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations, periodic_totals

@@ -29,6 +29,7 @@ ATTACK_FIELDS = ('DmgClass', 'SpellFamilyName', 'SpellFamilyFlags[1]', 'Attribut
 WEAPON_REQUIREMENT_FIELDS = EQUIP_FIELDS + ATTACK_FIELDS
 INVENTORY_TYPE_MASK_FIELD = 'EquippedItemInventoryTypeMask'
 SERVER_INVENTORY_MASKS = 'server_inventory_masks'
+WEAPON_SET_SPELLS = 'weapon_set_spells'
 EQUIPMENT_SLOT_RANGED = 17
 MAIN_HAND, OFF_HAND, RANGED = 'main_hand', 'off_hand', 'ranged'
 WEAPON_SET_HANDS = ((MAIN_HAND, EQUIPMENT_SLOT_MAIN_HAND), (OFF_HAND, EQUIPMENT_SLOT_OFF_HAND),
@@ -136,6 +137,38 @@ def check_weapon_sets(class_file: dict) -> None:
         raise ValueError('weapon must be the default weapon set main hand')
 
 
+def check_weapon_set_spells(class_file: dict) -> None:
+    sets = class_file.get('weapon_sets', {})
+    for name, spells in class_file.get(WEAPON_SET_SPELLS, {}).items():
+        if name not in sets:
+            raise ValueError(f'{WEAPON_SET_SPELLS} {name} is not in weapon_sets')
+        if not isinstance(spells, list) or not spells or any(
+                isinstance(spell, bool) or not isinstance(spell, int) or spell <= 0 for spell in spells):
+            raise ValueError(f'{WEAPON_SET_SPELLS} {name} must be a non-empty list of positive spell ids')
+        if len(set(spells)) != len(spells):
+            raise ValueError(f'{WEAPON_SET_SPELLS} {name} names a spell twice')
+
+
+def weapon_set_spells(class_file: dict, name: str | None) -> list[int]:
+    return class_file.get(WEAPON_SET_SPELLS, {}).get(name, [])
+
+
+def check_weapon_set_relearns(class_file: dict, key: str, scenario: dict) -> None:
+    set_spells = {spell for spells in class_file.get(WEAPON_SET_SPELLS, {}).values() for spell in spells}
+    known: set[int] = set()
+    for step in scenario['steps']:
+        spell = step.get('spell')
+        if spell not in set_spells or step['action'] not in ('learn', 'unlearn'):
+            continue
+        if step['action'] == 'unlearn':
+            known.discard(spell)
+        elif spell in known:
+            raise ValueError(f'Scenario {key} learns {spell} again while its weapon set has it learned; give its spell '
+                             f'a spell_weapon_sets set without {WEAPON_SET_SPELLS} {spell}')
+        else:
+            known.add(spell)
+
+
 def check_server_inventory_masks(class_file: dict) -> None:
     for spell_id, entry in class_file.get(SERVER_INVENTORY_MASKS, {}).items():
         if set(entry) != {'mask', 'source'}:
@@ -164,6 +197,7 @@ def class_file_among(paths: list[Path], class_id: int) -> dict:
                 server_dbc_dir(class_file['dbc_dir'])
             if 'weapon_sets' in class_file:
                 check_weapon_sets(class_file)
+            check_weapon_set_spells(class_file)
             check_server_inventory_masks(class_file)
             return class_file
     raise ValueError(f'No class file for class {class_id}')
@@ -203,6 +237,8 @@ def base_steps(class_file: dict) -> list[dict]:
     if 'weapon_sets' in class_file and 'weapon_set' not in class_file:
         class_file = with_weapon_set(class_file, class_file['default_weapon_set'], {})
     steps = [{'action': 'wait', 'label': 'settle', 'ms': SETTLE_MS}]
+    steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell}
+              for spell in weapon_set_spells(class_file, class_file.get('weapon_set'))]
     for weapon, slot in equipped_weapons(class_file):
         steps.append({'action': 'add_item', 'actor': CASTER, 'item': weapon['item']})
         steps.append({'action': 'equip', 'actor': CASTER, 'item': weapon['item'], 'slot': slot})
@@ -332,11 +368,16 @@ def off_hand_weapon(class_file: dict, item: int) -> dict:
     weapon = next((weapon for weapon in class_file.get('off_hand_weapons', []) if weapon['item'] == item), None)
     if weapon is None:
         raise ValueError(f'off-hand item {item} is not in the class file off_hand_weapons')
+    grants = weapon.get('grants', [])
+    if not isinstance(grants, list) or not all(type(spell) is int and spell > 0 for spell in grants):
+        raise ValueError(f'off-hand item {item} grants is a list of spell ids learned before it is equipped, not '
+                         f'{grants!r}')
     return weapon
 
 
-def off_hand_steps(item: int) -> list[dict]:
-    return [{'action': 'add_item', 'actor': CASTER, 'item': item},
+def off_hand_steps(item: int, grants: tuple[int, ...] = ()) -> list[dict]:
+    return [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in grants] + [
+            {'action': 'add_item', 'actor': CASTER, 'item': item},
             {'action': 'equip', 'actor': CASTER, 'item': item, 'slot': EQUIPMENT_SLOT_OFF_HAND}]
 
 

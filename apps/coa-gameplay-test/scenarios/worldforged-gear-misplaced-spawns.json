@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Worldforged gear pickups stand only at their recorded spots: misplaced copies removed, a lone misplaced one moved, a missing one added",
-  "contract": "Recorded find positions (LootCollector Vol'jin/Bronzebeard databases, archived Ascension pins) put One Ring to Flame Them All (item 515383, object 95934) only in Un'Goro Crater, Ambercoil Pendant (515163, object 96138) in Feralas and Durnar's Stein (object 1345041) in Loch Modan. Before rev_20261024_90 the ring also stood in the Valley of Trials (guid 6942006) and Ashenvale (guid 6942007), the pendant stood only in the Arathi Highlands (guid 6940038), and the stein had no spawn at all.",
+  "contract": "Recorded find positions (LootCollector Vol'jin/Bronzebeard databases, archived Ascension pins) put One Ring to Flame Them All (item 515383, object 95934) only in Un'Goro Crater, Ambercoil Pendant (515163, object 96138) in Feralas and Durnar's Stein (object 1345041) in Loch Modan. Before rev_20261024_90 the ring also stood in the Valley of Trials (guid 6942006) and Ashenvale (guid 6942007), the pendant stood only in the Arathi Highlands (guid 6940038), and the stein had no spawn at all. Ember Crown (item 515384, object 95933) also had a misplaced Valley of Trials copy (guid 6941687, #8222) that rev_20261024_90 removed.",
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -4971.7, "y": -3142.8, "z": 322.2, "o": 0 },
   "players": [
@@ -25,6 +25,9 @@
     { "action": "teleport", "actor": "p", "map": 1, "x": -424.5, "y": -4299.4, "z": 44.8, "o": 0 },
     { "action": "wait", "ms": 3000 },
     { "action": "assert", "label": "DISCRIMINATING: no misplaced ring copy in the Valley of Trials", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95934, "equals": 0 },
+    { "action": "teleport", "actor": "p", "map": 1, "x": -452.2, "y": -4317.3, "z": 45.9, "o": 0 },
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: no misplaced Ember Crown copy in the Valley of Trials (#8222)", "actor": "p", "metric": "nearby_gameobject_count", "entry": 95933, "equals": 0 },
 
     { "action": "teleport", "actor": "p", "map": 1, "x": 2850.4, "y": -1121.9, "z": 221.3, "o": 0 },
     { "action": "wait", "ms": 3000 },

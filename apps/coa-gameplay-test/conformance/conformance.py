@@ -11,23 +11,23 @@ from typing import Sequence
 
 from behaviours import behaviour_entries, behaviour_scenario, sized_behaviour
 from classes import CHARACTER_LEVEL, PROGRESSION_HEADER, ClassSpell, class_spells
-from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, VERDICTS_FILE, BuildMismatch, ScenarioDrift,
-                     evaluate, literal_values, write_levers, write_outputs)
+from compare import (ALERTS_FILE, LEVERS_FILE, REPORT_FILE, STATUSES, SUPERSEDED_BY, VERDICTS_FILE, BuildMismatch,
+                     ScenarioDrift, evaluate, literal_values, write_levers, write_outputs)
 from coverage import (COVERAGE_FILE, EvidenceError, clause_coverage, clause_coverage_lines, fragment_entries,
                       load_clauses, load_consumption, write_coverage, write_fragment)
 from diff import IMPACT_FILE, diff_directories, write_impact
 from expiry import EXPIRY_KIND, behaviour_expiry, trigger_expiry
 from packets import PacketError, write_packets
 from passives import passive_scenario
-from hits import (REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts, gate_stacks,
-                  MELEE_LABEL, hit_parts, melee_parts, rank_hit, records_of, reference_caster, reference_hit_model,
+from hits import (CLOSED, REFERENCE_TARGET, UNMODELLED, Unmodelled, aura_modifiers, casts_needed, floored_casts,
+                  gate_stacks, MELEE_LABEL, hit_parts, melee_parts, rank_hit, records_of, reference_caster, reference_hit_model,
                   reference_melee_model)
 from ledger import ledger, parse_text_bases, write_ledger
 from procs import (DELTA_CHECK, delta_proc_plan, delta_proc_scenario, modifier_key, proc_entries, proc_plan,
                    proc_scenario, proc_status_expectation, proc_unmodelled_expectation, shares_aura, shares_proc_spell,
                    trigger_key)
-from profile import (DBC_DIR, DbcSetMismatch, control_entries, for_entry, ledger_consumption_path,
-                     load_class_file, server_dbc_dir, spell_dbc_sha256)
+from profile import (DBC_DIR, DbcSetMismatch, check_weapon_set_relearns, control_entries, for_entry,
+                     ledger_consumption_path, load_class_file, server_dbc_dir, spell_dbc_sha256)
 from questions import QUESTIONS_FILE
 from sample import SampleError, load_buckets, parse_minimums, sample_document
 from scaffold import LIVE_BASELINE_HEADER, SHARED_DEFINES, scaffold_class
@@ -76,6 +76,7 @@ class ManifestWriter:
             raise ValueError(f'Duplicate scenario key {key}')
         file, sha = None, None
         if scenario is not None:
+            check_weapon_set_relearns(self.class_file, key, scenario)
             scenario = pinned_fixture_armor(scenario)
             text = json.dumps(run.validate(scenario, run.SIMULATED_CLOCK), indent=2) + '\n'
             file = f'{SCENARIO_DIR}/{key}.json'
@@ -139,10 +140,43 @@ def add_values(writer: ManifestWriter, spell: ClassSpell, dbc_dir: Path):
             add_periodic_total(writer, spell, rank_id, item)
 
 
+SUPERSEDED_HITS = 'superseded_hits'
+SUPERSEDED_HITS_CLASS = 27
+MENTOR_DECISION = re.compile(r'\bD-\d+\b')
+
+
+def superseded_hit(class_file: dict, rank_id: int) -> dict | None:
+    entry = next((entry for entry in class_file.get(SUPERSEDED_HITS, ()) if entry['spell'] == rank_id), None)
+    if entry is None:
+        return None
+    replaced_by = entry.get('replaced_by')
+    if (not {'spell', 'reason', 'replaced_by'} <= set(entry) <= {'spell', 'reason', 'replaced_by', 'ruling'}
+            or not isinstance(entry['reason'], str)
+            or not entry['reason'].strip() or not isinstance(replaced_by, list) or not replaced_by
+            or not all(isinstance(label, str) and label.strip() for label in replaced_by)
+            or f'{rank_id} hit_mean' in replaced_by):
+        raise ValueError(f'{SUPERSEDED_HITS} {rank_id} takes spell, a non-blank reason and replaced_by, the labels '
+                         f'that replace the hit (not the hit itself), and for a class other than '
+                         f'{SUPERSEDED_HITS_CLASS} a ruling, not {entry!r}')
+    ruling = entry.get('ruling')
+    if class_file['class_id'] != SUPERSEDED_HITS_CLASS and not (
+            isinstance(ruling, str) and MENTOR_DECISION.search(ruling)):
+        raise ValueError(f'{SUPERSEDED_HITS} {rank_id} in class {class_file["class_id"]} needs a ruling field naming '
+                         f'a mentor decision (D-<number>), not {ruling!r}')
+    return entry
+
+
 def add_hit(writer: ManifestWriter, spell: ClassSpell):
     class_file = writer.class_file
     key = scenario_key(class_file['name'], 'hit', spell.max_rank)
     label = f'{spell.max_rank} hit_mean'
+    superseded = superseded_hit(class_file, spell.max_rank)
+    if superseded is not None:
+        writer.add(key, 'hit', spell, spell.max_rank,
+                   [Expectation(label, 'unmodelled', spell.spell_id, spell.max_rank, None, '',
+                                f'{CLOSED}no check needed: {superseded["reason"]}',
+                                {SUPERSEDED_BY: list(superseded['replaced_by'])})])
+        return
     try:
         casts = floored_casts(class_file, spell.max_rank,
                               casts_needed(reference_hit_model(class_file, spell.max_rank)))
@@ -613,7 +647,7 @@ def mounted_roots(worktree: Path) -> list[Path]:
 
 def prove_command(args) -> int:
     from prove import SUMMARY_FILE, ProveSpec, is_under, prove
-    from pilot import hit_ratio_pilot, sizable_labels
+    from pilot import hit_ratio_pilot, sizable_labels, trial_floors
     from prove_ledger import ledger_hooks
     if not (args.behaviour or args.proc or args.trigger):
         raise ValueError('prove needs at least one --behaviour, --proc or --trigger entry of the class file')
@@ -635,7 +669,7 @@ def prove_command(args) -> int:
     out = Path(args.out).resolve()
     spec = ProveSpec(out, args.worktree, args.runs, args.build, args.timeout_ms, db_workers=args.db_workers)
     rows, enrich, annotate = ledger_hooks(args.clauses) if args.clauses else (None, None, None)
-    pilot = hit_ratio_pilot(sizable_labels(sized), make_pilot, make)
+    pilot = hit_ratio_pilot(sizable_labels(sized), make_pilot, make, floors=trial_floors(sized))
     code = prove(spec, make, rows, enrich, annotate, pilot=pilot)
     print(f'{out / SUMMARY_FILE}: exit {code}')
     return code

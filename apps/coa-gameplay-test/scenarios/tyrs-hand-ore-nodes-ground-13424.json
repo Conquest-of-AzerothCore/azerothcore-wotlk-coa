@@ -1,0 +1,168 @@
+{
+  "schema": 1,
+  "name": "Tyr's Hand ore nodes rest on the ground (#13424)",
+  "contract": "#13424 reported floating and hidden nodes in Tyr's Hand. Truesilver Deposit 200771 floated 9.05 yd above its pool partner's spot and pool 13556 (Rich Thorium 200731, Truesilver 200773) lay 2.37 yd under the ground; rev_20261124_13424 grounds them. The Mountain Silversage nodes from the same report are already grounded on main and covered by mountain-silversage-node-ground-12188 and mountain-silversage-node-ground-12152. Expected: each spawn is at its spot and grounded. The spawns are checked through their data, so the pools do not need to pick them.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 1533.41,
+    "y": -5413.83,
+    "z": 80.64,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200771 is at its spot",
+      "metric": "spawn_distance",
+      "x": 1534.41,
+      "y": -5413.83,
+      "z": 80.14,
+      "max": 0.3,
+      "guid": 200771,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Truesilver 200771 rests on the ground instead of 9.05 yd above it",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 200771,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200771 is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 200771,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200771 is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 200771,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": 1735.97,
+      "y": -5562.36,
+      "z": 120.79,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200731 is at its spot",
+      "metric": "spawn_distance",
+      "x": 1736.97,
+      "y": -5562.36,
+      "z": 120.29,
+      "max": 0.3,
+      "guid": 200731,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Rich Thorium 200731 rests on the ground instead of 2.37 yd under it",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 200731,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200731 is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 200731,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200731 is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 200731,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200773 is at its spot",
+      "metric": "spawn_distance",
+      "x": 1736.97,
+      "y": -5562.36,
+      "z": 120.29,
+      "max": 0.3,
+      "guid": 200773,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Truesilver 200773 rests on the ground instead of 2.37 yd under it",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 200773,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200773 is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 200773,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 200773 is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 200773,
+      "spawn_type": "gameobject"
+    }
+  ]
+}
