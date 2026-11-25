@@ -26876,6 +26876,807 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "706190 Effect[1] aura 172 SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK BasePoints 14 + DieSides 1 = +15% ($s1 = 15; Spell.dbc). Brown Horse 458 (Effect[1] aura 32 +60% mounted speed; Templar 562302 precedent) set on caster in both phases: Unit::UpdateSpeed scales mounted speed by max(non_stack_bonus, stack_bonus) * (1 + 0.60) = 1.60 before learn (control) and 1.15 * 1.60 = 1.84 after real learn of 706190 (tol 0.001; excludes 1.60 and 2.08). Reference search 2026-11-25: coa-history 706190: 0 events; coabuildhub entry 706190 matches verbatim."
+    },
+    {
+      "spell": 802043,
+      "name": "Entropic Retaliation (critical strike chance +2% per dodged attack)",
+      "kind": "metric_delta",
+      "variant": "crit_gain",
+      "label_suffix": "crit_gain",
+      "quote": "Avoiding an attack now increases your critical strike and dodge chance by $572613s1% for $572613d,",
+      "trigger_spell": 60235,
+      "gate_spell": 802043,
+      "target": "caster",
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "after_trigger_ms": 200
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 572613
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 1 dodged melee strike applies 1 stack of Entropic Retaliation 572613 after learning 802043 (0 before)."
+          }
+        ]
+      },
+      "metric": "melee_crit_chance_refreshed",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 3.0,
+      "expected_gain": 2.0,
+      "tolerance": 0.01,
+      "wait_ms": 300,
+      "expire_ms": 7000,
+      "observe_source": "802043 AscensionCultistEvents.cpp:65,235 casts 572613 on caster on avoided attack; 572613 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 1 + DieSides 1 = +2% ($572613s1 = 2; Spell.dbc). Striker casts melee 2118233 once with caster_avoidance dodge 100 (SetRealDodgeParryForTest does not alter sheet crit/dodge). Reads melee_crit_chance_refreshed before (control: 802043 unlearned, 572613 == 0) and after real learn of 802043 (572613 == 1): expected_gain +2.0 points (tol 0.01; excludes 0 and +4.0). Reference search 2026-11-25: coa-history 572613: 4 refreshes/applies in 1 log; coabuildhub 802043 matches 2% / 6s / 5 stacks."
+    },
+    {
+      "spell": 802043,
+      "name": "Entropic Retaliation (dodge chance +2% per dodged attack)",
+      "kind": "metric_delta",
+      "variant": "dodge_gain",
+      "label_suffix": "dodge_gain",
+      "quote": "Avoiding an attack now increases your critical strike and dodge chance by $572613s1% for $572613d,",
+      "trigger_spell": 60235,
+      "gate_spell": 802043,
+      "target": "caster",
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "after_trigger_ms": 200
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 572613
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 1 dodged melee strike applies 1 stack of 572613 after learning 802043 (0 before)."
+          }
+        ]
+      },
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 3.0,
+      "expected_gain": 2.0,
+      "tolerance": 0.01,
+      "wait_ms": 300,
+      "expire_ms": 7000,
+      "observe_source": "802043 casts 572613 on avoided attack; 572613 Effect[1] aura 49 SPELL_AURA_MOD_DODGE_PERCENT BasePoints 1 + DieSides 1 = +2% ($572613s1 = 2; Spell.dbc). SetRealDodgeParryForTest only sets m_realDodge, leaving PLAYER_DODGE_PERCENTAGE (dodge_chance) unaffected so 572613's +2.0% sheet dodge gain is read cleanly before (0 stacks) vs after real learn of 802043 (1 stack): expected_gain +2.0 (tol 0.01). Reference search 2026-11-25: coa-history 572613: 4 events in 1 log; installed Spell.dbc governs."
+    },
+    {
+      "spell": 802043,
+      "name": "Entropic Retaliation (572613 held at 5.6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Avoiding an attack now increases your critical strike and dodge chance by $572613s1% for $572613d,",
+      "trigger_spell": 60235,
+      "gate_spell": 802043,
+      "target": "caster",
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "after_trigger_ms": 200
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 572613
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5400,
+      "expire_ms": 7000,
+      "game_time": {
+        "after": [
+          5700,
+          6000
+        ]
+      },
+      "observe_source": "572613 DurationIndex 32 = 6000 ms ($572613d = 6 sec; Spell.dbc). Strike 2118233 lands at ~200 ms after trigger; reading at wait_ms 5400 (~5600 ms after strike, > 5400 ms = 0.9 * 6000) reads 572613 absent in control (0) and present after learn (1). Paired with duration_gone. Reference search 2026-11-25: coa-history 572613: 4 events; coabuildhub 802043 matches 6 sec."
+    },
+    {
+      "spell": 802043,
+      "name": "Entropic Retaliation (572613 gone at 6.4 sec)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Avoiding an attack now increases your critical strike and dodge chance by $572613s1% for $572613d,",
+      "trigger_spell": 60235,
+      "gate_spell": 802043,
+      "target": "caster",
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 200,
+        "after_trigger_ms": 200
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 572613
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 572613 actually applied once before expiring in the treatment phase."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 572613
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 6200,
+      "expire_ms": 7000,
+      "game_time": {
+        "after": [
+          6500,
+          6750
+        ]
+      },
+      "observe_source": "572613 DurationIndex 32 = 6000 ms (Spell.dbc). Reading at wait_ms 6200 (~6400 ms after strike, < 6600 ms = 1.1 * 6000) reads 572613 gone (0) after ally_arm confirms 1 application landed. Paired with duration_held. Reference search 2026-11-25: coa-history 572613: 4 events."
+    },
+    {
+      "spell": 802043,
+      "name": "Entropic Retaliation (caps at 5 stacks after 6 dodged strikes)",
+      "kind": "metric_delta",
+      "variant": "stack_cap",
+      "label_suffix": "stack_cap",
+      "quote": "stacking up to $572613u times.",
+      "trigger_spell": 60235,
+      "gate_spell": 802043,
+      "target": "caster",
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 6,
+        "wait_ms": 200,
+        "after_trigger_ms": 200
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 572613
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Confirms all 6 dodged strikes applied 572613 (0 before learn, 6 after)."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 572613
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 300,
+      "expire_ms": 7000,
+      "observe_source": "572613 StackAmount = 5 ($572613u = 5; Spell.dbc). Six dodged melee strikes 2118233 (200 ms apart, well inside 6000 ms duration) apply 572613 6 times (ally_arm aura_apply_count 0 -> 6) while aura_stacks caps at 5 (0 before learn). Reference search 2026-11-25: coa-history 572613: 4 events; coabuildhub 802043 matches 5 stacks."
+    },
+    {
+      "spell": 802728,
+      "name": "Eye of N'zoth (Tentacle spell critical strike chance +10%)",
+      "kind": "metric_delta",
+      "variant": "tentacle_crit_chance",
+      "label_suffix": "tentacle_crit_chance",
+      "quote": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
+      "trigger_spell": 801153,
+      "gate_spell": 802728,
+      "target": "dummy",
+      "cast_power": 2000,
+      "metric": "owned_creature_school_spell_crit_chance",
+      "fields": {
+        "entry": 50272,
+        "spell": 804999,
+        "school_mask": 32
+      },
+      "before_expected": 0.0,
+      "expected": 10.0,
+      "expected_gain": 10.0,
+      "tolerance": 0.05,
+      "wait_ms": 1500,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "802728 Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190) aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 9 + DieSides 1 = +10% ($s1 = 10), radius 45 yd (SpellAuras.cpp:2975; Spell.dbc). Summons Tentacle of C'Thun (801153 -> entry 50272, 30 s) in both phases (expire_ms 31000 despawns before-phase tentacle): reads owned_creature_school_spell_crit_chance for 804999 Shadow before (control) and after real learn of 802728: expected_gain +10.0 points (tol 0.05). Reference search 2026-11-25: coa-history 802728: 0 events (passive); coabuildhub 802728 matches verbatim ('10%')."
+    },
+    {
+      "spell": 802728,
+      "name": "Eye of N'zoth (Tentacle critical damage +10%)",
+      "kind": "hit_ratio",
+      "variant": "tentacle_crit_damage",
+      "label_suffix": "tentacle_crit_damage",
+      "quote": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
+      "expected": 1.1,
+      "observe_spell": 804999,
+      "cast_spell": 500110,
+      "caster_entry": 50272,
+      "warmup": [
+        801153
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          802728
+        ]
+      },
+      "critical": true,
+      "trials": 6,
+      "cast_power": 2000,
+      "cast_wait_ms": 2000,
+      "owned_auras": [
+        [
+          823764,
+          1,
+          50272
+        ]
+      ],
+      "expected_source": "802728 Effect[1] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190, EffectApplyAreaAura) aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS MiscValue 127 (all schools), BasePoints 9 + DieSides 1 = +10% ($s1 = 10; Unit.cpp:10690-10703 multiplies total critical damage by 1.10; Spell.dbc). Tentacle of C'Thun (warmup 801153 -> entry 50272, 30 s duration) casts Shadow bolt 804999 (1.5 s cadence via Mental Assault 801151; AscensionCultistData.h:113 + Contracts.cpp:287 adds 0.08 * caster SP) while caster engages dummy with 500110. fixture spell_power 50000 adds +4000 flat damage per hit so base roll variance is <0.3%; 6 trials * 2000 ms = 12 s < 30 s lifetime. Precondition target_auras on dummy: Vulnerable 213 (aura 197 +10000% crit taken) forces every 804999 to crit in both arms; cast_unit_auras 823764 on caster (read through the owner by GetEffectiveResistChance, matching Necromancer minion precedent) and owned_auras 823764 on 50272 remove partial resists. Expected critical damage ratio 1.10 (excludes 1.0 and 1.20). Reference search 2026-11-25: coa-history 802728: 0 events; coabuildhub 802728 matches verbatim.",
+      "warmup_power": 2000,
+      "target_auras": [
+        [
+          213,
+          1
+        ]
+      ],
+      "fixture": {
+        "spell_power": 50000
+      },
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (transforms into Faceless Monstrosity display 280071)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "display_id",
+      "fields": {},
+      "before_expected": 280072,
+      "expected": 280071,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "807128 AscensionCultistAuras.cpp:93-98 casts 806769 when Herald of the Depths 520326 applies; AscensionCultistContracts.cpp:81-82,121 maps 520326 to creature 250042 (creature_template_model DisplayID 280072, rev_20261031_99_cultist_herald_caster_display.sql:8) and 806769 to creature 250044 (creature_template_model DisplayID 280071, rev_1794304106850624051.sql:5, Faceless Monstrosity). Both phases set 85 Insanity (500706 == 85 and threshold 680604 == 1 read via after_setup_stacks), cast real Herald 520326, and read caster display_id: 280072 before learning 807128 (control), 280071 after. expire_ms 21000 clears 20s Herald. Reference search 2026-11-25: coa-history 806769: 6 applies in 2 logs; coabuildhub 807128 matches verbatim."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (critical strike chance +20% while Herald active)",
+      "kind": "metric_delta",
+      "variant": "crit_chance",
+      "label_suffix": "crit_chance",
+      "quote": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806769
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 806769 is absent in control and present after learning 807128."
+          }
+        ]
+      },
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 1.0,
+      "expected": 21.0,
+      "expected_gain": 20.0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "807128 casts 806769 on Herald 520326 apply (AscensionCultistAuras.cpp:95); 806769 Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 19 + DieSides 1 = +20% ($806769s2 = 20; Spell.dbc). Reads spell_crit_chance (Shadow) under real Herald 520326 (Insanity 85, 680604 == 1 read before cast) before vs after real learn of 807128: expected_gain +20.0 (tol 0.05). Reference search 2026-11-25: coa-history 806769: 6 applies in 2 logs; coabuildhub 807128 matches."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (critical healing +20% while Herald active)",
+      "kind": "metric_delta",
+      "variant": "crit_healing",
+      "label_suffix": "crit_healing",
+      "quote": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 500711,
+      "gate_spell": 807128,
+      "target": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        60235,
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807312
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 807312 (aura 50 +20% crit heal) is absent in control and present after learning 807128."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500711,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 48453,
+      "expected": 58144,
+      "expected_ratio": 1.2,
+      "tolerance": 0.005,
+      "wait_ms": 2200,
+      "expire_ms": 21000,
+      "phase_since": true,
+      "void_on_cast_failure": true,
+      "observe_source": "807128 casts 807312 on Herald 520326 apply (AscensionCultistAuras.cpp:96); 807312 Effect[0] aura 50 SPELL_AURA_MOD_CRITICAL_HEALING_AMOUNT BasePoints 19 + DieSides 1 = +20% ($806769s2 = 20; Unit.cpp:10752 multiplies crit heal by 1.20). Both phases set 85 Insanity, force_crit: spell, +50000 SP, cast real Herald 520326 (verified active), and cast Eldritch Mending 500711 (1500 ms cast time, wait_ms 2200) on caster: ratio of critical heal with vs without 807128 = 1.20 +- 0.005 (excludes 1.0 and 1.40). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "force_crit": "spell"
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (Herald duration reduced by 5 sec: held at 14.0 sec)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "but reducing its duration by $/1000;806769s1 sec.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520326
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 14000,
+      "expire_ms": 7000,
+      "game_time": {
+        "after": [
+          13800,
+          14300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "807128 AscensionCultistAbilities.cpp:112-113 subtracts abs(Amount(806769)) = 5000 ms from Herald 520326 (20000 ms -> 15000 ms; Spell.dbc). Reads aura 520326 at 14000 ms (> 13500 ms = 0.9 * 15000): held (1) in both control (20s) and treatment (15s). Paired with duration_gone. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (Herald duration reduced by 5 sec: gone at 16.0 sec)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "but reducing its duration by $/1000;806769s1 sec.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520326
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 16000,
+      "expire_ms": 5000,
+      "game_time": {
+        "after": [
+          15800,
+          16300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "807128 reduces Herald 520326 duration 20000 -> 15000 ms (AscensionCultistAbilities.cpp:112-113; Spell.dbc). Reads aura 520326 at 16000 ms (< 16500 ms = 1.1 * 15000): still present in control without 807128 (1), gone with 807128 (0). Paired with duration_held. Reference search 2026-11-25: coa-history 806769: 6 applies."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (immune to fear while Herald active)",
+      "kind": "metric_delta",
+      "variant": "immune_fear",
+      "label_suffix": "immune_fear",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 39176,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 39176
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants Immunity(player, Herald, {MECHANIC_FEAR, MECHANIC_HORROR, MECHANIC_POLYMORPH}, true) while Herald 520326 is active. Dummy casts Fear 39176 (Mechanic 5, 0 mana cost, single Fear aura e0=(6,7,6) in Spell.dbc) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (immune to horrify while Herald active)",
+      "kind": "metric_delta",
+      "variant": "immune_horrify",
+      "label_suffix": "immune_horrify",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 64044,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 64044
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants MECHANIC_HORROR immunity (and 807312 Effect[1] aura 77 misc 24) while Herald 520326 is active. Dummy casts Psychic Horror 64044 (Mechanic 24, Templar 804228 fixture) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (immune to polymorph while Herald active)",
+      "kind": "metric_delta",
+      "variant": "immune_polymorph",
+      "label_suffix": "immune_polymorph",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 13323,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 13323
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants MECHANIC_POLYMORPH immunity while Herald 520326 is active. Dummy casts Polymorph 13323 (Mechanic 17, 8s) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
     }
   ],
   "player_observations": [],

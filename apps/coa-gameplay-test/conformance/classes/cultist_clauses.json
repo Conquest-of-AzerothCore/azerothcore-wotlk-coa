@@ -3892,15 +3892,22 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "increases your critical strike and dodge chance by $572613s1%",
+        "claim": "increases your critical strike",
         "labels": [
-          "802043 effect_value 572613e0 #0"
+          "802043 behaviour_metric_delta crit_gain"
         ]
       },
       {
         "claim": "for $572613d",
         "labels": [
-          "802043 spell_duration 572613 #1"
+          "802043 behaviour_metric_delta duration_held",
+          "802043 behaviour_metric_delta duration_gone"
+        ]
+      },
+      {
+        "claim": "and dodge chance by $572613s1%",
+        "labels": [
+          "802043 behaviour_metric_delta dodge_gain"
         ]
       }
     ]
@@ -3909,7 +3916,7 @@
     "spell": 802043,
     "clause": "stacking up to $572613u times.",
     "labels": [
-      "802043 max_stacks 572613 #2"
+      "802043 behaviour_metric_delta stack_cap"
     ],
     "kind": "claim"
   },
@@ -4019,10 +4026,21 @@
   {
     "spell": 802728,
     "clause": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
-    "labels": [
-      "802728 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance",
+        "labels": [
+          "802728 behaviour_metric_delta tentacle_crit_chance"
+        ]
+      },
+      {
+        "claim": "and critical damage of your Tentacles by $s1%.",
+        "labels": [
+          "802728 behaviour_hit_ratio tentacle_crit_damage"
+        ]
+      }
+    ]
   },
   {
     "spell": 803236,
@@ -4614,23 +4632,45 @@
   {
     "spell": 807128,
     "clause": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
-    "labels": [
-      "807128 effect_value 806769e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and critical strike chance by $806769s2%,",
+        "labels": [
+          "807128 behaviour_metric_delta crit_chance"
+        ]
+      },
+      {
+        "claim": "increasing your critical healing",
+        "labels": [
+          "807128 behaviour_metric_delta crit_healing"
+        ]
+      },
+      {
+        "claim": "you now transform into a Faceless Monstrosity,",
+        "labels": [
+          "807128 behaviour_metric_delta transform"
+        ]
+      }
+    ]
   },
   {
     "spell": 807128,
     "clause": "but reducing its duration by $/1000;806769s1 sec.",
     "labels": [
-      "807128 effect_value 806769e0 #1"
+      "807128 behaviour_metric_delta duration_held",
+      "807128 behaviour_metric_delta duration_gone"
     ],
     "kind": "claim"
   },
   {
     "spell": 807128,
     "clause": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
-    "labels": [],
+    "labels": [
+      "807128 behaviour_metric_delta immune_fear",
+      "807128 behaviour_metric_delta immune_horrify",
+      "807128 behaviour_metric_delta immune_polymorph"
+    ],
     "kind": "claim"
   },
   {
