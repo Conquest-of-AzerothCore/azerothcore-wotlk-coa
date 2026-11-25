@@ -2018,7 +2018,10 @@
     "spell": 582307,
     "clause": "Each point of Insanity now reduces mana costs of your instant cast spells and abilities by $s1%.",
     "labels": [
-      "582307 effect_value e0 #0"
+      "582307 behaviour_metric_delta at_20",
+      "582307 behaviour_metric_delta at_50",
+      "582307 behaviour_metric_delta at_0",
+      "582307 behaviour_metric_delta casted_control"
     ],
     "kind": "claim"
   },
@@ -2516,7 +2519,10 @@
     "spell": 681106,
     "clause": "Each stack of Insanity increases the critical damage of your Netherstrike by $s1%.",
     "labels": [
-      "681106 effect_value e0 #0"
+      "681106 behaviour_hit_ratio crit_20",
+      "681106 behaviour_hit_ratio crit_50",
+      "681106 behaviour_hit_ratio crit_0",
+      "681106 behaviour_metric_delta mod_50"
     ],
     "kind": "claim"
   },
@@ -3619,16 +3625,31 @@
   {
     "spell": 572846,
     "clause": "Crush enemies in front of you, dealing $s2% Weapon Damage plus ${$m1+0} as Shadow damage",
-    "labels": [
-      "572846 effect_value e1 #0",
-      "572846 effect_value e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $s2% Weapon Damage plus ${$m1+0} as Shadow damage",
+        "labels": [
+          "572846 effect_value e1 #0",
+          "572846 effect_value e0 #1"
+        ]
+      },
+      {
+        "claim": "Crush enemies in front of you",
+        "labels": [
+          "572846 behaviour_metric_delta cone"
+        ]
+      }
+    ]
   },
   {
     "spell": 572846,
     "clause": "and draining 40 Insanity.",
-    "labels": [],
+    "labels": [
+      "572846 behaviour_metric_delta drain_40",
+      "572846 behaviour_metric_delta drain_60_to_20",
+      "572846 behaviour_metric_delta gate_59"
+    ],
     "kind": "claim"
   },
   {
@@ -3809,21 +3830,28 @@
     "spell": 806830,
     "clause": "Smash an enemy for $s1% Weapon Damage plus ${$m2+0} Shadow damage,",
     "labels": [
-      "806830 effect_value e0 #0",
-      "806830 effect_value e1 #1"
+      "806830 behaviour_metric_delta damage_ref",
+      "806830 behaviour_metric_delta damage_ap"
     ],
     "kind": "claim"
   },
   {
     "spell": 806830,
     "clause": "ignoring absorption effects and draining 40 Insanity.",
-    "labels": [],
+    "labels": [
+      "806830 behaviour_metric_delta ignore_absorb",
+      "806830 behaviour_metric_delta ignore_absorb_control",
+      "806830 behaviour_metric_delta drain_40",
+      "806830 behaviour_metric_delta gate_39"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806830,
     "clause": "$?s704869[ Refreshes a charge of Blade of the Empire.][]",
-    "labels": [],
+    "labels": [
+      "806830 behaviour_metric_delta hand_of_nzoth"
+    ],
     "kind": "claim"
   },
   {
