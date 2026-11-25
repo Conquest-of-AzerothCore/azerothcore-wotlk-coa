@@ -19061,6 +19061,1152 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "704473 DurationIndex 8 = 15000 ms ($d = 15 sec, SpellDuration.dbc). Final tick of Hand of Yogg-Saron 704476 fires at 15000 ms and refreshes 704473 to expire at 30000 ms (704476 read 0 on ally). Reads 704473 absent before cast (0), present at 29000 ms (14000 ms after final tick > 13500 ms = 0.9*15000), and gone at 31000 ms (16000 ms after final tick < 16500 ms = 1.1*15000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+    },
+    {
+      "spell": 300287,
+      "name": "Forbidden Resilience (-15% damage taken while Herald of the Depths is active)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "judge": "damage_ratio",
+      "health_loss": true,
+      "expected": 0.85,
+      "quote": "While Herald of the Depths is active, you now take $s2% less damage",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "caster_health_from_pct": 99,
+      "learn": [
+        92131,
+        520326
+      ],
+      "trials": 8,
+      "settle_ms": 100,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            300287
+          ],
+          "opening_casts": [
+            [
+              520326,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            300287
+          ],
+          "opening_casts": [
+            [
+              520326,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Forbidden Resilience 300287 Effect[1] BasePoints -16 + DieSides 1 = -15 ($s2 = 15; Spell.dbc). AscensionCultistContracts.cpp:345-346 applies AddPct(damage, -15) inside UnitScript::OnDamage while Herald of the Depths 520326 and 300287 are active; health_loss reads post-OnDamage HP loss from Void Zone 92559 (1000 Physical, no miss/crit). Herald 520326 is cast for real and verified present (aura == 1) in both arms; control unlearns 300287, treatment learns 300287 (expected 0.85). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300287,
+      "name": "Forbidden Resilience (Herald of the Depths gate: absent without form, -15% with form)",
+      "kind": "taken_hit",
+      "variant": "herald_gate",
+      "label_suffix": "herald_gate",
+      "judge": "damage_ratio",
+      "health_loss": true,
+      "expected": 0.85,
+      "quote": "While Herald of the Depths is active, you now take $s2% less damage",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "caster_health_from_pct": 99,
+      "learn": [
+        92131,
+        520326,
+        300287
+      ],
+      "trials": 8,
+      "settle_ms": 100,
+      "arms": [
+        {
+          "name": "control",
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              520326,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Form-gate partner for Forbidden Resilience 300287: 300287 learned in both arms; control reads Herald 520326 absent (0) and takes unreduced damage, treatment casts Herald 520326 and reads it present (1) and takes 0.85x damage. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300290,
+      "name": "Dark Rites (movement speed floored at 100% under slow while Herald active)",
+      "kind": "metric_delta",
+      "variant": "min_speed",
+      "label_suffix": "min_speed",
+      "quote": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
+      "trigger_spell": 520326,
+      "gate_spell": 300290,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "phase_auras": [
+        [
+          1715,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        },
+        {
+          "aura": 1715,
+          "source": "Hamstring 1715 (-50% speed) precondition fixture"
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 1.0,
+      "wait_ms": 1000,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Rites 300290 Effect[1] BasePoints 99 + DieSides 1 = 100 ($s2 = 100; Spell.dbc); patched to SPELL_AURA_MOD_MINIMUM_SPEED 100 in AscensionCultistContracts.cpp:112-113, gated on Herald 520326 in AscensionCultistAuras.cpp:99,137 and AscensionCultist.cpp:293. Precondition fixture: Hamstring 1715 (-50% run speed, 15s) set on caster in both phases. Before learning 300290 (with Herald 520326 cast): run_speed_rate = 0.5; after learning 300290 (with Herald 520326 cast and verified present alongside 1715): run_speed_rate = 1.0. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300290,
+      "name": "Dark Rites (Herald gate: slowed to 50% without Herald, floored at 100% with Herald)",
+      "kind": "metric_delta",
+      "variant": "herald_gate",
+      "label_suffix": "herald_gate",
+      "quote": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
+      "trigger_spell": 520326,
+      "gate_spell": 300290,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "phase_auras": [
+        [
+          1715,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        },
+        {
+          "aura": 1715,
+          "source": "Hamstring 1715 (-50% speed) precondition fixture"
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 1.0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-gate partner for Dark Rites 300290: 300290 learned at start; before phase has Hamstring 1715 without Herald 520326 -> run_speed_rate 0.5; after phase casts Herald 520326 (verified present with 1715) -> run_speed_rate 1.0. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (Herald grants 301259 for 10 sec)",
+      "kind": "metric_delta",
+      "variant": "window_duration",
+      "label_suffix": "window_duration",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 520326,
+      "gate_spell": 300291,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 301259,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10400,
+          10900
+        ]
+      },
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        }
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Void Barrier 300291 grants helper aura 301259 (DurationIndex 1 = 10000 ms; Spell.dbc) on casting Herald of the Depths 520326 (AscensionCultistAuras.cpp:91-92). Control (before learning 300291) casts 520326 and reads 301259 == 0; treatment learns 300291, waits for prior 520326 to expire, casts 520326 (verified present) and brackets 301259 expiry in game time: present at [9100..9600] ms and absent at [10400..10900] ms, strictly excluding 10% off (9000 / 11000 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (next Void Shield absorb doubled +100%)",
+      "kind": "metric_delta",
+      "variant": "absorb_doubled",
+      "label_suffix": "absorb_doubled",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 300291,
+      "learn": [
+        92131,
+        520326
+      ],
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "after_setup_reads": [
+        {
+          "spell": 520326,
+          "expected": 1
+        },
+        {
+          "spell": 301259,
+          "expected": 1
+        }
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        25000,
+        25000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 10,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 9606,
+      "after_at_least": 9552,
+      "after_at_most": 9660,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Void Barrier 300291 / 301259 Effect[0] BasePoints 99 + DieSides 1 = +100% ($301259s1 = 100; Spell.dbc; AscensionCultistAuras.cpp:129-130 amount *= 2). Level-60 Void Shield 578115 (BaseLevel 60, SpellLevel 60, MaxLevel 66, bp=775, die=55, coeff 2.0 SP) at player_spell_power 2000 has unboosted absorb [4776..4830]; doubled (+100%) is [9552..9660], broken by 10x Light of the Naaru 41394 (11000 Holy > 9660). Setup casts Herald 520326 and verifies both 520326 and 301259 present before 578115 cast. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (control: Void Shield absorb without 300291 after Herald)",
+      "kind": "metric_delta",
+      "variant": "absorb_control",
+      "label_suffix": "absorb_control",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 60235,
+      "learn": [
+        92131,
+        520326
+      ],
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "after_setup_reads": [
+        {
+          "spell": 520326,
+          "expected": 1
+        },
+        {
+          "spell": 301259,
+          "expected": 0
+        }
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        25000,
+        25000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 6,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4803,
+      "after_at_least": 4776,
+      "after_at_most": 4830,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Void Barrier 300291: casts Herald 520326 without 300291 (verifies 520326 == 1 and 301259 == 0), then casts Void Shield 578115 at SP 2000 -> unboosted absorb [4776..4830]. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (301259 consumed by the next Void Shield cast)",
+      "kind": "metric_delta",
+      "variant": "consumed_next",
+      "label_suffix": "consumed_next",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 300291,
+      "learn": [
+        92131,
+        520326
+      ],
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "after_setup_reads": [
+        {
+          "spell": 520326,
+          "expected": 1
+        },
+        {
+          "spell": 301259,
+          "expected": 1
+        }
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 301259,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Proves 'your next Void Shield' consumption for Void Barrier 300291: setup casts Herald 520326 and verifies 301259 == 1 before 578115; casting Void Shield 578115 consumes 301259 (AscensionCultistAbilities.cpp:19,27,34-40) so 301259 reads 0 afterward. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 301258,
+      "name": "Forbidden Strength (+10% Blade of the Empire crit while Herald active)",
+      "kind": "metric_delta",
+      "variant": "with_herald",
+      "label_suffix": "with_herald",
+      "quote": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
+      "trigger_spell": 520326,
+      "gate_spell": 301258,
+      "learn": [
+        92131,
+        502122
+      ],
+      "target": "caster",
+      "select_dummy": true,
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Forbidden Strength 301258 Effect[0] BasePoints 9 + DieSides 1 = 10 ($s1 = 10; Spell.dbc); AscensionCultistAbilities.cpp:104-105 adds Amount(301258) to OnSpellCritChance of Blade of the Empire (500720 chain, rank 502122) while Herald 520326 is active. Reads spell_done_crit_chance_scripted of 502122 against dummy with Herald 520326 cast for real in both phases, before and after learning 301258: expected gain +10.0 points (tol 0.05). Partnered with without_herald (gain 0). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 301258,
+      "name": "Forbidden Strength (no crit bonus without Herald of the Depths)",
+      "kind": "metric_delta",
+      "variant": "without_herald",
+      "label_suffix": "without_herald",
+      "quote": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
+      "trigger_spell": 500711,
+      "gate_spell": 301258,
+      "learn": [
+        92131,
+        502122
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "select_dummy": true,
+      "before_trigger_reads": [
+        {
+          "spell": 520326,
+          "expected": 0,
+          "actor": "caster"
+        }
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Negative form-gate partner for Forbidden Strength 301258: Herald 520326 verified absent (0) before learning 301258 and after; spell_done_crit_chance_scripted of Blade of the Empire 502122 gains 0.0 points (tol 0.05). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 680557,
+      "name": "Strength of the Black Empire (Dreadnought transforms caster into void monstrosity)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+      "trigger_spell": 567552,
+      "gate_spell": 680557,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_power": 2000,
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        },
+        {
+          "aura": 680556,
+          "source": "Strength of the Black Empire helper 680556 applied by Refresh"
+        }
+      ],
+      "metric": "display_id",
+      "fields": {},
+      "before_expected": 49,
+      "expected": 280073,
+      "wait_ms": 1000,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Strength of the Black Empire 680557 enables helper 680556 in AscensionCultist.cpp:287 while any ranked Dreadnought aura (567524 chain, rank 6 567552) is active. 680556 Effect[0] SPELL_AURA_TRANSFORM creature 250043 (AscensionCultistContracts.cpp:79-80) uses CreatureDisplayID 280073 (pending SQL rev_20261101_00_cultist_dreadnought_display.sql). Before learning 680557 (with 567552 cast): display_id = 49 (Human male); after learning 680557 (with 567552 cast and wait_ms 1000 for Refresh): 680556 present and display_id = 280073. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 680557,
+      "name": "Strength of the Black Empire (-10% damage taken during Dreadnought)",
+      "kind": "metric_delta",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "quote": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+      "trigger_spell": 567552,
+      "gate_spell": 680557,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 1000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        },
+        {
+          "aura": 680556,
+          "source": "Strength of the Black Empire helper 680556 applied by Refresh"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 990,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Strength of the Black Empire 680557 helper 680556 Effect[2] SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN BasePoints -11 + DieSides 1 = -10% ($680556s3 = 10; Spell.dbc). Dreadnought 567552 carries an all-school absorb (>2600) that absorbs 100% of one Light of the Naaru 41394 strike (1100 Holy) after SpellDamageBonusTaken applies -10%: floor(1100 * 0.90) = 990 absorbed (control without 680557 absorbs 1100). delay_ms 1000 lets Refresh apply 680556 before the strike. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 680557,
+      "name": "Strength of the Black Empire (control: unreduced 1100 strike during Dreadnought without 680557)",
+      "kind": "metric_delta",
+      "variant": "damage_taken_control",
+      "label_suffix": "damage_taken_control",
+      "quote": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+      "trigger_spell": 567552,
+      "gate_spell": 60235,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 1000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Strength of the Black Empire 680557: Dreadnought 567552 active without 680557 -> Light of the Naaru 41394 deals full 1100 Holy absorbed in full by 567552. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 801968,
+      "name": "Blessing of Y'Shaarj (+10% maximum health)",
+      "kind": "metric_delta",
+      "variant": "max_health",
+      "label_suffix": "max_health",
+      "quote": "Increases your maximum health by $s2%",
+      "trigger_spell": 60235,
+      "gate_spell": 801968,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1000,
+      "expected": 1100,
+      "expected_ratio": 1.1,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Blessing of Y'Shaarj 801968 Effect[1] SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT BasePoints 9 + DieSides 1 = +10% ($s2 = 10; Spell.dbc). Reads live max_health before and after learning 801968 (expected ratio 1.10, tol 0.002). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 801968,
+      "name": "Blessing of Y'Shaarj (+20% damage dealt while transformed into void monstrosity)",
+      "kind": "hit_ratio",
+      "variant": "monstrosity_damage",
+      "label_suffix": "monstrosity_damage",
+      "quote": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        680750,
+        567552,
+        680557
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            567552,
+            0
+          ],
+          [
+            680556,
+            0
+          ],
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 567552,
+            "target": "caster",
+            "power": 2000
+          }
+        ],
+        "casts_wait_ms": 600
+      },
+      "treatment": {
+        "learn": [
+          801968
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            567552,
+            0
+          ],
+          [
+            680556,
+            0
+          ],
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 567552,
+            "target": "caster",
+            "power": 2000
+          }
+        ],
+        "casts_wait_ms": 600
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Blessing of Y'Shaarj 801968 Effect[0] SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT2 +20 ($s1 = 20; Spell.dbc) targeting SpellFamilyFlags[2] 0x80000000 = 680556 Strength of the Black Empire Effect[1] (SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, base 0% -> +20%). Both arms cast Dreadnought 567552 with 680557 learned (clearing prior 567552/680556 first so Refresh applies a fresh 680556 after 801968 is learned in treatment) and wait 1500+600 ms before casting Horrorbolt 502182 at dummy. Expected ratio 1.20. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 801968,
+      "name": "Blessing of Y'Shaarj (no damage bonus when not transformed)",
+      "kind": "hit_ratio",
+      "variant": "without_monstrosity",
+      "label_suffix": "without_monstrosity",
+      "quote": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
+      "expected": 1.0,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        680750,
+        680557
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          801968
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative form-gate partner for Blessing of Y'Shaarj 801968: without Dreadnought / 680556 active, learning 801968 leaves Horrorbolt 502182 damage unchanged (expected ratio 1.00). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (Void Shield base absorb +100% at SP 0)",
+      "kind": "metric_delta",
+      "variant": "void_shield_base_sp0",
+      "label_suffix": "void_shield_base_sp0",
+      "quote": "Increases the base amount that Void Shield absorbs by $s1%",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 0,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1606,
+      "after_at_least": 1552,
+      "after_at_most": 1660,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Embodiment of Y'shaarj 681088 Effect[0] BasePoints 99 + DieSides 1 = +100% ($s1 = 100; Spell.dbc); AscensionCultistContracts.cpp:284-285 doubles Void Shield base value before adding 2.0*SP. Level-60 Void Shield 578115 (BaseLevel 60, MaxLevel 66, bp=775, die=55) at SP 0 rolls [776..830]; doubled base is [1552..1660], broken by 2x Light of the Naaru 41394 (2200 Holy). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (control: Void Shield base absorb without 681088 at SP 0)",
+      "kind": "metric_delta",
+      "variant": "void_shield_base_control",
+      "label_suffix": "void_shield_base_control",
+      "quote": "Increases the base amount that Void Shield absorbs by $s1%",
+      "trigger_spell": 578115,
+      "gate_spell": 60235,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 0,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 803,
+      "after_at_least": 776,
+      "after_at_most": 830,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Embodiment of Y'shaarj 681088 Void Shield base absorb: without 681088 at SP 0, Void Shield 578115 absorbs [776..830]. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (Void Shield base-only +100% at SP 2000: SP term not doubled)",
+      "kind": "metric_delta",
+      "variant": "void_shield_base_sp2000",
+      "label_suffix": "void_shield_base_sp2000",
+      "quote": "Increases the base amount that Void Shield absorbs by $s1%",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 6,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5606,
+      "after_at_least": 5552,
+      "after_at_most": 5660,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Separates base-amount doubling from total-absorb doubling for Embodiment of Y'shaarj 681088: at SP 2000, Void Shield 578115 absorbs [1552..1660] + 4000 = [5552..5660] (not [9552..9660]). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (Dreadnought ignores 25% of damage taken)",
+      "kind": "metric_delta",
+      "variant": "dreadnought_ignore_25",
+      "label_suffix": "dreadnought_ignore_25",
+      "quote": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
+      "trigger_spell": 567552,
+      "gate_spell": 681088,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 825,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Embodiment of Y'shaarj 681088 causes Dreadnought (567524 chain, rank 6 567552) Effect[0] SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (all schools) to apply -25% (AscensionCultistContracts.cpp:85-86, AscensionCultistAuras.cpp:127-128). One Light of the Naaru 41394 (1100 Holy) reduced by 25% is floor(1100 * 0.75) = 825, absorbed in full by 567552 (>2600 absorb). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (control: Dreadnought takes full 1100 without 681088)",
+      "kind": "metric_delta",
+      "variant": "dreadnought_ignore_control",
+      "label_suffix": "dreadnought_ignore_control",
+      "quote": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
+      "trigger_spell": 567552,
+      "gate_spell": 60235,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Embodiment of Y'shaarj 681088 Dreadnought -25% damage taken: without 681088, Light of the Naaru 41394 absorbs full 1100 Holy on Dreadnought 567552. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (absorbing 1100 grants +220 AP = 20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap",
+      "label_suffix": "absorb_ap",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 681067,
+          "source": "Embodiment of Y'shaarj AP buff 681067 granted on absorb"
+        }
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 596,
+      "expected_gain": 220,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Embodiment of Y'shaarj 681088 Effect[1] BasePoints 19 + DieSides 1 = 20% ($s2 = 20; Spell.dbc); AscensionCultistAuras.cpp:283-284 and AscensionCultist.cpp:171-181 grant 681067 SPELL_AURA_MOD_ATTACK_POWER for CalculatePct(absorbed, 20). One 41394 (1100 Holy) absorbed in full by Void Shield 578115 (SP 2000, capacity >5500) grants +220 AP (expected_gain 220, tol 1). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (absorbing 2200 grants +440 AP = 20%, scaling arm)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap_two_strikes",
+      "label_suffix": "absorb_ap_two_strikes",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 681067,
+          "source": "Embodiment of Y'shaarj AP buff 681067 granted on absorb"
+        }
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 816,
+      "expected_gain": 440,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Proves linear 20% scaling of Embodiment of Y'shaarj 681088 AP grant: two 41394 strikes (2200 absorbed in full) grant +440 AP (expected_gain 440, tol 1). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (control: absorbing 1100 grants 0 AP without 681088)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap_control",
+      "label_suffix": "absorb_ap_control",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 60235,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 376,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Embodiment of Y'shaarj 681088 AP grant: without 681088, absorbing 1100 Holy leaves attack_power unchanged (expected_gain 0). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (AP buff 681067 lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap_duration",
+      "label_suffix": "absorb_ap_duration",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 681067,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7200,
+      "expiry_wait_ms": 1400,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7500,
+          8100
+        ],
+        "expired": [
+          8900,
+          9500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Proves Embodiment of Y'shaarj AP buff 681067 duration (DurationIndex 31 = 8000 ms; Spell.dbc): 41394 lands at delay_ms 200 (+200 ms strike wait = ~400 ms after trigger cast); 681067 is present at wait_ms 7200 (~7400 ms after apply, >7200 ms -10% bound) and absent 1400 ms later (~8800 ms after apply, <8800 ms +10% bound). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (control: Herald does not grant 301259 without 300291)",
+      "kind": "metric_delta",
+      "variant": "window_control",
+      "label_suffix": "window_control",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 520326,
+      "gate_spell": 60235,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 301259,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        }
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Void Barrier 300291 window_duration: casting Herald of the Depths 520326 without 300291 does not apply 301259 (reads 0 -> 0 with 520326 verified present)."
     }
   ],
   "player_observations": [],

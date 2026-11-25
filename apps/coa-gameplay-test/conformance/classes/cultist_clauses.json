@@ -287,7 +287,8 @@
     "spell": 300287,
     "clause": "While Herald of the Depths is active, you now take $s2% less damage",
     "labels": [
-      "300287 effect_value e1 #0"
+      "300287 behaviour_hit_ratio damage_taken",
+      "300287 behaviour_hit_ratio herald_gate"
     ],
     "kind": "claim"
   },
@@ -303,7 +304,8 @@
     "spell": 300290,
     "clause": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
     "labels": [
-      "300290 effect_value e1 #0"
+      "300290 behaviour_metric_delta min_speed",
+      "300290 behaviour_metric_delta herald_gate"
     ],
     "kind": "claim"
   },
@@ -315,13 +317,16 @@
       {
         "claim": "within $301259d",
         "labels": [
-          "300291 spell_duration 301259 #0"
+          "300291 behaviour_metric_delta window_duration",
+          "300291 behaviour_metric_delta window_control"
         ]
       },
       {
         "claim": "increases the absorption of your next Void Shield ... by $301259s1%",
         "labels": [
-          "300291 effect_value 301259e0 #1"
+          "300291 behaviour_metric_delta absorb_doubled",
+          "300291 behaviour_metric_delta absorb_control",
+          "300291 behaviour_metric_delta consumed_next"
         ]
       }
     ]
@@ -766,7 +771,8 @@
     "spell": 301258,
     "clause": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
     "labels": [
-      "301258 effect_value e0 #0"
+      "301258 behaviour_metric_delta with_herald",
+      "301258 behaviour_metric_delta without_herald"
     ],
     "kind": "claim"
   },
@@ -1513,7 +1519,7 @@
         "labels": []
       }
     ],
-    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) — no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
+    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) \u2014 no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
   },
   {
     "spell": 524877,
@@ -2374,7 +2380,9 @@
     "spell": 680557,
     "clause": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
     "labels": [
-      "680557 effect_value 680556e2 #0"
+      "680557 behaviour_metric_delta transform",
+      "680557 behaviour_metric_delta damage_taken",
+      "680557 behaviour_metric_delta damage_taken_control"
     ],
     "kind": "claim"
   },
@@ -2604,14 +2612,19 @@
     "spell": 681088,
     "clause": "Increases the base amount that Void Shield absorbs by $s1%",
     "labels": [
-      "681088 effect_value e0 #0"
+      "681088 behaviour_metric_delta void_shield_base_sp0",
+      "681088 behaviour_metric_delta void_shield_base_control",
+      "681088 behaviour_metric_delta void_shield_base_sp2000"
     ],
     "kind": "claim"
   },
   {
     "spell": 681088,
     "clause": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
-    "labels": [],
+    "labels": [
+      "681088 behaviour_metric_delta dreadnought_ignore_25",
+      "681088 behaviour_metric_delta dreadnought_ignore_control"
+    ],
     "kind": "claim"
   },
   {
@@ -2622,13 +2635,15 @@
       {
         "claim": "Absorbing damage grants you $s2% of the absorbed value as attack power",
         "labels": [
-          "681088 effect_value e1 #1"
+          "681088 behaviour_metric_delta absorb_ap",
+          "681088 behaviour_metric_delta absorb_ap_two_strikes",
+          "681088 behaviour_metric_delta absorb_ap_control"
         ]
       },
       {
         "claim": "for $681067d",
         "labels": [
-          "681088 spell_duration 681067 #2"
+          "681088 behaviour_metric_delta absorb_ap_duration"
         ]
       }
     ]
@@ -3650,7 +3665,7 @@
     "spell": 801968,
     "clause": "Increases your maximum health by $s2%",
     "labels": [
-      "801968 effect_value e1 #0"
+      "801968 behaviour_metric_delta max_health"
     ],
     "kind": "claim"
   },
@@ -3658,7 +3673,8 @@
     "spell": 801968,
     "clause": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
     "labels": [
-      "801968 effect_value e0 #1"
+      "801968 behaviour_hit_ratio monstrosity_damage",
+      "801968 behaviour_hit_ratio without_monstrosity"
     ],
     "kind": "claim"
   },
