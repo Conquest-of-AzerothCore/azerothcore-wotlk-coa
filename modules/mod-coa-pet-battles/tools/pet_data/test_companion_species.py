@@ -176,5 +176,54 @@ class GenerateTest(unittest.TestCase):
         self.assertEqual(self.species_row(generated, 60000)[8], 'Icon_Beast')
 
 
+class SqlTest(unittest.TestCase):
+    COLUMNS = ['entry', 'name', 'faction', 'minlevel', 'maxlevel', 'type', 'AIName', 'ScriptName', 'npcflag']
+
+    def setUp(self):
+        self.generated = companion_species.generate(
+            [row(1, 60002, 'Gear Bot', '1 retail pet', 'Mechanical', '503 (new retail kit)', 'retail species 503'),
+             row(2, 60000, 'Zork', '5 picked', 'Beast'), row(3, 60000, 'Zork', '5 picked', 'Beast')],
+            make_tables(), make_retail())
+        self.sql = companion_species.companion_sql(self.generated, self.COLUMNS, '-- test header')
+        self.statements = [s.strip() for s in self.sql.split(';\n') if s.strip() and not s.startswith('--')]
+
+    def test_sql_never_deletes_creature_templates(self):
+        self.assertNotIn('DELETE FROM `creature_template`', self.sql)
+        self.assertNotRegex(self.sql, r'DELETE FROM `creature_template`\s+WHERE')
+
+    def test_sql_never_touches_the_offset_range(self):
+        self.assertNotIn('BETWEEN', self.sql)
+        self.assertNotRegex(self.sql, r'\b98[0-4]\d{4}\b')
+
+    def test_every_delete_is_keyed_to_generated_ids(self):
+        deletes = [s for s in self.sql.splitlines() if s.startswith('DELETE')]
+        self.assertTrue(deletes)
+        for line in deletes:
+            self.assertRegex(line, r'^DELETE FROM `\w+` WHERE `\w+` IN \([0-9, ]+\);$')
+        self.assertIn('DELETE FROM `creature_template_model` WHERE `CreatureID` IN (9850000, 9850001);', deletes)
+        self.assertIn('DELETE FROM `creature_equip_template` WHERE `CreatureID` IN (9850000, 9850001);', deletes)
+
+    def test_sql_round_trips_through_sql_reader(self):
+        import sql_reader
+        import tempfile
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'companions.sql'
+            path.write_text(self.sql, encoding='utf-8')
+            tables = sql_reader.read([path])
+        for name in companion_species.GENERATED_TABLES:
+            self.assertEqual([tuple(r) for r in tables.get(name, [])], [tuple(r) for r in self.generated.tables[name]],
+                             name)
+
+    def test_standin_copy_uses_level_60_faction_35_and_mapped_entry(self):
+        insert = next(s for s in self.statements if s.startswith('INSERT INTO `creature_template` '))
+        self.assertIn('`m`.`standin` AS `entry`', insert)
+        self.assertIn('35 AS `faction`', insert)
+        self.assertIn('60 AS `minlevel`', insert)
+        self.assertIn("'' AS `AIName`", insert)
+        self.assertIn('0 AS `npcflag`', insert)
+        self.assertIn('ROW(60000, 9850000), ROW(60002, 9850001)', insert)
+        self.assertIn('ON DUPLICATE KEY UPDATE', insert)
+
+
 if __name__ == '__main__':
     unittest.main()

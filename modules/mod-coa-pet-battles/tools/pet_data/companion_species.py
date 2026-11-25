@@ -6,6 +6,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
+import sql_writer
+import tables
+
 FAMILIES = ['Humanoid', 'Dragonkin', 'Flying', 'Undead', 'Critter', 'Magic', 'Elemental', 'Beast', 'Aquatic', 'Mechanical']
 KIT_STATS = ('Stat_Power', 'Stat_Speed', 'Stat_Stamina')
 EXPLICIT_STAND_IN_BASE = 9850000
@@ -187,3 +190,58 @@ def generate(proposal, tables, retail):
     out['coa_pet_kit'].sort()
     out['coa_pet_kit_ability'].sort()
     return Generated(out, notes)
+
+
+TABLE_KEYS = {'coa_pet_species': 'entry', 'coa_pet_kit': 'id', 'coa_pet_kit_ability': 'kit',
+              'coa_pet_presentation': 'species', 'coa_pet_companion': 'spell', 'coa_pet_standin': 'species'}
+STANDIN_COLUMNS = ['species', 'entry']
+
+
+def table_columns(name):
+    return STANDIN_COLUMNS if name == 'coa_pet_standin' else tables.TABLES[name]
+
+
+def id_list(values):
+    return ', '.join(str(value) for value in sorted(set(values)))
+
+
+def standin_expression(column):
+    return '`m`.`standin`' if column == 'entry' else sql_writer.template_expression(column)
+
+
+def companion_sql(generated, template_columns, header):
+    lines = [header]
+    for name in GENERATED_TABLES:
+        rows = generated.tables[name]
+        if not rows:
+            continue
+        columns = table_columns(name)
+        key = TABLE_KEYS[name]
+        lines.append(f'DELETE FROM `{name}` WHERE `{key}` IN ({id_list(r[columns.index(key)] for r in rows)});')
+        values = ',\n'.join('(' + ', '.join(sql_writer.literal(value) for value in r) + ')' for r in rows)
+        lines.append(f'INSERT INTO `{name}` ({", ".join(f"`{c}`" for c in columns)}) VALUES\n{values};')
+    standins = generated.tables['coa_pet_standin']
+    if not standins:
+        return '\n'.join(lines) + '\n'
+    mapping = ', '.join(f'ROW({species}, {entry})' for species, entry in standins)
+
+    def joined(key):
+        return f'JOIN (VALUES {mapping}) AS `m` (`src_entry`, `standin`) ON `src`.`{key}` = `m`.`src_entry`'
+    entries = id_list(entry for _, entry in standins)
+    selected = ', '.join(f'{standin_expression(column)} AS `{column}`' for column in template_columns)
+    updates = ', '.join(f'`{c}` = `coa_new`.`{c}`' for c in template_columns if c != 'entry')
+    lines += [
+        f'INSERT INTO `creature_template` ({", ".join(f"`{c}`" for c in template_columns)})\n'
+        f'SELECT * FROM (SELECT {selected} FROM `creature_template` AS `src` {joined("entry")}) AS `coa_new`\n'
+        f'ON DUPLICATE KEY UPDATE {updates};',
+        f'DELETE FROM `creature_template_model` WHERE `CreatureID` IN ({entries});',
+        'INSERT INTO `creature_template_model` (`CreatureID`, `Idx`, `CreatureDisplayID`, `DisplayScale`, '
+        '`Probability`, `VerifiedBuild`)\nSELECT `m`.`standin`, `src`.`Idx`, `src`.`CreatureDisplayID`, '
+        '`src`.`DisplayScale`, `src`.`Probability`, `src`.`VerifiedBuild` FROM `creature_template_model` AS `src` '
+        f'{joined("CreatureID")};',
+        f'DELETE FROM `creature_equip_template` WHERE `CreatureID` IN ({entries});',
+        'INSERT INTO `creature_equip_template` (`CreatureID`, `ID`, `ItemID1`, `ItemID2`, `ItemID3`, '
+        '`VerifiedBuild`)\nSELECT `m`.`standin`, `src`.`ID`, `src`.`ItemID1`, `src`.`ItemID2`, `src`.`ItemID3`, '
+        f'`src`.`VerifiedBuild` FROM `creature_equip_template` AS `src` {joined("CreatureID")};',
+    ]
+    return '\n'.join(lines) + '\n'
