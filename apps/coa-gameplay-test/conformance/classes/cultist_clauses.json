@@ -3469,7 +3469,7 @@
     "spell": 704878,
     "clause": "Increases the duration of your Tentacles by $s1%.",
     "labels": [
-      "704878 effect_value e0 #0"
+      "704878 behaviour_metric_delta tentacle_duration"
     ],
     "kind": "claim"
   },
@@ -3477,7 +3477,7 @@
     "spell": 704879,
     "clause": "Increases the duration of your Tentacles by $s1%.",
     "labels": [
-      "704879 effect_value e0 #0"
+      "704879 behaviour_metric_delta tentacle_duration"
     ],
     "kind": "claim"
   },

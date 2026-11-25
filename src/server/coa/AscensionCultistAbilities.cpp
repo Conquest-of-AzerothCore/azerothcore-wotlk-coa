@@ -454,7 +454,9 @@ class spell_ascension_cultist_ability : public SpellScript
             {
                 done = true;
                 Position position = GetExplTargetDest() ? GetExplTargetDest()->GetPosition() : player->GetNearPosition(2, 0);
-                Summon(player, effect.MiscValue, position, std::max(1000, GetSpellInfo()->GetDuration()),
+                int32 duration = GetSpellInfo()->GetDuration();
+                player->ApplySpellMod(GetSpellInfo()->Id, SPELLMOD_DURATION, duration);
+                Summon(player, effect.MiscValue, position, std::max(1000, duration),
                     GetExplTargetUnit(), GetSpellInfo()->Id);
             }
         }
