@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
+#include "Creature.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
 #include "Random.h"
@@ -88,7 +89,18 @@ public:
     {
         DeflectMeleeAbility(spell, info);
         Player* player = Owner(caster);
-        if (!player || caster != player || info->SpellFamilyName != 31 || spell->IsTriggered())
+        if (!player || caster != player || info->SpellFamilyName != 31)
+            return;
+        if (info->Id == 560109 && State(player).hourOfTwilightCorruptMind)
+        {
+            ObjectGuid targetGuid = spell->m_targets.GetUnitTargetGUID();
+            spell->GetUniqueTargetInfo()->remove_if([targetGuid](TargetInfo const& entry)
+            {
+                return entry.targetGUID != targetGuid;
+            });
+            return;
+        }
+        if (spell->IsTriggered())
             return;
         spell->SetScriptValue(Insanity, Count(player, Insanity));
         if (Named(info, 500110) || info->Id == 680576)
@@ -140,6 +152,14 @@ public:
             return;
         if (aura->GetId() == Herald && player->HasAura(807128))
             duration = std::max(1000, duration - std::abs(Amount(806769)));
+        if (aura->GetId() == 560109)
+            if (Unit const* target = aura->GetOwner() ? aura->GetOwner()->ToUnit() : nullptr)
+            {
+                Unit const* effective = target->GetOwner() ? target->GetOwner() : target;
+                if (effective->IsPlayer() || (effective->IsCreature() &&
+                    effective->ToCreature()->HasFlagsExtra(CREATURE_FLAG_EXTRA_ALL_DIMINISH)))
+                    duration = std::min(duration, 8000);
+            }
     }
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {

@@ -2,13 +2,18 @@
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
 #include "DBCStores.h"
+#include "Opcodes.h"
 #include "Player.h"
+#include "Random.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "WorldPacket.h"
 #include <algorithm>
+#include <tuple>
+#include <vector>
 namespace AscensionCultist
 {
 void ApplyContracts(SpellInfo* info)
@@ -207,10 +212,13 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
         info->Effects[1].TriggerSpell = 0;
     }
+    if (id == 255276)
+        info->Effects[2].BasePoints = -26;
     if (id == 704476)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
         info->Effects[0].TriggerSpell = 0;
+        info->Effects[0].TargetB = SpellImplicitTargetInfo();
     }
     if (id == 804277)
         info->Effects[2].Effect = 0;
@@ -271,7 +279,8 @@ public:
     cultist_scaling() : UnitScript("cultist_scaling", true,
         {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_SPELL_DAMAGE_TAKEN,
          UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK, UNITHOOK_MODIFY_HEAL_RECEIVED,
-         UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_ON_DAMAGE, UNITHOOK_ON_AURA_REMOVE}) { }
+         UNITHOOK_MODIFY_MELEE_DAMAGE, UNITHOOK_ON_DAMAGE, UNITHOOK_ON_AURA_APPLY,
+         UNITHOOK_ON_AURA_REMOVE}) { }
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
         Player* player = Owner(caster);
@@ -360,11 +369,60 @@ public:
         if (player->HasAura(Herald) && player->HasAura(300287))
             AddPct(damage, Amount(300287, 1));
     }
-    void OnAuraRemove(Unit*, AuraApplication* application, AuraRemoveMode mode) override
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (!aura || aura->GetId() != 255275)
+            return;
+        Player* player = Owner(unit);
+        if (!player || player != unit)
+            return;
+        for (Unit* enemy : Nearby(player, Radius(255276)))
+        {
+            if (!player->IsValidAttackTarget(enemy))
+                continue;
+            DispelChargesList dispelList;
+            enemy->GetDispellableAuraList(player, (1u << DISPEL_MAGIC), dispelList, aura->GetSpellInfo());
+            std::vector<std::tuple<uint32, ObjectGuid, uint8>> toDispel;
+            for (auto const& pair : dispelList)
+                if (Aura* candidate = pair.first)
+                    if (int32 chance = candidate->CalcDispelChance(enemy, true); chance > 0 && roll_chance_i(chance))
+                        toDispel.emplace_back(candidate->GetId(), candidate->GetCasterGUID(), pair.second);
+            std::vector<uint32> dispelled;
+            for (auto const& [spellId, casterGuid, charges] : toDispel)
+                if (enemy->GetAura(spellId, casterGuid))
+                {
+                    enemy->RemoveAurasDueToSpellByDispel(spellId, 255275, casterGuid, player, charges);
+                    dispelled.push_back(spellId);
+                }
+            if (!dispelled.empty())
+            {
+                WorldPacket data(SMSG_SPELLDISPELLOG, 8 + 8 + 4 + 1 + 4 + dispelled.size() * 5);
+                data << enemy->GetPackGUID();
+                data << player->GetPackGUID();
+                data << uint32(255275);
+                data << uint8(0);
+                data << uint32(dispelled.size());
+                for (uint32 spellId : dispelled)
+                    data << uint32(spellId) << uint8(0);
+                player->SendMessageToSet(&data, true);
+            }
+        }
+    }
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode mode) override
     {
         if (mode == AURA_REMOVE_BY_ENEMY_SPELL && application && application->GetBase()->GetId() == 560943)
             if (Player* player = Owner(application->GetBase()->GetCaster()))
                 Cast(player, player, 560947);
+        if (mode == AURA_REMOVE_BY_EXPIRE && application && application->GetBase()->GetId() == 255275)
+            if (Player* player = Owner(unit); player && player == unit && player->IsAlive())
+            {
+                bool previous = State(player).hourOfTwilightCorruptMind;
+                State(player).hourOfTwilightCorruptMind = true;
+                for (Unit* enemy : Nearby(player, Radius(255276)))
+                    if (player->IsValidAttackTarget(enemy))
+                        Cast(player, enemy, 560109);
+                State(player).hourOfTwilightCorruptMind = previous;
+            }
     }
 };
 }

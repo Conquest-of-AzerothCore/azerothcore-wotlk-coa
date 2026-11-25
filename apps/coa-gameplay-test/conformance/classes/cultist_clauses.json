@@ -184,7 +184,11 @@
     "spell": 255275,
     "clause": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
     "labels": [
-      "255275 behaviour_metric_delta corrupt_mind_end"
+      "255275 behaviour_metric_delta corrupt_mind_end",
+      "255275 behaviour_metric_delta corrupt_mind_end_group_duration",
+      "255275 behaviour_metric_delta corrupt_mind_end_group_applies",
+      "255275 behaviour_metric_delta corrupt_mind_end_outside_none",
+      "255275 behaviour_metric_delta corrupt_mind_early_cancel"
     ],
     "kind": "claim"
   },
@@ -1579,7 +1583,7 @@
       "520345 behaviour_metric_delta teleport_broken_control"
     ],
     "kind": "claim",
-    "reason": "Real server alert on the \"if the shield holds\" condition (tool gap closed by ADR 1302): teleport_holds passes (ok/ok: 15.0 yd displacement, distance_2d 15 -> 0, 520346 at 5 stacks), while teleport_broken_control alerts (alert/alert: 6x Void Zone 92559 = 6000 dmg breaks all 4 stacks of 520346 at 4200-4500 ms, yet Aura::UpdateOwner fires tick #5 of 520345 at 5000 ms right before AURA_REMOVE_BY_EXPIRE, re-applying 1 fresh stack of 520346 so AscensionCultistAuras.cpp:167-171 still teleports the caster 15.0 yd to the ally with 520346 at 1 stack). Claim stays uncounted until fixed."
+    "reason": "Proved after server fix (Cultist ADR 0025): on the final tick of Dark Veil 520345, aura_ascension_cultist_lifecycle::Tick skips re-applying 520346 if either shield is already broken. teleport_holds passes (ok/ok: 15.0 yd displacement, distance_2d 15 -> 0, 520346 at 5 stacks) and teleport_broken_control passes (ok/ok: 0.0 yd displacement, distance_2d 15 -> 15, 520346 at 0 stacks)."
   },
   {
     "spell": 520345,
@@ -2144,7 +2148,7 @@
         ]
       }
     ],
-    "reason": "Alert (claim 1 '8 sec vs players', uncounted; supported by cu-rt1 review): Spell.dbc 560109 has DurationIndex 64 = 40000 ms, Mechanic 5 (FEAR), and no pending_db_world override; SpellMgr.cpp:342-415 lacks an 8000 ms PvP cap for 560109 and falls through to the 10000 ms DIMINISHING_FEAR cap, so player_duration reads 560109 still active (1) at ~8.49 s post-apply."
+    "reason": "Proved after server fix (owner ruling O-15 Q-cu-28, Cultist ADR 0024): cultist_spells::OnCalcMaxDuration clamps 560109 max duration to 8000 ms for player targets (preserving 40000 ms on PvE creatures); player_duration reads 0 before cast, 1 at 9109 ms (~7.48 s post-apply), and 0 at 10118 ms (~8.49 s post-apply) in both counted runs."
   },
   {
     "spell": 560109,
