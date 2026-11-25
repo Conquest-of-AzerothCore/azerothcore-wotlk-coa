@@ -1,4 +1,4 @@
-# 0011. Mind Rot grants its 30% critical strike bonus when dispelled
+# 0007. Mind Rot grants its 30% critical strike bonus when dispelled
 
 - Status: accepted (provisional number, numbered at merge; owner ruling O-12 Q-cu-2, 2026-11-24)
 - Date: 2026-11-25

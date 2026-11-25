@@ -1,6 +1,6 @@
-# 0012. Obliteration Beam deals 20% more damage above 60 Insanity
+# 0008. Obliteration Beam deals 20% more damage above 60 Insanity
 
-- Status: accepted (provisional number, numbered at merge; owner ruling O-12 Q-cu-6, 2026-11-24)
+- Status: accepted (provisional number, numbered at merge; owner rulings O-12 Q-cu-6, 2026-11-24; Q-cu-36, 2026-11-25)
 - Date: 2026-11-25
 
 ## Context
@@ -54,6 +54,11 @@ shared file, DBC, SQL, or client text changes.
 - Regressions (`20261125-013848` and `20261125-013916`, build `2e5b678f0506`, 6/6 ok, 0 flips): `806897 above_60` (61
   Insanity, `before_trigger_reads` and `ally_arm` confirming `aura` 573315 = 1, 805573 damage = 958) and `806897 at_60`
   (60 Insanity boundary control, `before_trigger_reads` confirming `aura` 573315 = 0, 805573 damage = 798).
+
+## Live evidence
+
+Archived live logs (5 logs, 4 players) showed no +20% damage step in 4 of 5 logs; the owner ruled on 2026-11-25
+(ruling `Q-cu-36`) to keep the fix and follow the tooltip.
 
 ## Observation: Other Cultist "Above 60 Insanity" Spells
 

@@ -1,4 +1,4 @@
-# 0020. Shadowy Symbiosis doubles critical block chance only above 60 Insanity
+# 0010. Shadowy Symbiosis doubles critical block chance only above 60 Insanity
 
 - Status: accepted (provisional number, numbered at merge)
 - Date: 2026-11-25
