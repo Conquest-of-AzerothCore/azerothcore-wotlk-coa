@@ -2138,7 +2138,7 @@
         ]
       }
     ],
-    "reason": "Alert (claim 1 '8 sec vs players', uncounted; supported by cu-rt1 review): Spell.dbc 560109 has DurationIndex 64 = 40000 ms, Mechanic 5 (FEAR), and no pending_db_world override; SpellMgr.cpp:342-415 lacks an 8000 ms PvP cap for 560109 and falls through to the 10000 ms DIMINISHING_FEAR cap, so player_duration reads 560109 still active (1) at ~8.49 s post-apply."
+    "reason": "Proved after server fix (owner ruling O-15 Q-cu-28, Cultist ADR 0024): cultist_spells::OnCalcMaxDuration clamps 560109 max duration to 8000 ms for player targets (preserving 40000 ms on PvE creatures); player_duration reads 0 before cast, 1 at 9109 ms (~7.48 s post-apply), and 0 at 10118 ms (~8.49 s post-apply) in both counted runs."
   },
   {
     "spell": 560109,
