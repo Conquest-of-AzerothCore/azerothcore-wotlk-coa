@@ -2,7 +2,7 @@
   "schema": 1,
   "name": "Cultist (Dreadnought) threat-related abilities generate the threat their tooltips promise",
   "contract": [
-    "Eldritch Strength 680600 (Dreadnought talent): 'Increases the damage of Hammer of Twilight and Entropic Slam by 25% and they now generate a large amount of threat.' Effect[1] is SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 2 (SPELLMOD_THREAT), EffectBasePoints[1]=14 (the WotLK DBC off-by-one convention makes the real applied value basePoints+1 = 15, confirmed by the measured 115000 against a 100000 base), with EffectSpellClassMask bits selecting Hammer of Twilight (805116) and Entropic Slam (804152). Without the talent, SPELLMOD_THREAT for those spells is unmodified (spell_modifier(op=2) == base); with it, base is raised by 15%.",
+    "Eldritch Strength 680600 (Dreadnought talent): 'Increases the damage of Hammer of Twilight and Entropic Slam by 25% and they now generate a large amount of threat.' Effect[1] is SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 2 (SPELLMOD_THREAT), overridden by AscensionCultist::ApplyContracts (Cultist ADR 0030, owner ruling O-15 Q-cu-34) from DBC EffectBasePoints[1]=14 to 99 (the WotLK DBC off-by-one convention makes the real applied value basePoints+1 = 100%, i.e. 2x threat, giving 200000 against a 100000 base), with EffectSpellClassMask bits selecting Hammer of Twilight (805116) and Entropic Slam (804152). Without the talent, SPELLMOD_THREAT for those spells is unmodified (spell_modifier(op=2) == base); with it, base is doubled (+100%, bounds 199500..200500).",
     "Dreadfall 806175/807815: 'Raise your shield and charge towards an enemy ... generating additional threat.' The charge (806175) has its TRIGGER_MISSILE effect zeroed by AscensionCultistContracts.cpp and is instead implemented by StartDash/UpdateDash (AscensionCultistSummons.cpp), which casts 807815 on every unit the player's charge path crosses. 807815 carries SPELL_EFFECT_THREAT (effect 63, value 20, converted by rev_20261026_20_coa_tank_ability_threat.sql to spell_threat pctMod 1.2) but ALSO carries AttributesEx bit 10 (SPELL_ATTR1_NO_THREAT, value 33792 = 0x8400), the exact same shortcut as Shadow Brand 680517: ThreatManager::AddThreat (src/server/game/Combat/ThreatManager.cpp:401) returns before CalculateModifiedThreat ever reads the pctMod row, so Dreadfall's threat generation is broken the same way, not fixed as report A concluded. threat_per_damage on the struck dummy should be >=1.1 without a tank stance; this assertion is placed last in this scenario so the confirmed-defect failure does not block verifying every other ability in this file.",
     "Horrifying Presence 500723 (ClassSpells level 18): tooltip 'Taunts enemies within 8 yds for $d, and significantly increases threat generation for $500717d.' DBC shows 500723 has a single effect, an AoE SPELL_AURA_MOD_TAUNT with no SPELL_EFFECT_ATTACK_ME (confirmed OK for the taunt clause). Like Chosen of the Moon 680756 in the Starcaller scenario, ThreatManager::TauntUpdate (src/server/game/Combat/ThreatManager.cpp) only reorders taunt priority among ThreatReferences already on the target's threat list, so it cannot switch a victim the caster never had any threat against; this scenario's cultist never damaged presence_target before taunting, so only the taunt aura landing is asserted, not a victim switch. Spell 500717 (a separate SPELL_AURA_MOD_THREAT +199% self buff referenced only for its duration text) is never applied by 500723: the only C++ reference (AscensionCultistAbilities.cpp:288) runs the opposite direction ('if (id == 500717) Cast(player, player, 500723)'), and 500717 itself is never granted, learned, or triggered by anything else in ClassSpells, AscensionTaughtAbilityData or spell data. The 'significantly increases threat generation' clause is therefore unimplemented (MISSING): casting Horrifying Presence does not place aura 500717 on the caster.",
     "Test of Pride 804412 (ClassSpells level 14): 'Attempt to drive an enemy mad, taunting the target for $d.' DBC Effect[0] is SPELL_EFFECT_ATTACK_ME targeting the enemy; no threat-amount claim beyond the taunt itself.",
@@ -90,25 +90,25 @@
     },
     {
       "action": "assert",
-      "label": "Eldritch Strength: Hammer of Twilight's threat is raised 15% (SPELLMOD_THREAT, basePoints 14 + 1)",
+      "label": "Eldritch Strength: Hammer of Twilight's threat is doubled (+100%, SPELLMOD_THREAT, basePoints 99 + 1 per ADR 0030)",
       "actor": "cultist",
       "metric": "spell_modifier",
       "spell": 805116,
       "op": 2,
       "base": 100000,
-      "min": 114500,
-      "max": 115500
+      "min": 199500,
+      "max": 200500
     },
     {
       "action": "assert",
-      "label": "Eldritch Strength: Entropic Slam's threat is also raised 15% (SPELLMOD_THREAT, basePoints 14 + 1)",
+      "label": "Eldritch Strength: Entropic Slam's threat is also doubled (+100%, SPELLMOD_THREAT, basePoints 99 + 1 per ADR 0030)",
       "actor": "cultist",
       "metric": "spell_modifier",
       "spell": 804152,
       "op": 2,
       "base": 100000,
-      "min": 114500,
-      "max": 115500
+      "min": 199500,
+      "max": 200500
     },
     {
       "action": "learn",

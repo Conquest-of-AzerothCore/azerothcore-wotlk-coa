@@ -72,7 +72,9 @@
     }
   ],
   "off_hand_weapons": [],
-  "known_auras": [],
+  "known_auras": [
+    887013
+  ],
   "probe_auras": [],
   "extra_spells": [
     {
@@ -914,12 +916,29 @@
       "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.@s:560714:0@",
       "trigger_spell": 502220,
       "gate_spell": 300300,
+      "learn": [
+        806039,
+        572103,
+        800432
+      ],
       "target": "dummy",
       "target_entry": 6,
       "dummy_distance": 10,
       "measure_actor": "caster",
       "cast_power": 2200,
       "after_trigger_casts": [
+        {
+          "spell": 806039,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true
+        },
+        {
+          "spell": 572103,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true
+        },
         {
           "spell": 800432,
           "target": "dummy",
@@ -929,25 +948,7 @@
         {
           "spell": 800432,
           "target": "dummy",
-          "delay_ms": 2700,
-          "in_before": true
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700,
-          "in_before": true
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700,
-          "in_before": true
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700,
+          "delay_ms": 5100,
           "in_before": true
         }
       ],
@@ -985,24 +986,6 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          803060,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          10060,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          32182,
-          1,
-          "caster",
-          "caster"
         ]
       ],
       "metric": "spell_crit_chance",
@@ -1011,7 +994,7 @@
       "expected": 30,
       "expected_gain": 30,
       "tolerance": 0.01,
-      "wait_ms": 2800,
+      "wait_ms": 5300,
       "expire_ms": 500,
       "ally_arm": {
         "allies": 0,
@@ -1044,7 +1027,7 @@
           }
         ]
       },
-      "observe_source": "Owner ruling O-12 Q-cu-2 (Cultist ADR 0007): Mind Rot 300300 (@s:560714:0@) states 'If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.' (560947 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT +30%, DurationIndex 28 = 5000 ms). Darkwither 502220 (15000 ms, 5 ticks) plus five hasted Psychic Suppression 800432 channels (803060 +30%, 10060 +20%, 32182 +30% -> 2.028x spell haste, 2465 ms / 10 ticks each; all channels and Darkwither finish by 15000 ms before the 15200 ms Dispel Magic 988 cast, putting 40 periodic/channeled ticks inside the final 10000 ms window with proc miss rate 0.75^40 = 1.0e-5; omits void_on_cast_failure per DONT_REPORT 27). Dummy casts Dispel Magic 988 (dispelling 560943, confirmed 0 by ally_arm), granting +30.0 spell_crit_chance and aura 560947 (0 -> 1) to caster. Reference search 2026-11-24: coabuildhub 300300 matches verbatim; coa-history 560947: 0 events."
+      "observe_source": "Owner ruling O-12 Q-cu-2 (Cultist ADR 0007): Mind Rot 300300 (@s:560714:0@) states 'If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.' (560947 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT +30%, DurationIndex 28 = 5000 ms). Darkwither 502220 (t=0..15000 ms, 4 ticks in [5.3..15.0] s), learned Black Prayer 806039 (t=1600..10600 ms, 2 ticks in window), learned Tentacle of N'Zoth 572103 (t=3200..11200 ms, 3 ticks in window), and two full unhasted learned Psychic Suppression 800432 channels (t=4800..9800 ms and t=9900..14900 ms, 20 ticks; 800432 lacks SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC) all finish by 15000 ms before Dispel Magic 988 at 15200 ms, delivering 29 ticks in the final 10000 ms window (miss rate 0.75^29 = 2.4e-4 per run, 4.8e-4 per pair <= 0.1%; omits void_on_cast_failure per DONT_REPORT 27). Dummy casts Dispel Magic 988 (dispelling 560943, confirmed 0 by ally_arm), granting +30.0 spell_crit_chance and aura 560947 (0 -> 1) to caster. Reference search 2026-11-24: coabuildhub 300300 matches verbatim; coa-history 560947: 0 events."
     },
     {
       "spell": 300300,
@@ -1057,12 +1040,27 @@
       "gate_spell": 300300,
       "gate_timing": "start",
       "trigger_only_after": true,
+      "learn": [
+        806039,
+        572103,
+        800432
+      ],
       "target": "dummy",
       "target_entry": 6,
       "dummy_distance": 10,
       "measure_actor": "caster",
       "cast_power": 2200,
       "after_trigger_casts": [
+        {
+          "spell": 806039,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572103,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
         {
           "spell": 800432,
           "target": "dummy",
@@ -1071,22 +1069,7 @@
         {
           "spell": 800432,
           "target": "dummy",
-          "delay_ms": 2700
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700
+          "delay_ms": 5100
         }
       ],
       "target_casts": [
@@ -1123,24 +1106,6 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          803060,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          10060,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          32182,
-          1,
-          "caster",
-          "caster"
         ]
       ],
       "metric": "aura",
@@ -1149,7 +1114,7 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 2800,
+      "wait_ms": 5300,
       "expiry_wait_ms": 600,
       "after_expiry_expected": 0,
       "expire_ms": 500,
@@ -1177,11 +1142,11 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Confirms Dispel Magic 988 dispelled Mind Rot 560943 after Darkwither 502220 and all five 800432 channels finished"
+            "source": "Confirms Dispel Magic 988 dispelled Mind Rot 560943 after Darkwither 502220, Black Prayer 806039, Tentacle of N'Zoth 572103, and both 800432 channels finished"
           }
         ]
       },
-      "observe_source": "Duration proof for Mind Rot dispel buff 560947 (DurationIndex 28 = 5000 ms, $560947d; Cultist ADR 0007) on 300300: Darkwither 502220 (t=0..15000 ms) plus five 2.028x-hasted Psychic Suppression 800432 channels (finishing ~14865 ms; 40 ticks in final 10 s, miss rate 1.0e-5; omits void_on_cast_failure per DONT_REPORT 27) apply 560943, then instant Dispel Magic 988 at ~15250 ms dispels 560943 with zero remaining ticks and grants 560947 (expires ~20250 ms). Reads 560947 absent before cast (0), present at ~19850 ms (~4600 ms > 0.9 * 5000 after dispel: 1), and gone at ~20450 ms (~5200 ms < 1.1 * 5000 after dispel: 0). Paired with dispel_crit (learned contrast). Reference search 2026-11-24: coabuildhub 300300 matches ('for 5 seconds')."
+      "observe_source": "Duration proof for Mind Rot dispel buff 560947 (DurationIndex 28 = 5000 ms, $560947d; Cultist ADR 0007) on 300300: Darkwither 502220 (t=0..15000 ms) plus learned Black Prayer 806039 (t=1600..10600 ms), Tentacle of N'Zoth 572103 (t=3200..11200 ms), and two unhasted Psychic Suppression 800432 channels (t=4800..9800 ms and t=9900..14900 ms; 29 ticks in final 10 s, miss rate 2.4e-4/run, 4.8e-4/pair <= 0.1%; omits void_on_cast_failure per DONT_REPORT 27) apply 560943 and all finish by 15000 ms, then instant Dispel Magic 988 at ~15250 ms dispels 560943 with zero remaining ticks and grants 560947 (expires ~20250 ms). Reads 560947 absent before cast (0), present at ~19850 ms (~4600 ms > 0.9 * 5000 after dispel: 1), and gone at ~20450 ms (~5200 ms < 1.1 * 5000 after dispel: 0). Paired with dispel_crit (learned contrast). Reference search 2026-11-24: coabuildhub 300300 matches ('for 5 seconds')."
     },
     {
       "spell": 300300,
@@ -1194,12 +1159,27 @@
       "gate_spell": 300300,
       "gate_timing": "start",
       "trigger_only_after": true,
+      "learn": [
+        806039,
+        572103,
+        800432
+      ],
       "target": "dummy",
       "target_entry": 6,
       "dummy_distance": 10,
       "measure_actor": "caster",
       "cast_power": 2200,
       "after_trigger_casts": [
+        {
+          "spell": 806039,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 572103,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
         {
           "spell": 800432,
           "target": "dummy",
@@ -1208,22 +1188,7 @@
         {
           "spell": 800432,
           "target": "dummy",
-          "delay_ms": 2700
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700
-        },
-        {
-          "spell": 800432,
-          "target": "dummy",
-          "delay_ms": 2700
+          "delay_ms": 5100
         }
       ],
       "phase_auras": [
@@ -1256,24 +1221,6 @@
           1,
           "caster",
           "caster"
-        ],
-        [
-          803060,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          10060,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
-          32182,
-          1,
-          "caster",
-          "caster"
         ]
       ],
       "metric": "aura_apply_count",
@@ -1282,7 +1229,7 @@
       },
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 13500,
+      "wait_ms": 15700,
       "expire_ms": 500,
       "ally_arm": {
         "allies": 0,
@@ -1311,11 +1258,11 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Confirms Mind Rot 560943 (10000 ms duration, last possible proc <= 15000 ms) finished expiring naturally by 25900 ms"
+            "source": "Confirms Mind Rot 560943 (10000 ms duration, last possible proc <= 15000 ms) finished expiring naturally by ~25600 ms (> 25000 ms)"
           }
         ]
       },
-      "observe_source": "Negative non-dispel expiry control for Mind Rot 300300 (owner ruling O-12 Q-cu-2, Cultist ADR 0007): identical Darkwither 502220 + five 2.028x-hasted Psychic Suppression 800432 setup (40 ticks in final 10 s, miss rate 1.0e-5; omits void_on_cast_failure per DONT_REPORT 27) applying 560943 to Kobold Vermin 6 (confirmed >= 1 cast by ally_arm spell_cast_count 560943 in [1, 55]), with NO dispel cast; waits 13500 ms past the last channel start (~25900 ms > 25000 ms) so 560943 expires by AURA_REMOVE_BY_EXPIRE (confirmed 0 by ally_arm). aura_apply_count of 560947 on caster stays 0 -> 0. Reference search 2026-11-24: coabuildhub 300300 matches ('If this effect is dispelled')."
+      "observe_source": "Negative non-dispel expiry control for Mind Rot 300300 (owner ruling O-12 Q-cu-2, Cultist ADR 0007): identical Darkwither 502220 (t=0..15000 ms) + learned Black Prayer 806039 (t=1600..10600 ms) + learned Tentacle of N'Zoth 572103 (t=3200..11200 ms) + two unhasted Psychic Suppression 800432 channels (t=4800..9800 ms and t=9900..14900 ms; 31 total ticks, miss rate 0.75^31 = 1.3e-4; omits void_on_cast_failure per DONT_REPORT 27) applying 560943 to Kobold Vermin 6 (confirmed >= 1 cast by ally_arm spell_cast_count 560943 in [1, 55]), with NO dispel cast; waits 15700 ms past the last channel start (~25600 ms > 25000 ms) so 560943 expires by AURA_REMOVE_BY_EXPIRE (confirmed 0 by ally_arm). aura_apply_count of 560947 on caster stays 0 -> 0. Reference search 2026-11-24: coabuildhub 300300 matches ('If this effect is dispelled')."
     },
     {
       "spell": 525049,
@@ -46409,6 +46356,326 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Melee non-silence arm for Twisted Seal 525065 (Cultist ADR 0020; AscensionCultistEvents.cpp:68-70): Description[enUS] states \"Casters whose magic is deflected are silenced for $525066d.\" Precondition fixture 43689 (+20% Hit Chance, aura 333, overridden to +100% via phase_aura_amounts on dummy) removes melee miss; Night Slaughter 23583 (DmgClass 2 SPELL_DAMAGE_CLASS_MELEE, SPELL_ATTR0_NO_ACTIVE_DEFENSE, 0 mana, instant) skips dodge/parry/block (Unit.cpp:3800) so DeflectMeleeAbility deflects it with 100% chance (roll_chance_i(100), proved 10/10 in deflect_melee_ability). Without 525065 (before control) 525066 is 0; under 525065 the deflected melee ability does not apply 525066 (reads 0 on dummy at ~2000 ms, 1500 ms after the deflected cast, inside 525066's 3000 ms duration; pre-fix code read 1 and alerted). Paired with silence_on_deflect proving deflected magic spell 2653 applies 525066 for 3 sec."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (Hammer of Twilight threat multiplied by 2)",
+      "kind": "metric_delta",
+      "variant": "hammer_threat",
+      "label_suffix": "hammer_threat",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 680600,
+      "trigger_spell": 806830,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806830,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Hammer of Twilight 806830 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-15 Q-cu-34 (Cultist ADR 0030): Eldritch Strength 680600 Effect[1] SPELLMOD_THREAT BasePoints set to 99 (+DieSides 1 = +100% -> 2.0x threat) in AscensionCultist::ApplyContracts for Hammer of Twilight (805116 chain) and Entropic Slam (804152 chain), keeping its existing Bulwark Tab 88 talent gate (CharacterAdvancement 29273). At +20000 AP (Dreadnought set 2534 + 2129, non-crit 16255=-100, no resist 823764, 500706=40 + 680602=1), a ~7090 damage hit plus 60 unscaled initial threat (SpellLevel 60) yields threat_per_damage = (2*D + 60)/D ~ 2.0085 (expected 2.01 +- 0.02). Paired with hammer_threat_control (without 680600: ~1.01)."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (control: Hammer of Twilight threat without talent is 1x)",
+      "kind": "metric_delta",
+      "variant": "hammer_threat_control",
+      "label_suffix": "hammer_threat_control",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 806830,
+      "trigger_spell": 806830,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806830,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Hammer of Twilight 806830 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Unlearned control arm for 680600 hammer_threat (Cultist ADR 0030): identical Hammer of Twilight 806830 cast at +20000 AP without Eldritch Strength 680600 learned (gate_spell 806830). A ~5675 hit plus 60 flat initial threat yields threat_per_damage = (D + 60)/D ~ 1.0106 (expected 1.01 +- 0.02), proving 2.0x threat comes from 680600."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (Entropic Slam threat multiplied by 2)",
+      "kind": "metric_delta",
+      "variant": "slam_threat",
+      "label_suffix": "slam_threat",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 680600,
+      "trigger_spell": 572846,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680603,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572846,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Entropic Slam 572846 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-15 Q-cu-34 (Cultist ADR 0030): Eldritch Strength 680600 Effect[1] SPELLMOD_THREAT BasePoints set to 99 (+DieSides 1 = +100% -> 2.0x threat) in AscensionCultist::ApplyContracts for Entropic Slam (804152 chain). At +20000 AP (Dreadnought set 2534 + 2129, non-crit 16255=-100, no resist 823764, 500706=60 + 680603=1), a ~4705 damage hit plus 52 unscaled initial threat (SpellLevel 52) yields threat_per_damage = (2*D + 52)/D ~ 2.0111 (expected 2.01 +- 0.02). Paired with slam_threat_control (without 680600: ~1.01)."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (control: Entropic Slam threat without talent is 1x)",
+      "kind": "metric_delta",
+      "variant": "slam_threat_control",
+      "label_suffix": "slam_threat_control",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 572846,
+      "trigger_spell": 572846,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680603,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572846,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Entropic Slam 572846 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Unlearned control arm for 680600 slam_threat (Cultist ADR 0030): identical Entropic Slam 572846 cast at +20000 AP without Eldritch Strength 680600 learned (gate_spell 572846). A ~3765 hit plus 52 flat initial threat yields threat_per_damage = (D + 52)/D ~ 1.0138 (expected 1.01 +- 0.02), proving 2.0x threat comes from 680600."
     }
   ],
   "player_observations": [],

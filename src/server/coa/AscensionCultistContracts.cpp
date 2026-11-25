@@ -22,7 +22,10 @@ void ApplyContracts(SpellInfo* info)
         return;
     uint32 id = info->Id;
     if (id == 807815)
+    {
         info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
+        info->Effects[0].ChainTarget = 0;
+    }
     auto dummy = [info](uint8 slot)
     {
         info->Effects[slot].ApplyAuraName = SPELL_AURA_DUMMY;
@@ -89,6 +92,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[2].MiscValue = 250044;
     if (Any(info, {805116, 804152}))
         info->AscensionIgnoreAbsorb = Named(info, 805116);
+    if (Any(info, {806222, 804152}))
+        info->AscensionFlatAfterWeaponPercent = true;
     if (Named(info, 567524))
         aura(0, SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, 0, SPELL_SCHOOL_MASK_ALL, TARGET_UNIT_CASTER);
     if (id == 500727)
@@ -267,6 +272,12 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
     if (id == 806039)
         info->Effects[1].Effect = SPELL_EFFECT_DUMMY;
+    if (id == 704473)
+        info->Effects[0].RealPointsPerLevel = 0.0f;
+    if (id == 567525)
+        info->DurationEntry = sSpellDurationStore.LookupEntry(18);
+    if (id == 680600)
+        info->Effects[1].BasePoints = 99;
     info->_InitializeExplicitTargetMask();
 }
 }

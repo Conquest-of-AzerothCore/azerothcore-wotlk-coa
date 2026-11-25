@@ -1097,7 +1097,8 @@
     "labels": [
       "302015 script_hit 573311 blast_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Proved under ADR 0011 R4 (Q-cu-31, no server change): Cultist class tuning aura 887013 (+12% PvE damage done) listed in cultist.json known_auras folds into the expected value (floor(118 * 1.12) = 132 vs tooltip 118.6). Counted pair 20261125-100023 / 20261125-100220 (build 3744367126f6, 0 flips): 302015 script_hit 573311 blast_damage 132.0 / 132.0 (15 / 11 usable hits, control 0 hits) and blast_rate 0.2992 / 0.3018 both ok/ok."
   },
   {
     "spell": 302072,
@@ -2202,11 +2203,15 @@
       },
       {
         "claim": "and may briefly trick enemies into ignoring you.",
-        "labels": []
+        "labels": [
+          "560301 behaviour_metric_delta threat_reduce",
+          "560301 behaviour_metric_delta threat_reduce_control"
+        ]
       }
     ],
+    "reason": "Owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control in cu-t2 batch-b2 20261125-055332 / 20261125-055401) covers \"and may briefly trick enemies into ignoring you.\" with no server change. Copy movement direction (\"that run in a random direction\") remains a tool gap.",
     "tool_gap": {
-      "reason": "No existing conformance metric/kind reads an owned creature's movement path or heading to prove that Hallucination 560301's 3 copies (entry 840025, AscensionCultistSummons.cpp:278-283 Wander(me) -> MovePoint at a random angle) run in a random direction (owned_creature_distance_2d only measures scalar distance from the caster and has no STATE_PROMISES entry). In addition, 840025 has no taunt/aggro-redirect script in AscensionCultistSummons.cpp:278-283 (only player->GetThreatMgr().RemoveMeFromThreatLists() on cast in AscensionCultistAbilities.cpp:448), so \"may briefly trick enemies into ignoring you\" is recorded as an owner question.",
+      "reason": "No existing conformance metric/kind reads an owned creature's movement path or heading to prove that Hallucination 560301's 3 copies (entry 840025, AscensionCultistSummons.cpp:278-283 Wander(me) -> MovePoint at a random angle) run in a random direction (owned_creature_distance_2d only measures scalar distance from the caster and has no STATE_PROMISES entry).",
       "attempts": [
         {
           "agent": "cu-t2",
@@ -3048,18 +3053,15 @@
       },
       {
         "claim": "and they now generates a large amount of threat.",
-        "labels": []
+        "labels": [
+          "680600 behaviour_metric_delta hammer_threat",
+          "680600 behaviour_metric_delta hammer_threat_control",
+          "680600 behaviour_metric_delta slam_threat",
+          "680600 behaviour_metric_delta slam_threat_control"
+        ]
       }
     ],
-    "tool_gap": {
-      "reason": "Two blockers on \"and they now generates a large amount of threat.\": (1) Owner question: Eldritch Strength 680600 Effect[1] adds +15% SPELLMOD_THREAT (bp=14+1) to Hammer of Twilight 806830 and Entropic Slam 572846; the wording is not the Templar \"High Threat\" x2 phrase (ADR 0296) and +15% is far below x2, so owner confirmation is needed on whether +15% satisfies \"generates a large amount of threat\"; (2) Tool gap: standalone kind threat_above_control (kinds/threat_above_control.py) does not support gate_spell (passive learn contrast) or Insanity phase_auras (500706 + 680602/680603), so a passive threat modifier on Insanity-gated spells cannot be run under threat_above_control without extending threat_above_control.",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "reason": "Proved after Cultist ADR 0030 (owner ruling O-15 Q-cu-34, 2026-11-25: threat x2, keeping existing Bulwark Tab 88 talent gate CharacterAdvancement 29273): Effect[1] SPELLMOD_THREAT BasePoints set to 99 (+100%). Counted pair 20261125-092328 / 20261125-092359 (build 3744367126f6, 0 flips): hammer_threat 2.00844 / 2.00849 vs control 1.01057 / 1.01058; slam_threat 2.01105 / 2.01103 vs control 1.01384 / 1.01379."
   },
   {
     "spell": 680607,
@@ -3125,7 +3127,7 @@
       "680750 behaviour_metric_delta min_speed_late"
     ],
     "kind": "claim",
-    "reason": "Alert (uncounted): 567524 Dreadnought lasts 20 sec (DurationIndex 18 = 20000 ms) and triggers companion aura 567525 (80% minimum speed) which has DurationIndex 8 = 15000 ms in Spell.dbc with no SQL or C++ override. min_speed holds 0.80 at 14.2 s, while min_speed_late alerts at 19.2 s (speed drops to 0.70 and 567525 == 0 while 567524 == 1)."
+    "reason": "Proved after Cultist ADR 0028 (owner ruling O-15 Q-cu-27, 2026-11-25): companion aura 567525 uses DurationIndex 18 (20000 ms) matching Dreadnought 567524. Counted pair 20261125-091709 / 20261125-091744 (build 0189984a6fb8, 0 flips): min_speed (14.2 s) and min_speed_late (19.2 s / 20.8 s) both ok/ok (run_speed_rate 0.70 -> 0.80 -> 0.70, 567525 == 1 at 19.2 s)."
   },
   {
     "spell": 680750,
@@ -3135,7 +3137,7 @@
       "680750 behaviour_metric_delta min_speed_late"
     ],
     "kind": "claim",
-    "reason": "Alert (uncounted): Dreadnought form 567524 lasts 20 sec (duration passes at 19.2 s / 20.8 s), but companion minimum-speed aura 567525 has DurationIndex 8 = 15000 ms in Spell.dbc and expires 5 sec early (min_speed_late alerts at 19.2 s with run_speed_rate 0.70 and 567525 == 0)."
+    "reason": "Proved after Cultist ADR 0028 (owner ruling O-15 Q-cu-27, 2026-11-25): companion aura 567525 uses DurationIndex 18 (20000 ms) matching Dreadnought 567524. Counted pair 20261125-091709 / 20261125-091744 (build 0189984a6fb8, 0 flips): duration and min_speed_late both ok/ok (567524 == 1 and 567525 == 1 at 19.2 s, both expired by 20.8 s)."
   },
   {
     "spell": 680750,
