@@ -1601,17 +1601,12 @@
   {
     "spell": 520345,
     "clause": "At the end of the duration, if the shield holds, you teleport to them.",
-    "labels": [],
+    "labels": [
+      "520345 behaviour_metric_delta teleport_holds",
+      "520345 behaviour_metric_delta teleport_broken_control"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind/option counts Dark Veil 520345's teleport to the grouped ally as behaviour evidence under no-tool-code-changes: AscensionCultistAuras.cpp:164-172 calls player->NearTeleportTo(target->...) on 520345 expiry when both 520346 shield effects remain > 0, and metric_delta has ally_arm + ally_offsets + distance_2d / displacement_2d, but coverage.py:530 (STATE_PROMISES['distance_2d'] = r'location|hook\\w*|pull\\w*') and metric_delta_options/displacement.py:8 (STATE_PROMISES['displacement_2d'] = r'dash\\w*|direction|distance|leap\\w*|range|yds?') do not match 'teleport', so coverage.py:831-833 classifies any such entry as data rather than behaviour; nearest_creature_distance (coverage.py:512) only reads a creature entry, not a grouped ally player. Nearest kind: metric_delta with ally_arm, ally_offsets, and distance_2d or displacement (needs 'teleport\\w*' in STATE_PROMISES).",
-      "attempts": [
-        {
-          "agent": "cu-g8c",
-          "report": ".agents/plans/cu-g8c/report.md"
-        }
-      ]
-    }
+    "reason": "Real server alert on the \"if the shield holds\" condition (tool gap closed by ADR 1302): teleport_holds passes (ok/ok: 15.0 yd displacement, distance_2d 15 -> 0, 520346 at 5 stacks), while teleport_broken_control alerts (alert/alert: 6x Void Zone 92559 = 6000 dmg breaks all 4 stacks of 520346 at 4200-4500 ms, yet Aura::UpdateOwner fires tick #5 of 520345 at 5000 ms right before AURA_REMOVE_BY_EXPIRE, re-applying 1 fresh stack of 520346 so AscensionCultistAuras.cpp:167-171 still teleports the caster 15.0 yd to the ally with 520346 at 1 stack). Claim stays uncounted until fixed."
   },
   {
     "spell": 520345,
@@ -5009,18 +5004,11 @@
       },
       {
         "claim": "Raise your shield and charge towards an enemy",
-        "labels": []
+        "labels": [
+          "806175 behaviour_metric_delta charge_displacement"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "No existing conformance option counts Dreadfall 806175's \"charge towards an enemy\" as behaviour evidence under no-tool-code-changes: metric_delta_options/displacement.py:8 STATE_PROMISES[\"displacement_2d\"] = r\"dash\\w*|direction|distance|leap\\w*|range|yds?\" does not match \"charge\", and coverage.py:530 STATE_PROMISES[\"distance_2d\"] = r\"location|hook\\w*|pull\\w*\" does not match \"charge\", so any displacement/distance_2d entry is classified as data rather than behaviour. Extension: add \"charge\\w*\" to STATE_PROMISES[\"displacement_2d\"]. (Note: 806175 pass_through is a separate real server alert: 807815 retains EffectChainTarget[0]=20 in Spell.dbc, causing UpdateDash casts to chain and double-hit passed-through enemies and overshoot to area2 at 25 yd.)",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 578263,

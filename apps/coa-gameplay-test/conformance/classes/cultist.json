@@ -44306,6 +44306,176 @@
       ],
       "observe_source": "Void Strikes 680609 row 251 (\"Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.\"): Entropic Slam 572846 partner to blade_defense_direction (D-38, ADR 1301). power_term_direction varies defense rating (combat_rating 1) via Increased Defense 24774 (+180) with power_settle_ms 3000 and Insanity/680603 attempt_auras, verifying equal attack_power across all four arms and judging Welch Student-t direction only.",
       "variant": "slam_defense_direction"
+    },
+    {
+      "spell": 806175,
+      "name": "Dreadfall (charges forward toward enemy dummy at 15 yd)",
+      "kind": "metric_delta",
+      "variant": "charge_displacement",
+      "label_suffix": "charge_displacement",
+      "quote": "Raise your shield and charge towards an enemy",
+      "trigger_spell": 806175,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {
+        "bearing": 0
+      },
+      "before_expected": 0,
+      "expected": 13,
+      "after_at_least": 10.0,
+      "after_at_most": 15.5,
+      "tolerance": 0.5,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 15.0,
+            "expected": 2.0,
+            "tolerance": 2.0,
+            "source": "Caster closes from 15 yd to melee contact (~0-4 yd) of dummy after charging 806175."
+          }
+        ]
+      },
+      "observe_source": "Dreadfall 806175 row 409[2] (\"Raise your shield and charge towards an enemy\"): Effect[0] 149 charges the caster toward dummy at 15 yd (RangeIndex 94: 8-40 yd). displacement with bearing 0 (ADR 1302) verifies 0 yd displacement without cast, 10..15.5 yd forward displacement toward dummy (0 +- 15 deg from start facing) after casting 806175, and ally_arm confirms caster-to-dummy distance_2d closes from 15 yd to melee contact (0..4 yd). The separate pass_through damage alert on row 409[0] stays uncounted."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (teleports to grouped ally at channel expiry when shield holds)",
+      "kind": "metric_delta",
+      "variant": "teleport_holds",
+      "label_suffix": "teleport_holds",
+      "quote": "At the end of the duration, if the shield holds, you teleport to them.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "ally"
+            },
+            "before_expected": 15.0,
+            "expected": 0.0,
+            "tolerance": 0.5,
+            "source": "Caster starts 15 yd from ally and lands at ally position (0 yd) after 520345 expires with shields intact."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 520346,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Caster Dark Veil shield 520346 holds all 5 stacks at expiry."
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 15.0
+      },
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 0,
+      "expected": 15.0,
+      "tolerance": 0.5,
+      "wait_ms": 5600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Veil 520345 row 133 (\"At the end of the duration, if the shield holds, you teleport to them.\"): AscensionCultistAuras.cpp:164-172 calls player->NearTeleportTo(target) on 520345 AURA_REMOVE_BY_EXPIRE when both 520346 shield effects remain > 0. With grouped ally relocated 15 yd away (ally_offsets 15.0, within RangeIndex 14 30 yd) and no incoming damage, caster displacement after the 5 s channel (wait_ms 5600) moves 0 -> 15.0 +- 0.5 yd (ADR 1302), distance_2d to ally drops 15.0 -> 0.0 +- 0.5 yd, and shield 520346 remains present. Paired with teleport_broken_control."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (does not teleport when caster shield is broken before expiry)",
+      "kind": "metric_delta",
+      "variant": "teleport_broken_control",
+      "label_suffix": "teleport_broken_control",
+      "quote": "At the end of the duration, if the shield holds, you teleport to them.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "ally"
+            },
+            "before_expected": 15.0,
+            "expected": 15.0,
+            "tolerance": 0.5,
+            "source": "Caster remains 15 yd from ally when shield 520346 is broken before 520345 expires."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 520346,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster Dark Veil shield 520346 was broken by striker Void Zone 92559 (0 stacks expected; reads 1 stack because 520345 tick #5 at 5000 ms re-applies 520346 right before Remove() checks it)."
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 15.0
+      },
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 6,
+        "wait_ms": 50,
+        "after_trigger_ms": 4200,
+        "reaction": 0
+      },
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 0,
+      "expected": 0.0,
+      "tolerance": 0.5,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Veil 520345 row 133 negative control (\"if the shield holds\"): same 15 yd ally_offsets setup as teleport_holds, but a striker casts 6x Void Zone 92559 (6000 Physical damage > 4 stacks x 969 = 3876 absorb) at caster at 4200 ms, breaking 520346 before channel expiry. After channel end (4200 + 300 + 1200 = 5700 ms > 5000 ms), 520346 is absent, caster displacement stays 0.0 +- 0.5 yd, and distance_2d to ally remains 15.0 +- 0.5 yd."
     }
   ],
   "player_observations": [],
