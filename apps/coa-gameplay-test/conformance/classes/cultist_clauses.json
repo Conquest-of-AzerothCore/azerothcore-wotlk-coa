@@ -4587,7 +4587,7 @@
       "802044 behaviour_metric_delta slam_on_summon",
       "802044 behaviour_metric_delta slam_on_gaze",
       "802044 behaviour_hit_ratio stamina_scaling",
-      "802044 cone behaviour_fixed_count"
+      "802044 behaviour_metric_delta cone"
     ],
     "kind": "claim"
   },

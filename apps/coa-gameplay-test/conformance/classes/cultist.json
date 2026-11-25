@@ -28474,29 +28474,62 @@
     {
       "spell": 802044,
       "name": "Tentacle of Y'shaarj (10 yd frontal cone)",
-      "kind": "fixed_count",
+      "kind": "metric_delta",
       "variant": "cone",
       "label_suffix": "cone",
       "quote": "to all enemies in a $802046a yd frontal cone.",
-      "expected": 2,
-      "radius": 10,
-      "cluster_yd": 0.5,
-      "primary_distance_reads": true,
-      "uncapped": true,
-      "behind_yd": 5,
-      "radius_reason": "Tentacle of Y'shaarj slam 802046 Effect[0] TARGET_UNIT_CONE_ENEMY_24 (24 deg total / +-12 deg half-angle, Spell.cpp:1290), EffectRadiusIndex 13 = 10 yd (SpellRadius 13 RadiusMin 10), MaxAffectedTargets 0; tentacle 50096 spawns within 2 yd of caster (SpellRadius 7 = 2 yd) and faces primary dummy at 3 yd, so clustering the 2 extras within 0.5 yd of primary (at 3.17 and 3.33 yd) keeps the worst-case bearing delta <= 6.8 deg < 12 deg from every point in the 2 yd spawn disk, while far dummy at 15+ yd is outside 10 yd and behind dummy 5 yd behind caster is outside the frontal cone.",
-      "cast_spell": 500110,
-      "target_rank": 802046,
-      "caster_entry": 50096,
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "dummy_distance": 8.5,
+      "cast_in_before": false,
       "setup_casts": [
-        [
-          802044,
-          "caster"
-        ]
+        802044
       ],
-      "repeats": 3,
-      "settle_ms": 1500,
-      "observe_source": "Proves 10 yd frontal cone of Tentacle of Y'shaarj slam 802046 (TARGET_UNIT_CONE_ENEMY_24, 10 yd radius, Spell.dbc) on primary + 2 extras inside cone vs far dummy and behind dummy unhit. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 1000,
+      "cast_power": 2000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802046,
+        "target": "dummy",
+        "caster_entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "area_dummies": {
+        "placed": [
+          {
+            "dx": 8.75,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 1
+          },
+          {
+            "dx": 13.75,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 0
+          },
+          {
+            "dx": -5.0,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 0
+          },
+          {
+            "dx": 6.0,
+            "dy": 4.0,
+            "before_expected": 0,
+            "expected": 0
+          }
+        ]
+      },
+      "observe_source": "Brackets the 10 yd 24 deg frontal cone of Tentacle of Y'shaarj slam 802046 (Spell.dbc Effect[0] TARGET_UNIT_CONE_ENEMY_24 +-12 deg half-angle, Spell.cpp:1290; EffectRadiusIndex 13 = 10 yd, SpellRadius 13 RadiusMin 10; creature caster 50096 gets 0 yd leeway, Object.cpp:1789). WorldObjectSpellConeTargetCheck uses TARGET_REFERENCE_TYPE_CASTER (Spell.h:919, Spell.cpp:9465,9496) -> WorldObject::IsWithinDist3d adds target->GetObjectSize() = dummy entry 36 CombatReach 1.275 yd (creature_model_info.sql:259 model 367, Object.cpp:1357,2900), giving exact engine cone reach 10.0 + 1.275 = 11.275 yd centre-to-centre from tentacle 50096. Tentacle 50096 spawns on a random 1.5..2.0 yd annulus around caster (802044 TARGET_DEST_CASTER_RANDOM, SpellRadius 7 = 2.0 yd, Spell.cpp:1734-1767) and faces primary dummy at (8.5, 0) on Gaze of C'Thun 500110 (AscensionCultistSummons.cpp:306-310). Worst-case reach from caster is [11.275 - 2.0 = 9.275 yd guaranteed inside, 11.275 + 2.0 = 13.275 yd guaranteed outside]; accounting for the 0.25 yd area_dummies.placed position tolerance: primary dummy at (8.5, 0) (tentacle dist 6.50..10.50 <= 11.275, angle 0 deg) and area1 at (8.75, 0) (tentacle dist 6.75..10.75 <= 11.275, 0.525 yd margin, angle <= 0.41 deg < 12 deg) must both be hit (0 -> 1); area2 at (13.75, 0) (tentacle dist 11.75..15.75 > 11.275, 0.475 yd margin, angle <= 5.34 deg < 12 deg, strictly inside cone angle) must stay unhit (0 -> 0); area3 behind caster at (-5.0, 0) (dist 3.0..7.0, angle 144.5..180 deg) and area4 off-axis inside radius at (6.0, 4.0) (dist 5.21..9.21 < 11.275, angle 26.5..45.2 deg > 12 deg) must stay unhit (0 -> 0). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
     },
     {
       "spell": 802044,
