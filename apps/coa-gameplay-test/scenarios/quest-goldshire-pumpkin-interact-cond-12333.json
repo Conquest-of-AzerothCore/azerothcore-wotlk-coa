@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Goldshire Pumpkin requires quest activation to interact",
+  "contract": "#12333: Pumpkin 2300547 is a quest chest whose only loot is Pumpkin 558961 (QuestRequired=1) for Goldshire's Generosity 1660059. Expected: 2300547 carries GO_FLAG_INTERACT_COND (4), is not quest-active without quest 1660059, becomes quest-active while quest 1660059 needs Pumpkins, and stops being quest-active once 3 Pumpkins are carried.",
+  "timeout_ms": 30000,
+  "location": {
+    "map": 0,
+    "x": -9405.0,
+    "y": -47.0,
+    "z": 64.52,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "gatherer",
+      "race": 1,
+      "class": 1,
+      "level": 7
+    }
+  ],
+  "steps": [
+    {
+      "action": "summon_gameobject",
+      "actor": "gatherer",
+      "entry": 2300547,
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_flags",
+      "entry": 2300547,
+      "equals": 4,
+      "label": "Goldshire Pumpkin has GO_FLAG_INTERACT_COND (4)"
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300547,
+      "equals": 0,
+      "label": "Goldshire Pumpkin is not quest-active without Goldshire's Generosity"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "gatherer",
+      "quest": 1660059,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "gatherer",
+      "item": 558961
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300547,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Goldshire Pumpkin becomes quest-active while Goldshire's Generosity needs Pumpkins"
+    },
+    {
+      "action": "add_item",
+      "actor": "gatherer",
+      "item": 558961,
+      "count": 3
+    },
+    {
+      "action": "assert",
+      "actor": "gatherer",
+      "metric": "nearby_gameobject_quest_active",
+      "entry": 2300547,
+      "equals": 0,
+      "within_ms": 1000,
+      "label": "Goldshire Pumpkin stops being quest-active once 3 Pumpkins are carried"
+    }
+  ]
+}
