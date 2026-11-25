@@ -3644,7 +3644,6 @@
     "spell": 706177,
     "clause": "Increases the effectiveness of Sermon of Dread by $s1%.",
     "labels": [
-      "706177 effect_value e0 #0",
       "706177 behaviour_metric_delta sermon_attack_power"
     ],
     "kind": "claim"
