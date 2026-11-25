@@ -99,8 +99,12 @@ namespace coa_zg
         SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
         if (!info || !target || !amount || !target->IsAlive())
             return;
+        DamageInfo dmg(caster, target, amount, info, school, SPELL_DIRECT_DAMAGE);
+        Unit::CalcAbsorbResist(dmg);
         SpellNonMeleeDamage log(caster, target, info, school);
-        log.damage = std::min<uint32>(amount, target->GetHealth());
+        log.absorb = dmg.GetAbsorb();
+        log.resist = dmg.GetResist();
+        log.damage = std::min<uint32>(dmg.GetDamage(), target->GetHealth());
         caster->SendSpellNonMeleeDamageLog(&log);
         Unit::DealDamage(caster, target, log.damage, nullptr, SPELL_DIRECT_DAMAGE, school, info, false);
     }

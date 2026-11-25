@@ -1,0 +1,581 @@
+{
+  "schema": 1,
+  "name": "The Will of Soggoth: the shrine takes the raid to his map (Normal only), he pays every player and leaves a portal back",
+  "contract": [
+    "The shrine of The Will of Soggoth (280144) in Darkshore refuses a heroic raid difficulty and on a Normal one",
+    "takes the player to his map (883). His health is 387,000 x (players + 14), players counted from 10 to 40,",
+    "so 9288000 for one player. Every player gets 250 Runes of Ascension (375250), 100 to 150 Bazaar Tokens (975001) and a",
+    "Treasures of Azeroth chest (978059). The portal out (978078) opens where he falls and takes the player back.",
+    "While Corla (64606), Azil (64607) and Drahga (64608) live he stands shielded and bound by their",
+    "beams and cannot be attacked; a wipe brings fallen heralds back."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 1,
+    "x": 4551.0,
+    "y": 346.0,
+    "z": 49.0
+  },
+  "players": [
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "assert",
+      "label": "The shrine stands in Darkshore",
+      "actor": "raider",
+      "metric": "spawn_active",
+      "spawn": 9780916,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "raider",
+      "entry": 280144,
+      "distance": 2
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 280144
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "On a heroic difficulty the shrine refuses",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "raid_difficulty_packet",
+      "actor": "raider",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "use_gameobject",
+      "actor": "raider",
+      "entry": 280144
+    },
+    {
+      "action": "gossip_select",
+      "actor": "raider",
+      "option": 0,
+      "label": "Challenge The Will of Soggoth"
+    },
+    {
+      "action": "assert",
+      "label": "The shrine takes the player into his map",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 883,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the map is on the normal difficulty",
+      "actor": "raider",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "set_phase",
+      "actor": "raider",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "The raider walks down to the heralds",
+      "actor": "raider",
+      "guid": 9781601
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the raider stands by the heralds",
+      "actor": "raider",
+      "metric": "nearest_creature_distance",
+      "entry": 64607,
+      "max": 15
+    },
+    {
+      "action": "encounter_start",
+      "actor": "raider",
+      "boss_entry": 64605
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "He is there, in plain sight, while his heralds live",
+      "metric": "nearby_creature_at_client",
+      "entry": 64605,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "but cannot be attacked",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "His Twilight Shield holds",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119350,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "and he looks like a ghost",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 22650,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "His heralds bind him with their Twilight Beams",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119351,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64606 wears model 31546",
+      "metric": "nearby_creature_display",
+      "entry": 64606,
+      "equals": 31546
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64607 wears model 454000",
+      "metric": "nearby_creature_display",
+      "entry": 64607,
+      "equals": 454000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64608 wears model 31792",
+      "metric": "nearby_creature_display",
+      "entry": 64608,
+      "equals": 31792
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64606,
+      "kill": true,
+      "radius": 60
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64607,
+      "radius": 60
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "die",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "A wipe brings the fallen herald back",
+      "metric": "nearby_creature_count",
+      "entry": 64606,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "command",
+      "actor": "raider",
+      "command": ".revive"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "raider",
+      "guid": 9781601
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64606,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "With a herald alive he stays shielded",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64607,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "With a herald alive he stays shielded",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64608,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Once the three heralds are dead he can be attacked",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "and his shield is gone",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119350,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "nor looks like a ghost",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 22650,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "He engages on his own, without a pull",
+      "actor": "raider",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 64605,
+      "min": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "die",
+      "actor": "raider"
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "A wipe on him shields him again",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119350,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "as a ghost",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 22650,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "that cannot be attacked",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64606 is back",
+      "metric": "nearby_creature_count",
+      "entry": 64606,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64607 is back",
+      "metric": "nearby_creature_count",
+      "entry": 64607,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Herald 64608 is back",
+      "metric": "nearby_creature_count",
+      "entry": 64608,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "and they bind him again",
+      "metric": "nearby_creature_aura_count",
+      "entry": 64605,
+      "spell": 2119351,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "raider",
+      "command": ".revive"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "set_health",
+      "actor": "raider",
+      "value": 50000000,
+      "maximum": 50000000
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "raider",
+      "guid": 9781601
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64606,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64607,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64608,
+      "radius": 60,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "Without his heralds he can be attacked again",
+      "metric": "nearby_creature_can_attack",
+      "entry": 64605,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "raider",
+      "label": "He wears the green Faceless One of the WDB caches",
+      "metric": "nearby_creature_display",
+      "entry": 64605,
+      "equals": 228465
+    },
+    {
+      "action": "assert",
+      "label": "His health is 387,000 x (10 + 14) for a lone player",
+      "actor": "raider",
+      "metric": "nearby_creature_max_health",
+      "entry": 64605,
+      "equals": 9288000,
+      "within_ms": 3000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "raider",
+      "entry": 64605,
+      "kill": true,
+      "radius": 60
+    },
+    {
+      "action": "assert",
+      "label": "He dies",
+      "actor": "raider",
+      "metric": "nearby_creature_count",
+      "entry": 64605,
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "250 Runes of Ascension",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 250,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "100 to 150 Bazaar Tokens",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 975001,
+      "min": 100,
+      "max": 150
+    },
+    {
+      "action": "assert",
+      "label": "A Treasures of Azeroth chest",
+      "actor": "raider",
+      "metric": "item_count",
+      "item": 1615011,
+      "equals": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "The raider goes to where he stood",
+      "actor": "raider",
+      "guid": 9780102
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The portal out opens where he fell",
+      "actor": "raider",
+      "metric": "nearby_gameobject_count",
+      "entry": 978078,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "raider",
+      "entry": 978078
+    },
+    {
+      "action": "assert",
+      "label": "The portal takes the player back to the shrine's world",
+      "actor": "raider",
+      "metric": "map_id",
+      "equals": 1,
+      "within_ms": 8000
+    }
+  ]
+}
