@@ -85,6 +85,9 @@ class OffensiveDispelResistRateTests(unittest.TestCase):
                     self.assertTrue(all(steps[index]['target'] == ALLY for index in dispels))
                 else:
                     self.assertTrue(all(steps[index]['target'] == CASTER for index in dispels))
+                if entry.get('gate_cast') == 520326:
+                    self.assertTrue(any(step['action'] == 'set_aura' and step.get('spell') == 680604
+                                        for step in steps))
 
     def test_trials_are_sized_within_residual_for_both_false_fail_and_false_pass(self):
         for entry in (BASE_ENTRY, GATED_ENTRY, ALLY_ENTRY):

@@ -5,13 +5,13 @@ from pathlib import Path
 from statistics import NormalDist
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, STRIKER, STRIKER_DISTANCE, STRIKER_HEALTH, behaviour_entry,
-                        prose_rule, waited_ms)
+                        prose_rule, required_aura_steps, waited_ms)
 from compare import Run, Verdict, banded_rate, missing_measurement, rate_judgement
 from hits import MAX_SCENARIO_MS, timed
 from procs import Z_99, rate_band, wilson_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import ALLY, MAX_SCENARIO_STEPS, Expectation, dataset
+from values import ALLY, MAX_SCENARIO_STEPS, Expectation, dataset, facts_of
 
 KIND = 'offensive_dispel_resist_rate'
 ORDER = 56
@@ -266,7 +266,7 @@ def clear_steps(spec: OffensiveDispelResistSpec) -> list[dict]:
     return steps
 
 
-def arm_steps(spec: OffensiveDispelResistSpec, arm: str, count: int) -> list[dict]:
+def arm_steps(records: Records, spec: OffensiveDispelResistSpec, arm: str, count: int) -> list[dict]:
     prefix = check_label(spec)
     steps = clear_steps(spec)
     if spec.gate_cast is not None:
@@ -276,6 +276,7 @@ def arm_steps(spec: OffensiveDispelResistSpec, arm: str, count: int) -> list[dic
                 steps.append({'action': 'wait', 'label': f'{KIND} gate off settle', 'ms': spec.gate_settle_ms})
         else:
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.gate_cast})
+            steps += required_aura_steps(facts_of(records, spec.gate_cast))
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.gate_cast, 'target': CASTER})
             if spec.gate_settle_ms:
                 steps.append({'action': 'wait', 'label': f'{KIND} gate settle', 'ms': spec.gate_settle_ms})
@@ -292,18 +293,18 @@ def arm_steps(spec: OffensiveDispelResistSpec, arm: str, count: int) -> list[dic
     return steps + clear_steps(spec)
 
 
-def scenario_steps(class_file: dict, spec: OffensiveDispelResistSpec) -> list[dict]:
+def scenario_steps(records: Records, class_file: dict, spec: OffensiveDispelResistSpec) -> list[dict]:
     steps = base_steps(class_file)
     if spec.target == ALLY:
         steps += [{'action': 'relocate', 'actor': ALLY, 'dy': ALLY_DY_YD},
                   {'action': 'group', 'actor': CASTER, 'target': ALLY}]
     steps += [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.learn]
     trials = arm_trials(spec)
-    steps += arm_steps(spec, CONTROL, trials[CONTROL])
+    steps += arm_steps(records, spec, CONTROL, trials[CONTROL])
     steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
-    steps += arm_steps(spec, TREATMENT, trials[TREATMENT])
+    steps += arm_steps(records, spec, TREATMENT, trials[TREATMENT])
     if spec.gate_cast is not None:
-        steps += arm_steps(spec, GATE_OFF, trials[GATE_OFF])
+        steps += arm_steps(records, spec, GATE_OFF, trials[GATE_OFF])
     return steps
 
 
@@ -349,7 +350,7 @@ def offensive_dispel_resist_scenario(class_file: dict,
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     validate_spells(records, spec)
     entry = behaviour_entry(records, spec.spell, spec.name, KIND, spec.quote, spec.treatment_resist_pct)
-    steps = scenario_steps(class_file, spec)
+    steps = scenario_steps(records, class_file, spec)
     if len(steps) > MAX_SCENARIO_STEPS:
         raise ValueError(f'{spec.spell} {KIND} takes {len(steps)} steps, above {MAX_SCENARIO_STEPS}: add parts')
     players = [player_fixture(class_file)]
