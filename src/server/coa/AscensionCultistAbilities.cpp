@@ -111,8 +111,6 @@ public:
             return;
         if (aura->GetId() == Herald && player->HasAura(807128))
             duration = std::max(1000, duration - std::abs(Amount(806769)));
-        if (Named(aura->GetSpellInfo(), 582591) && player->HasAura(704881))
-            duration += std::abs(Amount(704881, 2));
     }
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
