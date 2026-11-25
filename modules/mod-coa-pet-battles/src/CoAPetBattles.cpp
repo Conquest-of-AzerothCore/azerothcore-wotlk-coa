@@ -34,9 +34,10 @@ namespace
         void OnStartup() override
         {
             sPetBattleData->Load();
-            for (char const* action : { "start", "cmd", "quit" })
+            for (char const* action : { "start", "cmd", "quit", "clean" })
                 Forward("pbt", action);
-            for (char const* action : { "list", "abil", "setabil", "setteam", "active" })
+            for (char const* action : { "list", "abil", "setabil", "setteam", "active", "feed", "summon", "dismiss",
+                "prime" })
                 Forward("pbj", action);
         }
 

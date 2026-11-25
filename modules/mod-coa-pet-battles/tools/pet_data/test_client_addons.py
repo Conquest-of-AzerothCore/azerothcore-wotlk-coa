@@ -1,5 +1,6 @@
 import hashlib
 import os
+import re
 import unittest
 from pathlib import Path
 
@@ -32,6 +33,18 @@ class ClientAddonsTest(unittest.TestCase):
             self.assertIn('## Interface: 30300', lines, toc.name)
             for name in (line.strip() for line in lines if line.strip() and not line.startswith('#')):
                 self.assertTrue((toc.parent / name).is_file(), f'{toc.name}: {name}')
+
+    def test_every_addon_action_reaches_the_server(self):
+        source = (CLIENT.parent / 'src' / 'CoAPetBattles.cpp').read_text(encoding='utf-8')
+        forwarded = set()
+        for actions, module in re.findall(r'for \(char const\* action : \{([^}]*)\}\)\s*Forward\("(\w+)", action\)',
+                                          source):
+            forwarded |= {(module, action) for action in re.findall(r'"(\w+)"', actions)}
+        sent = set()
+        for path in ADDONS.rglob('*.lua'):
+            sent |= set(re.findall(r'Send\("(pb[jt])", "(\w+)"', path.read_text(encoding='utf-8')))
+        gm_tools = {('pbt', 'fx'), ('pbt', 'trace'), ('pbt', 'bad')}
+        self.assertEqual(sorted(sent - gm_tools - forwarded), [])
 
     def test_matches_upstream_when_available(self):
         upstream = os.environ.get('PET_BATTLES_UPSTREAM')
