@@ -3092,17 +3092,11 @@
   {
     "spell": 680609,
     "clause": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Void Strikes 680609 periodically refreshes helper 567529 (AscensionCultistAuras.cpp:171-184) granting flat SPELLMOD_EFFECT1 equal to CR_DEFENSE_SKILL on Blade of the Empire 502122 and Entropic Slam 572846 (unfigured \"based on your defense rating\"). power_term_direction (power_term_direction.py) only allows power_metric in {attack_power, agility, max_health} and has no defense_rating metric (combat_rating 1 / aura 189 misc 2), so no existing unfigured-scaling kind can prove positive defense-rating direction without inventing an expected figure. Extension: add defense_rating to power_term_direction.POWER_METRICS (reading combat_rating 1 and accepting permanent rating-fixture auras such as 24774 +180 defense).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "680609 behaviour_metric_delta blade_defense_direction",
+      "680609 behaviour_metric_delta slam_defense_direction"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 680750,
