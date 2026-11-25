@@ -5310,7 +5310,7 @@
       "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Spell.dbc 704884 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 707185; AscensionCultistAbilities.cpp:215,222-224 replicates CalculatePct(healing, 50) of 500862 ally healing to caster via 707185. Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000, ally at 2000/20000 health so 500862 never overheals. Both phases cast 500751 on ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy: control (before learning 704884) yields 0 heals of 707185 on caster; treatment (after real learn of 704884) yields 1 heal of 707185 on caster at ratio 707185 / 500862 = 0.50 +- 0.005 (floor_count 0, excluding 0%, 45%, 55%, 100%). Reference search 2026-11-24: coa-history spell 704884/707185: 0 events in 186 logs (positive control 500862: 55154 heals in 27 logs); coabuildhub spells_master_index.json entry 704884 matches verbatim."
+      "observe_source": "Spell.dbc 704884 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 707185; AscensionCultistAbilities.cpp:215,222-224 replicates CalculatePct(healing, 50) of 500862 ally healing to caster via 707185 (note: gated on effective healing m_healing rather than overheal, so this entry tests effective healing at 2000/20000 ally health; overheal behaviour is untested pending any Cultist overheal ruling). Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000, ally at 2000/20000 health so 500862 never overheals. Both phases cast 500751 on ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy: control (before learning 704884) yields 0 heals of 707185 on caster; treatment (after real learn of 704884) yields 1 heal of 707185 on caster at ratio 707185 / 500862 = 0.50 +- 0.005 (floor_count 0, excluding 0%, 45%, 55%, 100%). Reference search 2026-11-24: coa-history spell 704884/707185: 0 events in 186 logs (positive control 500862: 55154 heals in 27 logs); coabuildhub spells_master_index.json entry 704884 matches verbatim."
     },
     {
       "spell": 704897,
@@ -5339,7 +5339,7 @@
       },
       "critical": false,
       "void_on_cast_failure": true,
-      "observe_source": "Spell.dbc 704897 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), BasePoints 19 + DieSides 1 = +20 ($s1), EffectSpellClassMask[0] 2147483648 = SpellFamilyFlags[0] of Abyssal Covenant 500751, raising 500751 Effect[1] SPELL_AURA_MOD_HEALING_RECEIVED (283, Unit.cpp:11086-11091 checks caster GUID == aurEff caster GUID) from 0% to +20%. Observes non-critical Eldritch Mending 502234 heals cast by caster at grouped ally with 500751 recast on ally in each arm (+5000 SP fixture so die variance is ~1%): control without 704897 vs treatment after real learn of 704897, expected ratio 1.20 (+20%, G-19 band +18% to +22%). Reference search 2026-11-24: coa-history spell 704897: 0 events in 186 logs (passive; positive control 500751: 148 casts in 26 logs); coabuildhub spells_master_index.json entry 704897 matches verbatim.",
+      "observe_source": "Spell.dbc 704897 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), BasePoints 19 + DieSides 1 = +20 ($s1), EffectSpellClassMask[0] 2147483648 = SpellFamilyFlags[0] of Abyssal Covenant 500751, raising 500751 Effect[1] SPELL_AURA_MOD_HEALING_RECEIVED (283, Unit.cpp:11086-11091 checks caster GUID == aurEff caster GUID) from 0% to +20%. Observes non-critical Eldritch Mending 502234 heals cast by caster at grouped ally with 500751 recast on ally in each arm (+5000 SP fixture so die variance is ~1%): control without 704897 vs treatment after real learn of 704897, expected ratio 1.20 (+20%, G-19 band +18% to +22%). Note: an unlinked-ally +0% negative arm is omitted because 704897 is a pure DBC SPELLMOD_EFFECT2 modifier scoped to 500751 via EffectSpellClassMask[0] 2147483648. Reference search 2026-11-24: coa-history spell 704897: 0 events in 186 logs (passive; positive control 500751: 148 casts in 26 logs); coabuildhub spells_master_index.json entry 704897 matches verbatim.",
       "warmup": [
         500751
       ],
@@ -6078,10 +6078,6 @@
       ],
       "ally_arm": {
         "allies": 1,
-        "ally_health": [
-          2000,
-          20000
-        ],
         "arms": [
           {
             "actors": [
@@ -6118,7 +6114,7 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Grouped ally at 10% health lacks Black Blood 804153 and must receive 0 heals of 500773."
+            "source": "Grouped ally lacks Black Blood 804153 and must receive 0 heals of 500773."
           }
         ],
         "ratios": [
@@ -6143,7 +6139,7 @@
       "after_at_most": 5,
       "wait_ms": 200,
       "expire_ms": 3000,
-      "observe_source": "Spell.dbc 525307 Effect[0] aura 354 BasePoints 99 + DieSides 1 = 100% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 heals lowest-health ally in Allies(player, player, 40) with Black Blood 804153 for CalculatePct(damage, 100) via 500773 (CultistCopies: no crit/mods). Precondition fixture: Black Blood 804153 (12000 ms) set on caster via phase_auras (phase_auras targets caster/dummy/striker only and attack_swings forbids setup_casts/ally_casts; caster is in Allies() per AscensionCultist.cpp:239-244), while grouped ally at 2000/20000 health without 804153 confirms Black Blood gating (0 heals). Three main-hand swings (Heretic staff 3300 ms speed -> 9900 ms + 200 ms < 12000 ms 804153 duration): 0 heals before learning 525307 (control), 2..5 heals after a real learn at ratio 500773_heal / melee_damage_total = 1.00 +- 0.01 (floor_count 0, excludes 0%, 10% off on both sides, and wrong rank). Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+      "observe_source": "Spell.dbc 525307 Effect[0] aura 354 BasePoints 99 + DieSides 1 = 100% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 heals lowest-health ally in Allies(player, player, 40) with Black Blood 804153 for CalculatePct(damage, 100) via 500773 (CultistCopies: no crit/mods). Proves the 100% auto-attack damage scaling and Black Blood gating: Black Blood 804153 (12000 ms) is set on caster via phase_auras (caster is in Allies() per AscensionCultist.cpp:239-244), while grouped ally without 804153 receives 0 heals. Reach on grouped allies and lowest-health selection among >=2 Black Blood allies are split to their own claim with a tool_gap on ledger row 166 (behaviours.py:1800,2103-2129 and ally_arm.py:334-335 do not support ally auras or distinct per-ally health fixtures with passive attack_swings). Three main-hand swings (Heretic staff 3300 ms speed -> 9900 ms + 200 ms < 12000 ms 804153 duration): 0 heals before learning 525307 (control), 2..5 heals after a real learn at ratio 500773_heal / melee_damage_total = 1.00 +- 0.01 (floor_count 0, excludes 0%, 10% off on both sides, and wrong rank). Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
     },
     {
       "spell": 706926,
@@ -6167,10 +6163,6 @@
       ],
       "ally_arm": {
         "allies": 1,
-        "ally_health": [
-          2000,
-          20000
-        ],
         "arms": [
           {
             "actors": [
@@ -6207,7 +6199,7 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Grouped ally at 10% health lacks Black Blood 804153 and must receive 0 heals of 500773."
+            "source": "Grouped ally lacks Black Blood 804153 and must receive 0 heals of 500773."
           }
         ],
         "ratios": [
@@ -6232,7 +6224,7 @@
       "after_at_most": 5,
       "wait_ms": 200,
       "expire_ms": 3000,
-      "observe_source": "Spell.dbc 706926 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 heals lowest-health ally in Allies(player, player, 40) with Black Blood 804153 for CalculatePct(damage, 50) via 500773 (CultistCopies: no crit/mods). Precondition fixture: Black Blood 804153 (12000 ms) set on caster via phase_auras (phase_auras targets caster/dummy/striker only and attack_swings forbids setup_casts/ally_casts; caster is in Allies() per AscensionCultist.cpp:239-244), while grouped ally at 2000/20000 health without 804153 confirms Black Blood gating (0 heals). Three main-hand swings (Heretic staff 3300 ms speed -> 9900 ms + 200 ms < 12000 ms 804153 duration): 0 heals before learning 706926 (control), 2..5 heals after a real learn at ratio 500773_heal / melee_damage_total = 0.50 +- 0.01 (floor_count 0, excludes 0%, 10% off on both sides, and wrong rank). Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+      "observe_source": "Spell.dbc 706926 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 heals lowest-health ally in Allies(player, player, 40) with Black Blood 804153 for CalculatePct(damage, 50) via 500773 (CultistCopies: no crit/mods). Proves the 50% auto-attack damage scaling and Black Blood gating: Black Blood 804153 (12000 ms) is set on caster via phase_auras (caster is in Allies() per AscensionCultist.cpp:239-244), while grouped ally without 804153 receives 0 heals. Reach on grouped allies and lowest-health selection among >=2 Black Blood allies are split to their own claim with a tool_gap on ledger row 327 (behaviours.py:1800,2103-2129 and ally_arm.py:334-335 do not support ally auras or distinct per-ally health fixtures with passive attack_swings). Three main-hand swings (Heretic staff 3300 ms speed -> 9900 ms + 200 ms < 12000 ms 804153 duration): 0 heals before learning 706926 (control), 2..5 heals after a real learn at ratio 500773_heal / melee_damage_total = 0.50 +- 0.01 (floor_count 0, excludes 0%, 10% off on both sides, and wrong rank). Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
     },
     {
       "spell": 300286,
@@ -6311,7 +6303,88 @@
     },
     {
       "spell": 300286,
-      "name": "Void-Touched (301982 stacks up to 10 times)",
+      "name": "Void-Touched (301982 reaches 10 stacks after 10 direct heals)",
+      "kind": "metric_delta",
+      "variant": "max_stacks_ten",
+      "label_suffix": "max_stacks_ten",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "gate_spell": 300286,
+      "trigger_spell": 502234,
+      "setup_casts": [
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036
+      ],
+      "setup_wait_ms": 1800,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 808050,
+              "target": "ally"
+            },
+            "before_expected": 9,
+            "expected": 18,
+            "tolerance": 0,
+            "source": "Confirms all 9 Eldritch Shock 808036 setup casts landed direct heal 808050 on ally in each phase (9 before, 18 cumulative after; AscensionCultistAbilities.cpp:425-431)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 502234,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms the 10th direct heal Eldritch Mending 502234 (2000 ms cast, wait_ms 2600) landed on ally in each phase (1 before, 2 cumulative after)."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 301982,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 2600,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Ledger clause 31 (\"stacking $301982u times.\", embedded via @s:301982:0@; quote uses 300286 own text). Spell.dbc 301982 StackAmount = 10 ($301982u). Performs 9 instant Eldritch Shock 808036 setup casts (1800 ms apart, each casting direct heal 808050 on ally per AscensionCultistAbilities.cpp:425-431; phase_auras sets 100 Insanity 500706 so Refresh preserves 680601) plus 1 trigger cast of Eldritch Mending 502234 (2000 ms cast, read at wait_ms 2600 = 18.8 s total < 30 s duration): ally_arm confirms 9 landed 808050 heals (9 before, 18 after) and 1 landed 502234 heal (1 before, 2 after) = 10 landed direct heals per phase, reaching 10 stacks of 301982 (0 control before learn -> 10 after learn). Paired with max_stacks (11 landed direct heals still capped at 10). Reference search 2026-11-24: coa-history spell 301982: 37853 SPELL_AURA_APPLIED_DOSE in 27 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (301982 stacks cap at 10 after 11 direct heals)",
       "kind": "metric_delta",
       "variant": "max_stacks",
       "label_suffix": "max_stacks",
@@ -6339,6 +6412,36 @@
         "ally_health": [
           1000,
           100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 808050,
+              "target": "ally"
+            },
+            "before_expected": 10,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Confirms all 10 Eldritch Shock 808036 setup casts landed direct heal 808050 on ally in each phase (10 before, 20 cumulative after; AscensionCultistAbilities.cpp:425-431)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 502234,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms the 11th direct heal Eldritch Mending 502234 (2000 ms cast, wait_ms 2600) landed on ally in each phase (1 before, 2 cumulative after), so 11 direct heals landed while 301982 capped at 10 stacks."
+          }
         ]
       },
       "metric": "aura_stacks",
@@ -6348,11 +6451,10 @@
       },
       "before_expected": 0,
       "expected": 10,
-      "wait_ms": 1800,
+      "wait_ms": 2600,
       "expire_ms": 2000,
       "void_on_cast_failure": true,
-      "observe_source": "Ledger clause 28 (\"stacking $301982u times.\", embedded via @s:301982:0@; quote uses 300286 own text). Spell.dbc 301982 StackAmount = 10 ($301982u). Casts instant 0-mana direct heal Eldritch Shock 808036 eleven times (10 setup casts 1600 ms apart + 1 trigger cast, total ~17.6 s < 30 s duration, ally at 1000/100000 health) before learning 300286 (control: 0 stacks) and after a real learn of 300286: aura_stacks of 301982 caps at 10 (excludes 0, 5, 9, and 11). Reference search 2026-11-24: coa-history spell 301982: 37853 SPELL_AURA_APPLIED_DOSE in 27 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
-      "note": "10 setup casts of Eldritch Shock 808036 (0 mana, instant direct heal with 680601 and reset_cooldown) plus 1 trigger cast of 502234 (0 cooldown, instant direct heal) = 11 direct heals; Spell.dbc 301982 StackAmount = 10 ($301982u) caps stacks at 10.",
+      "observe_source": "Ledger clause 31 (\"stacking $301982u times.\", embedded via @s:301982:0@; quote uses 300286 own text). Spell.dbc 301982 StackAmount = 10 ($301982u). Performs 10 instant Eldritch Shock 808036 setup casts (1800 ms apart, each casting direct heal 808050 on ally per AscensionCultistAbilities.cpp:425-431; phase_auras sets 100 Insanity 500706 so Refresh preserves 680601) plus 1 trigger cast of Eldritch Mending 502234 (SpellCastTimes CastingTimeIndex 5 = 2000 ms cast, read at wait_ms 2600 = 20.6 s total < 30 s duration): ally_arm confirms 10 landed 808050 heals (10 before, 20 after) and 1 landed 502234 heal (1 before, 2 after) = 11 landed direct heals per phase, while aura_stacks of 301982 stays capped at 10 (0 before learn -> 10 after learn, excluding 0, 9, and 11). Paired with max_stacks_ten (10 landed heals -> 10 stacks). Reference search 2026-11-24: coa-history spell 301982: 37853 SPELL_AURA_APPLIED_DOSE in 27 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
       "phase_auras": [
         [
           500706,
@@ -6431,7 +6533,7 @@
       "after_at_most": 365,
       "wait_ms": 1000,
       "expire_ms": 11000,
-      "observe_source": "Ledger clause 29 (Gaze of CThun 500110 consumes Void-Touched 301982 to heal allies via 301983 for ${$301983m1+$301983ppl1+$BH*0.35}, increased by stacks). Spell.dbc 301983 BasePoints 99 + DieSides 1 = 100, PPL 4.75, BaseLevel 17, MaxLevel 0 -> at level 60: 100 + floor(43 * 4.75) = 304; 301982 Effect[0] aura 283 (+20% healing received per stack on 301983 mask 1048576): 1 stack = 304 * 1.20 = 364.8 ([364..365]). Both phases cast instant direct heal Eldritch Shock 808036 at grouped ally (2000/20000 health) then Gaze of CThun 500110 at dummy: before learning 300286 (control) 0 stacks of 301982 and 0 heals of 301983; after real learn of 300286, 1 stack of 301982 is earned and consumed by Gaze 500110 (checking 301983 heal [364..365] and that 301982 stacks return to 0). Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub 300286 matches verbatim.",
+      "observe_source": "Ledger clause 32 (Gaze of CThun 500110 consumes Void-Touched 301982 to heal allies via 301983 for ${$301983m1+$301983ppl1+$BH*0.35}, increased by stacks). Spell.dbc 301983 BasePoints 99 + DieSides 1 = 100, PPL 4.75, BaseLevel 17, MaxLevel 0 -> at level 60: 100 + floor(43 * 4.75) = 304; 301982 Effect[0] aura 283 (+20% healing received per stack on 301983 mask 1048576): 1 stack = 304 * 1.20 = 364.8 ([364..365]). Both phases cast instant direct heal Eldritch Shock 808036 at grouped ally (2000/20000 health) then Gaze of CThun 500110 at dummy: before learning 300286 (control) 0 stacks of 301982 and 0 heals of 301983; after real learn of 300286, 1 stack of 301982 is earned and consumed by Gaze 500110 (checking 301983 heal [364..365] and that 301982 stacks return to 0). Note: void_on_cast_failure is omitted because 500110 Gaze of CThun's internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub 300286 matches verbatim.",
       "gate_spell": 300286,
       "learn": [
         808036
@@ -6494,7 +6596,7 @@
       "after_at_most": 1205,
       "wait_ms": 1000,
       "expire_ms": 11000,
-      "observe_source": "SP contrast arm for 301983 (${$301983m1+$301983ppl1+$BH*0.35}, AscensionCultistAbilities.cpp:70-71): player_spell_power 2000 (hit_arm: true) adds 2000 * 0.35 = +700 to 304 -> 1004; times 1.20 (1 stack of 301982) = 1204.8 ([1204..1205]). Paired with gaze_consume_base and gaze_consume_5stacks. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "observe_source": "SP contrast arm for 301983 (${$301983m1+$301983ppl1+$BH*0.35}, AscensionCultistAbilities.cpp:70-71): player_spell_power 2000 (hit_arm: true) adds 2000 * 0.35 = +700 to 304 -> 1004; times 1.20 (1 stack of 301982) = 1204.8 ([1204..1205]). Paired with gaze_consume_base and gaze_consume_5stacks. Note: void_on_cast_failure is omitted because 500110 Gaze of CThun's internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
       "gate_spell": 300286,
       "learn": [
         808036
@@ -6557,7 +6659,7 @@
       "after_at_most": 609,
       "wait_ms": 1000,
       "expire_ms": 11000,
-      "observe_source": "Stack-scaling arm for 301983 (\"increased based on how many stacks were on them\"): 5 stacks of 301982 (precondition fixture, +20% per stack = 2.00x) multiply base 304 to 608 exact (contrasting with 364 at 1 stack). Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "observe_source": "Stack-scaling arm for 301983 (\"increased based on how many stacks were on them\"): 5 stacks of 301982 (precondition fixture, +20% per stack = 2.00x) multiply base 304 to 608 exact (contrasting with 364 at 1 stack). Note: void_on_cast_failure is omitted because 500110 Gaze of CThun's internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts each 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
       "gate_spell": 300286,
       "learn": [
         808036

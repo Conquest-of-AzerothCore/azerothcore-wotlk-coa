@@ -258,6 +258,7 @@
     "spell": 300286,
     "clause": "stacking $301982u times.",
     "labels": [
+      "300286 behaviour_metric_delta max_stacks_ten",
       "300286 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
@@ -266,7 +267,9 @@
     "spell": 300286,
     "clause": "When you cast Gaze of C'Thun, all stacks are consumed to heal all allies affected by Void-Touched for ${$301983m1+$301983ppl1+$BH*0.35}, increased based on how many stacks were on them.",
     "labels": [
-      "300286 effect_value #2"
+      "300286 behaviour_metric_delta gaze_consume_base",
+      "300286 behaviour_metric_delta gaze_consume_sp",
+      "300286 behaviour_metric_delta gaze_consume_5stacks"
     ],
     "kind": "claim"
   },
@@ -1554,10 +1557,28 @@
   {
     "spell": 525307,
     "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
-    "labels": [
-      "525307 behaviour_metric_delta auto_heal"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "affected by Black Blood for $s1% of your auto attack damage.",
+        "labels": [
+          "525307 behaviour_metric_delta auto_heal"
+        ]
+      },
+      {
+        "claim": "heal the lowest health ally affected by Black Blood",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance kind can prove Shadow Pennant 525307 reach on grouped allies and lowest-health selection among >=2 Black Blood allies (with a reverse arm) during melee auto-attacks: (1) 525307 is a passive triggered only by melee auto-attack damage (AscensionCultistEvents.cpp:109-110,266-276) targeting Allies(player, player, 40) filtered by ally->HasAura(804153, player->GetGUID()) and sorted by health pct (AscensionCultist.cpp:245-249, includes caster); (2) in metric_delta with attack_swings (behaviours.py:2103-2129), phase_auras only allows caster/dummy/striker (behaviours.py:1800), ally_arm.ally_casts is forbidden with attack_swings (ally_arm.py:334-335), setup_casts requires gate_cast (which cannot cast passive 525307, and attack_setup_cast_steps casts only at caster, behaviours.py:1819, while 804153 is TARGET_UNIT_TARGET_ALLY per AscensionCultistContracts.cpp:138 and 502241 Malevolence requires an enemy target), and option_phase_steps is never called in attack_swings (ally_arm.ally_health is neither emitted nor per-ally distinct); (3) no other existing kind combines melee auto-attacks against a dummy with grouped allies carrying a caster-applied aura at distinct per-ally health percentages. Nearest kind: metric_delta with attack_swings and ally_arm (needs ally phase_auras or setup casts before swings plus distinct per-ally health fixtures).",
+      "attempts": [
+        {
+          "agent": "cu-g7c",
+          "report": ".agents/plans/cu-g7c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 527268,
@@ -3014,10 +3035,28 @@
   {
     "spell": 706926,
     "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
-    "labels": [
-      "706926 behaviour_metric_delta auto_heal"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "affected by Black Blood for $s1% of your auto attack damage.",
+        "labels": [
+          "706926 behaviour_metric_delta auto_heal"
+        ]
+      },
+      {
+        "claim": "heal the lowest health ally affected by Black Blood",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance kind can prove Shadow Pennant 706926 reach on grouped allies and lowest-health selection among >=2 Black Blood allies (with a reverse arm) during melee auto-attacks: (1) 706926 is a passive triggered only by melee auto-attack damage (AscensionCultistEvents.cpp:109-110,266-276) targeting Allies(player, player, 40) filtered by ally->HasAura(804153, player->GetGUID()) and sorted by health pct (AscensionCultist.cpp:245-249, includes caster); (2) in metric_delta with attack_swings (behaviours.py:2103-2129), phase_auras only allows caster/dummy/striker (behaviours.py:1800), ally_arm.ally_casts is forbidden with attack_swings (ally_arm.py:334-335), setup_casts requires gate_cast (which cannot cast passive 706926, and attack_setup_cast_steps casts only at caster, behaviours.py:1819, while 804153 is TARGET_UNIT_TARGET_ALLY per AscensionCultistContracts.cpp:138 and 502241 Malevolence requires an enemy target), and option_phase_steps is never called in attack_swings (ally_arm.ally_health is neither emitted nor per-ally distinct); (3) no other existing kind combines melee auto-attacks against a dummy with grouped allies carrying a caster-applied aura at distinct per-ally health percentages. Nearest kind: metric_delta with attack_swings and ally_arm (needs ally phase_auras or setup casts before swings plus distinct per-ally health fixtures).",
+      "attempts": [
+        {
+          "agent": "cu-g7c",
+          "report": ".agents/plans/cu-g7c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706928,
@@ -3928,25 +3967,26 @@
       {
         "claim": "within $807219a1 yds",
         "labels": [
-          "806382 effect_radius 807219e0 #0"
+          "806382 behaviour_metric_delta radius"
         ]
       },
       {
         "claim": "every $807124T2 sec",
         "labels": [
-          "806382 aura_amplitude_ms #1"
+          "806382 behaviour_metric_delta period"
         ]
       },
       {
         "claim": "for $807219d",
         "labels": [
-          "806382 spell_duration 807219 #2"
+          "806382 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "for ${$807219m1+$807219ppl1+$bh*.2}",
         "labels": [
-          "806382 effect_value #3"
+          "806382 behaviour_metric_delta heal_base",
+          "806382 behaviour_metric_delta heal_sp"
         ]
       }
     ]
