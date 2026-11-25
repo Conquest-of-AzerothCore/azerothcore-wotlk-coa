@@ -1903,7 +1903,7 @@
     "spell": 560321,
     "clause": "Create an Eldritch Obelisk beneath you for $560322d,",
     "labels": [
-      "560321 spell_duration 560322 #0"
+      "560321 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -1919,7 +1919,7 @@
     "spell": 560321,
     "clause": "and the movement speed of allies by $560322s3% while near it.",
     "labels": [
-      "560321 effect_value 560322e2 #2"
+      "560321 behaviour_metric_delta ally_speed"
     ],
     "kind": "claim"
   },
@@ -3143,7 +3143,8 @@
     "spell": 706187,
     "clause": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
     "labels": [
-      "706187 effect_value e0 #0"
+      "706187 behaviour_metric_delta black_blood_heal",
+      "706187 behaviour_metric_delta without_black_blood"
     ],
     "kind": "claim"
   },
@@ -3709,7 +3710,7 @@
     "spell": 802044,
     "clause": "Summon a Tentacle of Y'shaarj near you for $d.",
     "labels": [
-      "802044 aura_duration_ms #0"
+      "802044 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -3717,7 +3718,10 @@
     "spell": 802044,
     "clause": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
     "labels": [
-      "802044 effect_value #1"
+      "802044 behaviour_metric_delta slam_on_summon",
+      "802044 behaviour_metric_delta slam_on_gaze",
+      "802044 behaviour_hit_ratio stamina_scaling",
+      "802044 cone behaviour_fixed_count"
     ],
     "kind": "claim"
   },
@@ -3725,7 +3729,8 @@
     "spell": 802044,
     "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
     "labels": [
-      "802044 effect_value #2"
+      "802044 behaviour_metric_delta max_one",
+      "802044 behaviour_metric_delta replaces_nzoth"
     ],
     "kind": "claim"
   },
@@ -3742,7 +3747,7 @@
     "spell": 802048,
     "clause": "Increases the damage of your Tentacles by $s1%.",
     "labels": [
-      "802048 effect_value e0 #0"
+      "802048 behaviour_hit_ratio tentacle_damage"
     ],
     "kind": "claim"
   },

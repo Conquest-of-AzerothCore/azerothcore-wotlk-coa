@@ -20207,6 +20207,668 @@
       ],
       "void_on_cast_failure": true,
       "observe_source": "Negative control for Void Barrier 300291 window_duration: casting Herald of the Depths 520326 without 300291 does not apply 301259 (reads 0 -> 0 with 520326 verified present)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (summons creature 50096 for 30 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Summon a Tentacle of Y'shaarj near you for $d.",
+      "trigger_spell": 802044,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 28000,
+      "expiry_wait_ms": 4000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          27800,
+          28600
+        ],
+        "expired": [
+          31800,
+          32600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of Y'shaarj 802044 Effect[0] SPELL_EFFECT_SUMMON creature 50096, DurationIndex 9 = 30000 ms (Spell.dbc). Brackets owned_creature_count(50096) in game time: 0 before cast, 1 at [27800..28600] ms (>27000 ms -10%), 0 at [31800..32600] ms (<33000 ms +10%). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (slams on summon when in combat)",
+      "kind": "metric_delta",
+      "variant": "slam_on_summon",
+      "label_suffix": "slam_on_summon",
+      "quote": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+      "trigger_spell": 802044,
+      "target": "caster",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        502182
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of Y'shaarj 50096 slams with 802046 on first pulse after summon (AscensionCultistSummons.cpp:314-318). Horrorbolt 502182 engages dummy in both phases (before 802044: 0 hits from 50096); casting 802044 produces 1 slam without casting Gaze of C'Thun. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (slams whenever Gaze of C'Thun is used)",
+      "kind": "metric_delta",
+      "variant": "slam_on_gaze",
+      "label_suffix": "slam_on_gaze",
+      "quote": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        502182,
+        802044
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Tentacle of Y'shaarj 50096 slams with 802046 when commanded by Gaze of C'Thun 500110 (AscensionCultistAbilities.cpp:135-137, AscensionCultistSummons.cpp:203-204). Setup casts [502182, 802044] run in both phases: before phase produces 1 summon slam (before_expected = 1); after phase adds 1 summon slam plus 1 Gaze-commanded slam (expected = 3, tolerance 0; without Gaze command after would read 2). void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from its unused opposite-faction triggered effect 520335 when targeting an enemy. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (slam scales with Stamina)",
+      "kind": "hit_ratio",
+      "variant": "stamina_scaling",
+      "label_suffix": "stamina_scaling",
+      "quote": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+      "expected": 2.095238,
+      "observe_spell": 802046,
+      "cast_spell": 500110,
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044
+      ],
+      "cast_power": 2000,
+      "cast_wait_ms": 1000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            0
+          ],
+          [
+            48161,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "observe_source": "Tentacle of Y'shaarj slam 802046 (BasePoints 0 + DieSides 1 = 1, Physical SchoolMask 1, AscensionCultistContracts.cpp:77, AscensionCultistData.h:104 coeff 1.0*Stamina). Control has reference Stamina 104 (raw 105); treatment adds Power Word: Fortitude 48161 (+115 Stamina -> 219, raw 220). Ratio 220/105 = 2.095238 (armor cancels). void_on_cast_failure omitted because Gaze of C'Thun 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from unused ally effect 520335. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (10 yd frontal cone)",
+      "kind": "fixed_count",
+      "variant": "cone",
+      "label_suffix": "cone",
+      "quote": "to all enemies in a $802046a yd frontal cone.",
+      "expected": 2,
+      "radius": 10,
+      "cluster_yd": 0.5,
+      "primary_distance_reads": true,
+      "uncapped": true,
+      "behind_yd": 5,
+      "radius_reason": "Tentacle of Y'shaarj slam 802046 Effect[0] TARGET_UNIT_CONE_ENEMY_24 (24 deg total / +-12 deg half-angle, Spell.cpp:1290), EffectRadiusIndex 13 = 10 yd (SpellRadius 13 RadiusMin 10), MaxAffectedTargets 0; tentacle 50096 spawns within 2 yd of caster (SpellRadius 7 = 2 yd) and faces primary dummy at 3 yd, so clustering the 2 extras within 0.5 yd of primary (at 3.17 and 3.33 yd) keeps the worst-case bearing delta <= 6.8 deg < 12 deg from every point in the 2 yd spawn disk, while far dummy at 15+ yd is outside 10 yd and behind dummy 5 yd behind caster is outside the frontal cone.",
+      "cast_spell": 500110,
+      "target_rank": 802046,
+      "caster_entry": 50096,
+      "setup_casts": [
+        [
+          802044,
+          "caster"
+        ]
+      ],
+      "repeats": 3,
+      "settle_ms": 1500,
+      "observe_source": "Proves 10 yd frontal cone of Tentacle of Y'shaarj slam 802046 (TARGET_UNIT_CONE_ENEMY_24, 10 yd radius, Spell.dbc) on primary + 2 extras inside cone vs far dummy and behind dummy unhit. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (max 1 active on recast)",
+      "kind": "metric_delta",
+      "variant": "max_one",
+      "label_suffix": "max_one",
+      "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+      "trigger_spell": 802044,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        802044
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of Y'shaarj 802044 uses SummonProperties 63 (shared Old God Tentacle slot, AscensionCultistSummons.cpp:39,44): casting 802044 with one 50096 already active replaces it, keeping owned_creature_count(50096) at 1 -> 1. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (replaces existing Tentacle of N'Zoth)",
+      "kind": "metric_delta",
+      "variant": "replaces_nzoth",
+      "label_suffix": "replaces_nzoth",
+      "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+      "trigger_spell": 802044,
+      "target": "caster",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        572103
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 501464
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Proves shared Old God Tentacle cap across types: Tentacle of N'Zoth 572103 (entry 501464, 8s duration, SummonProperties 63) is present (1) before 802044 and replaced (0) after 802044 (at ~2.6s << 8s). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560321,
+      "name": "Eldritch Obelisk (lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Create an Eldritch Obelisk beneath you for $560322d,",
+      "trigger_spell": 560321,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 560322,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 18500,
+      "expiry_wait_ms": 3000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18300,
+          19000
+        ],
+        "expired": [
+          21300,
+          22000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Obelisk 560321 triggers 560322 (DurationIndex 18 = 20000 ms; Spell.dbc). Brackets persistent area aura 560322 on caster in game time: 0 before, 1 at [18300..19000] ms (>18000 ms -10%), 0 at [21300..22000] ms (<22000 ms +10%). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560321,
+      "name": "Eldritch Obelisk (+100% Tentacle damage)",
+      "kind": "hit_ratio",
+      "variant": "tentacle_damage",
+      "label_suffix": "tentacle_damage",
+      "quote": "increasing the damage of your Tentacles by $560322s1%",
+      "expected": 2.0,
+      "observe_spell": 802046,
+      "cast_spell": 500110,
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044,
+        560321
+      ],
+      "cast_power": 2000,
+      "cast_wait_ms": 1000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 560321,
+            "target": "caster",
+            "power": 2000
+          },
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ],
+        "casts_wait_ms": 500
+      },
+      "critical": false,
+      "trials": 10,
+      "observe_source": "Eldritch Obelisk 560322 Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190), SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) BasePoints 99 + DieSides 1 = +100% ($560322s1 = 100; Spell.dbc). Treatment casts Eldritch Obelisk 560321 before summoning Tentacle of Y'shaarj 802044 so every 802046 slam (summon and Gaze-commanded) lands while 560322 is active: expected ratio 2.00. void_on_cast_failure omitted because Gaze of C'Thun 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from unused ally effect 520335. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560321,
+      "name": "Eldritch Obelisk (+40% ally movement speed within 15 yd, not at 20 yd)",
+      "kind": "metric_delta",
+      "variant": "ally_speed",
+      "label_suffix": "ally_speed",
+      "quote": "and the movement speed of allies by $560322s3% while near it.",
+      "trigger_spell": 560321,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "ally_offsets": {
+        "ally": 10,
+        "ally2": 20
+      },
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 10,
+            "expected": 10,
+            "tolerance": 0.5,
+            "precondition": true,
+            "source": "ally placed 10 yd from caster on flat ground (< 15 yd radius of 560322 Effect[2])"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0.5,
+            "precondition": true,
+            "source": "ally2 placed 20 yd from caster on flat ground (> 15 yd radius of 560322 Effect[2])"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "run_speed_rate",
+            "fields": {},
+            "before_expected": 1.0,
+            "expected": 1.0,
+            "tolerance": 0.001,
+            "source": "ally2 at 20 yd (beyond 15 yd radius) receives no speed boost (1.0 -> 1.0)"
+          }
+        ]
+      },
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.4,
+      "tolerance": 0.001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Obelisk 560322 Effect[2] SPELL_EFFECT_PERSISTENT_AREA_AURA (27), SPELL_AURA_MOD_INCREASE_SPEED (31) BasePoints 39 + DieSides 1 = +40% ($560322s3 = 40), EffectRadiusIndex 18 = 15 yd (Spell.dbc; SpellAuras.cpp:3047). Grouped ally at 10 yd (<15 yd) gains 1.0 -> 1.4 run_speed_rate; grouped ally2 at 20 yd (>15 yd) stays 1.0 -> 1.0. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802048,
+      "name": "Corruptor's Gaze (+20% Tentacle damage)",
+      "kind": "hit_ratio",
+      "variant": "tentacle_damage",
+      "label_suffix": "tentacle_damage",
+      "quote": "Increases the damage of your Tentacles by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 802046,
+      "cast_spell": 500110,
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044
+      ],
+      "cast_power": 2000,
+      "cast_wait_ms": 1000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          802048
+        ],
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "observe_source": "Corruptor's Gaze 802048 Effect[0] BasePoints 19 + DieSides 1 = +20% ($s1 = 20; Spell.dbc); AscensionCultistContracts.cpp:293-296 multiplies Tentacle damage value by 1 + 20/100. Compares Tentacle of Y'shaarj 50096 slam 802046 damage without vs with 802048: expected ratio 1.20. void_on_cast_failure omitted because Gaze of C'Thun 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from unused ally effect 520335. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 706187,
+      "name": "Twisted Sanity (heals Black Blood ally for 30% of Tentacle damage)",
+      "kind": "metric_delta",
+      "variant": "black_blood_heal",
+      "label_suffix": "black_blood_heal",
+      "quote": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
+      "trigger_spell": 802044,
+      "gate_spell": 706187,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Malevolence 502241 applies Black Blood 804153 to injured grouped ally in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "source": "Twisted Sanity 706187 heals Black Blood ally via Copy 500773 (AscensionCultistSummons.cpp:354-357)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_total",
+            "count_metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "source": "Tentacle of Y'shaarj 50096 slam damage on dummy"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 2,
+            "expected": 0.3,
+            "tolerance": 0.015,
+            "floor_count": 1,
+            "source": "Twisted Sanity 706187 $s1 = 30% of Tentacle damage (CalculatePct floors per hit)"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Twisted Sanity 706187 Effect[0] BasePoints 29 + DieSides 1 = 30% ($s1 = 30; Spell.dbc); AscensionCultistSummons.cpp:354-357 heals grouped allies carrying Black Blood 804153 for CalculatePct(damage, 30) via 500773. Control (before 706187): 0 heals; treatment (after 706187): 1 heal at exact 0.30 ratio to Tentacle 50096 damage. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 706187,
+      "name": "Twisted Sanity (control: no heal for ally without Black Blood)",
+      "kind": "metric_delta",
+      "variant": "without_black_blood",
+      "label_suffix": "without_black_blood",
+      "quote": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
+      "trigger_spell": 802044,
+      "gate_spell": 706187,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        502182
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Horrorbolt 502182 engages dummy without applying Black Blood 804153 to ally"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Tentacle 50096 dealt damage in both phases"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative Black Blood gate for Twisted Sanity 706187: with 706187 learned and Tentacle 50096 dealing damage, ally without Black Blood 804153 receives 0 heals from 500773. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 704878,
+      "name": "Eternal Grasp rank 1 (Tentacle of Y'shaarj 30 sec -> 37.5 sec)",
+      "kind": "metric_delta",
+      "variant": "tentacle_duration",
+      "label_suffix": "tentacle_duration",
+      "quote": "Increases the duration of your Tentacles by $s1%.",
+      "trigger_spell": 802044,
+      "gate_spell": 704878,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 35000,
+      "expiry_wait_ms": 5000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          34800,
+          35600
+        ],
+        "expired": [
+          39800,
+          40600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Grasp 704878 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DURATION +25% ($s1 = 25; Spell.dbc) matching Tentacle of Y'shaarj 802044 (SpellFamilyFlags[2]=536870912, base 30000 ms -> expected 37500 ms). Brackets owned_creature_count(50096) at 35s (present) and 40s (absent), excluding +-10% (33750 / 41250 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 704879,
+      "name": "Eternal Grasp rank 2 (Tentacle of Y'shaarj 30 sec -> 45 sec)",
+      "kind": "metric_delta",
+      "variant": "tentacle_duration",
+      "label_suffix": "tentacle_duration",
+      "quote": "Increases the duration of your Tentacles by $s1%.",
+      "trigger_spell": 802044,
+      "gate_spell": 704879,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 42000,
+      "expiry_wait_ms": 6000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          41800,
+          42600
+        ],
+        "expired": [
+          47800,
+          48600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Grasp 704879 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DURATION +50% ($s1 = 50; Spell.dbc) matching Tentacle of Y'shaarj 802044 (SpellFamilyFlags[2]=536870912, base 30000 ms -> expected 45000 ms). Brackets owned_creature_count(50096) at 42s (present) and 48s (absent), excluding +-10% (40500 / 49500 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
     }
   ],
   "player_observations": [],
