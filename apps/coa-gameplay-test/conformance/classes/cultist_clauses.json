@@ -404,13 +404,15 @@
       {
         "claim": "your critical strike chance is increased by $560947s1%",
         "labels": [
-          "300300 effect_value 560947e0 #3"
+          "300300 behaviour_metric_delta dispel_crit",
+          "300300 behaviour_metric_delta dispel_expire_control"
         ]
       },
       {
         "claim": "for $560947d",
         "labels": [
-          "300300 spell_duration 560947 #4"
+          "300300 behaviour_metric_delta dispel_crit",
+          "300300 behaviour_metric_delta dispel_crit_duration"
         ]
       }
     ]
@@ -1499,13 +1501,16 @@
       {
         "claim": "your critical strike chance is increased by $560947s1%",
         "labels": [
-          "525049 effect_value 560947e0 #2"
+          "525049 behaviour_metric_delta dispel_crit",
+          "525049 behaviour_metric_delta dispel_crit_pct",
+          "525049 behaviour_metric_delta dispel_expire_control"
         ]
       },
       {
         "claim": "for $560947d",
         "labels": [
-          "525049 spell_duration 560947 #3"
+          "525049 behaviour_metric_delta dispel_crit",
+          "525049 behaviour_metric_delta dispel_crit_duration"
         ]
       }
     ]
