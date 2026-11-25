@@ -7,7 +7,8 @@
     "stays. Hearthstone 8690 (SPELL_EFFECT_TELEPORT_UNITS to the home bind) and Teleport: Stormwind 3561 (to a",
     "spell_target_position) fail with SPELL_FAILED_NOT_HERE (60) and leave the Criminal in place; an accepted",
     "Call To Arms 804723 summon does not move it; Blink 1953 (a leap, not a fixed-destination teleport) still moves",
-    "it about 20 yards. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
+    "it about 20 yards on the flat Thousand Needles salt flats. Once Criminal is removed, Teleport:",
+    "Stormwind lands at its target x -9003.46."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -25,11 +26,11 @@
     }
   ],
   "location": {
-    "map": 0,
-    "x": -8917.41,
-    "y": -115.853,
-    "z": 82.3711,
-    "o": 0
+    "map": 1,
+    "x": -5805.16,
+    "y": -3899.4,
+    "z": -95.32,
+    "o": 3.2
   },
   "steps": [
     {
@@ -40,20 +41,20 @@
     {
       "action": "teleport",
       "actor": "g",
-      "map": 0,
-      "x": -8917.41,
-      "y": -115.853,
-      "z": 82.3711,
-      "o": 0
+      "map": 1,
+      "x": -5805.16,
+      "y": -3899.4,
+      "z": -95.32,
+      "o": 3.2
     },
     {
       "action": "teleport",
       "actor": "mage",
-      "map": 0,
-      "x": -8917.41,
-      "y": -55.853,
-      "z": 82.3711,
-      "o": 0
+      "map": 1,
+      "x": -5805.16,
+      "y": -3839.4,
+      "z": -95.32,
+      "o": 3.2
     },
     {
       "action": "wait",
@@ -137,10 +138,10 @@
     },
     {
       "action": "assert",
-      "label": "The Criminal is still in Elwynn Forest",
+      "label": "The Criminal is still in Thousand Needles",
       "actor": "mage",
       "metric": "map_id",
-      "equals": 0
+      "equals": 1
     },
     {
       "action": "assert",
@@ -234,8 +235,8 @@
       "actor": "mage",
       "metric": "position_x",
       "relative_to": "blink_x",
-      "min": 15,
-      "within_ms": 2000
+      "within_ms": 2000,
+      "max": -15
     },
     {
       "action": "set_aura",

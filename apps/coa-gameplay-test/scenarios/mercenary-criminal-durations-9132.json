@@ -9,7 +9,7 @@
     "8 minutes; a further hit tops the timer up to 2 minutes when less is left. The tooltip names the Mercenary's",
     "own faction, so a Horde War Mode player hit by an Alliance Mercenary gives nothing. Two War Mode Humans and a",
     "High-Risk Human Mercenary pick their rulesets in Stormwind and fight in Elwynn Forest with a War Mode Orc.",
-    "Dodge and parry are zeroed on the victims so every timed hit lands."
+    "Dodge and parry are zeroed on the victims so every timed hit lands; all victims stand in front of the Mercenary."
   ],
   "timeout_ms": 240000,
   "players": [
@@ -139,7 +139,8 @@
       "map": 0,
       "x": -9617.06,
       "y": -288.949,
-      "z": 57.3053
+      "z": 57.3053,
+      "o": 0
     },
     {
       "action": "teleport",
@@ -147,23 +148,26 @@
       "map": 0,
       "x": -9615.06,
       "y": -288.949,
-      "z": 57.3053
+      "z": 57.3053,
+      "o": 3.14159
     },
     {
       "action": "teleport",
       "actor": "innocent2",
       "map": 0,
-      "x": -9617.06,
+      "x": -9615.06,
       "y": -286.949,
-      "z": 57.3053
+      "z": 57.3053,
+      "o": 3.14159
     },
     {
       "action": "teleport",
       "actor": "orc",
       "map": 0,
-      "x": -9619.06,
-      "y": -288.949,
-      "z": 57.3053
+      "x": -9615.06,
+      "y": -290.949,
+      "z": 57.3053,
+      "o": 3.14159
     },
     {
       "action": "wait",

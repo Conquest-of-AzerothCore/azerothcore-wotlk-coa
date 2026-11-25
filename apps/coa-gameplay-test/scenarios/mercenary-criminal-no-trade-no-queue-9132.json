@@ -175,7 +175,8 @@
       "actor": "queuer",
       "metric": "server_packets",
       "opcode": 724,
-      "save_as": "bg_status"
+      "save_as": "bg_status",
+      "row": 0
     },
     {
       "action": "client_packet",
@@ -206,7 +207,8 @@
       "opcode": 724,
       "relative_to": "bg_status",
       "min": 1,
-      "within_ms": 2000
+      "within_ms": 2000,
+      "row": 0
     },
     {
       "action": "assert",
@@ -215,7 +217,8 @@
       "metric": "server_packet_u32",
       "opcode": 724,
       "index": 1,
-      "min": 1
+      "min": 1,
+      "row": 0
     },
     {
       "action": "lfg_join",
@@ -239,7 +242,8 @@
       "actor": "queuer",
       "metric": "server_packets",
       "opcode": 724,
-      "save_as": "bg_left"
+      "save_as": "bg_left",
+      "row": 0
     },
     {
       "action": "set_aura",
@@ -256,7 +260,8 @@
       "opcode": 724,
       "relative_to": "bg_left",
       "min": 1,
-      "within_ms": 2000
+      "within_ms": 2000,
+      "row": 0
     },
     {
       "action": "assert",
@@ -265,7 +270,8 @@
       "metric": "server_packet_u32",
       "opcode": 724,
       "index": 1,
-      "equals": 0
+      "equals": 0,
+      "row": 0
     },
     {
       "action": "assert",
@@ -280,7 +286,8 @@
       "actor": "queuer",
       "metric": "server_packets",
       "opcode": 744,
-      "save_as": "bg_refused"
+      "save_as": "bg_refused",
+      "row": 0
     },
     {
       "action": "client_packet",
@@ -311,7 +318,8 @@
       "opcode": 744,
       "relative_to": "bg_refused",
       "min": 1,
-      "within_ms": 2000
+      "within_ms": 2000,
+      "row": 0
     },
     {
       "action": "assert",
@@ -320,7 +328,8 @@
       "metric": "server_packet_u32",
       "opcode": 744,
       "index": 0,
-      "equals": 0
+      "equals": 0,
+      "row": 0
     },
     {
       "action": "lfg_join",

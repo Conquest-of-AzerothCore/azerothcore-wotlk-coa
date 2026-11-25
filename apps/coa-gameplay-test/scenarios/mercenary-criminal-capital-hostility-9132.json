@@ -165,7 +165,8 @@
       "actor": "human",
       "metric": "server_packets",
       "opcode": 677,
-      "save_as": "forced_before"
+      "save_as": "forced_before",
+      "row": 5
     },
     {
       "action": "set_aura",
@@ -193,21 +194,13 @@
     },
     {
       "action": "assert",
-      "label": "The client is told about the forced reactions",
+      "label": "They name the five Alliance capital factions (count 5)",
       "actor": "human",
       "metric": "server_packets",
       "opcode": 677,
       "relative_to": "forced_before",
-      "min": 1
-    },
-    {
-      "action": "assert",
-      "label": "They name the five Alliance capital factions",
-      "actor": "human",
-      "metric": "server_packet_u32",
-      "opcode": 677,
-      "index": 0,
-      "equals": 5
+      "min": 1,
+      "row": 5
     },
     {
       "action": "relog",
@@ -236,7 +229,8 @@
       "actor": "human",
       "metric": "server_packets",
       "opcode": 677,
-      "save_as": "forced_cleared"
+      "save_as": "forced_cleared",
+      "row": 0
     },
     {
       "action": "set_aura",
@@ -264,21 +258,13 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the client is told again",
+      "label": "The forced reactions are cleared (count 0)",
       "actor": "human",
       "metric": "server_packets",
       "opcode": 677,
       "relative_to": "forced_cleared",
-      "min": 1
-    },
-    {
-      "action": "assert",
-      "label": "The forced reactions are cleared",
-      "actor": "human",
-      "metric": "server_packet_u32",
-      "opcode": 677,
-      "index": 0,
-      "equals": 0
+      "min": 1,
+      "row": 0
     },
     {
       "action": "snapshot",
