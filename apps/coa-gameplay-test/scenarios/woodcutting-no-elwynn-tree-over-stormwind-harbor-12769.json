@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "No Elwynn Tree floats over Stormwind Harbor (#12769)",
+  "contract": "#12769 reported an Elwynn woodcutting tree in the sky. Spawn 8000010 (entry 244614) floated 34.94 yd above a Stormwind Harbor cliff, in the Stormwind City zone; rev_20261124_12769 removes it. Expected: that spawn is gone while the grounded Elwynn Tree 8000006 in Elwynn Forest still spawns.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8712.26,
+    "y": 1209.93,
+    "z": 64.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the floating tree over the harbor is not spawned",
+      "metric": "spawn_active",
+      "equals": 0,
+      "spawn": 8000010
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -9737.78,
+      "y": 112.485,
+      "z": 48.2,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "CONTROL: the Elwynn Tree 8000006 in Elwynn Forest still spawns",
+      "metric": "spawn_active",
+      "equals": 1,
+      "spawn": 8000006
+    }
+  ]
+}

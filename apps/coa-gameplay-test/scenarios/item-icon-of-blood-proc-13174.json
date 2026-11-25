@@ -1,0 +1,237 @@
+{
+  "schema": 1,
+  "name": "Icon of Blood procs on melee and ranged abilities (#13174, #12236)",
+  "contract": [
+    "#13174, #12236: Icon of Blood (proc dummies 202027, 312524, 316524, 320524) never procced. Every dummy",
+    "carries Spell.dbc ProcFlags 0 and the world had no spell_proc row, so SpellMgr::LoadSpellProcs skipped it.",
+    "Tooltip: \"Melee and ranged abilities\", tiers \"(30sec. internal cooldown)\". Flags 272 (melee and ranged",
+    "abilities) as the merged Shadowcraft and Beaststalker 3-piece rows. spell_proc_chance reads each loaded",
+    "entry's chance, which equals the record's ProcChance, and spell_proc_cooldown_ms reads each loaded cooldown.",
+    "aura_proc_rate replays the aura's native proc decision, including the roll, 40000 times on one synthetic",
+    "event per check. It procs on a landed melee ability (Heroic Strike 78), a landed ranged ability (Arcane Shot",
+    "3044), at the record's chance; it never procs on a landed melee auto attack, a landed ranged auto attack, a",
+    "landed direct magic spell (Frostbolt 116). Before the repair the chance and cooldown lookups fail with",
+    "'Spell has no proc entry' and every rate reads 0, so the discriminating checks fail instead of flaking."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 202027",
+      "actor": "caster",
+      "spell": 202027,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 320524",
+      "actor": "caster",
+      "spell": 320524,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 202027 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 202027,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 320524 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 320524,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 202027 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 202027,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 312524 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 312524,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 316524 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 316524,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 320524 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 320524,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 202027 loads no internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 202027,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 312524 loads the tooltip's 30 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 312524,
+      "equals": 30000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 316524 loads the tooltip's 30 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 316524,
+      "equals": 30000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 320524 loads the tooltip's 30 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 320524,
+      "equals": 30000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee ability (Heroic Strike 78) procs 202027 at 15%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202027,
+      "target": "dummy",
+      "trigger_spell": 78,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged ability (Arcane Shot 3044) procs 202027 at 15%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202027,
+      "target": "dummy",
+      "trigger_spell": 3044,
+      "type_mask": 256,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee ability (Heroic Strike 78) procs 320524 at 15%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320524,
+      "target": "dummy",
+      "trigger_spell": 78,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged ability (Arcane Shot 3044) procs 320524 at 15%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320524,
+      "target": "dummy",
+      "trigger_spell": 3044,
+      "type_mask": 256,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed melee auto attack procs 202027 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202027,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed ranged auto attack procs 202027 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202027,
+      "target": "dummy",
+      "type_mask": 64,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed direct magic spell (Frostbolt 116) procs 202027 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 202027,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}

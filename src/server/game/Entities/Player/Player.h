@@ -1497,7 +1497,7 @@ public:
     bool SatisfyQuestBreadcrumb(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestNextChain(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const;
-    bool SatisfyQuestDay(Quest const* qInfo, bool msg) const;
+    bool SatisfyQuestDay(Quest const* qInfo, bool msg, bool allowRepeat = true) const;
     bool SatisfyQuestWeek(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestMonth(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestSeasonal(Quest const* qInfo, bool msg) const;

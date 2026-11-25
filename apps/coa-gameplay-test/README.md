@@ -530,6 +530,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `pvp` | Player `actor`, boolean `enabled`: native PvP toggle request. Disabling retains the ordinary flag-removal timer. |
 | `set_moving` | Player `actor`, boolean `enabled`: fixture the native forward movement flag for cast restriction tests. Optional `flag`: `forward` (default), `backward`, `strafe_left`, `strafe_right` or `falling` (airborne, as during a jump). |
 | `relocate` | Player `actor`, optional `dx`, `dy`, `dz` (yards, -20 to 20): move the actor through the native position update a client movement packet applies, so movement and turning interrupts run; no packet is sent. With `around_owner` (a player) and `around_entry` the actor is placed instead at that player's present owned creature of the entry, `radius` + both combat reaches + `edge_offset` (default 0, -5 to 5) yd away along `bearing` (radians on the world axes, default 0), at the creature's height; the record holds the `distance`. |
+| `relocate_to_creature` | Player `actor`, `entry`, optional `radius` (yards, 1-60, default 20): move the actor in the same way to the horizontal position of the nearest living creature of that entry, keeping the actor's height. |
 | `move_point` | Fixture creature `actor` (not `stationary`), `dx`, optional `dy` (yards, -100 to 100): a running point move from its position; speed auras apply to the move as it runs. |
 | `fall` | Player `actor`, `height` (yards, 1 to 60): a harness-simulated landing. The fall start is set `height` yards above the actor through `Player::UpdateFallInformationIfNeed` (as a client's first falling packet does), then `Player::HandleFall` is called with a landing `MovementInfo` at the actor's position, as `MSG_MOVE_FALL_LAND` reaches it in `WorldSession::ProcessMovementInfo`. Refused for a dead, GM, god-mode, hovering, feather-falling, flying, in-flight, swimming or physically immune player. The record carries `height`, `fall_time_ms`, `safe_fall` (SPELL_AURA_SAFE_FALL total), `fall_damage_rate` (Rate.Damage.Fall) and `health_lost`. |
 | `group` | `actor`, `target`, optional `loot_method` (0-4) and `master_looter` (a player id, read with `loot_method`) and `raid` (boolean): fixture party; creates the actor's group if needed, adds an ungrouped player and sets the loot method and master looter; `raid: true` then makes the group a raid. |
@@ -645,7 +646,7 @@ Metrics: `health`, `max_health`, `creature_type`, `power`, `max_power`, `alive`,
 `owned_creature_remaining_ms`, `charm_entry`, `charm_distance`, `charm_aura_stacks`, `owned_creature_sent_faction`,
 `controls_self`, `charmed`, `private_instance`, `dynamic_object`, `dynamic_object_count`,
 `dynamic_object_duration_ms`, `dynamic_object_height`, `dynamic_object_radius`, `dynamic_object_size`, `distance`,
-`spell_proc_count`, `spell_proc_chance`,
+`spell_proc_count`, `spell_proc_chance`, `spell_proc_cooldown_ms`,
 `aura_proc_rate`, `spell_cast_count`, `temporary_spell_replacement`,
 `carried_aura_count` (how many of the `spells` list the unit carries, optionally only from `caster`; for an
 effect that picks one of several auras at random),
@@ -895,7 +896,9 @@ snapshot it on one unit and assert another `relative_to` it to show that two uni
 These two count metrics accept each other's snapshots with `relative_to`. Subtract an engraving aura's proc count
 from its payload's total cast count to isolate a talent that casts the same payload without aura attribution.
 `spell_proc_chance` requires `spell` and reads the loaded `spell_proc` Chance, after a zero is replaced by the DBC
-ProcChance. `aura_proc_rate` requires `spell` (an aura on the actor), `target` and `type_mask` (proc flags), and runs
+ProcChance. `spell_proc_cooldown_ms` requires `spell` and reads the loaded `spell_proc` Cooldown, the internal
+cooldown each aura carries between procs.
+`aura_proc_rate` requires `spell` (an aura on the actor), `target` and `type_mask` (proc flags), and runs
 the aura's full proc decision, database filters, conditions, script CheckProc and the native chance roll, `trials`
 times (default 40000) on one synthetic event. It reports the percentage that would proc, without running the proc.
 The event deals 1000 damage, or 1000 effective healing with `heal`, from the actor to `target`, or from `target` to
@@ -1052,11 +1055,7 @@ when none was sent; the client refuses a cast without that aura before the reque
 `client_removals_keeping_buttons_for` counts its removed notices ending in a zero byte, which Extensions.dll
 answers without clearing the spell's action buttons. `client_spell_row_restored` returns 1 when the last two
 `SMSG_PATCH_SPELL` rows for `spell` are the same row, first with `SPELL_ATTR0_DO_NOT_DISPLAY` and then without.
-Each player starts with the Spell rows the client MPQs carry for the server's spell patches (the rows the server
-would send for `spell`), and `SMSG_PATCH_SPELL` rows the server sends replace them. `client_spell_row_contains`
-requires `spell` and `text` and returns 1 when the client's current row for `spell` contains `text`, 0 when not,
-or -1 without a row; `client_spell_row_u32` requires `spell` and `index` and returns that dword of the row (the
-`SMSG_PATCH_SPELL` layout, ID at 0), or -1.
+The model reads attributes only from rows the server sent, not from the client's own tables.
 `temporary_spell_replacement` requires `spell` and returns the spell ID currently standing in for it on the
 player's bars. `Player::GetTemporarySpellReplacement` returns the queried spell itself when nothing replaces
 it, so the unreplaced reading is that spell's own ID, never zero. It reads server-side state, not what the
@@ -1521,8 +1520,8 @@ template's) sets the hover anim tier; it is a swimmer when its movement allows s
 its template has no display or is a transport (types 11 and 15). A creature's displays are the spawn's model and
 every template model; a gameobject's is its template display. A display is `client` when its id is a record of
 `CreatureDisplayInfo.dbc` or `GameObjectDisplayInfo.dbc` under `DataDir/dbc` (the client set the server
-enforces), `server_only` when only the server store has it (a row of the `*_dbc` world tables, which the client
-MPQs carry), and `missing` otherwise.
+enforces), `server_only` when only the server store has it (a row of the `*_dbc` world tables, streamed to clients
+by the display patch service), and `missing` otherwise.
 
 Known limits: a spawn on the wrong floor layer (a cave spawn placed on the terrain above the cave) stands on
 ground and reads as grounded; a wrong but existing model needs an external reference; positions changed at

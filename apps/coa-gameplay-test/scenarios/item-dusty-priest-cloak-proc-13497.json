@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "Dusty Priest Cloak procs on heal over time effects (#13497)",
+  "contract": [
+    "#13497: Dusty Priest Cloak (proc dummies 303041, 312832, 316832, 320832) never procced. Every dummy carries",
+    "Spell.dbc ProcFlags 0 and the world had no spell_proc row, so SpellMgr::LoadSpellProcs skipped it. Tooltip:",
+    "\"Your heal over time effects\", tiers \"(10sec. internal cooldown)\". Flags 262144 (done periodic) for heals",
+    "only. The dummies' second effect (a root, 303039/312833/316833/320833) is not in the tooltip; it is disabled",
+    "(DisableEffectsMask 2) by the PR author's ruling. spell_proc_chance reads each loaded entry's chance, which",
+    "equals the record's ProcChance, and spell_proc_cooldown_ms reads each loaded cooldown. aura_proc_rate",
+    "replays the aura's native proc decision, including the roll, 40000 times on one synthetic event per check.",
+    "It procs on a heal over time tick (Rejuvenation 774), at the record's chance; it never procs on a direct",
+    "heal (Flash Heal 2061), a periodic Shadow tick (Shadow Word: Pain 589). Before the repair the chance and",
+    "cooldown lookups fail with 'Spell has no proc entry' and every rate reads 0, so the discriminating checks",
+    "fail instead of flaking."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 303041",
+      "actor": "caster",
+      "spell": 303041,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 320832",
+      "actor": "caster",
+      "spell": 320832,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 303041 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 303041,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 320832 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 320832,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 303041 loads the record's 5% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 303041,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 312832 loads the record's 5% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 312832,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 316832 loads the record's 5% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 316832,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 320832 loads the record's 5% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 320832,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 303041 loads no internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 303041,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 312832 loads the tooltip's 10 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 312832,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 316832 loads the tooltip's 10 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 316832,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 320832 loads the tooltip's 10 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 320832,
+      "equals": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a heal over time tick (Rejuvenation 774) procs 303041 at 5%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 303041,
+      "target": "caster",
+      "heal": true,
+      "trigger_spell": 774,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 2,
+      "hit_mask": 1,
+      "min": 3.5,
+      "max": 6.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a heal over time tick (Rejuvenation 774) procs 320832 at 5%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 320832,
+      "target": "caster",
+      "heal": true,
+      "trigger_spell": 774,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 2,
+      "hit_mask": 1,
+      "min": 3.5,
+      "max": 6.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a direct heal (Flash Heal 2061) procs 303041 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 303041,
+      "target": "caster",
+      "heal": true,
+      "trigger_spell": 2061,
+      "type_mask": 16384,
+      "phase_mask": 2,
+      "spell_type_mask": 2,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic Shadow tick (Shadow Word: Pain 589) procs 303041 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 303041,
+      "target": "dummy",
+      "trigger_spell": 589,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}

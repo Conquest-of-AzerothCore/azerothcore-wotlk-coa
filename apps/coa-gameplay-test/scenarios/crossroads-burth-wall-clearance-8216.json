@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Crossroads: Burth no longer stands inside the hut wall (#8216)",
+  "contract": "#8216 reported Burth (creature guid 9950044, entry 342828, Wildcard season event 194) partly inside a wall beside the Crossroads wyvern roost. #7212 had moved him to (-446.847, -2583.061, 96.055), 0.6-1.1 yd from the leaning east wall of the patch-WB1 Orchut.wmo hut. He now stands just outside that wall at (-443.847, -2580.061, 96.915), on the ground and at least 1 yd clear of every vmap model. The scenario activates event 194 to spawn Burth and restores its original state during teardown, including after a failed assertion.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -441.0,
+    "y": -2578.0,
+    "z": 97.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase Burth is spawned in",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "game_event",
+      "label": "Activate the Wildcard season event that spawns Burth",
+      "event": 194,
+      "active": true
+    },
+    {
+      "action": "assert",
+      "label": "Burth stands at the Crossroads",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 342828,
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Burth is at least 1 yd clear of the hut wall (was 0.6 yd)",
+      "actor": "p",
+      "metric": "spawn_clearance",
+      "min": 1,
+      "guid": 9950044,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Burth stands on the ground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.3,
+      "max": 0.3,
+      "guid": 9950044,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "No roof or overhang hangs over his head",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 2.5,
+      "guid": 9950044,
+      "spawn_type": "creature"
+    }
+  ]
+}

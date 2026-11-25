@@ -1,0 +1,343 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: a harmful aura, a DoT kill and a pet kill count as the Mercenary's (#9132)",
+  "contract": [
+    "Issue #9132. Criminal: Blood On Your Hands 9930873 follows the Mercenary's own acts, including harmful auras",
+    "without damage, damage-over-time effects and its pet. A High-Risk Human Warlock Mercenary opens on a same-",
+    "faction War Mode Human with Curse of Weakness 702 (two auras, no damage) and gets 3 minutes; Corruption 172",
+    "(periodic damage) kills a second War Mode Human with 1 health and gives 8 minutes; its Imp (Summon Imp 688,",
+    "pet 416) kills a third with 1 health and gives 8 minutes. Criminal is removed between the three cases."
+  ],
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 9,
+      "level": 60,
+      "spell_hit_rating": 600
+    },
+    {
+      "id": "cursed",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "dotted",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "petvictim",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormwind lets the Humans rest",
+      "actor": "cursed",
+      "metric": "resting",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "cursed",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: cursed is in War Mode",
+      "actor": "cursed",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "dotted",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: dotted is in War Mode",
+      "actor": "dotted",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "petvictim",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: petvictim is in War Mode",
+      "actor": "petvictim",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Warlock is in High-Risk",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and takes up Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 0,
+      "x": -9625.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "cursed",
+      "map": 0,
+      "x": -9615.06,
+      "y": -290.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "teleport",
+      "actor": "dotted",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "teleport",
+      "actor": "petvictim",
+      "map": 0,
+      "x": -9615.06,
+      "y": -286.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "label": "Let everyone arrive in Elwynn Forest",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "mercenary",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "cursed",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "dotted",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "petvictim",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "learn",
+      "actor": "mercenary",
+      "spell": 702
+    },
+    {
+      "action": "learn",
+      "actor": "mercenary",
+      "spell": 172
+    },
+    {
+      "action": "learn",
+      "actor": "mercenary",
+      "spell": 688
+    },
+    {
+      "action": "set_power",
+      "actor": "mercenary",
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "label": "The Mercenary opens on a same-faction innocent with Curse of Weakness",
+      "actor": "mercenary",
+      "spell": 702,
+      "target": "cursed"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the curse lands",
+      "actor": "cursed",
+      "metric": "aura",
+      "spell": 702,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a harmful aura without damage is a first strike",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "worth 3 minutes",
+      "actor": "mercenary",
+      "metric": "aura_duration_ms",
+      "spell": 9930873,
+      "min": 175000,
+      "max": 180000
+    },
+    {
+      "action": "set_aura",
+      "label": "Reset Criminal",
+      "actor": "mercenary",
+      "spell": 9930873,
+      "stacks": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "dotted",
+      "value": 1
+    },
+    {
+      "action": "cast",
+      "label": "The Mercenary puts Corruption on an innocent with 1 health",
+      "actor": "mercenary",
+      "spell": 172,
+      "target": "dotted",
+      "ignore_gcd": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Corruption tick kills the innocent",
+      "actor": "dotted",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a kill by a damage-over-time effect gives 8 minutes",
+      "actor": "mercenary",
+      "metric": "aura_duration_ms",
+      "spell": 9930873,
+      "min": 460000,
+      "max": 480000
+    },
+    {
+      "action": "set_aura",
+      "label": "Reset Criminal",
+      "actor": "mercenary",
+      "spell": 9930873,
+      "stacks": 0
+    },
+    {
+      "action": "cast",
+      "label": "The Mercenary summons an Imp",
+      "actor": "mercenary",
+      "spell": 688,
+      "ignore_gcd": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Imp is out",
+      "actor": "mercenary",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "petvictim",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "label": "The Imp attacks a third innocent with 1 health",
+      "actor": "mercenary",
+      "target": "petvictim",
+      "pet": true
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Imp kills the innocent",
+      "actor": "petvictim",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pet's kill counts as the Mercenary's",
+      "actor": "mercenary",
+      "metric": "aura_duration_ms",
+      "spell": 9930873,
+      "min": 460000,
+      "max": 480000
+    }
+  ]
+}

@@ -108,6 +108,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'carried_pool_item_count', 'carried_variant_item_count', 'carried_statless_armor_count',
     'client_knows_spell', 'client_spellbook_copies', 'client_cooldown_ready', 'client_cooldown_clears',
     'client_cooldown_blocked_casts', 'initial_spells_at', 'learned_spell_at',
+    'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows', 'chat_log_dropped',
@@ -153,7 +154,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spellbook_superseded_packets', 'spellbook_superseded_for', 'spellbook_loud_supersedes_for',
     'client_chat_lines_for', 'client_removals_keeping_buttons_for', 'client_placing_learns_for',
     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
-    'client_spell_row_restored', 'client_spell_row_contains', 'client_spell_row_u32',
+    'client_spell_row_restored',
     'spellbook_client_notable', 'spellbook_notify_id_mismatches',
     'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
     'spellbook_silent_buys', 'spellbook_multi_announced_buys',
@@ -216,7 +217,8 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_heal_count', 'owned_creature_heal_total', 'owned_creature_effective_heal_total',
     'pet_run_speed_rate',
     'distance', 'spawn_active', 'spawn_display', 'threat', 'threat_per_damage',
-    'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate', 'temporary_spell_replacement',
+    'spell_proc_count', 'spell_proc_chance', 'spell_proc_cooldown_ms', 'aura_proc_rate',
+    'temporary_spell_replacement',
     'aura_apply_count',
     'spell_family_flags',
     'creature_loot_quality_rate', 'creature_loot_item_rate', 'fishing_loot_item_rate', 'item_loot_item_rate', 'gameobject_loot_item_rate', 'equipped_gear_loot_rate', 'forced_loot_count',
@@ -298,6 +300,7 @@ ACTIONS = {
     'set_moving': ({'actor', 'enabled'}, {'actor', 'enabled', 'flag', 'unit_state'}),
     'relocate': ({'actor'}, {'actor', 'dx', 'dy', 'dz', 'around_owner', 'around_entry', 'radius', 'edge_offset',
                              'bearing'}),
+    'relocate_to_creature': ({'actor', 'entry'}, {'actor', 'entry', 'radius'}),
     'fall': ({'actor', 'height'}, {'actor', 'height'}),
     'level_scaling_packet': ({'actor', 'value'}, {'actor', 'value'}),
     'client_packet': ({'actor', 'opcode'},
@@ -924,6 +927,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     f'{where}: around fields need around_owner')
             for key in ('dx', 'dy', 'dz'):
                 number(step.get(key, 0), f'{where}.{key}', -20, 20)
+        if action == 'relocate_to_creature':
+            number(step.get('radius', 20), f'{where}.radius', 1, 60)
         if action == 'fall':
             require(step['actor'] in player_ids, f'{where}: fall needs a player')
             number(step['height'], f'{where}.height', 1, 60)
@@ -1416,15 +1421,11 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'quest_query_text_contains':
                 require(isinstance(step.get('text'), str) and bool(step['text']),
                         f'{where}: quest_query_text_contains needs text')
-            if metric == 'client_spell_row_contains':
-                require(isinstance(step.get('text'), str) and bool(step['text']),
-                        f'{where}: client_spell_row_contains needs text')
-            if metric == 'client_spell_row_u32':
-                number(step.get('index'), f'{where}.index', 0, None, True)
             if metric.startswith('aura') or metric in {
                     'knows_spell', 'spell_rank', 'first_rank_spell', 'cooldown_ms', 'spell_cooldown_packet_ms', 'sent_aura_amount', 'global_cooldown_ms', 'spell_charges', 'cast_remaining_ms', 'has_talent',
                     'pet_knows_spell', 'client_knows_spell', 'client_spellbook_copies', 'learned_spell_at',
                     'client_cooldown_ready', 'client_cooldown_clears', 'client_cooldown_blocked_casts',
+                    'skill_line_ability', 'skill_line_ability_at', 'skill_line_after_initial', 'skill_line_after_learned',
                     'pet_aura_stacks', 'pet_aura_duration_ms', 'charm_aura_stacks', 'spell_active',
                     'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms', 'dynamic_object_height',
                     'dynamic_object_radius', 'dynamic_object_size', 'spell_power_cost',
@@ -1445,7 +1446,8 @@ def validate(scenario, clock=REAL_CLOCK):
                     'spell_log_count', 'spell_absorb_total', 'spell_resist_total', 'spell_damage_with_resist_total',
                     'spell_uses_armor', 'pet_aura_amount', 'pet_aura_amplitude_ms', 'spell_heal_count', 'spell_heal_total',
                     'spell_effective_heal_total', 'spell_heal_absorb_total', 'spell_energize_count',
-                    'spell_energize_total', 'spell_proc_count', 'spell_proc_chance', 'aura_proc_rate',
+                    'spell_energize_total', 'spell_proc_count', 'spell_proc_chance', 'spell_proc_cooldown_ms',
+                    'aura_proc_rate',
                     'temporary_spell_replacement',
                     'cast_failure',
                     'trainer_window_state', 'trainer_window_ability', 'spellbook_superseded_for',
@@ -1453,7 +1455,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     'spellbook_notify_id_mismatches', 'client_chat_lines_for',
                     'client_removals_keeping_buttons_for', 'client_placing_learns_for',
                     'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
-                    'client_spell_row_restored', 'client_spell_row_contains', 'client_spell_row_u32'}:
+                    'client_spell_row_restored'}:
                 require('spell' in step, f'{where}: metric needs spell')
                 if metric == 'spell_id_for_difficulty':
                     require('target' in step, f'{where}: spell_id_for_difficulty needs a target')
@@ -1835,7 +1837,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'spellbook_superseded_for', 'spellbook_loud_supersedes_for', 'client_chat_lines_for',
                           'client_removals_keeping_buttons_for', 'client_placing_learns_for',
                           'client_placing_supersedes_for', 'client_spell_rank_for', 'client_spell_caster_aura_for',
-                          'client_spell_row_restored', 'client_spell_row_contains', 'client_spell_row_u32',
+                          'client_spell_row_restored',
                           'spellbook_client_notable',
                           'spellbook_cues_in_last_buy', 'spellbook_last_buy_cued',
                           'cast_speed_multiplier', 'spell_crit_chance', 'spell_power_cost', 'skill_line_for_spell',

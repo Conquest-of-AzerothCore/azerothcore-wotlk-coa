@@ -1,0 +1,106 @@
+{
+  "schema": 1,
+  "name": "CoA item stream: login excludes scaled items produced by other characters",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1, CoA.ItemScaling=1, DestinyWeaver.Enable=1 and CoA.QuestLevelScaling=1.",
+    "A producer previews quest 9146, whose Farstrider's Tunic 23405 has no ItemStat.dbc ladder, at ten levels five apart. With the copy path (CoA.ItemScaling.Native=0) this creates more than eight realm-wide scaled item records; with native item scaling active it creates none.",
+    "The viewer owns none of them. Its login sends at most eight item rows, including the capacity row.",
+    "Rows belonging to other characters must not enter this viewer's login stream."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "viewer",
+      "race": 1,
+      "class": 12,
+      "level": 32
+    },
+    {
+      "id": "producer",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "level_scaling_packet",
+      "actor": "producer",
+      "value": 1
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "producer",
+      "quest": 9146
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 25
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 30
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 35
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 40
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 45
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 50
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 55
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 60
+    },
+    {
+      "action": "set_level",
+      "actor": "producer",
+      "value": 65
+    },
+    {
+      "action": "client_packet",
+      "actor": "viewer",
+      "opcode": 1377
+    },
+    {
+      "action": "wait",
+      "ms": 100
+    },
+    {
+      "action": "assert",
+      "actor": "viewer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "min": 1,
+      "max": 8
+    }
+  ]
+}

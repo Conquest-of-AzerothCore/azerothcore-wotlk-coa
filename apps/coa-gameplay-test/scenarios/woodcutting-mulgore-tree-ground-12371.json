@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Mulgore Tree 8000670 stands on the ground and can be reached (#12371)",
+  "contract": "#12371 reported a Mulgore woodcutting tree that cannot be cut. Spawn 8000670 (entry 244629) lay 13.18 yd under the ground at z -9.42; rev_20261124_12371 raises it to the ground height of the server maps (3.762). Expected: the tree is at its spot and grounded. The spawn is checked through its data.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -2349.18,
+    "y": -293.398,
+    "z": 4.262,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 8000670 is at its spot",
+      "metric": "spawn_distance",
+      "x": -2350.18,
+      "y": -293.398,
+      "z": 3.762,
+      "max": 0.3,
+      "guid": 8000670,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the tree rests on the ground instead of 13.18 yd under it",
+      "metric": "spawn_ground_gap",
+      "min": -0.35,
+      "max": 0.35,
+      "guid": 8000670,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 8000670 is grounded within 0.8 yd",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 8000670,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "spawn 8000670 is not under water",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 8000670,
+      "spawn_type": "gameobject"
+    }
+  ]
+}

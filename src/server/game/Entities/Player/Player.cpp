@@ -25,6 +25,7 @@
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "AscensionBazaarTokenReserve.h"
+#include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
 #include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
@@ -3035,6 +3036,7 @@ void Player::SendInitialSpells()
     }
 
     SendDirectMessage(&data);
+    AscensionDisplayPatch::ResendSkillLineAbilityRows(this);
 }
 
 void Player::SendUnlearnSpells()
@@ -3291,6 +3293,7 @@ void Player::SendLearnPacket(uint32 spellId, bool learn, bool keepActionButtons 
         data << uint32(spellId);
         data << uint16(0);
         SendDirectMessage(&data);
+        AscensionDisplayPatch::ResendSkillLineAbilityRows(this, spellId);
     }
     else
     {
@@ -13076,28 +13079,37 @@ void Player::GetAurasForTarget(Unit* target, bool force /*= false*/)
 
 void Player::SetDailyQuestStatus(uint32 quest_id)
 {
-    if (Quest const* qQuest = sObjectMgr->GetQuestTemplate(quest_id))
+    Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id);
+    if (!quest)
+        return;
+
+    if (quest->IsDFQuest())
+        m_DFQuests.insert(quest_id);
+    else
     {
-        if (!qQuest->IsDFQuest())
+        uint32 emptySlot = PLAYER_MAX_DAILY_QUESTS;
+        uint32 slot = 0;
+        for (; slot < PLAYER_MAX_DAILY_QUESTS; ++slot)
         {
-            for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
-            {
-                if (!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx))
-                {
-                    SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, quest_id);
-                    m_lastDailyQuestTime = GameTime::GetGameTime().count();              // last daily quest time
-                    m_DailyQuestChanged = true;
-                    break;
-                }
-            }
+            uint32 id = GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + slot);
+            if (id == quest_id)
+                break;
+
+            if (!id && emptySlot == PLAYER_MAX_DAILY_QUESTS)
+                emptySlot = slot;
         }
-        else
+
+        if (slot == PLAYER_MAX_DAILY_QUESTS)
         {
-            m_DFQuests.insert(quest_id);
-            m_lastDailyQuestTime = GameTime::GetGameTime().count();
-            m_DailyQuestChanged = true;
+            if (emptySlot == PLAYER_MAX_DAILY_QUESTS)
+                return;
+
+            SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + emptySlot, quest_id);
         }
     }
+
+    m_lastDailyQuestTime = GameTime::GetGameTime().count();              // last daily quest time
+    m_DailyQuestChanged = true;
 }
 
 bool Player::IsDailyQuestDone(uint32 quest_id)
