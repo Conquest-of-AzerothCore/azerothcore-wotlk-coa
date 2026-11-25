@@ -17,7 +17,10 @@ void ApplyContracts(SpellInfo* info)
         return;
     uint32 id = info->Id;
     if (id == 807815)
+    {
         info->AttributesEx &= ~SPELL_ATTR1_NO_THREAT;
+        info->Effects[0].ChainTarget = 0;
+    }
     auto dummy = [info](uint8 slot)
     {
         info->Effects[slot].ApplyAuraName = SPELL_AURA_DUMMY;
