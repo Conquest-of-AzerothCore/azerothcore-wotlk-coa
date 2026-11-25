@@ -360,6 +360,8 @@ and Linux binaries.
 
 ## Scenario format
 
+A creature fixture accepts `distance` (0–100 yd along `+x` from its owner, default 3) or explicit 2D offsets `dx` and
+`dy` (-100–100 yd each, planar distance at most 100 yd, mutually exclusive with `distance`).
 A creature fixture accepts `spell_hit_bonus` (0–100 percentage points) for its native spell hit modifier, read by
 magic hit rolls (`MagicSpellHitResult`), and `melee_hit_bonus` (0–100) for its native melee hit modifier
 (`m_modMeleeHitChance`), which `MeleeSpellMissChance` subtracts for its melee attacks and melee-class spells.

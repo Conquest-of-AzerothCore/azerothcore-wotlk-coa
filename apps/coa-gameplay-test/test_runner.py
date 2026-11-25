@@ -479,6 +479,23 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(bonus=bonus), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_creature_dx_dy_offset_validation(self):
+        for offset in ({'dx': -5.0, 'dy': 0.0}, {'dx': 0.0, 'dy': 10.5}, {'dx': -60, 'dy': 80}, {'dy': -12.5},
+                       {'dx': 0}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0].pop('distance', None)
+            scenario['creatures'][0].update(offset)
+            with self.subTest(offset=offset):
+                self.assertIs(run.validate(scenario), scenario)
+        for bad in ({'distance': 3, 'dx': 5}, {'distance': 3, 'dy': 5}, {'dx': 101}, {'dy': -101},
+                    {'dx': 80, 'dy': 80}, {'dx': True}, {'dy': float('nan')}, {'dx': float('inf')}, {'dx': '5'}):
+            scenario = copy.deepcopy(self.scenario)
+            if 'distance' not in bad:
+                scenario['creatures'][0].pop('distance', None)
+            scenario['creatures'][0].update(bad)
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_creature_min_level_armor_validation(self):
         for value in (True, False):
             scenario = copy.deepcopy(self.scenario)
