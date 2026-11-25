@@ -26,6 +26,7 @@ RAID_TARGETS = frozenset({57})
 RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 ALLY_CASTS_KEY = 'value_ally_casts'
+HONOUR_MIN_RANGE_KEY = 'honour_min_range'
 ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
@@ -150,16 +151,30 @@ def armed_for(class_file: dict, records: Records, rank_id: int) -> dict:
     return armed(class_file, weapon_requirement(records, rank_id, class_file), rank_id)
 
 
-def cast_distance(records: Records, spell_id: int) -> float:
+def honour_min_range(class_file: dict | None) -> bool:
+    if class_file is None or HONOUR_MIN_RANGE_KEY not in class_file:
+        return False
+    value = class_file[HONOUR_MIN_RANGE_KEY]
+    if type(value) is not bool:
+        raise ValueError(f'{HONOUR_MIN_RANGE_KEY} must be a boolean')
+    return value
+
+
+def cast_distance(records: Records, spell_id: int, min_range: bool = False) -> float:
     range_index = records.field('Spell', spell_id, 'RangeIndex')
-    if records.field('SpellRange', range_index, 'Flags') != SPELL_RANGE_RANGED:
-        return DUMMY_DISTANCE
+    flags = records.field('SpellRange', range_index, 'Flags')
     low = records.field('SpellRange', range_index, 'RangeMin[0]')
+    if flags != SPELL_RANGE_RANGED and not (min_range and low > 0):
+        return DUMMY_DISTANCE
     high = records.field('SpellRange', range_index, 'RangeMax[0]')
     distance = (low + high) / 2
-    if distance <= low + NOMINAL_MELEE_RANGE_YD:
-        raise ValueError(f'{spell_id} range {range_index} ({low:g}-{high:g} yd, ranged) leaves no distance past its '
-                         f'minimum plus the {NOMINAL_MELEE_RANGE_YD:g} yd melee range')
+    if flags == SPELL_RANGE_RANGED:
+        if distance <= low + NOMINAL_MELEE_RANGE_YD:
+            raise ValueError(f'{spell_id} range {range_index} ({low:g}-{high:g} yd, ranged) leaves no distance past its '
+                             f'minimum plus the {NOMINAL_MELEE_RANGE_YD:g} yd melee range')
+    elif distance <= low or distance >= high:
+        raise ValueError(f'{spell_id} range {range_index} ({low:g}-{high:g} yd) leaves no valid cast distance '
+                         f'between its minimum and maximum')
     return distance
 
 
@@ -838,7 +853,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         if facts.cast_time_ms:
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
                                'ms': facts.cast_time_ms + CAST_MARGIN_MS})
-        travel_ms = missile_wait_ms(records, rank_id, cast_distance(records, rank_id)) if is_hostile(facts) else 0
+        use_min_range = honour_min_range(class_file)
+        travel_ms = (missile_wait_ms(records, rank_id, cast_distance(records, rank_id, use_min_range))
+                     if is_hostile(facts) else 0)
         if travel_ms:
             cast_steps.append({'action': 'wait', 'label': MISSILE_WAIT_LABEL, 'ms': travel_ms})
         cast_steps.append(measurement(f'{rank_id} cast_failure', CASTER, 'cast_failure', spell=rank_id))
@@ -869,7 +886,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     if (is_hostile(facts) or summon_target) and cast_wanted:
         placed = rank_id if is_hostile(facts) else summon_carrier['summon']
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
-                                  'health': DUMMY_HEALTH, 'distance': cast_distance(records, placed)}]
+                                  'health': DUMMY_HEALTH,
+                                  'distance': cast_distance(records, placed, honour_min_range(class_file))}]
     if (targets_resurrect(facts) or needs_ally_target or ally_cast is not None) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations, periodic_totals

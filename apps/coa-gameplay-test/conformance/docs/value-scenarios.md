@@ -45,7 +45,9 @@ referenced spell, so its `$sN`, `$u` and `$d` are checked as tokens of another s
 spell's points.
 
 The cast, when a cooldown or an aura is measured, targets the fixture creature `dummy` (entry 36) when an active
-effect has an enemy target (implicit targets 2, 6, 15, 16, 24), a fixture ally player `ally` when an active effect
+effect has an enemy target (implicit targets 2, 6, 15, 16, 24) — placed at `values.cast_distance`, which defaults to
+3 yd for non-ranged ranges (`SpellRange.Flags != 2`) and uses `(RangeMin[0] + RangeMax[0]) / 2` when `RangeMin[0] > 0`
+and the class file sets `"honour_min_range": true` (ADR 1316) — a fixture ally player `ally` when an active effect
 is a resurrection (`SPELL_EFFECT_RESURRECT` 18 or `SPELL_EFFECT_RESURRECT_NEW` 113, `targets_resurrect`) — the ally
 is killed with a `die` step right before the cast, since `TARGET_FLAG_CORPSE_ALLY` needs a dead friendly unit, not
 a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — or when the rank is listed in

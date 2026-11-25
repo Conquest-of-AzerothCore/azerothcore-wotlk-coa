@@ -1141,5 +1141,42 @@ class RemovedOwnEffectTest(unittest.TestCase):
         self.assertIn('spell_effect_radius', [step.get('metric') for step in scenario['steps']])
 
 
+DREADFALL = 806175
+CULTIST_CLASS_ID = 25
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HonourMinRangeTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cultist = load_class_file(CULTIST_CLASS_ID)
+        cls.records = Records(DataSet(DBC_DIR))
+        cls.dreadfall = ClassSpell(DREADFALL, 'Dreadfall', (DREADFALL,), DREADFALL, 0, False)
+
+    def test_non_ranged_minimum_range_requires_opt_in_and_places_dummy_at_midpoint(self):
+        from hits import hit_parts
+        from values import DUMMY_DISTANCE, HONOUR_MIN_RANGE_KEY, cast_distance
+        self.assertEqual(cast_distance(self.records, DREADFALL), DUMMY_DISTANCE)
+        self.assertEqual(cast_distance(self.records, DREADFALL, min_range=True), 24.0)
+        without = {key: value for key, value in self.cultist.items() if key != HONOUR_MIN_RANGE_KEY}
+        with_opt = {**without, HONOUR_MIN_RANGE_KEY: True}
+        sc_plain, _, _ = value_scenario(without, self.dreadfall, DREADFALL)
+        sc_opt, _, _ = value_scenario(with_opt, self.dreadfall, DREADFALL)
+        self.assertEqual(sc_plain['creatures'][0]['distance'], DUMMY_DISTANCE)
+        self.assertEqual(sc_opt['creatures'][0]['distance'], 24.0)
+        run.validate(sc_opt)
+        hit_plain, = hit_parts(without, self.dreadfall, 1, DREADFALL)
+        hit_opt, = hit_parts(with_opt, self.dreadfall, 1, DREADFALL)
+        self.assertEqual(hit_plain[0]['creatures'][0]['distance'], DUMMY_DISTANCE)
+        self.assertEqual(hit_opt[0]['creatures'][0]['distance'], 24.0)
+        run.validate(hit_opt[0])
+
+    def test_non_boolean_honour_min_range_is_refused(self):
+        from values import HONOUR_MIN_RANGE_KEY, honour_min_range
+        for bad in (1, 'true', None, []):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                honour_min_range({HONOUR_MIN_RANGE_KEY: bad})
+
+
 if __name__ == '__main__':
     unittest.main()
