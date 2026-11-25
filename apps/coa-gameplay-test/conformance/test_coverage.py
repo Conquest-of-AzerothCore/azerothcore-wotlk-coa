@@ -775,6 +775,8 @@ class EvidenceStatusTest(unittest.TestCase):
         self.assertEqual(METRIC_EVIDENCE['owned_creature_max_health'], STATE)
         self.assertEqual(evidence_of([claim('the maximum health of your summons by 5%', label)], [read])[0],
                          [BEHAVIOUR])
+        self.assertEqual(evidence_of([claim('The tentacle gains health based on your Stamina.', label)], [read])[0],
+                         [BEHAVIOUR])
         self.assertEqual(evidence_of([claim('Raise a Ghoul', label)], [read])[0], [DATA])
 
     def test_a_power_read_counts_where_the_clause_states_a_cost(self):

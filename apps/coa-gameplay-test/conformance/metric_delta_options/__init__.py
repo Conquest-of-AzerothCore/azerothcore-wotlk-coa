@@ -19,6 +19,11 @@ def parsed_options(entry: dict) -> tuple[tuple[str, object], ...]:
                  if entry.get(module.NAME) is not None)
 
 
+def forbids_expected(entry: dict) -> bool:
+    return any(getattr(module, 'FORBIDS_EXPECTED', False) and entry.get(module.NAME) is not None
+               for module in option_modules())
+
+
 def checked_options(spec):
     present = dict(spec.options)
     for module in option_modules():

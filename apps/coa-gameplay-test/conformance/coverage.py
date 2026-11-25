@@ -494,7 +494,7 @@ STATE_PROMISES = {
     'spell_hit_chance': r'hit chance|chance to hit', 'expertise': r'expertise',
     'spell_power': r'spell power|spell damage',
     'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
-    'max_health': r'maximum health', 'owned_creature_max_health': r'maximum health', 'max_power': POWER_WORDS,
+    'max_health': r'maximum health', 'owned_creature_max_health': r'(?:maximum )?health', 'max_power': POWER_WORDS,
     'power': rf'{POWER_WORDS}|\bcosts?', 'unit_flag_set': r'disarm\w*',
     'run_speed_rate': r'movement speed|run speed|slow\w*',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
