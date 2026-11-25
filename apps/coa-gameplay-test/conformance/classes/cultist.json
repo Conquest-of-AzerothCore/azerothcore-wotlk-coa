@@ -218,7 +218,8 @@
         "count_misses": true,
         "miss_exclusion": {
           "min_share": 0.04
-        }
+        },
+        "pause_before_reads": true
       },
       "residual_target": 0.001,
       "min_detectable": 4,
@@ -19155,13 +19156,19 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:68-70, 215; Cultist ADR 0020) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) when a magic spell (DmgClass == SPELL_DAMAGE_CLASS_MAGIC) is deflected. Precondition fixture 43689 (+20% Hit Chance, aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, set to +100% via phase_aura_amounts on dummy) removes the 3.99% equal-level spell-miss roll (Unit.cpp:3995-4053) without setting SPELL_ATTR7_NO_ATTACK_MISS so deflection runs at Unit.cpp:4094-4100. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t~500-509 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected magic cast applies 525066 present in game_time [3220, 3450] (>= 2711 ms > 2700 ms = 0.9*3000) and gone in game_time [3650, 3790] (<= 3290 ms < 3300 ms = 1.1*3000), strictly excluding durations 10% off on both sides. Paired with no_silence_on_melee_deflect proving deflected melee abilities do not silence.",
+      "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:68-70, 212; Cultist ADR 0020) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, DmgClass 1 Shadow, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9, SPELL_ATTR0_CU_BINARY_SPELL at SpellMgr.cpp:3933) when a magic spell (DmgClass == SPELL_DAMAGE_CLASS_MAGIC) is deflected. Precondition fixtures: 43689 (+20% Hit Chance, aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, set to +100% via phase_aura_amounts on dummy) removes the 3.99% equal-level spell-miss roll on 2653 (Unit.cpp:3995-4053 -> 0% miss) without setting SPELL_ATTR7_NO_ATTACK_MISS so deflection runs at Unit.cpp:4094-4100 (9999/10000 deflect; residual 1e-4 leak when irand(1, 10000) == 10000), and 823764 (beeg spellpen, aura 123 -9999 target resistance on caster) removes the level-60 dummy's 12% linear monster resistance (CoA.MonsterResistance.Enable = 1, 60 / 5 = 12%) that otherwise binary-resisted triggered 525066 in 1199/10000 = 11.99% of runs (Unit.cpp:4079-4091; cause of classend3 Run 1 alert 0). Residual flip probability: 1e-4 (0.01%) per run. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t~500-509 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected magic cast applies 525066 present in game_time [3220, 3450] (>= 2711 ms > 2700 ms = 0.9*3000) and gone in game_time [3650, 3790] (<= 3290 ms < 3300 ms = 1.1*3000), strictly excluding durations 10% off on both sides. Paired with no_silence_on_melee_deflect proving deflected melee abilities do not silence.",
       "phase_auras": [
         [
           43689,
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "phase_aura_amounts": [
@@ -28467,29 +28474,62 @@
     {
       "spell": 802044,
       "name": "Tentacle of Y'shaarj (10 yd frontal cone)",
-      "kind": "fixed_count",
+      "kind": "metric_delta",
       "variant": "cone",
       "label_suffix": "cone",
       "quote": "to all enemies in a $802046a yd frontal cone.",
-      "expected": 2,
-      "radius": 10,
-      "cluster_yd": 0.5,
-      "primary_distance_reads": true,
-      "uncapped": true,
-      "behind_yd": 5,
-      "radius_reason": "Tentacle of Y'shaarj slam 802046 Effect[0] TARGET_UNIT_CONE_ENEMY_24 (24 deg total / +-12 deg half-angle, Spell.cpp:1290), EffectRadiusIndex 13 = 10 yd (SpellRadius 13 RadiusMin 10), MaxAffectedTargets 0; tentacle 50096 spawns within 2 yd of caster (SpellRadius 7 = 2 yd) and faces primary dummy at 3 yd, so clustering the 2 extras within 0.5 yd of primary (at 3.17 and 3.33 yd) keeps the worst-case bearing delta <= 6.8 deg < 12 deg from every point in the 2 yd spawn disk, while far dummy at 15+ yd is outside 10 yd and behind dummy 5 yd behind caster is outside the frontal cone.",
-      "cast_spell": 500110,
-      "target_rank": 802046,
-      "caster_entry": 50096,
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "dummy_distance": 8.5,
+      "cast_in_before": false,
       "setup_casts": [
-        [
-          802044,
-          "caster"
-        ]
+        802044
       ],
-      "repeats": 3,
-      "settle_ms": 1500,
-      "observe_source": "Proves 10 yd frontal cone of Tentacle of Y'shaarj slam 802046 (TARGET_UNIT_CONE_ENEMY_24, 10 yd radius, Spell.dbc) on primary + 2 extras inside cone vs far dummy and behind dummy unhit. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 2000,
+      "cast_power": 2000,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802046,
+        "target": "dummy",
+        "caster_entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "area_dummies": {
+        "placed": [
+          {
+            "dx": 8.75,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 2
+          },
+          {
+            "dx": 13.75,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 0
+          },
+          {
+            "dx": -5.0,
+            "dy": 0.0,
+            "before_expected": 0,
+            "expected": 0
+          },
+          {
+            "dx": 6.0,
+            "dy": 4.0,
+            "before_expected": 0,
+            "expected": 0
+          }
+        ]
+      },
+      "observe_source": "Brackets the 10 yd 24 deg frontal cone of Tentacle of Y'shaarj slam 802046 (Spell.dbc Effect[0] TARGET_UNIT_CONE_ENEMY_24 +-12 deg half-angle, Spell.cpp:1290; EffectRadiusIndex 13 = 10 yd, SpellRadius 13 RadiusMin 10; creature caster 50096 gets 0 yd leeway, Object.cpp:1789). WorldObjectSpellConeTargetCheck uses TARGET_REFERENCE_TYPE_CASTER (Spell.h:919, Spell.cpp:9465,9496) -> WorldObject::IsWithinDist3d adds target->GetObjectSize() = dummy entry 36 CombatReach 1.275 yd (creature_model_info.sql:259 model 367, Object.cpp:1357,2900), giving exact engine cone reach 10.0 + 1.275 = 11.275 yd centre-to-centre from tentacle 50096. Tentacle 50096 spawns on a random 1.5..2.0 yd annulus around caster (802044 TARGET_DEST_CASTER_RANDOM, SpellRadius 7 = 2.0 yd, Spell.cpp:1734-1767) and faces primary dummy at (8.5, 0) on Gaze of C'Thun 500110 (AscensionCultistSummons.cpp:306-310); 500110 triggers 1 commanded slam (DoAction(1)) plus 1 deferred one-time summon slam (Pulse !portalCast within 1000 ms < 1500 ms wait_ms, AscensionCultistSummons.cpp:382,422-426) = 2 slams total per target in cone. Worst-case reach from caster is [11.275 - 2.0 = 9.275 yd guaranteed inside, 11.275 + 2.0 = 13.275 yd guaranteed outside]; accounting for the 0.25 yd area_dummies.placed position tolerance: primary dummy at (8.5, 0) (tentacle dist 6.50..10.50 <= 11.275, angle 0 deg) and area1 at (8.75, 0) (tentacle dist 6.75..10.75 <= 11.275, 0.525 yd margin, angle <= 0.41 deg < 12 deg) must both take 2 hits (0 -> 2); area2 at (13.75, 0) (tentacle dist 11.75..15.75 > 11.275, 0.475 yd margin, angle <= 5.34 deg < 12 deg, strictly inside cone angle) must stay unhit (0 -> 0); area3 behind caster at (-5.0, 0) (dist 3.0..7.0, angle 144.5..180 deg) and area4 off-axis inside radius at (6.0, 4.0) (dist 5.21..9.21 < 11.275, angle 26.5..45.2 deg > 12 deg) must stay unhit (0 -> 0). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
     },
     {
       "spell": 802044,
@@ -47098,6 +47138,12 @@
           1,
           "dummy",
           "dummy"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
         ]
       ],
       "phase_aura_amounts": [
@@ -47124,7 +47170,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Melee non-silence arm for Twisted Seal 525065 (Cultist ADR 0020; AscensionCultistEvents.cpp:68-70): Description[enUS] states \"Casters whose magic is deflected are silenced for $525066d.\" Precondition fixture 43689 (+20% Hit Chance, aura 333, overridden to +100% via phase_aura_amounts on dummy) removes melee miss; Night Slaughter 23583 (DmgClass 2 SPELL_DAMAGE_CLASS_MELEE, SPELL_ATTR0_NO_ACTIVE_DEFENSE, 0 mana, instant) skips dodge/parry/block (Unit.cpp:3800) so DeflectMeleeAbility deflects it with 100% chance (roll_chance_i(100), proved 10/10 in deflect_melee_ability). Without 525065 (before control) 525066 is 0; under 525065 the deflected melee ability does not apply 525066 (reads 0 on dummy at ~2000 ms, 1500 ms after the deflected cast, inside 525066's 3000 ms duration; pre-fix code read 1 and alerted). Paired with silence_on_deflect proving deflected magic spell 2653 applies 525066 for 3 sec."
+      "observe_source": "Melee non-silence arm for Twisted Seal 525065 (Cultist ADR 0020; AscensionCultistEvents.cpp:68-70): Description[enUS] states \"Casters whose magic is deflected are silenced for $525066d.\" Precondition fixtures: 43689 (+20% Hit Chance, aura 333, overridden to +100% via phase_aura_amounts on dummy) removes melee miss, and 823764 (beeg spellpen, aura 123 -9999 target resistance on caster) removes the level-60 dummy's 12% binary Shadow resist so any regression that erroneously casts 525066 on melee deflect cannot be masked by a resist; Night Slaughter 23583 (DmgClass 2 SPELL_DAMAGE_CLASS_MELEE, SPELL_ATTR0_NO_ACTIVE_DEFENSE, 0 mana, instant) skips dodge/parry/block (Unit.cpp:3800) so DeflectMeleeAbility deflects it with 100% chance (roll_chance_i(100), proved 10/10 in deflect_melee_ability). Without 525065 (before control) 525066 is 0; under 525065 the deflected melee ability does not apply 525066 (reads 0 on dummy at ~2000 ms, 1500 ms after the deflected cast, inside 525066's 3000 ms duration; pre-fix code read 1 and alerted). Paired with silence_on_deflect proving deflected magic spell 2653 applies 525066 for 3 sec."
     },
     {
       "spell": 680600,
@@ -48611,13 +48657,37 @@
     555352,
     555353,
     555354,
-    572846
+    572846,
+    806830
   ],
   "self_stack_bonus": [],
   "dual_target_effects": [],
   "target_aura_gates": [],
   "learned_hits": [],
-  "cast_auras": [],
+  "cast_auras": [
+    {
+      "spell": 572846,
+      "auras": [
+        [
+          500706,
+          70
+        ],
+        680603
+      ],
+      "reason": "AscensionCultistAbilities.cpp:82-84 rejects Entropic Slam 572846 with SPELL_FAILED_NO_POWER unless Insanity 500706 >= 60 (or Madness 803061), and AscensionCultist.cpp:270-273 Refresh() strips CasterAuraSpell 680603 whenever Insanity < 60; setting [500706, 70] then 680603 before each cast keeps both valid without overlapping 572846's SpellFamilyFlags (ADR 1319)."
+    },
+    {
+      "spell": 806830,
+      "auras": [
+        [
+          500706,
+          50
+        ],
+        680602
+      ],
+      "reason": "AscensionCultistAbilities.cpp:82-84 rejects Hammer of Twilight 806830 with SPELL_FAILED_NO_POWER unless Insanity 500706 >= 40 (or Madness 803061), and AscensionCultist.cpp:270-273 Refresh() strips CasterAuraSpell 680602 whenever Insanity < 40; setting [500706, 50] then 680602 before each cast keeps both valid without overlapping 806830's SpellFamilyFlags (ADR 1319)."
+    }
+  ],
   "hit_casts": [],
   "weapon_sets": {
     "Godblade": {
@@ -48926,7 +48996,11 @@
   "base_mana": {
     "power": 0,
     "value": 1512,
-    "source": "player_class_stats class 25 level 60 BaseMana 1512, read in the world database of the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable = 0); set before every cast of a scenario whose cost is a percentage of base mana (hits.base_mana_steps)"
+    "source": "Server create mana (GetCreateMana()): player_class_stats class 25 level 60 BaseMana 1512 in the in-RAM test MySQL (CoA.ClassLevelSixtyStats.Enable = 0; Paladin fallback compatibility curve, vs 1814 in ascension_class_stats). Under base_mana_power_cost, proves ManaCostPercentage is applied in SpellInfo::CalcPowerCost, not that the base mana table value is right or that mana was spent in a cast."
+  },
+  "base_health": {
+    "value": 1418,
+    "source": "Server create health (GetCreateHealth()): player_class_stats class 25 level 60 BaseHP 1418 (rev_20260903_01_live_class_baseline.sql level 1 BaseHP 65 + player_class_stats.sql fallback_class 2 level 60 BaseHP 1381 - level 1 BaseHP 28 via rev_20260912_00_custom_class_stat_progression.sql, CoA.ClassLevelSixtyStats.Enable = 0; vs 3502 in ascension_class_stats; confirmed by L60 max health 2278 - 860 Stamina bonus = 1418). Under base_mana_power_cost, proves ManaCostPercentage is applied in SpellInfo::CalcPowerCost, not that the base health table value is right or that health was spent in a cast."
   },
   "value_ally_casts": [
     {
@@ -48938,5 +49012,8 @@
     {
       "spell": 704476
     }
-  ]
+  ],
+  "honour_min_range": true,
+  "base_mana_power_cost": true,
+  "aura_duration_map_update_carry_in": true
 }
