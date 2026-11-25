@@ -2,6 +2,7 @@
 
 #include "AscensionDifficultyRelease.h"
 #include "gtest/gtest.h"
+#include <algorithm>
 
 TEST(AscensionDifficultyRelease, ActiveEventMatchesTheClientGameEventInfoLayout)
 {
@@ -31,4 +32,27 @@ TEST(AscensionDifficultyRelease, ReleasedEventsFollowTheReleaseLadder)
     EXPECT_EQ(AscensionDifficultyRelease::ReleasedEvents(1), heroic);
     EXPECT_EQ(AscensionDifficultyRelease::ReleasedEvents(2), both);
     EXPECT_EQ(AscensionDifficultyRelease::ReleasedEvents(8), both);
+}
+
+TEST(AscensionDifficultyRelease, BurningCrusadeEventsFollowTheirDifficulty)
+{
+    std::vector<uint16> const burningCrusadeHeroic = { 339, 400, 401, 402, 403, 404 };
+    std::vector<uint16> const burningCrusadeMythic = { 365, 221, 222, 223, 224, 225 };
+    std::vector<uint16> const heroicStage = AscensionDifficultyRelease::ReleasedEvents(1);
+    std::vector<uint16> const mythicStage = AscensionDifficultyRelease::ReleasedEvents(2);
+    auto released = [](std::vector<uint16> const& events, uint16 event)
+    {
+        return std::ranges::find(events, event) != events.end();
+    };
+
+    for (uint16 event : burningCrusadeHeroic)
+    {
+        EXPECT_TRUE(released(heroicStage, event)) << event;
+        EXPECT_TRUE(released(mythicStage, event)) << event;
+    }
+    for (uint16 event : burningCrusadeMythic)
+    {
+        EXPECT_FALSE(released(heroicStage, event)) << event;
+        EXPECT_TRUE(released(mythicStage, event)) << event;
+    }
 }
