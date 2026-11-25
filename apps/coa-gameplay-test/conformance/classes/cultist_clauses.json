@@ -652,11 +652,18 @@
       },
       {
         "claim": "and unleash Apocalyptic Skies upon the enemy.",
-        "labels": [
-          "301068 behaviour_metric_delta portal_spawn"
-        ]
+        "labels": []
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "301068 Row 66[1] (\"and unleash Apocalyptic Skies upon the enemy.\") references the sub-spell Apocalyptic Skies @s:301988:0@ (Row 67), whose sub-claim Row 67[2] (\"before disappearing.\") remains an unproven tool gap (summon_cast_once). Per review I4, Row 66[1] is left uncounted rather than double-counting Row 67[0] portal_spawn alone.",
+      "attempts": [
+        {
+          "agent": "cu-t2b",
+          "report": ".agents/plans/cu-t2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301068,
@@ -674,7 +681,8 @@
         "labels": [
           "301068 behaviour_metric_delta portal_cast_gaze",
           "301068 behaviour_metric_delta portal_cast_horrorbolt",
-          "301068 behaviour_metric_delta portal_cast_beam"
+          "301068 behaviour_metric_delta portal_cast_beam",
+          "301068 behaviour_metric_delta portal_only_three"
         ]
       },
       {
@@ -683,7 +691,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Matches merged Depths of Madness 706911 tool_gap: no existing conformance kind proves two properties of the void portal 533030 (AscensionCultistSummons.cpp:290-297): (1) exactly one cast per portal and no spell other than Gaze of C'thun, Horrorbolt, or Obliteration Beam (owned_creature_spell_cast_count reads one spell on a present portal; cumulative spell_damage_count with caster_entry counts damage ticks rather than casts, and metric_delta cannot assert sum(casts across 3 spells) == owned_creature_summon_count and total casts of all spells == owned_creature_summon_count); (2) \"before disappearing\" as despawn-follows-cast (533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, and proving post-cast disappearance distinct from fixed timer expiry requires a per-portal cast-then-despawn lifecycle read).",
+      "reason": "Matches merged Depths of Madness 706911 tool_gap for \"before disappearing.\" (Row 67[2]): while portal_only_three proves 100% of portal 533030 damage comes from {520332, 800416, 805573} and 0 heals, no existing conformance kind proves per-portal exact-one-cast and post-cast despawn (\"before disappearing.\": 533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, AscensionCultistSummons.cpp:290-297).",
       "attempts": [
         {
           "agent": "cu-t2",
@@ -788,7 +796,8 @@
         "labels": [
           "301200 behaviour_metric_delta portal_cast_gaze",
           "301200 behaviour_metric_delta portal_cast_horrorbolt",
-          "301200 behaviour_metric_delta portal_cast_beam"
+          "301200 behaviour_metric_delta portal_cast_beam",
+          "301200 behaviour_metric_delta portal_only_three"
         ]
       },
       {
@@ -797,7 +806,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Matches merged Depths of Madness 706911 tool_gap: no existing conformance kind proves two properties of the void portal 533030 (AscensionCultistSummons.cpp:290-297): (1) exactly one cast per portal and no spell other than Gaze of C'thun, Horrorbolt, or Obliteration Beam (owned_creature_spell_cast_count reads one spell on a present portal; cumulative spell_damage_count with caster_entry counts damage ticks rather than casts, and metric_delta cannot assert sum(casts across 3 spells) == owned_creature_summon_count and total casts of all spells == owned_creature_summon_count); (2) \"before disappearing\" as despawn-follows-cast (533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, and proving post-cast disappearance distinct from fixed timer expiry requires a per-portal cast-then-despawn lifecycle read).",
+      "reason": "Matches merged Depths of Madness 706911 tool_gap for \"before disappearing.\" (Row 75[2]): while portal_only_three proves 100% of portal 533030 damage comes from {520332, 800416, 805573} and 0 heals, no existing conformance kind proves per-portal exact-one-cast and post-cast despawn (\"before disappearing.\": 533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, AscensionCultistSummons.cpp:290-297).",
       "attempts": [
         {
           "agent": "cu-t2",
@@ -1513,9 +1522,7 @@
         "claim": "and the damage or healing done by this effect can critically strike.",
         "labels": [
           "520388 behaviour_metric_delta damage_can_crit",
-          "520388 behaviour_metric_delta damage_no_crit_control",
-          "520388 behaviour_metric_delta heal_can_crit",
-          "520388 behaviour_metric_delta heal_no_crit_control"
+          "520388 behaviour_metric_delta heal_can_crit"
         ]
       }
     ]
@@ -2029,7 +2036,8 @@
       {
         "claim": "Significantly reduces your threat",
         "labels": [
-          "560301 behaviour_metric_delta threat_reduce"
+          "560301 behaviour_metric_delta threat_reduce",
+          "560301 behaviour_metric_delta threat_reduce_control"
         ]
       },
       {
@@ -2331,11 +2339,21 @@
   {
     "spell": 574147,
     "clause": "Your healing power is increased based on your main-hand weapon damage.",
-    "labels": [
-      "574147 behaviour_metric_delta healing_power_ap_arms"
-    ],
+    "labels": [],
     "kind": "claim",
-    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof via attack_power_arms (ADR 1284, no coefficient invented). Shadow healing_power (other schools by ALL mask) reads 0 -> 190 at AP 376 and 0 -> 421 at AP 1356 (+980 AP fixture 35785 raises Heretic War Staff 2535 UNIT_FIELD_MINDAMAGE/MAXDAMAGE by +231)."
+    "tool_gap": {
+      "reason": "No existing conformance kind or metric_delta option varies the equipped main-hand weapon between two or three items of clearly different weapon damage (e.g., Dreadnought 2534 Rondel 28.46-45.46, Heretic 2535 War Staff 84.53-119.41, Godblade 2531 Great Axe 90.86-127.3) at equal attack_power inside one scenario while reading weapon_damage_min, attack_power, and healing_power and judging strictly rising direction with no invented figure (D-38). attack_power_arms confounds attack power with main-hand weapon damage (review I1), without_item only supports cast_failure, and separate per-weapon-set scenarios cannot compare healing_power across scenarios without inventing numeric thresholds forbidden by D-38. Smallest extension: Python-only weapon_damage_arms option on metric_delta (modeled on attack_power_arms, no finished-class impact).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        },
+        {
+          "agent": "cu-t2b",
+          "report": ".agents/plans/cu-t2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 574318,
@@ -2783,7 +2801,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Two blockers on \"and they now generates a large amount of threat.\": (1) Owner question: Eldritch Strength 680600 Effect[1] adds +15% SPELLMOD_THREAT (bp=14+1) to Hammer of Twilight 806830 and Entropic Slam 572846; the wording is not the Templar \"High Threat\" x2 phrase (ADR 0296) and +15% is far below x2, so owner confirmation is needed on whether +15% satisfies \"generates a large amount of threat\"; (2) Tool gap: metric_delta option threat_above_control does not support gate_spell (passive learn contrast) or Insanity phase_auras (500706 + 680602/680603), so a passive threat modifier on Insanity-gated spells cannot be run under threat_above_control without extending threat_above_control.",
+      "reason": "Two blockers on \"and they now generates a large amount of threat.\": (1) Owner question: Eldritch Strength 680600 Effect[1] adds +15% SPELLMOD_THREAT (bp=14+1) to Hammer of Twilight 806830 and Entropic Slam 572846; the wording is not the Templar \"High Threat\" x2 phrase (ADR 0296) and +15% is far below x2, so owner confirmation is needed on whether +15% satisfies \"generates a large amount of threat\"; (2) Tool gap: standalone kind threat_above_control (kinds/threat_above_control.py) does not support gate_spell (passive learn contrast) or Insanity phase_auras (500706 + 680602/680603), so a passive threat modifier on Insanity-gated spells cannot be run under threat_above_control without extending threat_above_control.",
       "attempts": [
         {
           "agent": "cu-t2",

@@ -29286,7 +29286,33 @@
           }
         ]
       },
-      "observe_source": "Direction-only proof (tooltip states no rate/amount): 502273 Forbidden Ritual has 3000 ms cast time and 60000 ms CategoryRecoveryTime (Spell.dbc); 300753 periodically triggers 301184 every 2000 ms, which calls Reduce(player, 800105, 2000) while Herald 520326 is active (AscensionCultistAbilities.cpp:437-442). Both phases cast 502273, cast Herald 520326 3500 ms later (after the 3000 ms cast completes), and attempt a 2nd 502273 54500 ms later (55 s after the 1st cast finished, 5 s before the 60 s base cooldown). Control (300753 unlearned): refused with SPELL_FAILED_NOT_READY (67). Treatment (300753 learned): succeeds (0), proving Forbidden Ritual cools down faster without asserting a figure. Paired with herald_gate (without Herald active, 2nd cast is still refused). Reference search 2026-11-25: coa-history 300753: 0 events in 186 logs (passive; 502273: 354 casts); coabuildhub 300753 matches Spell.dbc verbatim."
+      "observe_source": "Direction-only proof (tooltip states no rate/amount): 502273 Forbidden Ritual has 3000 ms cast time and 60000 ms CategoryRecoveryTime (Spell.dbc); 300753 periodically triggers 301184 every 2000 ms, which calls Reduce(player, 800105, 2000) while Herald 520326 is active (AscensionCultistAbilities.cpp:437-442). Both phases cast 502273, cast Herald 520326 3500 ms later (after the 3000 ms cast completes), and attempt a 2nd 502273 54500 ms later (55 s after the 1st cast finished, 5 s before the 60 s base cooldown). Control (300753 unlearned): refused with SPELL_FAILED_NOT_READY (67). Treatment (300753 learned): succeeds (0), proving Forbidden Ritual cools down faster without asserting a figure. Paired with herald_gate (without Herald active, 2nd cast is still refused). Reference search 2026-11-25: coa-history 300753: 0 events in 186 logs (passive; 502273: 354 casts); coabuildhub 300753 matches Spell.dbc verbatim. Insanity 500706 (80 stacks) and threshold aura 680604 (1 stack, required by Herald 520326) are set via phase_auras and read present in both arms via before_trigger_reads.",
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ]
     },
     {
       "spell": 300753,
@@ -29350,34 +29376,6 @@
         ]
       },
       "observe_source": "Condition-off arm for 300753 Blade of the Depths: same 58000 ms wait (55 s after 3000 ms cast finish, 5 s inside 60000 ms CategoryRecoveryTime) without Herald of the Depths 520326 active (verified absent by precondition). Both control (300753 unlearned) and treatment (300753 learned) refuse the 2nd cast of 502273 with SPELL_FAILED_NOT_READY (67), proving the cooldown acceleration is gated on Herald of the Depths. Reference search 2026-11-25: coa-history 300753: 0 events; coabuildhub matches verbatim."
-    },
-    {
-      "spell": 574147,
-      "name": "Void Power (healing power rises with main-hand weapon damage via attack power arms)",
-      "kind": "metric_delta",
-      "variant": "healing_power_ap_arms",
-      "label_suffix": "healing_power_ap_arms",
-      "quote": "Your healing power is increased based on your main-hand weapon damage.",
-      "trigger_spell": 60235,
-      "gate_spell": 574147,
-      "target": "caster",
-      "measure_actor": "caster",
-      "metric": "healing_power",
-      "fields": {
-        "school": 5
-      },
-      "before_expected": 0,
-      "expected": 190,
-      "tolerance": 0.5,
-      "wait_ms": 1000,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "attack_power_arms": {
-        "aura": 35785,
-        "wait_ms": 1000,
-        "source": "Attack Power 980 35785 (Spell.dbc Effect[0] aura 99 SPELL_AURA_MOD_ATTACK_POWER +980, DurationIndex 21): raises Heretic War Staff 2535 main-hand UNIT_FIELD_MINDAMAGE/MAXDAMAGE by 980/14*3.3 = +231, reflected in 574147 on the 500 ms OnPlayerUpdate Refresh(player)"
-      },
-      "observe_source": "Direction-only proof (ADR 1284 attack_power_arms; tooltip states no coefficient): 574147 Effect[0] is SPELL_AURA_MOD_HEALING_DONE (all schools, AscensionCultistContracts.cpp:143-147), updated on Refresh(player) (500 ms OnPlayerUpdate, AscensionCultist.cpp:291-292,364-368) to int32((UNIT_FIELD_MINDAMAGE + UNIT_FIELD_MAXDAMAGE) / 2). Heretic weapon set (2535 War Staff, 84.53-119.41, 3.3 s): raising attack power by +980 via fixture aura 35785 raises main-hand weapon damage (UNIT_FIELD_MINDAMAGE/MAXDAMAGE = weapon + AP/14*3.3) by +231. Judged on Shadow healing_power (school 5; other schools by school mask ALL in data): positive learned gain at base AP (low arm) and strictly larger learned gain at +980 AP (high arm), no coefficient or before value asserted. Note: varying the equipped main-hand weapon itself at constant AP is not exercised here because weapon sets are frozen per spec. Reference search 2026-11-25: coa-history 574147: 0 events in 186 logs (passive); coabuildhub 574147 matches Spell.dbc verbatim."
     },
     {
       "spell": 680579,
@@ -29610,6 +29608,18 @@
       "cast_power": 2000,
       "phase_auras": [
         [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
           823764,
           1,
           "caster",
@@ -29687,7 +29697,19 @@
           }
         ]
       },
-      "observe_source": "680579 Dreadful ($/1000;681475s1 = 2 sec per crit, Spell.dbc 681475 e0 bp=-2001+1; AscensionCultistEvents.cpp:95,215-218). Dreadnought 567524 CategoryRecoveryTime = 45000 ms; 5 forced Horrorbolt 502182 crits (force_crit spell, spell pen 823764, spell_hit_rating 10000; verified 5 crits/phase via ally_arm) reduce the 45 s cooldown by 10 s to 35 s (10% off 10 s cut is [34 s, 36 s]). Attempting a 2nd 567524 at 34.4 s (200 + 8000 + 26200 = 34400 ms > 34000 ms) is refused with SPELL_FAILED_NOT_READY (67) in both control and treatment, ruling out a cut >= 11 s. Paired with dreadnought_cd_ready (35.6 s). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs."
+      "observe_source": "680579 Dreadful ($/1000;681475s1 = 2 sec per crit, Spell.dbc 681475 e0 bp=-2001+1; AscensionCultistEvents.cpp:95,215-218). Dreadnought 567524 CategoryRecoveryTime = 45000 ms; 5 forced Horrorbolt 800416 crits (force_crit spell, spell pen 823764, spell_hit_rating 10000; verified 5 crits/phase via ally_arm) reduce the 45 s cooldown by 10 s to 35 s (10% off 10 s cut is [34 s, 36 s]). Attempting a 2nd 567524 at 34.4 s (1600 + 8400 + 24400 = 34400 ms > 34000 ms) is refused with SPELL_FAILED_NOT_READY (67) in both control and treatment, ruling out a cut >= 11 s. Paired with dreadnought_cd_ready (35.6 s). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs. Insanity 500706 (80 stacks) and threshold aura 680604 (1 stack, required by Dreadnought 567524) are set via phase_auras and read present in both arms via before_trigger_reads.",
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ]
     },
     {
       "spell": 680579,
@@ -29707,6 +29729,18 @@
       "force_crit": "spell",
       "cast_power": 2000,
       "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
         [
           823764,
           1,
@@ -29798,7 +29832,19 @@
           }
         ]
       },
-      "observe_source": "Upper bracket for 680579 Dreadful on Dreadnought 567524 (45 s - 5 x 2 s = 35 s): attempting a 2nd 567524 at 35.6 s (200 + 8000 + 27400 = 35600 ms < 36000 ms) is refused with SPELL_FAILED_NOT_READY (67) in control (680579 unlearned) and succeeds (0) in treatment (680579 learned), bracketing the 10 s reduction inside [34.4 s, 35.6 s] (excluding 10% off 10 s on both sides). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs."
+      "observe_source": "Upper bracket for 680579 Dreadful on Dreadnought 567524 (45 s - 5 x 2 s = 35 s): attempting a 2nd 567524 at 35.6 s (1600 + 8400 + 25600 = 35600 ms < 36000 ms) is refused with SPELL_FAILED_NOT_READY (67) in control (680579 unlearned) and succeeds (0) in treatment (680579 learned), bracketing the 10 s reduction inside [34.4 s, 35.6 s] (excluding 10% off 10 s on both sides). Reference search 2026-11-25: coa-history 680579: 0 events; installed Spell.dbc governs. Insanity 500706 (80 stacks) and threshold aura 680604 (1 stack, required by Dreadnought 567524) are set via phase_auras and read present in both arms via before_trigger_reads.",
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680604,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ]
     },
     {
       "spell": 680579,
@@ -30087,7 +30133,8 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "680600 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[2] 16384 matching Hammer of Twilight 806830 SpellFamilyFlags[2] 16384 (Spell.dbc). Dreadnought weapon set (2534 + 2129), +20000 AP, non-critical, spell pen 823764, Insanity fixture 500706=40 + 680602=1 in both arms. Reference search 2026-11-25: coa-history 680600: 0 events in 186 logs (passive; 806830: 2079 casts); coabuildhub 680600 matches Spell.dbc verbatim."
+      "expected_source": "680600 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[2] 16384 matching Hammer of Twilight 806830 SpellFamilyFlags[2] 16384 (Spell.dbc). Dreadnought weapon set (2534 + 2129), +20000 AP, non-critical, spell pen 823764, Insanity fixture 500706=40 + 680602=1 in both arms. Reference search 2026-11-25: coa-history 680600: 0 events in 186 logs (passive; 806830: 2079 casts); coabuildhub 680600 matches Spell.dbc verbatim. void_on_cast_failure is set so every trial cast (requiring CasterAuraSpell 680602 at 40 Insanity) is verified not refused; hit_ratio has no separate caster aura-readback option (documented limitation).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 680600,
@@ -30141,7 +30188,8 @@
       },
       "critical": false,
       "trials": 20,
-      "expected_source": "680600 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[0] 128 matching Entropic Slam 572846 SpellFamilyFlags[0] 128 (Spell.dbc). Dreadnought weapon set (2534 + 2129), +20000 AP, non-critical, spell pen 823764, Insanity fixture 500706=60 + 680603=1 in both arms. Reference search 2026-11-25: coa-history 680600: 0 events in 186 logs (passive; 572846: 1018 casts); coabuildhub 680600 matches Spell.dbc verbatim."
+      "expected_source": "680600 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[0] 128 matching Entropic Slam 572846 SpellFamilyFlags[0] 128 (Spell.dbc). Dreadnought weapon set (2534 + 2129), +20000 AP, non-critical, spell pen 823764, Insanity fixture 500706=60 + 680603=1 in both arms. Reference search 2026-11-25: coa-history 680600: 0 events in 186 logs (passive; 572846: 1018 casts); coabuildhub 680600 matches Spell.dbc verbatim. void_on_cast_failure is set so every trial cast (requiring CasterAuraSpell 680603 at 60 Insanity) is verified not refused; hit_ratio has no separate caster aura-readback option (documented limitation).",
+      "void_on_cast_failure": true
     },
     {
       "spell": 806175,
@@ -30357,25 +30405,26 @@
     },
     {
       "spell": 560301,
-      "name": "Hallucination (reduces threat on engaged enemy)",
+      "name": "Hallucination (reduces threat on engaged enemy, direction only)",
       "kind": "metric_delta",
       "variant": "threat_reduce",
       "label_suffix": "threat_reduce",
       "quote": "Significantly reduces your threat",
       "trigger_spell": 560301,
       "learn": [
-        800416
+        502182
       ],
       "target": "caster",
       "measure_actor": "dummy",
       "cast_in_before": false,
       "setup_casts": [
-        800416
+        502182
       ],
       "setup_target": "dummy",
       "setup_in_before": true,
-      "setup_wait_ms": 2200,
+      "setup_wait_ms": 3000,
       "cast_power": 2000,
+      "player_spell_power": 20000,
       "phase_auras": [
         [
           823764,
@@ -30397,17 +30446,139 @@
           -100
         ]
       ],
-      "metric": "threat",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Horrorbolt 502182 lands once in control (1) and once more in treatment (cumulative 2)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 560301
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Hallucination 560301 is not cast in control (0) and cast once in treatment (1)"
+          }
+        ]
+      },
+      "metric": "threat_per_damage",
       "fields": {
         "target": "caster"
       },
-      "before_expected": 31,
-      "expected": 0,
-      "tolerance": 4,
+      "before_expected": 1.003,
+      "expected": 0.99,
+      "after_at_least": 0,
+      "after_at_most": 0.99,
+      "tolerance": 0.01,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "560301 Hallucination calls player->GetThreatMgr().RemoveMeFromThreatLists() (AscensionCultistAbilities.cpp:448). Both phases cast Horrorbolt 800416 (Rank 1, MaxLevel 12) at dummy (non-crit 16255=-100, no resist 823764 -> ~29 damage + 2 threat = 31 threat). Control (no 560301): dummy threat on caster reads 31. Treatment (560301 cast): dummy threat on caster drops to 0. Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub matches verbatim."
+      "observe_source": "Direction-only proof under D-38 (tooltip states no reduction figure): both phases cast Horrorbolt 502182 (Rank 7, SpellLevel 60, SchoolMask 32, 1.0 threat/damage + 60 flat initial threat, Spell.cpp:5731-5737) at the same dummy at +20000 SP (non-crit 16255=-100, no resist 823764 -> ~17000+ damage), giving DBC-exact threat_per_damage = (D + 60)/D = 1.003 +- 0.01 without tuning on any measurement. Control (before phase, no 560301): threat_per_damage reads ~1.003. Treatment (after 2nd 502182 hit + 560301): judged only on 0 <= threat_per_damage <= 0.99 (strictly below the ~1.0015 unreduced baseline; any reduction from partial to total passes, while no reduction or an increase alerts). Paired with threat_reduce_control (same 2x 502182 without 560301, where threat_per_damage stays >= 0.995). Observation (not asserted): the server performs a total threat wipe to 0 via player->GetThreatMgr().RemoveMeFromThreatLists() (AscensionCultistAbilities.cpp:448). Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 560301,
+      "name": "Hallucination (control: without Hallucination, threat on the same dummy does not drop)",
+      "kind": "metric_delta",
+      "variant": "threat_reduce_control",
+      "label_suffix": "threat_reduce_control",
+      "quote": "Significantly reduces your threat",
+      "trigger_spell": 60235,
+      "learn": [
+        502182
+      ],
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        502182
+      ],
+      "setup_target": "dummy",
+      "setup_in_before": true,
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Horrorbolt 502182 lands once in phase 1 (1) and once more in phase 2 (cumulative 2)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 560301
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Hallucination 560301 is never cast in this control arm"
+          }
+        ]
+      },
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 1.003,
+      "expected": 1.002,
+      "after_at_least": 0.995,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm for 560301 threat_reduce (D-38): identical 2x Horrorbolt 502182 setup on the same dummy at +20000 SP, casting neutral self-cast 60235 instead of Hallucination 560301. threat_per_damage remains at ~1.002 (>= 0.995), proving that threat on the dummy does not drop on its own without 560301."
     },
     {
       "spell": 560301,
@@ -31344,14 +31515,24 @@
       "before_expected": 0,
       "expected": 1,
       "tolerance": 0,
-      "wait_ms": 4250,
-      "expiry_wait_ms": 500,
+      "wait_ms": 4400,
+      "expiry_wait_ms": 400,
       "after_expiry_expected": 0,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "520388 Vision of Doom (AscensionCultistEvents.cpp:176-182): direct damage applies 520450 (DurationIndex 27 = 3000 ms, RadiusIndex 8 = 5 yd) to enemies within 5 yd of target. After casting 520388, Horrorbolt 800416 (1500 ms cast) hits dummy: at wait_ms 4250 (2750 ms after hit, > 2700 = 0.9*3000), 520450 is present (1) on dummy and area1 (3 yd away), absent (0) on area2 (11 yd away); after expiry_wait_ms 500 (3250 ms after hit, < 3300 = 1.1*3000), 520450 is gone (0). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "observe_source": "520388 Vision of Doom (AscensionCultistEvents.cpp:176-182): direct damage applies 520450 (DurationIndex 27 = 3000 ms, RadiusIndex 8 = 5 yd) to enemies within 5 yd of target. After casting 520388, Horrorbolt 800416 (1500 ms cast, Speed 25 yd/s -> 120 ms flight over 3 yd) is cast at delay_ms 1600 and hits dummy at t = 3220 ms. Present read at wait_ms 4400 (game_time.after in [5950, 6150] ms -> 2730..2930 ms after application, strictly > 2700 ms = 0.9*3000 ms, excluding -10%); expired read after expiry_wait_ms 400 (game_time.expired in [6300, 6500] ms -> 3080..3280 ms after application, strictly < 3300 ms = 1.1*3000 ms, excluding +10%). Nearby enemy radius (area1 at 3 yd, area2 at 11 yd) is verified in 520388 damage_100pct. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
       "gate_timing": "start",
-      "trigger_only_after": true
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          5950,
+          6150
+        ],
+        "expired": [
+          6300,
+          6500
+        ]
+      }
     },
     {
       "spell": 520388,
@@ -31397,7 +31578,7 @@
             "before_expected": 0,
             "expected": 1,
             "tolerance": 0,
-            "source": "Nearby ally caster (within 5 yd 520497 radius of healed ally) also receives Vision of Doom 520497"
+            "source": "Healed caster also receives Vision of Doom 520497 alongside nearby grouped ally"
           }
         ]
       },
@@ -31410,13 +31591,23 @@
       "expected": 1,
       "tolerance": 0,
       "wait_ms": 4750,
-      "expiry_wait_ms": 500,
+      "expiry_wait_ms": 450,
       "after_expiry_expected": 0,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "520388 Vision of Doom (AscensionCultistEvents.cpp:183-185): direct effective healing applies 520497 (DurationIndex 27 = 3000 ms, RadiusIndex 8 = 5 yd) to allies within 5 yd of healed target. Eldritch Mending 574325 (2000 ms cast) heals injured ally (20000/100000 HP): at wait_ms 4750 (2750 ms after heal, > 2700 = 0.9*3000), 520497 is present (1) on ally and nearby caster; after expiry_wait_ms 500 (3250 ms after heal, < 3300 = 1.1*3000), 520497 is gone (0). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "observe_source": "520388 Vision of Doom (AscensionCultistEvents.cpp:183-185): direct effective healing applies 520497 (DurationIndex 27 = 3000 ms, RadiusIndex 8 = 5 yd) to allies within 5 yd of healed target. Eldritch Mending 574325 (2000 ms cast, instant impact) is cast at delay_ms 1600 on injured caster (2000/100000 HP), applying 520497 at t = 3600 ms to both caster and nearby grouped ally (within 5 yd). Present read at wait_ms 4750 (game_time.after in [6310, 6500] ms -> 2710..2900 ms after application, > 2700 ms = 0.9*3000); expired read after expiry_wait_ms 450 (game_time.expired in [6700, 6890] ms -> 3100..3290 ms after application, < 3300 ms = 1.1*3000). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
       "gate_timing": "start",
-      "trigger_only_after": true
+      "trigger_only_after": true,
+      "game_time": {
+        "after": [
+          6310,
+          6500
+        ],
+        "expired": [
+          6700,
+          6890
+        ]
+      }
     },
     {
       "spell": 520388,
@@ -31720,11 +31911,7 @@
         }
       ],
       "ally_arm": {
-        "allies": 1,
-        "ally_health": [
-          2000,
-          100000
-        ],
+        "allies": 0,
         "arms": [
           {
             "actors": [
@@ -31736,7 +31923,7 @@
               "spell": 520497,
               "target": "caster"
             },
-            "source": "Vision of Doom 520497 heal tick on ally at 3 sec expiry"
+            "source": "Vision of Doom 520497 heal tick on caster at 3 sec expiry"
           },
           {
             "actors": [
@@ -31748,7 +31935,7 @@
               "spell": 574325,
               "target": "caster"
             },
-            "source": "Triggering direct Eldritch Mending 574325 effective heal on ally"
+            "source": "Triggering direct Eldritch Mending 574325 effective heal on caster"
           }
         ],
         "ratios": [
@@ -31773,7 +31960,7 @@
       "wait_ms": 6000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "520388 Vision of Doom Effect[0] 100% ($s1); AscensionCultistEvents.cpp:183-185 calls Copy(player, ally, 520497, CalculatePct(healing, 100)). Non-crit (16255=-100), +5000 SP, injured ally (2000/100000 HP): Eldritch Mending 574325 (2000 ms cast) dooms ally; at wait_ms 6000 (after 2000 + 3000 ms), 520497 ticks once for 100% of 574325 effective healing (ratio 1.0 +- 0.005). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "observe_source": "520388 Vision of Doom Effect[0] 100% ($s1); AscensionCultistEvents.cpp:183-185 calls Copy(player, ally, 520497, CalculatePct(healing, 100)). Non-crit (16255=-100), +5000 SP, injured caster (2000/100000 HP): Eldritch Mending 574325 (2000 ms cast) heals injured caster and dooms caster; at wait_ms 6000 (after 2000 + 3000 ms), 520497 ticks once for 100% of 574325 effective healing (ratio 1.0 +- 0.005). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
       "caster_health": [
         2000,
         100000
@@ -32061,82 +32248,24 @@
     },
     {
       "spell": 520388,
-      "name": "Vision of Doom (520450 damage critically strikes under forced spell crit)",
+      "name": "Vision of Doom (520450 damage: 0/20 crits at 0% spell crit control, >=1/20 crits at >=100% spell crit)",
       "kind": "metric_delta",
       "variant": "damage_can_crit",
       "label_suffix": "damage_can_crit",
       "quote": "and the damage or healing done by this effect can critically strike.",
       "trigger_spell": 520388,
       "learn": [
-        502182
+        800416
       ],
       "target": "caster",
       "measure_actor": "caster",
-      "cast_in_before": false,
-      "cast_power": 2000,
-      "force_crit": "spell",
-      "phase_auras": [
-        [
-          823764,
-          1,
-          "caster",
-          "caster"
-        ]
+      "select_dummy": true,
+      "dummy_distance": 4.0,
+      "area_dummies": [
+        5.0,
+        6.0,
+        7.0
       ],
-      "after_trigger_casts": [
-        {
-          "spell": 502182,
-          "target": "dummy",
-          "delay_ms": 1600
-        }
-      ],
-      "ally_arm": {
-        "allies": 0,
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_damage_count",
-            "fields": {
-              "spell": 520450,
-              "target": "dummy"
-            },
-            "before_expected": 0,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "Confirms 520450 damage tick landed"
-          }
-        ]
-      },
-      "metric": "spell_damage_count",
-      "fields": {
-        "spell": 520450,
-        "target": "dummy",
-        "critical": true
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0,
-      "wait_ms": 6500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "520450 Vision of Doom (AscensionCultistContracts.cpp:61-65 clears SPELL_ATTR2_CANT_CRIT; AscensionCultistAuras.cpp:77-79 sets tick->SetCritChance(PLAYER_SPELL_CRIT_PERCENTAGE1 + SHADOW)). Treatment arm under force_crit spell (100% spell crit; 0% residual miss probability): 520450 lands once and critically strikes (critical=true count 0 -> 1). Paired with damage_no_crit_control (0% crit -> 0 crits). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
-    },
-    {
-      "spell": 520388,
-      "name": "Vision of Doom (control: 520450 damage never crits at 0% spell crit)",
-      "kind": "metric_delta",
-      "variant": "damage_no_crit_control",
-      "label_suffix": "damage_no_crit_control",
-      "quote": "and the damage or healing done by this effect can critically strike.",
-      "trigger_spell": 520388,
-      "learn": [
-        502182
-      ],
-      "target": "caster",
-      "measure_actor": "caster",
-      "cast_in_before": false,
       "cast_power": 2000,
       "phase_auras": [
         [
@@ -32152,18 +32281,61 @@
           "caster"
         ]
       ],
+      "after_auras": [
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
       "phase_aura_amounts": [
         [
           16255,
           0,
           -100
+        ],
+        [
+          984954,
+          1,
+          220
         ]
       ],
       "after_trigger_casts": [
         {
-          "spell": 502182,
+          "spell": 800416,
           "target": "dummy",
-          "delay_ms": 1600
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3600,
+          "in_before": true,
+          "reset_cooldown": true
         }
       ],
       "ally_arm": {
@@ -32173,15 +32345,28 @@
             "actors": [
               "caster"
             ],
+            "metric": "spell_crit_chance",
+            "fields": {
+              "school": 5
+            },
+            "before_expected": -95,
+            "expected": 125,
+            "tolerance": 10,
+            "precondition": true,
+            "source": "Shadow spell_crit_chance read <= -85 (0% effective crit) in before control under 16255=-100 and >= 115 (>=100% effective crit) in after treatment under 16255=-100 + 984954=+220"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
             "metric": "spell_damage_count",
             "fields": {
-              "spell": 520450,
-              "target": "dummy"
+              "spell": 520450
             },
-            "before_expected": 0,
-            "expected": 1,
+            "before_expected": 20,
+            "expected": 40,
             "tolerance": 0,
-            "source": "Confirms 520450 damage tick landed non-crit"
+            "source": "5 Horrorbolt 800416 procs (3.6 s apart > 3 s ICD) x 4 enemies within 5 yd = 20 ticks of 520450 in control (20) and 20 in treatment (cumulative 40)"
           }
         ]
       },
@@ -32192,16 +32377,18 @@
         "critical": true
       },
       "before_expected": 0,
-      "expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
       "tolerance": 0,
-      "wait_ms": 6500,
+      "wait_ms": 5500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Control arm for damage_can_crit: at 0% spell crit (16255=-100; 0% residual false-crit probability), 520450 lands once (spell_damage_count=1) with 0 critical strikes (critical=true count 0 -> 0). Together with damage_can_crit (100% crit -> 1/1 crits), proves 520450 responds to spell crit chance. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
+      "observe_source": "Sized crit-enablement proof for 520450 Vision of Doom under D-38 (presence of crits, no crit rate asserted; AscensionCultistContracts.cpp:61-65 clears SPELL_ATTR2_CANT_CRIT; AscensionCultistAuras.cpp:77-79 copies Shadow spell crit chance). Both phases cast 520388 and fire 5 Horrorbolt 800416 casts (3600 ms apart > 3000 ms ICD) at dummy (4 yd) surrounded by 3 area_dummies at 5, 6, 7 yd (all <= 3 yd <= 5 yd radius), producing 5 x 4 = 20 landed 520450 ticks per phase (verified 20 -> 40 via ally_arm). Control (before phase, 16255=-100, Shadow spell_crit_chance read <= -85% = 0% effective): 0/20 critical strikes (excludes a fixed 50% crit mutant with P = 0.5^20 = 9.5e-7 per run, 9.1e-13 per pair; excludes a 20% mutant with P = 0.8^40 = 0.013% <= 0.1% per pair). Treatment (after phase, +984954 e1=+220, Shadow spell_crit_chance read >= 115% >= 100% effective): at least 1 critical strike (0% false-negative residual at 100% crit; a CANT_CRIT mutant gives 0 and alerts). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "area_sum": true
     },
     {
       "spell": 520388,
-      "name": "Vision of Doom (520497 healing critically strikes under forced spell crit)",
+      "name": "Vision of Doom (520497 healing: 0/20 crits at 0% spell crit control, >=1/20 crits at >=100% spell crit)",
       "kind": "metric_delta",
       "variant": "heal_can_crit",
       "label_suffix": "heal_can_crit",
@@ -32212,75 +32399,22 @@
       ],
       "target": "caster",
       "measure_actor": "caster",
-      "cast_in_before": false,
       "cast_power": 2000,
-      "force_crit": "spell",
-      "after_trigger_casts": [
-        {
-          "spell": 574325,
-          "target": "caster",
-          "delay_ms": 1600
-        }
-      ],
-      "ally_arm": {
-        "allies": 1,
-        "ally_health": [
-          2000,
-          100000
-        ],
-        "arms": [
-          {
-            "actors": [
-              "caster"
-            ],
-            "metric": "spell_heal_count",
-            "fields": {
-              "spell": 520497,
-              "target": "caster"
-            },
-            "before_expected": 0,
-            "expected": 1,
-            "tolerance": 0,
-            "source": "Confirms 520497 heal tick landed on ally"
-          }
-        ]
-      },
-      "metric": "spell_heal_count",
-      "fields": {
-        "spell": 520497,
-        "target": "caster",
-        "critical": true
-      },
-      "before_expected": 0,
-      "expected": 1,
-      "tolerance": 0,
-      "wait_ms": 6000,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "520497 Vision of Doom (AscensionCultistContracts.cpp:61-65 clears SPELL_ATTR2_CANT_CRIT; AscensionCultistAuras.cpp:77-79 sets tick->SetCritChance(PLAYER_SPELL_CRIT_PERCENTAGE1 + SHADOW)). Treatment arm under force_crit spell (100% spell crit; 0% residual): 520497 lands once on injured ally and critically strikes (critical=true count 0 -> 1). Paired with heal_no_crit_control. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
       "caster_health": [
         2000,
         100000
-      ]
-    },
-    {
-      "spell": 520388,
-      "name": "Vision of Doom (control: 520497 healing never crits at 0% spell crit)",
-      "kind": "metric_delta",
-      "variant": "heal_no_crit_control",
-      "label_suffix": "heal_no_crit_control",
-      "quote": "and the damage or healing done by this effect can critically strike.",
-      "trigger_spell": 520388,
-      "learn": [
-        574325
       ],
-      "target": "caster",
-      "measure_actor": "caster",
-      "cast_in_before": false,
-      "cast_power": 2000,
       "phase_auras": [
         [
           16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          984954,
           1,
           "caster",
           "caster"
@@ -32291,17 +32425,45 @@
           16255,
           0,
           -100
+        ],
+        [
+          984954,
+          1,
+          220
         ]
       ],
       "after_trigger_casts": [
         {
           "spell": 574325,
           "target": "caster",
-          "delay_ms": 1600
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 574325,
+          "target": "caster",
+          "delay_ms": 3600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 574325,
+          "target": "caster",
+          "delay_ms": 3600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 574325,
+          "target": "caster",
+          "delay_ms": 3600,
+          "in_before": true,
+          "reset_cooldown": true
         }
       ],
       "ally_arm": {
-        "allies": 1,
+        "allies": 4,
         "ally_health": [
           2000,
           100000
@@ -32311,35 +32473,44 @@
             "actors": [
               "caster"
             ],
+            "metric": "spell_crit_chance",
+            "fields": {
+              "school": 5
+            },
+            "before_expected": -95,
+            "expected": 125,
+            "tolerance": 10,
+            "precondition": true,
+            "source": "Shadow spell_crit_chance read <= -85 (0% effective crit) in before control under 16255=-100 and >= 115 (>=100% effective crit) in after treatment under 16255=-100 + 984954=+220"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
             "metric": "spell_heal_count",
             "fields": {
-              "spell": 520497,
-              "target": "caster"
+              "spell": 520497
             },
-            "before_expected": 0,
-            "expected": 1,
+            "before_expected": 20,
+            "expected": 40,
             "tolerance": 0,
-            "source": "Confirms 520497 heal tick landed non-crit on ally"
+            "source": "4 Eldritch Mending 574325 procs (3.6 s apart > 3 s ICD) on injured caster x 5 nearby allies (caster + ally..ally4 within 5 yd) = 20 ticks of 520497 in control (20) and 20 in treatment (cumulative 40)"
           }
         ]
       },
       "metric": "spell_heal_count",
       "fields": {
         "spell": 520497,
-        "target": "caster",
         "critical": true
       },
       "before_expected": 0,
-      "expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
       "tolerance": 0,
-      "wait_ms": 6000,
-      "expire_ms": 500,
+      "wait_ms": 5800,
+      "expire_ms": 3500,
       "void_on_cast_failure": true,
-      "observe_source": "Control arm for heal_can_crit: at 0% spell crit (16255=-100; 0% residual), 520497 lands once on injured ally (spell_heal_count=1) with 0 critical strikes (critical=true count 0 -> 0). Together with heal_can_crit (100% crit -> 1/1 crits), proves 520497 responds to spell crit chance. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
-      "caster_health": [
-        2000,
-        100000
-      ]
+      "observe_source": "Sized crit-enablement proof for 520497 Vision of Doom under D-38 (presence of crits, no crit rate asserted; AscensionCultistContracts.cpp:61-65 clears SPELL_ATTR2_CANT_CRIT; AscensionCultistAuras.cpp:77-79 copies Shadow spell crit chance). Both phases cast 520388 and cast 4 Eldritch Mending 574325 heals (3600 ms apart > 3000 ms ICD; total mana 40% + 4x20% = 120% of 1512 = 1815 <= 2000) on injured caster (2000/100000 HP) grouped with 4 injured allies (ally..ally4 at 0 yd <= 5 yd), producing 4 x 5 = 20 landed 520497 ticks per phase (verified 20 -> 40 via ally_arm). Control (before phase, 16255=-100, Shadow spell_crit_chance read <= -85% = 0% effective): 0/20 critical heals (excludes a fixed 50% crit mutant with P = 0.5^20 = 9.5e-7 per run, 9.1e-13 per pair; excludes a 20% mutant with P = 0.8^40 = 0.013% <= 0.1% per pair). Treatment (after phase, +984954 e1=+220, Shadow spell_crit_chance read >= 115% >= 100% effective): at least 1 critical heal (0% false-negative residual at 100% crit; a CANT_CRIT mutant gives 0 and alerts). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
     },
     {
       "spell": 301068,
@@ -32361,7 +32532,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -32391,7 +32562,62 @@
       "after_expiry_expected": 0,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "301068 Sunderer of Realities (AscensionCultistAbilities.cpp:149-155): casting Wrath of the Black Empire 504904 (1500 ms cast, 20 Insanity cost via 503695, CasterAuraSpell 680601) applies 301067 (DurationIndex 8 = 15000 ms, $301067d = 15 sec). Absent before cast (0), present (1) at wait_ms 15500 (14000 ms after 1500 ms cast, > 13500 = 0.9*15000), and gone (0) after expiry_wait_ms 2000 (16000 ms after cast, < 16500 = 1.1*15000), excluding 10% off on both sides. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+      "observe_source": "301068 Sunderer of Realities (AscensionCultistAbilities.cpp:149-155): casting Wrath of the Black Empire 504904 (3000 ms cast, 20 Insanity cost via 503695, CasterAuraSpell 680601) applies 301067 on cast finish (DurationIndex 8 = 15000 ms, $301067d = 15 sec). Insanity 500706 starts at 60 (below 100 Total Madness) with 680601=1; both are read in both arms (60 -> 40, 1 -> 1). Absent before cast (0), present (1) at wait_ms 17000 (game_time.after in [16600, 17600] ms -> 13600..14600 ms after 3000 ms cast, > 13500 = 0.9*15000), and gone (0) after expiry_wait_ms 2000 (game_time.expired in [18500, 19400] ms -> 15500..16400 ms after cast, < 16500 = 1.1*15000), excluding 10% off on both sides. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim.",
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 60,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 reads 60 in uncast control and 40 after one Wrath 504904 (-20 Insanity)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) is active in both arms"
+          }
+        ]
+      },
+      "game_time": {
+        "after": [
+          16600,
+          17600
+        ],
+        "expired": [
+          18500,
+          19400
+        ]
+      }
     },
     {
       "spell": 301068,
@@ -32417,7 +32643,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -32459,7 +32685,64 @@
       "wait_ms": 3500,
       "expire_ms": 16500,
       "void_on_cast_failure": true,
-      "observe_source": "301067 Effect[1] aura 108 SPELLMOD_DAMAGE bp=14+die=1 = +15% per stack ($301067s2 = 15) on Wrath of the Black Empire 504904 (bp=817, die=148 -> [818..965], mean 891.5, SP coef 1.0, Cultist tuning 887013 +12%). At +20000 SP, non-crit (16255=-100), no resist (823764): 1 unbuffed Wrath = (20891.5 +- 74) * 1.12 = 23398.5 +- 83. Each phase casts 504904 twice (setup + trigger, 1700 ms apart): control (before 301068) deals 2 * 23398.5 = 46797 +- 166; treatment (after 301068) deals 1.00 + 1.15 = 2.15 * 23398.5 = 50306 +- 179 (cumulative 97103, expected_gain 50306 +- 350, excluding 0% 46797 and +30% 53816 by > 3150). Paired with wrath_damage_2stacks. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+      "observe_source": "301067 Effect[1] aura 108 SPELLMOD_DAMAGE bp=14+die=1 = +15% per stack ($301067s2 = 15) on Wrath of the Black Empire 504904 (bp=817, die=148 -> [818..965], mean 891.5, SP coef 1.0, Cultist tuning 887013 +12%). At +20000 SP, non-crit (16255=-100), no resist (823764): 1 unbuffed Wrath = (20891.5 +- 74) * 1.12 = 23398.5 +- 83. Each phase casts 504904 twice (setup + trigger, 1700 ms apart): control (before 301068) deals 2 * 23398.5 = 46797 +- 166; treatment (after 301068) deals 1.00 + 1.15 = 2.15 * 23398.5 = 50306 +- 179 (cumulative 97103, expected_gain 50306 +- 350, excluding 0% 46797 and +30% 53816 by > 3150). Paired with wrath_damage_2stacks. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim.",
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 40
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 and reads 20 after 2 Wrath 504904 casts (-40) in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) holds throughout both arms"
+          }
+        ]
+      }
     },
     {
       "spell": 301068,
@@ -32486,7 +32769,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          80,
           "caster",
           "caster"
         ],
@@ -32528,7 +32811,64 @@
       "wait_ms": 3500,
       "expire_ms": 16500,
       "void_on_cast_failure": true,
-      "observe_source": "301067 stacks +15% per subsequent Wrath (StackAmount 15). Each phase casts 504904 3 times (setup x2 + trigger): control (before 301068) deals 3 * 23398.5 = 70195 +- 250; treatment (after 301068) deals (1.00 + 1.15 + 1.30) = 3.45 * 23398.5 = 80725 +- 287 (cumulative 150920, expected_gain 80725 +- 500, excluding non-stacking 3.30 * 23398.5 = 77215 by 3510 and 0% 70195 by 10530). Paired with wrath_damage_1stack. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+      "observe_source": "301067 stacks +15% per subsequent Wrath (StackAmount 15). Each phase casts 504904 3 times (setup x2 + trigger): control (before 301068) deals 3 * 23398.5 = 70195 +- 250; treatment (after 301068) deals (1.00 + 1.15 + 1.30) = 3.45 * 23398.5 = 80725 +- 287 (cumulative 150920, expected_gain 80725 +- 500, excluding non-stacking 3.30 * 23398.5 = 77215 by 3510 and 0% 70195 by 10530). Paired with wrath_damage_1stack. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim.",
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 40
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 80 and reads 20 after 3 Wrath 504904 casts (-60) in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) holds throughout both arms"
+          }
+        ]
+      }
     },
     {
       "spell": 301068,
@@ -32556,7 +32896,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -32583,7 +32923,64 @@
       "wait_ms": 3500,
       "expire_ms": 3500,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionCultistAbilities.cpp:149-155: casting Wrath of the Black Empire 504904 with 301068 spawns Void Portal 533030 ONLY when 301067 is already active (i.e. on subsequent Wraths), and then applies 301067. Two 504904 casts (setup + trigger, 1700 ms apart): control (before 301068) spawns 0 portals; treatment (after 301068) has exactly 1 portal present at wait_ms 2000 (proving 1st Wrath spawned 0 and 2nd Wrath spawned 1, not 2). Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+      "observe_source": "AscensionCultistAbilities.cpp:149-155: casting Wrath of the Black Empire 504904 with 301068 spawns Void Portal 533030 ONLY when 301067 is already active (i.e. on subsequent Wraths), and then applies 301067. Two 504904 casts (setup + trigger, 1700 ms apart): control (before 301068) spawns 0 portals; treatment (after 301068) has exactly 1 portal present at wait_ms 2000 (proving 1st Wrath spawned 0 and 2nd Wrath spawned 1, not 2). Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim.",
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 40
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 and reads 20 after 2 Wrath 504904 casts (-40) in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) holds throughout both arms"
+          }
+        ]
+      }
     },
     {
       "spell": 301068,
@@ -32650,6 +33047,8 @@
         504904,
         500712,
         504904,
+        500712,
+        504904,
         500712
       ],
       "setup_target": "dummy",
@@ -32661,7 +33060,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -32689,7 +33088,65 @@
       "after_at_least": 1,
       "wait_ms": 14000,
       "expire_ms": 3500,
-      "observe_source": "Matches merged Depths of Madness 706911 precedent: AscensionCultistSummons.cpp:290-297 picks roots[urand(0,2)] from {500110, 800416, 805572}; Gaze reaches dummy via 500110 -> 520334 -> 520332 (caster_entry 533030). 24 alternating [504904, 500712] setup casts (+20/-20 Insanity neutral) + 1 trigger 504904 = 25 Wrath casts -> 24 deterministic portals (every cast after #1 has 301067 active). Sizing: P(miss one spell in 1 run) = (2/3)^24 = 5.95e-5; union bound over 3 spells x 2 runs of a pair = 6 * (2/3)^24 = 3.57e-4 = 0.036% <= 0.1% per pair. No share asserted. Control (before 301068): 0 events. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+      "observe_source": "Matches merged Depths of Madness 706911 precedent, repaired for C1/I5: starts Insanity 500706 at 60 (oscillating 60 -> 40 -> 60 across 25 alternating [504904, 500712] setup pairs, never hitting 100 Total Madness) with void_on_cast_failure: true and explicit 500706/680601 reads at start, after setup (60/1), and at end (40/1) of both arms. 25 deterministic portals spawn in treatment (0 in control). Union bound across all 4 portal entries x 2 runs = 12 * (2/3)^25 = 0.048% <= 0.1% per pair. No share asserted (D-38). Paired with 301068 portal_only_three asserting only the three named spells are cast. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim.",
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 (below 100 Total Madness), stays 60 after alternating [504904 (-20), 500712 (+20)] setup casts, and reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms with zero refused casts"
+          }
+        ]
+      }
     },
     {
       "spell": 301068,
@@ -32756,6 +33213,8 @@
         504904,
         500712,
         504904,
+        500712,
+        504904,
         500712
       ],
       "setup_target": "dummy",
@@ -32767,7 +33226,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -32795,7 +33254,65 @@
       "after_at_least": 1,
       "wait_ms": 14000,
       "expire_ms": 3500,
-      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Horrorbolt 800416 (caster_entry 533030) seen at least once over 24 deterministic portals (25 Wrath casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+      "observe_source": "Matches merged Depths of Madness 706911 precedent, repaired for C1/I5: starts Insanity 500706 at 60 (oscillating 60 -> 40 -> 60 across 25 alternating [504904, 500712] setup pairs, never hitting 100 Total Madness) with void_on_cast_failure: true and explicit 500706/680601 reads at start, after setup (60/1), and at end (40/1) of both arms. 25 deterministic portals spawn in treatment (0 in control). Union bound across all 4 portal entries x 2 runs = 12 * (2/3)^25 = 0.048% <= 0.1% per pair. No share asserted (D-38). Paired with 301068 portal_only_three asserting only the three named spells are cast. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim.",
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 (below 100 Total Madness), stays 60 after alternating [504904 (-20), 500712 (+20)] setup casts, and reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms with zero refused casts"
+          }
+        ]
+      }
     },
     {
       "spell": 301068,
@@ -32862,6 +33379,8 @@
         504904,
         500712,
         504904,
+        500712,
+        504904,
         500712
       ],
       "setup_target": "dummy",
@@ -32873,7 +33392,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -32901,7 +33420,322 @@
       "after_at_least": 1,
       "wait_ms": 14000,
       "expire_ms": 3500,
-      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Obliteration Beam 805572 -> 805573 (caster_entry 533030) seen at least once over 24 deterministic portals (25 Wrath casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+      "observe_source": "Matches merged Depths of Madness 706911 precedent, repaired for C1/I5: starts Insanity 500706 at 60 (oscillating 60 -> 40 -> 60 across 25 alternating [504904, 500712] setup pairs, never hitting 100 Total Madness) with void_on_cast_failure: true and explicit 500706/680601 reads at start, after setup (60/1), and at end (40/1) of both arms. 25 deterministic portals spawn in treatment (0 in control). Union bound across all 4 portal entries x 2 runs = 12 * (2/3)^25 = 0.048% <= 0.1% per pair. No share asserted (D-38). Paired with 301068 portal_only_three asserting only the three named spells are cast. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim.",
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 (below 100 Total Madness), stays 60 after alternating [504904 (-20), 500712 (+20)] setup casts, and reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms with zero refused casts"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (void portal casts only Gaze of C'thun, Horrorbolt, or Obliteration Beam and no other spell)",
+      "kind": "metric_delta",
+      "variant": "portal_only_three",
+      "label_suffix": "portal_only_three",
+      "quote": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+      "gate_spell": 301068,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_total",
+            "count_metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 533030
+            },
+            "source": "Total damage (all spells + melee) dealt by all spawned Void Portals 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 520332,
+              "caster_entry": 533030,
+              "target": "dummy"
+            },
+            "source": "Gaze of C'thun (500110 -> 520334 -> 520332) damage dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "caster_entry": 533030,
+              "target": "dummy"
+            },
+            "source": "Horrorbolt (800416) damage dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 805573,
+              "caster_entry": 533030,
+              "target": "dummy"
+            },
+            "source": "Obliteration Beam (805572 -> 805573) damage dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_heal_total",
+            "count_metric": "owned_creature_heal_count",
+            "fields": {
+              "entry": 533030
+            },
+            "source": "Total healing dealt by all spawned Void Portals 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 520333,
+              "caster_entry": 533030
+            },
+            "source": "Gaze of C'thun ally heal (500110 -> 520335 -> 520333) dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": [
+              1,
+              2,
+              3
+            ],
+            "expected": 1.0,
+            "tolerance": 0,
+            "source": "100% of Void Portal 533030 damage comes exclusively from Gaze of C'thun 520332, Horrorbolt 800416, and Obliteration Beam 805573 (ratio == 1.0 exact; any other damaging spell or melee alerts)"
+          },
+          {
+            "numerator": 4,
+            "denominator": 5,
+            "expected": 1.0,
+            "tolerance": 0,
+            "source": "100% of Void Portal 533030 healing comes exclusively from Gaze of C'thun 520333 (500110 -> 520335 -> 520333; ratio == 1.0 exact; any other healing spell alerts)"
+          }
+        ]
+      },
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 533030
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 3,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Exclusivity check for 301068 Sunderer of Realities void portal 533030 (C1): over 25 deterministic portals (starting Insanity 500706=60, oscillating 60->40->60 with void_on_cast_failure: true and 500706/680601 reads at start, after setup, and at end of both arms), checks that (1) all three named spells land at least once (ratio-only count_metric > 0 for 520332, 800416, 805573; union bound with sibling entries 12*(2/3)^25 = 0.048% <= 0.1% per pair), (2) owned_creature_damage_total(533030) / (dmg_520332 + dmg_800416 + dmg_805573) == 1.0 exact (tolerance 0; any other damaging spell or melee swing alerts), and (3) owned_creature_heal_total(533030) / spell_heal_total(520333, caster_entry=533030) == 1.0 exact (Gaze of C'thun 500110 triggers both damage 520332 and ally heal 520333, Spell.dbc; any other healing spell alerts). Control (before 301068): 0 portal damage hits. Per-portal exact-one-cast and post-cast despawn remain in the ledger tool_gap (\"before disappearing.\"). Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
     },
     {
       "spell": 301200,
@@ -32924,7 +33758,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -32951,7 +33785,52 @@
       "wait_ms": 3500,
       "expire_ms": 3500,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionCultistAbilities.cpp:149-152: casting Wrath of the Black Empire 504904 with 301200 Apocalyptic Skies deterministically summons Void Portal 533030 at target for 12000 ms. Control (before learning 301200): 0 portals. Treatment (after real learn of 301200): 1 portal present at wait_ms 2000. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+      "observe_source": "AscensionCultistAbilities.cpp:149-152: casting Wrath of the Black Empire 504904 with 301200 Apocalyptic Skies deterministically summons Void Portal 533030 at target for 12000 ms. Control (before learning 301200): 0 portals. Treatment (after real learn of 301200): 1 portal present at wait_ms 2000. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim.",
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 and reads 40 after 1 Wrath 504904 cast (-20) in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) holds throughout both arms"
+          }
+        ]
+      }
     },
     {
       "spell": 301200,
@@ -33016,6 +33895,8 @@
         504904,
         500712,
         504904,
+        500712,
+        504904,
         500712
       ],
       "setup_target": "dummy",
@@ -33027,7 +33908,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -33055,7 +33936,65 @@
       "after_at_least": 1,
       "wait_ms": 14000,
       "expire_ms": 3500,
-      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Gaze of C'thun 500110 -> 520334 -> 520332 (caster_entry 533030) seen at least once over 24 deterministic portals (24 Wrath 504904 casts, alternating 500712 for Insanity neutrality). Sizing: union bound over 3 spells x 2 runs = 6 * (2/3)^24 = 0.036% <= 0.1% per pair. No share asserted. Control: 0 events. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+      "observe_source": "Matches merged Depths of Madness 706911 precedent, repaired for C1/I5: starts Insanity 500706 at 60 (oscillating 60 -> 40 -> 60 across 24 alternating [504904, 500712] setup pairs, never hitting 100 Total Madness) with void_on_cast_failure: true and explicit 500706/680601 reads at start, after setup (60/1), and at end (40/1) of both arms. 25 deterministic portals spawn in treatment (0 in control). Union bound across all 4 portal entries x 2 runs = 12 * (2/3)^25 = 0.048% <= 0.1% per pair. No share asserted (D-38). Paired with 301200 portal_only_three asserting only the three named spells are cast. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim.",
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 (below 100 Total Madness), stays 60 after alternating [504904 (-20), 500712 (+20)] setup casts, and reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms with zero refused casts"
+          }
+        ]
+      }
     },
     {
       "spell": 301200,
@@ -33120,6 +34059,8 @@
         504904,
         500712,
         504904,
+        500712,
+        504904,
         500712
       ],
       "setup_target": "dummy",
@@ -33131,7 +34072,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -33159,7 +34100,65 @@
       "after_at_least": 1,
       "wait_ms": 14000,
       "expire_ms": 3500,
-      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Horrorbolt 800416 (caster_entry 533030) seen at least once over 24 deterministic portals (24 Wrath 504904 casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+      "observe_source": "Matches merged Depths of Madness 706911 precedent, repaired for C1/I5: starts Insanity 500706 at 60 (oscillating 60 -> 40 -> 60 across 24 alternating [504904, 500712] setup pairs, never hitting 100 Total Madness) with void_on_cast_failure: true and explicit 500706/680601 reads at start, after setup (60/1), and at end (40/1) of both arms. 25 deterministic portals spawn in treatment (0 in control). Union bound across all 4 portal entries x 2 runs = 12 * (2/3)^25 = 0.048% <= 0.1% per pair. No share asserted (D-38). Paired with 301200 portal_only_three asserting only the three named spells are cast. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim.",
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 (below 100 Total Madness), stays 60 after alternating [504904 (-20), 500712 (+20)] setup casts, and reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms with zero refused casts"
+          }
+        ]
+      }
     },
     {
       "spell": 301200,
@@ -33224,6 +34223,8 @@
         504904,
         500712,
         504904,
+        500712,
+        504904,
         500712
       ],
       "setup_target": "dummy",
@@ -33235,7 +34236,7 @@
       "phase_auras": [
         [
           500706,
-          100,
+          60,
           "caster",
           "caster"
         ],
@@ -33263,7 +34264,320 @@
       "after_at_least": 1,
       "wait_ms": 14000,
       "expire_ms": 3500,
-      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Obliteration Beam 805572 -> 805573 (caster_entry 533030) seen at least once over 24 deterministic portals (24 Wrath 504904 casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+      "observe_source": "Matches merged Depths of Madness 706911 precedent, repaired for C1/I5: starts Insanity 500706 at 60 (oscillating 60 -> 40 -> 60 across 24 alternating [504904, 500712] setup pairs, never hitting 100 Total Madness) with void_on_cast_failure: true and explicit 500706/680601 reads at start, after setup (60/1), and at end (40/1) of both arms. 25 deterministic portals spawn in treatment (0 in control). Union bound across all 4 portal entries x 2 runs = 12 * (2/3)^25 = 0.048% <= 0.1% per pair. No share asserted (D-38). Paired with 301200 portal_only_three asserting only the three named spells are cast. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim.",
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 starts at 60 (below 100 Total Madness), stays 60 after alternating [504904 (-20), 500712 (+20)] setup casts, and reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms with zero refused casts"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 301200,
+      "name": "Apocalyptic Skies (void portal casts only Gaze of C'thun, Horrorbolt, or Obliteration Beam and no other spell)",
+      "kind": "metric_delta",
+      "variant": "portal_only_three",
+      "label_suffix": "portal_only_three",
+      "quote": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+      "gate_spell": 301200,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "void_on_cast_failure": true,
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_total",
+            "count_metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 533030
+            },
+            "source": "Total damage (all spells + melee) dealt by all spawned Void Portals 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 520332,
+              "caster_entry": 533030,
+              "target": "dummy"
+            },
+            "source": "Gaze of C'thun (500110 -> 520334 -> 520332) damage dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "caster_entry": 533030,
+              "target": "dummy"
+            },
+            "source": "Horrorbolt (800416) damage dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 805573,
+              "caster_entry": 533030,
+              "target": "dummy"
+            },
+            "source": "Obliteration Beam (805572 -> 805573) damage dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_heal_total",
+            "count_metric": "owned_creature_heal_count",
+            "fields": {
+              "entry": 533030
+            },
+            "source": "Total healing dealt by all spawned Void Portals 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 520333,
+              "caster_entry": 533030
+            },
+            "source": "Gaze of C'thun ally heal (500110 -> 520335 -> 520333) dealt by Void Portal 533030"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706,
+              "caster": "caster"
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Insanity 500706 reads 40 after final trigger Wrath 504904 in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>=20 Insanity) stays active in both arms"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": [
+              1,
+              2,
+              3
+            ],
+            "expected": 1.0,
+            "tolerance": 0,
+            "source": "100% of Void Portal 533030 damage comes exclusively from Gaze of C'thun 520332, Horrorbolt 800416, and Obliteration Beam 805573 (ratio == 1.0 exact; any other damaging spell or melee alerts)"
+          },
+          {
+            "numerator": 4,
+            "denominator": 5,
+            "expected": 1.0,
+            "tolerance": 0,
+            "source": "100% of Void Portal 533030 healing comes exclusively from Gaze of C'thun 520333 (500110 -> 520335 -> 520333; ratio == 1.0 exact; any other healing spell alerts)"
+          }
+        ]
+      },
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 533030
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 3,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Exclusivity check for 301200 Apocalyptic Skies void portal 533030 (C1): over 25 deterministic portals (starting Insanity 500706=60, oscillating 60->40->60 with void_on_cast_failure: true and 500706/680601 reads at start, after setup, and at end of both arms), checks that (1) all three named spells land at least once (ratio-only count_metric > 0 for 520332, 800416, 805573; union bound with sibling entries 12*(2/3)^25 = 0.048% <= 0.1% per pair), (2) owned_creature_damage_total(533030) / (dmg_520332 + dmg_800416 + dmg_805573) == 1.0 exact (tolerance 0; any other damaging spell or melee swing alerts), and (3) owned_creature_heal_total(533030) / spell_heal_total(520333, caster_entry=533030) == 1.0 exact (Gaze of C'thun 500110 triggers both damage 520332 and ally heal 520333, Spell.dbc; any other healing spell alerts). Control (before 301200): 0 portal damage hits. Per-portal exact-one-cast and post-cast despawn remain in the ledger tool_gap (\"before disappearing.\"). Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
     }
   ],
   "player_observations": [],
