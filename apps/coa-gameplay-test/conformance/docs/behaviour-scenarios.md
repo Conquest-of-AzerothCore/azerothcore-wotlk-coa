@@ -2291,6 +2291,8 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   0594)
 - [`npc_repair`](kinds/npc_repair.md): repair at an owned creature through the real repair handler, per requester (ADR
   0384)
+- [`offensive_dispel_resist_rate`](kinds/offensive_dispel_resist_rate.md): survival rate of a positive Magic buff on the
+  caster or a grouped ally under enemy dispels through `Aura::CalcDispelChance` (ADR 1294, provisional)
 - [`parried_restore`](kinds/parried_restore.md): a restore of a percent of the missing health and Rage per
   parried swing, one swing per cycle at a set state (ADR 0801; judged window ADR 0850)
 - [`power_term_direction`](kinds/power_term_direction.md): the direction of a power term without a figure, from four
