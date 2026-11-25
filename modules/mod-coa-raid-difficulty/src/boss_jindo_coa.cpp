@@ -68,6 +68,7 @@
 #include "TemporarySummon.h"
 #include "../../../src/server/scripts/EasternKingdoms/ZulGurub/zulgurub.h"
 #include "zg_coa_common.h"
+#include "zg_coa_leash.h"
 
 #include <algorithm>
 #include <array>
@@ -196,7 +197,10 @@ namespace
 
     struct boss_jindo_coa : public BossAI
     {
-        boss_jindo_coa(Creature* creature) : BossAI(creature, DATA_JINDO) { }
+        boss_jindo_coa(Creature* creature) : BossAI(creature, DATA_JINDO)
+        {
+            SetBoundary(coa_zg::LeashFor(DATA_JINDO));
+        }
 
         void Reset() override
         {

@@ -1,0 +1,248 @@
+{
+  "schema": 1,
+  "name": "Wailing Caverns: Mutanus and the Naralex event adds scale on Heroic and Mythic (#11504)",
+  "contract": "#11504: Mutanus the Devourer (3654) and the creatures the Disciple of Naralex summons were barely scaled on Heroic and Mythic. Mutanus' templates 103654/203654 stayed at level 61 with the elite DamageModifier 1.34/1.74 (he hit for 142 on Heroic, Skum for 1929) and he had no coa_dungeon_health row (165k Heroic, 215k Mythic against 465k/605k for Skum). Deviate Moccasin (5762) and Nightmare Ectoplasm (5763) had no Heroic/Mythic templates. Now Mutanus is a level 63 boss with Skum's DamageModifier (17.56/37.87) and Lord Cobrahn's health (377077/490200: in a Mythic+ run of 2026-08-25 both took 2.56M damage); the Moccasin hits about 18% of Mutanus as in the logs (507/2883 and 727/4141), the Ectoplasm hits like the Moccasin, as in the logs (530/530 and 570/727 median); a Deviate Viper hits about 1.5 times as hard (824, 1054).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 43,
+      "x": 120.0,
+      "y": 240.0,
+      "z": -102.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Wailing Caverns on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 3654,
+      "as": "mutanus1",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 5762,
+      "as": "moccasin1",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 5763,
+      "as": "ectoplasm1",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "Mutanus is level 63 on Heroic, like the other Wailing Caverns bosses",
+      "actor": "mutanus1",
+      "metric": "level",
+      "equals": 63
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mutanus has a Heroic boss's health (377077)",
+      "actor": "mutanus1",
+      "metric": "max_health",
+      "equals": 377077
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mutanus hits like Skum on Heroic",
+      "actor": "mutanus1",
+      "metric": "weapon_damage_min",
+      "min": 1920,
+      "max": 1940
+    },
+    {
+      "action": "assert",
+      "label": "Deviate Moccasin is level 61 on Heroic",
+      "actor": "moccasin1",
+      "metric": "level",
+      "equals": 61
+    },
+    {
+      "action": "assert",
+      "label": "Deviate Moccasin has an elite's health on Heroic",
+      "actor": "moccasin1",
+      "metric": "max_health",
+      "equals": 48855
+    },
+    {
+      "action": "assert",
+      "label": "Deviate Moccasin hits about a sixth of Mutanus, as in the logs",
+      "actor": "moccasin1",
+      "metric": "weapon_damage_min",
+      "min": 285,
+      "max": 305
+    },
+    {
+      "action": "assert",
+      "label": "Nightmare Ectoplasm is level 60 on Heroic",
+      "actor": "ectoplasm1",
+      "metric": "level",
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "Nightmare Ectoplasm hits like a Deviate Moccasin, as in the logs",
+      "actor": "ectoplasm1",
+      "metric": "weapon_damage_min",
+      "min": 270,
+      "max": 300
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 43,
+      "x": 120.0,
+      "y": 240.0,
+      "z": -102.5
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Wailing Caverns on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 3654,
+      "as": "mutanus2",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 5762,
+      "as": "moccasin2",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 5763,
+      "as": "ectoplasm2",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "Mutanus is level 63 on Mythic, like the other Wailing Caverns bosses",
+      "actor": "mutanus2",
+      "metric": "level",
+      "equals": 63
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mutanus has a Mythic boss's health (490200)",
+      "actor": "mutanus2",
+      "metric": "max_health",
+      "equals": 490200
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mutanus hits like Skum on Mythic",
+      "actor": "mutanus2",
+      "metric": "weapon_damage_min",
+      "min": 4150,
+      "max": 4170
+    },
+    {
+      "action": "assert",
+      "label": "Deviate Moccasin is level 61 on Mythic",
+      "actor": "moccasin2",
+      "metric": "level",
+      "equals": 61
+    },
+    {
+      "action": "assert",
+      "label": "Deviate Moccasin has an elite's health on Mythic",
+      "actor": "moccasin2",
+      "metric": "max_health",
+      "equals": 63512
+    },
+    {
+      "action": "assert",
+      "label": "Deviate Moccasin hits about a sixth of Mutanus, as in the logs",
+      "actor": "moccasin2",
+      "metric": "weapon_damage_min",
+      "min": 740,
+      "max": 760
+    },
+    {
+      "action": "assert",
+      "label": "Nightmare Ectoplasm is level 60 on Mythic",
+      "actor": "ectoplasm2",
+      "metric": "level",
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "label": "Nightmare Ectoplasm hits like a Deviate Moccasin, as in the logs",
+      "actor": "ectoplasm2",
+      "metric": "weapon_damage_min",
+      "min": 690,
+      "max": 760
+    }
+  ]
+}

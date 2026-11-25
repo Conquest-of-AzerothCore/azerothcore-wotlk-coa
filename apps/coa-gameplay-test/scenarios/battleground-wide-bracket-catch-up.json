@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Low-level battleground players are lifted to their bracket top while inside",
-  "contract": "A level 12 Human Warrior and a level 12 Human class 12 who enter a Warsong Gulch of the 10-29 bracket gain the difference between the level 29 and level 12 rows of player_class_stats and player_race_stats: Warrior Strength +24, Agility +15, Stamina +22, Intellect +3, Spirit +7 and maximum health +459 (base health +239, 22 Stamina x 10); class 12 Strength +14, Agility +27, Stamina +14, Intellect +4, Spirit +7 and maximum health +394 (base health +254, 14 Stamina x 10). A level 29 Orc Warrior gets nothing; a second one completes the faction pairing for the class 12 player. Leveling to 13 inside recomputes the lift instead of stacking it and keeps the level-up fill at the lifted maximum health. Leaving through the leave packet or by teleport removes the lift and clamps health to the restored maximum.",
+  "contract": "A level 12 Human Warrior and a level 12 Human class 12 who enter a Warsong Gulch of the 10-29 bracket get a health-only lift: the difference between the level 29 and level 12 rows of player_class_stats and player_race_stats in base health and Stamina, and nothing else. Warrior Stamina +22 and maximum health +459 (base health +239, 22 Stamina x 10); class 12 Stamina +14 and maximum health +394 (base health +254, 14 Stamina x 10). Strength, Agility, Intellect, Spirit and mana are not lifted and are not asserted here; the output scaling scenario checks that they stay put. A level 29 Orc Warrior gets nothing; a second one completes the faction pairing for the class 12 player. Leveling to 13 inside recomputes the lift instead of stacking it and keeps the Warrior at its full lifted maximum health. Leaving through the leave packet or by teleport removes the lift and clamps health to the restored maximum.",
   "timeout_ms": 240000,
   "location": {
     "map": 0,
@@ -44,36 +44,8 @@
       "action": "snapshot",
       "actor": "war",
       "metric": "stat",
-      "save_as": "war_stat0",
-      "stat": 0
-    },
-    {
-      "action": "snapshot",
-      "actor": "war",
-      "metric": "stat",
-      "save_as": "war_stat1",
-      "stat": 1
-    },
-    {
-      "action": "snapshot",
-      "actor": "war",
-      "metric": "stat",
       "save_as": "war_stat2",
       "stat": 2
-    },
-    {
-      "action": "snapshot",
-      "actor": "war",
-      "metric": "stat",
-      "save_as": "war_stat3",
-      "stat": 3
-    },
-    {
-      "action": "snapshot",
-      "actor": "war",
-      "metric": "stat",
-      "save_as": "war_stat4",
-      "stat": 4
     },
     {
       "action": "snapshot",
@@ -85,36 +57,8 @@
       "action": "snapshot",
       "actor": "coa",
       "metric": "stat",
-      "save_as": "coa_stat0",
-      "stat": 0
-    },
-    {
-      "action": "snapshot",
-      "actor": "coa",
-      "metric": "stat",
-      "save_as": "coa_stat1",
-      "stat": 1
-    },
-    {
-      "action": "snapshot",
-      "actor": "coa",
-      "metric": "stat",
       "save_as": "coa_stat2",
       "stat": 2
-    },
-    {
-      "action": "snapshot",
-      "actor": "coa",
-      "metric": "stat",
-      "save_as": "coa_stat3",
-      "stat": 3
-    },
-    {
-      "action": "snapshot",
-      "actor": "coa",
-      "metric": "stat",
-      "save_as": "coa_stat4",
-      "stat": 4
     },
     {
       "action": "snapshot",
@@ -345,52 +289,12 @@
     },
     {
       "action": "assert",
-      "label": "Level 12 Warrior Strength rises by the level 29 difference 24",
-      "actor": "war",
-      "metric": "stat",
-      "relative_to": "war_stat0",
-      "equals": 24,
-      "stat": 0,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Level 12 Warrior Agility rises by the level 29 difference 15",
-      "actor": "war",
-      "metric": "stat",
-      "relative_to": "war_stat1",
-      "equals": 15,
-      "stat": 1,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
       "label": "Level 12 Warrior Stamina rises by the level 29 difference 22",
       "actor": "war",
       "metric": "stat",
       "relative_to": "war_stat2",
       "equals": 22,
       "stat": 2,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Level 12 Warrior Intellect rises by the level 29 difference 3",
-      "actor": "war",
-      "metric": "stat",
-      "relative_to": "war_stat3",
-      "equals": 3,
-      "stat": 3,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Level 12 Warrior Spirit rises by the level 29 difference 7",
-      "actor": "war",
-      "metric": "stat",
-      "relative_to": "war_stat4",
-      "equals": 7,
-      "stat": 4,
       "within_ms": 5000
     },
     {
@@ -404,52 +308,12 @@
     },
     {
       "action": "assert",
-      "label": "Level 12 class 12 Strength rises by the level 29 difference 14",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat0",
-      "equals": 14,
-      "stat": 0,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Level 12 class 12 Agility rises by the level 29 difference 27",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat1",
-      "equals": 27,
-      "stat": 1,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
       "label": "Level 12 class 12 Stamina rises by the level 29 difference 14",
       "actor": "coa",
       "metric": "stat",
       "relative_to": "coa_stat2",
       "equals": 14,
       "stat": 2,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Level 12 class 12 Intellect rises by the level 29 difference 4",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat3",
-      "equals": 4,
-      "stat": 3,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Level 12 class 12 Spirit rises by the level 29 difference 7",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat4",
-      "equals": 7,
-      "stat": 4,
       "within_ms": 5000
     },
     {
@@ -542,52 +406,12 @@
     },
     {
       "action": "assert",
-      "label": "Leaving restores class 12 Strength",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat0",
-      "equals": 0,
-      "stat": 0,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Leaving restores class 12 Agility",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat1",
-      "equals": 0,
-      "stat": 1,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
       "label": "Leaving restores class 12 Stamina",
       "actor": "coa",
       "metric": "stat",
       "relative_to": "coa_stat2",
       "equals": 0,
       "stat": 2,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Leaving restores class 12 Intellect",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat3",
-      "equals": 0,
-      "stat": 3,
-      "within_ms": 5000
-    },
-    {
-      "action": "assert",
-      "label": "Leaving restores class 12 Spirit",
-      "actor": "coa",
-      "metric": "stat",
-      "relative_to": "coa_stat4",
-      "equals": 0,
-      "stat": 4,
       "within_ms": 5000
     },
     {

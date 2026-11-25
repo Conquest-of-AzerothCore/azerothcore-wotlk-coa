@@ -1,9 +1,20 @@
 #include "POLICY_HEADER"
 #include <algorithm>
 #include <array>
-#include <cassert>
 #include <cstdint>
 #include <memory>
+#include <cstdlib>
+#include <iostream>
+
+#define CHECK(condition) \
+    do \
+    { \
+        if (!(condition)) \
+        { \
+            std::cerr << __FILE__ << ':' << __LINE__ << ": " << #condition << '\n'; \
+            std::exit(1); \
+        } \
+    } while (false)
 
 using uint8 = std::uint8_t;
 using uint32 = std::uint32_t;
@@ -37,6 +48,7 @@ struct Unit
     void SetCreateStat(Stats stat, float value) { stats[stat] = value; }
     void UpdateStats(Stats) { }
     uint32 GetHealth() const { return health; }
+    uint32 GetMaxHealth() const { return maxHealth; }
     uint32 GetPower(Powers power) const { return powers[power]; }
     void SetHealth(uint32 value) { health = std::min(value, maxHealth); }
     void SetPower(Powers power, uint32 value) { powers[power] = std::min(value, maxima[power]); }
@@ -73,51 +85,76 @@ Policy::LevelValues PlayerLevelValues(Player const*, uint8 level)
 
 int main()
 {
-    Policy::Lift const large{200, 200, {}};
-    Policy::Lift const small{100, 100, {}};
+    Policy::Lift const large{200, 0};
+    Policy::Lift const small{100, 0};
     for (bool pet : {false, true})
     {
         Unit unit;
         unit.pet = pet;
-        ApplyLift(&unit, large);
-        assert(unit.health == 100 && unit.powers[POWER_MANA] == 100);
-        unit.SetHealth(250);
-        unit.SetPower(POWER_MANA, 240);
+        unit.SetPower(POWER_MANA, 40);
         auto const powers = unit.powers;
-        ApplyLift(&unit, large);
-        assert(unit.health == 250 && unit.powers == powers);
-        ApplyLift(&unit, small);
-        assert(unit.health == 200 && unit.powers[POWER_MANA] == 200);
-        ApplyLift(&unit, large);
-        assert(unit.health == 200 && unit.powers[POWER_MANA] == 200);
-        unit.SetHealth(0);
-        ApplyLift(&unit, large);
-        assert(unit.health == 0);
-        unit.SetHealth(250);
+        ApplyLift(&unit, large, 2.0f);
+        CHECK(unit.maxHealth == 300 && unit.health == 300);
+        CHECK(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 2.0f);
+        CHECK(unit.powers == powers && unit.maxima[POWER_MANA] == 100);
         RemoveLift(&unit);
-        assert(unit.health == 100 && unit.powers[POWER_MANA] == 100);
-        assert(!unit.CustomData.Get<AppliedLift>(LiftKey));
-        ApplyLift(&unit, large);
-        unit.SetHealth(250);
-        unit.SetPower(POWER_MANA, 250);
-        ApplyLift(&unit, {});
-        assert(unit.health == 100 && unit.powers[POWER_MANA] == 100);
+        CHECK(unit.maxHealth == 100 && unit.health == 100);
+        CHECK(!unit.CustomData.Get<AppliedLift>(LiftKey));
+
+        unit.SetHealth(50);
+        ApplyLift(&unit, large, 2.0f);
+        CHECK(unit.health == 150);
+        ApplyLift(&unit, small, 1.5f);
+        CHECK(unit.maxHealth == 200 && unit.health == 100);
+        CHECK(unit.CustomData.Get<AppliedLift>(LiftKey)->ratio == 1.5f);
+        ApplyLift(&unit, large, 2.0f);
+        CHECK(unit.health == 150);
+        RemoveLift(&unit);
+        CHECK(unit.health == 50 && unit.powers == powers);
+
+        unit.SetHealth(0);
+        ApplyLift(&unit, large, 2.0f);
+        CHECK(unit.health == 0);
+        RemoveLift(&unit);
+        CHECK(unit.health == 0);
+
+        unit.SetHealth(1);
+        ApplyLift(&unit, large, 2.0f);
+        CHECK(unit.health == 3);
+        unit.SetHealth(1);
+        RemoveLift(&unit);
+        CHECK(unit.health == 1);
+
+        unit.SetHealth(100);
+        ApplyLift(&unit, large, 2.0f);
+        ApplyLift(&unit, {}, 1.0f);
+        CHECK(unit.maxHealth == 100 && unit.health == 100);
+        CHECK(!unit.CustomData.Get<AppliedLift>(LiftKey));
     }
 
+    Unit pet;
+    pet.pet = true;
+    ApplyLift(&pet, {0, 5}, 1.0f);
+    CHECK(pet.stats[STAT_STAMINA] == 5.0f && pet.stats[STAT_STRENGTH] == 0.0f);
+    RemoveLift(&pet);
+    CHECK(pet.stats[STAT_STAMINA] == 0.0f);
+
     Player player;
-    player.maxHealth = player.maxima[POWER_MANA] = 120;
+    player.maxHealth = 120;
+    player.SetHealth(120);
     RefreshPlayerLift(&player);
+    CHECK(player.maxHealth == 290 && player.health == 290);
+    float const ratio = player.CustomData.Get<AppliedLift>(LiftKey)->ratio;
+    CHECK(ratio > 2.416f && ratio < 2.417f);
+    player.SetHealth(145);
     player.level = 13;
     player.maxHealth += 10;
-    player.maxima[POWER_MANA] += 10;
-    player.SetHealth(player.maxHealth);
-    player.SetPower(POWER_MANA, player.maxima[POWER_MANA]);
     RefreshPlayerLift(&player);
-    assert(player.maxHealth == 290 && player.health == 290);
-    assert(player.maxima[POWER_MANA] == 290 && player.powers[POWER_MANA] == 290);
+    CHECK(player.maxHealth == 290 && player.health == 140);
     RefreshPlayerLift(&player);
-    assert(player.health == 290 && player.powers[POWER_MANA] == 290);
+    CHECK(player.health == 140);
     player.level = 29;
     RefreshPlayerLift(&player);
-    assert(player.health == 130 && player.powers[POWER_MANA] == 130);
+    CHECK(player.maxHealth == 130 && player.health == 63);
+    CHECK(!player.CustomData.Get<AppliedLift>(LiftKey));
 }

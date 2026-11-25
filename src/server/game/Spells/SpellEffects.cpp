@@ -50,6 +50,7 @@
 #include "OutdoorPvPMgr.h"
 #include "Pet.h"
 #include "Player.h"
+#include "PrismaticSetting.h"
 #include "RBAC.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
@@ -1347,7 +1348,7 @@ void Spell::EffectSchoolDMG(SpellEffIndex effIndex)
                             {
                                 if (AuraEffect* aurEff = owner->GetAuraEffect(SPELL_AURA_ADD_FLAT_MODIFIER, SPELLFAMILY_WARLOCK, 214, 0))
                                 {
-                                    int32 bp0 = aurEff->GetId() == 54037 ? 4 : 8;
+                                    int32 bp0 = sSpellMgr->GetSpellTwinSource(aurEff->GetId()) == 54037 ? 4 : 8;
                                     m_caster->CastCustomSpell(m_caster, 54425, &bp0, nullptr, nullptr, true);
                                 }
                             }
@@ -3942,6 +3943,38 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
         if (!item_owner)
             return;
 
+        bool const addsSetting = m_spellInfo->Id == PrismaticSetting::Spell;
+        bool const replacesSetting = PrismaticSetting::IsApplied(*itemTarget);
+        if (addsSetting)
+        {
+            if (item_owner != p_caster || !PrismaticSetting::IsEligible(*itemTarget->GetTemplate()) ||
+                itemTarget->GetEnchantmentId(PRISMATIC_ENCHANTMENT_SLOT) ||
+                PrismaticSetting::AddedSocket(*itemTarget->GetTemplate()) == MAX_ITEM_PROTO_SOCKETS)
+                return;
+            itemTarget->SetEnchantment(PRISMATIC_ENCHANTMENT_SLOT, enchant_id, 0, 0, m_caster->GetGUID());
+        }
+        else if (replacesSetting)
+        {
+            uint8 const socket = PrismaticSetting::AddedSocket(*itemTarget->GetTemplate());
+            if (item_owner != p_caster || socket == MAX_ITEM_PROTO_SOCKETS)
+                return;
+
+            auto const gemSlot = EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + socket);
+            if (uint32 const gem = itemTarget->GetEnchantmentId(gemSlot))
+            {
+                auto const* enchant = sSpellItemEnchantmentStore.LookupEntry(gem);
+                if (!enchant || !enchant->GemID || !item_owner->AddItem(enchant->GemID, 1))
+                    return;
+                uint8 const slot = itemTarget->IsEquipped() ? itemTarget->GetSlot() : uint8(NULL_SLOT);
+                item_owner->ToggleMetaGemsActive(slot, false);
+                item_owner->ApplyEnchantment(itemTarget, gemSlot, false);
+                itemTarget->ClearEnchantment(gemSlot);
+                item_owner->ToggleMetaGemsActive(slot, true);
+            }
+            item_owner->ApplyEnchantment(itemTarget, PRISMATIC_ENCHANTMENT_SLOT, false);
+            itemTarget->ClearEnchantment(PRISMATIC_ENCHANTMENT_SLOT);
+        }
+
         // remove old enchanting before applying new if equipped
         item_owner->ApplyEnchantment(itemTarget, PERM_ENCHANTMENT_SLOT, false);
 
@@ -3949,6 +3982,8 @@ void Spell::EffectEnchantItemPerm(SpellEffIndex effIndex)
 
         // add new enchanting if equipped
         item_owner->ApplyEnchantment(itemTarget, PERM_ENCHANTMENT_SLOT, true);
+        if (addsSetting || replacesSetting)
+            itemTarget->SendUpdateSockets();
 
         if (item_owner != p_caster && p_caster->GetSession()->HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
         {
@@ -4536,7 +4571,7 @@ void Spell::EffectWeaponDmg(SpellEffIndex effIndex)
             }
         case SPELLFAMILY_PALADIN:
             {
-                switch (m_spellInfo->Id)
+                switch (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 53385 ? 53385 : m_spellInfo->Id)
                 {
                     case 20467: // Seal of Command Unleashed
                         spell_bonus += int32(0.08f * m_caster->GetTotalAttackPowerValue(BASE_ATTACK));

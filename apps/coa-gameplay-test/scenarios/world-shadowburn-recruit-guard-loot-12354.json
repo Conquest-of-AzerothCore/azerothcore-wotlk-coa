@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Shadowburn Recruit and Shadowburn Guard have a loot table",
+  "contract": "The Pale Reach Shadowburn Recruit (164476) and Shadowburn Guard (164489) drop the same level 27-28 humanoid loot as Braicag Ealdir, so their loot templates roll Silk Cloth in about 23% of kills instead of never.",
+  "players": [
+    { "id": "looter", "race": 1, "class": 1, "level": 28 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "Shadowburn Recruit drops Silk Cloth in about 23% of kills",
+      "actor": "looter",
+      "metric": "creature_loot_item_rate",
+      "entry": 164476,
+      "item": 4306,
+      "min": 18,
+      "max": 28
+    },
+    {
+      "action": "assert",
+      "label": "Shadowburn Guard drops Silk Cloth in about 23% of kills",
+      "actor": "looter",
+      "metric": "creature_loot_item_rate",
+      "entry": 164489,
+      "item": 4306,
+      "min": 18,
+      "max": 28
+    }
+  ]
+}

@@ -4,6 +4,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "Log.h"
+#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -45,6 +46,8 @@ enum StormbringerTalentSpells : uint32
     SPELL_CRITICAL_CIRCUIT = 807314,
     SPELL_REFUND_STATIC_10 = 804084,
     SPELL_CONJURATION_MASTERY = 300595,
+    SPELL_EYE_OF_THE_TORNADO = 706297,
+    SPELL_REFUND_STATIC_5 = 804044,
     SPELL_PREDICTABLE_WEATHER_WINDOW = 807481,
     SPELL_LIGHTNING_ROD = 300609,
     SPELL_LIGHTNING_ROD_SPREAD = 300928,
@@ -70,6 +73,8 @@ enum StormbringerTalentSpells : uint32
 
 constexpr int32 ASCENSION_SPELLMOD_BONUS_MULTIPLIER = 41;
 constexpr uint32 CONJURE_STORM_FAMILY_FLAG_TWO = 16;
+constexpr uint32 UPDRAFT_FAMILY_FLAG_ZERO = 8192;
+constexpr uint32 UPDRAFT_FAMILY_FLAG_ONE = 256;
 constexpr uint32 SHOCK_FAMILY_FLAG_ZERO = 2048;
 constexpr uint32 BRINE_FAMILY_FLAG_ONE = 128;
 constexpr uint32 TORRENTIAL_WRATH_FAMILY_FLAG_ONE = 1;
@@ -79,6 +84,12 @@ constexpr uint32 DELUGE_FAMILY_FLAG_ONE = 0x8000;
 bool IsConjureStorm(SpellInfo const* info)
 {
     return info && info->SpellFamilyName == 22 && (info->SpellFamilyFlags[2] & CONJURE_STORM_FAMILY_FLAG_TWO);
+}
+
+bool IsUpdraft(SpellInfo const* info)
+{
+    return info && info->SpellFamilyName == 22 && (info->SpellFamilyFlags[0] & UPDRAFT_FAMILY_FLAG_ZERO) &&
+        (info->SpellFamilyFlags[1] & UPDRAFT_FAMILY_FLAG_ONE);
 }
 
 bool SpendsStatic(uint32 spellId)
@@ -186,7 +197,26 @@ class stormbringer_talent_casts : public AllSpellScript
 {
 public:
     stormbringer_talent_casts() : AllSpellScript("stormbringer_talent_casts",
-        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT}) { }
+        {ALLSPELLHOOK_ON_BEFORE_EFFECTS, ALLSPELLHOOK_ON_CAST, ALLSPELLHOOK_ON_HIT_RESULT,
+            ALLSPELLHOOK_ON_SPELL_CHECK_CAST}) { }
+
+    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    {
+        SpellInfo const* trigger = spell->GetTriggeredByAuraSpellInfo();
+        if (result != SPELL_CAST_OK || spell->GetSpellInfo()->Id != SPELL_REFUND_STATIC_5 || !trigger ||
+            trigger->Id != SPELL_EYE_OF_THE_TORNADO)
+            return;
+        Player* player = spell->GetCaster()->ToPlayer();
+        Spell* spender = player ? player->GetCurrentSpell(CURRENT_GENERIC_SPELL) : nullptr;
+        if (!spender || !SpendsStatic(spender->GetSpellInfo()->Id))
+            return;
+        result = SPELL_FAILED_DONT_REPORT;
+        player->m_Events.AddEventAtOffset([guid = player->GetGUID()]()
+        {
+            if (Player* owner = ObjectAccessor::FindPlayer(guid))
+                owner->CastSpell(owner, SPELL_REFUND_STATIC_5, true);
+        }, Milliseconds(1));
+    }
 
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
@@ -207,7 +237,8 @@ public:
             !spell->IsTriggered())
             player->CastSpell(player, SPELL_RIDE_THE_LIGHTNING_LEAP, true);
 
-        if (player && player->getClass() == CLASS_STORMBRINGER && IsConjureStorm(info) &&
+        if (player && player->getClass() == CLASS_STORMBRINGER &&
+            (IsConjureStorm(info) || IsUpdraft(info)) &&
             !spell->IsTriggered() && player->HasSpell(SPELL_CONJURATION_MASTERY))
             player->CastSpell(player, SPELL_REFUND_STATIC_10, true);
     }
@@ -385,6 +416,44 @@ class spell_ascension_stormbringer_cooldown_reduction : public SpellScript
     void Register() override
     {
         OnEffectHitTarget += SpellEffectFn(spell_ascension_stormbringer_cooldown_reduction::Reduce,
+            EFFECT_ALL, SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN);
+    }
+};
+
+class spell_ascension_stormbringer_waterfall : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_stormbringer_waterfall);
+
+    bool Load() override
+    {
+        return GetCaster()->IsPlayer() && GetCaster()->getClass() == CLASS_STORMBRINGER;
+    }
+
+    void Reduce(SpellEffIndex index)
+    {
+        PreventHitDefaultEffect(index);
+        Player* player = GetHitPlayer();
+        int32 const delta = GetEffectValue();
+        if (index != EFFECT_0 || !player || delta >= 0)
+            return;
+        uint32 const family = GetSpellInfo()->SpellFamilyName;
+        std::vector<uint32> cooldowns;
+        for (auto const& entry : player->GetSpellCooldownMap())
+            if (SpellInfo const* info = sSpellMgr->GetSpellInfo(entry.first))
+                if (info->SpellFamilyName == family)
+                    cooldowns.push_back(entry.first);
+        for (uint32 spell : cooldowns)
+        {
+            if (uint64(-int64(delta)) >= player->GetSpellCooldownDelay(spell))
+                player->RemoveSpellCooldown(spell, true);
+            else
+                player->ModifySpellCooldown(spell, delta);
+        }
+    }
+
+    void Register() override
+    {
+        OnEffectHitTarget += SpellEffectFn(spell_ascension_stormbringer_waterfall::Reduce,
             EFFECT_ALL, SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN);
     }
 };
@@ -662,6 +731,7 @@ void AddSC_AscensionStormbringerTalents()
     new stormbringer_pulse_conversion();
     new stormbringer_resource_contracts();
     RegisterSpellScript(spell_ascension_stormbringer_cooldown_reduction);
+    RegisterSpellScript(spell_ascension_stormbringer_waterfall);
     RegisterSpellScript(spell_ascension_stormbringer_aether_current);
     RegisterSpellScript(aura_ascension_barometric_pressure);
     RegisterSpellScript(aura_ascension_electrical_charge);

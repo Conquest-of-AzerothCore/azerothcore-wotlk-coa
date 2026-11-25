@@ -3,6 +3,7 @@
  */
 
 #include "Creature.h"
+#include "CoADungeonRescale.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "QueryResult.h"
@@ -29,7 +30,7 @@ namespace
 
     int32 TrashCap(Unit const* attacker, SpellInfo const* spellInfo)
     {
-        if (!attacker || !spellInfo || Multipliers.count(spellInfo->Id))
+        if (DungeonRescale::Owns(attacker) || !attacker || !spellInfo || Multipliers.count(spellInfo->Id))
             return 0;
         Creature const* creature = attacker->ToCreature();
         if (!creature || creature->GetCharmerOrOwnerPlayerOrPlayerItself() || creature->IsSummon() || Bosses.count(creature->GetEntry()))
@@ -42,7 +43,7 @@ namespace
 
     float Multiplier(Unit const* attacker, SpellInfo const* spellInfo)
     {
-        if (Multipliers.empty() || !attacker || !spellInfo)
+        if (DungeonRescale::Owns(attacker) || Multipliers.empty() || !attacker || !spellInfo)
             return 1.0f;
         Creature const* creature = attacker->ToCreature();
         if (!creature || creature->GetCharmerOrOwnerPlayerOrPlayerItself())
@@ -56,7 +57,8 @@ namespace
 
     float CreatureMultiplier(Unit const* attacker, SpellInfo const* spellInfo = nullptr)
     {
-        if ((CreatureMultipliers.empty() && CreatureSpellMultipliers.empty()) || !attacker)
+        if (DungeonRescale::Owns(attacker) ||
+            (CreatureMultipliers.empty() && CreatureSpellMultipliers.empty()) || !attacker)
             return 1.0f;
         Creature const* creature = attacker->ToCreature();
         if (!creature || creature->IsControlledByPlayer())

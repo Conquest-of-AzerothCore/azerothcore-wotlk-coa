@@ -1,0 +1,172 @@
+{
+  "schema": 1,
+  "name": "Venomancer Sea Serpent Form shows the Aquatic Form incarnation",
+  "contract": [
+    "Sea Serpent Form 803212 is the Venomancer's Aquatic Form: it is not a shapeshift but a transform to creature 5872 (display 4480), so it carries no form id for AppearanceCategories.dbc field 20/21.",
+    "With the Aquatic Form category (20) open to the Venomancer, a selected Aquatic Form incarnation replaces the serpent model while the form lasts: appearance 47619 = display 48887. The model follows a selection made inside the form and survives logging in again; clearing the selection brings the serpent back and leaving the form restores the character."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "v",
+      "name": "Tidecoil",
+      "race": 1,
+      "class": 29,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 530,
+    "x": -211.237,
+    "y": 4278.54,
+    "z": 86.5678,
+    "o": 4.59776
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "v",
+      "spell": 803212
+    },
+    {
+      "action": "snapshot",
+      "label": "The character's own model",
+      "actor": "v",
+      "metric": "display_id",
+      "save_as": "native"
+    },
+    {
+      "action": "cast",
+      "label": "Sea Serpent Form without a selection",
+      "actor": "v",
+      "spell": 803212
+    },
+    {
+      "action": "assert",
+      "label": "Sea Serpent Form shows the serpent",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 4480,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Select the Aquatic Form incarnation inside the form",
+      "actor": "v",
+      "selection": {
+        "20": 47619
+      }
+    },
+    {
+      "metric": "server_packet_contains",
+      "opcode": 1688,
+      "text": "APPLY_APPEARANCES_OK",
+      "equals": 1,
+      "within_ms": 2000,
+      "action": "assert",
+      "label": "The Aquatic Form incarnation is offered to a Venomancer",
+      "actor": "v"
+    },
+    {
+      "action": "assert",
+      "label": "The serpent takes the incarnation at once",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 48887,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "label": "Past the next Venomancer and cosmetic refresh ticks",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The incarnation is still shown after the refresh ticks",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 48887
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Leave Sea Serpent Form",
+      "actor": "v",
+      "spell": 803212
+    },
+    {
+      "action": "assert",
+      "label": "Leaving the form restores the character",
+      "actor": "v",
+      "metric": "display_id",
+      "relative_to": "native",
+      "equals": 0,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Sea Serpent Form with the selection saved",
+      "actor": "v",
+      "spell": 803212
+    },
+    {
+      "action": "assert",
+      "label": "The saved incarnation is used when the form starts",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 48887,
+      "within_ms": 1000
+    },
+    {
+      "action": "relog",
+      "label": "Log in again inside the form",
+      "actor": "v"
+    },
+    {
+      "action": "assert",
+      "label": "The incarnation is back after logging in again",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 48887,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Past the next Venomancer and cosmetic refresh ticks",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "The incarnation stays after logging in again",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 48887
+    },
+    {
+      "action": "apply_appearances",
+      "label": "Clear the selection inside the form",
+      "actor": "v",
+      "selection": {}
+    },
+    {
+      "action": "assert",
+      "label": "Clearing the selection brings the serpent back",
+      "actor": "v",
+      "metric": "display_id",
+      "equals": 4480,
+      "within_ms": 1000
+    }
+  ]
+}

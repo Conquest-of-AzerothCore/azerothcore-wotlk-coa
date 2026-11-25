@@ -119,7 +119,7 @@ uint32 Acore::XP::Gain(Player* player, Unit* unit, bool isBattleGround /*= false
         // on is fighting their version of this creature, and reward has to follow the fight, or
         // every scaled kill in an old zone is a gray kill and the promise dies.
         ContentLevels const content = GetContentLevelsForMapAndZone(unit->GetMapId(), unit->GetZoneId());
-        gain = BaseGain(playerLevel, unit->getLevelForTarget(player), content);
+        gain = BaseGain(playerLevel, unit->getRewardLevelForTarget(player), content);
 
         if (gain && creature)
         {

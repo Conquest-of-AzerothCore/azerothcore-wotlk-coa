@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Atmospheric Pressure reads as a cancellable self buff and generates Static on damage taken (#10243, #9843)",
-  "contract": "Atmospheric Pressure (803565) is the fourth Stormbringer stance. Unlike Barometric (803563) and Crushing (803564) Pressure, its Spell.dbc row has SPELL_ATTR0_AURA_IS_DEBUFF and SPELL_ATTR5_NO_CASTER_AURA_ICON instead of SPELL_ATTR5_NO_TARGET_AURA_ICON, so the client hid the caster's own aura and never lit the stance button, and the server kept it negative and uncancellable. The contract gives it its siblings' flags and streams the corrected row to the client (SMSG_PATCH_SPELL 2346). Its tooltip also says it makes you 'generate additional Static on damage taken': Effect[1] is PROC_TRIGGER_SPELL 803568 (-> 807945 Add 1 Static) but ProcFlags is 0; a spell_proc row on damage taken lets it fire.",
+  "contract": "Atmospheric Pressure (803565) is the fourth Stormbringer stance. Unlike Barometric (803563) and Crushing (803564) Pressure, its Spell.dbc row has SPELL_ATTR0_AURA_IS_DEBUFF and SPELL_ATTR5_NO_CASTER_AURA_ICON instead of SPELL_ATTR5_NO_TARGET_AURA_ICON, so the client hid the caster's own aura and never lit the stance button, and the server kept it negative and uncancellable. The contract gives it its siblings' flags and the client's spell data carries the corrected row. Its tooltip also says it makes you 'generate additional Static on damage taken': Effect[1] is PROC_TRIGGER_SPELL 803568 (-> 807945 Add 1 Static) but ProcFlags is 0; a spell_proc row on damage taken lets it fire.",
   "timeout_ms": 90000,
   "players": [
     { "id": "storm", "race": 1, "class": 16, "level": 60 }
@@ -11,9 +11,9 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
-    { "action": "assert", "label": "FIX: the corrected Atmospheric Pressure row is streamed to the client",
-      "actor": "storm", "metric": "server_packet_contains", "opcode": 2346, "row": 803565,
-      "text": "Atmospheric Pressure", "equals": 1, "within_ms": 5000 },
+    { "action": "assert", "label": "FIX: the client's Atmospheric Pressure row carries the correction",
+      "actor": "storm", "metric": "client_spell_row_contains", "spell": 803565,
+      "text": "Atmospheric Pressure", "equals": 1 },
 
     { "action": "learn", "actor": "storm", "spell": 803565 },
     { "action": "set_power", "actor": "storm", "value": 1000 },

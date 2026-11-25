@@ -4,6 +4,7 @@
 #define COA_ASCENSION_ITEM_POWER_H
 
 #include "AscensionItemPowerTable.h"
+#include "CoAZoneScaling.h"
 #include "AscensionPvePowerPolicy.h"
 #include "AscensionPvpPowerPolicy.h"
 #include "Item.h"
@@ -17,6 +18,8 @@ constexpr uint32 EquippedCap = 495;
 
 [[nodiscard]] inline uint32 OfItem(ItemTemplate const* proto, bool pvp)
 {
+    if (std::optional<uint32> const power = ZoneScaling::ItemPower(proto->ItemId, pvp))
+        return *power;
     ItemPowerTable::Table const& table = ItemPowerTable::Loaded();
     if (uint32 const authored = pvp ? table.Pvp(proto->ItemId) : table.Pve(proto->ItemId))
         return authored;

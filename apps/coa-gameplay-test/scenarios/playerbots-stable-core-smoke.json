@@ -1,0 +1,133 @@
+{
+  "schema": 1,
+  "name": "Playerbots AI attaches and detaches on the stable CoA core",
+  "contract": [
+    "With the CoA Playerbots and Dungeon Clear modules enabled, a GM can attach real PlayerbotAI to a Felsworn through the self-bot command, use Dungeon Clear configuration commands, and detach it cleanly. A separate mage fixture casts a learned spell while real PlayerbotAI is attached and then detaches it.",
+    "This is an initialization and command integration check. It does not prove autonomous rotations, movement, remote bot login, or completion of a dungeon."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 14,
+      "level": 60,
+      "security": 3,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 8,
+      "level": 60,
+      "security": 3,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "target",
+      "owner": "caster",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".playerbots bot self"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "Enable player botAI",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".dc config"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "DungeonClear config (effective values",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "hero",
+      "command": ".playerbots bot self"
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "metric": "system_message_contains",
+      "text": "Disable player botAI",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".playerbots bot self"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "system_message_contains",
+      "text": "Enable player botAI",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 116
+    },
+    {
+      "action": "snapshot",
+      "actor": "target",
+      "metric": "health",
+      "save_as": "before_cast"
+    },
+    {
+      "action": "cast",
+      "actor": "caster",
+      "spell": 116,
+      "target": "target"
+    },
+    {
+      "action": "assert",
+      "actor": "target",
+      "metric": "health",
+      "relative_to": "before_cast",
+      "max": -1,
+      "within_ms": 5000
+    },
+    {
+      "action": "command",
+      "actor": "caster",
+      "command": ".playerbots bot self"
+    },
+    {
+      "action": "assert",
+      "actor": "caster",
+      "metric": "system_message_contains",
+      "text": "Disable player botAI",
+      "equals": 1,
+      "within_ms": 5000
+    }
+  ]
+}

@@ -5,7 +5,7 @@
     "Critical Rylak, Wildclaw and pet Primal Shred grant the specified owner/pet buffs; talent removal stops",
     "procs. Leokk Fury 560974 effect 0 and pet effect 1 grant 2% melee attack speed per stack; compare actual",
     "owner and pet attack periods, rather than haste rating. The owner's active amount is effect 0 and the",
-    "pet's is effect 1. The streamed buff tooltip must sum $w1 and $w2 so either application displays its",
+    "pet's is effect 1. The client's buff tooltip must sum $w1 and $w2 so either application displays its",
     "own attack speed increase; the inactive effect contributes zero. Preserve the original description."
   ],
   "timeout_ms": 120000,
@@ -327,22 +327,19 @@
     },
     {
       "action": "assert",
-      "label": "The streamed Leokk tooltip reads the active owner or pet effect",
+      "label": "The client's Leokk tooltip reads the active owner or pet effect",
       "actor": "primalist",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 560974,
+      "metric": "client_spell_row_contains",
+      "spell": 560974,
       "text": "Attack speed increased by ${$w1+$w2}%.",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "The spell patch preserves Leokk's original description",
+      "label": "The client row preserves Leokk's original description",
       "actor": "primalist",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 560974,
+      "metric": "client_spell_row_contains",
+      "spell": 560974,
       "text": "Imbues you with the spirit of Leokk increasing melee attack speed by $s1%, stacks up to $u times.",
       "equals": 1
     },

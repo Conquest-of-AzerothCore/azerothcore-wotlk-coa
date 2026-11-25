@@ -1,0 +1,443 @@
+{
+  "schema": 1,
+  "name": "Level 60 battlegrounds pay Battleground Spoils and the first win of the day 500 arena points",
+  "contract": "With Call to Arms off, one Alliance and one Horde level 60 player finish Warsong Gulch twice on the same day, Alliance winning both. The winner is paid Classic Battleground 60 (Win): Battleground Spoils (Win) 1175640 and 1000 of 375250, with 500 arena points for the first win of the day and 200 for the next. The loser is paid Classic Battleground 60 (Loss): Battleground Spoils (Loss) 1675640, 400 of 375250 and 100 arena points for each loss.",
+  "timeout_ms": 600000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "alliance",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "horde",
+      "race": 2,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "game_event",
+      "event": 19,
+      "active": false
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "alliance"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "alliance enters Warsong Gulch",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "horde"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "horde enters Warsong Gulch",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The match leaves preparation",
+      "actor": "alliance",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "end_battleground",
+      "label": "Alliance wins the first match of the day",
+      "actor": "alliance",
+      "winner": "alliance"
+    },
+    {
+      "action": "assert",
+      "label": "The winner gets Battleground Spoils (Win)",
+      "actor": "alliance",
+      "metric": "item_count",
+      "item": 1175640,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The winner gets 1000 of currency 375250",
+      "actor": "alliance",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 1000,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The first win of the day pays 500 arena points",
+      "actor": "alliance",
+      "metric": "arena_points",
+      "equals": 500,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The loser gets Battleground Spoils (Loss)",
+      "actor": "horde",
+      "metric": "item_count",
+      "item": 1675640,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The loser gets 400 of currency 375250",
+      "actor": "horde",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 400,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The loser gets 100 arena points",
+      "actor": "horde",
+      "metric": "arena_points",
+      "equals": 100,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "alliance leaves the finished battleground",
+      "actor": "alliance",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "horde leaves the finished battleground",
+      "actor": "horde",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "alliance is back outside",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "horde is back outside",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "alliance",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "alliance"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "alliance enters Warsong Gulch",
+      "actor": "alliance",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "horde",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "horde"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "horde enters Warsong Gulch",
+      "actor": "horde",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The match leaves preparation",
+      "actor": "alliance",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "end_battleground",
+      "label": "Alliance wins a second match the same day",
+      "actor": "alliance",
+      "winner": "alliance"
+    },
+    {
+      "action": "assert",
+      "label": "The second win pays another Battleground Spoils (Win)",
+      "actor": "alliance",
+      "metric": "item_count",
+      "item": 1175640,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The second win of the day adds 200 arena points",
+      "actor": "alliance",
+      "metric": "arena_points",
+      "equals": 700,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The second loss pays another Battleground Spoils (Loss)",
+      "actor": "horde",
+      "metric": "item_count",
+      "item": 1675640,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The second loss adds 100 arena points",
+      "actor": "horde",
+      "metric": "arena_points",
+      "equals": 200,
+      "within_ms": 5000
+    }
+  ]
+}

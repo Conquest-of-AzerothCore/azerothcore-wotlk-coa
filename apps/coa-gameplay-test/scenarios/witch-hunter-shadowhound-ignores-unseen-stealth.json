@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "The Shadowhound only hunts a stealthed player its Witch Hunter detects",
+  "contract": [
+    "Pets use their owner's stealth detection, but a unit in combat with a stealthed player ignores the stealth, so a Shadowhound fighting a player kept chasing them after they stealthed.",
+    "The hounds now hunt a stealthed player only while their Witch Hunter detects them. The Shadowhound fights a PvP-flagged player thirty yards from its owner. When the player enters Stealth 1787",
+    "and the owner cannot detect them, the hound drops them at once (before the fix it kept them as its victim). With Invisibility and Stealth Detection 18950 (aura 17, +100000) on the owner, it keeps them."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "hunter", "race": 1, "class": 15, "level": 60 },
+    { "id": "rogue", "race": 2, "class": 4, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and class synchronisation settle", "ms": 4000 },
+    { "action": "teleport", "actor": "hunter", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "rogue", "map": 0, "x": -9587.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "pvp", "actor": "hunter", "enabled": true },
+    { "action": "pvp", "actor": "rogue", "enabled": true },
+    { "action": "set_health", "actor": "rogue", "maximum": 1000000, "value": 1000000 },
+    { "action": "learn", "actor": "hunter", "spell": 801343 },
+    { "action": "cast", "actor": "hunter", "spell": 801343 },
+    { "action": "assert", "label": "SETUP: the Shadowhound is out", "actor": "hunter", "metric": "pet_entry", "equals": 50124, "within_ms": 15000 },
+    { "action": "attack", "label": "Send the Shadowhound at the player", "actor": "hunter", "target": "rogue", "pet": true },
+    {
+      "action": "assert", "label": "SETUP: the Shadowhound fights the player", "actor": "hunter",
+      "metric": "owned_creature_victim", "entry": 50124, "target": "rogue", "equals": 1, "within_ms": 8000
+    },
+    { "action": "wait", "label": "Let the fight run", "ms": 3000 },
+    { "action": "set_aura", "label": "The player stealths mid-fight", "actor": "rogue", "spell": 1787, "stacks": 1 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the owner cannot detect the player, so the Shadowhound drops them",
+      "actor": "hunter", "metric": "owned_creature_victim", "entry": 50124, "target": "rogue", "equals": 0,
+      "within_ms": 1000
+    },
+    { "action": "set_aura", "actor": "rogue", "spell": 1787, "stacks": 0 },
+    { "action": "set_aura", "label": "Fixture: the Witch Hunter detects stealth", "actor": "hunter", "spell": 18950, "stacks": 1 },
+    { "action": "attack", "label": "Send the Shadowhound at the player again", "actor": "hunter", "target": "rogue", "pet": true },
+    {
+      "action": "assert", "label": "SETUP: the Shadowhound fights the player again", "actor": "hunter",
+      "metric": "owned_creature_victim", "entry": 50124, "target": "rogue", "equals": 1, "within_ms": 8000
+    },
+    { "action": "set_aura", "label": "The player stealths again", "actor": "rogue", "spell": 1787, "stacks": 1 },
+    { "action": "wait", "label": "Give the hound time to drop a target it may not hunt", "ms": 1000 },
+    {
+      "action": "assert", "label": "The owner detects the stealthed player, so the Shadowhound keeps them",
+      "actor": "hunter", "metric": "owned_creature_victim", "entry": 50124, "target": "rogue", "equals": 1
+    }
+  ]
+}

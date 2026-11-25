@@ -1,0 +1,173 @@
+{
+ "schema": 1,
+ "name": "Wisdomball Q10 Hold the Anchors: Khadgar attacks the ambush the moment it appears (Pitho 2026-11-19)",
+ "contract": [
+  "At route point 25 escort Khadgar 9417004 stops and his actionlist summons two Gloomhorn Prowlers 9417021 ahead; they",
+  "attack the closest player. Khadgar attacks every creature he summons while escorting (SUMMONED_UNIT -> ATTACK_START)",
+  "and opens with Arcane Blast 30451 (2.5 s cast) at once.",
+  "DISCRIMINATING: the player never attacks; a Khadgar Arcane Blast hit is seen within 4 s of the ambush appearing (creature health % is not usable: level scaling moves it right after the summon). Before, Khadgar only",
+  "joined once a Prowler reached the player and waited 2-3 s more, so the first hit came after about 6-7 s."
+ ],
+ "timeout_ms": 150000,
+ "location": {
+  "map": 0,
+  "x": -8996.0,
+  "y": 853.5,
+  "z": 29.62,
+  "o": 3.8
+ },
+ "players": [
+  {
+   "id": "p",
+   "race": 1,
+   "class": 1,
+   "level": 60,
+   "security": 2
+  }
+ ],
+ "steps": [
+  {
+   "action": "set_phase",
+   "label": "world phase 1",
+   "actor": "p",
+   "value": 1
+  },
+  {
+   "action": "prepare_quest",
+   "label": "SETUP: Hold the Anchors (Q10) in progress",
+   "actor": "p",
+   "quest": 9417110,
+   "complete": false
+  },
+  {
+   "action": "teleport",
+   "label": "to the crater camp next to escort Khadgar",
+   "actor": "p",
+   "map": 4418,
+   "x": 321.0,
+   "y": 266.0,
+   "z": 53.3,
+   "o": 4.7,
+   "ignore_access": true
+  },
+  {
+   "action": "assert",
+   "label": "on map 4418",
+   "actor": "p",
+   "metric": "map_id",
+   "equals": 4418,
+   "within_ms": 15000
+  },
+  {
+   "action": "wait",
+   "ms": 4000
+  },
+  {
+   "action": "command",
+   "label": "the player cannot die (it never attacks back)",
+   "actor": "p",
+   "command": ".cheat god on"
+  },
+  {
+   "action": "gossip_hello",
+   "label": "talk to escort Khadgar",
+   "actor": "p",
+   "entry": 9417004
+  },
+  {
+   "action": "gossip_select",
+   "label": "I am ready - lead the way.",
+   "actor": "p",
+   "option": 0
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "teleport",
+   "label": "follow (point 8)",
+   "actor": "p",
+   "map": 4418,
+   "x": 333.3,
+   "y": 231.4,
+   "z": 42.5,
+   "o": 5.5
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "teleport",
+   "label": "follow (point 12)",
+   "actor": "p",
+   "map": 4418,
+   "x": 348.3,
+   "y": 219.5,
+   "z": 43.3,
+   "o": 0.2
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "teleport",
+   "label": "follow (point 16)",
+   "actor": "p",
+   "map": 4418,
+   "x": 359.8,
+   "y": 219.9,
+   "z": 42.1,
+   "o": 0.5
+  },
+  {
+   "action": "wait",
+   "ms": 3000
+  },
+  {
+   "action": "teleport",
+   "label": "follow (point 20)",
+   "actor": "p",
+   "map": 4418,
+   "x": 373.3,
+   "y": 228.2,
+   "z": 41.7,
+   "o": 1.0
+  },
+  {
+   "action": "wait",
+   "ms": 2000
+  },
+  {
+   "action": "teleport",
+   "label": "stand at the first ambush stop (point 24)",
+   "actor": "p",
+   "map": 4418,
+   "x": 378.9,
+   "y": 237.3,
+   "z": 40.1,
+   "o": 1.8
+  },
+  {
+   "action": "assert",
+   "label": "the first ambush appeared",
+   "actor": "p",
+   "metric": "nearby_creature_count",
+   "entry": 9417021,
+   "min": 1,
+   "within_ms": 15000
+  },
+  {
+   "action": "assert",
+   "label": "DISCRIMINATING: Khadgar's Arcane Blast hit within 4 s of the ambush appearing",
+   "actor": "p",
+   "metric": "spell_damage_count",
+   "spell": 30451,
+   "caster_entry": 9417004,
+   "min": 1,
+   "within_ms": 4000
+  }
+ ]
+}

@@ -19,9 +19,16 @@ references below.
 `.agents/skills/coa-development/SKILL.md` is the repository's development skill: task routing, the issue queue
 workflow, gameplay scenarios, PR descriptions, the CoA Knowledge MCP and the optional guide tooling.
 
+- Raid conversions and rescaling → `.agents/skills/coa-raid-rescaling/SKILL.md`
+- Outdoor zone conversions and rescaling → `.agents/skills/coa-zone-rescaling/SKILL.md`
+- Five-player dungeon conversions by zone → `.agents/skills/coa-dungeon-rescale/SKILL.md`
+
 ## Task references
 
 Read the relevant sections when needed for the work. Do not read every guide or turn examples into extra tasks.
+
+- Updating this realm to the latest stable release → `docs/coa/realm-stable-upgrade.md`, especially
+  "Normal workflow for realm release updates". Use custom release branches; do not deploy from development `main`.
 
 - CMake configuration/build → `.agents/docs/build.md`
 - Verification setup, stages, selection, outputs and gameplay queue-mode limits → `docs/coa/verification.md`
@@ -81,8 +88,9 @@ External modules live in `modules/`, each with its sources in `src/`. Disable on
 
 In this fork, CoA is a required server component in `src/server/coa/`, with focused tests in
 `apps/coa-tests/`. `modules/mod-ascension/data/sql/` keeps its historical SQL migrations only.
-`origin` is the CoA fork; `upstream` is the original AzerothCore
-repository. Fetching upstream is separate from reviewing, merging, building or deploying its changes.
+For this realm, `origin` is `prosbloom225/azerothcore-wotlk-coa`; `upstream` is
+`Conquest-of-AzerothCore/azerothcore-wotlk-coa`. The `zyth45` remote preserves access to the old core fork.
+Fetching upstream is separate from reviewing, merging, building or deploying its changes.
 
 ## Maintaining guidance
 

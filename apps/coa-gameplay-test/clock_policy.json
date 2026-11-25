@@ -34,6 +34,9 @@
     "battleground-wide-bracket-group-boundary": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "battleground-wide-bracket-catch-up": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
     "battleground-wide-bracket-pet-catch-up": "Joins the process-global Warsong Gulch queue, which would match players of other running cases",
-    "mercenary-wintergrasp-team-faction": "Starts and stops the process-global Wintergrasp battle that every player in the zone takes part in"
+    "mercenary-wintergrasp-team-faction": "Starts and stops the process-global Wintergrasp battle that every player in the zone takes part in",
+    "crows-cache-mercenary-wall-12720": "Starts the process-global Crow's Cache event, whose next start removes an unclaimed chest of another running case",
+    "crows-cache-carrier-cannot-hide-12720": "Starts the process-global Crow's Cache event, whose next start removes an unclaimed chest of another running case",
+    "crows-cache-carrier-drops-12720": "Starts the process-global Crow's Cache event, whose next start removes an unclaimed chest of another running case"
   }
 }

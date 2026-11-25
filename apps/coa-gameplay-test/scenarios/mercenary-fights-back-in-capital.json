@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: a Mercenary can fight back a ruleset player who attacked it in a capital",
+  "contract": [
+    "A Mercenary's client sees a same-faction High-Risk or War Mode player as friendly unless that player carries the free-for-all PvP flag, which the server patches in only outside no-PvP areas, and capitals are no-PvP areas.",
+    "Inside a capital the ruleset player could therefore attack the Mercenary while the Mercenary could not attack back. Two Orcs pick High-Risk at the Orgrimmar gate and one takes up Mercenary for Hire!.",
+    "Before any fight the Mercenary is not sent the other Orc's free-for-all flag. Once that Orc attacks, the Mercenary is sent the Orc with the hostile Mercenary faction 1163 while they are in combat, the server lets the Mercenary attack back and its swings land. The hostile view lasts until the Orc leaves combat altogether: once the first Mercenary's fight has ended while a second Mercenary keeps the Orc in combat, the Orc's attack on that second Mercenary resends its faction to every viewer, and both Mercenaries are sent the hostile faction. When the Orc leaves combat, its own faction is sent again."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "mercenary", "race": 2, "class": 1, "level": 60 },
+    { "id": "highrisk", "race": 2, "class": 1, "level": 60 },
+    { "id": "mercenary2", "race": 2, "class": 1, "level": 60 }
+  ],
+  "location": { "map": 1, "x": 1406.44, "y": -4378.1, "z": 25.5624, "o": 3.0 },
+  "steps": [
+    { "action": "wait", "label": "Let login scripts settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: the Orgrimmar gate lets both characters rest", "actor": "mercenary", "metric": "resting", "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "actor": "highrisk", "spell": 84421 },
+    { "action": "assert", "label": "SETUP: one character is in High-Risk", "actor": "highrisk", "metric": "aura", "spell": 1004019, "equals": 1, "within_ms": 3000 },
+    { "action": "cast", "actor": "mercenary", "spell": 84421 },
+    { "action": "assert", "label": "SETUP: the other is in High-Risk too", "actor": "mercenary", "metric": "aura", "spell": 1004019, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Let the ruleset spell's global cooldown pass", "ms": 2000 },
+    { "action": "cast", "actor": "mercenary", "spell": 9930874 },
+    { "action": "assert", "label": "SETUP: and takes up Mercenary for Hire! in Orgrimmar", "actor": "mercenary", "metric": "aura", "spell": 9930874, "equals": 1, "within_ms": 15000 },
+    { "action": "cast", "actor": "mercenary2", "spell": 84421 },
+    { "action": "assert", "label": "SETUP: a second Orc is in High-Risk", "actor": "mercenary2", "metric": "aura", "spell": 1004019, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Let its global cooldown pass", "ms": 2000 },
+    { "action": "cast", "actor": "mercenary2", "spell": 9930874 },
+    { "action": "assert", "label": "SETUP: and is a Mercenary too", "actor": "mercenary2", "metric": "aura", "spell": 9930874, "equals": 1, "within_ms": 15000 },
+    { "action": "set_health", "actor": "mercenary2", "maximum": 1000000, "value": 1000000 },
+    { "action": "set_health", "actor": "mercenary", "maximum": 1000000, "value": 1000000 },
+    { "action": "set_health", "actor": "highrisk", "maximum": 1000000, "value": 1000000 },
+    { "action": "assert", "label": "SETUP: before any fight the Mercenary is not sent the High-Risk Orc with free-for-all PvP", "actor": "mercenary", "metric": "sent_free_for_all_pvp", "target": "highrisk", "equals": 0 },
+    { "action": "assert", "label": "SETUP: the High-Risk Orc can attack the Mercenary", "actor": "highrisk", "metric": "can_attack", "target": "mercenary", "equals": 1 },
+    { "action": "attack", "label": "The High-Risk Orc attacks the Mercenary in Orgrimmar", "actor": "highrisk", "target": "mercenary" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Mercenary is sent its attacker with the hostile Mercenary faction",
+      "actor": "mercenary", "metric": "sent_faction", "target": "highrisk", "equals": 1163, "within_ms": 5000
+    },
+    { "action": "assert", "label": "The server lets the Mercenary attack back", "actor": "mercenary", "metric": "can_attack", "target": "highrisk", "equals": 1 },
+    { "action": "snapshot", "actor": "mercenary", "metric": "melee_attack_count", "save_as": "mercenary_swings" },
+    { "action": "attack", "label": "The Mercenary fights back", "actor": "mercenary", "target": "highrisk" },
+    {
+      "action": "assert", "label": "The Mercenary's swings go out", "actor": "mercenary",
+      "metric": "melee_attack_count", "relative_to": "mercenary_swings", "min": 1, "within_ms": 6000
+    },
+    { "action": "stop_attack", "actor": "mercenary" },
+    { "action": "attack", "label": "The second Mercenary attacks the Orc and keeps it in combat", "actor": "mercenary2", "target": "highrisk" },
+    { "action": "stop_attack", "label": "The Orc stops hitting the first Mercenary", "actor": "highrisk" },
+    {
+      "action": "assert", "label": "SETUP: the first Mercenary's combat with the Orc ends", "actor": "mercenary",
+      "metric": "combat", "equals": 0, "within_ms": 20000
+    },
+    { "action": "assert", "label": "SETUP: while the Orc is still in combat", "actor": "highrisk", "metric": "combat", "equals": 1 },
+    { "action": "attack", "label": "The Orc attacks a second Mercenary, which resends its faction to every viewer", "actor": "highrisk", "target": "mercenary2" },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the second Mercenary is sent the attacker with the hostile faction too",
+      "actor": "mercenary2", "metric": "sent_faction", "target": "highrisk", "equals": 1163, "within_ms": 5000
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the resend keeps the hostile faction for the first Mercenary, whose own fight has ended",
+      "actor": "mercenary", "metric": "sent_faction", "target": "highrisk", "equals": 1163
+    },
+    { "action": "stop_attack", "actor": "highrisk" },
+    { "action": "stop_attack", "actor": "mercenary2" },
+    { "action": "die", "label": "The Orc dies and leaves combat", "actor": "highrisk" },
+    {
+      "action": "assert", "label": "Once the Orc is out of combat the Mercenary is sent its own faction again", "actor": "mercenary",
+      "metric": "sent_faction", "target": "highrisk", "equals": 2, "within_ms": 10000
+    }
+  ]
+}

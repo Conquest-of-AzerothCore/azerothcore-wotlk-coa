@@ -1,0 +1,146 @@
+{
+  "schema": 2,
+  "name": "Hellfire outdoor scaling: quest summons, pets and zone exclusion",
+  "contract": [
+    "Use the real outdoor Hellfire map, not a scripted private instance.",
+    "Both unowned enemies and player-triggered quest enemies receive the outdoor budget. Actual tamed pets and another outdoor zone do not.",
+    "The fixture uses administrator security only for the pet-taming command; it does not measure combat tuning."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 530,
+    "x": -795.034,
+    "y": 2360.13,
+    "z": 12.0403
+  },
+  "players": [
+    {
+      "id": "tester",
+      "race": 1,
+      "class": 18,
+      "level": 60,
+      "security": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "tester",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "tester",
+      "maximum": 2000000000,
+      "value": 2000000000
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "private_instance",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "tester",
+      "as": "wild",
+      "entry": 16972,
+      "distance": 8,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "level",
+      "equals": 60
+    },
+    {
+      "action": "assert",
+      "actor": "wild",
+      "metric": "max_health",
+      "equals": 106410
+    },
+    {
+      "action": "summon",
+      "actor": "tester",
+      "as": "quest_enemy",
+      "entry": 16972,
+      "distance": 12
+    },
+    {
+      "action": "assert",
+      "actor": "quest_enemy",
+      "metric": "max_health",
+      "equals": 106410
+    },
+    {
+      "action": "select",
+      "actor": "tester",
+      "target": "wild"
+    },
+    {
+      "action": "command",
+      "actor": "tester",
+      "command": ".npc tame"
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "pet_entry",
+      "equals": 16972
+    },
+    {
+      "action": "assert",
+      "actor": "tester",
+      "metric": "pet_max_health",
+      "max": 99999
+    },
+    {
+      "action": "summon",
+      "actor": "tester",
+      "as": "boss",
+      "entry": 18728,
+      "distance": 20,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "boss",
+      "metric": "level",
+      "equals": 63
+    },
+    {
+      "action": "assert",
+      "actor": "boss",
+      "metric": "max_health",
+      "equals": 3600000
+    },
+    {
+      "action": "teleport",
+      "actor": "tester",
+      "map": 0,
+      "x": 2296.01,
+      "y": -5340.98,
+      "z": 90.8799,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "summon",
+      "actor": "tester",
+      "as": "outside",
+      "entry": 16972,
+      "distance": 8,
+      "unowned": true
+    },
+    {
+      "action": "assert",
+      "actor": "outside",
+      "metric": "max_health",
+      "max": 99999
+    }
+  ]
+}

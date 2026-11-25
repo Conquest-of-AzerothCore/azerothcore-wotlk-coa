@@ -1,0 +1,3580 @@
+Item ID	Item name	Field	Before	After
+10488	Dreadborne Breastplate	ItemLevel	86	88
+10488	Dreadborne Breastplate	armor	846	866
+10488	Dreadborne Breastplate	stat_value1	31	32
+10488	Dreadborne Breastplate	stat_value2	29	30
+10489	Dreadborne Legplates	ItemLevel	86	88
+10489	Dreadborne Legplates	armor	742	759
+10489	Dreadborne Legplates	stat_value1	34	35
+10489	Dreadborne Legplates	stat_value2	27	28
+10490	Dreadborne Helmet	ItemLevel	86	88
+10490	Dreadborne Helmet	armor	688	704
+10490	Dreadborne Helmet	stat_value1	28	29
+10490	Dreadborne Helmet	stat_value2	27	28
+10491	Dreadborne Pauldrons	ItemLevel	86	88
+10491	Dreadborne Pauldrons	armor	636	651
+10491	Dreadborne Pauldrons	stat_value1	28	29
+10491	Dreadborne Pauldrons	stat_value2	24	25
+10492	Dreadborne Sabatons	ItemLevel	86	88
+10492	Dreadborne Sabatons	armor	584	598
+10492	Dreadborne Sabatons	stat_value1	24	25
+10492	Dreadborne Sabatons	stat_value2	22	23
+10493	Dreadborne Gauntlets	ItemLevel	86	88
+10493	Dreadborne Gauntlets	armor	533	545
+10493	Dreadborne Gauntlets	stat_value1	23	24
+10494	Dreadborne Waistguard	ItemLevel	86	88
+10494	Dreadborne Waistguard	armor	478	489
+10494	Dreadborne Waistguard	stat_value1	28	29
+10495	Dreadborne Bracers	ItemLevel	86	88
+10495	Dreadborne Bracers	armor	371	380
+10519	Earthshatter Crown	ItemLevel	86	88
+10519	Earthshatter Crown	armor	543	556
+10519	Earthshatter Crown	stat_value1	23	24
+10519	Earthshatter Crown	stat_value2	23	24
+10519	Earthshatter Crown	stat_value5	29	30
+10520	Earthshatter Epaulets	ItemLevel	86	88
+10520	Earthshatter Epaulets	armor	502	514
+10520	Earthshatter Epaulets	stat_value1	23	24
+10520	Earthshatter Epaulets	stat_value2	22	23
+10520	Earthshatter Epaulets	stat_value5	30	31
+10729	Earthshatter Breastplate	ItemLevel	86	88
+10729	Earthshatter Breastplate	armor	668	684
+10729	Earthshatter Breastplate	stat_value1	26	27
+10729	Earthshatter Breastplate	stat_value2	23	24
+10729	Earthshatter Breastplate	stat_value5	26	27
+10729	Earthshatter Breastplate	stat_value6	36	37
+10730	Earthshatter Bracers	ItemLevel	86	88
+10730	Earthshatter Bracers	armor	293	300
+10730	Earthshatter Bracers	stat_value4	23	24
+10731	Earthshatter Gauntlets	ItemLevel	86	88
+10731	Earthshatter Gauntlets	armor	421	431
+10731	Earthshatter Gauntlets	stat_value1	24	25
+10731	Earthshatter Gauntlets	stat_value4	29	30
+10809	Earthshatter Belt	ItemLevel	86	88
+10809	Earthshatter Belt	armor	377	386
+10809	Earthshatter Belt	stat_value1	24	25
+10809	Earthshatter Belt	stat_value4	34	35
+10848	Earthshatter Legplates	ItemLevel	86	88
+10848	Earthshatter Legplates	armor	586	600
+10848	Earthshatter Legplates	stat_value1	28	29
+10848	Earthshatter Legplates	stat_value2	25	26
+10848	Earthshatter Legplates	stat_value5	34	35
+10859	Earthshatter Greaves	ItemLevel	86	88
+10859	Earthshatter Greaves	armor	461	472
+10859	Earthshatter Greaves	stat_value1	22	23
+10859	Earthshatter Greaves	stat_value4	34	35
+13566	Frozen Vrykul Armguards	ItemLevel	86	88
+13566	Frozen Vrykul Armguards	armor	293	300
+13566	Frozen Vrykul Armguards	stat_value3	29	30
+13567	Frozen Vrykul Hauberk	ItemLevel	86	88
+13567	Frozen Vrykul Hauberk	armor	668	684
+13567	Frozen Vrykul Hauberk	stat_value1	25	26
+13567	Frozen Vrykul Hauberk	stat_value2	22	23
+13567	Frozen Vrykul Hauberk	stat_value3	35	36
+13567	Frozen Vrykul Hauberk	stat_value7	33	34
+13568	Frozen Vrykul Greaves	ItemLevel	86	88
+13568	Frozen Vrykul Greaves	armor	586	600
+13568	Frozen Vrykul Greaves	stat_value1	33	34
+13568	Frozen Vrykul Greaves	stat_value2	26	27
+13568	Frozen Vrykul Greaves	stat_value3	36	37
+13568	Frozen Vrykul Greaves	stat_value4	24	25
+13568	Frozen Vrykul Greaves	stat_value5	27	28
+13568	Frozen Vrykul Greaves	stat_value6	36	37
+13569	Frozen Vrykul Gloves	ItemLevel	86	88
+13569	Frozen Vrykul Gloves	armor	421	431
+13569	Frozen Vrykul Gloves	stat_value1	23	24
+13569	Frozen Vrykul Gloves	stat_value3	28	29
+13570	Frozen Vrykul Boots	ItemLevel	86	88
+13570	Frozen Vrykul Boots	armor	461	472
+13570	Frozen Vrykul Boots	stat_value1	22	23
+13570	Frozen Vrykul Boots	stat_value3	33	34
+13570	Frozen Vrykul Boots	stat_value5	22	23
+13571	Frozen Vrykul Helm	ItemLevel	86	88
+13571	Frozen Vrykul Helm	armor	543	556
+13571	Frozen Vrykul Helm	stat_value1	24	25
+13571	Frozen Vrykul Helm	stat_value3	38	39
+13633	Frozen Vrykul Girdle	ItemLevel	86	88
+13633	Frozen Vrykul Girdle	armor	377	386
+13633	Frozen Vrykul Girdle	stat_value1	24	25
+13633	Frozen Vrykul Girdle	stat_value3	28	29
+13633	Frozen Vrykul Girdle	stat_value5	22	23
+13634	Frozen Vrykul Spaulders	ItemLevel	86	88
+13634	Frozen Vrykul Spaulders	armor	502	514
+13634	Frozen Vrykul Spaulders	stat_value1	22	23
+13634	Frozen Vrykul Spaulders	stat_value3	31	32
+13634	Frozen Vrykul Spaulders	stat_value5	22	23
+22416	Dreadnaught Breastplate	ItemLevel	86	88
+22416	Dreadnaught Breastplate	armor	846	866
+22416	Dreadnaught Breastplate	stat_value2	38	39
+22416	Dreadnaught Breastplate	stat_value6	28	29
+22417	Dreadnaught Legplates	ItemLevel	86	88
+22417	Dreadnaught Legplates	armor	742	759
+22417	Dreadnaught Legplates	stat_value1	23	24
+22417	Dreadnaught Legplates	stat_value2	37	38
+22418	Dreadnaught Helmet	ItemLevel	86	88
+22418	Dreadnaught Helmet	armor	688	704
+22418	Dreadnaught Helmet	stat_value1	45	46
+22419	Dreadnaught Pauldrons	ItemLevel	86	88
+22419	Dreadnaught Pauldrons	armor	636	651
+22419	Dreadnaught Pauldrons	stat_value2	28	29
+22419	Dreadnaught Pauldrons	stat_value6	26	27
+22420	Dreadnaught Sabatons	ItemLevel	86	88
+22420	Dreadnaught Sabatons	armor	584	598
+22420	Dreadnaught Sabatons	stat_value2	34	35
+22421	Dreadnaught Gauntlets	ItemLevel	86	88
+22421	Dreadnaught Gauntlets	armor	533	545
+22421	Dreadnaught Gauntlets	stat_value2	24	25
+22421	Dreadnaught Gauntlets	stat_value5	35	36
+22422	Dreadnaught Waistguard	ItemLevel	86	88
+22422	Dreadnaught Waistguard	armor	478	489
+22422	Dreadnaught Waistguard	stat_value2	26	27
+22423	Dreadnaught Bracers	ItemLevel	86	88
+22423	Dreadnaught Bracers	armor	371	380
+22423	Dreadnaught Bracers	stat_value2	28	29
+22424	Redemption Wristguards	ItemLevel	86	88
+22424	Redemption Wristguards	armor	371	380
+22424	Redemption Wristguards	stat_value2	22	23
+22424	Redemption Wristguards	stat_value5	28	29
+22425	Redemption Tunic	ItemLevel	86	88
+22425	Redemption Tunic	armor	846	866
+22425	Redemption Tunic	stat_value1	25	26
+22425	Redemption Tunic	stat_value2	33	34
+22425	Redemption Tunic	stat_value3	28	29
+22425	Redemption Tunic	stat_value4	32	33
+22426	Redemption Handguards	ItemLevel	86	88
+22426	Redemption Handguards	armor	533	545
+22426	Redemption Handguards	stat_value1	24	25
+22426	Redemption Handguards	stat_value2	23	24
+22426	Redemption Handguards	stat_value4	33	34
+22427	Redemption Legguards	ItemLevel	86	88
+22427	Redemption Legguards	armor	742	759
+22427	Redemption Legguards	stat_value1	33	34
+22427	Redemption Legguards	stat_value2	28	29
+22427	Redemption Legguards	stat_value3	25	26
+22427	Redemption Legguards	stat_value5	38	39
+22428	Redemption Headpiece	ItemLevel	86	88
+22428	Redemption Headpiece	armor	688	704
+22428	Redemption Headpiece	stat_value1	32	33
+22428	Redemption Headpiece	stat_value2	28	29
+22428	Redemption Headpiece	stat_value3	25	26
+22428	Redemption Headpiece	stat_value4	39	40
+22429	Redemption Spaulders	ItemLevel	86	88
+22429	Redemption Spaulders	armor	636	651
+22429	Redemption Spaulders	stat_value1	26	27
+22429	Redemption Spaulders	stat_value2	22	23
+22429	Redemption Spaulders	stat_value5	28	29
+22430	Redemption Boots	ItemLevel	86	88
+22430	Redemption Boots	armor	584	598
+22430	Redemption Boots	stat_value1	22	23
+22430	Redemption Boots	stat_value2	22	23
+22430	Redemption Boots	stat_value4	28	29
+22431	Redemption Girdle	ItemLevel	86	88
+22431	Redemption Girdle	armor	478	489
+22431	Redemption Girdle	stat_value1	32	33
+22431	Redemption Girdle	stat_value4	36	37
+22436	Cryptstalker Tunic	ItemLevel	86	88
+22436	Cryptstalker Tunic	armor	668	684
+22436	Cryptstalker Tunic	stat_value1	26	27
+22436	Cryptstalker Tunic	stat_value3	27	28
+22436	Cryptstalker Tunic	stat_value6	43	44
+22437	Cryptstalker Legguards	ItemLevel	86	88
+22437	Cryptstalker Legguards	armor	586	600
+22437	Cryptstalker Legguards	stat_value1	28	29
+22437	Cryptstalker Legguards	stat_value3	26	27
+22437	Cryptstalker Legguards	stat_value5	53	54
+22438	Cryptstalker Headpiece	ItemLevel	86	88
+22438	Cryptstalker Headpiece	armor	543	556
+22438	Cryptstalker Headpiece	stat_value1	23	24
+22438	Cryptstalker Headpiece	stat_value3	30	31
+22438	Cryptstalker Headpiece	stat_value4	28	29
+22438	Cryptstalker Headpiece	stat_value5	38	39
+22439	Cryptstalker Spaulders	ItemLevel	86	88
+22439	Cryptstalker Spaulders	armor	502	514
+22439	Cryptstalker Spaulders	stat_value3	23	24
+22439	Cryptstalker Spaulders	stat_value5	34	35
+22440	Cryptstalker Boots	ItemLevel	86	88
+22440	Cryptstalker Boots	armor	461	472
+22440	Cryptstalker Boots	stat_value1	22	23
+22440	Cryptstalker Boots	stat_value5	40	41
+22441	Cryptstalker Handguards	ItemLevel	86	88
+22441	Cryptstalker Handguards	armor	421	431
+22441	Cryptstalker Handguards	stat_value5	26	27
+22442	Cryptstalker Girdle	ItemLevel	86	88
+22442	Cryptstalker Girdle	armor	377	386
+22442	Cryptstalker Girdle	stat_value3	22	23
+22442	Cryptstalker Girdle	stat_value6	30	31
+22443	Cryptstalker Wristguards	ItemLevel	86	88
+22443	Cryptstalker Wristguards	armor	293	300
+22443	Cryptstalker Wristguards	stat_value5	26	27
+22464	Earthshatter Tunic	ItemLevel	86	88
+22464	Earthshatter Tunic	armor	668	684
+22464	Earthshatter Tunic	stat_value1	26	27
+22464	Earthshatter Tunic	stat_value3	23	24
+22464	Earthshatter Tunic	stat_value4	22	23
+22464	Earthshatter Tunic	stat_value6	30	31
+22465	Earthshatter Legguards	ItemLevel	86	88
+22465	Earthshatter Legguards	armor	586	600
+22465	Earthshatter Legguards	stat_value1	30	31
+22465	Earthshatter Legguards	stat_value3	29	30
+22465	Earthshatter Legguards	stat_value6	30	31
+22466	Earthshatter Headpiece	ItemLevel	86	88
+22466	Earthshatter Headpiece	armor	543	556
+22466	Earthshatter Headpiece	stat_value1	28	29
+22466	Earthshatter Headpiece	stat_value3	25	26
+22466	Earthshatter Headpiece	stat_value6	31	32
+22467	Earthshatter Spaulders	ItemLevel	86	88
+22467	Earthshatter Spaulders	armor	502	514
+22467	Earthshatter Spaulders	stat_value1	23	24
+22467	Earthshatter Spaulders	stat_value3	22	23
+22467	Earthshatter Spaulders	stat_value5	23	24
+22468	Earthshatter Boots	ItemLevel	86	88
+22468	Earthshatter Boots	armor	461	472
+22468	Earthshatter Boots	stat_value1	23	24
+22468	Earthshatter Boots	stat_value5	25	26
+22469	Earthshatter Handguards	ItemLevel	86	88
+22469	Earthshatter Handguards	armor	421	431
+22469	Earthshatter Handguards	stat_value1	23	24
+22469	Earthshatter Handguards	stat_value5	22	23
+22470	Earthshatter Girdle	ItemLevel	86	88
+22470	Earthshatter Girdle	armor	377	386
+22470	Earthshatter Girdle	stat_value1	23	24
+22470	Earthshatter Girdle	stat_value5	26	27
+22471	Earthshatter Wristguards	ItemLevel	86	88
+22471	Earthshatter Wristguards	armor	293	300
+22476	Bonescythe Breastplate	ItemLevel	86	88
+22476	Bonescythe Breastplate	armor	570	583
+22476	Bonescythe Breastplate	stat_value1	28	29
+22476	Bonescythe Breastplate	stat_value2	29	30
+22476	Bonescythe Breastplate	stat_value6	26	27
+22477	Bonescythe Legplates	ItemLevel	86	88
+22477	Bonescythe Legplates	armor	500	512
+22477	Bonescythe Legplates	stat_value1	37	38
+22477	Bonescythe Legplates	stat_value2	25	26
+22477	Bonescythe Legplates	stat_value5	31	32
+22478	Bonescythe Helmet	ItemLevel	86	88
+22478	Bonescythe Helmet	armor	463	474
+22478	Bonescythe Helmet	stat_value1	23	24
+22478	Bonescythe Helmet	stat_value2	29	30
+22478	Bonescythe Helmet	stat_value6	27	28
+22479	Bonescythe Pauldrons	ItemLevel	86	88
+22479	Bonescythe Pauldrons	armor	428	438
+22479	Bonescythe Pauldrons	stat_value1	28	29
+22479	Bonescythe Pauldrons	stat_value4	29	30
+22480	Bonescythe Sabatons	ItemLevel	86	88
+22480	Bonescythe Sabatons	armor	394	403
+22480	Bonescythe Sabatons	stat_value1	34	35
+22480	Bonescythe Sabatons	stat_value4	26	27
+22481	Bonescythe Gauntlets	ItemLevel	86	88
+22481	Bonescythe Gauntlets	armor	359	367
+22481	Bonescythe Gauntlets	stat_value1	26	27
+22481	Bonescythe Gauntlets	stat_value4	22	23
+22482	Bonescythe Waistguard	ItemLevel	86	88
+22482	Bonescythe Waistguard	armor	322	329
+22482	Bonescythe Waistguard	stat_value1	28	29
+22482	Bonescythe Waistguard	stat_value3	26	27
+22483	Bonescythe Bracers	ItemLevel	86	88
+22483	Bonescythe Bracers	armor	250	256
+22488	Dreamwalker Tunic	ItemLevel	86	88
+22488	Dreamwalker Tunic	armor	570	583
+22488	Dreamwalker Tunic	stat_value2	27	28
+22488	Dreamwalker Tunic	stat_value3	29	30
+22488	Dreamwalker Tunic	stat_value5	35	36
+22489	Dreamwalker Legguards	ItemLevel	86	88
+22489	Dreamwalker Legguards	armor	500	512
+22489	Dreamwalker Legguards	stat_value2	23	24
+22489	Dreamwalker Legguards	stat_value3	22	23
+22489	Dreamwalker Legguards	stat_value5	35	36
+22490	Dreamwalker Headpiece	ItemLevel	86	88
+22490	Dreamwalker Headpiece	armor	463	474
+22490	Dreamwalker Headpiece	stat_value1	28	29
+22490	Dreamwalker Headpiece	stat_value2	22	23
+22490	Dreamwalker Headpiece	stat_value3	25	26
+22490	Dreamwalker Headpiece	stat_value5	36	37
+22491	Dreamwalker Spaulders	ItemLevel	86	88
+22491	Dreamwalker Spaulders	armor	428	438
+22491	Dreamwalker Spaulders	stat_value5	33	34
+22492	Dreamwalker Boots	ItemLevel	86	88
+22492	Dreamwalker Boots	armor	394	403
+22492	Dreamwalker Boots	stat_value6	29	30
+22493	Dreamwalker Handguards	ItemLevel	86	88
+22493	Dreamwalker Handguards	armor	359	367
+22493	Dreamwalker Handguards	stat_value4	28	29
+22494	Dreamwalker Girdle	ItemLevel	86	88
+22494	Dreamwalker Girdle	armor	322	329
+22494	Dreamwalker Girdle	stat_value6	35	36
+22495	Dreamwalker Wristguards	ItemLevel	86	88
+22495	Dreamwalker Wristguards	armor	250	256
+22496	Frostfire Robe	ItemLevel	86	88
+22496	Frostfire Robe	armor	445	455
+22496	Frostfire Robe	stat_value1	24	25
+22496	Frostfire Robe	stat_value2	23	24
+22496	Frostfire Robe	stat_value3	22	23
+22496	Frostfire Robe	stat_value5	44	45
+22497	Frostfire Leggings	ItemLevel	86	88
+22497	Frostfire Leggings	armor	391	400
+22497	Frostfire Leggings	stat_value1	29	30
+22497	Frostfire Leggings	stat_value2	25	26
+22497	Frostfire Leggings	stat_value6	43	44
+22498	Frostfire Circlet	ItemLevel	86	88
+22498	Frostfire Circlet	armor	362	370
+22498	Frostfire Circlet	stat_value1	25	26
+22498	Frostfire Circlet	stat_value3	24	25
+22498	Frostfire Circlet	stat_value6	40	41
+22499	Frostfire Shoulderpads	ItemLevel	86	88
+22499	Frostfire Shoulderpads	armor	335	343
+22499	Frostfire Shoulderpads	stat_value1	26	27
+22499	Frostfire Shoulderpads	stat_value2	24	25
+22499	Frostfire Shoulderpads	stat_value4	36	37
+22500	Frostfire Sandals	ItemLevel	86	88
+22500	Frostfire Sandals	armor	308	315
+22500	Frostfire Sandals	stat_value5	28	29
+22501	Frostfire Gloves	ItemLevel	86	88
+22501	Frostfire Gloves	armor	280	287
+22501	Frostfire Gloves	stat_value4	36	37
+22502	Frostfire Belt	ItemLevel	86	88
+22502	Frostfire Belt	armor	252	258
+22502	Frostfire Belt	stat_value1	23	24
+22502	Frostfire Belt	stat_value6	28	29
+22503	Frostfire Bindings	ItemLevel	86	88
+22503	Frostfire Bindings	armor	195	200
+22503	Frostfire Bindings	stat_value5	23	24
+22504	Plagueheart Robe	ItemLevel	86	88
+22504	Plagueheart Robe	armor	445	455
+22504	Plagueheart Robe	stat_value2	33	34
+22504	Plagueheart Robe	stat_value5	47	48
+22505	Plagueheart Leggings	ItemLevel	86	88
+22505	Plagueheart Leggings	armor	391	400
+22505	Plagueheart Leggings	stat_value3	25	26
+22505	Plagueheart Leggings	stat_value6	32	33
+22506	Plagueheart Circlet	ItemLevel	86	88
+22506	Plagueheart Circlet	armor	362	370
+22506	Plagueheart Circlet	stat_value1	24	25
+22506	Plagueheart Circlet	stat_value2	23	24
+22506	Plagueheart Circlet	stat_value3	33	34
+22506	Plagueheart Circlet	stat_value6	36	37
+22507	Plagueheart Shoulderpads	ItemLevel	86	88
+22507	Plagueheart Shoulderpads	armor	335	343
+22507	Plagueheart Shoulderpads	stat_value2	24	25
+22507	Plagueheart Shoulderpads	stat_value5	35	36
+22508	Plagueheart Sandals	ItemLevel	86	88
+22508	Plagueheart Sandals	armor	308	315
+22508	Plagueheart Sandals	stat_value2	23	24
+22508	Plagueheart Sandals	stat_value4	41	42
+22509	Plagueheart Gloves	ItemLevel	86	88
+22509	Plagueheart Gloves	armor	280	287
+22509	Plagueheart Gloves	stat_value2	25	26
+22509	Plagueheart Gloves	stat_value4	38	39
+22510	Plagueheart Belt	ItemLevel	86	88
+22510	Plagueheart Belt	armor	252	258
+22510	Plagueheart Belt	stat_value2	23	24
+22510	Plagueheart Belt	stat_value5	34	35
+22511	Plagueheart Bindings	ItemLevel	86	88
+22511	Plagueheart Bindings	armor	195	200
+22511	Plagueheart Bindings	stat_value3	22	23
+22512	Robe of Faith	ItemLevel	86	88
+22512	Robe of Faith	armor	445	455
+22512	Robe of Faith	stat_value2	22	23
+22512	Robe of Faith	stat_value3	25	26
+22512	Robe of Faith	stat_value7	31	32
+22513	Leggings of Faith	ItemLevel	86	88
+22513	Leggings of Faith	armor	391	400
+22513	Leggings of Faith	stat_value2	24	25
+22513	Leggings of Faith	stat_value3	25	26
+22513	Leggings of Faith	stat_value6	32	33
+22514	Circlet of Faith	ItemLevel	86	88
+22514	Circlet of Faith	armor	362	370
+22514	Circlet of Faith	stat_value2	22	23
+22514	Circlet of Faith	stat_value3	26	27
+22514	Circlet of Faith	stat_value6	28	29
+22515	Shoulderpads of Faith	ItemLevel	86	88
+22515	Shoulderpads of Faith	armor	335	343
+22515	Shoulderpads of Faith	stat_value3	24	25
+22515	Shoulderpads of Faith	stat_value5	31	32
+22516	Sandals of Faith	ItemLevel	86	88
+22516	Sandals of Faith	armor	308	315
+22516	Sandals of Faith	stat_value5	28	29
+22517	Gloves of Faith	ItemLevel	86	88
+22517	Gloves of Faith	armor	280	287
+22517	Gloves of Faith	stat_value2	22	23
+22517	Gloves of Faith	stat_value6	27	28
+22518	Belt of Faith	ItemLevel	86	88
+22518	Belt of Faith	armor	252	258
+22518	Belt of Faith	stat_value5	28	29
+22519	Bindings of Faith	ItemLevel	86	88
+22519	Bindings of Faith	armor	195	200
+210488	Dreadborne Breastplate	ItemLevel	99	101
+210488	Dreadborne Breastplate	armor	964	983
+210488	Dreadborne Breastplate	stat_value1	38	39
+210488	Dreadborne Breastplate	stat_value2	36	37
+210489	Dreadborne Legplates	ItemLevel	99	101
+210489	Dreadborne Legplates	armor	846	863
+210489	Dreadborne Legplates	stat_value1	42	43
+210489	Dreadborne Legplates	stat_value2	33	34
+210490	Dreadborne Helmet	ItemLevel	99	101
+210490	Dreadborne Helmet	armor	786	802
+210490	Dreadborne Helmet	stat_value1	35	36
+210490	Dreadborne Helmet	stat_value2	33	34
+210491	Dreadborne Pauldrons	ItemLevel	99	101
+210491	Dreadborne Pauldrons	armor	725	740
+210491	Dreadborne Pauldrons	stat_value1	35	36
+210491	Dreadborne Pauldrons	stat_value2	30	31
+210492	Dreadborne Sabatons	ItemLevel	99	101
+210492	Dreadborne Sabatons	armor	666	679
+210492	Dreadborne Sabatons	stat_value1	30	31
+210492	Dreadborne Sabatons	stat_value2	27	28
+210493	Dreadborne Gauntlets	ItemLevel	99	101
+210493	Dreadborne Gauntlets	armor	607	619
+210493	Dreadborne Gauntlets	stat_value1	29	30
+210493	Dreadborne Gauntlets	stat_value2	25	26
+210494	Dreadborne Waistguard	ItemLevel	99	101
+210494	Dreadborne Waistguard	armor	544	555
+210494	Dreadborne Waistguard	stat_value1	35	36
+210494	Dreadborne Waistguard	stat_value2	25	26
+210495	Dreadborne Bracers	ItemLevel	99	101
+210495	Dreadborne Bracers	armor	423	432
+210495	Dreadborne Bracers	stat_value1	26	27
+210519	Earthshatter Crown	ItemLevel	99	101
+210519	Earthshatter Crown	armor	620	633
+210519	Earthshatter Crown	stat_value1	29	30
+210519	Earthshatter Crown	stat_value2	29	30
+210519	Earthshatter Crown	stat_value5	36	37
+210520	Earthshatter Epaulets	ItemLevel	99	101
+210520	Earthshatter Epaulets	armor	573	585
+210520	Earthshatter Epaulets	stat_value1	29	30
+210520	Earthshatter Epaulets	stat_value2	27	28
+210520	Earthshatter Epaulets	stat_value5	37	38
+210729	Earthshatter Breastplate	ItemLevel	99	101
+210729	Earthshatter Breastplate	armor	761	776
+210729	Earthshatter Breastplate	stat_value1	32	33
+210729	Earthshatter Breastplate	stat_value2	29	30
+210729	Earthshatter Breastplate	stat_value5	32	33
+210729	Earthshatter Breastplate	stat_value6	45	46
+210730	Earthshatter Bracers	ItemLevel	99	101
+210730	Earthshatter Bracers	armor	334	341
+210730	Earthshatter Bracers	stat_value4	29	30
+210731	Earthshatter Gauntlets	ItemLevel	99	101
+210731	Earthshatter Gauntlets	armor	479	489
+210731	Earthshatter Gauntlets	stat_value1	30	31
+210731	Earthshatter Gauntlets	stat_value4	36	37
+210809	Earthshatter Belt	ItemLevel	99	101
+210809	Earthshatter Belt	armor	430	439
+210809	Earthshatter Belt	stat_value1	30	31
+210809	Earthshatter Belt	stat_value4	42	43
+210848	Earthshatter Legplates	ItemLevel	99	101
+210848	Earthshatter Legplates	armor	668	681
+210848	Earthshatter Legplates	stat_value1	35	36
+210848	Earthshatter Legplates	stat_value2	31	32
+210848	Earthshatter Legplates	stat_value5	42	43
+210859	Earthshatter Greaves	ItemLevel	99	101
+210859	Earthshatter Greaves	armor	526	537
+210859	Earthshatter Greaves	stat_value1	27	28
+210859	Earthshatter Greaves	stat_value4	42	43
+213566	Frozen Vrykul Armguards	ItemLevel	99	101
+213566	Frozen Vrykul Armguards	armor	334	341
+213566	Frozen Vrykul Armguards	stat_value3	36	37
+213567	Frozen Vrykul Hauberk	ItemLevel	99	101
+213567	Frozen Vrykul Hauberk	armor	761	776
+213567	Frozen Vrykul Hauberk	stat_value1	31	32
+213567	Frozen Vrykul Hauberk	stat_value2	27	28
+213567	Frozen Vrykul Hauberk	stat_value3	43	44
+213567	Frozen Vrykul Hauberk	stat_value5	26	27
+213567	Frozen Vrykul Hauberk	stat_value7	41	42
+213568	Frozen Vrykul Greaves	ItemLevel	99	101
+213568	Frozen Vrykul Greaves	armor	668	681
+213568	Frozen Vrykul Greaves	stat_value1	41	42
+213568	Frozen Vrykul Greaves	stat_value2	32	33
+213568	Frozen Vrykul Greaves	stat_value3	45	46
+213568	Frozen Vrykul Greaves	stat_value4	30	31
+213568	Frozen Vrykul Greaves	stat_value5	33	34
+213568	Frozen Vrykul Greaves	stat_value6	45	46
+213569	Frozen Vrykul Gloves	ItemLevel	99	101
+213569	Frozen Vrykul Gloves	armor	479	489
+213569	Frozen Vrykul Gloves	stat_value1	29	30
+213569	Frozen Vrykul Gloves	stat_value3	35	36
+213569	Frozen Vrykul Gloves	stat_value5	25	26
+213569	Frozen Vrykul Gloves	stat_value6	26	27
+213570	Frozen Vrykul Boots	ItemLevel	99	101
+213570	Frozen Vrykul Boots	armor	526	537
+213570	Frozen Vrykul Boots	stat_value1	27	28
+213570	Frozen Vrykul Boots	stat_value3	41	42
+213570	Frozen Vrykul Boots	stat_value5	27	28
+213571	Frozen Vrykul Helm	ItemLevel	99	101
+213571	Frozen Vrykul Helm	armor	620	633
+213571	Frozen Vrykul Helm	stat_value1	30	31
+213571	Frozen Vrykul Helm	stat_value2	26	27
+213571	Frozen Vrykul Helm	stat_value3	47	48
+213571	Frozen Vrykul Helm	stat_value6	26	27
+213571	Frozen Vrykul Helm	stat_value7	25	26
+213633	Frozen Vrykul Girdle	ItemLevel	99	101
+213633	Frozen Vrykul Girdle	armor	430	439
+213633	Frozen Vrykul Girdle	stat_value1	30	31
+213633	Frozen Vrykul Girdle	stat_value3	35	36
+213633	Frozen Vrykul Girdle	stat_value5	27	28
+213634	Frozen Vrykul Spaulders	ItemLevel	99	101
+213634	Frozen Vrykul Spaulders	armor	573	585
+213634	Frozen Vrykul Spaulders	stat_value1	27	28
+213634	Frozen Vrykul Spaulders	stat_value3	38	39
+213634	Frozen Vrykul Spaulders	stat_value5	27	28
+222416	Dreadnaught Breastplate	ItemLevel	99	101
+222416	Dreadnaught Breastplate	armor	964	983
+222416	Dreadnaught Breastplate	stat_value1	26	27
+222416	Dreadnaught Breastplate	stat_value2	47	48
+222416	Dreadnaught Breastplate	stat_value6	35	36
+222417	Dreadnaught Legplates	ItemLevel	99	101
+222417	Dreadnaught Legplates	armor	846	863
+222417	Dreadnaught Legplates	stat_value1	29	30
+222417	Dreadnaught Legplates	stat_value2	46	47
+222417	Dreadnaught Legplates	stat_value5	25	26
+222418	Dreadnaught Helmet	ItemLevel	99	101
+222418	Dreadnaught Helmet	armor	786	802
+222418	Dreadnaught Helmet	stat_value1	56	57
+222418	Dreadnaught Helmet	stat_value2	26	27
+222418	Dreadnaught Helmet	stat_value3	26	27
+222419	Dreadnaught Pauldrons	ItemLevel	99	101
+222419	Dreadnaught Pauldrons	armor	725	740
+222419	Dreadnaught Pauldrons	stat_value2	35	36
+222419	Dreadnaught Pauldrons	stat_value6	32	33
+222420	Dreadnaught Sabatons	ItemLevel	99	101
+222420	Dreadnaught Sabatons	armor	666	679
+222420	Dreadnaught Sabatons	stat_value2	42	43
+222421	Dreadnaught Gauntlets	ItemLevel	99	101
+222421	Dreadnaught Gauntlets	armor	607	619
+222421	Dreadnaught Gauntlets	stat_value2	30	31
+222421	Dreadnaught Gauntlets	stat_value5	43	44
+222422	Dreadnaught Waistguard	ItemLevel	99	101
+222422	Dreadnaught Waistguard	armor	544	555
+222422	Dreadnaught Waistguard	stat_value1	25	26
+222422	Dreadnaught Waistguard	stat_value2	32	33
+222422	Dreadnaught Waistguard	stat_value5	25	26
+222423	Dreadnaught Bracers	ItemLevel	99	101
+222423	Dreadnaught Bracers	armor	423	432
+222423	Dreadnaught Bracers	stat_value2	35	36
+222424	Redemption Wristguards	ItemLevel	99	101
+222424	Redemption Wristguards	armor	423	432
+222424	Redemption Wristguards	stat_value2	27	28
+222424	Redemption Wristguards	stat_value5	35	36
+222425	Redemption Tunic	ItemLevel	99	101
+222425	Redemption Tunic	armor	964	983
+222425	Redemption Tunic	stat_value1	31	32
+222425	Redemption Tunic	stat_value2	41	42
+222425	Redemption Tunic	stat_value3	35	36
+222425	Redemption Tunic	stat_value4	40	41
+222426	Redemption Handguards	ItemLevel	99	101
+222426	Redemption Handguards	armor	607	619
+222426	Redemption Handguards	stat_value1	30	31
+222426	Redemption Handguards	stat_value2	29	30
+222426	Redemption Handguards	stat_value4	41	42
+222427	Redemption Legguards	ItemLevel	99	101
+222427	Redemption Legguards	armor	846	863
+222427	Redemption Legguards	stat_value1	41	42
+222427	Redemption Legguards	stat_value2	35	36
+222427	Redemption Legguards	stat_value3	31	32
+222427	Redemption Legguards	stat_value5	47	48
+222428	Redemption Headpiece	ItemLevel	99	101
+222428	Redemption Headpiece	armor	786	802
+222428	Redemption Headpiece	stat_value1	40	41
+222428	Redemption Headpiece	stat_value2	35	36
+222428	Redemption Headpiece	stat_value3	31	32
+222428	Redemption Headpiece	stat_value4	48	49
+222429	Redemption Spaulders	ItemLevel	99	101
+222429	Redemption Spaulders	armor	725	740
+222429	Redemption Spaulders	stat_value1	32	33
+222429	Redemption Spaulders	stat_value2	27	28
+222429	Redemption Spaulders	stat_value5	35	36
+222430	Redemption Boots	ItemLevel	99	101
+222430	Redemption Boots	armor	666	679
+222430	Redemption Boots	stat_value1	27	28
+222430	Redemption Boots	stat_value2	27	28
+222430	Redemption Boots	stat_value4	35	36
+222431	Redemption Girdle	ItemLevel	99	101
+222431	Redemption Girdle	armor	544	555
+222431	Redemption Girdle	stat_value1	40	41
+222431	Redemption Girdle	stat_value4	45	46
+222436	Cryptstalker Tunic	ItemLevel	99	101
+222436	Cryptstalker Tunic	armor	761	776
+222436	Cryptstalker Tunic	stat_value1	32	33
+222436	Cryptstalker Tunic	stat_value3	33	34
+222436	Cryptstalker Tunic	stat_value6	53	54
+222437	Cryptstalker Legguards	ItemLevel	99	101
+222437	Cryptstalker Legguards	armor	668	681
+222437	Cryptstalker Legguards	stat_value1	35	36
+222437	Cryptstalker Legguards	stat_value3	32	33
+222437	Cryptstalker Legguards	stat_value5	66	67
+222438	Cryptstalker Headpiece	ItemLevel	99	101
+222438	Cryptstalker Headpiece	armor	620	633
+222438	Cryptstalker Headpiece	stat_value1	29	30
+222438	Cryptstalker Headpiece	stat_value3	37	38
+222438	Cryptstalker Headpiece	stat_value4	35	36
+222438	Cryptstalker Headpiece	stat_value5	47	48
+222439	Cryptstalker Spaulders	ItemLevel	99	101
+222439	Cryptstalker Spaulders	armor	573	585
+222439	Cryptstalker Spaulders	stat_value1	25	26
+222439	Cryptstalker Spaulders	stat_value3	29	30
+222439	Cryptstalker Spaulders	stat_value5	42	43
+222440	Cryptstalker Boots	ItemLevel	99	101
+222440	Cryptstalker Boots	armor	526	537
+222440	Cryptstalker Boots	stat_value1	27	28
+222440	Cryptstalker Boots	stat_value5	50	51
+222441	Cryptstalker Handguards	ItemLevel	99	101
+222441	Cryptstalker Handguards	armor	479	489
+222441	Cryptstalker Handguards	stat_value1	26	27
+222441	Cryptstalker Handguards	stat_value3	26	27
+222441	Cryptstalker Handguards	stat_value5	32	33
+222442	Cryptstalker Girdle	ItemLevel	99	101
+222442	Cryptstalker Girdle	armor	430	439
+222442	Cryptstalker Girdle	stat_value3	27	28
+222442	Cryptstalker Girdle	stat_value6	37	38
+222443	Cryptstalker Wristguards	ItemLevel	99	101
+222443	Cryptstalker Wristguards	armor	334	341
+222443	Cryptstalker Wristguards	stat_value5	32	33
+222464	Earthshatter Tunic	ItemLevel	99	101
+222464	Earthshatter Tunic	armor	761	776
+222464	Earthshatter Tunic	stat_value1	32	33
+222464	Earthshatter Tunic	stat_value3	29	30
+222464	Earthshatter Tunic	stat_value4	27	28
+222464	Earthshatter Tunic	stat_value6	37	38
+222465	Earthshatter Legguards	ItemLevel	99	101
+222465	Earthshatter Legguards	armor	668	681
+222465	Earthshatter Legguards	stat_value1	37	38
+222465	Earthshatter Legguards	stat_value3	36	37
+222465	Earthshatter Legguards	stat_value6	37	38
+222466	Earthshatter Headpiece	ItemLevel	99	101
+222466	Earthshatter Headpiece	armor	620	633
+222466	Earthshatter Headpiece	stat_value1	35	36
+222466	Earthshatter Headpiece	stat_value3	31	32
+222466	Earthshatter Headpiece	stat_value6	38	39
+222467	Earthshatter Spaulders	ItemLevel	99	101
+222467	Earthshatter Spaulders	armor	573	585
+222467	Earthshatter Spaulders	stat_value1	29	30
+222467	Earthshatter Spaulders	stat_value3	27	28
+222467	Earthshatter Spaulders	stat_value5	29	30
+222468	Earthshatter Boots	ItemLevel	99	101
+222468	Earthshatter Boots	armor	526	537
+222468	Earthshatter Boots	stat_value1	29	30
+222468	Earthshatter Boots	stat_value5	31	32
+222469	Earthshatter Handguards	ItemLevel	99	101
+222469	Earthshatter Handguards	armor	479	489
+222469	Earthshatter Handguards	stat_value1	29	30
+222469	Earthshatter Handguards	stat_value5	27	28
+222470	Earthshatter Girdle	ItemLevel	99	101
+222470	Earthshatter Girdle	armor	430	439
+222470	Earthshatter Girdle	stat_value1	29	30
+222470	Earthshatter Girdle	stat_value5	32	33
+222471	Earthshatter Wristguards	ItemLevel	99	101
+222471	Earthshatter Wristguards	armor	334	341
+222476	Bonescythe Breastplate	ItemLevel	99	101
+222476	Bonescythe Breastplate	armor	649	662
+222476	Bonescythe Breastplate	stat_value1	35	36
+222476	Bonescythe Breastplate	stat_value2	36	37
+222476	Bonescythe Breastplate	stat_value6	32	33
+222477	Bonescythe Legplates	ItemLevel	99	101
+222477	Bonescythe Legplates	armor	570	582
+222477	Bonescythe Legplates	stat_value1	46	47
+222477	Bonescythe Legplates	stat_value2	31	32
+222477	Bonescythe Legplates	stat_value5	38	39
+222478	Bonescythe Helmet	ItemLevel	99	101
+222478	Bonescythe Helmet	armor	529	540
+222478	Bonescythe Helmet	stat_value1	29	30
+222478	Bonescythe Helmet	stat_value2	36	37
+222478	Bonescythe Helmet	stat_value6	33	34
+222479	Bonescythe Pauldrons	ItemLevel	99	101
+222479	Bonescythe Pauldrons	armor	489	499
+222479	Bonescythe Pauldrons	stat_value1	35	36
+222479	Bonescythe Pauldrons	stat_value4	36	37
+222480	Bonescythe Sabatons	ItemLevel	99	101
+222480	Bonescythe Sabatons	armor	448	457
+222480	Bonescythe Sabatons	stat_value1	42	43
+222480	Bonescythe Sabatons	stat_value2	26	27
+222480	Bonescythe Sabatons	stat_value4	32	33
+222481	Bonescythe Gauntlets	ItemLevel	99	101
+222481	Bonescythe Gauntlets	armor	409	417
+222481	Bonescythe Gauntlets	stat_value1	32	33
+222481	Bonescythe Gauntlets	stat_value2	25	26
+222481	Bonescythe Gauntlets	stat_value3	26	27
+222481	Bonescythe Gauntlets	stat_value4	27	28
+222482	Bonescythe Waistguard	ItemLevel	99	101
+222482	Bonescythe Waistguard	armor	367	374
+222482	Bonescythe Waistguard	stat_value1	35	36
+222482	Bonescythe Waistguard	stat_value2	25	26
+222482	Bonescythe Waistguard	stat_value3	32	33
+222483	Bonescythe Bracers	ItemLevel	99	101
+222483	Bonescythe Bracers	armor	285	291
+222488	Dreamwalker Tunic	ItemLevel	99	101
+222488	Dreamwalker Tunic	armor	649	662
+222488	Dreamwalker Tunic	stat_value1	26	27
+222488	Dreamwalker Tunic	stat_value2	33	34
+222488	Dreamwalker Tunic	stat_value3	36	37
+222488	Dreamwalker Tunic	stat_value5	43	44
+222489	Dreamwalker Legguards	ItemLevel	99	101
+222489	Dreamwalker Legguards	armor	570	582
+222489	Dreamwalker Legguards	stat_value1	25	26
+222489	Dreamwalker Legguards	stat_value2	28	29
+222489	Dreamwalker Legguards	stat_value3	27	28
+222489	Dreamwalker Legguards	stat_value5	43	44
+222490	Dreamwalker Headpiece	ItemLevel	99	101
+222490	Dreamwalker Headpiece	armor	529	540
+222490	Dreamwalker Headpiece	stat_value1	35	36
+222490	Dreamwalker Headpiece	stat_value2	27	28
+222490	Dreamwalker Headpiece	stat_value3	31	32
+222490	Dreamwalker Headpiece	stat_value5	45	46
+222491	Dreamwalker Spaulders	ItemLevel	99	101
+222491	Dreamwalker Spaulders	armor	489	499
+222491	Dreamwalker Spaulders	stat_value5	40	41
+222492	Dreamwalker Boots	ItemLevel	99	101
+222492	Dreamwalker Boots	armor	448	457
+222492	Dreamwalker Boots	stat_value2	25	26
+222492	Dreamwalker Boots	stat_value3	25	26
+222492	Dreamwalker Boots	stat_value6	36	37
+222493	Dreamwalker Handguards	ItemLevel	99	101
+222493	Dreamwalker Handguards	armor	409	417
+222493	Dreamwalker Handguards	stat_value4	35	36
+222494	Dreamwalker Girdle	ItemLevel	99	101
+222494	Dreamwalker Girdle	armor	367	374
+222494	Dreamwalker Girdle	stat_value6	43	44
+222495	Dreamwalker Wristguards	ItemLevel	99	101
+222495	Dreamwalker Wristguards	armor	285	291
+222495	Dreamwalker Wristguards	stat_value2	26	27
+222495	Dreamwalker Wristguards	stat_value4	26	27
+222496	Frostfire Robe	ItemLevel	99	101
+222496	Frostfire Robe	armor	507	517
+222496	Frostfire Robe	stat_value1	30	31
+222496	Frostfire Robe	stat_value2	29	30
+222496	Frostfire Robe	stat_value3	27	28
+222496	Frostfire Robe	stat_value5	55	56
+222497	Frostfire Leggings	ItemLevel	99	101
+222497	Frostfire Leggings	armor	445	454
+222497	Frostfire Leggings	stat_value1	36	37
+222497	Frostfire Leggings	stat_value2	31	32
+222497	Frostfire Leggings	stat_value6	53	54
+222498	Frostfire Circlet	ItemLevel	99	101
+222498	Frostfire Circlet	armor	414	422
+222498	Frostfire Circlet	stat_value1	31	32
+222498	Frostfire Circlet	stat_value2	26	27
+222498	Frostfire Circlet	stat_value3	30	31
+222498	Frostfire Circlet	stat_value6	50	51
+222499	Frostfire Shoulderpads	ItemLevel	99	101
+222499	Frostfire Shoulderpads	armor	382	390
+222499	Frostfire Shoulderpads	stat_value1	32	33
+222499	Frostfire Shoulderpads	stat_value2	30	31
+222499	Frostfire Shoulderpads	stat_value4	45	46
+222500	Frostfire Sandals	ItemLevel	99	101
+222500	Frostfire Sandals	armor	350	357
+222500	Frostfire Sandals	stat_value5	35	36
+222501	Frostfire Gloves	ItemLevel	99	101
+222501	Frostfire Gloves	armor	319	325
+222501	Frostfire Gloves	stat_value1	26	27
+222501	Frostfire Gloves	stat_value4	45	46
+222502	Frostfire Belt	ItemLevel	99	101
+222502	Frostfire Belt	armor	286	292
+222502	Frostfire Belt	stat_value1	29	30
+222502	Frostfire Belt	stat_value6	35	36
+222503	Frostfire Bindings	ItemLevel	99	101
+222503	Frostfire Bindings	armor	222	226
+222503	Frostfire Bindings	stat_value5	29	30
+222504	Plagueheart Robe	ItemLevel	99	101
+222504	Plagueheart Robe	armor	507	517
+222504	Plagueheart Robe	stat_value1	25	26
+222504	Plagueheart Robe	stat_value2	41	42
+222504	Plagueheart Robe	stat_value5	58	59
+222505	Plagueheart Leggings	ItemLevel	99	101
+222505	Plagueheart Leggings	armor	445	454
+222505	Plagueheart Leggings	stat_value1	26	27
+222505	Plagueheart Leggings	stat_value3	31	32
+222505	Plagueheart Leggings	stat_value6	40	41
+222506	Plagueheart Circlet	ItemLevel	99	101
+222506	Plagueheart Circlet	armor	414	422
+222506	Plagueheart Circlet	stat_value1	30	31
+222506	Plagueheart Circlet	stat_value2	29	30
+222506	Plagueheart Circlet	stat_value3	41	42
+222506	Plagueheart Circlet	stat_value6	45	46
+222507	Plagueheart Shoulderpads	ItemLevel	99	101
+222507	Plagueheart Shoulderpads	armor	382	390
+222507	Plagueheart Shoulderpads	stat_value2	30	31
+222507	Plagueheart Shoulderpads	stat_value5	43	44
+222508	Plagueheart Sandals	ItemLevel	99	101
+222508	Plagueheart Sandals	armor	350	357
+222508	Plagueheart Sandals	stat_value2	29	30
+222508	Plagueheart Sandals	stat_value4	51	52
+222509	Plagueheart Gloves	ItemLevel	99	101
+222509	Plagueheart Gloves	armor	319	325
+222509	Plagueheart Gloves	stat_value2	31	32
+222509	Plagueheart Gloves	stat_value4	47	48
+222510	Plagueheart Belt	ItemLevel	99	101
+222510	Plagueheart Belt	armor	286	292
+222510	Plagueheart Belt	stat_value2	29	30
+222510	Plagueheart Belt	stat_value5	42	43
+222511	Plagueheart Bindings	ItemLevel	99	101
+222511	Plagueheart Bindings	armor	222	226
+222511	Plagueheart Bindings	stat_value3	27	28
+222511	Plagueheart Bindings	stat_value5	25	26
+222512	Robe of Faith	ItemLevel	99	101
+222512	Robe of Faith	armor	507	517
+222512	Robe of Faith	stat_value2	27	28
+222512	Robe of Faith	stat_value3	31	32
+222512	Robe of Faith	stat_value7	38	39
+222513	Leggings of Faith	ItemLevel	99	101
+222513	Leggings of Faith	armor	445	454
+222513	Leggings of Faith	stat_value1	25	26
+222513	Leggings of Faith	stat_value2	30	31
+222513	Leggings of Faith	stat_value3	31	32
+222513	Leggings of Faith	stat_value6	40	41
+222514	Circlet of Faith	ItemLevel	99	101
+222514	Circlet of Faith	armor	414	422
+222514	Circlet of Faith	stat_value2	27	28
+222514	Circlet of Faith	stat_value3	32	33
+222514	Circlet of Faith	stat_value6	35	36
+222515	Shoulderpads of Faith	ItemLevel	99	101
+222515	Shoulderpads of Faith	armor	382	390
+222515	Shoulderpads of Faith	stat_value3	30	31
+222515	Shoulderpads of Faith	stat_value5	38	39
+222516	Sandals of Faith	ItemLevel	99	101
+222516	Sandals of Faith	armor	350	357
+222516	Sandals of Faith	stat_value5	35	36
+222517	Gloves of Faith	ItemLevel	99	101
+222517	Gloves of Faith	armor	319	325
+222517	Gloves of Faith	stat_value2	27	28
+222517	Gloves of Faith	stat_value6	33	34
+222518	Belt of Faith	ItemLevel	99	101
+222518	Belt of Faith	armor	286	292
+222518	Belt of Faith	stat_value1	25	26
+222518	Belt of Faith	stat_value2	26	27
+222518	Belt of Faith	stat_value5	35	36
+222519	Bindings of Faith	ItemLevel	99	101
+222519	Bindings of Faith	armor	222	226
+310488	Dreadborne Breastplate	ItemLevel	90	92
+310488	Dreadborne Breastplate	armor	882	902
+310488	Dreadborne Breastplate	stat_value1	33	34
+310488	Dreadborne Breastplate	stat_value2	31	32
+310489	Dreadborne Legplates	ItemLevel	90	92
+310489	Dreadborne Legplates	armor	774	791
+310489	Dreadborne Legplates	stat_value1	37	38
+310489	Dreadborne Legplates	stat_value2	29	30
+310490	Dreadborne Helmet	ItemLevel	90	92
+310490	Dreadborne Helmet	armor	718	734
+310490	Dreadborne Helmet	stat_value1	30	31
+310490	Dreadborne Helmet	stat_value2	29	30
+310491	Dreadborne Pauldrons	ItemLevel	90	92
+310491	Dreadborne Pauldrons	armor	663	678
+310491	Dreadborne Pauldrons	stat_value1	30	31
+310491	Dreadborne Pauldrons	stat_value2	26	27
+310492	Dreadborne Sabatons	ItemLevel	90	92
+310492	Dreadborne Sabatons	armor	609	623
+310492	Dreadborne Sabatons	stat_value1	26	27
+310492	Dreadborne Sabatons	stat_value2	24	25
+310493	Dreadborne Gauntlets	ItemLevel	90	92
+310493	Dreadborne Gauntlets	armor	556	568
+310493	Dreadborne Gauntlets	stat_value1	25	26
+310494	Dreadborne Waistguard	ItemLevel	90	92
+310494	Dreadborne Waistguard	armor	498	509
+310494	Dreadborne Waistguard	stat_value1	30	31
+310495	Dreadborne Bracers	ItemLevel	90	92
+310495	Dreadborne Bracers	armor	387	396
+310495	Dreadborne Bracers	stat_value1	23	24
+310519	Earthshatter Crown	ItemLevel	90	92
+310519	Earthshatter Crown	armor	567	580
+310519	Earthshatter Crown	stat_value1	25	26
+310519	Earthshatter Crown	stat_value2	25	26
+310519	Earthshatter Crown	stat_value5	31	32
+310520	Earthshatter Epaulets	ItemLevel	90	92
+310520	Earthshatter Epaulets	armor	524	536
+310520	Earthshatter Epaulets	stat_value1	25	26
+310520	Earthshatter Epaulets	stat_value2	24	25
+310520	Earthshatter Epaulets	stat_value5	32	33
+310729	Earthshatter Breastplate	ItemLevel	90	92
+310729	Earthshatter Breastplate	armor	696	711
+310729	Earthshatter Breastplate	stat_value1	28	29
+310729	Earthshatter Breastplate	stat_value2	25	26
+310729	Earthshatter Breastplate	stat_value5	28	29
+310729	Earthshatter Breastplate	stat_value6	39	40
+310730	Earthshatter Bracers	ItemLevel	90	92
+310730	Earthshatter Bracers	armor	305	312
+310730	Earthshatter Bracers	stat_value4	25	26
+310731	Earthshatter Gauntlets	ItemLevel	90	92
+310731	Earthshatter Gauntlets	armor	439	449
+310731	Earthshatter Gauntlets	stat_value1	26	27
+310731	Earthshatter Gauntlets	stat_value4	31	32
+310809	Earthshatter Belt	ItemLevel	90	92
+310809	Earthshatter Belt	armor	393	402
+310809	Earthshatter Belt	stat_value1	26	27
+310809	Earthshatter Belt	stat_value4	37	38
+310848	Earthshatter Legplates	ItemLevel	90	92
+310848	Earthshatter Legplates	armor	611	625
+310848	Earthshatter Legplates	stat_value1	30	31
+310848	Earthshatter Legplates	stat_value2	27	28
+310848	Earthshatter Legplates	stat_value5	37	38
+310859	Earthshatter Greaves	ItemLevel	90	92
+310859	Earthshatter Greaves	armor	481	492
+310859	Earthshatter Greaves	stat_value1	24	25
+310859	Earthshatter Greaves	stat_value4	37	38
+313566	Frozen Vrykul Armguards	ItemLevel	90	92
+313566	Frozen Vrykul Armguards	armor	305	312
+313566	Frozen Vrykul Armguards	stat_value3	31	32
+313567	Frozen Vrykul Hauberk	ItemLevel	90	92
+313567	Frozen Vrykul Hauberk	armor	696	711
+313567	Frozen Vrykul Hauberk	stat_value1	27	28
+313567	Frozen Vrykul Hauberk	stat_value2	24	25
+313567	Frozen Vrykul Hauberk	stat_value3	38	39
+313567	Frozen Vrykul Hauberk	stat_value5	23	24
+313567	Frozen Vrykul Hauberk	stat_value7	36	37
+313568	Frozen Vrykul Greaves	ItemLevel	90	92
+313568	Frozen Vrykul Greaves	armor	611	625
+313568	Frozen Vrykul Greaves	stat_value1	36	37
+313568	Frozen Vrykul Greaves	stat_value2	28	29
+313568	Frozen Vrykul Greaves	stat_value3	39	40
+313568	Frozen Vrykul Greaves	stat_value4	26	27
+313568	Frozen Vrykul Greaves	stat_value5	29	30
+313568	Frozen Vrykul Greaves	stat_value6	39	40
+313569	Frozen Vrykul Gloves	ItemLevel	90	92
+313569	Frozen Vrykul Gloves	armor	439	449
+313569	Frozen Vrykul Gloves	stat_value1	25	26
+313569	Frozen Vrykul Gloves	stat_value3	30	31
+313569	Frozen Vrykul Gloves	stat_value6	23	24
+313570	Frozen Vrykul Boots	ItemLevel	90	92
+313570	Frozen Vrykul Boots	armor	481	492
+313570	Frozen Vrykul Boots	stat_value1	24	25
+313570	Frozen Vrykul Boots	stat_value3	36	37
+313570	Frozen Vrykul Boots	stat_value5	24	25
+313571	Frozen Vrykul Helm	ItemLevel	90	92
+313571	Frozen Vrykul Helm	armor	567	580
+313571	Frozen Vrykul Helm	stat_value1	26	27
+313571	Frozen Vrykul Helm	stat_value2	23	24
+313571	Frozen Vrykul Helm	stat_value3	41	42
+313571	Frozen Vrykul Helm	stat_value6	23	24
+313633	Frozen Vrykul Girdle	ItemLevel	90	92
+313633	Frozen Vrykul Girdle	armor	393	402
+313633	Frozen Vrykul Girdle	stat_value1	26	27
+313633	Frozen Vrykul Girdle	stat_value3	30	31
+313633	Frozen Vrykul Girdle	stat_value5	24	25
+313634	Frozen Vrykul Spaulders	ItemLevel	90	92
+313634	Frozen Vrykul Spaulders	armor	524	536
+313634	Frozen Vrykul Spaulders	stat_value1	24	25
+313634	Frozen Vrykul Spaulders	stat_value3	33	34
+313634	Frozen Vrykul Spaulders	stat_value5	24	25
+322416	Dreadnaught Breastplate	ItemLevel	90	92
+322416	Dreadnaught Breastplate	armor	882	902
+322416	Dreadnaught Breastplate	stat_value1	23	24
+322416	Dreadnaught Breastplate	stat_value2	41	42
+322416	Dreadnaught Breastplate	stat_value6	30	31
+322417	Dreadnaught Legplates	ItemLevel	90	92
+322417	Dreadnaught Legplates	armor	774	791
+322417	Dreadnaught Legplates	stat_value1	25	26
+322417	Dreadnaught Legplates	stat_value2	40	41
+322418	Dreadnaught Helmet	ItemLevel	90	92
+322418	Dreadnaught Helmet	armor	718	734
+322418	Dreadnaught Helmet	stat_value1	49	50
+322418	Dreadnaught Helmet	stat_value2	23	24
+322418	Dreadnaught Helmet	stat_value3	23	24
+322419	Dreadnaught Pauldrons	ItemLevel	90	92
+322419	Dreadnaught Pauldrons	armor	663	678
+322419	Dreadnaught Pauldrons	stat_value2	30	31
+322419	Dreadnaught Pauldrons	stat_value6	28	29
+322420	Dreadnaught Sabatons	ItemLevel	90	92
+322420	Dreadnaught Sabatons	armor	609	623
+322420	Dreadnaught Sabatons	stat_value2	37	38
+322421	Dreadnaught Gauntlets	ItemLevel	90	92
+322421	Dreadnaught Gauntlets	armor	556	568
+322421	Dreadnaught Gauntlets	stat_value2	26	27
+322421	Dreadnaught Gauntlets	stat_value5	38	39
+322422	Dreadnaught Waistguard	ItemLevel	90	92
+322422	Dreadnaught Waistguard	armor	498	509
+322422	Dreadnaught Waistguard	stat_value2	28	29
+322423	Dreadnaught Bracers	ItemLevel	90	92
+322423	Dreadnaught Bracers	armor	387	396
+322423	Dreadnaught Bracers	stat_value2	30	31
+322424	Redemption Wristguards	ItemLevel	90	92
+322424	Redemption Wristguards	armor	387	396
+322424	Redemption Wristguards	stat_value2	24	25
+322424	Redemption Wristguards	stat_value5	30	31
+322425	Redemption Tunic	ItemLevel	90	92
+322425	Redemption Tunic	armor	882	902
+322425	Redemption Tunic	stat_value1	27	28
+322425	Redemption Tunic	stat_value2	36	37
+322425	Redemption Tunic	stat_value3	30	31
+322425	Redemption Tunic	stat_value4	35	36
+322426	Redemption Handguards	ItemLevel	90	92
+322426	Redemption Handguards	armor	556	568
+322426	Redemption Handguards	stat_value1	26	27
+322426	Redemption Handguards	stat_value2	25	26
+322426	Redemption Handguards	stat_value4	36	37
+322427	Redemption Legguards	ItemLevel	90	92
+322427	Redemption Legguards	armor	774	791
+322427	Redemption Legguards	stat_value1	36	37
+322427	Redemption Legguards	stat_value2	30	31
+322427	Redemption Legguards	stat_value3	27	28
+322427	Redemption Legguards	stat_value5	41	42
+322428	Redemption Headpiece	ItemLevel	90	92
+322428	Redemption Headpiece	armor	718	734
+322428	Redemption Headpiece	stat_value1	35	36
+322428	Redemption Headpiece	stat_value2	30	31
+322428	Redemption Headpiece	stat_value3	27	28
+322428	Redemption Headpiece	stat_value4	42	43
+322429	Redemption Spaulders	ItemLevel	90	92
+322429	Redemption Spaulders	armor	663	678
+322429	Redemption Spaulders	stat_value1	28	29
+322429	Redemption Spaulders	stat_value2	24	25
+322429	Redemption Spaulders	stat_value5	30	31
+322430	Redemption Boots	ItemLevel	90	92
+322430	Redemption Boots	armor	609	623
+322430	Redemption Boots	stat_value1	24	25
+322430	Redemption Boots	stat_value2	24	25
+322430	Redemption Boots	stat_value4	30	31
+322431	Redemption Girdle	ItemLevel	90	92
+322431	Redemption Girdle	armor	498	509
+322431	Redemption Girdle	stat_value1	35	36
+322431	Redemption Girdle	stat_value4	39	40
+322436	Cryptstalker Tunic	ItemLevel	90	92
+322436	Cryptstalker Tunic	armor	696	711
+322436	Cryptstalker Tunic	stat_value1	28	29
+322436	Cryptstalker Tunic	stat_value3	29	30
+322436	Cryptstalker Tunic	stat_value6	46	47
+322437	Cryptstalker Legguards	ItemLevel	90	92
+322437	Cryptstalker Legguards	armor	611	625
+322437	Cryptstalker Legguards	stat_value1	30	31
+322437	Cryptstalker Legguards	stat_value3	28	29
+322437	Cryptstalker Legguards	stat_value5	57	58
+322438	Cryptstalker Headpiece	ItemLevel	90	92
+322438	Cryptstalker Headpiece	armor	567	580
+322438	Cryptstalker Headpiece	stat_value1	25	26
+322438	Cryptstalker Headpiece	stat_value3	32	33
+322438	Cryptstalker Headpiece	stat_value4	30	31
+322438	Cryptstalker Headpiece	stat_value5	41	42
+322439	Cryptstalker Spaulders	ItemLevel	90	92
+322439	Cryptstalker Spaulders	armor	524	536
+322439	Cryptstalker Spaulders	stat_value3	25	26
+322439	Cryptstalker Spaulders	stat_value5	37	38
+322440	Cryptstalker Boots	ItemLevel	90	92
+322440	Cryptstalker Boots	armor	481	492
+322440	Cryptstalker Boots	stat_value1	24	25
+322440	Cryptstalker Boots	stat_value5	43	44
+322441	Cryptstalker Handguards	ItemLevel	90	92
+322441	Cryptstalker Handguards	armor	439	449
+322441	Cryptstalker Handguards	stat_value1	23	24
+322441	Cryptstalker Handguards	stat_value3	23	24
+322441	Cryptstalker Handguards	stat_value5	28	29
+322442	Cryptstalker Girdle	ItemLevel	90	92
+322442	Cryptstalker Girdle	armor	393	402
+322442	Cryptstalker Girdle	stat_value3	24	25
+322442	Cryptstalker Girdle	stat_value6	32	33
+322443	Cryptstalker Wristguards	ItemLevel	90	92
+322443	Cryptstalker Wristguards	armor	305	312
+322443	Cryptstalker Wristguards	stat_value5	28	29
+322464	Earthshatter Tunic	ItemLevel	90	92
+322464	Earthshatter Tunic	armor	696	711
+322464	Earthshatter Tunic	stat_value1	28	29
+322464	Earthshatter Tunic	stat_value3	25	26
+322464	Earthshatter Tunic	stat_value4	24	25
+322464	Earthshatter Tunic	stat_value6	32	33
+322465	Earthshatter Legguards	ItemLevel	90	92
+322465	Earthshatter Legguards	armor	611	625
+322465	Earthshatter Legguards	stat_value1	32	33
+322465	Earthshatter Legguards	stat_value3	31	32
+322465	Earthshatter Legguards	stat_value6	32	33
+322466	Earthshatter Headpiece	ItemLevel	90	92
+322466	Earthshatter Headpiece	armor	567	580
+322466	Earthshatter Headpiece	stat_value1	30	31
+322466	Earthshatter Headpiece	stat_value3	27	28
+322466	Earthshatter Headpiece	stat_value6	33	34
+322467	Earthshatter Spaulders	ItemLevel	90	92
+322467	Earthshatter Spaulders	armor	524	536
+322467	Earthshatter Spaulders	stat_value1	25	26
+322467	Earthshatter Spaulders	stat_value3	24	25
+322467	Earthshatter Spaulders	stat_value5	25	26
+322468	Earthshatter Boots	ItemLevel	90	92
+322468	Earthshatter Boots	armor	481	492
+322468	Earthshatter Boots	stat_value1	25	26
+322468	Earthshatter Boots	stat_value5	27	28
+322469	Earthshatter Handguards	ItemLevel	90	92
+322469	Earthshatter Handguards	armor	439	449
+322469	Earthshatter Handguards	stat_value1	25	26
+322469	Earthshatter Handguards	stat_value5	24	25
+322470	Earthshatter Girdle	ItemLevel	90	92
+322470	Earthshatter Girdle	armor	393	402
+322470	Earthshatter Girdle	stat_value1	25	26
+322470	Earthshatter Girdle	stat_value5	28	29
+322471	Earthshatter Wristguards	ItemLevel	90	92
+322471	Earthshatter Wristguards	armor	305	312
+322476	Bonescythe Breastplate	ItemLevel	90	92
+322476	Bonescythe Breastplate	armor	594	607
+322476	Bonescythe Breastplate	stat_value1	30	31
+322476	Bonescythe Breastplate	stat_value2	31	32
+322476	Bonescythe Breastplate	stat_value6	28	29
+322477	Bonescythe Legplates	ItemLevel	90	92
+322477	Bonescythe Legplates	armor	522	534
+322477	Bonescythe Legplates	stat_value1	40	41
+322477	Bonescythe Legplates	stat_value2	27	28
+322477	Bonescythe Legplates	stat_value5	33	34
+322478	Bonescythe Helmet	ItemLevel	90	92
+322478	Bonescythe Helmet	armor	484	495
+322478	Bonescythe Helmet	stat_value1	25	26
+322478	Bonescythe Helmet	stat_value2	31	32
+322478	Bonescythe Helmet	stat_value6	29	30
+322479	Bonescythe Pauldrons	ItemLevel	90	92
+322479	Bonescythe Pauldrons	armor	447	457
+322479	Bonescythe Pauldrons	stat_value1	30	31
+322479	Bonescythe Pauldrons	stat_value4	31	32
+322480	Bonescythe Sabatons	ItemLevel	90	92
+322480	Bonescythe Sabatons	armor	411	420
+322480	Bonescythe Sabatons	stat_value1	37	38
+322480	Bonescythe Sabatons	stat_value2	23	24
+322480	Bonescythe Sabatons	stat_value4	28	29
+322481	Bonescythe Gauntlets	ItemLevel	90	92
+322481	Bonescythe Gauntlets	armor	374	382
+322481	Bonescythe Gauntlets	stat_value1	28	29
+322481	Bonescythe Gauntlets	stat_value3	23	24
+322481	Bonescythe Gauntlets	stat_value4	24	25
+322482	Bonescythe Waistguard	ItemLevel	90	92
+322482	Bonescythe Waistguard	armor	336	343
+322482	Bonescythe Waistguard	stat_value1	30	31
+322482	Bonescythe Waistguard	stat_value3	28	29
+322483	Bonescythe Bracers	ItemLevel	90	92
+322483	Bonescythe Bracers	armor	261	267
+322488	Dreamwalker Tunic	ItemLevel	90	92
+322488	Dreamwalker Tunic	armor	594	607
+322488	Dreamwalker Tunic	stat_value1	23	24
+322488	Dreamwalker Tunic	stat_value2	29	30
+322488	Dreamwalker Tunic	stat_value3	31	32
+322488	Dreamwalker Tunic	stat_value5	38	39
+322489	Dreamwalker Legguards	ItemLevel	90	92
+322489	Dreamwalker Legguards	armor	522	534
+322489	Dreamwalker Legguards	stat_value2	25	26
+322489	Dreamwalker Legguards	stat_value3	24	25
+322489	Dreamwalker Legguards	stat_value5	38	39
+322490	Dreamwalker Headpiece	ItemLevel	90	92
+322490	Dreamwalker Headpiece	armor	484	495
+322490	Dreamwalker Headpiece	stat_value1	30	31
+322490	Dreamwalker Headpiece	stat_value2	24	25
+322490	Dreamwalker Headpiece	stat_value3	27	28
+322490	Dreamwalker Headpiece	stat_value5	39	40
+322491	Dreamwalker Spaulders	ItemLevel	90	92
+322491	Dreamwalker Spaulders	armor	447	457
+322491	Dreamwalker Spaulders	stat_value5	36	37
+322492	Dreamwalker Boots	ItemLevel	90	92
+322492	Dreamwalker Boots	armor	411	420
+322492	Dreamwalker Boots	stat_value6	31	32
+322493	Dreamwalker Handguards	ItemLevel	90	92
+322493	Dreamwalker Handguards	armor	374	382
+322493	Dreamwalker Handguards	stat_value4	30	31
+322494	Dreamwalker Girdle	ItemLevel	90	92
+322494	Dreamwalker Girdle	armor	336	343
+322494	Dreamwalker Girdle	stat_value6	38	39
+322495	Dreamwalker Wristguards	ItemLevel	90	92
+322495	Dreamwalker Wristguards	armor	261	267
+322495	Dreamwalker Wristguards	stat_value2	23	24
+322495	Dreamwalker Wristguards	stat_value4	23	24
+322496	Frostfire Robe	ItemLevel	90	92
+322496	Frostfire Robe	armor	464	474
+322496	Frostfire Robe	stat_value1	26	27
+322496	Frostfire Robe	stat_value2	25	26
+322496	Frostfire Robe	stat_value3	24	25
+322496	Frostfire Robe	stat_value5	48	49
+322497	Frostfire Leggings	ItemLevel	90	92
+322497	Frostfire Leggings	armor	408	417
+322497	Frostfire Leggings	stat_value1	31	32
+322497	Frostfire Leggings	stat_value2	27	28
+322497	Frostfire Leggings	stat_value6	46	47
+322498	Frostfire Circlet	ItemLevel	90	92
+322498	Frostfire Circlet	armor	378	386
+322498	Frostfire Circlet	stat_value1	27	28
+322498	Frostfire Circlet	stat_value2	23	24
+322498	Frostfire Circlet	stat_value3	26	27
+322498	Frostfire Circlet	stat_value6	43	44
+322499	Frostfire Shoulderpads	ItemLevel	90	92
+322499	Frostfire Shoulderpads	armor	349	357
+322499	Frostfire Shoulderpads	stat_value1	28	29
+322499	Frostfire Shoulderpads	stat_value2	26	27
+322499	Frostfire Shoulderpads	stat_value4	39	40
+322500	Frostfire Sandals	ItemLevel	90	92
+322500	Frostfire Sandals	armor	321	328
+322500	Frostfire Sandals	stat_value5	30	31
+322501	Frostfire Gloves	ItemLevel	90	92
+322501	Frostfire Gloves	armor	292	298
+322501	Frostfire Gloves	stat_value1	23	24
+322501	Frostfire Gloves	stat_value4	39	40
+322502	Frostfire Belt	ItemLevel	90	92
+322502	Frostfire Belt	armor	262	268
+322502	Frostfire Belt	stat_value1	25	26
+322502	Frostfire Belt	stat_value6	30	31
+322503	Frostfire Bindings	ItemLevel	90	92
+322503	Frostfire Bindings	armor	204	209
+322503	Frostfire Bindings	stat_value5	25	26
+322504	Plagueheart Robe	ItemLevel	90	92
+322504	Plagueheart Robe	armor	464	474
+322504	Plagueheart Robe	stat_value2	36	37
+322504	Plagueheart Robe	stat_value5	51	52
+322505	Plagueheart Leggings	ItemLevel	90	92
+322505	Plagueheart Leggings	armor	408	417
+322505	Plagueheart Leggings	stat_value1	23	24
+322505	Plagueheart Leggings	stat_value3	27	28
+322505	Plagueheart Leggings	stat_value6	35	36
+322506	Plagueheart Circlet	ItemLevel	90	92
+322506	Plagueheart Circlet	armor	378	386
+322506	Plagueheart Circlet	stat_value1	26	27
+322506	Plagueheart Circlet	stat_value2	25	26
+322506	Plagueheart Circlet	stat_value3	36	37
+322506	Plagueheart Circlet	stat_value6	39	40
+322507	Plagueheart Shoulderpads	ItemLevel	90	92
+322507	Plagueheart Shoulderpads	armor	349	357
+322507	Plagueheart Shoulderpads	stat_value2	26	27
+322507	Plagueheart Shoulderpads	stat_value5	38	39
+322508	Plagueheart Sandals	ItemLevel	90	92
+322508	Plagueheart Sandals	armor	321	328
+322508	Plagueheart Sandals	stat_value2	25	26
+322508	Plagueheart Sandals	stat_value4	44	45
+322509	Plagueheart Gloves	ItemLevel	90	92
+322509	Plagueheart Gloves	armor	292	298
+322509	Plagueheart Gloves	stat_value2	27	28
+322509	Plagueheart Gloves	stat_value4	41	42
+322510	Plagueheart Belt	ItemLevel	90	92
+322510	Plagueheart Belt	armor	262	268
+322510	Plagueheart Belt	stat_value2	25	26
+322510	Plagueheart Belt	stat_value5	37	38
+322511	Plagueheart Bindings	ItemLevel	90	92
+322511	Plagueheart Bindings	armor	204	209
+322511	Plagueheart Bindings	stat_value3	24	25
+322512	Robe of Faith	ItemLevel	90	92
+322512	Robe of Faith	armor	464	474
+322512	Robe of Faith	stat_value2	24	25
+322512	Robe of Faith	stat_value3	27	28
+322512	Robe of Faith	stat_value7	33	34
+322513	Leggings of Faith	ItemLevel	90	92
+322513	Leggings of Faith	armor	408	417
+322513	Leggings of Faith	stat_value2	26	27
+322513	Leggings of Faith	stat_value3	27	28
+322513	Leggings of Faith	stat_value6	35	36
+322514	Circlet of Faith	ItemLevel	90	92
+322514	Circlet of Faith	armor	378	386
+322514	Circlet of Faith	stat_value2	24	25
+322514	Circlet of Faith	stat_value3	28	29
+322514	Circlet of Faith	stat_value6	30	31
+322515	Shoulderpads of Faith	ItemLevel	90	92
+322515	Shoulderpads of Faith	armor	349	357
+322515	Shoulderpads of Faith	stat_value3	26	27
+322515	Shoulderpads of Faith	stat_value5	33	34
+322516	Sandals of Faith	ItemLevel	90	92
+322516	Sandals of Faith	armor	321	328
+322516	Sandals of Faith	stat_value5	30	31
+322517	Gloves of Faith	ItemLevel	90	92
+322517	Gloves of Faith	armor	292	298
+322517	Gloves of Faith	stat_value2	24	25
+322517	Gloves of Faith	stat_value6	29	30
+322518	Belt of Faith	ItemLevel	90	92
+322518	Belt of Faith	armor	262	268
+322518	Belt of Faith	stat_value2	23	24
+322518	Belt of Faith	stat_value5	30	31
+322519	Bindings of Faith	ItemLevel	90	92
+322519	Bindings of Faith	armor	204	209
+1310488	Dreadborne Breastplate	ItemLevel	95	97
+1310488	Dreadborne Breastplate	armor	927	947
+1310488	Dreadborne Breastplate	stat_value1	36	37
+1310488	Dreadborne Breastplate	stat_value2	34	35
+1310489	Dreadborne Legplates	ItemLevel	95	97
+1310489	Dreadborne Legplates	armor	814	831
+1310489	Dreadborne Legplates	stat_value1	39	40
+1310489	Dreadborne Legplates	stat_value2	31	32
+1310490	Dreadborne Helmet	ItemLevel	95	97
+1310490	Dreadborne Helmet	armor	756	772
+1310490	Dreadborne Helmet	stat_value1	32	33
+1310490	Dreadborne Helmet	stat_value2	31	32
+1310491	Dreadborne Pauldrons	ItemLevel	95	97
+1310491	Dreadborne Pauldrons	armor	698	713
+1310491	Dreadborne Pauldrons	stat_value1	32	33
+1310491	Dreadborne Pauldrons	stat_value2	28	29
+1310492	Dreadborne Sabatons	ItemLevel	95	97
+1310492	Dreadborne Sabatons	armor	641	654
+1310492	Dreadborne Sabatons	stat_value1	28	29
+1310492	Dreadborne Sabatons	stat_value2	26	27
+1310493	Dreadborne Gauntlets	ItemLevel	95	97
+1310493	Dreadborne Gauntlets	armor	584	596
+1310493	Dreadborne Gauntlets	stat_value1	27	28
+1310494	Dreadborne Waistguard	ItemLevel	95	97
+1310494	Dreadborne Waistguard	armor	524	535
+1310494	Dreadborne Waistguard	stat_value1	32	33
+1310495	Dreadborne Bracers	ItemLevel	95	97
+1310495	Dreadborne Bracers	armor	407	416
+1310495	Dreadborne Bracers	stat_value1	24	25
+1310519	Earthshatter Crown	ItemLevel	95	97
+1310519	Earthshatter Crown	armor	597	610
+1310519	Earthshatter Crown	stat_value1	27	28
+1310519	Earthshatter Crown	stat_value2	27	28
+1310519	Earthshatter Crown	stat_value5	34	35
+1310520	Earthshatter Epaulets	ItemLevel	95	97
+1310520	Earthshatter Epaulets	armor	551	563
+1310520	Earthshatter Epaulets	stat_value1	27	28
+1310520	Earthshatter Epaulets	stat_value2	26	27
+1310520	Earthshatter Epaulets	stat_value5	35	36
+1310729	Earthshatter Breastplate	ItemLevel	95	97
+1310729	Earthshatter Breastplate	armor	732	747
+1310729	Earthshatter Breastplate	stat_value1	30	31
+1310729	Earthshatter Breastplate	stat_value2	27	28
+1310729	Earthshatter Breastplate	stat_value5	31	32
+1310729	Earthshatter Breastplate	stat_value6	42	43
+1310730	Earthshatter Bracers	ItemLevel	95	97
+1310730	Earthshatter Bracers	armor	321	328
+1310730	Earthshatter Bracers	stat_value4	27	28
+1310731	Earthshatter Gauntlets	ItemLevel	95	97
+1310731	Earthshatter Gauntlets	armor	461	471
+1310731	Earthshatter Gauntlets	stat_value1	28	29
+1310731	Earthshatter Gauntlets	stat_value4	34	35
+1310809	Earthshatter Belt	ItemLevel	95	97
+1310809	Earthshatter Belt	armor	413	422
+1310809	Earthshatter Belt	stat_value1	28	29
+1310809	Earthshatter Belt	stat_value4	39	40
+1310848	Earthshatter Legplates	ItemLevel	95	97
+1310848	Earthshatter Legplates	armor	643	657
+1310848	Earthshatter Legplates	stat_value1	32	33
+1310848	Earthshatter Legplates	stat_value2	29	30
+1310848	Earthshatter Legplates	stat_value5	39	40
+1310859	Earthshatter Greaves	ItemLevel	95	97
+1310859	Earthshatter Greaves	armor	506	517
+1310859	Earthshatter Greaves	stat_value1	26	27
+1310859	Earthshatter Greaves	stat_value4	39	40
+1313566	Frozen Vrykul Armguards	ItemLevel	95	97
+1313566	Frozen Vrykul Armguards	armor	321	328
+1313566	Frozen Vrykul Armguards	stat_value3	34	35
+1313567	Frozen Vrykul Hauberk	ItemLevel	95	97
+1313567	Frozen Vrykul Hauberk	armor	732	747
+1313567	Frozen Vrykul Hauberk	stat_value1	29	30
+1313567	Frozen Vrykul Hauberk	stat_value2	26	27
+1313567	Frozen Vrykul Hauberk	stat_value3	41	42
+1313567	Frozen Vrykul Hauberk	stat_value5	24	25
+1313567	Frozen Vrykul Hauberk	stat_value7	38	39
+1313568	Frozen Vrykul Greaves	ItemLevel	95	97
+1313568	Frozen Vrykul Greaves	armor	643	657
+1313568	Frozen Vrykul Greaves	stat_value1	38	39
+1313568	Frozen Vrykul Greaves	stat_value2	30	31
+1313568	Frozen Vrykul Greaves	stat_value3	42	43
+1313568	Frozen Vrykul Greaves	stat_value4	28	29
+1313568	Frozen Vrykul Greaves	stat_value5	31	32
+1313568	Frozen Vrykul Greaves	stat_value6	42	43
+1313569	Frozen Vrykul Gloves	ItemLevel	95	97
+1313569	Frozen Vrykul Gloves	armor	461	471
+1313569	Frozen Vrykul Gloves	stat_value1	27	28
+1313569	Frozen Vrykul Gloves	stat_value3	32	33
+1313569	Frozen Vrykul Gloves	stat_value6	24	25
+1313570	Frozen Vrykul Boots	ItemLevel	95	97
+1313570	Frozen Vrykul Boots	armor	506	517
+1313570	Frozen Vrykul Boots	stat_value1	26	27
+1313570	Frozen Vrykul Boots	stat_value3	38	39
+1313570	Frozen Vrykul Boots	stat_value5	26	27
+1313571	Frozen Vrykul Helm	ItemLevel	95	97
+1313571	Frozen Vrykul Helm	armor	597	610
+1313571	Frozen Vrykul Helm	stat_value1	28	29
+1313571	Frozen Vrykul Helm	stat_value2	24	25
+1313571	Frozen Vrykul Helm	stat_value3	44	45
+1313571	Frozen Vrykul Helm	stat_value6	24	25
+1313633	Frozen Vrykul Girdle	ItemLevel	95	97
+1313633	Frozen Vrykul Girdle	armor	413	422
+1313633	Frozen Vrykul Girdle	stat_value1	28	29
+1313633	Frozen Vrykul Girdle	stat_value3	32	33
+1313633	Frozen Vrykul Girdle	stat_value5	26	27
+1313634	Frozen Vrykul Spaulders	ItemLevel	95	97
+1313634	Frozen Vrykul Spaulders	armor	551	563
+1313634	Frozen Vrykul Spaulders	stat_value1	26	27
+1313634	Frozen Vrykul Spaulders	stat_value3	36	37
+1313634	Frozen Vrykul Spaulders	stat_value5	26	27
+1322416	Dreadnaught Breastplate	ItemLevel	95	97
+1322416	Dreadnaught Breastplate	armor	927	947
+1322416	Dreadnaught Breastplate	stat_value1	24	25
+1322416	Dreadnaught Breastplate	stat_value2	44	45
+1322416	Dreadnaught Breastplate	stat_value6	32	33
+1322417	Dreadnaught Legplates	ItemLevel	95	97
+1322417	Dreadnaught Legplates	armor	814	831
+1322417	Dreadnaught Legplates	stat_value1	27	28
+1322417	Dreadnaught Legplates	stat_value2	43	44
+1322418	Dreadnaught Helmet	ItemLevel	95	97
+1322418	Dreadnaught Helmet	armor	756	772
+1322418	Dreadnaught Helmet	stat_value1	52	53
+1322418	Dreadnaught Helmet	stat_value2	24	25
+1322418	Dreadnaught Helmet	stat_value3	24	25
+1322419	Dreadnaught Pauldrons	ItemLevel	95	97
+1322419	Dreadnaught Pauldrons	armor	698	713
+1322419	Dreadnaught Pauldrons	stat_value2	32	33
+1322419	Dreadnaught Pauldrons	stat_value6	30	31
+1322420	Dreadnaught Sabatons	ItemLevel	95	97
+1322420	Dreadnaught Sabatons	armor	641	654
+1322420	Dreadnaught Sabatons	stat_value2	39	40
+1322421	Dreadnaught Gauntlets	ItemLevel	95	97
+1322421	Dreadnaught Gauntlets	armor	584	596
+1322421	Dreadnaught Gauntlets	stat_value2	28	29
+1322421	Dreadnaught Gauntlets	stat_value5	41	42
+1322422	Dreadnaught Waistguard	ItemLevel	95	97
+1322422	Dreadnaught Waistguard	armor	524	535
+1322422	Dreadnaught Waistguard	stat_value2	30	31
+1322423	Dreadnaught Bracers	ItemLevel	95	97
+1322423	Dreadnaught Bracers	armor	407	416
+1322423	Dreadnaught Bracers	stat_value2	32	33
+1322424	Redemption Wristguards	ItemLevel	95	97
+1322424	Redemption Wristguards	armor	407	416
+1322424	Redemption Wristguards	stat_value2	26	27
+1322424	Redemption Wristguards	stat_value5	32	33
+1322425	Redemption Tunic	ItemLevel	95	97
+1322425	Redemption Tunic	armor	927	947
+1322425	Redemption Tunic	stat_value1	29	30
+1322425	Redemption Tunic	stat_value2	38	39
+1322425	Redemption Tunic	stat_value3	32	33
+1322425	Redemption Tunic	stat_value4	37	38
+1322426	Redemption Handguards	ItemLevel	95	97
+1322426	Redemption Handguards	armor	584	596
+1322426	Redemption Handguards	stat_value1	28	29
+1322426	Redemption Handguards	stat_value2	27	28
+1322426	Redemption Handguards	stat_value4	38	39
+1322427	Redemption Legguards	ItemLevel	95	97
+1322427	Redemption Legguards	armor	814	831
+1322427	Redemption Legguards	stat_value1	38	39
+1322427	Redemption Legguards	stat_value2	32	33
+1322427	Redemption Legguards	stat_value3	29	30
+1322427	Redemption Legguards	stat_value5	44	45
+1322428	Redemption Headpiece	ItemLevel	95	97
+1322428	Redemption Headpiece	armor	756	772
+1322428	Redemption Headpiece	stat_value1	37	38
+1322428	Redemption Headpiece	stat_value2	32	33
+1322428	Redemption Headpiece	stat_value3	29	30
+1322428	Redemption Headpiece	stat_value4	45	46
+1322429	Redemption Spaulders	ItemLevel	95	97
+1322429	Redemption Spaulders	armor	698	713
+1322429	Redemption Spaulders	stat_value1	30	31
+1322429	Redemption Spaulders	stat_value2	26	27
+1322429	Redemption Spaulders	stat_value5	32	33
+1322430	Redemption Boots	ItemLevel	95	97
+1322430	Redemption Boots	armor	641	654
+1322430	Redemption Boots	stat_value1	26	27
+1322430	Redemption Boots	stat_value2	26	27
+1322430	Redemption Boots	stat_value4	32	33
+1322431	Redemption Girdle	ItemLevel	95	97
+1322431	Redemption Girdle	armor	524	535
+1322431	Redemption Girdle	stat_value1	37	38
+1322431	Redemption Girdle	stat_value4	42	43
+1322436	Cryptstalker Tunic	ItemLevel	95	97
+1322436	Cryptstalker Tunic	armor	732	747
+1322436	Cryptstalker Tunic	stat_value1	30	31
+1322436	Cryptstalker Tunic	stat_value3	31	32
+1322436	Cryptstalker Tunic	stat_value6	50	51
+1322437	Cryptstalker Legguards	ItemLevel	95	97
+1322437	Cryptstalker Legguards	armor	643	657
+1322437	Cryptstalker Legguards	stat_value1	32	33
+1322437	Cryptstalker Legguards	stat_value3	30	31
+1322437	Cryptstalker Legguards	stat_value5	61	62
+1322438	Cryptstalker Headpiece	ItemLevel	95	97
+1322438	Cryptstalker Headpiece	armor	597	610
+1322438	Cryptstalker Headpiece	stat_value1	27	28
+1322438	Cryptstalker Headpiece	stat_value3	35	36
+1322438	Cryptstalker Headpiece	stat_value4	32	33
+1322438	Cryptstalker Headpiece	stat_value5	44	45
+1322439	Cryptstalker Spaulders	ItemLevel	95	97
+1322439	Cryptstalker Spaulders	armor	551	563
+1322439	Cryptstalker Spaulders	stat_value3	27	28
+1322439	Cryptstalker Spaulders	stat_value5	39	40
+1322440	Cryptstalker Boots	ItemLevel	95	97
+1322440	Cryptstalker Boots	armor	506	517
+1322440	Cryptstalker Boots	stat_value1	26	27
+1322440	Cryptstalker Boots	stat_value5	46	47
+1322441	Cryptstalker Handguards	ItemLevel	95	97
+1322441	Cryptstalker Handguards	armor	461	471
+1322441	Cryptstalker Handguards	stat_value1	24	25
+1322441	Cryptstalker Handguards	stat_value3	24	25
+1322441	Cryptstalker Handguards	stat_value5	30	31
+1322442	Cryptstalker Girdle	ItemLevel	95	97
+1322442	Cryptstalker Girdle	armor	413	422
+1322442	Cryptstalker Girdle	stat_value3	26	27
+1322442	Cryptstalker Girdle	stat_value6	35	36
+1322443	Cryptstalker Wristguards	ItemLevel	95	97
+1322443	Cryptstalker Wristguards	armor	321	328
+1322443	Cryptstalker Wristguards	stat_value5	30	31
+1322464	Earthshatter Tunic	ItemLevel	95	97
+1322464	Earthshatter Tunic	armor	732	747
+1322464	Earthshatter Tunic	stat_value1	30	31
+1322464	Earthshatter Tunic	stat_value3	27	28
+1322464	Earthshatter Tunic	stat_value4	26	27
+1322464	Earthshatter Tunic	stat_value6	35	36
+1322465	Earthshatter Legguards	ItemLevel	95	97
+1322465	Earthshatter Legguards	armor	643	657
+1322465	Earthshatter Legguards	stat_value1	35	36
+1322465	Earthshatter Legguards	stat_value3	34	35
+1322465	Earthshatter Legguards	stat_value6	35	36
+1322466	Earthshatter Headpiece	ItemLevel	95	97
+1322466	Earthshatter Headpiece	armor	597	610
+1322466	Earthshatter Headpiece	stat_value1	32	33
+1322466	Earthshatter Headpiece	stat_value3	29	30
+1322466	Earthshatter Headpiece	stat_value6	36	37
+1322467	Earthshatter Spaulders	ItemLevel	95	97
+1322467	Earthshatter Spaulders	armor	551	563
+1322467	Earthshatter Spaulders	stat_value1	27	28
+1322467	Earthshatter Spaulders	stat_value3	26	27
+1322467	Earthshatter Spaulders	stat_value5	27	28
+1322468	Earthshatter Boots	ItemLevel	95	97
+1322468	Earthshatter Boots	armor	506	517
+1322468	Earthshatter Boots	stat_value1	27	28
+1322468	Earthshatter Boots	stat_value5	29	30
+1322469	Earthshatter Handguards	ItemLevel	95	97
+1322469	Earthshatter Handguards	armor	461	471
+1322469	Earthshatter Handguards	stat_value1	27	28
+1322469	Earthshatter Handguards	stat_value5	26	27
+1322470	Earthshatter Girdle	ItemLevel	95	97
+1322470	Earthshatter Girdle	armor	413	422
+1322470	Earthshatter Girdle	stat_value1	27	28
+1322470	Earthshatter Girdle	stat_value5	30	31
+1322471	Earthshatter Wristguards	ItemLevel	95	97
+1322471	Earthshatter Wristguards	armor	321	328
+1322476	Bonescythe Breastplate	ItemLevel	95	97
+1322476	Bonescythe Breastplate	armor	625	638
+1322476	Bonescythe Breastplate	stat_value1	32	33
+1322476	Bonescythe Breastplate	stat_value2	34	35
+1322476	Bonescythe Breastplate	stat_value6	30	31
+1322477	Bonescythe Legplates	ItemLevel	95	97
+1322477	Bonescythe Legplates	armor	548	560
+1322477	Bonescythe Legplates	stat_value1	43	44
+1322477	Bonescythe Legplates	stat_value2	29	30
+1322477	Bonescythe Legplates	stat_value5	36	37
+1322478	Bonescythe Helmet	ItemLevel	95	97
+1322478	Bonescythe Helmet	armor	509	520
+1322478	Bonescythe Helmet	stat_value1	27	28
+1322478	Bonescythe Helmet	stat_value2	34	35
+1322478	Bonescythe Helmet	stat_value6	31	32
+1322479	Bonescythe Pauldrons	ItemLevel	95	97
+1322479	Bonescythe Pauldrons	armor	470	480
+1322479	Bonescythe Pauldrons	stat_value1	32	33
+1322479	Bonescythe Pauldrons	stat_value4	34	35
+1322480	Bonescythe Sabatons	ItemLevel	95	97
+1322480	Bonescythe Sabatons	armor	432	441
+1322480	Bonescythe Sabatons	stat_value1	39	40
+1322480	Bonescythe Sabatons	stat_value2	24	25
+1322480	Bonescythe Sabatons	stat_value4	30	31
+1322481	Bonescythe Gauntlets	ItemLevel	95	97
+1322481	Bonescythe Gauntlets	armor	394	402
+1322481	Bonescythe Gauntlets	stat_value1	30	31
+1322481	Bonescythe Gauntlets	stat_value3	24	25
+1322481	Bonescythe Gauntlets	stat_value4	26	27
+1322482	Bonescythe Waistguard	ItemLevel	95	97
+1322482	Bonescythe Waistguard	armor	353	360
+1322482	Bonescythe Waistguard	stat_value1	32	33
+1322482	Bonescythe Waistguard	stat_value3	30	31
+1322483	Bonescythe Bracers	ItemLevel	95	97
+1322483	Bonescythe Bracers	armor	274	280
+1322488	Dreamwalker Tunic	ItemLevel	95	97
+1322488	Dreamwalker Tunic	armor	625	638
+1322488	Dreamwalker Tunic	stat_value1	24	25
+1322488	Dreamwalker Tunic	stat_value2	31	32
+1322488	Dreamwalker Tunic	stat_value3	34	35
+1322488	Dreamwalker Tunic	stat_value5	41	42
+1322489	Dreamwalker Legguards	ItemLevel	95	97
+1322489	Dreamwalker Legguards	armor	548	560
+1322489	Dreamwalker Legguards	stat_value2	26	27
+1322489	Dreamwalker Legguards	stat_value3	26	27
+1322489	Dreamwalker Legguards	stat_value5	41	42
+1322490	Dreamwalker Headpiece	ItemLevel	95	97
+1322490	Dreamwalker Headpiece	armor	509	520
+1322490	Dreamwalker Headpiece	stat_value1	32	33
+1322490	Dreamwalker Headpiece	stat_value2	26	27
+1322490	Dreamwalker Headpiece	stat_value3	29	30
+1322490	Dreamwalker Headpiece	stat_value5	42	43
+1322491	Dreamwalker Spaulders	ItemLevel	95	97
+1322491	Dreamwalker Spaulders	armor	470	480
+1322491	Dreamwalker Spaulders	stat_value5	38	39
+1322492	Dreamwalker Boots	ItemLevel	95	97
+1322492	Dreamwalker Boots	armor	432	441
+1322492	Dreamwalker Boots	stat_value6	34	35
+1322493	Dreamwalker Handguards	ItemLevel	95	97
+1322493	Dreamwalker Handguards	armor	394	402
+1322493	Dreamwalker Handguards	stat_value4	32	33
+1322494	Dreamwalker Girdle	ItemLevel	95	97
+1322494	Dreamwalker Girdle	armor	353	360
+1322494	Dreamwalker Girdle	stat_value6	41	42
+1322495	Dreamwalker Wristguards	ItemLevel	95	97
+1322495	Dreamwalker Wristguards	armor	274	280
+1322495	Dreamwalker Wristguards	stat_value2	24	25
+1322495	Dreamwalker Wristguards	stat_value4	24	25
+1322496	Frostfire Robe	ItemLevel	95	97
+1322496	Frostfire Robe	armor	488	498
+1322496	Frostfire Robe	stat_value1	28	29
+1322496	Frostfire Robe	stat_value2	27	28
+1322496	Frostfire Robe	stat_value3	26	27
+1322496	Frostfire Robe	stat_value5	51	52
+1322497	Frostfire Leggings	ItemLevel	95	97
+1322497	Frostfire Leggings	armor	428	437
+1322497	Frostfire Leggings	stat_value1	34	35
+1322497	Frostfire Leggings	stat_value2	29	30
+1322497	Frostfire Leggings	stat_value6	50	51
+1322498	Frostfire Circlet	ItemLevel	95	97
+1322498	Frostfire Circlet	armor	398	406
+1322498	Frostfire Circlet	stat_value1	29	30
+1322498	Frostfire Circlet	stat_value2	24	25
+1322498	Frostfire Circlet	stat_value3	28	29
+1322498	Frostfire Circlet	stat_value6	46	47
+1322499	Frostfire Shoulderpads	ItemLevel	95	97
+1322499	Frostfire Shoulderpads	armor	367	375
+1322499	Frostfire Shoulderpads	stat_value1	30	31
+1322499	Frostfire Shoulderpads	stat_value2	28	29
+1322499	Frostfire Shoulderpads	stat_value4	42	43
+1322500	Frostfire Sandals	ItemLevel	95	97
+1322500	Frostfire Sandals	armor	337	344
+1322500	Frostfire Sandals	stat_value5	32	33
+1322501	Frostfire Gloves	ItemLevel	95	97
+1322501	Frostfire Gloves	armor	307	313
+1322501	Frostfire Gloves	stat_value1	24	25
+1322501	Frostfire Gloves	stat_value4	42	43
+1322502	Frostfire Belt	ItemLevel	95	97
+1322502	Frostfire Belt	armor	276	282
+1322502	Frostfire Belt	stat_value1	27	28
+1322502	Frostfire Belt	stat_value6	32	33
+1322503	Frostfire Bindings	ItemLevel	95	97
+1322503	Frostfire Bindings	armor	214	219
+1322503	Frostfire Bindings	stat_value5	27	28
+1322504	Plagueheart Robe	ItemLevel	95	97
+1322504	Plagueheart Robe	armor	488	498
+1322504	Plagueheart Robe	stat_value2	38	39
+1322504	Plagueheart Robe	stat_value5	55	56
+1322505	Plagueheart Leggings	ItemLevel	95	97
+1322505	Plagueheart Leggings	armor	428	437
+1322505	Plagueheart Leggings	stat_value1	24	25
+1322505	Plagueheart Leggings	stat_value3	29	30
+1322505	Plagueheart Leggings	stat_value6	37	38
+1322506	Plagueheart Circlet	ItemLevel	95	97
+1322506	Plagueheart Circlet	armor	398	406
+1322506	Plagueheart Circlet	stat_value1	28	29
+1322506	Plagueheart Circlet	stat_value2	27	28
+1322506	Plagueheart Circlet	stat_value3	38	39
+1322506	Plagueheart Circlet	stat_value6	42	43
+1322507	Plagueheart Shoulderpads	ItemLevel	95	97
+1322507	Plagueheart Shoulderpads	armor	367	375
+1322507	Plagueheart Shoulderpads	stat_value2	28	29
+1322507	Plagueheart Shoulderpads	stat_value5	41	42
+1322508	Plagueheart Sandals	ItemLevel	95	97
+1322508	Plagueheart Sandals	armor	337	344
+1322508	Plagueheart Sandals	stat_value2	27	28
+1322508	Plagueheart Sandals	stat_value4	48	49
+1322509	Plagueheart Gloves	ItemLevel	95	97
+1322509	Plagueheart Gloves	armor	307	313
+1322509	Plagueheart Gloves	stat_value2	29	30
+1322509	Plagueheart Gloves	stat_value4	44	45
+1322510	Plagueheart Belt	ItemLevel	95	97
+1322510	Plagueheart Belt	armor	276	282
+1322510	Plagueheart Belt	stat_value2	27	28
+1322510	Plagueheart Belt	stat_value5	39	40
+1322511	Plagueheart Bindings	ItemLevel	95	97
+1322511	Plagueheart Bindings	armor	214	219
+1322511	Plagueheart Bindings	stat_value3	26	27
+1322512	Robe of Faith	ItemLevel	95	97
+1322512	Robe of Faith	armor	488	498
+1322512	Robe of Faith	stat_value2	26	27
+1322512	Robe of Faith	stat_value3	29	30
+1322512	Robe of Faith	stat_value7	36	37
+1322513	Leggings of Faith	ItemLevel	95	97
+1322513	Leggings of Faith	armor	428	437
+1322513	Leggings of Faith	stat_value2	28	29
+1322513	Leggings of Faith	stat_value3	29	30
+1322513	Leggings of Faith	stat_value6	37	38
+1322514	Circlet of Faith	ItemLevel	95	97
+1322514	Circlet of Faith	armor	398	406
+1322514	Circlet of Faith	stat_value2	26	27
+1322514	Circlet of Faith	stat_value3	30	31
+1322514	Circlet of Faith	stat_value6	32	33
+1322515	Shoulderpads of Faith	ItemLevel	95	97
+1322515	Shoulderpads of Faith	armor	367	375
+1322515	Shoulderpads of Faith	stat_value3	28	29
+1322515	Shoulderpads of Faith	stat_value5	36	37
+1322516	Sandals of Faith	ItemLevel	95	97
+1322516	Sandals of Faith	armor	337	344
+1322516	Sandals of Faith	stat_value5	32	33
+1322517	Gloves of Faith	ItemLevel	95	97
+1322517	Gloves of Faith	armor	307	313
+1322517	Gloves of Faith	stat_value2	26	27
+1322517	Gloves of Faith	stat_value6	31	32
+1322518	Belt of Faith	ItemLevel	95	97
+1322518	Belt of Faith	armor	276	282
+1322518	Belt of Faith	stat_value2	24	25
+1322518	Belt of Faith	stat_value5	32	33
+1322519	Bindings of Faith	ItemLevel	95	97
+1322519	Bindings of Faith	armor	214	219
+1522416	Dreadnaught Chestguard	ItemLevel	86	88
+1522416	Dreadnaught Chestguard	armor	846	866
+1522416	Dreadnaught Chestguard	stat_value1	28	29
+1522416	Dreadnaught Chestguard	stat_value2	39	40
+1522417	Dreadnaught Legguards	ItemLevel	86	88
+1522417	Dreadnaught Legguards	armor	742	759
+1522417	Dreadnaught Legguards	stat_value2	39	40
+1522418	Dreadnaught Braincage	ItemLevel	86	88
+1522418	Dreadnaught Braincage	armor	688	704
+1522418	Dreadnaught Braincage	stat_value1	39	40
+1522418	Dreadnaught Braincage	stat_value2	24	25
+1522419	Dreadnaught Spaulders	ItemLevel	86	88
+1522419	Dreadnaught Spaulders	armor	636	651
+1522419	Dreadnaught Spaulders	stat_value1	30	31
+1522420	Dreadnaught Stompers	ItemLevel	86	88
+1522420	Dreadnaught Stompers	armor	584	598
+1522420	Dreadnaught Stompers	stat_value2	31	32
+1522421	Dreadnaught Grips	ItemLevel	86	88
+1522421	Dreadnaught Grips	armor	533	545
+1522421	Dreadnaught Grips	stat_value2	24	25
+1522422	Dreadnaught Belt	ItemLevel	86	88
+1522422	Dreadnaught Belt	armor	478	489
+1522422	Dreadnaught Belt	stat_value1	24	25
+1522422	Dreadnaught Belt	stat_value2	26	27
+1522422	Dreadnaught Belt	stat_value3	22	23
+1522423	Dreadnaught Wristguards	ItemLevel	86	88
+1522423	Dreadnaught Wristguards	armor	371	380
+1522423	Dreadnaught Wristguards	stat_value2	28	29
+1522424	Redemption Bracers	ItemLevel	86	88
+1522424	Redemption Bracers	armor	371	380
+1522424	Redemption Bracers	stat_value3	26	27
+1522425	Redemption Chestguard	ItemLevel	86	88
+1522425	Redemption Chestguard	armor	846	866
+1522425	Redemption Chestguard	stat_value1	27	28
+1522425	Redemption Chestguard	stat_value3	36	37
+1522425	Redemption Chestguard	stat_value6	29	30
+1522426	Redemption Grips	ItemLevel	86	88
+1522426	Redemption Grips	armor	533	545
+1522426	Redemption Grips	stat_value3	22	23
+1522426	Redemption Grips	stat_value6	24	25
+1522426	Redemption Grips	stat_value7	31	32
+1522427	Redemption Legplates	ItemLevel	86	88
+1522427	Redemption Legplates	armor	742	759
+1522427	Redemption Legplates	stat_value1	23	24
+1522427	Redemption Legplates	stat_value3	36	37
+1522427	Redemption Legplates	stat_value5	31	32
+1522428	Redemption Helmet	ItemLevel	86	88
+1522428	Redemption Helmet	armor	688	704
+1522428	Redemption Helmet	stat_value3	40	41
+1522428	Redemption Helmet	stat_value6	24	25
+1522429	Redemption Shoulderpads	ItemLevel	86	88
+1522429	Redemption Shoulderpads	armor	636	651
+1522429	Redemption Shoulderpads	stat_value3	26	27
+1522429	Redemption Shoulderpads	stat_value6	26	27
+1522429	Redemption Shoulderpads	stat_value7	34	35
+1522430	Redemption Stompers	ItemLevel	86	88
+1522430	Redemption Stompers	armor	584	598
+1522430	Redemption Stompers	stat_value3	29	30
+1522430	Redemption Stompers	stat_value5	26	27
+1522431	Redemption Waistguard	ItemLevel	86	88
+1522431	Redemption Waistguard	armor	478	489
+1522431	Redemption Waistguard	stat_value3	24	25
+1522431	Redemption Waistguard	stat_value6	27	28
+1522464	Earthshatter Chestguard	ItemLevel	86	88
+1522464	Earthshatter Chestguard	armor	668	684
+1522464	Earthshatter Chestguard	stat_value1	26	27
+1522464	Earthshatter Chestguard	stat_value2	24	25
+1522464	Earthshatter Chestguard	stat_value4	28	29
+1522464	Earthshatter Chestguard	stat_value5	36	37
+1522465	Earthshatter Leggings	ItemLevel	86	88
+1522465	Earthshatter Leggings	armor	586	600
+1522465	Earthshatter Leggings	stat_value1	26	27
+1522465	Earthshatter Leggings	stat_value2	25	26
+1522465	Earthshatter Leggings	stat_value6	36	37
+1522466	Earthshatter Helmet	ItemLevel	86	88
+1522466	Earthshatter Helmet	armor	543	556
+1522466	Earthshatter Helmet	stat_value2	25	26
+1522466	Earthshatter Helmet	stat_value5	33	34
+1522467	Earthshatter Shoulders	ItemLevel	86	88
+1522467	Earthshatter Shoulders	armor	502	514
+1522467	Earthshatter Shoulders	stat_value2	22	23
+1522467	Earthshatter Shoulders	stat_value4	32	33
+1522468	Earthshatter Stompers	ItemLevel	86	88
+1522468	Earthshatter Stompers	armor	461	472
+1522468	Earthshatter Stompers	stat_value5	29	30
+1522469	Earthshatter Grips	ItemLevel	86	88
+1522469	Earthshatter Grips	armor	421	431
+1522469	Earthshatter Grips	stat_value5	34	35
+1522470	Earthshatter Belt	ItemLevel	86	88
+1522470	Earthshatter Belt	armor	377	386
+1522470	Earthshatter Belt	stat_value3	22	23
+1522470	Earthshatter Belt	stat_value4	32	33
+1522471	Earthshatter Bracers	ItemLevel	86	88
+1522471	Earthshatter Bracers	armor	293	300
+1522471	Earthshatter Bracers	stat_value5	24	25
+1522488	Dreamwalker Robe	ItemLevel	86	88
+1522488	Dreamwalker Robe	armor	570	583
+1522488	Dreamwalker Robe	stat_value1	22	23
+1522488	Dreamwalker Robe	stat_value2	29	30
+1522488	Dreamwalker Robe	stat_value6	29	30
+1522489	Dreamwalker Leggings	ItemLevel	86	88
+1522489	Dreamwalker Leggings	armor	500	512
+1522489	Dreamwalker Leggings	stat_value1	24	25
+1522489	Dreamwalker Leggings	stat_value3	22	23
+1522489	Dreamwalker Leggings	stat_value5	37	38
+1522490	Dreamwalker Hood	ItemLevel	86	88
+1522490	Dreamwalker Hood	armor	463	474
+1522490	Dreamwalker Hood	stat_value2	22	23
+1522490	Dreamwalker Hood	stat_value3	25	26
+1522490	Dreamwalker Hood	stat_value6	27	28
+1522491	Dreamwalker Shoulderpads	ItemLevel	86	88
+1522491	Dreamwalker Shoulderpads	armor	428	438
+1522491	Dreamwalker Shoulderpads	stat_value5	33	34
+1522492	Dreamwalker Sandals	ItemLevel	86	88
+1522492	Dreamwalker Sandals	armor	394	403
+1522492	Dreamwalker Sandals	stat_value5	32	33
+1522493	Dreamwalker Gloves	ItemLevel	86	88
+1522493	Dreamwalker Gloves	armor	359	367
+1522493	Dreamwalker Gloves	stat_value2	26	27
+1522493	Dreamwalker Gloves	stat_value3	22	23
+1522493	Dreamwalker Gloves	stat_value4	29	30
+1522494	Dreamwalker Waist	ItemLevel	86	88
+1522494	Dreamwalker Waist	armor	322	329
+1522494	Dreamwalker Waist	stat_value5	28	29
+1522495	Dreamwalker Bracers	ItemLevel	86	88
+1522495	Dreamwalker Bracers	armor	250	256
+1522495	Dreamwalker Bracers	stat_value4	23	24
+1522512	Garb of Faith	ItemLevel	86	88
+1522512	Garb of Faith	armor	445	455
+1522512	Garb of Faith	stat_value3	29	30
+1522512	Garb of Faith	stat_value6	30	31
+1522513	Legguards of Faith	ItemLevel	86	88
+1522513	Legguards of Faith	armor	391	400
+1522513	Legguards of Faith	stat_value2	24	25
+1522513	Legguards of Faith	stat_value3	23	24
+1522513	Legguards of Faith	stat_value6	37	38
+1522514	Halo of Faith	ItemLevel	86	88
+1522514	Halo of Faith	armor	362	370
+1522514	Halo of Faith	stat_value2	23	24
+1522514	Halo of Faith	stat_value3	26	27
+1522514	Halo of Faith	stat_value6	34	35
+1522515	Spaulders of Faith	ItemLevel	86	88
+1522515	Spaulders of Faith	armor	335	343
+1522515	Spaulders of Faith	stat_value3	22	23
+1522515	Spaulders of Faith	stat_value5	30	31
+1522516	Boots of Faith	ItemLevel	86	88
+1522516	Boots of Faith	armor	308	315
+1522516	Boots of Faith	stat_value5	28	29
+1522517	Handguards of Faith	ItemLevel	86	88
+1522517	Handguards of Faith	armor	280	287
+1522517	Handguards of Faith	stat_value5	26	27
+1522518	Waistguard of Faith	ItemLevel	86	88
+1522518	Waistguard of Faith	armor	252	258
+1522518	Waistguard of Faith	stat_value5	26	27
+1522519	Bracers of Faith	ItemLevel	86	88
+1522519	Bracers of Faith	armor	195	200
+1532424	Redemption Bindings	ItemLevel	86	88
+1532424	Redemption Bindings	armor	371	380
+1532425	Redemption Breastplate	ItemLevel	86	88
+1532425	Redemption Breastplate	armor	846	866
+1532425	Redemption Breastplate	stat_value1	28	29
+1532425	Redemption Breastplate	stat_value3	26	27
+1532425	Redemption Breastplate	stat_value6	26	27
+1532426	Redemption Gauntlets	ItemLevel	86	88
+1532426	Redemption Gauntlets	armor	533	545
+1532426	Redemption Gauntlets	stat_value5	25	26
+1532427	Redemption Leggings	ItemLevel	86	88
+1532427	Redemption Leggings	armor	742	759
+1532427	Redemption Leggings	stat_value1	34	35
+1532427	Redemption Leggings	stat_value3	28	29
+1532427	Redemption Leggings	stat_value5	28	29
+1532428	Redemption Visor	ItemLevel	86	88
+1532428	Redemption Visor	armor	688	704
+1532428	Redemption Visor	stat_value1	25	26
+1532428	Redemption Visor	stat_value3	28	29
+1532428	Redemption Visor	stat_value6	33	34
+1532429	Redemption Shoulderguards	ItemLevel	86	88
+1532429	Redemption Shoulderguards	armor	636	651
+1532429	Redemption Shoulderguards	stat_value3	24	25
+1532429	Redemption Shoulderguards	stat_value5	24	25
+1532430	Redemption Cleats	ItemLevel	86	88
+1532430	Redemption Cleats	armor	584	598
+1532431	Redemption Belt	ItemLevel	86	88
+1532431	Redemption Belt	armor	478	489
+1532431	Redemption Belt	stat_value1	24	25
+1532431	Redemption Belt	stat_value5	25	26
+1722416	Dreadnaught Chestguard	ItemLevel	99	101
+1722416	Dreadnaught Chestguard	armor	964	983
+1722416	Dreadnaught Chestguard	stat_value1	35	36
+1722416	Dreadnaught Chestguard	stat_value2	48	49
+1722417	Dreadnaught Legguards	ItemLevel	99	101
+1722417	Dreadnaught Legguards	armor	846	863
+1722417	Dreadnaught Legguards	stat_value1	26	27
+1722417	Dreadnaught Legguards	stat_value2	48	49
+1722417	Dreadnaught Legguards	stat_value5	25	26
+1722418	Dreadnaught Braincage	ItemLevel	99	101
+1722418	Dreadnaught Braincage	armor	786	802
+1722418	Dreadnaught Braincage	stat_value1	48	49
+1722418	Dreadnaught Braincage	stat_value2	30	31
+1722419	Dreadnaught Spaulders	ItemLevel	99	101
+1722419	Dreadnaught Spaulders	armor	725	740
+1722419	Dreadnaught Spaulders	stat_value1	37	38
+1722420	Dreadnaught Stompers	ItemLevel	99	101
+1722420	Dreadnaught Stompers	armor	666	679
+1722420	Dreadnaught Stompers	stat_value2	38	39
+1722421	Dreadnaught Grips	ItemLevel	99	101
+1722421	Dreadnaught Grips	armor	607	619
+1722421	Dreadnaught Grips	stat_value2	30	31
+1722422	Dreadnaught Belt	ItemLevel	99	101
+1722422	Dreadnaught Belt	armor	544	555
+1722422	Dreadnaught Belt	stat_value1	30	31
+1722422	Dreadnaught Belt	stat_value2	32	33
+1722422	Dreadnaught Belt	stat_value3	27	28
+1722423	Dreadnaught Wristguards	ItemLevel	99	101
+1722423	Dreadnaught Wristguards	armor	423	432
+1722423	Dreadnaught Wristguards	stat_value1	26	27
+1722423	Dreadnaught Wristguards	stat_value2	35	36
+1722424	Redemption Bracers	ItemLevel	99	101
+1722424	Redemption Bracers	armor	423	432
+1722424	Redemption Bracers	stat_value3	32	33
+1722425	Redemption Chestguard	ItemLevel	99	101
+1722425	Redemption Chestguard	armor	964	983
+1722425	Redemption Chestguard	stat_value1	33	34
+1722425	Redemption Chestguard	stat_value3	45	46
+1722425	Redemption Chestguard	stat_value6	36	37
+1722426	Redemption Grips	ItemLevel	99	101
+1722426	Redemption Grips	armor	607	619
+1722426	Redemption Grips	stat_value3	27	28
+1722426	Redemption Grips	stat_value6	30	31
+1722426	Redemption Grips	stat_value7	38	39
+1722427	Redemption Legplates	ItemLevel	99	101
+1722427	Redemption Legplates	armor	846	863
+1722427	Redemption Legplates	stat_value1	29	30
+1722427	Redemption Legplates	stat_value3	45	46
+1722427	Redemption Legplates	stat_value4	26	27
+1722427	Redemption Legplates	stat_value5	38	39
+1722428	Redemption Helmet	ItemLevel	99	101
+1722428	Redemption Helmet	armor	786	802
+1722428	Redemption Helmet	stat_value3	50	51
+1722428	Redemption Helmet	stat_value4	26	27
+1722428	Redemption Helmet	stat_value6	30	31
+1722429	Redemption Shoulderpads	ItemLevel	99	101
+1722429	Redemption Shoulderpads	armor	725	740
+1722429	Redemption Shoulderpads	stat_value3	32	33
+1722429	Redemption Shoulderpads	stat_value6	32	33
+1722429	Redemption Shoulderpads	stat_value7	42	43
+1722430	Redemption Stompers	ItemLevel	99	101
+1722430	Redemption Stompers	armor	666	679
+1722430	Redemption Stompers	stat_value3	36	37
+1722430	Redemption Stompers	stat_value5	32	33
+1722431	Redemption Waistguard	ItemLevel	99	101
+1722431	Redemption Waistguard	armor	544	555
+1722431	Redemption Waistguard	stat_value3	30	31
+1722431	Redemption Waistguard	stat_value6	33	34
+1722464	Earthshatter Chestguard	ItemLevel	99	101
+1722464	Earthshatter Chestguard	armor	761	776
+1722464	Earthshatter Chestguard	stat_value1	32	33
+1722464	Earthshatter Chestguard	stat_value2	30	31
+1722464	Earthshatter Chestguard	stat_value4	35	36
+1722464	Earthshatter Chestguard	stat_value5	45	46
+1722465	Earthshatter Leggings	ItemLevel	99	101
+1722465	Earthshatter Leggings	armor	668	681
+1722465	Earthshatter Leggings	stat_value1	32	33
+1722465	Earthshatter Leggings	stat_value2	31	32
+1722465	Earthshatter Leggings	stat_value6	45	46
+1722466	Earthshatter Helmet	ItemLevel	99	101
+1722466	Earthshatter Helmet	armor	620	633
+1722466	Earthshatter Helmet	stat_value1	25	26
+1722466	Earthshatter Helmet	stat_value2	31	32
+1722466	Earthshatter Helmet	stat_value3	25	26
+1722466	Earthshatter Helmet	stat_value5	41	42
+1722467	Earthshatter Shoulders	ItemLevel	99	101
+1722467	Earthshatter Shoulders	armor	573	585
+1722467	Earthshatter Shoulders	stat_value1	26	27
+1722467	Earthshatter Shoulders	stat_value2	27	28
+1722467	Earthshatter Shoulders	stat_value4	40	41
+1722468	Earthshatter Stompers	ItemLevel	99	101
+1722468	Earthshatter Stompers	armor	526	537
+1722468	Earthshatter Stompers	stat_value5	36	37
+1722469	Earthshatter Grips	ItemLevel	99	101
+1722469	Earthshatter Grips	armor	479	489
+1722469	Earthshatter Grips	stat_value1	26	27
+1722469	Earthshatter Grips	stat_value5	42	43
+1722470	Earthshatter Belt	ItemLevel	99	101
+1722470	Earthshatter Belt	armor	430	439
+1722470	Earthshatter Belt	stat_value3	27	28
+1722470	Earthshatter Belt	stat_value4	40	41
+1722471	Earthshatter Bracers	ItemLevel	99	101
+1722471	Earthshatter Bracers	armor	334	341
+1722471	Earthshatter Bracers	stat_value5	30	31
+1722488	Dreamwalker Robe	ItemLevel	99	101
+1722488	Dreamwalker Robe	armor	649	662
+1722488	Dreamwalker Robe	stat_value1	27	28
+1722488	Dreamwalker Robe	stat_value2	36	37
+1722488	Dreamwalker Robe	stat_value6	36	37
+1722489	Dreamwalker Leggings	ItemLevel	99	101
+1722489	Dreamwalker Leggings	armor	570	582
+1722489	Dreamwalker Leggings	stat_value1	30	31
+1722489	Dreamwalker Leggings	stat_value3	27	28
+1722489	Dreamwalker Leggings	stat_value5	46	47
+1722490	Dreamwalker Hood	ItemLevel	99	101
+1722490	Dreamwalker Hood	armor	529	540
+1722490	Dreamwalker Hood	stat_value2	27	28
+1722490	Dreamwalker Hood	stat_value3	31	32
+1722490	Dreamwalker Hood	stat_value6	33	34
+1722491	Dreamwalker Shoulderpads	ItemLevel	99	101
+1722491	Dreamwalker Shoulderpads	armor	489	499
+1722491	Dreamwalker Shoulderpads	stat_value5	41	42
+1722492	Dreamwalker Sandals	ItemLevel	99	101
+1722492	Dreamwalker Sandals	armor	448	457
+1722492	Dreamwalker Sandals	stat_value3	25	26
+1722492	Dreamwalker Sandals	stat_value5	40	41
+1722493	Dreamwalker Gloves	ItemLevel	99	101
+1722493	Dreamwalker Gloves	armor	409	417
+1722493	Dreamwalker Gloves	stat_value2	32	33
+1722493	Dreamwalker Gloves	stat_value3	27	28
+1722493	Dreamwalker Gloves	stat_value4	36	37
+1722494	Dreamwalker Waist	ItemLevel	99	101
+1722494	Dreamwalker Waist	armor	367	374
+1722494	Dreamwalker Waist	stat_value4	26	27
+1722494	Dreamwalker Waist	stat_value5	35	36
+1722495	Dreamwalker Bracers	ItemLevel	99	101
+1722495	Dreamwalker Bracers	armor	285	291
+1722495	Dreamwalker Bracers	stat_value2	25	26
+1722495	Dreamwalker Bracers	stat_value4	29	30
+1722512	Garb of Faith	ItemLevel	99	101
+1722512	Garb of Faith	armor	507	517
+1722512	Garb of Faith	stat_value2	26	27
+1722512	Garb of Faith	stat_value3	36	37
+1722512	Garb of Faith	stat_value6	37	38
+1722513	Legguards of Faith	ItemLevel	99	101
+1722513	Legguards of Faith	armor	445	454
+1722513	Legguards of Faith	stat_value1	25	26
+1722513	Legguards of Faith	stat_value2	30	31
+1722513	Legguards of Faith	stat_value3	29	30
+1722513	Legguards of Faith	stat_value6	46	47
+1722514	Halo of Faith	ItemLevel	99	101
+1722514	Halo of Faith	armor	414	422
+1722514	Halo of Faith	stat_value1	26	27
+1722514	Halo of Faith	stat_value2	29	30
+1722514	Halo of Faith	stat_value3	32	33
+1722514	Halo of Faith	stat_value6	42	43
+1722515	Spaulders of Faith	ItemLevel	99	101
+1722515	Spaulders of Faith	armor	382	390
+1722515	Spaulders of Faith	stat_value3	27	28
+1722515	Spaulders of Faith	stat_value5	37	38
+1722516	Boots of Faith	ItemLevel	99	101
+1722516	Boots of Faith	armor	350	357
+1722516	Boots of Faith	stat_value1	26	27
+1722516	Boots of Faith	stat_value5	35	36
+1722517	Handguards of Faith	ItemLevel	99	101
+1722517	Handguards of Faith	armor	319	325
+1722517	Handguards of Faith	stat_value3	25	26
+1722517	Handguards of Faith	stat_value5	32	33
+1722518	Waistguard of Faith	ItemLevel	99	101
+1722518	Waistguard of Faith	armor	286	292
+1722518	Waistguard of Faith	stat_value2	25	26
+1722518	Waistguard of Faith	stat_value5	32	33
+1722519	Bracers of Faith	ItemLevel	99	101
+1722519	Bracers of Faith	armor	222	226
+1732424	Redemption Bindings	ItemLevel	99	101
+1732424	Redemption Bindings	armor	423	432
+1732425	Redemption Breastplate	ItemLevel	99	101
+1732425	Redemption Breastplate	armor	964	983
+1732425	Redemption Breastplate	stat_value1	35	36
+1732425	Redemption Breastplate	stat_value3	32	33
+1732425	Redemption Breastplate	stat_value6	32	33
+1732426	Redemption Gauntlets	ItemLevel	99	101
+1732426	Redemption Gauntlets	armor	607	619
+1732426	Redemption Gauntlets	stat_value1	26	27
+1732426	Redemption Gauntlets	stat_value3	26	27
+1732426	Redemption Gauntlets	stat_value5	31	32
+1732427	Redemption Leggings	ItemLevel	99	101
+1732427	Redemption Leggings	armor	846	863
+1732427	Redemption Leggings	stat_value1	42	43
+1732427	Redemption Leggings	stat_value3	35	36
+1732427	Redemption Leggings	stat_value5	35	36
+1732428	Redemption Visor	ItemLevel	99	101
+1732428	Redemption Visor	armor	786	802
+1732428	Redemption Visor	stat_value1	31	32
+1732428	Redemption Visor	stat_value3	35	36
+1732428	Redemption Visor	stat_value6	41	42
+1732429	Redemption Shoulderguards	ItemLevel	99	101
+1732429	Redemption Shoulderguards	armor	725	740
+1732429	Redemption Shoulderguards	stat_value1	26	27
+1732429	Redemption Shoulderguards	stat_value3	30	31
+1732429	Redemption Shoulderguards	stat_value5	30	31
+1732430	Redemption Cleats	ItemLevel	99	101
+1732430	Redemption Cleats	armor	666	679
+1732430	Redemption Cleats	stat_value1	25	26
+1732430	Redemption Cleats	stat_value3	25	26
+1732430	Redemption Cleats	stat_value6	26	27
+1732431	Redemption Belt	ItemLevel	99	101
+1732431	Redemption Belt	armor	544	555
+1732431	Redemption Belt	stat_value1	30	31
+1732431	Redemption Belt	stat_value5	31	32
+1822416	Dreadnaught Chestguard	ItemLevel	90	92
+1822416	Dreadnaught Chestguard	armor	882	902
+1822416	Dreadnaught Chestguard	stat_value1	30	31
+1822416	Dreadnaught Chestguard	stat_value2	42	43
+1822417	Dreadnaught Legguards	ItemLevel	90	92
+1822417	Dreadnaught Legguards	armor	774	791
+1822417	Dreadnaught Legguards	stat_value1	23	24
+1822417	Dreadnaught Legguards	stat_value2	42	43
+1822418	Dreadnaught Braincage	ItemLevel	90	92
+1822418	Dreadnaught Braincage	armor	718	734
+1822418	Dreadnaught Braincage	stat_value1	42	43
+1822418	Dreadnaught Braincage	stat_value2	26	27
+1822419	Dreadnaught Spaulders	ItemLevel	90	92
+1822419	Dreadnaught Spaulders	armor	663	678
+1822419	Dreadnaught Spaulders	stat_value1	32	33
+1822420	Dreadnaught Stompers	ItemLevel	90	92
+1822420	Dreadnaught Stompers	armor	609	623
+1822420	Dreadnaught Stompers	stat_value2	33	34
+1822421	Dreadnaught Grips	ItemLevel	90	92
+1822421	Dreadnaught Grips	armor	556	568
+1822421	Dreadnaught Grips	stat_value2	26	27
+1822422	Dreadnaught Belt	ItemLevel	90	92
+1822422	Dreadnaught Belt	armor	498	509
+1822422	Dreadnaught Belt	stat_value1	26	27
+1822422	Dreadnaught Belt	stat_value2	28	29
+1822422	Dreadnaught Belt	stat_value3	24	25
+1822423	Dreadnaught Wristguards	ItemLevel	90	92
+1822423	Dreadnaught Wristguards	armor	387	396
+1822423	Dreadnaught Wristguards	stat_value1	23	24
+1822423	Dreadnaught Wristguards	stat_value2	30	31
+1822424	Redemption Bracers	ItemLevel	90	92
+1822424	Redemption Bracers	armor	387	396
+1822424	Redemption Bracers	stat_value3	28	29
+1822425	Redemption Chestguard	ItemLevel	90	92
+1822425	Redemption Chestguard	armor	882	902
+1822425	Redemption Chestguard	stat_value1	29	30
+1822425	Redemption Chestguard	stat_value3	39	40
+1822425	Redemption Chestguard	stat_value6	31	32
+1822426	Redemption Grips	ItemLevel	90	92
+1822426	Redemption Grips	armor	556	568
+1822426	Redemption Grips	stat_value3	24	25
+1822426	Redemption Grips	stat_value6	26	27
+1822426	Redemption Grips	stat_value7	33	34
+1822427	Redemption Legplates	ItemLevel	90	92
+1822427	Redemption Legplates	armor	774	791
+1822427	Redemption Legplates	stat_value1	25	26
+1822427	Redemption Legplates	stat_value3	39	40
+1822427	Redemption Legplates	stat_value4	23	24
+1822427	Redemption Legplates	stat_value5	33	34
+1822428	Redemption Helmet	ItemLevel	90	92
+1822428	Redemption Helmet	armor	718	734
+1822428	Redemption Helmet	stat_value3	43	44
+1822428	Redemption Helmet	stat_value4	23	24
+1822428	Redemption Helmet	stat_value6	26	27
+1822429	Redemption Shoulderpads	ItemLevel	90	92
+1822429	Redemption Shoulderpads	armor	663	678
+1822429	Redemption Shoulderpads	stat_value3	28	29
+1822429	Redemption Shoulderpads	stat_value6	28	29
+1822429	Redemption Shoulderpads	stat_value7	37	38
+1822430	Redemption Stompers	ItemLevel	90	92
+1822430	Redemption Stompers	armor	609	623
+1822430	Redemption Stompers	stat_value3	31	32
+1822430	Redemption Stompers	stat_value5	28	29
+1822431	Redemption Waistguard	ItemLevel	90	92
+1822431	Redemption Waistguard	armor	498	509
+1822431	Redemption Waistguard	stat_value3	26	27
+1822431	Redemption Waistguard	stat_value6	29	30
+1822464	Earthshatter Chestguard	ItemLevel	90	92
+1822464	Earthshatter Chestguard	armor	696	711
+1822464	Earthshatter Chestguard	stat_value1	28	29
+1822464	Earthshatter Chestguard	stat_value2	26	27
+1822464	Earthshatter Chestguard	stat_value4	30	31
+1822464	Earthshatter Chestguard	stat_value5	39	40
+1822465	Earthshatter Leggings	ItemLevel	90	92
+1822465	Earthshatter Leggings	armor	611	625
+1822465	Earthshatter Leggings	stat_value1	28	29
+1822465	Earthshatter Leggings	stat_value2	27	28
+1822465	Earthshatter Leggings	stat_value6	39	40
+1822466	Earthshatter Helmet	ItemLevel	90	92
+1822466	Earthshatter Helmet	armor	567	580
+1822466	Earthshatter Helmet	stat_value2	27	28
+1822466	Earthshatter Helmet	stat_value5	36	37
+1822467	Earthshatter Shoulders	ItemLevel	90	92
+1822467	Earthshatter Shoulders	armor	524	536
+1822467	Earthshatter Shoulders	stat_value1	23	24
+1822467	Earthshatter Shoulders	stat_value2	24	25
+1822467	Earthshatter Shoulders	stat_value4	35	36
+1822468	Earthshatter Stompers	ItemLevel	90	92
+1822468	Earthshatter Stompers	armor	481	492
+1822468	Earthshatter Stompers	stat_value5	31	32
+1822469	Earthshatter Grips	ItemLevel	90	92
+1822469	Earthshatter Grips	armor	439	449
+1822469	Earthshatter Grips	stat_value1	23	24
+1822469	Earthshatter Grips	stat_value5	37	38
+1822470	Earthshatter Belt	ItemLevel	90	92
+1822470	Earthshatter Belt	armor	393	402
+1822470	Earthshatter Belt	stat_value3	24	25
+1822470	Earthshatter Belt	stat_value4	35	36
+1822471	Earthshatter Bracers	ItemLevel	90	92
+1822471	Earthshatter Bracers	armor	305	312
+1822471	Earthshatter Bracers	stat_value5	26	27
+1822488	Dreamwalker Robe	ItemLevel	90	92
+1822488	Dreamwalker Robe	armor	594	607
+1822488	Dreamwalker Robe	stat_value1	24	25
+1822488	Dreamwalker Robe	stat_value2	31	32
+1822488	Dreamwalker Robe	stat_value6	31	32
+1822489	Dreamwalker Leggings	ItemLevel	90	92
+1822489	Dreamwalker Leggings	armor	522	534
+1822489	Dreamwalker Leggings	stat_value1	26	27
+1822489	Dreamwalker Leggings	stat_value3	24	25
+1822489	Dreamwalker Leggings	stat_value5	40	41
+1822490	Dreamwalker Hood	ItemLevel	90	92
+1822490	Dreamwalker Hood	armor	484	495
+1822490	Dreamwalker Hood	stat_value2	24	25
+1822490	Dreamwalker Hood	stat_value3	27	28
+1822490	Dreamwalker Hood	stat_value6	29	30
+1822491	Dreamwalker Shoulderpads	ItemLevel	90	92
+1822491	Dreamwalker Shoulderpads	armor	447	457
+1822491	Dreamwalker Shoulderpads	stat_value5	36	37
+1822492	Dreamwalker Sandals	ItemLevel	90	92
+1822492	Dreamwalker Sandals	armor	411	420
+1822492	Dreamwalker Sandals	stat_value5	35	36
+1822493	Dreamwalker Gloves	ItemLevel	90	92
+1822493	Dreamwalker Gloves	armor	374	382
+1822493	Dreamwalker Gloves	stat_value2	28	29
+1822493	Dreamwalker Gloves	stat_value3	24	25
+1822493	Dreamwalker Gloves	stat_value4	31	32
+1822494	Dreamwalker Waist	ItemLevel	90	92
+1822494	Dreamwalker Waist	armor	336	343
+1822494	Dreamwalker Waist	stat_value4	23	24
+1822494	Dreamwalker Waist	stat_value5	30	31
+1822495	Dreamwalker Bracers	ItemLevel	90	92
+1822495	Dreamwalker Bracers	armor	261	267
+1822495	Dreamwalker Bracers	stat_value4	25	26
+1822512	Garb of Faith	ItemLevel	90	92
+1822512	Garb of Faith	armor	464	474
+1822512	Garb of Faith	stat_value2	23	24
+1822512	Garb of Faith	stat_value3	31	32
+1822512	Garb of Faith	stat_value6	32	33
+1822513	Legguards of Faith	ItemLevel	90	92
+1822513	Legguards of Faith	armor	408	417
+1822513	Legguards of Faith	stat_value2	26	27
+1822513	Legguards of Faith	stat_value3	25	26
+1822513	Legguards of Faith	stat_value6	40	41
+1822514	Halo of Faith	ItemLevel	90	92
+1822514	Halo of Faith	armor	378	386
+1822514	Halo of Faith	stat_value1	23	24
+1822514	Halo of Faith	stat_value2	25	26
+1822514	Halo of Faith	stat_value3	28	29
+1822514	Halo of Faith	stat_value6	37	38
+1822515	Spaulders of Faith	ItemLevel	90	92
+1822515	Spaulders of Faith	armor	349	357
+1822515	Spaulders of Faith	stat_value3	24	25
+1822515	Spaulders of Faith	stat_value5	32	33
+1822516	Boots of Faith	ItemLevel	90	92
+1822516	Boots of Faith	armor	321	328
+1822516	Boots of Faith	stat_value1	23	24
+1822516	Boots of Faith	stat_value5	30	31
+1822517	Handguards of Faith	ItemLevel	90	92
+1822517	Handguards of Faith	armor	292	298
+1822517	Handguards of Faith	stat_value5	28	29
+1822518	Waistguard of Faith	ItemLevel	90	92
+1822518	Waistguard of Faith	armor	262	268
+1822518	Waistguard of Faith	stat_value5	28	29
+1822519	Bracers of Faith	ItemLevel	90	92
+1822519	Bracers of Faith	armor	204	209
+1832424	Redemption Bindings	ItemLevel	90	92
+1832424	Redemption Bindings	armor	387	396
+1832425	Redemption Breastplate	ItemLevel	90	92
+1832425	Redemption Breastplate	armor	882	902
+1832425	Redemption Breastplate	stat_value1	30	31
+1832425	Redemption Breastplate	stat_value3	28	29
+1832425	Redemption Breastplate	stat_value6	28	29
+1832426	Redemption Gauntlets	ItemLevel	90	92
+1832426	Redemption Gauntlets	armor	556	568
+1832426	Redemption Gauntlets	stat_value1	23	24
+1832426	Redemption Gauntlets	stat_value3	23	24
+1832426	Redemption Gauntlets	stat_value5	27	28
+1832427	Redemption Leggings	ItemLevel	90	92
+1832427	Redemption Leggings	armor	774	791
+1832427	Redemption Leggings	stat_value1	37	38
+1832427	Redemption Leggings	stat_value3	30	31
+1832427	Redemption Leggings	stat_value5	30	31
+1832428	Redemption Visor	ItemLevel	90	92
+1832428	Redemption Visor	armor	718	734
+1832428	Redemption Visor	stat_value1	27	28
+1832428	Redemption Visor	stat_value3	30	31
+1832428	Redemption Visor	stat_value6	36	37
+1832429	Redemption Shoulderguards	ItemLevel	90	92
+1832429	Redemption Shoulderguards	armor	663	678
+1832429	Redemption Shoulderguards	stat_value1	23	24
+1832429	Redemption Shoulderguards	stat_value3	26	27
+1832429	Redemption Shoulderguards	stat_value5	26	27
+1832430	Redemption Cleats	ItemLevel	90	92
+1832430	Redemption Cleats	armor	609	623
+1832430	Redemption Cleats	stat_value6	23	24
+1832431	Redemption Belt	ItemLevel	90	92
+1832431	Redemption Belt	armor	498	509
+1832431	Redemption Belt	stat_value1	26	27
+1832431	Redemption Belt	stat_value5	27	28
+2822416	Dreadnaught Chestguard	ItemLevel	95	97
+2822416	Dreadnaught Chestguard	armor	927	947
+2822416	Dreadnaught Chestguard	stat_value1	32	33
+2822416	Dreadnaught Chestguard	stat_value2	45	46
+2822417	Dreadnaught Legguards	ItemLevel	95	97
+2822417	Dreadnaught Legguards	armor	814	831
+2822417	Dreadnaught Legguards	stat_value1	24	25
+2822417	Dreadnaught Legguards	stat_value2	45	46
+2822418	Dreadnaught Braincage	ItemLevel	95	97
+2822418	Dreadnaught Braincage	armor	756	772
+2822418	Dreadnaught Braincage	stat_value1	45	46
+2822418	Dreadnaught Braincage	stat_value2	28	29
+2822419	Dreadnaught Spaulders	ItemLevel	95	97
+2822419	Dreadnaught Spaulders	armor	698	713
+2822419	Dreadnaught Spaulders	stat_value1	35	36
+2822420	Dreadnaught Stompers	ItemLevel	95	97
+2822420	Dreadnaught Stompers	armor	641	654
+2822420	Dreadnaught Stompers	stat_value2	36	37
+2822421	Dreadnaught Grips	ItemLevel	95	97
+2822421	Dreadnaught Grips	armor	584	596
+2822421	Dreadnaught Grips	stat_value2	28	29
+2822422	Dreadnaught Belt	ItemLevel	95	97
+2822422	Dreadnaught Belt	armor	524	535
+2822422	Dreadnaught Belt	stat_value1	28	29
+2822422	Dreadnaught Belt	stat_value2	30	31
+2822422	Dreadnaught Belt	stat_value3	26	27
+2822423	Dreadnaught Wristguards	ItemLevel	95	97
+2822423	Dreadnaught Wristguards	armor	407	416
+2822423	Dreadnaught Wristguards	stat_value1	24	25
+2822423	Dreadnaught Wristguards	stat_value2	32	33
+2822424	Redemption Bracers	ItemLevel	95	97
+2822424	Redemption Bracers	armor	407	416
+2822424	Redemption Bracers	stat_value3	30	31
+2822425	Redemption Chestguard	ItemLevel	95	97
+2822425	Redemption Chestguard	armor	927	947
+2822425	Redemption Chestguard	stat_value1	31	32
+2822425	Redemption Chestguard	stat_value3	42	43
+2822425	Redemption Chestguard	stat_value6	34	35
+2822426	Redemption Grips	ItemLevel	95	97
+2822426	Redemption Grips	armor	584	596
+2822426	Redemption Grips	stat_value3	26	27
+2822426	Redemption Grips	stat_value6	28	29
+2822426	Redemption Grips	stat_value7	36	37
+2822427	Redemption Legplates	ItemLevel	95	97
+2822427	Redemption Legplates	armor	814	831
+2822427	Redemption Legplates	stat_value1	27	28
+2822427	Redemption Legplates	stat_value3	42	43
+2822427	Redemption Legplates	stat_value4	24	25
+2822427	Redemption Legplates	stat_value5	36	37
+2822428	Redemption Helmet	ItemLevel	95	97
+2822428	Redemption Helmet	armor	756	772
+2822428	Redemption Helmet	stat_value3	46	47
+2822428	Redemption Helmet	stat_value4	24	25
+2822428	Redemption Helmet	stat_value6	28	29
+2822429	Redemption Shoulderpads	ItemLevel	95	97
+2822429	Redemption Shoulderpads	armor	698	713
+2822429	Redemption Shoulderpads	stat_value3	30	31
+2822429	Redemption Shoulderpads	stat_value6	30	31
+2822429	Redemption Shoulderpads	stat_value7	39	40
+2822430	Redemption Stompers	ItemLevel	95	97
+2822430	Redemption Stompers	armor	641	654
+2822430	Redemption Stompers	stat_value3	34	35
+2822430	Redemption Stompers	stat_value5	30	31
+2822431	Redemption Waistguard	ItemLevel	95	97
+2822431	Redemption Waistguard	armor	524	535
+2822431	Redemption Waistguard	stat_value3	28	29
+2822431	Redemption Waistguard	stat_value6	31	32
+2822464	Earthshatter Chestguard	ItemLevel	95	97
+2822464	Earthshatter Chestguard	armor	732	747
+2822464	Earthshatter Chestguard	stat_value1	30	31
+2822464	Earthshatter Chestguard	stat_value2	28	29
+2822464	Earthshatter Chestguard	stat_value4	32	33
+2822464	Earthshatter Chestguard	stat_value5	42	43
+2822465	Earthshatter Leggings	ItemLevel	95	97
+2822465	Earthshatter Leggings	armor	643	657
+2822465	Earthshatter Leggings	stat_value1	30	31
+2822465	Earthshatter Leggings	stat_value2	29	30
+2822465	Earthshatter Leggings	stat_value6	42	43
+2822466	Earthshatter Helmet	ItemLevel	95	97
+2822466	Earthshatter Helmet	armor	597	610
+2822466	Earthshatter Helmet	stat_value2	29	30
+2822466	Earthshatter Helmet	stat_value5	38	39
+2822467	Earthshatter Shoulders	ItemLevel	95	97
+2822467	Earthshatter Shoulders	armor	551	563
+2822467	Earthshatter Shoulders	stat_value1	24	25
+2822467	Earthshatter Shoulders	stat_value2	26	27
+2822467	Earthshatter Shoulders	stat_value4	37	38
+2822468	Earthshatter Stompers	ItemLevel	95	97
+2822468	Earthshatter Stompers	armor	506	517
+2822468	Earthshatter Stompers	stat_value5	34	35
+2822469	Earthshatter Grips	ItemLevel	95	97
+2822469	Earthshatter Grips	armor	461	471
+2822469	Earthshatter Grips	stat_value1	24	25
+2822469	Earthshatter Grips	stat_value5	39	40
+2822470	Earthshatter Belt	ItemLevel	95	97
+2822470	Earthshatter Belt	armor	413	422
+2822470	Earthshatter Belt	stat_value3	26	27
+2822470	Earthshatter Belt	stat_value4	37	38
+2822471	Earthshatter Bracers	ItemLevel	95	97
+2822471	Earthshatter Bracers	armor	321	328
+2822471	Earthshatter Bracers	stat_value5	28	29
+2822488	Dreamwalker Robe	ItemLevel	95	97
+2822488	Dreamwalker Robe	armor	625	638
+2822488	Dreamwalker Robe	stat_value1	26	27
+2822488	Dreamwalker Robe	stat_value2	34	35
+2822488	Dreamwalker Robe	stat_value6	34	35
+2822489	Dreamwalker Leggings	ItemLevel	95	97
+2822489	Dreamwalker Leggings	armor	548	560
+2822489	Dreamwalker Leggings	stat_value1	28	29
+2822489	Dreamwalker Leggings	stat_value3	26	27
+2822489	Dreamwalker Leggings	stat_value5	43	44
+2822490	Dreamwalker Hood	ItemLevel	95	97
+2822490	Dreamwalker Hood	armor	509	520
+2822490	Dreamwalker Hood	stat_value2	26	27
+2822490	Dreamwalker Hood	stat_value3	29	30
+2822490	Dreamwalker Hood	stat_value6	31	32
+2822491	Dreamwalker Shoulderpads	ItemLevel	95	97
+2822491	Dreamwalker Shoulderpads	armor	470	480
+2822491	Dreamwalker Shoulderpads	stat_value5	38	39
+2822492	Dreamwalker Sandals	ItemLevel	95	97
+2822492	Dreamwalker Sandals	armor	432	441
+2822492	Dreamwalker Sandals	stat_value5	37	38
+2822493	Dreamwalker Gloves	ItemLevel	95	97
+2822493	Dreamwalker Gloves	armor	394	402
+2822493	Dreamwalker Gloves	stat_value2	30	31
+2822493	Dreamwalker Gloves	stat_value3	26	27
+2822493	Dreamwalker Gloves	stat_value4	34	35
+2822494	Dreamwalker Waist	ItemLevel	95	97
+2822494	Dreamwalker Waist	armor	353	360
+2822494	Dreamwalker Waist	stat_value4	24	25
+2822494	Dreamwalker Waist	stat_value5	32	33
+2822495	Dreamwalker Bracers	ItemLevel	95	97
+2822495	Dreamwalker Bracers	armor	274	280
+2822495	Dreamwalker Bracers	stat_value4	27	28
+2822512	Garb of Faith	ItemLevel	95	97
+2822512	Garb of Faith	armor	488	498
+2822512	Garb of Faith	stat_value2	24	25
+2822512	Garb of Faith	stat_value3	34	35
+2822512	Garb of Faith	stat_value6	35	36
+2822513	Legguards of Faith	ItemLevel	95	97
+2822513	Legguards of Faith	armor	428	437
+2822513	Legguards of Faith	stat_value2	28	29
+2822513	Legguards of Faith	stat_value3	27	28
+2822513	Legguards of Faith	stat_value6	43	44
+2822514	Halo of Faith	ItemLevel	95	97
+2822514	Halo of Faith	armor	398	406
+2822514	Halo of Faith	stat_value1	24	25
+2822514	Halo of Faith	stat_value2	27	28
+2822514	Halo of Faith	stat_value3	30	31
+2822514	Halo of Faith	stat_value6	39	40
+2822515	Spaulders of Faith	ItemLevel	95	97
+2822515	Spaulders of Faith	armor	367	375
+2822515	Spaulders of Faith	stat_value3	26	27
+2822515	Spaulders of Faith	stat_value5	35	36
+2822516	Boots of Faith	ItemLevel	95	97
+2822516	Boots of Faith	armor	337	344
+2822516	Boots of Faith	stat_value1	24	25
+2822516	Boots of Faith	stat_value5	32	33
+2822517	Handguards of Faith	ItemLevel	95	97
+2822517	Handguards of Faith	armor	307	313
+2822517	Handguards of Faith	stat_value5	30	31
+2822518	Waistguard of Faith	ItemLevel	95	97
+2822518	Waistguard of Faith	armor	276	282
+2822518	Waistguard of Faith	stat_value5	30	31
+2822519	Bracers of Faith	ItemLevel	95	97
+2822519	Bracers of Faith	armor	214	219
+2832424	Redemption Bindings	ItemLevel	95	97
+2832424	Redemption Bindings	armor	407	416
+2832425	Redemption Breastplate	ItemLevel	95	97
+2832425	Redemption Breastplate	armor	927	947
+2832425	Redemption Breastplate	stat_value1	32	33
+2832425	Redemption Breastplate	stat_value3	30	31
+2832425	Redemption Breastplate	stat_value6	30	31
+2832426	Redemption Gauntlets	ItemLevel	95	97
+2832426	Redemption Gauntlets	armor	584	596
+2832426	Redemption Gauntlets	stat_value1	24	25
+2832426	Redemption Gauntlets	stat_value3	24	25
+2832426	Redemption Gauntlets	stat_value5	29	30
+2832427	Redemption Leggings	ItemLevel	95	97
+2832427	Redemption Leggings	armor	814	831
+2832427	Redemption Leggings	stat_value1	39	40
+2832427	Redemption Leggings	stat_value3	32	33
+2832427	Redemption Leggings	stat_value5	32	33
+2832428	Redemption Visor	ItemLevel	95	97
+2832428	Redemption Visor	armor	756	772
+2832428	Redemption Visor	stat_value1	29	30
+2832428	Redemption Visor	stat_value3	32	33
+2832428	Redemption Visor	stat_value6	38	39
+2832429	Redemption Shoulderguards	ItemLevel	95	97
+2832429	Redemption Shoulderguards	armor	698	713
+2832429	Redemption Shoulderguards	stat_value1	24	25
+2832429	Redemption Shoulderguards	stat_value3	28	29
+2832429	Redemption Shoulderguards	stat_value5	28	29
+2832430	Redemption Cleats	ItemLevel	95	97
+2832430	Redemption Cleats	armor	641	654
+2832430	Redemption Cleats	stat_value6	24	25
+2832431	Redemption Belt	ItemLevel	95	97
+2832431	Redemption Belt	armor	524	535
+2832431	Redemption Belt	stat_value1	28	29
+2832431	Redemption Belt	stat_value5	29	30
+6010488	Bloodforged Dreadborne Breastplate	ItemLevel	86	88
+6010488	Bloodforged Dreadborne Breastplate	armor	846	866
+6010488	Bloodforged Dreadborne Breastplate	stat_value1	26	27
+6010488	Bloodforged Dreadborne Breastplate	stat_value2	25	26
+6010489	Bloodforged Dreadborne Legplates	ItemLevel	86	88
+6010489	Bloodforged Dreadborne Legplates	armor	742	759
+6010489	Bloodforged Dreadborne Legplates	stat_value1	29	30
+6010489	Bloodforged Dreadborne Legplates	stat_value2	23	24
+6010490	Bloodforged Dreadborne Helmet	ItemLevel	86	88
+6010490	Bloodforged Dreadborne Helmet	armor	688	704
+6010490	Bloodforged Dreadborne Helmet	stat_value1	24	25
+6010490	Bloodforged Dreadborne Helmet	stat_value2	23	24
+6010491	Bloodforged Dreadborne Pauldrons	ItemLevel	86	88
+6010491	Bloodforged Dreadborne Pauldrons	armor	636	651
+6010491	Bloodforged Dreadborne Pauldrons	stat_value1	24	25
+6010492	Bloodforged Dreadborne Sabatons	ItemLevel	86	88
+6010492	Bloodforged Dreadborne Sabatons	armor	584	598
+6010493	Bloodforged Dreadborne Gauntlets	ItemLevel	86	88
+6010493	Bloodforged Dreadborne Gauntlets	armor	533	545
+6010494	Bloodforged Dreadborne Waistguard	ItemLevel	86	88
+6010494	Bloodforged Dreadborne Waistguard	armor	478	489
+6010494	Bloodforged Dreadborne Waistguard	stat_value1	24	25
+6010495	Bloodforged Dreadborne Bracers	ItemLevel	86	88
+6010495	Bloodforged Dreadborne Bracers	armor	371	380
+6010519	Bloodforged Earthshatter Crown	ItemLevel	86	88
+6010519	Bloodforged Earthshatter Crown	armor	543	556
+6010519	Bloodforged Earthshatter Crown	stat_value5	25	26
+6010520	Bloodforged Earthshatter Epaulets	ItemLevel	86	88
+6010520	Bloodforged Earthshatter Epaulets	armor	502	514
+6010520	Bloodforged Earthshatter Epaulets	stat_value5	26	27
+6010729	Bloodforged Earthshatter Breastplate	ItemLevel	86	88
+6010729	Bloodforged Earthshatter Breastplate	armor	668	684
+6010729	Bloodforged Earthshatter Breastplate	stat_value1	22	23
+6010729	Bloodforged Earthshatter Breastplate	stat_value5	22	23
+6010729	Bloodforged Earthshatter Breastplate	stat_value6	31	32
+6010730	Bloodforged Earthshatter Bracers	ItemLevel	86	88
+6010730	Bloodforged Earthshatter Bracers	armor	293	300
+6010731	Bloodforged Earthshatter Gauntlets	ItemLevel	86	88
+6010731	Bloodforged Earthshatter Gauntlets	armor	421	431
+6010731	Bloodforged Earthshatter Gauntlets	stat_value4	25	26
+6010809	Bloodforged Earthshatter Belt	ItemLevel	86	88
+6010809	Bloodforged Earthshatter Belt	armor	377	386
+6010809	Bloodforged Earthshatter Belt	stat_value4	29	30
+6010848	Bloodforged Earthshatter Legplates	ItemLevel	86	88
+6010848	Bloodforged Earthshatter Legplates	armor	586	600
+6010848	Bloodforged Earthshatter Legplates	stat_value1	24	25
+6010848	Bloodforged Earthshatter Legplates	stat_value5	29	30
+6010859	Bloodforged Earthshatter Greaves	ItemLevel	86	88
+6010859	Bloodforged Earthshatter Greaves	armor	461	472
+6010859	Bloodforged Earthshatter Greaves	stat_value4	29	30
+6013566	Bloodforged Frozen Vrykul Armguards	ItemLevel	86	88
+6013566	Bloodforged Frozen Vrykul Armguards	armor	293	300
+6013566	Bloodforged Frozen Vrykul Armguards	stat_value3	25	26
+6013567	Bloodforged Frozen Vrykul Hauberk	ItemLevel	86	88
+6013567	Bloodforged Frozen Vrykul Hauberk	armor	668	684
+6013567	Bloodforged Frozen Vrykul Hauberk	stat_value3	30	31
+6013567	Bloodforged Frozen Vrykul Hauberk	stat_value7	28	29
+6013568	Bloodforged Frozen Vrykul Greaves	ItemLevel	86	88
+6013568	Bloodforged Frozen Vrykul Greaves	armor	586	600
+6013568	Bloodforged Frozen Vrykul Greaves	stat_value1	28	29
+6013568	Bloodforged Frozen Vrykul Greaves	stat_value2	22	23
+6013568	Bloodforged Frozen Vrykul Greaves	stat_value3	31	32
+6013568	Bloodforged Frozen Vrykul Greaves	stat_value5	23	24
+6013568	Bloodforged Frozen Vrykul Greaves	stat_value6	31	32
+6013569	Bloodforged Frozen Vrykul Gloves	ItemLevel	86	88
+6013569	Bloodforged Frozen Vrykul Gloves	armor	421	431
+6013569	Bloodforged Frozen Vrykul Gloves	stat_value3	24	25
+6013570	Bloodforged Frozen Vrykul Boots	ItemLevel	86	88
+6013570	Bloodforged Frozen Vrykul Boots	armor	461	472
+6013570	Bloodforged Frozen Vrykul Boots	stat_value3	28	29
+6013571	Bloodforged Frozen Vrykul Helm	ItemLevel	86	88
+6013571	Bloodforged Frozen Vrykul Helm	armor	543	556
+6013571	Bloodforged Frozen Vrykul Helm	stat_value3	32	33
+6013633	Bloodforged Frozen Vrykul Girdle	ItemLevel	86	88
+6013633	Bloodforged Frozen Vrykul Girdle	armor	377	386
+6013633	Bloodforged Frozen Vrykul Girdle	stat_value3	24	25
+6013634	Bloodforged Frozen Vrykul Spaulders	ItemLevel	86	88
+6013634	Bloodforged Frozen Vrykul Spaulders	armor	502	514
+6013634	Bloodforged Frozen Vrykul Spaulders	stat_value3	26	27
+6022416	Bloodforged Dreadnaught Breastplate	ItemLevel	86	88
+6022416	Bloodforged Dreadnaught Breastplate	armor	846	866
+6022416	Bloodforged Dreadnaught Breastplate	stat_value2	32	33
+6022416	Bloodforged Dreadnaught Breastplate	stat_value6	24	25
+6022417	Bloodforged Dreadnaught Legplates	ItemLevel	86	88
+6022417	Bloodforged Dreadnaught Legplates	armor	742	759
+6022417	Bloodforged Dreadnaught Legplates	stat_value2	31	32
+6022418	Bloodforged Dreadnaught Helmet	ItemLevel	86	88
+6022418	Bloodforged Dreadnaught Helmet	armor	688	704
+6022418	Bloodforged Dreadnaught Helmet	stat_value1	38	39
+6022419	Bloodforged Dreadnaught Pauldrons	ItemLevel	86	88
+6022419	Bloodforged Dreadnaught Pauldrons	armor	636	651
+6022419	Bloodforged Dreadnaught Pauldrons	stat_value2	24	25
+6022419	Bloodforged Dreadnaught Pauldrons	stat_value6	22	23
+6022420	Bloodforged Dreadnaught Sabatons	ItemLevel	86	88
+6022420	Bloodforged Dreadnaught Sabatons	armor	584	598
+6022420	Bloodforged Dreadnaught Sabatons	stat_value2	29	30
+6022421	Bloodforged Dreadnaught Gauntlets	ItemLevel	86	88
+6022421	Bloodforged Dreadnaught Gauntlets	armor	533	545
+6022421	Bloodforged Dreadnaught Gauntlets	stat_value5	30	31
+6022422	Bloodforged Dreadnaught Waistguard	ItemLevel	86	88
+6022422	Bloodforged Dreadnaught Waistguard	armor	478	489
+6022422	Bloodforged Dreadnaught Waistguard	stat_value2	22	23
+6022423	Bloodforged Dreadnaught Bracers	ItemLevel	86	88
+6022423	Bloodforged Dreadnaught Bracers	armor	371	380
+6022423	Bloodforged Dreadnaught Bracers	stat_value2	24	25
+6022424	Bloodforged Redemption Wristguards	ItemLevel	86	88
+6022424	Bloodforged Redemption Wristguards	armor	371	380
+6022424	Bloodforged Redemption Wristguards	stat_value5	24	25
+6022425	Bloodforged Redemption Tunic	ItemLevel	86	88
+6022425	Bloodforged Redemption Tunic	armor	846	866
+6022425	Bloodforged Redemption Tunic	stat_value2	28	29
+6022425	Bloodforged Redemption Tunic	stat_value3	24	25
+6022425	Bloodforged Redemption Tunic	stat_value4	27	28
+6022426	Bloodforged Redemption Handguards	ItemLevel	86	88
+6022426	Bloodforged Redemption Handguards	armor	533	545
+6022426	Bloodforged Redemption Handguards	stat_value4	28	29
+6022427	Bloodforged Redemption Legguards	ItemLevel	86	88
+6022427	Bloodforged Redemption Legguards	armor	742	759
+6022427	Bloodforged Redemption Legguards	stat_value1	28	29
+6022427	Bloodforged Redemption Legguards	stat_value2	24	25
+6022427	Bloodforged Redemption Legguards	stat_value5	32	33
+6022428	Bloodforged Redemption Headpiece	ItemLevel	86	88
+6022428	Bloodforged Redemption Headpiece	armor	688	704
+6022428	Bloodforged Redemption Headpiece	stat_value1	27	28
+6022428	Bloodforged Redemption Headpiece	stat_value2	24	25
+6022428	Bloodforged Redemption Headpiece	stat_value4	33	34
+6022429	Bloodforged Redemption Spaulders	ItemLevel	86	88
+6022429	Bloodforged Redemption Spaulders	armor	636	651
+6022429	Bloodforged Redemption Spaulders	stat_value1	22	23
+6022429	Bloodforged Redemption Spaulders	stat_value5	24	25
+6022430	Bloodforged Redemption Boots	ItemLevel	86	88
+6022430	Bloodforged Redemption Boots	armor	584	598
+6022430	Bloodforged Redemption Boots	stat_value4	24	25
+6022431	Bloodforged Redemption Girdle	ItemLevel	86	88
+6022431	Bloodforged Redemption Girdle	armor	478	489
+6022431	Bloodforged Redemption Girdle	stat_value1	27	28
+6022431	Bloodforged Redemption Girdle	stat_value4	31	32
+6022436	Bloodforged Cryptstalker Tunic	ItemLevel	86	88
+6022436	Bloodforged Cryptstalker Tunic	armor	668	684
+6022436	Bloodforged Cryptstalker Tunic	stat_value1	22	23
+6022436	Bloodforged Cryptstalker Tunic	stat_value3	23	24
+6022436	Bloodforged Cryptstalker Tunic	stat_value6	37	38
+6022437	Bloodforged Cryptstalker Legguards	ItemLevel	86	88
+6022437	Bloodforged Cryptstalker Legguards	armor	586	600
+6022437	Bloodforged Cryptstalker Legguards	stat_value1	24	25
+6022437	Bloodforged Cryptstalker Legguards	stat_value3	22	23
+6022437	Bloodforged Cryptstalker Legguards	stat_value5	45	46
+6022438	Bloodforged Cryptstalker Headpiece	ItemLevel	86	88
+6022438	Bloodforged Cryptstalker Headpiece	armor	543	556
+6022438	Bloodforged Cryptstalker Headpiece	stat_value3	26	27
+6022438	Bloodforged Cryptstalker Headpiece	stat_value4	24	25
+6022438	Bloodforged Cryptstalker Headpiece	stat_value5	32	33
+6022439	Bloodforged Cryptstalker Spaulders	ItemLevel	86	88
+6022439	Bloodforged Cryptstalker Spaulders	armor	502	514
+6022439	Bloodforged Cryptstalker Spaulders	stat_value5	29	30
+6022440	Bloodforged Cryptstalker Boots	ItemLevel	86	88
+6022440	Bloodforged Cryptstalker Boots	armor	461	472
+6022440	Bloodforged Cryptstalker Boots	stat_value5	34	35
+6022441	Bloodforged Cryptstalker Handguards	ItemLevel	86	88
+6022441	Bloodforged Cryptstalker Handguards	armor	421	431
+6022441	Bloodforged Cryptstalker Handguards	stat_value5	22	23
+6022442	Bloodforged Cryptstalker Girdle	ItemLevel	86	88
+6022442	Bloodforged Cryptstalker Girdle	armor	377	386
+6022442	Bloodforged Cryptstalker Girdle	stat_value6	26	27
+6022443	Bloodforged Cryptstalker Wristguards	ItemLevel	86	88
+6022443	Bloodforged Cryptstalker Wristguards	armor	293	300
+6022443	Bloodforged Cryptstalker Wristguards	stat_value5	22	23
+6022464	Bloodforged Earthshatter Tunic	ItemLevel	86	88
+6022464	Bloodforged Earthshatter Tunic	armor	668	684
+6022464	Bloodforged Earthshatter Tunic	stat_value1	22	23
+6022464	Bloodforged Earthshatter Tunic	stat_value6	26	27
+6022465	Bloodforged Earthshatter Legguards	ItemLevel	86	88
+6022465	Bloodforged Earthshatter Legguards	armor	586	600
+6022465	Bloodforged Earthshatter Legguards	stat_value1	26	27
+6022465	Bloodforged Earthshatter Legguards	stat_value3	25	26
+6022465	Bloodforged Earthshatter Legguards	stat_value6	26	27
+6022466	Bloodforged Earthshatter Headpiece	ItemLevel	86	88
+6022466	Bloodforged Earthshatter Headpiece	armor	543	556
+6022466	Bloodforged Earthshatter Headpiece	stat_value1	24	25
+6022466	Bloodforged Earthshatter Headpiece	stat_value6	26	27
+6022467	Bloodforged Earthshatter Spaulders	ItemLevel	86	88
+6022467	Bloodforged Earthshatter Spaulders	armor	502	514
+6022468	Bloodforged Earthshatter Boots	ItemLevel	86	88
+6022468	Bloodforged Earthshatter Boots	armor	461	472
+6022469	Bloodforged Earthshatter Handguards	ItemLevel	86	88
+6022469	Bloodforged Earthshatter Handguards	armor	421	431
+6022470	Bloodforged Earthshatter Girdle	ItemLevel	86	88
+6022470	Bloodforged Earthshatter Girdle	armor	377	386
+6022470	Bloodforged Earthshatter Girdle	stat_value5	22	23
+6022471	Bloodforged Earthshatter Wristguards	ItemLevel	86	88
+6022471	Bloodforged Earthshatter Wristguards	armor	293	300
+6022476	Bloodforged Bonescythe Breastplate	ItemLevel	86	88
+6022476	Bloodforged Bonescythe Breastplate	armor	570	583
+6022476	Bloodforged Bonescythe Breastplate	stat_value1	24	25
+6022476	Bloodforged Bonescythe Breastplate	stat_value2	25	26
+6022476	Bloodforged Bonescythe Breastplate	stat_value6	22	23
+6022477	Bloodforged Bonescythe Legplates	ItemLevel	86	88
+6022477	Bloodforged Bonescythe Legplates	armor	500	512
+6022477	Bloodforged Bonescythe Legplates	stat_value1	31	32
+6022477	Bloodforged Bonescythe Legplates	stat_value5	26	27
+6022478	Bloodforged Bonescythe Helmet	ItemLevel	86	88
+6022478	Bloodforged Bonescythe Helmet	armor	463	474
+6022478	Bloodforged Bonescythe Helmet	stat_value2	25	26
+6022478	Bloodforged Bonescythe Helmet	stat_value6	23	24
+6022479	Bloodforged Bonescythe Pauldrons	ItemLevel	86	88
+6022479	Bloodforged Bonescythe Pauldrons	armor	428	438
+6022479	Bloodforged Bonescythe Pauldrons	stat_value1	24	25
+6022479	Bloodforged Bonescythe Pauldrons	stat_value4	25	26
+6022480	Bloodforged Bonescythe Sabatons	ItemLevel	86	88
+6022480	Bloodforged Bonescythe Sabatons	armor	394	403
+6022480	Bloodforged Bonescythe Sabatons	stat_value1	29	30
+6022480	Bloodforged Bonescythe Sabatons	stat_value4	22	23
+6022481	Bloodforged Bonescythe Gauntlets	ItemLevel	86	88
+6022481	Bloodforged Bonescythe Gauntlets	armor	359	367
+6022481	Bloodforged Bonescythe Gauntlets	stat_value1	22	23
+6022482	Bloodforged Bonescythe Waistguard	ItemLevel	86	88
+6022482	Bloodforged Bonescythe Waistguard	armor	322	329
+6022482	Bloodforged Bonescythe Waistguard	stat_value1	24	25
+6022482	Bloodforged Bonescythe Waistguard	stat_value3	22	23
+6022483	Bloodforged Bonescythe Bracers	ItemLevel	86	88
+6022483	Bloodforged Bonescythe Bracers	armor	250	256
+6022488	Bloodforged Dreamwalker Tunic	ItemLevel	86	88
+6022488	Bloodforged Dreamwalker Tunic	armor	570	583
+6022488	Bloodforged Dreamwalker Tunic	stat_value2	23	24
+6022488	Bloodforged Dreamwalker Tunic	stat_value3	25	26
+6022488	Bloodforged Dreamwalker Tunic	stat_value5	30	31
+6022489	Bloodforged Dreamwalker Legguards	ItemLevel	86	88
+6022489	Bloodforged Dreamwalker Legguards	armor	500	512
+6022489	Bloodforged Dreamwalker Legguards	stat_value5	30	31
+6022490	Bloodforged Dreamwalker Headpiece	ItemLevel	86	88
+6022490	Bloodforged Dreamwalker Headpiece	armor	463	474
+6022490	Bloodforged Dreamwalker Headpiece	stat_value1	24	25
+6022490	Bloodforged Dreamwalker Headpiece	stat_value5	31	32
+6022491	Bloodforged Dreamwalker Spaulders	ItemLevel	86	88
+6022491	Bloodforged Dreamwalker Spaulders	armor	428	438
+6022491	Bloodforged Dreamwalker Spaulders	stat_value5	28	29
+6022492	Bloodforged Dreamwalker Boots	ItemLevel	86	88
+6022492	Bloodforged Dreamwalker Boots	armor	394	403
+6022492	Bloodforged Dreamwalker Boots	stat_value6	25	26
+6022493	Bloodforged Dreamwalker Handguards	ItemLevel	86	88
+6022493	Bloodforged Dreamwalker Handguards	armor	359	367
+6022493	Bloodforged Dreamwalker Handguards	stat_value4	24	25
+6022494	Bloodforged Dreamwalker Girdle	ItemLevel	86	88
+6022494	Bloodforged Dreamwalker Girdle	armor	322	329
+6022494	Bloodforged Dreamwalker Girdle	stat_value6	30	31
+6022495	Bloodforged Dreamwalker Wristguards	ItemLevel	86	88
+6022495	Bloodforged Dreamwalker Wristguards	armor	250	256
+6022496	Bloodforged Frostfire Robe	ItemLevel	86	88
+6022496	Bloodforged Frostfire Robe	armor	445	455
+6022496	Bloodforged Frostfire Robe	stat_value5	37	38
+6022497	Bloodforged Frostfire Leggings	ItemLevel	86	88
+6022497	Bloodforged Frostfire Leggings	armor	391	400
+6022497	Bloodforged Frostfire Leggings	stat_value1	25	26
+6022497	Bloodforged Frostfire Leggings	stat_value6	37	38
+6022498	Bloodforged Frostfire Circlet	ItemLevel	86	88
+6022498	Bloodforged Frostfire Circlet	armor	362	370
+6022498	Bloodforged Frostfire Circlet	stat_value6	34	35
+6022499	Bloodforged Frostfire Shoulderpads	ItemLevel	86	88
+6022499	Bloodforged Frostfire Shoulderpads	armor	335	343
+6022499	Bloodforged Frostfire Shoulderpads	stat_value1	22	23
+6022499	Bloodforged Frostfire Shoulderpads	stat_value4	31	32
+6022500	Bloodforged Frostfire Sandals	ItemLevel	86	88
+6022500	Bloodforged Frostfire Sandals	armor	308	315
+6022500	Bloodforged Frostfire Sandals	stat_value5	24	25
+6022501	Bloodforged Frostfire Gloves	ItemLevel	86	88
+6022501	Bloodforged Frostfire Gloves	armor	280	287
+6022501	Bloodforged Frostfire Gloves	stat_value4	31	32
+6022502	Bloodforged Frostfire Belt	ItemLevel	86	88
+6022502	Bloodforged Frostfire Belt	armor	252	258
+6022502	Bloodforged Frostfire Belt	stat_value6	24	25
+6022503	Bloodforged Frostfire Bindings	ItemLevel	86	88
+6022503	Bloodforged Frostfire Bindings	armor	195	200
+6022504	Bloodforged Plagueheart Robe	ItemLevel	86	88
+6022504	Bloodforged Plagueheart Robe	armor	445	455
+6022504	Bloodforged Plagueheart Robe	stat_value2	28	29
+6022504	Bloodforged Plagueheart Robe	stat_value5	40	41
+6022505	Bloodforged Plagueheart Leggings	ItemLevel	86	88
+6022505	Bloodforged Plagueheart Leggings	armor	391	400
+6022505	Bloodforged Plagueheart Leggings	stat_value6	27	28
+6022506	Bloodforged Plagueheart Circlet	ItemLevel	86	88
+6022506	Bloodforged Plagueheart Circlet	armor	362	370
+6022506	Bloodforged Plagueheart Circlet	stat_value3	28	29
+6022506	Bloodforged Plagueheart Circlet	stat_value6	31	32
+6022507	Bloodforged Plagueheart Shoulderpads	ItemLevel	86	88
+6022507	Bloodforged Plagueheart Shoulderpads	armor	335	343
+6022507	Bloodforged Plagueheart Shoulderpads	stat_value5	30	31
+6022508	Bloodforged Plagueheart Sandals	ItemLevel	86	88
+6022508	Bloodforged Plagueheart Sandals	armor	308	315
+6022508	Bloodforged Plagueheart Sandals	stat_value4	35	36
+6022509	Bloodforged Plagueheart Gloves	ItemLevel	86	88
+6022509	Bloodforged Plagueheart Gloves	armor	280	287
+6022509	Bloodforged Plagueheart Gloves	stat_value4	32	33
+6022510	Bloodforged Plagueheart Belt	ItemLevel	86	88
+6022510	Bloodforged Plagueheart Belt	armor	252	258
+6022510	Bloodforged Plagueheart Belt	stat_value5	29	30
+6022511	Bloodforged Plagueheart Bindings	ItemLevel	86	88
+6022511	Bloodforged Plagueheart Bindings	armor	195	200
+6022512	Bloodforged Robe of Faith	ItemLevel	86	88
+6022512	Bloodforged Robe of Faith	armor	445	455
+6022512	Bloodforged Robe of Faith	stat_value7	26	27
+6022513	Bloodforged Leggings of Faith	ItemLevel	86	88
+6022513	Bloodforged Leggings of Faith	armor	391	400
+6022513	Bloodforged Leggings of Faith	stat_value6	27	28
+6022514	Bloodforged Circlet of Faith	ItemLevel	86	88
+6022514	Bloodforged Circlet of Faith	armor	362	370
+6022514	Bloodforged Circlet of Faith	stat_value3	22	23
+6022514	Bloodforged Circlet of Faith	stat_value6	24	25
+6022515	Bloodforged Shoulderpads of Faith	ItemLevel	86	88
+6022515	Bloodforged Shoulderpads of Faith	armor	335	343
+6022515	Bloodforged Shoulderpads of Faith	stat_value5	26	27
+6022516	Bloodforged Sandals of Faith	ItemLevel	86	88
+6022516	Bloodforged Sandals of Faith	armor	308	315
+6022516	Bloodforged Sandals of Faith	stat_value5	24	25
+6022517	Bloodforged Gloves of Faith	ItemLevel	86	88
+6022517	Bloodforged Gloves of Faith	armor	280	287
+6022517	Bloodforged Gloves of Faith	stat_value6	23	24
+6022518	Bloodforged Belt of Faith	ItemLevel	86	88
+6022518	Bloodforged Belt of Faith	armor	252	258
+6022518	Bloodforged Belt of Faith	stat_value5	24	25
+6022519	Bloodforged Bindings of Faith	ItemLevel	86	88
+6022519	Bloodforged Bindings of Faith	armor	195	200
+6310488	Bloodforged Dreadborne Breastplate	ItemLevel	90	92
+6310488	Bloodforged Dreadborne Breastplate	armor	882	902
+6310488	Bloodforged Dreadborne Breastplate	stat_value1	33	34
+6310488	Bloodforged Dreadborne Breastplate	stat_value2	31	32
+6310489	Bloodforged Dreadborne Legplates	ItemLevel	90	92
+6310489	Bloodforged Dreadborne Legplates	armor	774	791
+6310489	Bloodforged Dreadborne Legplates	stat_value1	37	38
+6310489	Bloodforged Dreadborne Legplates	stat_value2	29	30
+6310490	Bloodforged Dreadborne Helmet	ItemLevel	90	92
+6310490	Bloodforged Dreadborne Helmet	armor	718	734
+6310490	Bloodforged Dreadborne Helmet	stat_value1	30	31
+6310490	Bloodforged Dreadborne Helmet	stat_value2	29	30
+6310491	Bloodforged Dreadborne Pauldrons	ItemLevel	90	92
+6310491	Bloodforged Dreadborne Pauldrons	armor	663	678
+6310491	Bloodforged Dreadborne Pauldrons	stat_value1	30	31
+6310491	Bloodforged Dreadborne Pauldrons	stat_value2	26	27
+6310492	Bloodforged Dreadborne Sabatons	ItemLevel	90	92
+6310492	Bloodforged Dreadborne Sabatons	armor	609	623
+6310492	Bloodforged Dreadborne Sabatons	stat_value1	26	27
+6310492	Bloodforged Dreadborne Sabatons	stat_value2	24	25
+6310493	Bloodforged Dreadborne Gauntlets	ItemLevel	90	92
+6310493	Bloodforged Dreadborne Gauntlets	armor	556	568
+6310493	Bloodforged Dreadborne Gauntlets	stat_value1	25	26
+6310494	Bloodforged Dreadborne Waistguard	ItemLevel	90	92
+6310494	Bloodforged Dreadborne Waistguard	armor	498	509
+6310494	Bloodforged Dreadborne Waistguard	stat_value1	30	31
+6310495	Bloodforged Dreadborne Bracers	ItemLevel	90	92
+6310495	Bloodforged Dreadborne Bracers	armor	387	396
+6310495	Bloodforged Dreadborne Bracers	stat_value1	23	24
+6310519	Bloodforged Earthshatter Crown	ItemLevel	90	92
+6310519	Bloodforged Earthshatter Crown	armor	567	580
+6310519	Bloodforged Earthshatter Crown	stat_value1	25	26
+6310519	Bloodforged Earthshatter Crown	stat_value2	25	26
+6310519	Bloodforged Earthshatter Crown	stat_value5	31	32
+6310520	Bloodforged Earthshatter Epaulets	ItemLevel	90	92
+6310520	Bloodforged Earthshatter Epaulets	armor	524	536
+6310520	Bloodforged Earthshatter Epaulets	stat_value1	25	26
+6310520	Bloodforged Earthshatter Epaulets	stat_value2	24	25
+6310520	Bloodforged Earthshatter Epaulets	stat_value5	32	33
+6310729	Bloodforged Earthshatter Breastplate	ItemLevel	90	92
+6310729	Bloodforged Earthshatter Breastplate	armor	696	711
+6310729	Bloodforged Earthshatter Breastplate	stat_value1	28	29
+6310729	Bloodforged Earthshatter Breastplate	stat_value2	25	26
+6310729	Bloodforged Earthshatter Breastplate	stat_value5	28	29
+6310729	Bloodforged Earthshatter Breastplate	stat_value6	39	40
+6310730	Bloodforged Earthshatter Bracers	ItemLevel	90	92
+6310730	Bloodforged Earthshatter Bracers	armor	305	312
+6310730	Bloodforged Earthshatter Bracers	stat_value4	25	26
+6310731	Bloodforged Earthshatter Gauntlets	ItemLevel	90	92
+6310731	Bloodforged Earthshatter Gauntlets	armor	439	449
+6310731	Bloodforged Earthshatter Gauntlets	stat_value1	26	27
+6310731	Bloodforged Earthshatter Gauntlets	stat_value4	31	32
+6310809	Bloodforged Earthshatter Belt	ItemLevel	90	92
+6310809	Bloodforged Earthshatter Belt	armor	393	402
+6310809	Bloodforged Earthshatter Belt	stat_value1	26	27
+6310809	Bloodforged Earthshatter Belt	stat_value4	37	38
+6310848	Bloodforged Earthshatter Legplates	ItemLevel	90	92
+6310848	Bloodforged Earthshatter Legplates	armor	611	625
+6310848	Bloodforged Earthshatter Legplates	stat_value1	30	31
+6310848	Bloodforged Earthshatter Legplates	stat_value2	27	28
+6310848	Bloodforged Earthshatter Legplates	stat_value5	37	38
+6310859	Bloodforged Earthshatter Greaves	ItemLevel	90	92
+6310859	Bloodforged Earthshatter Greaves	armor	481	492
+6310859	Bloodforged Earthshatter Greaves	stat_value1	24	25
+6310859	Bloodforged Earthshatter Greaves	stat_value4	37	38
+6313566	Bloodforged Frozen Vrykul Armguards	ItemLevel	90	92
+6313566	Bloodforged Frozen Vrykul Armguards	armor	305	312
+6313566	Bloodforged Frozen Vrykul Armguards	stat_value3	31	32
+6313567	Bloodforged Frozen Vrykul Hauberk	ItemLevel	90	92
+6313567	Bloodforged Frozen Vrykul Hauberk	armor	696	711
+6313567	Bloodforged Frozen Vrykul Hauberk	stat_value1	27	28
+6313567	Bloodforged Frozen Vrykul Hauberk	stat_value2	24	25
+6313567	Bloodforged Frozen Vrykul Hauberk	stat_value3	38	39
+6313567	Bloodforged Frozen Vrykul Hauberk	stat_value5	23	24
+6313567	Bloodforged Frozen Vrykul Hauberk	stat_value7	36	37
+6313568	Bloodforged Frozen Vrykul Greaves	ItemLevel	90	92
+6313568	Bloodforged Frozen Vrykul Greaves	armor	611	625
+6313568	Bloodforged Frozen Vrykul Greaves	stat_value1	36	37
+6313568	Bloodforged Frozen Vrykul Greaves	stat_value2	28	29
+6313568	Bloodforged Frozen Vrykul Greaves	stat_value3	39	40
+6313568	Bloodforged Frozen Vrykul Greaves	stat_value4	26	27
+6313568	Bloodforged Frozen Vrykul Greaves	stat_value5	29	30
+6313568	Bloodforged Frozen Vrykul Greaves	stat_value6	39	40
+6313569	Bloodforged Frozen Vrykul Gloves	ItemLevel	90	92
+6313569	Bloodforged Frozen Vrykul Gloves	armor	439	449
+6313569	Bloodforged Frozen Vrykul Gloves	stat_value1	25	26
+6313569	Bloodforged Frozen Vrykul Gloves	stat_value3	30	31
+6313569	Bloodforged Frozen Vrykul Gloves	stat_value6	23	24
+6313570	Bloodforged Frozen Vrykul Boots	ItemLevel	90	92
+6313570	Bloodforged Frozen Vrykul Boots	armor	481	492
+6313570	Bloodforged Frozen Vrykul Boots	stat_value1	24	25
+6313570	Bloodforged Frozen Vrykul Boots	stat_value3	36	37
+6313570	Bloodforged Frozen Vrykul Boots	stat_value5	24	25
+6313571	Bloodforged Frozen Vrykul Helm	ItemLevel	90	92
+6313571	Bloodforged Frozen Vrykul Helm	armor	567	580
+6313571	Bloodforged Frozen Vrykul Helm	stat_value1	26	27
+6313571	Bloodforged Frozen Vrykul Helm	stat_value2	23	24
+6313571	Bloodforged Frozen Vrykul Helm	stat_value3	41	42
+6313571	Bloodforged Frozen Vrykul Helm	stat_value6	23	24
+6313633	Bloodforged Frozen Vrykul Girdle	ItemLevel	90	92
+6313633	Bloodforged Frozen Vrykul Girdle	armor	393	402
+6313633	Bloodforged Frozen Vrykul Girdle	stat_value1	26	27
+6313633	Bloodforged Frozen Vrykul Girdle	stat_value3	30	31
+6313633	Bloodforged Frozen Vrykul Girdle	stat_value5	24	25
+6313634	Bloodforged Frozen Vrykul Spaulders	ItemLevel	90	92
+6313634	Bloodforged Frozen Vrykul Spaulders	armor	524	536
+6313634	Bloodforged Frozen Vrykul Spaulders	stat_value1	24	25
+6313634	Bloodforged Frozen Vrykul Spaulders	stat_value3	33	34
+6313634	Bloodforged Frozen Vrykul Spaulders	stat_value5	24	25
+6322416	Bloodforged Dreadnaught Breastplate	ItemLevel	90	92
+6322416	Bloodforged Dreadnaught Breastplate	armor	882	902
+6322416	Bloodforged Dreadnaught Breastplate	stat_value1	23	24
+6322416	Bloodforged Dreadnaught Breastplate	stat_value2	41	42
+6322416	Bloodforged Dreadnaught Breastplate	stat_value6	30	31
+6322417	Bloodforged Dreadnaught Legplates	ItemLevel	90	92
+6322417	Bloodforged Dreadnaught Legplates	armor	774	791
+6322417	Bloodforged Dreadnaught Legplates	stat_value1	25	26
+6322417	Bloodforged Dreadnaught Legplates	stat_value2	40	41
+6322418	Bloodforged Dreadnaught Helmet	ItemLevel	90	92
+6322418	Bloodforged Dreadnaught Helmet	armor	718	734
+6322418	Bloodforged Dreadnaught Helmet	stat_value1	49	50
+6322418	Bloodforged Dreadnaught Helmet	stat_value2	23	24
+6322418	Bloodforged Dreadnaught Helmet	stat_value3	23	24
+6322419	Bloodforged Dreadnaught Pauldrons	ItemLevel	90	92
+6322419	Bloodforged Dreadnaught Pauldrons	armor	663	678
+6322419	Bloodforged Dreadnaught Pauldrons	stat_value2	30	31
+6322419	Bloodforged Dreadnaught Pauldrons	stat_value6	28	29
+6322420	Bloodforged Dreadnaught Sabatons	ItemLevel	90	92
+6322420	Bloodforged Dreadnaught Sabatons	armor	609	623
+6322420	Bloodforged Dreadnaught Sabatons	stat_value2	37	38
+6322421	Bloodforged Dreadnaught Gauntlets	ItemLevel	90	92
+6322421	Bloodforged Dreadnaught Gauntlets	armor	556	568
+6322421	Bloodforged Dreadnaught Gauntlets	stat_value2	26	27
+6322421	Bloodforged Dreadnaught Gauntlets	stat_value5	38	39
+6322422	Bloodforged Dreadnaught Waistguard	ItemLevel	90	92
+6322422	Bloodforged Dreadnaught Waistguard	armor	498	509
+6322422	Bloodforged Dreadnaught Waistguard	stat_value2	28	29
+6322423	Bloodforged Dreadnaught Bracers	ItemLevel	90	92
+6322423	Bloodforged Dreadnaught Bracers	armor	387	396
+6322423	Bloodforged Dreadnaught Bracers	stat_value2	30	31
+6322424	Bloodforged Redemption Wristguards	ItemLevel	90	92
+6322424	Bloodforged Redemption Wristguards	armor	387	396
+6322424	Bloodforged Redemption Wristguards	stat_value2	24	25
+6322424	Bloodforged Redemption Wristguards	stat_value5	30	31
+6322425	Bloodforged Redemption Tunic	ItemLevel	90	92
+6322425	Bloodforged Redemption Tunic	armor	882	902
+6322425	Bloodforged Redemption Tunic	stat_value1	27	28
+6322425	Bloodforged Redemption Tunic	stat_value2	36	37
+6322425	Bloodforged Redemption Tunic	stat_value3	30	31
+6322425	Bloodforged Redemption Tunic	stat_value4	35	36
+6322426	Bloodforged Redemption Handguards	ItemLevel	90	92
+6322426	Bloodforged Redemption Handguards	armor	556	568
+6322426	Bloodforged Redemption Handguards	stat_value1	26	27
+6322426	Bloodforged Redemption Handguards	stat_value2	25	26
+6322426	Bloodforged Redemption Handguards	stat_value4	36	37
+6322427	Bloodforged Redemption Legguards	ItemLevel	90	92
+6322427	Bloodforged Redemption Legguards	armor	774	791
+6322427	Bloodforged Redemption Legguards	stat_value1	36	37
+6322427	Bloodforged Redemption Legguards	stat_value2	30	31
+6322427	Bloodforged Redemption Legguards	stat_value3	27	28
+6322427	Bloodforged Redemption Legguards	stat_value5	41	42
+6322428	Bloodforged Redemption Headpiece	ItemLevel	90	92
+6322428	Bloodforged Redemption Headpiece	armor	718	734
+6322428	Bloodforged Redemption Headpiece	stat_value1	35	36
+6322428	Bloodforged Redemption Headpiece	stat_value2	30	31
+6322428	Bloodforged Redemption Headpiece	stat_value3	27	28
+6322428	Bloodforged Redemption Headpiece	stat_value4	42	43
+6322429	Bloodforged Redemption Spaulders	ItemLevel	90	92
+6322429	Bloodforged Redemption Spaulders	armor	663	678
+6322429	Bloodforged Redemption Spaulders	stat_value1	28	29
+6322429	Bloodforged Redemption Spaulders	stat_value2	24	25
+6322429	Bloodforged Redemption Spaulders	stat_value5	30	31
+6322430	Bloodforged Redemption Boots	ItemLevel	90	92
+6322430	Bloodforged Redemption Boots	armor	609	623
+6322430	Bloodforged Redemption Boots	stat_value1	24	25
+6322430	Bloodforged Redemption Boots	stat_value2	24	25
+6322430	Bloodforged Redemption Boots	stat_value4	30	31
+6322431	Bloodforged Redemption Girdle	ItemLevel	90	92
+6322431	Bloodforged Redemption Girdle	armor	498	509
+6322431	Bloodforged Redemption Girdle	stat_value1	35	36
+6322431	Bloodforged Redemption Girdle	stat_value4	39	40
+6322436	Bloodforged Cryptstalker Tunic	ItemLevel	90	92
+6322436	Bloodforged Cryptstalker Tunic	armor	696	711
+6322436	Bloodforged Cryptstalker Tunic	stat_value1	28	29
+6322436	Bloodforged Cryptstalker Tunic	stat_value3	29	30
+6322436	Bloodforged Cryptstalker Tunic	stat_value6	46	47
+6322437	Bloodforged Cryptstalker Legguards	ItemLevel	90	92
+6322437	Bloodforged Cryptstalker Legguards	armor	611	625
+6322437	Bloodforged Cryptstalker Legguards	stat_value1	30	31
+6322437	Bloodforged Cryptstalker Legguards	stat_value3	28	29
+6322437	Bloodforged Cryptstalker Legguards	stat_value5	57	58
+6322438	Bloodforged Cryptstalker Headpiece	ItemLevel	90	92
+6322438	Bloodforged Cryptstalker Headpiece	armor	567	580
+6322438	Bloodforged Cryptstalker Headpiece	stat_value1	25	26
+6322438	Bloodforged Cryptstalker Headpiece	stat_value3	32	33
+6322438	Bloodforged Cryptstalker Headpiece	stat_value4	30	31
+6322438	Bloodforged Cryptstalker Headpiece	stat_value5	41	42
+6322439	Bloodforged Cryptstalker Spaulders	ItemLevel	90	92
+6322439	Bloodforged Cryptstalker Spaulders	armor	524	536
+6322439	Bloodforged Cryptstalker Spaulders	stat_value3	25	26
+6322439	Bloodforged Cryptstalker Spaulders	stat_value5	37	38
+6322440	Bloodforged Cryptstalker Boots	ItemLevel	90	92
+6322440	Bloodforged Cryptstalker Boots	armor	481	492
+6322440	Bloodforged Cryptstalker Boots	stat_value1	24	25
+6322440	Bloodforged Cryptstalker Boots	stat_value5	43	44
+6322441	Bloodforged Cryptstalker Handguards	ItemLevel	90	92
+6322441	Bloodforged Cryptstalker Handguards	armor	439	449
+6322441	Bloodforged Cryptstalker Handguards	stat_value1	23	24
+6322441	Bloodforged Cryptstalker Handguards	stat_value3	23	24
+6322441	Bloodforged Cryptstalker Handguards	stat_value5	28	29
+6322442	Bloodforged Cryptstalker Girdle	ItemLevel	90	92
+6322442	Bloodforged Cryptstalker Girdle	armor	393	402
+6322442	Bloodforged Cryptstalker Girdle	stat_value3	24	25
+6322442	Bloodforged Cryptstalker Girdle	stat_value6	32	33
+6322443	Bloodforged Cryptstalker Wristguards	ItemLevel	90	92
+6322443	Bloodforged Cryptstalker Wristguards	armor	305	312
+6322443	Bloodforged Cryptstalker Wristguards	stat_value5	28	29
+6322464	Bloodforged Earthshatter Tunic	ItemLevel	90	92
+6322464	Bloodforged Earthshatter Tunic	armor	696	711
+6322464	Bloodforged Earthshatter Tunic	stat_value1	28	29
+6322464	Bloodforged Earthshatter Tunic	stat_value3	25	26
+6322464	Bloodforged Earthshatter Tunic	stat_value4	24	25
+6322464	Bloodforged Earthshatter Tunic	stat_value6	32	33
+6322465	Bloodforged Earthshatter Legguards	ItemLevel	90	92
+6322465	Bloodforged Earthshatter Legguards	armor	611	625
+6322465	Bloodforged Earthshatter Legguards	stat_value1	32	33
+6322465	Bloodforged Earthshatter Legguards	stat_value3	31	32
+6322465	Bloodforged Earthshatter Legguards	stat_value6	32	33
+6322466	Bloodforged Earthshatter Headpiece	ItemLevel	90	92
+6322466	Bloodforged Earthshatter Headpiece	armor	567	580
+6322466	Bloodforged Earthshatter Headpiece	stat_value1	30	31
+6322466	Bloodforged Earthshatter Headpiece	stat_value3	27	28
+6322466	Bloodforged Earthshatter Headpiece	stat_value6	33	34
+6322467	Bloodforged Earthshatter Spaulders	ItemLevel	90	92
+6322467	Bloodforged Earthshatter Spaulders	armor	524	536
+6322467	Bloodforged Earthshatter Spaulders	stat_value1	25	26
+6322467	Bloodforged Earthshatter Spaulders	stat_value3	24	25
+6322467	Bloodforged Earthshatter Spaulders	stat_value5	25	26
+6322468	Bloodforged Earthshatter Boots	ItemLevel	90	92
+6322468	Bloodforged Earthshatter Boots	armor	481	492
+6322468	Bloodforged Earthshatter Boots	stat_value1	25	26
+6322468	Bloodforged Earthshatter Boots	stat_value5	27	28
+6322469	Bloodforged Earthshatter Handguards	ItemLevel	90	92
+6322469	Bloodforged Earthshatter Handguards	armor	439	449
+6322469	Bloodforged Earthshatter Handguards	stat_value1	25	26
+6322469	Bloodforged Earthshatter Handguards	stat_value5	24	25
+6322470	Bloodforged Earthshatter Girdle	ItemLevel	90	92
+6322470	Bloodforged Earthshatter Girdle	armor	393	402
+6322470	Bloodforged Earthshatter Girdle	stat_value1	25	26
+6322470	Bloodforged Earthshatter Girdle	stat_value5	28	29
+6322471	Bloodforged Earthshatter Wristguards	ItemLevel	90	92
+6322471	Bloodforged Earthshatter Wristguards	armor	305	312
+6322476	Bloodforged Bonescythe Breastplate	ItemLevel	90	92
+6322476	Bloodforged Bonescythe Breastplate	armor	594	607
+6322476	Bloodforged Bonescythe Breastplate	stat_value1	30	31
+6322476	Bloodforged Bonescythe Breastplate	stat_value2	31	32
+6322476	Bloodforged Bonescythe Breastplate	stat_value6	28	29
+6322477	Bloodforged Bonescythe Legplates	ItemLevel	90	92
+6322477	Bloodforged Bonescythe Legplates	armor	522	534
+6322477	Bloodforged Bonescythe Legplates	stat_value1	40	41
+6322477	Bloodforged Bonescythe Legplates	stat_value2	27	28
+6322477	Bloodforged Bonescythe Legplates	stat_value5	33	34
+6322478	Bloodforged Bonescythe Helmet	ItemLevel	90	92
+6322478	Bloodforged Bonescythe Helmet	armor	484	495
+6322478	Bloodforged Bonescythe Helmet	stat_value1	25	26
+6322478	Bloodforged Bonescythe Helmet	stat_value2	31	32
+6322478	Bloodforged Bonescythe Helmet	stat_value6	29	30
+6322479	Bloodforged Bonescythe Pauldrons	ItemLevel	90	92
+6322479	Bloodforged Bonescythe Pauldrons	armor	447	457
+6322479	Bloodforged Bonescythe Pauldrons	stat_value1	30	31
+6322479	Bloodforged Bonescythe Pauldrons	stat_value4	31	32
+6322480	Bloodforged Bonescythe Sabatons	ItemLevel	90	92
+6322480	Bloodforged Bonescythe Sabatons	armor	411	420
+6322480	Bloodforged Bonescythe Sabatons	stat_value1	37	38
+6322480	Bloodforged Bonescythe Sabatons	stat_value2	23	24
+6322480	Bloodforged Bonescythe Sabatons	stat_value4	28	29
+6322481	Bloodforged Bonescythe Gauntlets	ItemLevel	90	92
+6322481	Bloodforged Bonescythe Gauntlets	armor	374	382
+6322481	Bloodforged Bonescythe Gauntlets	stat_value1	28	29
+6322481	Bloodforged Bonescythe Gauntlets	stat_value3	23	24
+6322481	Bloodforged Bonescythe Gauntlets	stat_value4	24	25
+6322482	Bloodforged Bonescythe Waistguard	ItemLevel	90	92
+6322482	Bloodforged Bonescythe Waistguard	armor	336	343
+6322482	Bloodforged Bonescythe Waistguard	stat_value1	30	31
+6322482	Bloodforged Bonescythe Waistguard	stat_value3	28	29
+6322483	Bloodforged Bonescythe Bracers	ItemLevel	90	92
+6322483	Bloodforged Bonescythe Bracers	armor	261	267
+6322488	Bloodforged Dreamwalker Tunic	ItemLevel	90	92
+6322488	Bloodforged Dreamwalker Tunic	armor	594	607
+6322488	Bloodforged Dreamwalker Tunic	stat_value1	23	24
+6322488	Bloodforged Dreamwalker Tunic	stat_value2	29	30
+6322488	Bloodforged Dreamwalker Tunic	stat_value3	31	32
+6322488	Bloodforged Dreamwalker Tunic	stat_value5	38	39
+6322489	Bloodforged Dreamwalker Legguards	ItemLevel	90	92
+6322489	Bloodforged Dreamwalker Legguards	armor	522	534
+6322489	Bloodforged Dreamwalker Legguards	stat_value2	25	26
+6322489	Bloodforged Dreamwalker Legguards	stat_value3	24	25
+6322489	Bloodforged Dreamwalker Legguards	stat_value5	38	39
+6322490	Bloodforged Dreamwalker Headpiece	ItemLevel	90	92
+6322490	Bloodforged Dreamwalker Headpiece	armor	484	495
+6322490	Bloodforged Dreamwalker Headpiece	stat_value1	30	31
+6322490	Bloodforged Dreamwalker Headpiece	stat_value2	24	25
+6322490	Bloodforged Dreamwalker Headpiece	stat_value3	27	28
+6322490	Bloodforged Dreamwalker Headpiece	stat_value5	39	40
+6322491	Bloodforged Dreamwalker Spaulders	ItemLevel	90	92
+6322491	Bloodforged Dreamwalker Spaulders	armor	447	457
+6322491	Bloodforged Dreamwalker Spaulders	stat_value5	36	37
+6322492	Bloodforged Dreamwalker Boots	ItemLevel	90	92
+6322492	Bloodforged Dreamwalker Boots	armor	411	420
+6322492	Bloodforged Dreamwalker Boots	stat_value6	31	32
+6322493	Bloodforged Dreamwalker Handguards	ItemLevel	90	92
+6322493	Bloodforged Dreamwalker Handguards	armor	374	382
+6322493	Bloodforged Dreamwalker Handguards	stat_value4	30	31
+6322494	Bloodforged Dreamwalker Girdle	ItemLevel	90	92
+6322494	Bloodforged Dreamwalker Girdle	armor	336	343
+6322494	Bloodforged Dreamwalker Girdle	stat_value6	38	39
+6322495	Bloodforged Dreamwalker Wristguards	ItemLevel	90	92
+6322495	Bloodforged Dreamwalker Wristguards	armor	261	267
+6322495	Bloodforged Dreamwalker Wristguards	stat_value2	23	24
+6322495	Bloodforged Dreamwalker Wristguards	stat_value4	23	24
+6322496	Bloodforged Frostfire Robe	ItemLevel	90	92
+6322496	Bloodforged Frostfire Robe	armor	464	474
+6322496	Bloodforged Frostfire Robe	stat_value1	26	27
+6322496	Bloodforged Frostfire Robe	stat_value2	25	26
+6322496	Bloodforged Frostfire Robe	stat_value3	24	25
+6322496	Bloodforged Frostfire Robe	stat_value5	48	49
+6322497	Bloodforged Frostfire Leggings	ItemLevel	90	92
+6322497	Bloodforged Frostfire Leggings	armor	408	417
+6322497	Bloodforged Frostfire Leggings	stat_value1	31	32
+6322497	Bloodforged Frostfire Leggings	stat_value2	27	28
+6322497	Bloodforged Frostfire Leggings	stat_value6	46	47
+6322498	Bloodforged Frostfire Circlet	ItemLevel	90	92
+6322498	Bloodforged Frostfire Circlet	armor	378	386
+6322498	Bloodforged Frostfire Circlet	stat_value1	27	28
+6322498	Bloodforged Frostfire Circlet	stat_value2	23	24
+6322498	Bloodforged Frostfire Circlet	stat_value3	26	27
+6322498	Bloodforged Frostfire Circlet	stat_value6	43	44
+6322499	Bloodforged Frostfire Shoulderpads	ItemLevel	90	92
+6322499	Bloodforged Frostfire Shoulderpads	armor	349	357
+6322499	Bloodforged Frostfire Shoulderpads	stat_value1	28	29
+6322499	Bloodforged Frostfire Shoulderpads	stat_value2	26	27
+6322499	Bloodforged Frostfire Shoulderpads	stat_value4	39	40
+6322500	Bloodforged Frostfire Sandals	ItemLevel	90	92
+6322500	Bloodforged Frostfire Sandals	armor	321	328
+6322500	Bloodforged Frostfire Sandals	stat_value5	30	31
+6322501	Bloodforged Frostfire Gloves	ItemLevel	90	92
+6322501	Bloodforged Frostfire Gloves	armor	292	298
+6322501	Bloodforged Frostfire Gloves	stat_value1	23	24
+6322501	Bloodforged Frostfire Gloves	stat_value4	39	40
+6322502	Bloodforged Frostfire Belt	ItemLevel	90	92
+6322502	Bloodforged Frostfire Belt	armor	262	268
+6322502	Bloodforged Frostfire Belt	stat_value1	25	26
+6322502	Bloodforged Frostfire Belt	stat_value6	30	31
+6322503	Bloodforged Frostfire Bindings	ItemLevel	90	92
+6322503	Bloodforged Frostfire Bindings	armor	204	209
+6322503	Bloodforged Frostfire Bindings	stat_value5	25	26
+6322504	Bloodforged Plagueheart Robe	ItemLevel	90	92
+6322504	Bloodforged Plagueheart Robe	armor	464	474
+6322504	Bloodforged Plagueheart Robe	stat_value2	36	37
+6322504	Bloodforged Plagueheart Robe	stat_value5	51	52
+6322505	Bloodforged Plagueheart Leggings	ItemLevel	90	92
+6322505	Bloodforged Plagueheart Leggings	armor	408	417
+6322505	Bloodforged Plagueheart Leggings	stat_value1	23	24
+6322505	Bloodforged Plagueheart Leggings	stat_value3	27	28
+6322505	Bloodforged Plagueheart Leggings	stat_value6	35	36
+6322506	Bloodforged Plagueheart Circlet	ItemLevel	90	92
+6322506	Bloodforged Plagueheart Circlet	armor	378	386
+6322506	Bloodforged Plagueheart Circlet	stat_value1	26	27
+6322506	Bloodforged Plagueheart Circlet	stat_value2	25	26
+6322506	Bloodforged Plagueheart Circlet	stat_value3	36	37
+6322506	Bloodforged Plagueheart Circlet	stat_value6	39	40
+6322507	Bloodforged Plagueheart Shoulderpads	ItemLevel	90	92
+6322507	Bloodforged Plagueheart Shoulderpads	armor	349	357
+6322507	Bloodforged Plagueheart Shoulderpads	stat_value2	26	27
+6322507	Bloodforged Plagueheart Shoulderpads	stat_value5	38	39
+6322508	Bloodforged Plagueheart Sandals	ItemLevel	90	92
+6322508	Bloodforged Plagueheart Sandals	armor	321	328
+6322508	Bloodforged Plagueheart Sandals	stat_value2	25	26
+6322508	Bloodforged Plagueheart Sandals	stat_value4	44	45
+6322509	Bloodforged Plagueheart Gloves	ItemLevel	90	92
+6322509	Bloodforged Plagueheart Gloves	armor	292	298
+6322509	Bloodforged Plagueheart Gloves	stat_value2	27	28
+6322509	Bloodforged Plagueheart Gloves	stat_value4	41	42
+6322510	Bloodforged Plagueheart Belt	ItemLevel	90	92
+6322510	Bloodforged Plagueheart Belt	armor	262	268
+6322510	Bloodforged Plagueheart Belt	stat_value2	25	26
+6322510	Bloodforged Plagueheart Belt	stat_value5	37	38
+6322511	Bloodforged Plagueheart Bindings	ItemLevel	90	92
+6322511	Bloodforged Plagueheart Bindings	armor	204	209
+6322511	Bloodforged Plagueheart Bindings	stat_value3	24	25
+6322512	Bloodforged Robe of Faith	ItemLevel	90	92
+6322512	Bloodforged Robe of Faith	armor	464	474
+6322512	Bloodforged Robe of Faith	stat_value2	24	25
+6322512	Bloodforged Robe of Faith	stat_value3	27	28
+6322512	Bloodforged Robe of Faith	stat_value7	33	34
+6322513	Bloodforged Leggings of Faith	ItemLevel	90	92
+6322513	Bloodforged Leggings of Faith	armor	408	417
+6322513	Bloodforged Leggings of Faith	stat_value2	26	27
+6322513	Bloodforged Leggings of Faith	stat_value3	27	28
+6322513	Bloodforged Leggings of Faith	stat_value6	35	36
+6322514	Bloodforged Circlet of Faith	ItemLevel	90	92
+6322514	Bloodforged Circlet of Faith	armor	378	386
+6322514	Bloodforged Circlet of Faith	stat_value2	24	25
+6322514	Bloodforged Circlet of Faith	stat_value3	28	29
+6322514	Bloodforged Circlet of Faith	stat_value6	30	31
+6322515	Bloodforged Shoulderpads of Faith	ItemLevel	90	92
+6322515	Bloodforged Shoulderpads of Faith	armor	349	357
+6322515	Bloodforged Shoulderpads of Faith	stat_value3	26	27
+6322515	Bloodforged Shoulderpads of Faith	stat_value5	33	34
+6322516	Bloodforged Sandals of Faith	ItemLevel	90	92
+6322516	Bloodforged Sandals of Faith	armor	321	328
+6322516	Bloodforged Sandals of Faith	stat_value5	30	31
+6322517	Bloodforged Gloves of Faith	ItemLevel	90	92
+6322517	Bloodforged Gloves of Faith	armor	292	298
+6322517	Bloodforged Gloves of Faith	stat_value2	24	25
+6322517	Bloodforged Gloves of Faith	stat_value6	29	30
+6322518	Bloodforged Belt of Faith	ItemLevel	90	92
+6322518	Bloodforged Belt of Faith	armor	262	268
+6322518	Bloodforged Belt of Faith	stat_value2	23	24
+6322518	Bloodforged Belt of Faith	stat_value5	30	31
+6322519	Bloodforged Bindings of Faith	ItemLevel	90	92
+6322519	Bloodforged Bindings of Faith	armor	204	209
+7522416	Bloodforged Dreadnaught Chestguard	ItemLevel	86	88
+7522416	Bloodforged Dreadnaught Chestguard	armor	846	866
+7522416	Bloodforged Dreadnaught Chestguard	stat_value1	24	25
+7522416	Bloodforged Dreadnaught Chestguard	stat_value2	33	34
+7522417	Bloodforged Dreadnaught Legguards	ItemLevel	86	88
+7522417	Bloodforged Dreadnaught Legguards	armor	742	759
+7522417	Bloodforged Dreadnaught Legguards	stat_value2	33	34
+7522418	Bloodforged Dreadnaught Braincage	ItemLevel	86	88
+7522418	Bloodforged Dreadnaught Braincage	armor	688	704
+7522418	Bloodforged Dreadnaught Braincage	stat_value1	33	34
+7522419	Bloodforged Dreadnaught Spaulders	ItemLevel	86	88
+7522419	Bloodforged Dreadnaught Spaulders	armor	636	651
+7522419	Bloodforged Dreadnaught Spaulders	stat_value1	26	27
+7522420	Bloodforged Dreadnaught Stompers	ItemLevel	86	88
+7522420	Bloodforged Dreadnaught Stompers	armor	584	598
+7522420	Bloodforged Dreadnaught Stompers	stat_value2	26	27
+7522421	Bloodforged Dreadnaught Grips	ItemLevel	86	88
+7522421	Bloodforged Dreadnaught Grips	armor	533	545
+7522422	Bloodforged Dreadnaught Belt	ItemLevel	86	88
+7522422	Bloodforged Dreadnaught Belt	armor	478	489
+7522422	Bloodforged Dreadnaught Belt	stat_value2	22	23
+7522423	Bloodforged Dreadnaught Wristguards	ItemLevel	86	88
+7522423	Bloodforged Dreadnaught Wristguards	armor	371	380
+7522423	Bloodforged Dreadnaught Wristguards	stat_value2	24	25
+7522424	Bloodforged Redemption Bracers	ItemLevel	86	88
+7522424	Bloodforged Redemption Bracers	armor	371	380
+7522424	Bloodforged Redemption Bracers	stat_value3	22	23
+7522425	Bloodforged Redemption Chestguard	ItemLevel	86	88
+7522425	Bloodforged Redemption Chestguard	armor	846	866
+7522425	Bloodforged Redemption Chestguard	stat_value1	23	24
+7522425	Bloodforged Redemption Chestguard	stat_value3	31	32
+7522425	Bloodforged Redemption Chestguard	stat_value6	25	26
+7522426	Bloodforged Redemption Grips	ItemLevel	86	88
+7522426	Bloodforged Redemption Grips	armor	533	545
+7522426	Bloodforged Redemption Grips	stat_value7	26	27
+7522427	Bloodforged Redemption Legplates	ItemLevel	86	88
+7522427	Bloodforged Redemption Legplates	armor	742	759
+7522427	Bloodforged Redemption Legplates	stat_value3	31	32
+7522427	Bloodforged Redemption Legplates	stat_value5	26	27
+7522428	Bloodforged Redemption Helmet	ItemLevel	86	88
+7522428	Bloodforged Redemption Helmet	armor	688	704
+7522428	Bloodforged Redemption Helmet	stat_value3	34	35
+7522429	Bloodforged Redemption Shoulderpads	ItemLevel	86	88
+7522429	Bloodforged Redemption Shoulderpads	armor	636	651
+7522429	Bloodforged Redemption Shoulderpads	stat_value3	22	23
+7522429	Bloodforged Redemption Shoulderpads	stat_value6	22	23
+7522429	Bloodforged Redemption Shoulderpads	stat_value7	29	30
+7522430	Bloodforged Redemption Stompers	ItemLevel	86	88
+7522430	Bloodforged Redemption Stompers	armor	584	598
+7522430	Bloodforged Redemption Stompers	stat_value3	25	26
+7522430	Bloodforged Redemption Stompers	stat_value5	22	23
+7522431	Bloodforged Redemption Waistguard	ItemLevel	86	88
+7522431	Bloodforged Redemption Waistguard	armor	478	489
+7522431	Bloodforged Redemption Waistguard	stat_value6	23	24
+7522464	Bloodforged Earthshatter Chestguard	ItemLevel	86	88
+7522464	Bloodforged Earthshatter Chestguard	armor	668	684
+7522464	Bloodforged Earthshatter Chestguard	stat_value1	22	23
+7522464	Bloodforged Earthshatter Chestguard	stat_value4	24	25
+7522464	Bloodforged Earthshatter Chestguard	stat_value5	31	32
+7522465	Bloodforged Earthshatter Leggings	ItemLevel	86	88
+7522465	Bloodforged Earthshatter Leggings	armor	586	600
+7522465	Bloodforged Earthshatter Leggings	stat_value1	22	23
+7522465	Bloodforged Earthshatter Leggings	stat_value6	31	32
+7522466	Bloodforged Earthshatter Helmet	ItemLevel	86	88
+7522466	Bloodforged Earthshatter Helmet	armor	543	556
+7522466	Bloodforged Earthshatter Helmet	stat_value5	28	29
+7522467	Bloodforged Earthshatter Shoulders	ItemLevel	86	88
+7522467	Bloodforged Earthshatter Shoulders	armor	502	514
+7522467	Bloodforged Earthshatter Shoulders	stat_value4	27	28
+7522468	Bloodforged Earthshatter Stompers	ItemLevel	86	88
+7522468	Bloodforged Earthshatter Stompers	armor	461	472
+7522468	Bloodforged Earthshatter Stompers	stat_value5	25	26
+7522469	Bloodforged Earthshatter Grips	ItemLevel	86	88
+7522469	Bloodforged Earthshatter Grips	armor	421	431
+7522469	Bloodforged Earthshatter Grips	stat_value5	29	30
+7522470	Bloodforged Earthshatter Belt	ItemLevel	86	88
+7522470	Bloodforged Earthshatter Belt	armor	377	386
+7522470	Bloodforged Earthshatter Belt	stat_value4	27	28
+7522471	Bloodforged Earthshatter Bracers	ItemLevel	86	88
+7522471	Bloodforged Earthshatter Bracers	armor	293	300
+7522488	Bloodforged Dreamwalker Robe	ItemLevel	86	88
+7522488	Bloodforged Dreamwalker Robe	armor	570	583
+7522488	Bloodforged Dreamwalker Robe	stat_value2	25	26
+7522488	Bloodforged Dreamwalker Robe	stat_value6	25	26
+7522489	Bloodforged Dreamwalker Leggings	ItemLevel	86	88
+7522489	Bloodforged Dreamwalker Leggings	armor	500	512
+7522489	Bloodforged Dreamwalker Leggings	stat_value5	31	32
+7522490	Bloodforged Dreamwalker Hood	ItemLevel	86	88
+7522490	Bloodforged Dreamwalker Hood	armor	463	474
+7522490	Bloodforged Dreamwalker Hood	stat_value6	23	24
+7522491	Bloodforged Dreamwalker Shoulderpads	ItemLevel	86	88
+7522491	Bloodforged Dreamwalker Shoulderpads	armor	428	438
+7522491	Bloodforged Dreamwalker Shoulderpads	stat_value5	28	29
+7522492	Bloodforged Dreamwalker Sandals	ItemLevel	86	88
+7522492	Bloodforged Dreamwalker Sandals	armor	394	403
+7522492	Bloodforged Dreamwalker Sandals	stat_value5	27	28
+7522493	Bloodforged Dreamwalker Gloves	ItemLevel	86	88
+7522493	Bloodforged Dreamwalker Gloves	armor	359	367
+7522493	Bloodforged Dreamwalker Gloves	stat_value2	22	23
+7522493	Bloodforged Dreamwalker Gloves	stat_value4	25	26
+7522494	Bloodforged Dreamwalker Waist	ItemLevel	86	88
+7522494	Bloodforged Dreamwalker Waist	armor	322	329
+7522494	Bloodforged Dreamwalker Waist	stat_value5	24	25
+7522495	Bloodforged Dreamwalker Bracers	ItemLevel	86	88
+7522495	Bloodforged Dreamwalker Bracers	armor	250	256
+7522512	Bloodforged Garb of Faith	ItemLevel	86	88
+7522512	Bloodforged Garb of Faith	armor	445	455
+7522512	Bloodforged Garb of Faith	stat_value3	25	26
+7522512	Bloodforged Garb of Faith	stat_value6	26	27
+7522513	Bloodforged Legguards of Faith	ItemLevel	86	88
+7522513	Bloodforged Legguards of Faith	armor	391	400
+7522513	Bloodforged Legguards of Faith	stat_value6	31	32
+7522514	Bloodforged Halo of Faith	ItemLevel	86	88
+7522514	Bloodforged Halo of Faith	armor	362	370
+7522514	Bloodforged Halo of Faith	stat_value3	22	23
+7522514	Bloodforged Halo of Faith	stat_value6	29	30
+7522515	Bloodforged Spaulders of Faith	ItemLevel	86	88
+7522515	Bloodforged Spaulders of Faith	armor	335	343
+7522515	Bloodforged Spaulders of Faith	stat_value5	26	27
+7522516	Bloodforged Boots of Faith	ItemLevel	86	88
+7522516	Bloodforged Boots of Faith	armor	308	315
+7522516	Bloodforged Boots of Faith	stat_value5	24	25
+7522517	Bloodforged Handguards of Faith	ItemLevel	86	88
+7522517	Bloodforged Handguards of Faith	armor	280	287
+7522517	Bloodforged Handguards of Faith	stat_value5	22	23
+7522518	Bloodforged Waistguard of Faith	ItemLevel	86	88
+7522518	Bloodforged Waistguard of Faith	armor	252	258
+7522518	Bloodforged Waistguard of Faith	stat_value5	22	23
+7522519	Bloodforged Bracers of Faith	ItemLevel	86	88
+7522519	Bloodforged Bracers of Faith	armor	195	200
+7532424	Bloodforged Redemption Bindings	ItemLevel	86	88
+7532424	Bloodforged Redemption Bindings	armor	371	380
+7532425	Bloodforged Redemption Breastplate	ItemLevel	86	88
+7532425	Bloodforged Redemption Breastplate	armor	846	866
+7532425	Bloodforged Redemption Breastplate	stat_value1	24	25
+7532425	Bloodforged Redemption Breastplate	stat_value3	22	23
+7532425	Bloodforged Redemption Breastplate	stat_value6	22	23
+7532426	Bloodforged Redemption Gauntlets	ItemLevel	86	88
+7532426	Bloodforged Redemption Gauntlets	armor	533	545
+7532427	Bloodforged Redemption Leggings	ItemLevel	86	88
+7532427	Bloodforged Redemption Leggings	armor	742	759
+7532427	Bloodforged Redemption Leggings	stat_value1	29	30
+7532427	Bloodforged Redemption Leggings	stat_value3	24	25
+7532427	Bloodforged Redemption Leggings	stat_value5	24	25
+7532428	Bloodforged Redemption Visor	ItemLevel	86	88
+7532428	Bloodforged Redemption Visor	armor	688	704
+7532428	Bloodforged Redemption Visor	stat_value3	24	25
+7532428	Bloodforged Redemption Visor	stat_value6	28	29
+7532429	Bloodforged Redemption Shoulderguards	ItemLevel	86	88
+7532429	Bloodforged Redemption Shoulderguards	armor	636	651
+7532430	Bloodforged Redemption Cleats	ItemLevel	86	88
+7532430	Bloodforged Redemption Cleats	armor	584	598
+7532431	Bloodforged Redemption Belt	ItemLevel	86	88
+7532431	Bloodforged Redemption Belt	armor	478	489
+7822416	Bloodforged Dreadnaught Chestguard	ItemLevel	90	92
+7822416	Bloodforged Dreadnaught Chestguard	armor	882	902
+7822416	Bloodforged Dreadnaught Chestguard	stat_value1	30	31
+7822416	Bloodforged Dreadnaught Chestguard	stat_value2	42	43
+7822417	Bloodforged Dreadnaught Legguards	ItemLevel	90	92
+7822417	Bloodforged Dreadnaught Legguards	armor	774	791
+7822417	Bloodforged Dreadnaught Legguards	stat_value1	23	24
+7822417	Bloodforged Dreadnaught Legguards	stat_value2	42	43
+7822418	Bloodforged Dreadnaught Braincage	ItemLevel	90	92
+7822418	Bloodforged Dreadnaught Braincage	armor	718	734
+7822418	Bloodforged Dreadnaught Braincage	stat_value1	42	43
+7822418	Bloodforged Dreadnaught Braincage	stat_value2	26	27
+7822419	Bloodforged Dreadnaught Spaulders	ItemLevel	90	92
+7822419	Bloodforged Dreadnaught Spaulders	armor	663	678
+7822419	Bloodforged Dreadnaught Spaulders	stat_value1	32	33
+7822420	Bloodforged Dreadnaught Stompers	ItemLevel	90	92
+7822420	Bloodforged Dreadnaught Stompers	armor	609	623
+7822420	Bloodforged Dreadnaught Stompers	stat_value2	33	34
+7822421	Bloodforged Dreadnaught Grips	ItemLevel	90	92
+7822421	Bloodforged Dreadnaught Grips	armor	556	568
+7822421	Bloodforged Dreadnaught Grips	stat_value2	26	27
+7822422	Bloodforged Dreadnaught Belt	ItemLevel	90	92
+7822422	Bloodforged Dreadnaught Belt	armor	498	509
+7822422	Bloodforged Dreadnaught Belt	stat_value1	26	27
+7822422	Bloodforged Dreadnaught Belt	stat_value2	28	29
+7822422	Bloodforged Dreadnaught Belt	stat_value3	24	25
+7822423	Bloodforged Dreadnaught Wristguards	ItemLevel	90	92
+7822423	Bloodforged Dreadnaught Wristguards	armor	387	396
+7822423	Bloodforged Dreadnaught Wristguards	stat_value1	23	24
+7822423	Bloodforged Dreadnaught Wristguards	stat_value2	30	31
+7822424	Bloodforged Redemption Bracers	ItemLevel	90	92
+7822424	Bloodforged Redemption Bracers	armor	387	396
+7822424	Bloodforged Redemption Bracers	stat_value3	28	29
+7822425	Bloodforged Redemption Chestguard	ItemLevel	90	92
+7822425	Bloodforged Redemption Chestguard	armor	882	902
+7822425	Bloodforged Redemption Chestguard	stat_value1	29	30
+7822425	Bloodforged Redemption Chestguard	stat_value3	39	40
+7822425	Bloodforged Redemption Chestguard	stat_value6	31	32
+7822426	Bloodforged Redemption Grips	ItemLevel	90	92
+7822426	Bloodforged Redemption Grips	armor	556	568
+7822426	Bloodforged Redemption Grips	stat_value3	24	25
+7822426	Bloodforged Redemption Grips	stat_value6	26	27
+7822426	Bloodforged Redemption Grips	stat_value7	33	34
+7822427	Bloodforged Redemption Legplates	ItemLevel	90	92
+7822427	Bloodforged Redemption Legplates	armor	774	791
+7822427	Bloodforged Redemption Legplates	stat_value1	25	26
+7822427	Bloodforged Redemption Legplates	stat_value3	39	40
+7822427	Bloodforged Redemption Legplates	stat_value4	23	24
+7822427	Bloodforged Redemption Legplates	stat_value5	33	34
+7822428	Bloodforged Redemption Helmet	ItemLevel	90	92
+7822428	Bloodforged Redemption Helmet	armor	718	734
+7822428	Bloodforged Redemption Helmet	stat_value3	43	44
+7822428	Bloodforged Redemption Helmet	stat_value4	23	24
+7822428	Bloodforged Redemption Helmet	stat_value6	26	27
+7822429	Bloodforged Redemption Shoulderpads	ItemLevel	90	92
+7822429	Bloodforged Redemption Shoulderpads	armor	663	678
+7822429	Bloodforged Redemption Shoulderpads	stat_value3	28	29
+7822429	Bloodforged Redemption Shoulderpads	stat_value6	28	29
+7822429	Bloodforged Redemption Shoulderpads	stat_value7	37	38
+7822430	Bloodforged Redemption Stompers	ItemLevel	90	92
+7822430	Bloodforged Redemption Stompers	armor	609	623
+7822430	Bloodforged Redemption Stompers	stat_value3	31	32
+7822430	Bloodforged Redemption Stompers	stat_value5	28	29
+7822431	Bloodforged Redemption Waistguard	ItemLevel	90	92
+7822431	Bloodforged Redemption Waistguard	armor	498	509
+7822431	Bloodforged Redemption Waistguard	stat_value3	26	27
+7822431	Bloodforged Redemption Waistguard	stat_value6	29	30
+7822464	Bloodforged Earthshatter Chestguard	ItemLevel	90	92
+7822464	Bloodforged Earthshatter Chestguard	armor	696	711
+7822464	Bloodforged Earthshatter Chestguard	stat_value1	28	29
+7822464	Bloodforged Earthshatter Chestguard	stat_value2	26	27
+7822464	Bloodforged Earthshatter Chestguard	stat_value4	30	31
+7822464	Bloodforged Earthshatter Chestguard	stat_value5	39	40
+7822465	Bloodforged Earthshatter Leggings	ItemLevel	90	92
+7822465	Bloodforged Earthshatter Leggings	armor	611	625
+7822465	Bloodforged Earthshatter Leggings	stat_value1	28	29
+7822465	Bloodforged Earthshatter Leggings	stat_value2	27	28
+7822465	Bloodforged Earthshatter Leggings	stat_value6	39	40
+7822466	Bloodforged Earthshatter Helmet	ItemLevel	90	92
+7822466	Bloodforged Earthshatter Helmet	armor	567	580
+7822466	Bloodforged Earthshatter Helmet	stat_value2	27	28
+7822466	Bloodforged Earthshatter Helmet	stat_value5	36	37
+7822467	Bloodforged Earthshatter Shoulders	ItemLevel	90	92
+7822467	Bloodforged Earthshatter Shoulders	armor	524	536
+7822467	Bloodforged Earthshatter Shoulders	stat_value1	23	24
+7822467	Bloodforged Earthshatter Shoulders	stat_value2	24	25
+7822467	Bloodforged Earthshatter Shoulders	stat_value4	35	36
+7822468	Bloodforged Earthshatter Stompers	ItemLevel	90	92
+7822468	Bloodforged Earthshatter Stompers	armor	481	492
+7822468	Bloodforged Earthshatter Stompers	stat_value5	31	32
+7822469	Bloodforged Earthshatter Grips	ItemLevel	90	92
+7822469	Bloodforged Earthshatter Grips	armor	439	449
+7822469	Bloodforged Earthshatter Grips	stat_value1	23	24
+7822469	Bloodforged Earthshatter Grips	stat_value5	37	38
+7822470	Bloodforged Earthshatter Belt	ItemLevel	90	92
+7822470	Bloodforged Earthshatter Belt	armor	393	402
+7822470	Bloodforged Earthshatter Belt	stat_value3	24	25
+7822470	Bloodforged Earthshatter Belt	stat_value4	35	36
+7822471	Bloodforged Earthshatter Bracers	ItemLevel	90	92
+7822471	Bloodforged Earthshatter Bracers	armor	305	312
+7822471	Bloodforged Earthshatter Bracers	stat_value5	26	27
+7822488	Bloodforged Dreamwalker Robe	ItemLevel	90	92
+7822488	Bloodforged Dreamwalker Robe	armor	594	607
+7822488	Bloodforged Dreamwalker Robe	stat_value1	24	25
+7822488	Bloodforged Dreamwalker Robe	stat_value2	31	32
+7822488	Bloodforged Dreamwalker Robe	stat_value6	31	32
+7822489	Bloodforged Dreamwalker Leggings	ItemLevel	90	92
+7822489	Bloodforged Dreamwalker Leggings	armor	522	534
+7822489	Bloodforged Dreamwalker Leggings	stat_value1	26	27
+7822489	Bloodforged Dreamwalker Leggings	stat_value3	24	25
+7822489	Bloodforged Dreamwalker Leggings	stat_value5	40	41
+7822490	Bloodforged Dreamwalker Hood	ItemLevel	90	92
+7822490	Bloodforged Dreamwalker Hood	armor	484	495
+7822490	Bloodforged Dreamwalker Hood	stat_value2	24	25
+7822490	Bloodforged Dreamwalker Hood	stat_value3	27	28
+7822490	Bloodforged Dreamwalker Hood	stat_value6	29	30
+7822491	Bloodforged Dreamwalker Shoulderpads	ItemLevel	90	92
+7822491	Bloodforged Dreamwalker Shoulderpads	armor	447	457
+7822491	Bloodforged Dreamwalker Shoulderpads	stat_value5	36	37
+7822492	Bloodforged Dreamwalker Sandals	ItemLevel	90	92
+7822492	Bloodforged Dreamwalker Sandals	armor	411	420
+7822492	Bloodforged Dreamwalker Sandals	stat_value5	35	36
+7822493	Bloodforged Dreamwalker Gloves	ItemLevel	90	92
+7822493	Bloodforged Dreamwalker Gloves	armor	374	382
+7822493	Bloodforged Dreamwalker Gloves	stat_value2	28	29
+7822493	Bloodforged Dreamwalker Gloves	stat_value3	24	25
+7822493	Bloodforged Dreamwalker Gloves	stat_value4	31	32
+7822494	Bloodforged Dreamwalker Waist	ItemLevel	90	92
+7822494	Bloodforged Dreamwalker Waist	armor	336	343
+7822494	Bloodforged Dreamwalker Waist	stat_value4	23	24
+7822494	Bloodforged Dreamwalker Waist	stat_value5	30	31
+7822495	Bloodforged Dreamwalker Bracers	ItemLevel	90	92
+7822495	Bloodforged Dreamwalker Bracers	armor	261	267
+7822495	Bloodforged Dreamwalker Bracers	stat_value4	25	26
+7822512	Bloodforged Garb of Faith	ItemLevel	90	92
+7822512	Bloodforged Garb of Faith	armor	464	474
+7822512	Bloodforged Garb of Faith	stat_value2	23	24
+7822512	Bloodforged Garb of Faith	stat_value3	31	32
+7822512	Bloodforged Garb of Faith	stat_value6	32	33
+7822513	Bloodforged Legguards of Faith	ItemLevel	90	92
+7822513	Bloodforged Legguards of Faith	armor	408	417
+7822513	Bloodforged Legguards of Faith	stat_value2	26	27
+7822513	Bloodforged Legguards of Faith	stat_value3	25	26
+7822513	Bloodforged Legguards of Faith	stat_value6	40	41
+7822514	Bloodforged Halo of Faith	ItemLevel	90	92
+7822514	Bloodforged Halo of Faith	armor	378	386
+7822514	Bloodforged Halo of Faith	stat_value1	23	24
+7822514	Bloodforged Halo of Faith	stat_value2	25	26
+7822514	Bloodforged Halo of Faith	stat_value3	28	29
+7822514	Bloodforged Halo of Faith	stat_value6	37	38
+7822515	Bloodforged Spaulders of Faith	ItemLevel	90	92
+7822515	Bloodforged Spaulders of Faith	armor	349	357
+7822515	Bloodforged Spaulders of Faith	stat_value3	24	25
+7822515	Bloodforged Spaulders of Faith	stat_value5	32	33
+7822516	Bloodforged Boots of Faith	ItemLevel	90	92
+7822516	Bloodforged Boots of Faith	armor	321	328
+7822516	Bloodforged Boots of Faith	stat_value1	23	24
+7822516	Bloodforged Boots of Faith	stat_value5	30	31
+7822517	Bloodforged Handguards of Faith	ItemLevel	90	92
+7822517	Bloodforged Handguards of Faith	armor	292	298
+7822517	Bloodforged Handguards of Faith	stat_value5	28	29
+7822518	Bloodforged Waistguard of Faith	ItemLevel	90	92
+7822518	Bloodforged Waistguard of Faith	armor	262	268
+7822518	Bloodforged Waistguard of Faith	stat_value5	28	29
+7822519	Bloodforged Bracers of Faith	ItemLevel	90	92
+7822519	Bloodforged Bracers of Faith	armor	204	209
+7832424	Bloodforged Redemption Bindings	ItemLevel	90	92
+7832424	Bloodforged Redemption Bindings	armor	387	396
+7832425	Bloodforged Redemption Breastplate	ItemLevel	90	92
+7832425	Bloodforged Redemption Breastplate	armor	882	902
+7832425	Bloodforged Redemption Breastplate	stat_value1	30	31
+7832425	Bloodforged Redemption Breastplate	stat_value3	28	29
+7832425	Bloodforged Redemption Breastplate	stat_value6	28	29
+7832426	Bloodforged Redemption Gauntlets	ItemLevel	90	92
+7832426	Bloodforged Redemption Gauntlets	armor	556	568
+7832426	Bloodforged Redemption Gauntlets	stat_value1	23	24
+7832426	Bloodforged Redemption Gauntlets	stat_value3	23	24
+7832426	Bloodforged Redemption Gauntlets	stat_value5	27	28
+7832427	Bloodforged Redemption Leggings	ItemLevel	90	92
+7832427	Bloodforged Redemption Leggings	armor	774	791
+7832427	Bloodforged Redemption Leggings	stat_value1	37	38
+7832427	Bloodforged Redemption Leggings	stat_value3	30	31
+7832427	Bloodforged Redemption Leggings	stat_value5	30	31
+7832428	Bloodforged Redemption Visor	ItemLevel	90	92
+7832428	Bloodforged Redemption Visor	armor	718	734
+7832428	Bloodforged Redemption Visor	stat_value1	27	28
+7832428	Bloodforged Redemption Visor	stat_value3	30	31
+7832428	Bloodforged Redemption Visor	stat_value6	36	37
+7832429	Bloodforged Redemption Shoulderguards	ItemLevel	90	92
+7832429	Bloodforged Redemption Shoulderguards	armor	663	678
+7832429	Bloodforged Redemption Shoulderguards	stat_value1	23	24
+7832429	Bloodforged Redemption Shoulderguards	stat_value3	26	27
+7832429	Bloodforged Redemption Shoulderguards	stat_value5	26	27
+7832430	Bloodforged Redemption Cleats	ItemLevel	90	92
+7832430	Bloodforged Redemption Cleats	armor	609	623
+7832430	Bloodforged Redemption Cleats	stat_value6	23	24
+7832431	Bloodforged Redemption Belt	ItemLevel	90	92
+7832431	Bloodforged Redemption Belt	armor	498	509
+7832431	Bloodforged Redemption Belt	stat_value1	26	27
+7832431	Bloodforged Redemption Belt	stat_value5	27	28

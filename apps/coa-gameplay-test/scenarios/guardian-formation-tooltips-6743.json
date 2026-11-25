@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Guardian formation abilities name the formation they require (#6742-#6748)",
-  "contract": "Six reports (#6742 Knight's Calling 504151, #6743 Linebreaker 806220, #6744 Brace 800313, #6745 Guard 803895, #6746 Raise Shield 500168, #6748 Battle Rush 501548) all say the same thing: the ability 'can only be used when in X Formation despite not mentioning the requirement in the tooltip'. The requirement is real and is enforced by the core - Spell.dbc column 24 (CasterAuraSpell) names the formation aura, and Spell::CheckCasterAuras refuses the cast without it - but the client renders no tooltip line for CasterAuraSpell, and Stances/StancesNot are 0 on every spell the SQL publishes. rev_20261007_10_guardian_formation_tooltips.sql therefore republishes every learnable formation-gated Guardian ability with the prefix the repository already uses for the Runeshroud runes in rev_20261003_00_coa_palm_sigil_runeshroud_tooltip.sql, '$?a<aura>[|cffffffff][|cffff3232]Requires <Formation>|r' plus a line break, ahead of the client's own untouched description; AscensionCompat streams those rows to the client as SMSG_PATCH_SPELL (opcode 2346) at login. This scenario reads the streamed rows and then proves the text it carries is true. Expected before the SQL: none of the 44 rows arrives and every gated cast fails whatever formation the player is in. Expected after: each reported ability's row carries its formation's line, no row borrows another formation's line, and Brace is refused with no formation up while Knight's Calling succeeds once the Tower Formation aura is on the player.",
+  "contract": "Six reports (#6742 Knight's Calling 504151, #6743 Linebreaker 806220, #6744 Brace 800313, #6745 Guard 803895, #6746 Raise Shield 500168, #6748 Battle Rush 501548) all say the same thing: the ability 'can only be used when in X Formation despite not mentioning the requirement in the tooltip'. The requirement is real and is enforced by the core - Spell.dbc column 24 (CasterAuraSpell) names the formation aura, and Spell::CheckCasterAuras refuses the cast without it - but the client renders no tooltip line for CasterAuraSpell, and Stances/StancesNot are 0 on every spell the SQL publishes. rev_20261007_10_guardian_formation_tooltips.sql therefore republishes every learnable formation-gated Guardian ability with the prefix the repository already uses for the Runeshroud runes in rev_20261003_00_coa_palm_sigil_runeshroud_tooltip.sql, '$?a<aura>[|cffffffff][|cffff3232]Requires <Formation>|r' plus a line break, ahead of the client's own untouched description; those rows are baked into the client's spell rows. This scenario reads the client rows and then proves the text it carries is true. Expected before the SQL: none of the 44 rows carries it and every gated cast fails whatever formation the player is in. Expected after: each reported ability's row carries its formation's line, no row borrows another formation's line, and Brace is refused with no formation up while Knight's Calling succeeds once the Tower Formation aura is on the player.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -21,136 +21,114 @@
   "steps": [
     {
       "action": "wait",
-      "label": "Let spawn AI, level scaling and the 5 s login patch stream settle",
+      "label": "Let spawn AI and level scaling settle",
       "ms": 7000
     },
     {
       "action": "assert",
-      "label": "CONTROL: the shared description table still streams Runeshroud's own gate line as row 500639",
+      "label": "CONTROL: the client's spell row 500639 still carries Runeshroud's own gate line",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500639,
+      "metric": "client_spell_row_contains",
+      "spell": 500639,
       "text": "Requires Runeshroud",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
       "label": "CONTROL: that same row borrows no formation line",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500639,
+      "metric": "client_spell_row_contains",
+      "spell": 500639,
       "text": "Requires Tower Formation",
       "equals": 0
     },
     {
       "action": "assert",
-      "label": "#6742 STREAM: Knight's Calling (504151) reaches the client with the Tower Formation requirement",
+      "label": "#6742 CLIENT ROW: Knight's Calling (504151) carries the Tower Formation requirement",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504151,
+      "metric": "client_spell_row_contains",
+      "spell": 504151,
       "text": "Requires Tower Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "#6743 STREAM: Linebreaker (806220) reaches the client with the Line Formation requirement",
+      "label": "#6743 CLIENT ROW: Linebreaker (806220) carries the Line Formation requirement",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 806220,
+      "metric": "client_spell_row_contains",
+      "spell": 806220,
       "text": "Requires Line Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "#6744 STREAM: Brace (800313) reaches the client with the Tower Formation requirement",
+      "label": "#6744 CLIENT ROW: Brace (800313) carries the Tower Formation requirement",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 800313,
+      "metric": "client_spell_row_contains",
+      "spell": 800313,
       "text": "Requires Tower Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "#6745 STREAM: Guard (803895) reaches the client with the Tower Formation requirement",
+      "label": "#6745 CLIENT ROW: Guard (803895) carries the Tower Formation requirement",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 803895,
+      "metric": "client_spell_row_contains",
+      "spell": 803895,
       "text": "Requires Tower Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "#6746 STREAM: Raise Shield (500168) reaches the client with the Tower Formation requirement",
+      "label": "#6746 CLIENT ROW: Raise Shield (500168) carries the Tower Formation requirement",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500168,
+      "metric": "client_spell_row_contains",
+      "spell": 500168,
       "text": "Requires Tower Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
-      "label": "#6748 STREAM: Battle Rush Rank 4 (501548) reaches the client with the Assault Formation requirement",
+      "label": "#6748 CLIENT ROW: Battle Rush Rank 4 (501548) carries the Assault Formation requirement",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 501548,
+      "metric": "client_spell_row_contains",
+      "spell": 501548,
       "text": "Requires Assault Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
       "label": "SIBLINGS: Battle Rush Rank 3 (501547) is covered too, not just the reported rank",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 501547,
+      "metric": "client_spell_row_contains",
+      "spell": 501547,
       "text": "Requires Assault Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
       "label": "SIBLINGS: Advance Rank 2 (503344) carries the Line Formation line",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 503344,
+      "metric": "client_spell_row_contains",
+      "spell": 503344,
       "text": "Requires Line Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
       "label": "SIBLINGS: Knight's Calling 504693 carries the Tower Formation line as well",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 504693,
+      "metric": "client_spell_row_contains",
+      "spell": 504693,
       "text": "Requires Tower Formation",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
       "label": "NO CROSS-TALK: Linebreaker does not claim Tower Formation",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 806220,
+      "metric": "client_spell_row_contains",
+      "spell": 806220,
       "text": "Requires Tower Formation",
       "equals": 0
     },
@@ -158,9 +136,8 @@
       "action": "assert",
       "label": "NO CROSS-TALK: Brace does not claim Line Formation",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 800313,
+      "metric": "client_spell_row_contains",
+      "spell": 800313,
       "text": "Requires Line Formation",
       "equals": 0
     },
@@ -168,12 +145,10 @@
       "action": "assert",
       "label": "THE CLIENT'S OWN TEXT SURVIVES: row 806220 still carries Linebreaker's body",
       "actor": "g",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 806220,
+      "metric": "client_spell_row_contains",
+      "spell": 806220,
       "text": "destroying any damage absorption or damage immunity effects",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "learn",

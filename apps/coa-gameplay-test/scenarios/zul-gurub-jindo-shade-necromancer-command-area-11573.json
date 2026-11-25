@@ -1,0 +1,82 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: a commanded Ghoul's area attack reaches the chosen Shade of Jin'do (#11573)",
+  "contract": [
+    "Issue #11573: a Necromancer's minions deal no damage to the Shades of Jin'do (14986). The shade's",
+    "creature_immunities -95 carries ImmuneAoE, so WorldObjectSpellAreaTargetCheck drops it from every area and",
+    "cone search, and the Ghoul's Command: Ghouls (801514, TARGET_UNIT_SRC_AREA_ENEMY, 10 yd) never selected it.",
+    "Command: Undead (504868) reads 'Command your Undead minions to perform a unique attack on your target', so the",
+    "commanded target is the one exception: spell_ascension_necromancer_command_area adds the Necromancer's",
+    "Command focus to its minions' area and cone command attacks when that focus avoids area damage and stands",
+    "inside the effect's radius, arc and line of sight. A second shade beside it stays AoE-immune. Two Ghouls each",
+    "cast once, so a single Command: Ghouls miss cannot fail the hit assertion on its own."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8914, "y": -133, "z": 80.6, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the Life Force aura settle", "ms": 3000 },
+    {
+      "action": "teleport", "actor": "n", "map": 309, "x": -11515.8, "y": -1275.48, "z": 79.6621, "o": 3.15905,
+      "ignore_access": true
+    },
+    {
+      "action": "assert", "label": "CONTROL: the Necromancer is in Zul'Gurub", "actor": "n",
+      "metric": "map_id", "equals": 309, "within_ms": 15000
+    },
+    { "action": "wait", "ms": 1000 },
+    { "action": "set_health", "actor": "n", "value": 10000000, "maximum": 10000000 },
+    { "action": "learn", "actor": "n", "spell": 500971 },
+    { "action": "learn", "actor": "n", "spell": 504868 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise the first Ghoul", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: one Ghoul", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 500 },
+    { "action": "set_power", "actor": "n", "power": 0, "value": 1500 },
+    { "action": "cast", "label": "Raise the second Ghoul", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert", "label": "SETUP: two Ghouls", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50073, "equals": 2, "within_ms": 5000
+    },
+    {
+      "action": "set_aura", "label": "Curse the Necromancer with the Delusions vision", "actor": "n",
+      "spell": 2118511, "stacks": 1
+    },
+    { "action": "summon", "label": "The commanded shade", "actor": "n", "entry": 14986, "as": "shade", "distance": 3 },
+    {
+      "action": "summon", "label": "A second shade inside the same Ghoul radius", "actor": "n", "entry": 14986,
+      "as": "bystander", "distance": 3
+    },
+    { "action": "wait", "label": "Let the shades take their invisibility", "ms": 2000 },
+    {
+      "action": "assert", "label": "CONTROL: the shade carries its invisibility", "actor": "shade",
+      "metric": "aura", "spell": 24307, "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: the cursed Necromancer sees the shade", "actor": "n",
+      "metric": "can_detect", "target": "shade", "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert", "label": "CONTROL: no Ghoul has hit the shade before the order", "actor": "n",
+      "metric": "spell_damage_count", "spell": 801514, "entry": 50073, "target": "shade", "equals": 0
+    },
+    { "action": "set_power", "actor": "n", "power": 6, "value": 1000 },
+    { "action": "cast", "label": "Command: Undead on the shade", "actor": "n", "spell": 504868, "target": "shade" },
+    {
+      "action": "assert", "label": "Command: Ghouls damages the commanded shade", "actor": "n",
+      "metric": "spell_damage_count", "spell": 801514, "entry": 50073, "target": "shade", "min": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Allow every Ghoul's cast to land", "ms": 1500 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the shade that was not commanded keeps its area immunity",
+      "actor": "n", "metric": "spell_damage_count", "spell": 801514, "entry": 50073, "target": "bystander",
+      "equals": 0
+    }
+  ]
+}

@@ -1,0 +1,497 @@
+{
+  "schema": 1,
+  "name": "Mythic+: TBC reward chests stay empty after the key finishes",
+  "contract": "A completed key continues suppressing ordinary loot from the Ramparts and Mechanar reward chests. Each chest pays out in a base Mythic instance before key activation.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "hero",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "hero",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 269,
+      "x": -1547.06,
+      "y": 7113.63,
+      "z": 32.8189
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "Black Morass is Mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 185169,
+      "distance": 3,
+      "duration_s": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "hero",
+      "entry": 185169
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "Ramparts chest before the key",
+      "metric": "loot_count",
+      "within_ms": 2000,
+      "min": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 184849,
+      "distance": 3,
+      "duration_s": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "hero",
+      "entry": 184849
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "Mechanar chest before the key",
+      "metric": "loot_count",
+      "within_ms": 2000,
+      "min": 1
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "add_item",
+      "actor": "hero",
+      "item": 60008,
+      "count": 1
+    },
+    {
+      "action": "use_item",
+      "actor": "hero",
+      "item": 60008,
+      "spell": 161
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "TBC key opens the socket",
+      "metric": "server_packets",
+      "opcode": 2310,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "client_packet",
+      "actor": "hero",
+      "opcode": 1319
+    },
+    {
+      "action": "wait",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "TBC key countdown ended",
+      "metric": "rooted",
+      "equals": 0
+    },
+    {
+      "action": "set_phase",
+      "actor": "hero",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "hero",
+      "map": 269,
+      "x": -1547.06,
+      "y": 7113.63,
+      "z": 32.8189
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_0",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_1",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_2",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_3",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_4",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_5",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_6",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_7",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_8",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_9",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_10",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_11",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_12",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_13",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17839,
+      "as": "guardian_14",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17839,
+      "kill": true
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17879,
+      "as": "boss_17879",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17879,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17880,
+      "as": "boss_17880",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17880,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "summon",
+      "actor": "hero",
+      "entry": 17881,
+      "as": "boss_17881",
+      "distance": 4
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 17881,
+      "kill": true
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "Timed Black Morass grants a TBC cache",
+      "metric": "item_count",
+      "item": 10300001,
+      "equals": 3,
+      "within_ms": 4000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 185169,
+      "distance": 3,
+      "duration_s": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "hero",
+      "entry": 185169
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "Ramparts chest after the key",
+      "metric": "loot_count",
+      "within_ms": 2000,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 184849,
+      "distance": 3,
+      "duration_s": 4
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "loot_gameobject",
+      "actor": "hero",
+      "entry": 184849
+    },
+    {
+      "action": "assert",
+      "actor": "hero",
+      "label": "Mechanar chest after the key",
+      "metric": "loot_count",
+      "within_ms": 2000,
+      "equals": 0
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    }
+  ]
+}

@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Daily Login Reward Bazaar Tokens are Realm Bound: they cannot be mailed to another account",
+  "contract": [
+    "The 200 Bazaar Tokens (975001) the Daily Login Reward mails (coa_daily_login_rewards) join the account's",
+    "Realm Bound reserve, like the Elite Warchest's tokens: once taken from the mail they cannot be mailed to another",
+    "account, so throwaway accounts cannot collect the reward and pass it on. Mail to the account's own characters",
+    "stays free (the shared reserve path elite-warchest-bazaar-tokens-realm-bound covers; a second character of the",
+    "same account is left out here because the account's single claim would go to whichever character logs in first)."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "name": "Coadailyhero",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    },
+    {
+      "id": "other",
+      "name": "Coadailyoth",
+      "race": 1,
+      "class": 1,
+      "level": 1
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon_gameobject",
+      "actor": "hero",
+      "entry": 142119
+    },
+    {
+      "action": "money",
+      "actor": "hero",
+      "copper": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The Daily Login Reward arrives by mail",
+      "actor": "hero",
+      "metric": "mail_has_item",
+      "item": 975001,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "client_packet",
+      "label": "Take the reward tokens from the mailbox",
+      "actor": "hero",
+      "opcode": 582,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "mail_id": 975001
+        },
+        {
+          "mail_item_guid": 975001
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The reward is 200 Bazaar Tokens",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "equals": 200,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "Mail the 200 reward tokens to another account",
+      "actor": "hero",
+      "opcode": 568,
+      "consumed": false,
+      "fields": [
+        {
+          "gameobject_guid": 142119
+        },
+        {
+          "string": "Coadailyoth"
+        },
+        {
+          "string": "Tokens"
+        },
+        {
+          "string": "Daily"
+        },
+        {
+          "u32": 41
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 1
+        },
+        {
+          "u8": 0
+        },
+        {
+          "item_guid": 975001
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u64": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: daily reward tokens cannot be mailed to another account",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 569,
+      "index": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The tokens stay with the sender",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 975001,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "The refusal is explained",
+      "actor": "hero",
+      "metric": "system_messages",
+      "min": 1
+    }
+  ]
+}

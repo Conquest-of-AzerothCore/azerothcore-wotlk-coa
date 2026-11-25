@@ -47,6 +47,18 @@ neither is used as a health target.
 | `lfg_dungeon_template` | none | unknown; nothing shows live ZG in RDF | — |
 | release gate | `StageZulGurub` 4, dist `ReleaseStage` 3: closed by default | config decision | — |
 
+Release Spirit checkpoints (tester, 2026-11-20): a player who releases is revived at the nearest checkpoint whose boss
+is dead, otherwise at the entrance as before. Arlokk's checkpoint is the tester's; Venoxis has none yet.
+
+| boss (id) | checkpoint (x, y, z, o) |
+|---|---|
+| Mar'li (2), Mandokir (6) | -12111.865, -1794.2035, 80.478745, 2.6665816 |
+| Arlokk (3) | -11617.389, -1617.7999, 38.90633, 1.5104696 |
+| Edge of Madness (9) | -11945.865, -1813.931, 52.090435, 0.07633516 |
+| Jeklik (0) | -11940.951, -1549.5022, 39.647, 4.4934187 |
+| Jin'do (7) | -11657.934, -1516.3619, 39.839127, 2.8283699 |
+| Thekal (4) | -11714.241, -1851.3381, 40.527004, 5.9236217 |
+
 ## 4. Bosses
 
 Measured health per player is net damage taken in the log divided by the group size; flex is assumed linear.
@@ -192,6 +204,8 @@ Left as is unless decided otherwise: quests 580290 and 580295 carry local Path t
 | tester feedback of 2026-11-15, round 8 (videos from the CoA PTR): Mar'li's Spider Eggs 14915 can be selected but not attacked by players until their own Hatching 2118119 starts, and an egg whose Hatching fails (Mar'li dies or resets mid-cast) is sealed again; Evolve 2118116 still reaches a sealed egg; eggs are immune to every crowd-control mechanic (charm, disorient, distract, fear, grip, root, silence, sleep, snare, stun, freeze, knockout, polymorph, banish, shackle, turn, horror, daze, sap), so no CC holds a Hatching; they gained no interrupt immunity (user decision), but Hatching itself has no prevention type, so Kick, Pummel or Counterspell cannot stop it and only killing the egg or Mar'li does; the Shade detection 24306 that Jin'do's Delusions give ends when the vision 2118511 ends, by expiry or dispel (it stayed, so the player kept seeing shades; round 10 drops 24306 and lets the vision reveal the shade); the Shade of Jin'do 14986 that Delusions summons appears at a random point 15 to 30 yards from Jin'do instead of on the cursed player, on ground no more than 10 yards above or below him, in his sight, out of the water and on walkable ground that his navmesh path reaches, so never on top of a wall or object (user request), or up to 15 yards from him in a random direction, stopping short of the first obstacle, when 32 tries find no such point; the cursed player still summons it, so it keeps that player's phase and its 240 s lifetime (user decision); Mandokir casts Level Up! 2118416 on himself for every kill, so its visual plays, yells "Ding!" (broadcast text 10505) on every kill instead of on streak kills 1, 3, 5, 7 and 10, and grows by stock Level Up's 24312 +20 % scale per kill, uncapped, back to his own size on reset (user decision; 2118416 has no scale effect); once Hakkar consumes the Avatar of Hir'eek six Bloodseeker Bats 11368 come at once and every 45 s, and once he consumes the Avatar of Bethekk four Zulian Prowlers 15101 do, which attack a random player at once instead of walking to Arlokk, and both leave with his death or reset (live logs of 2026-08-01, 2026-08-09 and Bronzebeard 2025-12-21: 108 bats in 15 waves on 2026-08-01); Whirlwind 2118408's periodic effect does name 2118409 (round 7 said it named no spell): the script prevents the stock tick and has Mandokir cast the hit on himself; the Blood Orb 92008 (display 462101) floats over the Blood Pit again as a prop players cannot attack (tester video, CoA log of 2026-08-24; spot, height, level, faction and flags estimated) | `boss_marli_coa.cpp`, `boss_jindo_coa.cpp`, `boss_mandokir_coa.cpp`, `boss_hakkar_coa.cpp`, `rev_20261115_43`, `rev_20261115_44` | tester, live log, wdb, dbc, user decision |
 | tester feedback of 2026-11-15, round 9 (Bronzebeard video of 2025-11-13 from 27:10): Mandokir engages the moment his ride down from the ledge ends, not on a 6 s timer from its start (he stood idle about 5 s on the arena floor; a 10 s fallback remains); when Ohgan comes within 10 yards in the fight (15 yards and from 55 s since round 10), Mandokir mounts him for 30 s, riding Ohgan's display 215271 (a passenger seat since round 10) with Mounted 2118412 (+20 % damage done, -20 % taken) while Ohgan carries Mounted 2118411 and keeps attacking his rider's target, and both stay selectable and attackable; 30 s after dismounting he mounts again when Ohgan is in reach (his timers wait while he casts, so a Whirlwind can hold either step back by up to 9 s), and he dismounts for good when Ohgan dies (user decision; neither Mounted aura is in any live log, so the 10 yard reach and the 30 s before the next mount are estimated, the 30 s ride is the tester's measure from 28:07 to 28:40); Whirlwind keeps its first hit about a second into the spin (user decision: the live logs show the first 2118409 hit about 0.95 s after the spin starts, over at least 41 spins) | `boss_mandokir_coa.cpp` | tester video, live log, dbc, user decision |
 | tester feedback of 2026-11-16, round 10 (CoA PTR): Mandokir sits on Ohgan's back as a vehicle passenger (vehicle 485, a stand-in seat; no mount display of his own) instead of riding Ohgan's display while Ohgan fights beside him; he mounts no earlier than 55 s into the fight and only with Ohgan within 15 yards (testers; the video mounts 57 s after the pull), rides 30 s and mounts again 45 s after he dismounts (estimated); he casts Berserker Charge himself, on foot, 10 s into the fight and then 25 and 50 s apart in turn while Ohgan lives, as all six charges in the live log of 2026-08-02 do while Ohgan keeps hitting his own tank, and a charge due while he rides dismounts him first (user decision); every third 25 s slot, or every slot once Ohgan is dead or nobody stands out of melee, is a Whirlwind alone, so he still whirls every 25 s as that log shows; Jin'do resets once no living player within 250 yards (estimated) is in combat, whatever his ward, totems or shades still do (testers: he stayed in the fight after a wipe with a ward up; why is not reproduced); a Delusions curse is the vision 2118511 and one damage aura as in the live logs, and the vision itself reveals the Shade of Jin'do, so vanilla's 24306 no longer lands as a third debuff; the shade's own Seeking Shadow Bolts cast 2118556 ended its invisibility 24307 (an invisibility aura ends on a cast that breaks stealth), so every shade showed to everyone, which likely explains the shades dead testers saw (a retest without GM mode confirms it); it now casts without ending its auras; the Blood Orb 92008 is three times its size and the Spider Eggs 14915 1.5 times theirs (user request); Hakkar's Sons, bats and prowlers come up the stairs from the two platforms below him, taking turns (tester positions; the turn order is estimated); the Heart of Hakkar's missing nameplate is an uncertain expectation and unchanged | `boss_mandokir_coa.cpp`, `boss_jindo_coa.cpp`, `boss_hakkar_coa.cpp`, `rev_20261116_40` | tester, live log, dbc, user decision |
+| tester feedback of 2026-11-20, round 11: each boss resets once the 2.5 s boundary check finds it past the line the tester marked across its way out, a straight line through the mark at right angles to the direction from the boss's home to the mark (Jeklik from her cave home; Mar'li's, Venoxis's, Thekal's, Mandokir's and Jin'do's homes are their spawns; the Edge of Madness line runs from the summon spot): Jeklik (-12104.9, -1478.3), Venoxis (-11992.4, -1657.1), Mar'li (-12240.4, -1680.8), Thekal (-11716.1, -1864.6), Mandokir (-12285.6, -1905.0), Jin'do (-11614.6, -1360.5) and Gri'lek (-11939.5, -1843.1); Hazza'rah, Renataki and Wushoolay keep their stock scripts and no line, Arlokk's mark is still awaited, and Hakkar keeps his platform height check | `zg_coa_leash.h`, the seven boss scripts | tester |
+| tester feedback of 2026-11-20, round 11: Release Spirit revives the player at the nearest checkpoint whose boss is dead (§3), exact 3D distance; with no boss dead the player goes to the entrance as before. Mar'li and Mandokir share one spot, so the most recent kill never has to break a tie; Venoxis has no checkpoint yet | `AscensionDungeonRelease.cpp`, `zg_coa_checkpoints.cpp` | tester, user decision (nearest) |
 
 Normal boss health is unchanged except Gri'lek's and the Heart of Hakkar's. Knockdown 520871 is not added: it is a player ability, and the bosses are immune
 to it in the log.
@@ -229,12 +243,13 @@ to it in the log.
       server DBC, the client DBC, the Exiles DB and the SUB dump all give 30 % haste and 30 % more damage taken,
       with no tier variant. In the live log of 2026-08-02 his median swing drops from 2.47 s to 1.80 s under
       Frenzy, about 1.4 times faster, not the 1.65 of 65 %. Kept at 30 % (user decision, 2026-11-04).
-    - Jin'do's shades taking no area damage may come from one class's ability; the tester retests it.
+    - Jin'do's shades taking no area damage may come from one class's ability; the tester retests it. Round 11
+      keeps their area immunity and lets a Necromancer's commanded minions reach the chosen shade (item 21).
 16. Tester feedback of 2026-11-08:
     - Not changed, the live logs disagree: Thekal's Frenzy every 90 s, Mandokir charging only ranged players, a
       bleed from Ohgan, Arlokk's melee bleeding everyone, a 30 s Arlokk cycle, and Hakkar's click box (the client model, identical on live). Hakkar's Dungeon Spoils already drop
       (§6).
-    - No source yet: raid revive checkpoints, and the distance of Jin'do's totems.
+    - No source yet: the distance of Jin'do's totems. The raid revive checkpoints came in round 11 (§3, §7).
     - Gri'lek's melee: the live logs carry no armor, so the calibrated DamageModifier is a floor. The server's mean
       hit before armor with his avatar was 4,598; the live median hit is 17,520.
 17. Tester feedback of 2026-11-12:
@@ -317,3 +332,19 @@ to it in the log.
       takes a random point inside the area the outer six spots enclose (about 4,900 square yards), on the floor
       those spots stand on (76.6-81.2), out of the water, in Jin'do's sight and within the spell's 100 yd range,
       keeping the 20 yd spacing where the floor allows. Estimated: the area's edges and the floor band.
+21. Tester feedback of 2026-11-20 (round 11):
+    - Already works, no change: a pet or guardian sees and can attack a Shade of Jin'do while its own owner carries
+      the Delusions vision 2118511, and loses sight once the vision ends, because a controlled unit detects with
+      its owner's detection (`WorldObject::CanDetect`). A Warlock's Imp and a Mage's Mirror Images in one grouped
+      instance prove it, each only for its own cursed owner; the CoA hounds and Necromancer minions are guardians
+      with an owner too (summon properties 61 and 64). Observation, not changed: the Witch Hunter hound (50224)
+      keeps an attack it already started on a shade after its owner's vision ends, because its AI never drops a
+      victim it can no longer see. Uncertain expectation: the tester's report that the other pet classes
+      (Farstrider Ranger, Wildwalker Primalist, Houndmaster Witch Hunter) could not help; the tester is asked which
+      pet failed and whether its owner was cursed.
+    - Necromancer minions dealt no damage to a shade (#11573): seeing it was not the problem. The shade's
+      creature immunities -95 make it immune to area damage, so the area and cone command attacks of the Ghoul
+      (801514), Skeletal Warriors (570042), Decaying Colossus (505229), Zombie Plague (504022) and Bonestorm
+      (801411) never selected it. The shades stay immune to area damage (user decision, 2026-11-21); only the
+      target of Command: Undead 504868 is added to its minions' area and cone command attacks, when it stands
+      within the effect's radius, arc and line of sight. A second shade beside it takes no damage.

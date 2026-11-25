@@ -1,0 +1,15 @@
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9714 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9715 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9717 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9719 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9738 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9763 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9764 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9765 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9766 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 9876 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 10459 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 11368 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 11369 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 11370 AND `MinLevel` BETWEEN 61 AND 254;
+UPDATE `quest_template` SET `MinLevel` = 60 WHERE `ID` = 11371 AND `MinLevel` BETWEEN 61 AND 254;

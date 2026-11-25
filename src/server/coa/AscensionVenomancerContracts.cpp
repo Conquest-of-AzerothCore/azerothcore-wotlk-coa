@@ -63,6 +63,8 @@ void ApplyContracts(SpellInfo* info)
     if (id == 520307 || id == 803212)
         info->AuraInterruptFlags |=
             AURA_INTERRUPT_FLAG_CAST | AURA_INTERRUPT_FLAG_SPELL_ATTACK | AURA_INTERRUPT_FLAG_MELEE_ATTACK;
+    if (id == VizierForm || id == WaspForm)
+        info->AuraInterruptFlags |= AURA_INTERRUPT_FLAG_MOUNT;
     if (id == 504796 || id == 504803)
         info->Effects[1].Effect = 0;
     if (id == Brood)

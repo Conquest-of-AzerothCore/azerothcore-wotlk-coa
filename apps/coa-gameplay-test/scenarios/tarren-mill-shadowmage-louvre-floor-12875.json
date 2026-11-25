@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Tarren Mill: Shadowmage Louvre stands on the mage tower floor (#12875)",
+  "contract": "#12875: Shadowmage Louvre (312408, guid 9950774) floated in the Tarren Mill mage tower. rev_20261027_84_coa_hillsbrad_restore.sql estimated his spot at (34.0, -921.5, 73.2), over the walkway's outer edge where the Duskwood_Magetower WMO has a collision layer at 73.3 about 1.5 yd above the rendered floor (71.8). No archive holds his live position. The fix moves him 1 yd inward to (33.0, -921.5, 71.96), where the client WMO collision floor (71.89) and render floor (71.96) agree, keeping his facing.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "auditor",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Shadowmage Louvre stands at the fixed spot",
+      "actor": "auditor",
+      "metric": "spawn_distance",
+      "guid": 9950774,
+      "spawn_type": "creature",
+      "x": 33.0,
+      "y": -921.5,
+      "z": 71.96,
+      "max": 0.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Shadowmage Louvre stands on the ground",
+      "actor": "auditor",
+      "metric": "spawn_ground_gap",
+      "guid": 9950774,
+      "spawn_type": "creature",
+      "min": -0.3,
+      "max": 0.5
+    },
+    {
+      "action": "assert",
+      "label": "Shadowmage Louvre is not under water",
+      "actor": "auditor",
+      "metric": "spawn_submerged",
+      "guid": 9950774,
+      "spawn_type": "creature",
+      "equals": 0
+    }
+  ]
+}

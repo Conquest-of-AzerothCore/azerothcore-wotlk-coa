@@ -287,14 +287,14 @@ class pyromancer_spells : public AllSpellScript
                 if (tender)
                     for (Unit* ally : Allies(player, target, 10, sSpellMgr->GetSpellInfo(704274)->MaxAffectedTargets))
                         Copy(player, ally, 704274, CalculatePct(healing, Amount(tender->GetId())));
-                if (player->GetOwnedAura(806747, player->GetGUID()) && target->ToCreature() && AnyPet(target))
-                {
-                    SpellInfo const* fuel = sSpellMgr->GetSpellInfo(806749);
-                    for (Unit* ally :
-                         Allies(player, target, fuel->Effects[0].CalcRadius(player), fuel->MaxAffectedTargets))
-                        Cast(player, ally, 806749);
-                }
             }
+        }
+        if (Named(info, 800818) && spell->GetScriptHealingIncludingOverheal() &&
+            player->GetOwnedAura(806747, player->GetGUID()) && target->ToCreature() && AnyPet(target))
+        {
+            SpellInfo const* fuel = sSpellMgr->GetSpellInfo(806749);
+            for (Unit* ally : Allies(player, target, fuel->Effects[0].CalcRadius(player), fuel->MaxAffectedTargets))
+                Cast(player, ally, 806749);
         }
         if (id == 802120 && target != player && player->HasAura(807686))
             Mana(player, (player->GetMaxPower(POWER_MANA) - player->GetPower(POWER_MANA)) / 4);

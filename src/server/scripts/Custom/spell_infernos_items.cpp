@@ -18,7 +18,6 @@
  *    (909838-909841, 100% weapon damage) - once per enemy, not once per tile.
  */
 
-#include "../../coa/AscensionClientSpellPatches.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -39,9 +38,6 @@
 
 namespace
 {
-    constexpr uint32 ITEM_INFUSED_INFERNOS_NORMAL = 998102;
-    constexpr uint32 ITEM_INFUSED_INFERNOS_ASCENDED = 998105;
-
     constexpr uint32 SPELL_INFERNAL_STRIKE_NORMAL = 909834;
     constexpr uint32 SPELL_INFERNAL_STRIKE_DAMAGE_NORMAL = 909838;
     constexpr uint32 SPELL_INFERNAL_STRIKE_BURN = 909842;
@@ -160,9 +156,5 @@ class spell_infernos_infernal_strike : public SpellScript
 
 void AddSC_spell_infernos_items()
 {
-    // The Infused axes are missing from the live client's Item.dbc; their item_dbc rows only
-    // reach the client once the item ids are registered for streaming.
-    for (uint32 itemId = ITEM_INFUSED_INFERNOS_NORMAL; itemId <= ITEM_INFUSED_INFERNOS_ASCENDED; ++itemId)
-        Ascension::ClientItemPatches::Instance().Register(itemId);
     RegisterSpellScript(spell_infernos_infernal_strike);
 }

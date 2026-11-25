@@ -28,24 +28,24 @@
 DELETE FROM `coa_boss_schedule` WHERE (`entry` = 12118 AND `idx` = 3) OR (`entry` = 12118 AND `idx` = 4)
   OR (`entry` = 11988 AND `idx` = 3) OR (`entry` = 11988 AND `idx` = 4) OR (`entry` = 11988 AND `idx` = 5);
 INSERT INTO `coa_boss_schedule`
-  (`entry`, `idx`, `spell_d0`, `spell_d1`, `spell_d2`, `spell_d3`, `effect`, `first_ms`, `period_ms`, `hp_pct`, `target`, `comment`)
+  (`entry`, `idx`, `spell_d0`, `spell_d1`, `spell_d2`, `spell_d3`, `effect_d0`, `effect_d1`, `effect_d2`, `effect_d3`, `first_ms`, `period_ms`, `hp_pct`, `target`, `comment`)
 VALUES
 -- Lucifron (12118): idx3 already existed (measured); only its `effect` column changes, from 0 to
 -- the Suppressing Shadows damage family's base id (2105219, already difficulty-resolved by
 -- SpellDifficulty.dbc row 2095) -- the logs recorded the debuff cast but never its landing hit.
-(12118, 3, 2105218, 2105218, 2105218, 2105218, 2105219, 29200, 25100, 0, 3, 'Suppressing Shadows [designed: landing spell]'),
+(12118, 3, 2105218, 2105218, 2105218, 2105218,2105219, 2105219, 2105219, 2105219, 29200, 25100, 0, 3, 'Suppressing Shadows [designed: landing spell]'),
 -- idx4 is new: Impending Doom (2105201, SpellDifficulty row 2093) was never seen in any of the 5
 -- probe/legacy runs sampled for Lucifron and has no row at all in the base schedule file --
 -- structurally absent, not a sampling gap. Timer taken from DBM-Warmane's vanilla Lucifron "Doom"
 -- (19702, CD 20s, first cast 7s) as the nearest evidenced analogue; effect fires the dummy's own
 -- EffectTriggerSpell payload (2105205) the moment the cast completes, same pattern as every other
 -- dummy-plus-effect row in this table.
-(12118, 4, 2105201, 2105201, 2105201, 2105201, 2105205, 7000, 20000, 0, 3, 'Impending Doom [dbm]'),
+(12118, 4, 2105201, 2105201, 2105201, 2105201,2105205, 2105205, 2105205, 2105205, 7000, 20000, 0, 3, 'Impending Doom [dbm]'),
 -- Golemagg (11988): three kit spells with no schedule row at any difficulty. All three read as
 -- plain targeted casts from Spell.dbc (no proc/passive framing fits their EffectImplicitTargetA);
 -- families are clean ascending siblings already covered by SpellDifficulty.dbc rows 2122/2125.
 -- No log ever recorded any of these -- timers are [designed], picked to not collide with the
 -- boss's existing Fierce Blow/Lava Burst/Massive Stomp cadence.
-(11988, 3, 2105802, 2105802, 2105802, 2105802, 0, 10000, 18000, 0, 0, 'Magma Splash [designed]'),
-(11988, 4, 2105806, 2105806, 2105806, 2105806, 0, 16000, 32000, 0, 0, 'Molten Armor [designed]'),
-(11988, 5, 2105825, 2105825, 2105825, 2105825, 0, 35000, 55000, 0, 3, 'Cave In [designed]');
+(11988, 3, 2105802, 2105802, 2105802, 2105802,0, 0, 0, 0, 10000, 18000, 0, 0, 'Magma Splash [designed]'),
+(11988, 4, 2105806, 2105806, 2105806, 2105806,0, 0, 0, 0, 16000, 32000, 0, 0, 'Molten Armor [designed]'),
+(11988, 5, 2105825, 2105825, 2105825, 2105825,0, 0, 0, 0, 35000, 55000, 0, 3, 'Cave In [designed]');

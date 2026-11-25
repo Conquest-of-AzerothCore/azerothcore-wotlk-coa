@@ -1,6 +1,8 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionItemScaling.h"
+#include "CoAZoneScaling.h"
+#include "CoADungeonRescale.h"
 #include "AscensionItemScalingPolicy.h"
 #include "AscensionItemStatData.h"
 #include "AscensionNativeItemScaling.h"
@@ -87,7 +89,7 @@ bool Eligible(ItemTemplate const& proto)
 
 bool Liftable(ItemTemplate const& proto)
 {
-    if (!Eligible(proto) || IsWorldforgedDescription(proto.Description))
+    if (ZoneScaling::OwnsItem(proto.ItemId) || !Eligible(proto) || IsWorldforgedDescription(proto.Description))
         return false;
 
     std::shared_lock lock(unliftableMutex);
@@ -572,6 +574,9 @@ uint32 BaseEntry(uint32 entry)
 
 std::optional<ClientItemRow> ClientRow(uint32 entry)
 {
+    if (DungeonRescale::OwnsItem(entry))
+        if (ItemTemplate const* proto = sObjectMgr->GetItemTemplate(entry))
+            return RowOf(*proto);
     if (ItemTemplate const* proto = Registry::Instance().Template(entry))
         return RowOf(*proto);
     return std::nullopt;
@@ -584,6 +589,8 @@ void RebracketDisenchant(ItemTemplate& scaled, ItemTemplate const& base, uint32 
 
 bool LiftableEntry(uint32 entry)
 {
+    if (ZoneScaling::OwnsItem(entry))
+        return false;
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(entry);
     return proto && Liftable(*proto);
 }
@@ -596,7 +603,7 @@ void HandleStatQuery(WorldSession* session, WorldPacket const& packet)
     uint32 const item = packet.read<uint32>(0);
     uint32 const level = packet.read<uint32>(sizeof(uint32));
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(item);
-    if (!proto || NativeItemScaling::Handles(item))
+    if (!proto || ZoneScaling::OwnsItem(item) || NativeItemScaling::Handles(item))
         return;
     CapturedStats::Record const* record = capturedStats.Find(BaseEntry(item), level);
     if (!record)

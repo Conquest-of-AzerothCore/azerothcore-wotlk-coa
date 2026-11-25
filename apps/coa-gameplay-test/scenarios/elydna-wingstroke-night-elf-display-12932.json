@@ -1,0 +1,307 @@
+{
+  "schema": 1,
+  "name": "Elydna Wingstroke always shows as a Night Elf woman (#12932)",
+  "contract": "#12932: Elydna Wingstroke (161784) appeared as a Tauren. Her stand-in display 17849 (Night Elf female, rev_20260924_10_coa_teldrassil_vulture_cult.sql; the live 652029 is in no client archive) has creature_model_info.DisplayID_Other_Gender 17850, a Tauren female, and ObjectMgr::GetCreatureModelRandomGender picks it on half of all creations. The fix gives her display 13403, a Night Elf female (model 56) with no other-gender partner; 17849 stays for the stock Fallen Druid 18490. Each of 20 creations must keep 13403: with the old data each has a 50% chance of 17850, so a false pass is about 1e-6.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 10826,
+    "y": 446,
+    "z": 1387,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 4,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna0",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 1 of 20 shows the Night Elf display 13403",
+      "actor": "elydna0",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna1",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 2 of 20 shows the Night Elf display 13403",
+      "actor": "elydna1",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna2",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 3 of 20 shows the Night Elf display 13403",
+      "actor": "elydna2",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna3",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 4 of 20 shows the Night Elf display 13403",
+      "actor": "elydna3",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna4",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 5 of 20 shows the Night Elf display 13403",
+      "actor": "elydna4",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna5",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 6 of 20 shows the Night Elf display 13403",
+      "actor": "elydna5",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna6",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 7 of 20 shows the Night Elf display 13403",
+      "actor": "elydna6",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna7",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 8 of 20 shows the Night Elf display 13403",
+      "actor": "elydna7",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna8",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 9 of 20 shows the Night Elf display 13403",
+      "actor": "elydna8",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna9",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 10 of 20 shows the Night Elf display 13403",
+      "actor": "elydna9",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna10",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 11 of 20 shows the Night Elf display 13403",
+      "actor": "elydna10",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna11",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 12 of 20 shows the Night Elf display 13403",
+      "actor": "elydna11",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna12",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 13 of 20 shows the Night Elf display 13403",
+      "actor": "elydna12",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna13",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 14 of 20 shows the Night Elf display 13403",
+      "actor": "elydna13",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna14",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 15 of 20 shows the Night Elf display 13403",
+      "actor": "elydna14",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna15",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 16 of 20 shows the Night Elf display 13403",
+      "actor": "elydna15",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna16",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 17 of 20 shows the Night Elf display 13403",
+      "actor": "elydna16",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna17",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 18 of 20 shows the Night Elf display 13403",
+      "actor": "elydna17",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna18",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 19 of 20 shows the Night Elf display 13403",
+      "actor": "elydna18",
+      "metric": "display_id",
+      "equals": 13403
+    },
+    {
+      "action": "summon",
+      "actor": "p",
+      "entry": 161784,
+      "as": "elydna19",
+      "distance": 3
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: summon 20 of 20 shows the Night Elf display 13403",
+      "actor": "elydna19",
+      "metric": "display_id",
+      "equals": 13403
+    }
+  ]
+}

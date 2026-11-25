@@ -1,6 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
-#include "../../coa/AscensionClientSpellPatches.h"
 #include "AllCreatureScript.h"
 #include "AllSpellScript.h"
 #include "CreatureScript.h"
@@ -93,8 +92,6 @@ void SetCraterPhase(Player* player, uint32 phase)
     player->SetPhaseMask(phase, true);
     player->GetSession()->SendSetPhaseShift(phase);
 }
-
-constexpr uint32 WISDOMBALL_QUEST_ITEMS[] = { 9417301, 9417303, 9417307, 9417328 };
 
 constexpr uint32 REWARD_SHOWN_FIRST = 9417310;
 constexpr uint32 REWARD_SHOWN_LAST  = 9417326;
@@ -540,13 +537,4 @@ void AddSC_instance_guardians_library()
     new wisdomball_crater_phase_reset();
     new wisdomball_questline_mana_cost();
     new wisdomball_memory_melee();
-
-    for (uint32 itemId : WISDOMBALL_QUEST_ITEMS)
-        Ascension::ClientItemPatches::Instance().Register(itemId);
-    for (uint32 itemId = REWARD_SHOWN_FIRST; itemId <= REWARD_SHOWN_LAST; ++itemId)
-    {
-        Ascension::ClientItemPatches::Instance().Register(itemId);
-        for (uint8 level = 35; level <= 60; level += 5)
-            Ascension::ClientItemPatches::Instance().Register(RewardVariant(itemId, level));
-    }
 }

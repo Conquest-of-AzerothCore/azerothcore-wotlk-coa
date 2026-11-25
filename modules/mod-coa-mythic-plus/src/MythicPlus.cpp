@@ -209,6 +209,7 @@ namespace
     }
     std::unordered_map<uint32, Run> g_runs;             // by instance id
     std::unordered_map<uint32, uint32> g_forces;        // creature entry -> enemy forces
+    std::unordered_map<uint32, uint32> g_wingCredit;
     std::vector<Reward> g_rewards;
     std::unordered_map<ObjectGuid, uint32> g_socketed;   // player -> keystone item used, waiting for Start
 
@@ -462,8 +463,12 @@ namespace
             return nullptr;
         uint32 const base = BaseEntry(creature->GetEntry());
         for (WingEncounter const& encounter : *list)
-            if (encounter.creature == base || encounter.creature == creature->GetEntry())
+        {
+            auto const credit = g_wingCredit.find(encounter.id);
+            uint32 const killed = credit != g_wingCredit.end() ? credit->second : encounter.creature;
+            if (killed == base || killed == creature->GetEntry())
                 return &encounter;
+        }
         return nullptr;
     }
 
@@ -730,9 +735,18 @@ namespace
     constexpr std::array<uint32, 12> MYTHICAL_CACHES = { 2093952, 2093963, 2093964, 2093965, 2093966, 2093967,
         2093968, 2093995, 2093996, 2093997, 2093998, 2093999 };
 
-    uint32 CacheForLevel(uint32 level)
+    std::map<uint32, uint32> g_tbcCacheByLevel;
+    std::map<uint32, std::vector<uint32>> g_tbcCacheRewards;
+    std::map<uint32, std::vector<uint32>> g_tbcUpgradeChains;
+    std::set<uint32> g_tbcRewardItems;
+
+    uint32 CacheForLevel(uint32 level, uint32 expansion)
     {
-        return MYTHICAL_CACHES[std::clamp<uint32>(level, 1, MYTHICAL_CACHES.size()) - 1];
+        uint32 const depth = std::clamp<uint32>(level, 1, MYTHICAL_CACHES.size());
+        if (expansion == 1)
+            if (auto const cache = g_tbcCacheByLevel.find(depth); cache != g_tbcCacheByLevel.end())
+                return cache->second;
+        return MYTHICAL_CACHES[depth - 1];
     }
 
     // Weeks start on Tuesday 00:00 UTC (1970-01-06 was one).
@@ -797,11 +811,16 @@ namespace
 
     // 50 Mythic Coins per keystone level, plus the first-time bonus, up to the weekly cap. Each expansion has its own
     // coin: Mythic Coin, Mythic Coin (TBC), Mythic Coin (WOTLK).
-    void GiveCoins(Player* player, uint32 level, uint32 bonusPercent, uint32 expansion)
+    uint32 CoinItemForExpansion(uint32 expansion)
     {
-        uint32 const coinItem = expansion >= 2 ? sConfigMgr->GetOption<uint32>("MythicPlus.CoinItem.WotLK", 1414530)
+        return expansion >= 2 ? sConfigMgr->GetOption<uint32>("MythicPlus.CoinItem.WotLK", 1414530)
             : expansion == 1 ? sConfigMgr->GetOption<uint32>("MythicPlus.CoinItem.TBC", 1414529)
             : sConfigMgr->GetOption<uint32>("MythicPlus.CoinItem", 1414500);
+    }
+
+    void GiveCoins(Player* player, uint32 level, uint32 bonusPercent, uint32 expansion)
+    {
+        uint32 const coinItem = CoinItemForExpansion(expansion);
         uint32 const perLevel = sConfigMgr->GetOption<uint32>("MythicPlus.CoinsPerLevel", 50);
         Weekly const weekly = GetWeekly(player->GetGUID());
         uint32 const cap = WeeklyCoinCap();
@@ -831,14 +850,46 @@ namespace
 
     void LoadItemPools()
     {
+        g_tbcCacheByLevel.clear();
+        g_tbcCacheRewards.clear();
+        g_tbcUpgradeChains.clear();
+        g_tbcRewardItems.clear();
+        if (WorldDatabase.Query("SHOW TABLES LIKE 'coa_mythic_tbc_item'"))
+            if (QueryResult result = WorldDatabase.Query(
+                "SELECT t.base_item, t.key_level, t.reward_item, t.cache_item FROM coa_mythic_tbc_item t "
+                "JOIN item_template b ON b.entry=t.base_item JOIN item_template r ON r.entry=t.reward_item "
+                "LEFT JOIN item_template c ON c.entry=t.cache_item WHERE t.cache_item=0 OR c.entry IS NOT NULL "
+                "ORDER BY t.base_item,t.key_level"))
+                do
+                {
+                    Field* row = result->Fetch();
+                    uint32 const base = row[0].Get<uint32>();
+                    uint32 const level = row[1].Get<uint32>();
+                    uint32 const reward = row[2].Get<uint32>();
+                    uint32 const cache = row[3].Get<uint32>();
+                    auto& chain = g_tbcUpgradeChains.try_emplace(base, std::vector<uint32>{ base }).first->second;
+                    if (level != chain.size() || level > 40)
+                        continue;
+                    chain.push_back(reward);
+                    g_tbcRewardItems.insert(reward);
+                    if (cache && level <= MYTHICAL_CACHES.size())
+                    {
+                        auto const configured = g_tbcCacheByLevel.emplace(level, cache);
+                        if (configured.first->second == cache)
+                            g_tbcCacheRewards[cache].push_back(reward);
+                    }
+                } while (result->NextRow());
+
         g_mythicItems.clear();
         g_heroicItems.clear();
         g_mythicDungeonItems.clear();
+        std::string const excludeTbc = g_tbcRewardItems.empty() ? "" :
+            "AND NOT EXISTS (SELECT 1 FROM coa_mythic_tbc_item t WHERE t.reward_item=p.entry) ";
         if (QueryResult result = WorldDatabase.Query("SELECT MIN(p.entry), p.description FROM item_template p "
             "JOIN (SELECT DISTINCT i.name, i.InventoryType FROM coa_dungeon_loot_variant v JOIN item_template i ON i.entry = v.mythic_item) d "
             "ON d.name = p.name AND d.InventoryType = p.InventoryType "
             "WHERE p.description LIKE '@Mythic %@' AND p.RequiredLevel = 60 AND p.class IN (2, 4) AND p.Quality >= 3 "
-            "GROUP BY p.name, p.InventoryType, p.description"))
+            "{}GROUP BY p.name, p.InventoryType, p.description", excludeTbc))
             do
             {
                 std::string const text = (*result)[1].Get<std::string>();
@@ -1072,7 +1123,7 @@ namespace
                     if (run.level >= r.levelMin && run.level <= r.levelMax)
                         Give(player, r.item, r.count);
             if (caches)
-                Give(player, CacheForLevel(run.level), caches);
+                Give(player, CacheForLevel(run.level, run.dungeon.expansion), caches);
             if (timed)
             {
                 SetBestLevel(player->GetGUID(), run.level);
@@ -1281,6 +1332,12 @@ namespace
                 g_forces[result->Fetch()[0].Get<uint32>()] = result->Fetch()[1].Get<uint32>();
             while (result->NextRow());
 
+        g_wingCredit.clear();
+        if (QueryResult result = WorldDatabase.Query("SELECT encounter, creature FROM coa_mythic_wing_credit"))
+            do
+                g_wingCredit[result->Fetch()[0].Get<uint32>()] = result->Fetch()[1].Get<uint32>();
+            while (result->NextRow());
+
         g_rewards.clear();
         if (QueryResult result = WorldDatabase.Query("SELECT level_min, level_max, item, count FROM coa_mythic_reward"))
             do
@@ -1289,8 +1346,8 @@ namespace
                 g_rewards.push_back({ f[0].Get<uint32>(), f[1].Get<uint32>(), f[2].Get<uint32>(), f[3].Get<uint32>() });
             } while (result->NextRow());
 
-        LOG_INFO("server.loading", ">> Mythic+: {} enemy forces values, {} cache rows",
-            uint32(g_forces.size()), uint32(g_rewards.size()));
+        LOG_INFO("server.loading", ">> Mythic+: {} enemy forces values, {} wing credits, {} cache rows",
+            uint32(g_forces.size()), uint32(g_wingCredit.size()), uint32(g_rewards.size()));
     }
 }
 
@@ -1556,7 +1613,8 @@ public:
             return;
         std::lock_guard<std::recursive_mutex> guard(g_lock);
         Run const* run = RunFor(owner->GetMap());
-        if (!run || !run->Active())
+        // Reward chests can unlock after the timer has been resolved.
+        if (!run || !run->Scaled())
             return;
         loot->items.clear();
         loot->quest_items.clear();
@@ -1992,7 +2050,8 @@ public:
         else
         {
             auto itr = std::find(MYTHICAL_CACHES.begin(), MYTHICAL_CACHES.end(), entry);
-            if (itr == MYTHICAL_CACHES.end())
+            auto const tbc = g_tbcCacheRewards.find(entry);
+            if (itr == MYTHICAL_CACHES.end() && tbc == g_tbcCacheRewards.end())
                 return false;
             Weekly const weekly = GetWeekly(player->GetGUID());
             if (weekly.caches >= WeeklyCacheCap())
@@ -2001,7 +2060,10 @@ public:
                     weekly.caches, WeeklyCacheCap());
                 return true;
             }
-            rewards.push_back(RandomForSpecialization(player, g_mythicItems[uint32(itr - MYTHICAL_CACHES.begin()) + 1]));
+            if (tbc != g_tbcCacheRewards.end())
+                rewards.push_back(RandomForSpecialization(player, tbc->second));
+            else
+                rewards.push_back(RandomForSpecialization(player, g_mythicItems[uint32(itr - MYTHICAL_CACHES.begin()) + 1]));
         }
 
         std::erase(rewards, 0u);
@@ -2076,6 +2138,8 @@ namespace
     constexpr uint32 MARK_VENDOR = 9414500;           // Mark of Triumph items; + slot group: Heroic Dungeon items
     constexpr uint32 TEXT_EDRIM = 9416000;
     constexpr uint32 TEXT_MARKUS = 9414500;
+    constexpr uint32 MARKUS_ICON_SIZE = 48;
+    constexpr uint32 MARKUS_ICON_RISE = 3;
     constexpr uint32 RANDOMIZE_COST = 10 * GOLD;
 
     char const* const SLOT_NAMES[17] = { "", "Head", "Neck", "Shoulders", "Back", "Chest", "Wrists", "Main Hand",
@@ -2086,9 +2150,9 @@ namespace
 
     // Ascension menus paint their own icon into the option text, hanging over the row's left edge (as the Destiny
     // Weaver menus do): |TInterface/ICONS/<icon>:<size>:<size>:<shift>:0|t|r<label>.
-    std::string Opt(char const* icon, std::string const& label, uint32 size = 40)
+    std::string Opt(char const* icon, std::string const& label, uint32 size = 40, uint32 rise = 0)
     {
-        return Acore::StringFormat("|TInterface/ICONS/{}:{}:{}:-{}:0|t|r{}", icon, size, size, size / 2 + 2, label);
+        return Acore::StringFormat("|TInterface/ICONS/{}:{}:{}:-{}:{}|t|r{}", icon, size, size, size / 2 + 2, rise, label);
     }
 
     std::string ItemOpt(ItemTemplate const* proto, std::string const& label)
@@ -2102,10 +2166,13 @@ namespace
     std::vector<std::vector<uint32>> g_chains;
     std::unordered_map<uint32, std::pair<uint32, uint32>> g_chainOf;   // item -> chain, level
 
+    std::set<uint32> g_tbcUpgradeItems;
+
     void LoadUpgradeChains()
     {
         g_chains.clear();
         g_chainOf.clear();
+        g_tbcUpgradeItems.clear();
         std::unordered_map<std::string, uint32> byKey;
         if (QueryResult result = WorldDatabase.Query("SELECT DISTINCT i.entry, i.name, i.InventoryType FROM coa_dungeon_loot_variant v "
             "JOIN item_template i ON i.entry = v.mythic_item ORDER BY i.entry"))
@@ -2122,6 +2189,8 @@ namespace
             "WHERE RequiredLevel = 60 AND class IN (2, 4) AND description LIKE '@Mythic %@' ORDER BY entry"))
             do
             {
+                if (g_tbcRewardItems.count((*result)[0].Get<uint32>()))
+                    continue;
                 std::string const text = (*result)[3].Get<std::string>();
                 uint32 const level = uint32(std::strtoul(text.c_str() + 8, nullptr, 10));
                 auto chain = byKey.find((*result)[1].Get<std::string>() + "|" + std::to_string((*result)[2].Get<uint32>()));
@@ -2135,6 +2204,19 @@ namespace
                 levels[level] = (*result)[0].Get<uint32>();
                 g_chainOf[levels[level]] = { chain->second, level };
             } while (result->NextRow());
+        for (auto const& [base, chain] : g_tbcUpgradeChains)
+        {
+            if (chain.size() < 2 || std::any_of(chain.begin(), chain.end(),
+                [](uint32 entry) { return g_chainOf.count(entry) != 0; }))
+                continue;
+            uint32 const index = uint32(g_chains.size());
+            for (uint32 level = 0; level < chain.size(); ++level)
+            {
+                g_chainOf.emplace(chain[level], std::make_pair(index, level));
+                g_tbcUpgradeItems.insert(chain[level]);
+            }
+            g_chains.push_back(chain);
+        }
         LOG_INFO("server.loading", ">> Mythic+: {} item upgrade chains", uint32(g_chains.size()));
     }
 
@@ -2218,9 +2300,13 @@ namespace
             Give(player, newEntry, 1);
     }
 
-    bool PayCoins(Player* player, uint32 coins)
+    uint32 CoinItemForUpgrade(uint32 entry)
     {
-        uint32 const coinItem = sConfigMgr->GetOption<uint32>("MythicPlus.CoinItem", 1414500);
+        return CoinItemForExpansion(g_tbcUpgradeItems.count(entry) ? 1 : 0);
+    }
+
+    bool PayCoins(Player* player, uint32 coins, uint32 coinItem)
+    {
         if (!player->HasItemCount(coinItem, coins))
         {
             ChatHandler(player->GetSession()).PSendSysMessage("You need {} Mythic Coins.", coins);
@@ -2249,8 +2335,9 @@ namespace
             ChatHandler(player->GetSession()).PSendSysMessage("You have reached the weekly cap of {} Mythic Coins.", WeeklyCoinCap());
             return false;
         }
+        uint32 const coinItem = CoinItemForUpgrade(item->GetEntry());
         player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
-        Give(player, sConfigMgr->GetOption<uint32>("MythicPlus.CoinItem", 1414500), value);
+        Give(player, coinItem, value);
         AddWeekly(player->GetGUID(), value, 0);
         return true;
     }
@@ -2384,8 +2471,9 @@ private:
                 return;
             std::string const name = item->GetTemplate()->Name1;
             AddGossipItemFor(player, GOSSIP_ICON_INTERACT_1, ItemOpt(item->GetTemplate(), Acore::StringFormat("{} ({})", name, LevelName(nextLevel - 1))),
-                DO_UPGRADE, item->GetGUID().GetCounter(), Acore::StringFormat("Upgrade {} to {} for {} Mythic Coins?", name,
-                LevelName(nextLevel), UpgradeCost(nextLevel)), 0, false);
+                DO_UPGRADE, item->GetGUID().GetCounter(), Acore::StringFormat("Upgrade {} to {} for {} {}?", name,
+                LevelName(nextLevel), UpgradeCost(nextLevel),
+                g_tbcUpgradeItems.count(item->GetEntry()) ? "Mythic Coins (TBC)" : "Mythic Coins"), 0, false);
         });
         AddGossipItemFor(player, GOSSIP_ICON_CHAT, Opt("Spell_Shadow_Teleport", "Back"), MENU_MAIN, 0);
         SendGossipMenuFor(player, TEXT_EDRIM, creature->GetGUID());
@@ -2421,7 +2509,7 @@ private:
     {
         uint32 nextLevel = 0;
         uint32 const next = NextLevelItem(item->GetEntry(), nextLevel);
-        if (!next || nextLevel > GetBestLevel(player->GetGUID()) || !PayCoins(player, UpgradeCost(nextLevel)))
+        if (!next || nextLevel > GetBestLevel(player->GetGUID()) || !PayCoins(player, UpgradeCost(nextLevel), CoinItemForUpgrade(item->GetEntry())))
             return;
         ReplaceItem(player, item, next);
     }
@@ -2431,7 +2519,7 @@ private:
         ForEachOwnedItem(player, true, [&](Item* item)
         {
             auto itr = g_chainOf.find(item->GetEntry());
-            if (itr == g_chainOf.end())
+            if (itr == g_chainOf.end() || g_tbcUpgradeItems.count(item->GetEntry()))
                 return;
             std::vector<uint32> const& levels = g_chains[itr->second.first];
             if (itr->second.second >= target || target >= levels.size() || !levels[target])
@@ -2447,13 +2535,14 @@ private:
         uint32 const target = std::min(HighestOwnedLevel(player), GetBestLevel(player->GetGUID()));
         uint32 count = 0, cost = 0;
         UpgradeAllPlan(player, target, count, cost);
-        if (!count || !PayCoins(player, cost))
+        if (!count || !PayCoins(player, cost, CoinItemForExpansion(0)))
             return;
         std::vector<Item*> items;
         ForEachOwnedItem(player, true, [&](Item* item)
         {
             auto itr = g_chainOf.find(item->GetEntry());
-            if (itr != g_chainOf.end() && itr->second.second < target && target < g_chains[itr->second.first].size()
+            if (itr != g_chainOf.end() && !g_tbcUpgradeItems.count(item->GetEntry()) &&
+                itr->second.second < target && target < g_chains[itr->second.first].size()
                 && g_chains[itr->second.first][target])
                 items.push_back(item);
         });
@@ -2505,8 +2594,10 @@ public:
     bool OnGossipHello(Player* player, Creature* creature) override
     {
         ClearGossipMenuFor(player);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt("pvecurrency-valor", "Mark of Triumph"), 2, 0);
-        AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt("pvecurrency-valor", "Heroic Dungeon Items"), 1, 0);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+            Opt("pvecurrency-valor", "|cffa335eeMark of Triumph|r", MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 2, 0);
+        AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+            Opt("pvecurrency-valor", "|cffa335eeHeroic Dungeon Items|r", MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 1, 0);
         SendGossipMenuFor(player, TEXT_MARKUS, creature->GetGUID());
         return true;
     }
@@ -2518,7 +2609,8 @@ public:
         {
             for (uint32 slot = 1; slot <= 16; ++slot)
                 if (VendorItemData const* items = sObjectMgr->GetNpcVendorItemList(MARK_VENDOR + slot); items && !items->Empty())
-                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR, Opt(SLOT_ICONS[slot], SLOT_NAMES[slot]), 2, slot);
+                    AddGossipItemFor(player, GOSSIP_ICON_VENDOR,
+                        Opt(SLOT_ICONS[slot], SLOT_NAMES[slot], MARKUS_ICON_SIZE, MARKUS_ICON_RISE), 2, slot);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, Opt("Spell_Shadow_Teleport", "Back"), 3, 0);
             SendGossipMenuFor(player, TEXT_MARKUS, creature->GetGUID());
             return true;
