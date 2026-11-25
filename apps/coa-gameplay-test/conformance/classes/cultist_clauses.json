@@ -2607,21 +2607,10 @@
   {
     "spell": 574147,
     "clause": "Your healing power is increased based on your main-hand weapon damage.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind or metric_delta option varies the equipped main-hand weapon between two or three items of clearly different weapon damage (e.g., Dreadnought 2534 Rondel 28.46-45.46, Heretic 2535 War Staff 84.53-119.41, Godblade 2531 Great Axe 90.86-127.3) at equal attack_power inside one scenario while reading weapon_damage_min, attack_power, and healing_power and judging strictly rising direction with no invented figure (D-38). attack_power_arms confounds attack power with main-hand weapon damage (review I1), without_item only supports cast_failure, and separate per-weapon-set scenarios cannot compare healing_power across scenarios without inventing numeric thresholds forbidden by D-38. Smallest extension: Python-only weapon_damage_arms option on metric_delta (modeled on attack_power_arms, no finished-class impact).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        },
-        {
-          "agent": "cu-t2b",
-          "report": ".agents/plans/cu-t2b/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "574147 behaviour_metric_delta healing_weapon_arms"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 574318,

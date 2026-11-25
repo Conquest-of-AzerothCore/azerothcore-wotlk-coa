@@ -44170,6 +44170,52 @@
         "wait_ms": 1000
       },
       "observe_source": "Dreadful 680579 row 246 ('Increases your critical strike rating based on your parry and dodge rating.'): dodge-rating partner to crit_parry_arms (D-38, ADR 1295). Passive stat_arms tests 3 measured dodge rating values (0, +24 via 13670, +48 via 13672) before and after real learn of 680579 plus an unrelated-stat control (+100 Haste Rating via 10033), judging strict monotonicity and unrelated-stat invariance without asserting any coefficient."
+    },
+    {
+      "spell": 574147,
+      "name": "Void Power (healing power rises with main-hand weapon damage)",
+      "kind": "metric_delta",
+      "variant": "healing_weapon_arms",
+      "label_suffix": "healing_weapon_arms",
+      "quote": "Your healing power is increased based on your main-hand weapon damage.",
+      "trigger_spell": 60235,
+      "gate_spell": 574147,
+      "target": "caster",
+      "metric": "healing_power",
+      "fields": {
+        "school": 5
+      },
+      "tolerance": 0.5,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "weapon_damage_arms": {
+        "weapons": [
+          {
+            "item": 2534,
+            "source": "Dreadnought Rondel (weapon_sets.Dreadnought.main_hand, 28.46-45.46)"
+          },
+          {
+            "item": 2535,
+            "source": "Heretic War Staff (weapon_sets.Heretic.main_hand, 84.53-119.41)"
+          },
+          {
+            "item": 2531,
+            "source": "Godblade Great Axe (weapon_sets.Godblade.main_hand, 90.86-127.3)"
+          }
+        ],
+        "unrelated": {
+          "metric": "combat_rating",
+          "fields": {
+            "rating": 17
+          },
+          "aura": 10033,
+          "stacks": 1,
+          "source": "QA Test +100 Haste Rating (10033, Effect[0] aura 189, misc 917504, +100 Haste Rating, DurationIndex 21)"
+        },
+        "wait_ms": 1000
+      },
+      "observe_source": "Void Power 574147 row 211 (\"Your healing power is increased based on your main-hand weapon damage.\"): unfigured direction-only claim (D-38, ADR 1299). AscensionCultist.cpp:291-292 and AscensionCultistAuras.cpp:135-136 set effect 0 (SPELL_AURA_MOD_HEALING_DONE, all schools) to int32((UNIT_FIELD_MINDAMAGE + UNIT_FIELD_MAXDAMAGE) / 2), refreshed every 500 ms. weapon_damage_arms equips three white main-hand weapons declared in weapon_sets (Dreadnought Rondel 2534, Heretic War Staff 2535, Godblade Great Axe 2531) before and after a real learn of 574147, verifying equipped_item (slot 15), strictly rising weapon_damage_min, equal attack_power across all arms (376.0, no AP confound), and invariance under an unrelated-stat control (+100 Haste Rating via 10033), judging strictly monotonic healing_power (school 5) gain with no figure asserted."
     }
   ],
   "player_observations": [],
