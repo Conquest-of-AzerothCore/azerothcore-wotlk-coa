@@ -218,6 +218,9 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
         reads[name] = rows
         return steps
 
+    pre_learn_clear = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.trigger_spell, 'stacks': 0,
+                         'target': TARGET, 'caster': CASTER}]
+                       if spec.feed_stop_target == TARGET and feeding and spec.trigger_target == TARGET else [])
     if spec.feed_stop_target == TARGET and feeding:
         cleared = [{'action': 'set_aura', 'actor': CASTER, 'spell': stop_aura, 'stacks': 0,
                     'target': TARGET, 'caster': CASTER}]
@@ -232,6 +235,7 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
     steps = (base_steps(class_file)
              + ([{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] if feeding else [])
              + arm(ARMS[0], spec.control_window_ms)
+             + pre_learn_clear
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
                 for spell in dict.fromkeys((spec.gate_spell, spec.trigger_spell))]
              + cleared
@@ -265,18 +269,18 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
             f'known in both arms; {spec.gate_spell} is learned after the control arm (control: no {spec.aura})')
         scenario['contract'] += (
             f' The cast_until_aura step casts it every {spec.feed_every_ms} ms (power and cooldown reset before each '
-            f'cast), at most {max_casts} casts per arm, until {stop_aura} is on the {stop_holder}: one roll per cast at the '
-            f'ProcChance of {spec.gate_spell} leaves at most {FEED_RESIDUAL:.2%} of a run without the grant after '
-            f'{max_casts} casts. Before the measured arm {stop_aura} is cancelled on the {stop_holder}, the aura and its '
-            f'application count are read, and nothing is cast but the loop, which stops at the first grant, so no '
-            f'earlier grant is on. A loop that reaches its cap leaves the arm unmeasured. The grant is at most '
-            f'{FEED_STAMP_MS} ms before the first poll after the loop, the remaining duration is read right after '
-            f'the stop, and the expected duration is the DBC one. An encounter timeline opened before the measured '
-            f'feed (after a game time read) stamps every apply of {spec.aura} on the holder in the game time base: '
-            f'the aura\'s age at the first read after the loop is at most that read minus the start read and the '
-            f'first apply stamp; above {FEED_STAMP_MS} ms, without a stamp, or with any count of stamped applies '
-            f'but one (a refresh or a second apply leaves the last application unstamped), the arm is unmeasured. '
-            f'The timeline is process global, so the scenario runs exclusive in a batch.')
+            f'cast), at most {max_casts} casts per arm, until {stop_aura} is on the {stop_holder}: one roll per cast '
+            f'at the ProcChance of {spec.gate_spell} leaves at most {FEED_RESIDUAL:.2%} of a run without the grant '
+            f'after {max_casts} casts. Before the measured arm {stop_aura} is cancelled on the {stop_holder}, the '
+            f'aura and its application count are read, and nothing is cast but the loop, which stops at the first '
+            f'grant, so no earlier grant is on. A loop that reaches its cap leaves the arm unmeasured. The grant is '
+            f'at most {FEED_STAMP_MS} ms before the first poll after the loop, the remaining duration is read right '
+            f'after the stop, and the expected duration is the DBC one. An encounter timeline opened before the '
+            f'measured feed (after a game time read) stamps every apply of {spec.aura} on the holder in the game '
+            f'time base: the aura\'s age at the first read after the loop is at most that read minus the start read '
+            f'and the first apply stamp; above {FEED_STAMP_MS} ms, without a stamp, or with any count of stamped '
+            f'applies but one (a refresh or a second apply leaves the last application unstamped), the arm is '
+            f'unmeasured. The timeline is process global, so the scenario runs exclusive in a batch.')
     if spec.same_stamp_applies:
         scenario['contract'] += (
             f' Two or more stamped applies are accepted only when the run\'s recorded timeline holds exactly that '

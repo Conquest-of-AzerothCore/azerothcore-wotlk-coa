@@ -466,12 +466,20 @@ class StopTargetFeedTests(unittest.TestCase):
         clears = [step for step in steps if step['action'] == 'set_aura' and step.get('spell') == 707010]
         self.assertEqual(len(clears), 1)
         self.assertEqual((clears[0]['target'], clears[0]['stacks']), ('dummy', 0))
+        trigger_clears = [(i, step) for i, step in enumerate(steps)
+                          if step['action'] == 'set_aura' and step.get('spell') == TARGET_FED['trigger_spell']]
+        learn_gate_idx = next(i for i, step in enumerate(steps)
+                              if step['action'] == 'learn' and step.get('spell') == TARGET_FED['gate_spell'])
+        self.assertEqual(len(trigger_clears), 1)
+        self.assertLess(trigger_clears[0][0], learn_gate_idx)
+        self.assertEqual((trigger_clears[0][1]['target'], trigger_clears[0][1]['stacks']), ('dummy', 0))
         self.assertIn('until 707010 is on the dummy', scenario['contract'])
 
     def test_without_stop_target_loop_omits_stop_target_and_reads_caster(self):
         scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), FED)
         loops = [step for step in scenario['steps'] if step['action'] == 'cast_until_aura']
         self.assertTrue(all('stop_target' not in step for step in loops))
+        self.assertFalse(any(step['action'] == 'set_aura' for step in scenario['steps']))
         stop_label = expectation.model['feed']['reads']['treatment']['stop']
         stop_step = next(step for step in scenario['steps'] if step.get('label') == stop_label)
         self.assertEqual(stop_step['actor'], 'caster')

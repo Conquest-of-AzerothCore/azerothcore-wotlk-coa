@@ -63,10 +63,12 @@ proven. A failing bracket still alerts. The timeline is process global, so a fed
 `feed` excludes `repeat`, `forced_roll` and `no_refresh`.
 
 `stop_target: "dummy"` inside `feed` (opt-in; ADR 1297, provisional) passes `stop_target` to `cast_until_aura`, reads
-the stop `aura` on `"dummy"`, and clears `stop_aura` on `"dummy"` via `set_aura` before the treatment arm, so a rolled
-debuff applied directly to the dummy with no caster companion aura can stop its own feed loop. When omitted, `feed`
-checks the caster and emits no `stop_target` field (byte-identical for all earlier entries). Cultist: Mind Rot `300300`
-(`806039` Black Prayer feeding `560943` Mind Rot on the dummy, `10000 ms`).
+the stop `aura` on `"dummy"`, clears any lingering `trigger_spell` aura on `"dummy"` before learning `gate_spell`, and
+clears `stop_aura` on `"dummy"` via `set_aura` before the treatment arm, so a rolled debuff applied directly to the
+dummy with no caster companion aura can stop its own feed loop without a leftover control DoT tick firing into
+treatment. When omitted, `feed` checks the caster and emits no `stop_target` or `set_aura` step (byte-identical for
+all earlier entries). Cultist: Mind Rot `300300` (`806039` Black Prayer feeding `560943` Mind Rot on the dummy,
+`10000 ms`).
 
 `same_stamp_applies: true` (with `feed` only; ADR 1289, provisional, mentor D-116 and D-117) accepts a stamped apply
 count of two or more when the run's recorded timeline (`result.json` `timeline`, read into the run by `compare`) holds

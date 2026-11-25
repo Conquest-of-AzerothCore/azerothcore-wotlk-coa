@@ -22,11 +22,12 @@ companion aura.
    - `run.py` validates optional `stop_target` against `actor_ids`.
 2. **Opt-in `feed.stop_target` on `last_application_expiry`** (`kinds/last_application_expiry.py`):
    - Accepts optional `"stop_target": "dummy" | "caster"` inside `feed`.
-   - When omitted, emits no `stop_target` field in `cast_until_aura`, reads stop `aura` on `caster`, cancels on `caster`,
-     and writes the exact prior contract text (byte-identical for all existing entries).
+   - When omitted, emits no `stop_target` field in `cast_until_aura`, reads stop `aura` on `caster`, cancels on
+     `caster`, and writes the exact prior contract text (byte-identical for all existing entries).
    - When set to `"dummy"`, emits `"stop_target": "dummy"` on `cast_until_aura`, reads the stop `aura` on `"dummy"`,
-     clears `stop_aura` on `"dummy"` via `set_aura` before the treatment arm, and allows `stop_aura` to default to
-     `aura` when `caster: false` (while still refusing a mismatch without `stop_aura` when `caster: true`).
+     clears any lingering `trigger_spell` aura on `"dummy"` via `set_aura` before learning `gate_spell`, clears
+     `stop_aura` on `"dummy"` via `set_aura` before the treatment arm, and allows `stop_aura` to default to `aura`
+     when `caster: false` (while still refusing a mismatch without `stop_aura` when `caster: true`).
 
 ## Consequences
 
