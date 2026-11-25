@@ -18,6 +18,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include <array>
+#include <mutex>
 #include <unordered_set>
 #include <vector>
 
@@ -219,6 +220,27 @@ void LeaveEveryQueue(Player* player)
     LeaveDungeonFinder(player);
 }
 
+std::mutex PendingQueueLeaversMutex;
+std::vector<ObjectGuid> PendingQueueLeavers;
+
+void LeaveEveryQueueOnWorldThread(Player* player)
+{
+    std::lock_guard lock(PendingQueueLeaversMutex);
+    PendingQueueLeavers.push_back(player->GetGUID());
+}
+
+void LeavePendingQueues()
+{
+    std::vector<ObjectGuid> leavers;
+    {
+        std::lock_guard lock(PendingQueueLeaversMutex);
+        leavers.swap(PendingQueueLeavers);
+    }
+    for (ObjectGuid const& guid : leavers)
+        if (Player* player = ObjectAccessor::FindPlayer(guid); player && player->IsInWorld() && IsCriminal(player))
+            LeaveEveryQueue(player);
+}
+
 void TurnCriminal(Player* player)
 {
     SetOutlawed(player, true);
@@ -226,8 +248,17 @@ void TurnCriminal(Player* player)
         return;
     if (player->GetTradeData())
         player->TradeCancel(true);
-    LeaveEveryQueue(player);
+    LeaveEveryQueueOnWorldThread(player);
 }
+
+class ascension_mercenary_criminal_queue_leavers : public WorldScript
+{
+public:
+    ascension_mercenary_criminal_queue_leavers()
+        : WorldScript("ascension_mercenary_criminal_queue_leavers", {WORLDHOOK_ON_UPDATE}) { }
+
+    void OnUpdate(uint32) override { LeavePendingQueues(); }
+};
 
 class ascension_mercenary_criminal_acts : public UnitScript
 {
@@ -370,6 +401,7 @@ private:
 
 void AddSC_AscensionMercenaryCriminal()
 {
+    new ascension_mercenary_criminal_queue_leavers();
     new ascension_mercenary_criminal_acts();
     new ascension_mercenary_criminal_outlaw();
     new ascension_mercenary_criminal_no_retreat_spells();
