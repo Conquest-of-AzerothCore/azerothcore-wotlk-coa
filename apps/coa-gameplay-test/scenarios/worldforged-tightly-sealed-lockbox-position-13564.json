@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Worldforged Tightly Sealed Lockbox rests on the Wildwind Lake lakebed instead of the waterfall cliff (#13564)",
+  "contract": "#13564 reported the Tightly Sealed Lockbox pickup (gameobject entry 96108, guid 6942442, drops Worn Angler Cord 515158) in Wildwind Lake, Feralas unreachable on the side of the waterfall cliff. The realm-map pass moved it 19.7 yd off its observed realm-dump lakebed spot (-4490.840, 180.309, -35.059; 17.2 deg slope) onto an 82.1 deg cliff face (-4497.600, 161.800, 14.013). rev_20261126_13564 restores first-pass row 6901352. Expected: the lockbox stands at (-4490.840, 180.309, -35.059), rests flush on the lakebed, and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -4490.84,
+    "y": 180.31,
+    "z": -34.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 96108,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the lockbox stands at its realm-dump lakebed spot (-4490.840, 180.309, -35.059) instead of the cliff",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -4490.84,
+      "y": 180.309,
+      "z": -35.059,
+      "max": 0.3,
+      "guid": 6942442,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the lockbox rests flush on the lakebed terrain",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.2,
+      "guid": 6942442,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the lockbox is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6942442,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "no model surface lies above the lockbox",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6942442,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 96108
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the lockbox is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
