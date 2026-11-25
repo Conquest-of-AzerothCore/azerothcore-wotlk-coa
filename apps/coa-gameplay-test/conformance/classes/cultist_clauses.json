@@ -1444,13 +1444,16 @@
       {
         "claim": "dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage",
         "labels": [
-          "572141 effect_value e0 #0"
+          "572141 behaviour_metric_delta damage_base",
+          "572141 behaviour_metric_delta damage_sp",
+          "572141 behaviour_metric_delta damage_ap",
+          "572141 behaviour_metric_delta no_shield"
         ]
       },
       {
         "claim": "to up to $x1 enemies",
         "labels": [
-          "572141 effect_value #2"
+          "572141 behaviour_metric_delta target_cap"
         ]
       }
     ]
@@ -1459,7 +1462,8 @@
     "spell": 572141,
     "clause": "reduced by ${($f1-1)*100* -1}% with each jump.",
     "labels": [
-      "572141 effect_value #3"
+      "572141 behaviour_metric_delta bounce_2",
+      "572141 behaviour_metric_delta bounce_3"
     ],
     "kind": "claim"
   },
@@ -1467,7 +1471,8 @@
     "spell": 572141,
     "clause": "Damage increased by $500706s1% for each stack of Insanity.",
     "labels": [
-      "572141 effect_value 500706e0 #1"
+      "572141 behaviour_metric_delta insanity_20",
+      "572141 behaviour_metric_delta insanity_50"
     ],
     "kind": "claim"
   },
@@ -2513,7 +2518,8 @@
     "spell": 680581,
     "clause": "Dealing damage with Twilight Shieldtoss now heals you for $680581s1% of the damage dealt.",
     "labels": [
-      "680581 effect_value e0 #0"
+      "680581 behaviour_metric_delta heal_ratio_base",
+      "680581 behaviour_metric_delta heal_ratio_sp"
     ],
     "kind": "claim"
   },
@@ -2597,7 +2603,9 @@
   {
     "spell": 681087,
     "clause": "Damage dealt by Twilight Shieldtoss now generates 3 Insanity.",
-    "labels": [],
+    "labels": [
+      "681087 behaviour_metric_delta insanity_gain"
+    ],
     "kind": "claim"
   },
   {
@@ -3790,10 +3798,21 @@
   {
     "spell": 803236,
     "clause": "Increases the damage dealt by your Twilight Shieldtoss by $s1% but it to no longer bounces.",
-    "labels": [
-      "803236 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage dealt by your Twilight Shieldtoss by $s1%",
+        "labels": [
+          "803236 behaviour_hit_ratio damage_double"
+        ]
+      },
+      {
+        "claim": "but it to no longer bounces.",
+        "labels": [
+          "803236 behaviour_metric_delta no_bounce"
+        ]
+      }
+    ]
   },
   {
     "spell": 803283,
