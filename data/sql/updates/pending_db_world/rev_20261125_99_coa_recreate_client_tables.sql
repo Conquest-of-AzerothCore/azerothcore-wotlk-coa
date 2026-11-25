@@ -2,7 +2,8 @@
 -- zzzz_rev_20261118_20_coa_drop_baked_client_tables.sql (PR #12775) and read again since PR #13604.
 -- Statements are taken verbatim in filename order from the 36 earlier pending_db_world migrations
 -- (with rev_20261031_00_skinpeeler_full_parity.sql's five consecutive super_track INSERTs folded
--- into one multi-row INSERT and `ID` backtick-quoted for SQL codestyle compliance).
+-- into one multi-row INSERT and `ID` backtick-quoted for SQL codestyle compliance, and the three
+-- historical apex 9930001..9930032 cleanup DELETEs narrowed to the 13 IDs actually inserted).
 
 -- Source: rev_1791558178309625533.sql
 CREATE TABLE IF NOT EXISTS `coa_client_skill_line_ability` (
@@ -246,7 +247,7 @@ INSERT INTO `coa_client_shapeshift_form` (`ID`, `BonusActionBar`) VALUES
 (37, 1);
 
 -- Source: rev_20261028_17_apex_poi_track.sql
-DELETE FROM `coa_client_super_track` WHERE `ID` BETWEEN 9930001 AND 9930032;
+DELETE FROM `coa_client_super_track` WHERE `ID` IN (9930001, 9930002, 9930003, 9930011, 9930012, 9930013, 9930014, 9930021, 9930022, 9930023, 9930024, 9930031, 9930032);
 INSERT INTO `coa_client_super_track` (`ID`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, `Radius`, `NextID`, `Flags`) VALUES
 (9930001, 1, 2267.21, -6787.11, 125.24, 25, 0, 0),
 (9930002, 1, 2310.67, -6875.93, 121.74, 25, 0, 0),
@@ -281,7 +282,7 @@ INSERT INTO `coa_client_super_track` (`ID`, `MapID`, `PositionX`, `PositionY`, `
 (9269, 1, -3870.56, 1991.62, 72.962, 25, 0, 0),
 (9270, 0, -9168.72, 768.735, 154.275, 15, 0, 0),
 (9271, 1, 2003.64, -4645.85, 25.9132, 15, 0, 0);
-DELETE FROM `coa_client_super_track` WHERE `ID` BETWEEN 9930001 AND 9930032;
+DELETE FROM `coa_client_super_track` WHERE `ID` IN (9930001, 9930002, 9930003, 9930011, 9930012, 9930013, 9930014, 9930021, 9930022, 9930023, 9930024, 9930031, 9930032);
 
 -- Source: rev_20261028_24_apex_track_reuse_ids.sql
 DELETE FROM `coa_client_super_track` WHERE `ID` IN (2, 3, 27, 53, 78, 107, 108, 109, 110, 111, 116, 146, 202);
@@ -329,7 +330,7 @@ INSERT INTO `coa_client_super_track` (`ID`, `MapID`, `PositionX`, `PositionY`, `
 (7311, 1, -3887.07, 1958.59, 75.3706, 5.5, 0, 0);
 
 -- Source: rev_20261031_00_skinpeeler_full_parity.sql
-DELETE FROM `coa_client_super_track` WHERE `ID` BETWEEN 9259 AND 9271 OR `ID` BETWEEN 9930001 AND 9930032;
+DELETE FROM `coa_client_super_track` WHERE `ID` BETWEEN 9259 AND 9271 OR `ID` IN (9930001, 9930002, 9930003, 9930011, 9930012, 9930013, 9930014, 9930021, 9930022, 9930023, 9930024, 9930031, 9930032);
 DELETE FROM `coa_client_super_track` WHERE `ID` IN (21505,21508,21523,21589,21603);
 INSERT INTO `coa_client_super_track` (`ID`, `MapID`, `PositionX`, `PositionY`, `PositionZ`, `Radius`, `NextID`, `Flags`) VALUES
 (21505,1,2267.21,-6787.11,125.24,5.5,0,0),
