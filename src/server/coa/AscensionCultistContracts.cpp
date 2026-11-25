@@ -209,6 +209,7 @@ void ApplyContracts(SpellInfo* info)
     {
         info->Effects[0].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
         info->Effects[0].TriggerSpell = 0;
+        info->Effects[0].TargetB = SpellImplicitTargetInfo();
     }
     if (id == 804277)
         info->Effects[2].Effect = 0;
