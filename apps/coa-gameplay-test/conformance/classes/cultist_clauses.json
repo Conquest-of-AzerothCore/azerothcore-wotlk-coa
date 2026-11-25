@@ -61,43 +61,82 @@
   {
     "spell": 92131,
     "clause": "Reaching 100 Insanity no longer causes Total Madness.",
-    "labels": [],
+    "labels": [
+      "92131 behaviour_metric_delta madness_suppressed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 92131,
     "clause": "Teaches you Herald of the Depths.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Automatic Level 10 specialization passive 92131 teaches 520326 via SynchronizeTaughtAbilities (AscensionTaughtAbilityData.h:35, SpecId=40, RequiredLevel=10). Nearest existing option metric_delta specialization (ORDER 26) switches to spec 40 at level 60 during before, which runs SynchronizeAutomaticTalents + SynchronizeTaughtAbilities and auto-learns both 92131 and 520326 before the control read (knows_spell reads 1 in before); unlearn_before runs at ORDER 20 (before specialization) and cannot clear them after the spec switch. Smallest extension: Python-only opt-in unlearn_after_specialization (ORDER > 26) or between-phase specialization switch on metric_delta.",
+      "attempts": [
+        {
+          "agent": "cu-t1",
+          "report": ".agents/plans/cu-t1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 92131,
     "clause": "Transform into a Herald of the Depths for $d,",
     "labels": [
-      "92131 spell_duration 520326 #0"
+      "92131 behaviour_metric_delta transform",
+      "92131 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 92131,
     "clause": "increasing damage and healing done by $s3%",
-    "labels": [
-      "92131 effect_value 520326e2 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing damage ... by $s3%",
+        "labels": [
+          "92131 behaviour_metric_delta damage_shadow",
+          "92131 behaviour_metric_delta damage_melee"
+        ]
+      },
+      {
+        "claim": "and healing done by $s3%",
+        "labels": [
+          "92131 behaviour_metric_delta healing_done"
+        ]
+      }
+    ]
   },
   {
     "spell": 92131,
     "clause": "and the base duration of absorption and healing over time effects by $s2%.",
-    "labels": [
-      "92131 effect_value 520326e1 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and the base duration of absorption ... by $s2%.",
+        "labels": [
+          "92131 behaviour_metric_delta absorb_duration_contrast",
+          "92131 behaviour_metric_delta absorb_duration_expiry"
+        ]
+      },
+      {
+        "claim": "and healing over time effects by $s2%.",
+        "labels": [
+          "92131 behaviour_metric_delta hot_duration_contrast",
+          "92131 behaviour_metric_delta hot_duration_expiry"
+        ]
+      }
+    ]
   },
   {
     "spell": 92131,
     "clause": "At the end of the duration, your Insanity is reduced to 0.",
-    "labels": [],
+    "labels": [
+      "92131 behaviour_metric_delta insanity_zero"
+    ],
     "kind": "claim"
   },
   {
@@ -1568,7 +1607,7 @@
         "labels": []
       }
     ],
-    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) — no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
+    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) \u2014 no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
   },
   {
     "spell": 524877,
@@ -1885,7 +1924,9 @@
   {
     "spell": 560109,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "560109 behaviour_metric_delta insanity_gain"
+    ],
     "kind": "claim"
   },
   {
@@ -1896,26 +1937,46 @@
       {
         "claim": "for $d",
         "labels": [
-          "560109 aura_duration_ms #0"
+          "560109 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "8 sec vs players",
-        "labels": []
+        "labels": [
+          "560109 behaviour_metric_delta player_duration"
+        ]
+      }
+    ],
+    "reason": "Alert (claim 1 '8 sec vs players', uncounted; supported by cu-rt1 review): Spell.dbc 560109 has DurationIndex 64 = 40000 ms, Mechanic 5 (FEAR), and no pending_db_world override; SpellMgr.cpp:342-415 lacks an 8000 ms PvP cap for 560109 and falls through to the 10000 ms DIMINISHING_FEAR cap, so player_duration reads 560109 still active (1) at ~8.49 s post-apply."
+  },
+  {
+    "spell": 560109,
+    "clause": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them][].",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "bouncing to up to 2 nearby enemies",
+        "labels": [
+          "560109 behaviour_metric_delta bounce_cap"
+        ]
+      },
+      {
+        "claim": "and applying Mind Rot to them",
+        "labels": [
+          "560109 behaviour_metric_delta mind_rot_branch"
+        ]
       }
     ]
   },
   {
     "spell": 560109,
-    "clause": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them][].",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 560109,
     "clause": "Damage dealt may end this effect.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "560109 behaviour_metric_delta damage_breaks",
+      "560109 behaviour_metric_delta damage_holds"
+    ],
+    "kind": "claim",
+    "reason": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (stock deterministic HandleBreakableCCAuraProc cumulative damage cap BaseHealth(60)/4.75 = 1048 at SpellAuraEffects.cpp:548-562,7245-7253, no break probability asserted): both entries read aura 560109 PRESENT == 1 on dummy before the damage hit (after_setup_stacks + before_expected 1); damage_holds proves a ~620 Shadow hit leaves 560109 active (1 -> 1) and damage_breaks proves a ~31000 Shadow hit ends 560109 (1 -> 0)."
   },
   {
     "spell": 560301,
@@ -2069,13 +2130,31 @@
   {
     "spell": 560977,
     "clause": "Removes the cooldown of Eldritch Shock and guarantees it to critically strike when used with at least 60 Insanity.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the cooldown of Eldritch Shock",
+        "labels": [
+          "560977 behaviour_metric_delta no_cooldown"
+        ]
+      },
+      {
+        "claim": "and guarantees it to critically strike when used with at least 60 Insanity.",
+        "labels": [
+          "560977 behaviour_crit_rate crit_at_60",
+          "560977 behaviour_crit_rate crit_below_60",
+          "560977 behaviour_hit_ratio crit_shock_at_60",
+          "560977 behaviour_hit_ratio crit_heal_at_60"
+        ]
+      }
+    ]
   },
   {
     "spell": 560977,
     "clause": "Eldritch Shock can now be cast while channeling.",
-    "labels": [],
+    "labels": [
+      "560977 behaviour_metric_delta cast_while_channeling"
+    ],
     "kind": "claim"
   },
   {
@@ -2729,20 +2808,33 @@
   {
     "spell": 680750,
     "clause": "Reaching 100 Insanity no longer causes Total Madness.",
-    "labels": [],
+    "labels": [
+      "680750 behaviour_metric_delta madness_suppressed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 680750,
     "clause": "Teaches you Dreadnought.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Automatic Level 10 specialization passive 680750 teaches 567524 via SynchronizeTaughtAbilities (AscensionTaughtAbilityData.h:36, SpecId=96, RequiredLevel=10). Same ORDER gap as 92131: specialization (ORDER 26) auto-learns 680750 + 567524 at level 60 before the control read, while unlearn_before runs at ORDER 20. Smallest extension: Python-only opt-in unlearn_after_specialization (ORDER > 26) or between-phase specialization switch on metric_delta.",
+      "attempts": [
+        {
+          "agent": "cu-t1",
+          "report": ".agents/plans/cu-t1/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680750,
     "clause": "Absorbs ${$m2+0+$STA*3+$INT*3} damage, scaling with Intellect and Stamina.",
     "labels": [
-      "680750 effect_value 567524e1 #0"
+      "680750 behaviour_metric_delta absorb_base",
+      "680750 behaviour_metric_delta absorb_sta",
+      "680750 behaviour_metric_delta absorb_int"
     ],
     "kind": "claim"
   },
@@ -2750,22 +2842,28 @@
     "spell": 680750,
     "clause": "Protects movement speed from going below $567525s2% of normal speed.",
     "labels": [
-      "680750 effect_value 567525e1 #1"
+      "680750 behaviour_metric_delta min_speed",
+      "680750 behaviour_metric_delta min_speed_late"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Alert (uncounted): 567524 Dreadnought lasts 20 sec (DurationIndex 18 = 20000 ms) and triggers companion aura 567525 (80% minimum speed) which has DurationIndex 8 = 15000 ms in Spell.dbc with no SQL or C++ override. min_speed holds 0.80 at 14.2 s, while min_speed_late alerts at 19.2 s (speed drops to 0.70 and 567525 == 0 while 567524 == 1)."
   },
   {
     "spell": 680750,
     "clause": "Lasts $d.",
     "labels": [
-      "680750 spell_duration 567524 #2"
+      "680750 behaviour_metric_delta duration",
+      "680750 behaviour_metric_delta min_speed_late"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Alert (uncounted): Dreadnought form 567524 lasts 20 sec (duration passes at 19.2 s / 20.8 s), but companion minimum-speed aura 567525 has DurationIndex 8 = 15000 ms in Spell.dbc and expires 5 sec early (min_speed_late alerts at 19.2 s with run_speed_rate 0.70 and 567525 == 0)."
   },
   {
     "spell": 680750,
     "clause": "Depletes all Insanity upon expiration.",
-    "labels": [],
+    "labels": [
+      "680750 behaviour_metric_delta insanity_zero"
+    ],
     "kind": "claim"
   },
   {
@@ -3178,13 +3276,14 @@
       {
         "claim": "shields you for $s1% of the damage dealt",
         "labels": [
-          "704889 effect_value e0 #0"
+          "704889 behaviour_metric_delta shield_ratio_base",
+          "704889 behaviour_metric_delta shield_ratio_sp"
         ]
       },
       {
         "claim": "for $850002d",
         "labels": [
-          "704889 spell_duration 850002 #1"
+          "704889 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -3192,8 +3291,21 @@
   {
     "spell": 704889,
     "clause": "Additional shields add to the remaining absorb amount and refresh its duration.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Additional shields add to the remaining absorb amount",
+        "labels": [
+          "704889 behaviour_metric_delta stack_sum"
+        ]
+      },
+      {
+        "claim": "and refresh its duration.",
+        "labels": [
+          "704889 behaviour_metric_delta stack_refresh"
+        ]
+      }
+    ]
   },
   {
     "spell": 704895,
@@ -3773,16 +3885,34 @@
   {
     "spell": 800430,
     "clause": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
-    "labels": [
-      "800430 aura_duration_ms #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Create a void zone for $d at target location",
+        "labels": [
+          "800430 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "that slows enemies' movement speed while inside.",
+        "labels": [
+          "800430 behaviour_metric_delta slows_inside",
+          "800430 behaviour_metric_delta slows_outside"
+        ]
+      }
     ],
-    "kind": "claim"
+    "reason": "Orchestrator decision D-38 (direction-only ruling for unfigured slow): slows_inside proves dummy inside the 10 yd void zone is strictly slowed (no percentage asserted) and slows_outside proves an enemy outside the zone (13 yd from center) suffers zero slow."
   },
   {
     "spell": 800430,
     "clause": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "800430 behaviour_metric_delta slow_gradient",
+      "800430 behaviour_metric_delta slow_gradient_inner",
+      "800430 behaviour_metric_delta slows_outside"
+    ],
+    "kind": "claim",
+    "reason": "Orchestrator decision D-38 (direction-only ruling for unfigured gradient): three inside distances strictly monotonic (speed at 2 yd < 5 yd < 8 yd via slow_gradient + slow_gradient_inner) plus outside-zone no-slow control (slows_outside at 13 yd), all run_speed_rate behaviour reads, no slope, ratio, or endpoint value asserted."
   },
   {
     "spell": 800432,

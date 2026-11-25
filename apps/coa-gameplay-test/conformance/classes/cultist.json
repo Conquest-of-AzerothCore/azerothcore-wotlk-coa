@@ -6778,7 +6778,7 @@
       "critical": false,
       "trials": 10,
       "void_on_cast_failure": true,
-      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc — no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 704880,
@@ -11884,7 +11884,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert — no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert \u2014 no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
     },
     {
       "spell": 502122,
@@ -29843,6 +29843,3883 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Proves shared Old God Tentacle cap across types: Tentacle of Y'shaarj 802044 (entry 50096, 30 s duration, SummonProperties 63) is present (1) before 572103 and replaced (0) after 572103 while 501464 rises 0 -> 1 (~2.6 s << 30 s). Paired with max_one. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (reaching 100 Insanity no longer triggers Total Madness 803061/803060)",
+      "kind": "metric_delta",
+      "variant": "madness_suppressed",
+      "label_suffix": "madness_suppressed",
+      "quote": "Reaching 100 Insanity no longer causes Total Madness.",
+      "trigger_spell": 502220,
+      "gate_spell": 92131,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          803061,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          803060,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          90,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 803061,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803061
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 803060
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultist.cpp:218-220: reaching 100 Insanity casts Insane 803060 (which triggers Total Madness 803061) when 92131 is absent, and suppresses it when 92131 is known"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Darkwither 502220 (+10 Insanity, AscensionCustomResourceData.h:282) drives Insanity 500706 from 90 to 100 in both arms"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultist.cpp:218-220 checks !player->HasSpell(92131) before casting Insane 803060 (triggering Total Madness 803061) when Insanity 500706 rises from <100 to 100. Both phases clear 803061/803060 first, set Insanity 500706 to 90 (precondition fixture) plus 823764 (spellpen), cast neutral 804056 + 1700 ms wait (past GCD, < 10000 ms 500727 decay) confirming 500706 == 90 and 803061 == 0 via after_setup_stacks, then cast Darkwither 502220 (+10 Insanity) at dummy. Control (before learning 92131) reaches 100 Insanity and receives 803060 == 1 and 803061 == 1; treatment (after real learn of 92131) reaches 100 Insanity with 803060 == 0 and 803061 == 0. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (transforms caster into display 280072)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 520326,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        520326
+      ],
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "display_id",
+      "fields": {},
+      "before_expected": 49,
+      "expected": 280072,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 80,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald form 520326 is absent (0) in control and active (1) in treatment"
+          }
+        ]
+      },
+      "observe_source": "520326 Effect[0] aura 56 SPELL_AURA_TRANSFORM MiscValue 250042 (Spell.dbc, AscensionCultistContracts.cpp:121); rev_20261031_99_cultist_herald_caster_display.sql sets creature_template_model 250042 -> CreatureDisplayID 280072. Reference Human Male display_id reads 49 in the uncast control phase and 280072 500 ms after one real cast of 520326; exact Insanity 500706 == 80, threshold 680604 == 1 (preconditions), and form 520326 (0 -> 1) are read in both phases via ally_arm. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 520326,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        520326,
+        502220
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520326
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 90,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 in before (immediate) and 90 at 19200 ms in after (80 + 10 from Darkwither 502220, in combat)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 in both before and after"
+          }
+        ]
+      },
+      "observe_source": "520326 DurationIndex 18 = 20000 ms ($d = 20 sec, SpellDuration.dbc), instant cast. Reads aura 520326 absent before cast (0), present (1) at [18800..19600] ms (> 18000 = 0.9*20000) and gone (0) at [20400..21400] ms (< 22000 = 1.1*20000), excluding 10% off on both sides. Horrorbolt 502182 (+0 Insanity) setup enters combat in after so Sanity 500727 does not decay; exact Insanity 500706 == 80 and threshold 680604 == 1 are verified in both phases via ally_arm and right before 520326 via after_setup_stacks. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+15% Shadow spell damage done)",
+      "kind": "metric_delta",
+      "variant": "damage_shadow",
+      "label_suffix": "damage_shadow",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        502182
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502182,
+        "target": "dummy"
+      },
+      "before_expected": 10000,
+      "expected": 21500,
+      "expected_ratio": 2.15,
+      "tolerance": 0.02,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 90,
+            "expected": 90,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 90 (80 + 10 from Horrorbolt 502182) read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald form 520326 is absent (0) in control and active (1) in treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Exactly 1 non-critical Horrorbolt 502182 hit lands in control and 1 in treatment (cumulative 2)"
+          }
+        ]
+      },
+      "observe_source": "520326 Effect[2] bp=14+1=15 ($s3 = 15%); AscensionCultistContracts.cpp:304,316 multiplies Cultist spell damage by 1 + Amount(Herald, 2)/100 = 1.15 when aura 520326 is active. Both arms set Insanity 500706=80, 680604=1, 823764=1 (spellpen), 16255=-100 (non-crit), and +20000 SP (die spread 71/~17500 = 0.4% << 2% band); treatment casts Herald 520326 for real before Horrorbolt 502182 (+0 Insanity). Exact 500706 == 80, 680604 == 1, and form 520326 (0 -> 1) are read in both arms via ally_arm (and after_setup_stacks before 502182 in treatment). Cumulative after/before ratio 2.15 +- 0.02 (G-19 band [2.13, 2.17], excluding 2.00 and 2.30). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+15% Physical melee damage done)",
+      "kind": "metric_delta",
+      "variant": "damage_melee",
+      "label_suffix": "damage_melee",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 520326,
+      "gate_spell": 520326,
+      "gate_cast": true,
+      "attack_swings": 4,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "melee_damage_total",
+      "fields": {
+        "hand": 0,
+        "glancing": false,
+        "critical": false
+      },
+      "ratio_to_metric": {
+        "metric": "melee_damage_count",
+        "fields": {
+          "hand": 0,
+          "glancing": false,
+          "critical": false
+        },
+        "increments": true
+      },
+      "before_expected": 3000,
+      "expected": 3450,
+      "expected_ratio": 1.15,
+      "tolerance": 0.02,
+      "wait_ms": 200,
+      "expire_ms": 300,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 80,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 read in both control and treatment arms (in combat)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald form 520326 is absent (0) in control and still active (1) after 4 swings (~14.9 s < 20 s) in treatment"
+          }
+        ]
+      },
+      "observe_source": "Physical-school check for 520326 'increasing damage ... by $s3%' (ADR 0287 'tout inclus'); AscensionCultistContracts.cpp:335-336 AddPct(damage, Amount(Herald, 2)) adds +15% to melee swings while Herald 520326 is active. Both arms set Insanity 500706=80, 680604=1, 16255=-100 (non-crit), and +20000 AP (Godblade 2531 weapon spread +-0.34% << 2% band); gate_cast casts Herald 520326 for real between the 4-swing control and 4-swing treatment arms (~14.9 s < 20 s). ratio_to_metric (melee_damage_count, increments: true) computes per-hit non-glancing non-crit mean in each arm: expected ratio 1.15 +- 0.02 (G-19 band [1.13, 1.17]). Exact 500706 == 80, 680604 == 1, and form 520326 (0 -> 1) are read in both arms via ally_arm. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+15% healing done)",
+      "kind": "metric_delta",
+      "variant": "healing_done",
+      "label_suffix": "healing_done",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 574325,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        574325
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 574325,
+        "target": "caster"
+      },
+      "before_expected": 10000,
+      "expected": 21500,
+      "expected_ratio": 2.15,
+      "tolerance": 0.02,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 80,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald form 520326 is absent (0) in control and active (1) in treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 574325,
+              "target": "caster"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Exactly 1 non-critical Eldritch Mending 574325 heal lands in control and 1 in treatment (cumulative 2)"
+          }
+        ]
+      },
+      "observe_source": "520326 Effect[2] bp=14+1=15 ($s3 = 15%); AscensionCultistContracts.cpp:304,330 multiplies Cultist healing done by 1 + Amount(Herald, 2)/100 = 1.15 when aura 520326 is active. Both arms set Insanity 500706=80, 680604=1, 16255=-100 (non-crit), and +20000 SP (die spread 88/~18000 = 0.5% << 2% band); treatment casts Herald 520326 for real before Eldritch Mending 574325 (+0 Insanity) on caster. Exact 500706 == 80, 680604 == 1, and form 520326 (0 -> 1) are read in both arms via ally_arm (and after_setup_stacks before 574325 in treatment). Cumulative after/before ratio 2.15 +- 0.02 (G-19 band [2.13, 2.17]). Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% absorption base duration on Forbidden Ritual 502273) (contrast without Herald)",
+      "kind": "metric_delta",
+      "variant": "absorb_duration_contrast",
+      "label_suffix": "absorb_duration_contrast",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 502220,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        502220,
+        502273
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          502273,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502273,
+          "target": "caster",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          15800,
+          16600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 90,
+            "expected": 90,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 90 (80 + 10 from Darkwither 502220 entering combat; zero Sanity decay) in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald form 520326 is absent (0) in control and still active (1) at ~16500 ms (< 20000 ms) in treatment"
+          }
+        ]
+      },
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) with SpellClassMask (0x2, 0x20008000, 0x44000) matching Void Shield, Forbidden Ritual 502273 (0x40000, absorb aura 69, cast 3000 ms, base duration 10000 ms -> 20000 ms under Herald), and Black Blood (note: Dark Veil 520346 and Embrace the Void 582591 lie outside 520326 e1's class mask). Both phases cast Darkwither 502220 at dummy (entering combat so Sanity 500727 cannot decay, raising 500706 80 -> 90), then cast Forbidden Ritual 502273 at 1700 ms and read 14500 ms later (~11500 ms post-apply): control without Herald has already expired (0 > 10000 ms), treatment with Herald still holds 502273 (1 < 20000 ms) and Herald 520326 (1 at ~16.5 s < 20 s). Exact 500706 (80 via after_setup_stacks, 90 in both arms via ally_arm), 680604 == 1, and form 520326 (0 -> 1) are read in both arms. Paired with absorb_duration_expiry bracketing the full 20000 ms duration at 19.2 s / 20.8 s. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% absorption base duration on Forbidden Ritual 502273) (expiry bracket)",
+      "kind": "metric_delta",
+      "variant": "absorb_duration_expiry",
+      "label_suffix": "absorb_duration_expiry",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 502273,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        520326,
+        502273
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          502273,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 22200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          21800,
+          22600
+        ],
+        "expired": [
+          23400,
+          24400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 in before (immediate) and 0 at 22200 ms in after (reset by Herald 520326 expiry at 20000 ms; 80 verified right before 502273 via after_setup_stacks)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Exact threshold aura 680604 == 1 in before and 0 after Herald 520326 expiry (1 verified right before 502273 via after_setup_stacks)"
+          }
+        ]
+      },
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) doubles Forbidden Ritual 502273 base duration 10000 ms -> 20000 ms (3000 ms cast): reads 0 before cast, 1 at [21800..22600] ms (~19200 ms after cast finish, > 18000 = 0.9*20000), and 0 at [23400..24400] ms (~20800 ms after cast finish, < 22000 = 1.1*20000). Exact Insanity 500706 == 80 and 680604 == 1 are verified in before (ally_arm) and right before 502273 in after (after_setup_stacks, with 520326 == 1). Paired with absorb_duration_contrast. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% HoT base duration on Black Blood 804153) (contrast without Herald)",
+      "kind": "metric_delta",
+      "variant": "hot_duration_contrast",
+      "label_suffix": "hot_duration_contrast",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 500714,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        500714
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804153,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804153
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 16500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          16100,
+          16900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 90,
+            "expected": 90,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 90 (80 + 10 from Malevolence 500714, AscensionCustomResourceData.h:280, in combat) in both arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 read in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald form 520326 is absent (0) in control and still active (1) at 16800 ms (< 20000 ms) in treatment"
+          }
+        ]
+      },
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) with SpellClassMask (0x2, 0x20008000, 0x44000) matching Black Blood 804153 (0x8000, HoT aura 8, base duration 12000 ms -> 24000 ms under Herald), applied to caster by Malevolence 500714 (cast 1500 ms, +10 Insanity, entering combat) on dummy (note: Dark Veil 520346 and Embrace the Void 582591 lie outside 520326 e1's class mask). Read at 16500 ms (15000 ms after cast finish): control without Herald has already expired (0 > 12000 ms), treatment with Herald still holds 804153 (1 < 24000 ms) and Herald 520326 (1 < 20000 ms). Exact 500706 (80 before 500714 -> 90 after), 680604 == 1, and form 520326 (0 -> 1) are read in both arms via ally_arm and after_setup_stacks. Paired with hot_duration_expiry bracketing the full 24000 ms duration at 23.0 s / 25.0 s. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (+100% HoT base duration on Black Blood 804153) (expiry bracket)",
+      "kind": "metric_delta",
+      "variant": "hot_duration_expiry",
+      "label_suffix": "hot_duration_expiry",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 500714,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        520326,
+        500714
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 300,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          804153,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804153
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 24500,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          24100,
+          24900
+        ],
+        "expired": [
+          26000,
+          27100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 in before (immediate) and 0 at 24500 ms in after (reset by Herald 520326 expiry at 20000 ms; 80 verified right before 500714 via after_setup_stacks)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Exact threshold aura 680604 == 1 in before and 0 after Herald 520326 expiry (1 verified right before 500714 via after_setup_stacks)"
+          }
+        ]
+      },
+      "observe_source": "520326 Effect[1] aura 108 SPELLMOD_DURATION bp=99+1=+100% ($s2 = 100) doubles Black Blood 804153 base duration 12000 ms -> 24000 ms (1500 ms cast of Malevolence 500714): reads 0 before cast, 1 at [24100..24900] ms (~23000 ms after cast finish, > 21600 = 0.9*24000), and 0 at [26000..27100] ms (~25000 ms after cast finish, < 26400 = 1.1*24000). Exact Insanity 500706 == 80 and 680604 == 1 are verified in before (ally_arm) and right before 500714 in after (after_setup_stacks, with 520326 == 1). Paired with hot_duration_contrast. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql)."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (reduces Insanity to 0 upon expiration)",
+      "kind": "metric_delta",
+      "variant": "insanity_zero",
+      "label_suffix": "insanity_zero",
+      "quote": "Teaches you Herald of the Depths.@s:520326:0@",
+      "trigger_spell": 520326,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "learn": [
+        520326,
+        502220
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          520326,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          70,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 70,
+      "expected": 80,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Herald 520326 is absent in before and still active at 19200 ms right before expiry"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAuras.cpp:181-182: on Remove of Herald 520326 (20000 ms duration), Resource(player, Insanity, -100, true) clears Insanity 500706 to 0. trigger_only_after: true reads immediate t=0 baseline 500706 == 70 (520326 == 0) in before; treatment sets 500706=70, casts Darkwither 502220 at dummy (entering combat so Sanity 500727 decay does not tick, raising Insanity 70 -> 80, verified exact with 680604 == 1 via after_setup_stacks), casts 520326, holds 500706 == 80 (520326 == 1) at 19200 ms while active, and drops 500706 to 0 at 20800 ms after expiry. Reference search 2026-11-25: coa-history spell 92131 has 0 events (passive), 520326 Herald of the Depths has 442 casts / 442 applies / 443 removals in 23-24 logs; coabuildhub spells_master_index.json 92131 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (display 280072 from rev_20261031_99_cultist_herald_caster_display.sql).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (reaching 100 Insanity no longer triggers Total Madness 803061/803060)",
+      "kind": "metric_delta",
+      "variant": "madness_suppressed",
+      "label_suffix": "madness_suppressed",
+      "quote": "Reaching 100 Insanity no longer causes Total Madness.",
+      "trigger_spell": 502220,
+      "gate_spell": 680750,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          803061,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          803060,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          90,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 803061,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803061
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 803060
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultist.cpp:218-220: reaching 100 Insanity casts Insane 803060 (triggering Total Madness 803061) when 680750 is absent, and suppresses it when 680750 is known"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 100,
+            "expected": 100,
+            "tolerance": 0,
+            "source": "Darkwither 502220 (+10 Insanity) drives Insanity 500706 from 90 to 100 in both arms"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultist.cpp:218-220 checks !player->HasSpell(680750) before casting Insane 803060 (triggering Total Madness 803061) when Insanity 500706 rises from <100 to 100. Identical arm design to 92131 madness_suppressed: control without 680750 reads 803060 == 1, 803061 == 1 at 100 Insanity; treatment after real learn of 680750 reads 803060 == 0, 803061 == 0 at 100 Insanity. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (absorbs 691 at base Stamina 104 and Intellect 71)",
+      "kind": "metric_delta",
+      "variant": "absorb_base",
+      "label_suffix": "absorb_base",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        567524
+      ],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 567524,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 20000,
+        "max_health": 20000,
+        "after_trigger_ms": 200,
+        "count": 2,
+        "wait_ms": 200,
+        "reaction": 0
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 691,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567525
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Companion aura 567525 triggered by 567524 is absent (0) in control and present (1) in treatment after 567524 absorb breaks"
+          }
+        ]
+      },
+      "observe_source": "567524 Dreadnought Rank 1 (taught by 680750) Effect[1] aura 69 SPELL_AURA_SCHOOL_ABSORB bp=149+die=1=150, per_lvl=2.0, BaseLevel=10, MaxLevel=18 -> 150 + int32(8*2.0) = 166; AscensionCultistData.h:84 adds 3.0*STA + 3.0*INT. At Cultist reference stats (STA 104, INT 71): 166 + 3*104 + 3*71 = 691 absorbed against 2x Light of the Naaru 41394 (2200 Holy). Paired with absorb_sta (+165 STA) and absorb_int (+300 INT). Both phases run neutral 804056 setup (setup_in_before: true) and verify exact Insanity 500706 == 80, threshold 680604 == 1, and 567524 == 0 right before trigger via after_setup_stacks; ally_arm verifies 567525 (0 -> 1). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (absorb scales +3*STA: 1186 at +165 Stamina)",
+      "kind": "metric_delta",
+      "variant": "absorb_sta",
+      "label_suffix": "absorb_sta",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        567524
+      ],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          72590,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 567524,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 20000,
+        "max_health": 20000,
+        "after_trigger_ms": 200,
+        "count": 2,
+        "wait_ms": 200,
+        "reaction": 0
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1186,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567525
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Companion aura 567525 triggered by 567524 is absent (0) in control and present (1) in treatment after 567524 absorb breaks"
+          }
+        ]
+      },
+      "observe_source": "Stamina scaling arm for 567524 Dreadnought Rank 1: Fortitude 72590 (+165 STA, precondition fixture) raises STA 104 -> 269 (INT stays 71) -> 166 + 3*269 + 3*71 = 1186 (+495 = +3*165 over absorb_base 691), absorbed against 2x Light of the Naaru 41394 (2200 Holy). Both phases run neutral 804056 setup (setup_in_before: true) and verify exact Insanity 500706 == 80, threshold 680604 == 1, and 567524 == 0 right before trigger via after_setup_stacks; ally_arm verifies 567525 (0 -> 1). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (absorb scales +3*INT: 1591 at +300 Intellect)",
+      "kind": "metric_delta",
+      "variant": "absorb_int",
+      "label_suffix": "absorb_int",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "measure_actor": "caster",
+      "learn": [
+        567524
+      ],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          60234,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 567524,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 20000,
+        "max_health": 20000,
+        "after_trigger_ms": 200,
+        "count": 2,
+        "wait_ms": 200,
+        "reaction": 0
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1591,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567525
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Companion aura 567525 triggered by 567524 is absent (0) in control and present (1) in treatment after 567524 absorb breaks"
+          }
+        ]
+      },
+      "observe_source": "Intellect scaling arm for 567524 Dreadnought Rank 1: Greatness 60234 (+300 INT, precondition fixture) raises INT 71 -> 371 (STA stays 104) -> 166 + 3*104 + 3*371 = 1591 (+900 = +3*300 over absorb_base 691), absorbed against 2x Light of the Naaru 41394 (2200 Holy). Both phases run neutral 804056 setup (setup_in_before: true) and verify exact Insanity 500706 == 80, threshold 680604 == 1, and 567524 == 0 right before trigger via after_setup_stacks; ally_arm verifies 567525 (0 -> 1). Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (protects movement speed from going below 80% before 15 sec under -30% slow)",
+      "kind": "metric_delta",
+      "variant": "min_speed",
+      "label_suffix": "min_speed",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "learn": [
+        567524,
+        502220
+      ],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          30011,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.7,
+      "expected": 0.8,
+      "tolerance": 0.005,
+      "wait_ms": 14200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13800,
+          14600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 90,
+            "expected": 90,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 90 (80 + 10 from Darkwither 502220, in combat) in both control and treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567524
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dreadnought 567524 is absent (0) in control and active (1) at 14200 ms in treatment"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567525
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Companion aura 567525 (80% minimum speed) is absent (0) in control and active (1) at 14200 ms (< 15000 ms) in treatment"
+          }
+        ]
+      },
+      "observe_source": "567524 Effect[2] triggers 567525 whose Effect[1] is aura 305 SPELL_AURA_MOD_MINIMUM_SPEED bp=79+1=80% ($567525s2 = 80; Spell.dbc). Both phases apply infinite -30% slow 30011 (DurationIndex 21, Effect[0] aura 33 bp=-31+1=-30%, AuraInterruptFlags 0) and enter combat via Horrorbolt 502182 (+0 Insanity; exact 500706 == 80 and 680604 == 1 verified via after_setup_stacks and ally_arm). Uncast control reads run_speed_rate 0.70; at 14200 ms (before 15 s) after casting 567524, run_speed_rate holds 0.80 with 567524 == 1 and 567525 == 1. Paired with min_speed_late (19200 ms and 20800 ms) testing the 15 s..20 s window and >20 s expiry. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (movement speed floor and companion aura 567525 through full 20 sec duration: 19.2s and 20.8s)",
+      "kind": "metric_delta",
+      "variant": "min_speed_late",
+      "label_suffix": "min_speed_late",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        567524,
+        502220
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          30011,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.7,
+      "expected": 0.8,
+      "after_expiry_expected": 0.7,
+      "tolerance": 0.005,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 90,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 in before (immediate) and 90 at 19200 ms in after (80 + 10 from Darkwither 502220, in combat)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567524
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dreadnought 567524 (DurationIndex 18 = 20000 ms) is absent (0) in control and still active (1) at 19200 ms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567525
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tooltip states 'Protects movement speed from going below $567525s2% of normal speed. Lasts $d.' ($d = 20 sec), so 567525 must still be active (1) at 19200 ms (> 18000 ms)"
+          }
+        ]
+      },
+      "observe_source": "567524 tooltip states 'Protects movement speed from going below $567525s2% of normal speed. Lasts $d.' where 567524 has DurationIndex 18 = 20000 ms ($d = 20 sec) and triggers companion 567525 (SPELL_AURA_MOD_MINIMUM_SPEED 80%), which has DurationIndex 8 = 15000 ms in Spell.dbc with no SQL or C++ duration override. Under infinite -30% slow 30011, reads run_speed_rate at 0 ms (control 0.70), at 19200 ms (between 15 s and 20 s: tooltip expects 0.80 and 567525 == 1 while 567524 == 1), and at 20800 ms (after 20 s: 0.70). Alerts if the speed floor and 567525 disappear at 15 s while Dreadnought 567524 lasts 20 s. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (form 567524 lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        567524,
+        502220
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 567524
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 80,
+            "expected": 90,
+            "tolerance": 0,
+            "source": "Exact Insanity 500706 == 80 in before (immediate) and 90 at 19200 ms in after (80 + 10 from Darkwither 502220, in combat)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 680604
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exact 80-Insanity threshold aura 680604 == 1 in both phases"
+          }
+        ]
+      },
+      "observe_source": "567524 DurationIndex 18 = 20000 ms ($d = 20 sec, SpellDuration.dbc), instant cast. Reads aura 567524 absent before cast (0), present (1) at [18800..19600] ms (> 18000 = 0.9*20000) and gone (0) at [20400..21400] ms (< 22000 = 1.1*20000), excluding 10% off on both sides. Exact Insanity 500706 == 80 and threshold 680604 == 1 are verified in both phases via ally_arm and after_setup_stacks. Paired with min_speed_late which alerts on companion aura 567525 expiring at 15000 ms instead of 20000 ms. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql)."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (depletes all Insanity upon expiration)",
+      "kind": "metric_delta",
+      "variant": "insanity_zero",
+      "label_suffix": "insanity_zero",
+      "quote": "Teaches you Dreadnought.@s:567524:0@",
+      "trigger_spell": 567524,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "learn": [
+        567524,
+        502220
+      ],
+      "cast_power": 2000,
+      "setup_casts": [
+        502220
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          70,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 70,
+      "expected": 80,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18800,
+          19600
+        ],
+        "expired": [
+          20400,
+          21400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 567524
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dreadnought 567524 is absent in before and still active at 19200 ms right before expiry"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAuras.cpp:181-182: on Remove of Dreadnought 567524 (20000 ms duration), Resource(player, Insanity, -100, true) depletes Insanity 500706 to 0. trigger_only_after: true reads immediate t=0 baseline 500706 == 70 (567524 == 0) in before; treatment sets 500706=70, casts Darkwither 502220 at dummy (entering combat so Sanity 500727 decay does not tick, raising Insanity 70 -> 80, verified exact with 680604 == 1 via after_setup_stacks), casts 567524, holds 500706 == 80 (567524 == 1) at 19200 ms while active, and drops 500706 to 0 at 20800 ms after expiry. Reference search 2026-11-25: coa-history spell 680750 has 0 events (passive), 567524 Dreadnought has 1 cast / 1 apply / 8 refreshes / 1 removal in 1 log; coabuildhub spells_master_index.json 680750 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override (rank chain in rev_20261017_08_cultist_dreadnought_ranks.sql).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (removes the 8 sec cooldown of Eldritch Shock: second cast at 1700 ms succeeds)",
+      "kind": "metric_delta",
+      "variant": "no_cooldown",
+      "label_suffix": "no_cooldown",
+      "quote": "Removes the cooldown of Eldritch Shock",
+      "trigger_spell": 808036,
+      "gate_spell": 560977,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 808036,
+          "target": "dummy",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 808036
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_gain": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "observe_source": "Eldritch Shock 808036 has CategoryRecoveryTime 8000 ms and StartRecoveryTime (GCD) 1500 ms (Spell.dbc); AscensionCultistAbilities.cpp:203-204 calls Reduce(player, id, INT32_MAX) -> RemoveSpellCooldown(id, true) whenever player->HasAura(560977) (unconditional on Insanity; tooltip wording 'Removes the cooldown of Eldritch Shock and guarantees it to critically strike when used with at least 60 Insanity.' is tested here at 60 Insanity). Follows ADR 0238 (real second cast right after GCD against a refused control; GCD limit 1500 ms stated): both phases confirm Insanity 500706 == 60 (680601/680603 == 1) via after_setup_stacks (enough for two 20-Insanity casts), cast 808036 at dummy, and attempt a second 808036 at 1700 ms without cooldown reset. Control without 560977 is refused (1 cast); treatment after real learn of 560977 succeeds on both casts (cumulative 3, gain 2). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (crit_rate 100% guarantee on Eldritch Shock damage 808043 at 60 Insanity)",
+      "kind": "crit_rate",
+      "variant": "crit_at_60",
+      "label_suffix": "crit_at_60",
+      "quote": "and guarantees it to critically strike when used with at least 60 Insanity.",
+      "expected": 100,
+      "treatment_share": 100,
+      "observe_spell": 808043,
+      "control": {
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680601,
+            1
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          560977
+        ],
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680601,
+            1
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "trials": 160,
+      "expected_source": "ADR 0760 crit_rate with treatment_share: 100 over 160 casts per arm of Eldritch Shock damage 808043 (AscensionCultistAbilities.cpp:97-99 sets chance = 100 for 808043..808045 / 808050..808052 when HasAura(560977) and Insanity >= 60). Both arms set Insanity 500706=60, 680601=1, 680603=1, and 823764=1 (spellpen) before every cast with NO crit-suppression fixture. Control (560977 unlearned, knows_spell == 0) rolls natural crit (Wilson 99% UB well below 95%); treatment learns 560977 (knows_spell == 1) and must crit 160/160 (99% Wilson lower bound 160 / (160 + 2.576^2) = 96.0% >= 95% G-19 floor; 159/160 gives 94.77% < 95% and does not pass). Residual false-pass probability: at true 95% crit, 0.95^160 = 2.7e-4 per run and 7.5e-8 per pair (<< 0.1%); at true 50% crit, 6.8e-49 per run (4.7e-97 per pair). Deterministic at true 100% (false alert 0). Paired with crit_below_60 (59 vs 60 Insanity threshold without crit suppression), crit_shock_at_60 (real 808036 wrapper cast with 20-Insanity drain), and crit_heal_at_60 (real 808036 -> 808050 heal). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (threshold: 59 Insanity natural crit vs 60 Insanity 100% guarantee, 560977 learned)",
+      "kind": "crit_rate",
+      "variant": "crit_below_60",
+      "label_suffix": "crit_below_60",
+      "quote": "and guarantees it to critically strike when used with at least 60 Insanity.",
+      "expected": 100,
+      "treatment_share": 100,
+      "observe_spell": 808043,
+      "learn": [
+        560977
+      ],
+      "control": {
+        "auras": [
+          [
+            500706,
+            59
+          ],
+          [
+            680601,
+            1
+          ],
+          [
+            680603,
+            0
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680601,
+            1
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "trials": 160,
+      "expected_source": "ADR 0760 crit_rate threshold contrast ('when used with at least 60 Insanity'): 560977 is learned in BOTH arms with NO crit-suppression fixture, over 160 casts per arm of 808043. Control holds 59 Insanity (680603=0) and rolls natural crit (~5%, Wilson 99% UB << 95%; a guarantee firing at 59 Insanity would reach 100% and fail contrast); treatment holds 60 Insanity (680603=1) and must crit 160/160 (99% Wilson LB 96.0% >= 95%). Residual false-pass probability at true 95% crit: 2.7e-4 per run, 7.5e-8 per pair (<< 0.1%). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (real Eldritch Shock 808036 damage 808043 crit guarantee over 140 casts at 60 Insanity)",
+      "kind": "hit_ratio",
+      "variant": "crit_shock_at_60",
+      "label_suffix": "crit_shock_at_60",
+      "quote": "and guarantees it to critically strike when used with at least 60 Insanity.",
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 100,
+      "cast_spell": 808036,
+      "observe_spell": 808043,
+      "learn": [
+        808036
+      ],
+      "cast_power": 2000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          560977
+        ],
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "trials": 140,
+      "min_trials": 140,
+      "void_on_cast_failure": true,
+      "expected_source": "Real Eldritch Shock 808036 wrapper cast (which drains 20 Insanity 60 -> 40 before triggering 808043, relying on State(player).shockInsanity at AscensionCultistAbilities.cpp:98) over 140 casts per arm. hit_ratio rate 'critical' (expected_points: 100, G-19 band [95, 105]) with 16255=-100 so control (unlearned) crits 0/140 (0%) and treatment (560977 learned) crits 140/140 (100%, +100 points). Residual false-pass probability: a 95% broken crit rate has P(140/140) = 0.95^140 = 7.6e-4 per run and 5.8e-7 per pair (<< 0.1%); a 90% broken rate has P(pass G-19 95% band in pair) < 2e-4; a 50% broken rate has P < 1e-35. Paired with crit_at_60 and crit_below_60 (no -100% fixture). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (real Eldritch Shock 808036 heal 808050 crit guarantee over 140 casts at 60 Insanity)",
+      "kind": "hit_ratio",
+      "variant": "crit_heal_at_60",
+      "label_suffix": "crit_heal_at_60",
+      "quote": "and guarantees it to critically strike when used with at least 60 Insanity.",
+      "metric": "spell_heal_total",
+      "expected": 1.0,
+      "rate": "critical",
+      "expected_points": 100,
+      "cast_spell": 808036,
+      "observe_spell": 808050,
+      "target": "caster",
+      "learn": [
+        808036
+      ],
+      "cast_power": 2000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          560977
+        ],
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ]
+      },
+      "trials": 140,
+      "min_trials": 140,
+      "void_on_cast_failure": true,
+      "expected_source": "Friendly-target heal path for 560977 crit guarantee (AscensionCultistAbilities.cpp:97-99 covers heal sub-spells 808050..808052 as well as damage 808043..808045): hit_ratio metric spell_heal_total with rate 'critical' (expected_points: 100, G-19 band [95, 105]) over 140 real casts per arm of Eldritch Shock 808036 on caster (follows cultist 802049 mending_crit precedent). Both arms set 500706=60, 680603=1, and 16255=-100: control (unlearned) crits 0/140 (0%), treatment (560977 learned) crits 140/140 (100%, +100 points). Residual false-pass probability: a 95% broken crit rate has P(140/140) = 7.6e-4 per run, 5.8e-7 per pair (<< 0.1%); a 90% broken rate has P(pass G-19 95% band in pair) < 2e-4; a 50% broken rate has P < 1e-35. Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 560977,
+      "name": "Twilight Horror (Eldritch Shock can be cast while channeling Satiate without interrupting it)",
+      "kind": "metric_delta",
+      "variant": "cast_while_channeling",
+      "label_suffix": "cast_while_channeling",
+      "quote": "Eldritch Shock can now be cast while channeling.",
+      "trigger_spell": 804275,
+      "gate_spell": 560977,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "learn": [
+        808036
+      ],
+      "cast_in_before": true,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1700,
+      "phase_auras": [
+        [
+          804275,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 40
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 808036,
+          "target": "dummy",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808043,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "casting",
+            "fields": {},
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Unit::IsNonMeleeSpellCast: casting 808036 without 560977 interrupts Satiate (0), whereas with 560977 Satiate continues channeling (1)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804275
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Satiate 804275 channel aura is broken in control (0) and remains active after casting 808036 in treatment (1) (Unit.cpp:4839,5148)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 804275
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Satiate 804275 actually went off and began channeling in both control (1) and treatment (cumulative 2) before 808036"
+          }
+        ]
+      },
+      "observe_source": "Unit::CanCastDuringChannel (Unit.cpp:5147-5149) allows Eldritch Shock 808036..808038 during an active channel when HasAura(560977) (Unit.cpp:4839 otherwise interrupts CURRENT_CHANNELED_SPELL). Both phases run neutral 804056 setup and verify exact Insanity 500706 == 40 and 680601 == 1 via after_setup_stacks before casting Satiate 804275 (6000 ms channel, confirmed via spell_go_count 1 -> 2 and void_on_cast_failure: true) and then casting Eldritch Shock 808036 at dummy 1700 ms later (past 1500 ms GCD). Control without 560977 interrupts Satiate (aura 804275 == 0, casting == 0) while 808043 lands (count 1); treatment after real learn of 560977 lands 808043 (cumulative 2) while Satiate keeps channeling (aura 804275 == 1, casting == 1). Reference search 2026-11-25: coa-history spell 560977 has 0 events (passive), 808036 Eldritch Shock has 2 casts in 1 log; coabuildhub spells_master_index.json 560977 holds an older Dark Whispers text (installed server Spell.dbc Twilight Horror governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (shields caster for 100% of Twilight Shieldtoss damage at base SP)",
+      "kind": "metric_delta",
+      "variant": "shield_ratio_base",
+      "label_suffix": "shield_ratio_base",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 500,
+        "count": 3,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 704889 Effect[0] bp=99+die=1=100% ($s1 = 100); AscensionCultistAbilities.cpp:289-299 applies 850002 for CalculatePct(damage, 100) on every 572141 hit (572141 bounces from dummy to the hostile striker, dealing 1.0x + 0.8x = 1.8x damage across both targets). ratio_to_metric (increments: true, fields.spell 572141 across all targets) divides absorbed damage against 3x Light of the Naaru 41394 (3300 Holy) by total 572141 damage dealt: 0 before learning 704889, 1.00 +- 0.02 after. Paired with shield_ratio_sp (+20000 SP). Reference search 2026-11-25: coa-history 704889/850002 0 events, 572141 4 casts/4 hits in 1 log; coabuildhub 704889 holds older text; installed Spell.dbc governs per G-9."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (shields caster for 100% of Twilight Shieldtoss damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "shield_ratio_sp",
+      "label_suffix": "shield_ratio_sp",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 500,
+        "count": 12,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "High-damage contrast arm (+20000 SP, 572141 bounces across dummy + striker for ~10645 total damage -> ~10645 shield broken by 12x Light of the Naaru 41394 = 13200 Holy) separating 100% of damage dealt from a flat absorb: 0 before learning 704889, 1.00 +- 0.02 after. Reference search 2026-11-25: see shield_ratio_base. Note (M3): striker is hostile (default react state 1), so a single low-damage melee nibble (~19 damage) during the 500 ms delay can absorb ~0.18% of the ~10600 shield before the 41394 strikes, leaving the measured ratio at ~0.998 inside [0.98, 1.02]. Note (M3): striker is hostile (default react state 1), so a single low-damage melee nibble (~19 damage) during the 500 ms delay can absorb ~0.18% of the ~10600 shield before the 41394 strikes, leaving the measured ratio at ~0.998 inside [0.98, 1.02]. Note (M3): striker is hostile (default react state 1), so a single low-damage melee nibble (~19 damage) during the 500 ms delay can absorb ~0.18% of the ~10600 shield before the 41394 strikes, leaving the measured ratio at ~0.998 inside [0.98, 1.02]. Note (M3): striker is hostile (default react state 1), so a single low-damage melee nibble (~19 damage) during the 500 ms delay can absorb ~0.18% of the ~10600 shield before the 41394 strikes, leaving the measured ratio at ~0.998 inside [0.98, 1.02]."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (shield 850002 lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 850002
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7500,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7300,
+          7700
+        ],
+        "expired": [
+          8400,
+          8850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "850002 DurationIndex 31 = 8000 ms ($850002d, SpellDuration.dbc); 572141 speed 35 yd/s at 3 yd -> ~86 ms flight. Reads 850002 absent before cast (0), present (1) at [7300..7700] ms (~7414 ms after apply, > 7200 = 0.9*8000), and gone (0) at [8400..8850] ms (~8514 ms after apply, < 8800 = 1.1*8000). Reference search 2026-11-25: coa-history spell 704889 has 0 events (passive), 850002 has 0 events, 572141 Twilight Shieldtoss has 4 casts / 4 SPELL_DAMAGE events in 1 log; coabuildhub spells_master_index.json 704889 holds an older text ('The first instance of damage dealt by Twilight Shieldtoss now shields you for 100% of the damage dealt for 8 sec.'; installed server Spell.dbc governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (second shield adds to remaining absorb amount across two Shieldtoss hits)",
+      "kind": "metric_delta",
+      "variant": "stack_sum",
+      "label_suffix": "stack_sum",
+      "quote": "Additional shields add to the remaining absorb amount and refresh its duration.",
+      "setup_casts": [
+        572141
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "trigger_reset_after_setup": true,
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 500,
+        "count": 5,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572141,
+              "target": "dummy"
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Two Twilight Shieldtoss 572141 hits land in each phase (2 before, cumulative 4 after)"
+          }
+        ]
+      },
+      "observe_source": "AscensionCultistAbilities.cpp:291-298: reads remaining amount of 850002, reapplies 850002 with newly added amount, then calls shield->ChangeAmount(added + remaining). Each phase casts 572141 twice 2000 ms apart (setup_casts + trigger_reset_after_setup + trigger_spell; both hits on dummy verified via ally_arm count 2 -> 4, plus bounces to striker). After the second cast, 5x Light of the Naaru 41394 (5500 Holy) breaks the accumulated shield: ratio_to_metric divides absorbed total by total 572141 damage across all hits of both casts, reading 0 before learning 704889 and 1.00 +- 0.02 after (replacing instead of adding would read <= 0.50). Reference search 2026-11-25: see shield_ratio_base. Note (M3): tests full first shield + second shield (broken after cast 2); striker's single ~19-point melee nibble during the 500 ms delay accounts for the ~0.993-0.995 ratio inside [0.98, 1.02]. Note (M3): tests full first shield + second shield (broken after cast 2); striker's single ~19-point melee nibble during the 500 ms delay accounts for the ~0.993-0.995 ratio inside [0.98, 1.02]. Note (M3): tests full first shield + second shield (broken after cast 2); striker's single ~19-point melee nibble during the 500 ms delay accounts for the ~0.993-0.995 ratio inside [0.98, 1.02]. Note (M3): tests full first shield + second shield (broken after cast 2); striker's single ~19-point melee nibble during the 500 ms delay accounts for the ~0.993-0.995 ratio inside [0.98, 1.02]."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (second shield at 4000 ms refreshes 850002 duration to 8 sec from the second hit)",
+      "kind": "metric_delta",
+      "variant": "stack_refresh",
+      "label_suffix": "stack_refresh",
+      "quote": "Additional shields add to the remaining absorb amount and refresh its duration.",
+      "setup_casts": [
+        572141
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 4000,
+      "trigger_reset_after_setup": true,
+      "trigger_spell": 572141,
+      "gate_spell": 704889,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          850002,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 850002
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7500,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7300,
+          7700
+        ],
+        "expired": [
+          8400,
+          8850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572141,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Both Twilight Shieldtoss 572141 hits land 4000 ms apart in treatment (0 before, 2 after)"
+          }
+        ]
+      },
+      "observe_source": "Duration-refresh proof for 704889 (AscensionCultistAbilities.cpp:296 Copy reapplies 850002, refreshing its 8000 ms timer): treatment casts 572141, waits 4000 ms, resets CD and casts a second 572141 (both hits confirmed via ally_arm count 0 -> 2). At 7500 ms after the second cast (11500 ms after the first, 3.5 sec past the first shield's unrefreshed 8000 ms expiry), 850002 is still present (1, > 7200 ms from cast 2); 1100 ms later (8600 ms after cast 2, < 8800 ms), 850002 is gone (0). Reference search 2026-11-25: coa-history spell 704889 has 0 events (passive), 850002 has 0 events, 572141 Twilight Shieldtoss has 4 casts / 4 SPELL_DAMAGE events in 1 log; coabuildhub spells_master_index.json 704889 holds an older text ('The first instance of damage dealt by Twilight Shieldtoss now shields you for 100% of the damage dealt for 8 sec.'; installed server Spell.dbc governs per G-9, no pending_db_world spell_dbc or streamed description override)."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (void zone lasts 5 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
+      "trigger_spell": 800430,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800430,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4650,
+      "expiry_wait_ms": 650,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4850
+        ],
+        "expired": [
+          5200,
+          5480
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "800430 DurationIndex 28 = 5000 ms ($d = 5 sec, SpellDuration.dbc), instant cast, Effect[1] persistent area aura (radius 10 yd). Reads dynobj aura 800430 absent on dummy before cast (0), present (1) at [4550..4850] ms (> 4500 = 0.9*5000), and gone (0) at [5200..5480] ms (< 5500 = 1.1*5000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (slows enemies while inside the void zone, direction only, D-38)",
+      "kind": "metric_delta",
+      "variant": "slows_inside",
+      "label_suffix": "slows_inside",
+      "quote": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
+      "trigger_spell": 800430,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.0,
+      "expected_gain": -0.5,
+      "tolerance": 0.49,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "Primary dummy stands at 3 yd (void zone cast on dummy)"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800430,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dummy is inside the 10 yd void zone after cast (0 -> 1)"
+          }
+        ]
+      },
+      "observe_source": "Orchestrator decision D-38 (unfigured direction-only ruling): Entropic Singularity 800430 (10 yd radius; AscensionCultistAuras.cpp:240-247) slows enemies inside the void zone via 802788 without stating a percentage, so no slow percent or endpoint value is asserted. Dummy at void-zone center (3 yd from caster) reads uncast baseline run_speed_rate before and strictly lower 800 ms after casting 800430 (after - before in [-0.99, -0.01], excluding 0), with aura 800430 0 -> 1. Paired with slows_outside proving an enemy at 13 yd from the zone center suffers zero slow. Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (outside-zone enemy at 13 yd from center reads no slow, D-38)",
+      "kind": "metric_delta",
+      "variant": "slows_outside",
+      "label_suffix": "slows_outside",
+      "quote": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
+      "trigger_spell": 804056,
+      "gate_spell": 60235,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "dummy_distance": 13,
+      "learn": [
+        800430
+      ],
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800430,
+          "target": "dummy",
+          "destination_unit": "caster",
+          "delay_ms": 1700,
+          "in_before": false,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.5,
+      "expected_gain": 0.0,
+      "tolerance": 0.005,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 13.0,
+            "expected": 13.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "Dummy stands at 13 yd from caster (void zone center), 3 yd outside the 10 yd radius"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 800430
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Entropic Singularity 800430 actually cast at caster position in treatment (0 -> 1)"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800430,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Dummy at 13 yd is outside the 10 yd void zone (aura 800430 reads 0 -> 0)"
+          }
+        ]
+      },
+      "observe_source": "Orchestrator decision D-38 outside-zone control: dummy stands at 13 yd from caster (verified via distance_2d precondition), 3 yd outside the 10 yd void zone centered at caster (destination_unit: caster, spell_go_count 0 -> 1). Dummy holds no 800430 aura (0 -> 0) and its run_speed_rate changes by 0.0 +- 0.005 (no slow outside the zone, no baseline speed asserted). Paired with slows_inside and the 3-distance monotonic gradient (slow_gradient 8 yd -> 5 yd, slow_gradient_inner 5 yd -> 2 yd). Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (monotonic gradient step 1: 8 yd vs 5 yd from center, D-38)",
+      "kind": "metric_delta",
+      "variant": "slow_gradient",
+      "label_suffix": "slow_gradient",
+      "quote": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
+      "trigger_spell": 804056,
+      "gate_spell": 60235,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "dummy_distance": 11,
+      "learn": [
+        800430
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "relocate_before_trigger": {
+        "dx": 3
+      },
+      "after_trigger_casts": [
+        {
+          "spell": 800430,
+          "target": "dummy",
+          "destination_unit": "caster",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.0,
+      "expected_gain": -0.5,
+      "tolerance": 0.49,
+      "wait_ms": 800,
+      "expire_ms": 5800,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 8.0,
+            "expected": 5.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "Caster relocates +3 yd per phase (x0+3 then x0+6) while dummy stands at x0+11, placing dummy 8 yd (before) vs 5 yd (after) from the void zone centered at caster"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800430,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dummy is inside the 10 yd Entropic Singularity void zone in both arms (8 yd and 5 yd)"
+          }
+        ]
+      },
+      "observe_source": "Orchestrator decision D-38 (unfigured direction-only ruling: 3+ distances strictly monotonic, closer = slower, plus outside-zone no-slow control, no slope/ratio/endpoint asserted). AscensionCultistAuras.cpp:240-246 scales 802788 slow by distance to the 10 yd dynobj center. Step 1 of 3-distance monotonic chain (8 yd -> 5 yd -> 2 yd): dummy at x0+11, caster relocates +3 yd per phase to x0+3 (8 yd) then x0+6 (5 yd), casting 800430 at caster position (distances verified via precondition distance_2d and aura 800430 == 1 in both arms). Dummy run_speed_rate at 5 yd must be strictly below 8 yd (after - before in [-0.99, -0.01]; a flat slow gives 0 and alerts). Paired with slow_gradient_inner (5 yd -> 2 yd) and slows_outside (13 yd = 0 slow). Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 800430,
+      "name": "Entropic Singularity (monotonic gradient step 2: 5 yd vs 2 yd from center, D-38)",
+      "kind": "metric_delta",
+      "variant": "slow_gradient_inner",
+      "label_suffix": "slow_gradient_inner",
+      "quote": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
+      "trigger_spell": 804056,
+      "gate_spell": 60235,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "dummy_distance": 8,
+      "learn": [
+        800430
+      ],
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "relocate_before_trigger": {
+        "dx": 3
+      },
+      "after_trigger_casts": [
+        {
+          "spell": 800430,
+          "target": "dummy",
+          "destination_unit": "caster",
+          "delay_ms": 1700,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.0,
+      "expected_gain": -0.5,
+      "tolerance": 0.49,
+      "wait_ms": 800,
+      "expire_ms": 5800,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 5.0,
+            "expected": 2.0,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "Caster relocates +3 yd per phase (x0+3 then x0+6) while dummy stands at x0+8, placing dummy 5 yd (before) vs 2 yd (after) from the void zone centered at caster"
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800430,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dummy is inside the 10 yd Entropic Singularity void zone in both arms (5 yd and 2 yd)"
+          }
+        ]
+      },
+      "observe_source": "Orchestrator decision D-38 (unfigured direction-only ruling: 3+ distances strictly monotonic, closer = slower, plus outside-zone no-slow control, no slope/ratio/endpoint asserted). Step 2 of 3-distance monotonic chain (8 yd -> 5 yd -> 2 yd): dummy at x0+8, caster relocates +3 yd per phase to x0+3 (5 yd) then x0+6 (2 yd), casting 800430 at caster position (distances verified via precondition distance_2d and aura 800430 == 1 in both arms). Dummy run_speed_rate at 2 yd must be strictly below 5 yd (after - before in [-0.99, -0.01]; a flat slow gives 0 and alerts). Paired with slow_gradient (8 yd -> 5 yd) and slows_outside (13 yd = 0 slow). Reference search 2026-11-25: coa-history spell 800430 has 5 casts / 39 applies / 39 removals in 2-3 logs and 802788 (slow) has 40 applies / 40 removals in 2 logs (no speed figures logged); coabuildhub spells_master_index.json 800430 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (generates 10 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity_gain",
+      "label_suffix": "insanity_gain",
+      "quote": "Generates 10 Insanity",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCustomResourceData.h:284 ({25, 560109, 560109, 500706, 10, ResourceMutation::AuraStacks}): casting Corrupt Mind 560109 (1500 ms cast, 23 yd/s projectile at 3 yd -> ~1630 ms, Kobold Vermin 6 because stock dummy 36 is Fear-immune) raises Insanity 500706 from 0 (uncast control) to 10. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (fears creature target in place for 40 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Corrupt the mind of an enemy and spread madness, fearing them in place for $d (8 sec vs players),",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 39600,
+      "expiry_wait_ms": 3200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          39200,
+          40100
+        ],
+        "expired": [
+          42400,
+          43400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "560109 DurationIndex 64 = 40000 ms ($d = 40 sec, SpellDuration.dbc), Effect[0] aura 26 MOD_ROOT + Effect[1] aura 7 MOD_FEAR, 1500 ms cast + ~130 ms flight at 3 yd -> lands ~1630 ms, expires ~41630 ms (Kobold Vermin 6). Reads 0 before cast, 1 at ~39600 ms (~38000 ms after apply, > 36000 = 0.9*40000) and 0 at ~42800 ms (~41200 ms after apply, < 44000 = 1.1*40000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (8 sec duration vs enemy player)",
+      "kind": "metric_delta",
+      "variant": "player_duration",
+      "label_suffix": "player_duration",
+      "quote": "Corrupt the mind of an enemy and spread madness, fearing them in place for $d (8 sec vs players),",
+      "trigger_spell": 560109,
+      "target": "enemy",
+      "enemy_player_race": 2,
+      "measure_actor": "enemy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9100,
+      "expiry_wait_ms": 1000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          8900,
+          9350
+        ],
+        "expired": [
+          9900,
+          10450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "560109 tooltip states '(8 sec vs players)'. Cast at enemy player (race 2, 1500 ms cast + ~130 ms flight -> lands ~1630 ms, expected 8000 ms expiry ~9630 ms): reads 0 before cast, 1 at ~9100 ms (~7470 ms after apply, > 7200 = 0.9*8000) and 0 at ~10100 ms (~8470 ms after apply, < 8800 = 1.1*8000). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (bounces to up to 2 nearby enemies: 3 of 5 in-range enemies feared)",
+      "kind": "metric_delta",
+      "variant": "bounce_cap",
+      "label_suffix": "bounce_cap",
+      "quote": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them@s:560714:0@][].",
+      "trigger_spell": 560109,
+      "target": "dummy",
+      "target_entry": 6,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0
+      ],
+      "area_sum": true,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "560109 EffectChainTarget[0..1] = 3, MaxAffectedTargets = 3, Radius 8 yd (Spell.dbc): primary enemy plus up to 2 nearby enemies = 3 total. Five Kobold Vermin (entry 6) stand within 2 yd of primary (dummy at 3 yd, area1..4 at 3.5..5.0 yd): area_sum of aura 560109 reads 0 before cast and exactly 3 after cast (leaving 2 in-range enemies unaffected). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (with Eldritch Screams 525049, applies Mind Rot 560943 to nearby enemies)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_branch",
+      "label_suffix": "mind_rot_branch",
+      "quote": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them@s:560714:0@][].",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "area_dummies": [
+        5
+      ],
+      "measure_actor": "area1",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560943
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:301-304: Corrupt Mind 560109 applies Mind Rot 560943 to target dummy and nearby enemies within 10 yd when 525049 is known"
+          }
+        ]
+      },
+      "observe_source": "Conditional $?s525049 branch of 560109 tooltip (AscensionCultistAbilities.cpp:301-304): casting 560109 at Kobold Vermin 6 (area1 at 5 yd = 2 yd away) applies Mind Rot 560943 to neither without 525049 (0) and to both after learning 525049 (1). Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (damage dealt above stock cap ends the effect: 1 -> 0 with pre-damage read, D-38)",
+      "kind": "metric_delta",
+      "variant": "damage_breaks",
+      "label_suffix": "damage_breaks",
+      "quote": "Damage dealt may end this effect.",
+      "trigger_spell": 500712,
+      "gate_spell": 500712,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "setup_casts": [
+        560109
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2200,
+      "phase_auras": [
+        [
+          560109,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 560109,
+          "actor": "dummy",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 500712,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Ancient Curse 500712 (+20000 SP, ~31000 Shadow damage) lands on the feared Kobold Vermin 6 in treatment only (0 -> 1)"
+          }
+        ]
+      },
+      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (stock HandleBreakableCCAuraProc cumulative damage cap BaseHealth(60)/4.75 = 1048 at SpellAuraEffects.cpp:548-562,7245-7253, deterministic, no break probability asserted): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and read aura 560109 PRESENT == 1 right before the trigger via after_setup_stacks (eliminating any 0 -> 0 false pass). Control (no damage) reads 560109 == 1; treatment casts Ancient Curse 500712 (+20000 SP, ~31000 Shadow damage, confirmed landed 0 -> 1 via ally_arm) and reads 560109 == 0 (broken). Paired with damage_holds proving a smaller damaging hit (~620 Shadow damage) leaves 560109 active (1 -> 1), observing both outcomes literally asserted by 'Damage dealt may end this effect.' Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+    },
+    {
+      "spell": 560109,
+      "name": "Corrupt Mind (damage dealt below stock cap does not end the effect: 1 -> 1 with pre-damage read, D-38)",
+      "kind": "metric_delta",
+      "variant": "damage_holds",
+      "label_suffix": "damage_holds",
+      "quote": "Damage dealt may end this effect.",
+      "trigger_spell": 502182,
+      "gate_spell": 502182,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        560109
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2200,
+      "phase_auras": [
+        [
+          560109,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 560109,
+          "actor": "dummy",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage < 1048 stock cap) lands on the feared Kobold Vermin 6 in treatment only (0 -> 1)"
+          }
+        ]
+      },
+      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (second outcome of 'Damage dealt may end this effect.' \u2014 proving not every damaging hit ends it): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and verify aura 560109 PRESENT == 1 via after_setup_stacks right before trigger. Control deals no damage (1); treatment lands one unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage, confirmed 0 -> 1 via ally_arm, below the stock 1048 cap at SpellAuraEffects.cpp:548-562,7245-7253) and 560109 remains active (1). Paired with damage_breaks (large hit ends 560109: 1 -> 0). No break chance is asserted. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
     }
   ],
   "player_observations": [],
