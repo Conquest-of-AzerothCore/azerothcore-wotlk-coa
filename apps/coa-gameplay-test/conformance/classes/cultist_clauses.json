@@ -4570,22 +4570,11 @@
       },
       {
         "claim": "of all enemies around you",
-        "labels": []
+        "labels": [
+          "804056 behaviour_metric_delta interrupt_around"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "No existing conformance kind/option can prove Crushing Dissonance 804056 (Effect[0] SPELL_EFFECT_INTERRUPT_CAST, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 = 8 yd) interrupts multiple casting enemies around the caster at distinct bearings and distances up to near the edge while leaving a casting enemy outside the radius uninterrupted, with position reads: (1) metric_delta target_casts_before (behaviours.py:1928,2036-2038) casts only on the single 'dummy' actor (TARGET) and never on area1/area2; (2) area_dummies (area_dummies.py:125,133,151) places extra dummies only along +x with no casting step, and its edge/cone forms require spell_damage_count or spell_damage_total (804056 deals no damage); (3) radius_edge (kinds/radius_edge.py) has no creature-casting step and reads only spell_damage_count or aura (804056 deals no damage and applies no aura); (4) school_lockout (expiry.py:557-597) spawns only one dummy at default 3 yd; (5) enemy_casts_before (enemy_casts_before.py:18-27) casts only once at the start of the before phase on one enemy player at fixed position, never before the treatment trigger. Nearest kind: metric_delta with target_casts_before and area_dummies (needs multi-dummy casting at distinct bearings/distances with position reads and per-dummy casting reads).",
-      "attempts": [
-        {
-          "agent": "cu-g8d",
-          "report": ".agents/plans/cu-g8d/report.md"
-        },
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 572846,

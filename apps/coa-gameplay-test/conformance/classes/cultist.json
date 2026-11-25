@@ -18073,6 +18073,61 @@
     },
     {
       "spell": 804056,
+      "name": "Crushing Dissonance (interrupts all enemies around caster)",
+      "kind": "metric_delta",
+      "variant": "interrupt_around",
+      "label_suffix": "interrupt_around",
+      "quote": "Unleash a wave of maddening resonance, interrupting the current spell cast of all enemies around you and preventing any spell in that school from being cast for $d.",
+      "trigger_spell": 804056,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "target_casts_before": [
+        12051
+      ],
+      "area_dummies": {
+        "placed": [
+          {
+            "dx": -5.0,
+            "dy": 0.0,
+            "before_expected": 1,
+            "expected": 0
+          },
+          {
+            "dx": 0.0,
+            "dy": 5.0,
+            "before_expected": 1,
+            "expected": 0
+          },
+          {
+            "dx": 0.0,
+            "dy": -10.5,
+            "before_expected": 1,
+            "expected": 0
+          },
+          {
+            "dx": 14.0,
+            "dy": 0.0,
+            "before_expected": 1,
+            "expected": 1
+          }
+        ],
+        "casts_before": [
+          12051
+        ]
+      },
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "804056 Effect[0] 68 SPELL_EFFECT_INTERRUPT_CAST, TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY (15), EffectRadiusIndex 14 (8.0 yd, SpellRadius.dbc), ManaCostPercentage 18, RecoveryTime 30000 ms (Spell.dbc). Effective player area search edge is 8.0 + 1.275 (Harvest Golem dummy 36 combat reach, Spell.cpp:9437-9442) + 2.66 (player area leeway on TARGET_UNIT_SRC_AREA_ENEMY, Spell.cpp:1398-1402) = 11.935 yd. Primary dummy stands at (+3, 0) yd (front) and four placed dummies stand around the caster at (-5, 0) yd (behind, inside), (0, +5) yd (left, inside), (0, -10.5) yd (right, inside -10% of 11.935 yd) and (+14, 0) yd (outside +10% of 11.935 yd). All five channel Evocation 12051 (8 s interruptible Arcane channel) before each phase: without casting 804056 all five read casting 1; after one cast of 804056, dummy and area1..area3 read 0 while outside area4 reads 1."
+    },
+    {
+      "spell": 804056,
       "name": "Crushing Dissonance (school lockout 3 sec)",
       "kind": "school_lockout",
       "variant": "lockout",
