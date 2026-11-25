@@ -5103,14 +5103,14 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: 1331 answers with 1 POIs, 0 objective area(s) and 1 turn-in pin",
+      "label": "DISCRIMINATING: 1331 answers with 2 POIs, 1 objective area(s) and 1 turn-in pin (#13524)",
       "actor": "a1",
       "metric": "server_packet_u32",
       "opcode": 484,
       "row": 1,
       "offset": 8,
       "index": 0,
-      "equals": 1,
+      "equals": 2,
       "within_ms": 4000
     },
     {
@@ -5171,6 +5171,78 @@
       "offset": 48,
       "index": 0,
       "equals": 4294966834,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1331: POI 1 has id 1",
+      "actor": "a1",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 52,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1331: POI 1 is objective 0, the Feral Mountain Lion kills",
+      "actor": "a1",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 56,
+      "index": 0,
+      "equals": 0,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1331: POI 1 is drawn on WorldMapAreaId 24",
+      "actor": "a1",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 64,
+      "index": 0,
+      "equals": 24,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1331: POI 1 has 4 point(s)",
+      "actor": "a1",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 80,
+      "index": 0,
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1331: POI 1 first point x -1326",
+      "actor": "a1",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 84,
+      "index": 0,
+      "equals": 4294965970,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "1331: POI 1 first point y -747",
+      "actor": "a1",
+      "metric": "server_packet_u32",
+      "opcode": 484,
+      "row": 1,
+      "offset": 88,
+      "index": 0,
+      "equals": 4294966549,
       "within_ms": 4000
     },
     {
@@ -7179,26 +7251,26 @@
     },
     {
       "action": "assert",
-      "label": "255146: POI 0 first point x -858",
+      "label": "255146: POI 0 first point x -733",
       "actor": "a1",
       "metric": "server_packet_u32",
       "opcode": 484,
       "row": 1,
       "offset": 44,
       "index": 0,
-      "equals": 4294966438,
+      "equals": 4294966563,
       "within_ms": 4000
     },
     {
       "action": "assert",
-      "label": "255146: POI 0 first point y -476",
+      "label": "255146: POI 0 first point y -653",
       "actor": "a1",
       "metric": "server_packet_u32",
       "opcode": 484,
       "row": 1,
       "offset": 48,
       "index": 0,
-      "equals": 4294966820,
+      "equals": 4294966643,
       "within_ms": 4000
     },
     {

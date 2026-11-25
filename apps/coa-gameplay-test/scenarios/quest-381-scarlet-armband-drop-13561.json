@@ -1,0 +1,347 @@
+{
+  "schema": 1,
+  "name": "The Scarlet Crusade: Scarlet Converts and Initiates always drop the needed Scarlet Armband (#13561)",
+  "contract": [
+    "Report #13561: Scarlet Armbands for The Scarlet Crusade (381) dropped too rarely. Scarlet Convert 1506,",
+    "Scarlet Initiate 1507 and Meven Korgal 1667 dropped Scarlet Armband 3266 at 70% (stock AzerothCore data);",
+    "Ascension drops it at 100% while the quest needs it (db.exil.es dump of 2026-10-04, creature_loot chance 100).",
+    "rev_20261125_13561 raises the three rows to 100%. An Undead on 381 without armbands kills three Converts and",
+    "three Initiates one at a time; every corpse must offer exactly one armband and all six reach the bags. At 100%",
+    "the outcome is deterministic; on the old 70% data all six corpses offer one with probability 0.7^6 = 0.12."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": 1875.67,
+    "y": 1303.86,
+    "z": 90.863,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 5,
+      "class": 1,
+      "level": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the grid activate",
+      "ms": 3000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: the Undead carries 381 unfinished",
+      "actor": "hero",
+      "quest": 381,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "label": "SETUP: drop the armband stack prepare_quest hands out",
+      "actor": "hero",
+      "item": 3266
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Scarlet Armband carried",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 3266,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon",
+      "label": "Scarlet Convert 1",
+      "actor": "hero",
+      "entry": 1506,
+      "as": "convert1",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1506,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "convert1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "convert1"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: corpse 1 (Scarlet Convert) offers a Scarlet Armband",
+      "actor": "hero",
+      "metric": "loot_offered_item_count",
+      "item": 3266,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 3266
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "summon",
+      "label": "Scarlet Initiate 1",
+      "actor": "hero",
+      "entry": 1507,
+      "as": "initiate1",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1507,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "initiate1",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "initiate1"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: corpse 2 (Scarlet Initiate) offers a Scarlet Armband",
+      "actor": "hero",
+      "metric": "loot_offered_item_count",
+      "item": 3266,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 3266
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "summon",
+      "label": "Scarlet Convert 2",
+      "actor": "hero",
+      "entry": 1506,
+      "as": "convert2",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1506,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "convert2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "convert2"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: corpse 3 (Scarlet Convert) offers a Scarlet Armband",
+      "actor": "hero",
+      "metric": "loot_offered_item_count",
+      "item": 3266,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 3266
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "summon",
+      "label": "Scarlet Initiate 2",
+      "actor": "hero",
+      "entry": 1507,
+      "as": "initiate2",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1507,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "initiate2",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "initiate2"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: corpse 4 (Scarlet Initiate) offers a Scarlet Armband",
+      "actor": "hero",
+      "metric": "loot_offered_item_count",
+      "item": 3266,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 3266
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "summon",
+      "label": "Scarlet Convert 3",
+      "actor": "hero",
+      "entry": 1506,
+      "as": "convert3",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1506,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "convert3",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "convert3"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: corpse 5 (Scarlet Convert) offers a Scarlet Armband",
+      "actor": "hero",
+      "metric": "loot_offered_item_count",
+      "item": 3266,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 3266
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "summon",
+      "label": "Scarlet Initiate 3",
+      "actor": "hero",
+      "entry": 1507,
+      "as": "initiate3",
+      "distance": 3
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "hero",
+      "entry": 1507,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "initiate3",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "loot_creature",
+      "actor": "hero",
+      "target": "initiate3"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: corpse 6 (Scarlet Initiate) offers a Scarlet Armband",
+      "actor": "hero",
+      "metric": "loot_offered_item_count",
+      "item": 3266,
+      "equals": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "hero",
+      "item": 3266
+    },
+    {
+      "action": "close_loot",
+      "actor": "hero"
+    },
+    {
+      "action": "assert",
+      "label": "all six armbands reach the bags",
+      "actor": "hero",
+      "metric": "item_count",
+      "item": 3266,
+      "equals": 6
+    }
+  ]
+}
