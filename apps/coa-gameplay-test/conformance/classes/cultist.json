@@ -6778,7 +6778,7 @@
       "critical": false,
       "trials": 10,
       "void_on_cast_failure": true,
-      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc — no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 704880,
@@ -11884,7 +11884,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert \u2014 no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert — no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
     },
     {
       "spell": 502122,
@@ -26355,7 +26355,7 @@
     },
     {
       "spell": 302072,
-      "name": "Persistent Prayers R1 (Void Shield held at 36.0 sec)",
+      "name": "Persistent Prayers R1 (Void Shield held at 36.9 sec)",
       "kind": "metric_delta",
       "variant": "void_shield_held",
       "label_suffix": "void_shield_held",
@@ -26370,20 +26370,20 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 36000,
+      "wait_ms": 36900,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          35800,
-          36300
+          36800,
+          37200
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 24 + DieSides 1 = +25% ($s1 = 25), mask [0, 536870912, 262144] matching Void Shield 578115 (DurationIndex 9 = 30000 ms; Spell.dbc): 30000 * 1.25 = 37500 ms. Reads aura 578115 at 36000 ms (> 33750 ms = 0.9 * 37500): control (30000 ms) already expired (0); treatment held (1). Paired with void_shield_gone. Reference search 2026-11-25: coa-history 302072: 0 events (passive; 578115: 59538 events); coabuildhub entry 302072 matches verbatim ('25%')."
+      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 24 + DieSides 1 = +25% ($s1 = 25), mask [0, 536870912, 262144] matching Void Shield 578115 (DurationIndex 9 = 30000 ms; Spell.dbc): 30000 * 1.25 = 37500 ms. Reads aura 578115 at 36900 ms (window [36800, 37200] > 36750 ms = 30000 + 0.9 * 7500 and > 33750 ms = 0.9 * 37500): control (30000 ms) already expired (0); treatment held (1). Paired with void_shield_gone. Reference search 2026-11-25: coa-history 302072: 0 events (passive; 578115: 59538 events); coabuildhub entry 302072 matches verbatim ('25%')."
     },
     {
       "spell": 302072,
-      "name": "Persistent Prayers R1 (Void Shield gone at 39.0 sec)",
+      "name": "Persistent Prayers R1 (Void Shield gone at 37.9 sec)",
       "kind": "metric_delta",
       "variant": "void_shield_gone",
       "label_suffix": "void_shield_gone",
@@ -26398,16 +26398,16 @@
       },
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 39000,
+      "wait_ms": 37900,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          38800,
-          39300
+          37750,
+          38150
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION +25% on Void Shield 578115 (37500 ms; Spell.dbc). Reads aura 578115 at 39000 ms (< 41250 ms = 1.1 * 37500): gone (0) in both phases, excluding a duration 10% long. Paired with void_shield_held. Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
+      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION +25% on Void Shield 578115 (37500 ms; Spell.dbc). Reads aura 578115 at 37900 ms (window [37750, 38150] < 38250 ms = 30000 + 1.1 * 7500 and < 41250 ms = 1.1 * 37500): gone (0) in both phases, excluding a duration 10% long. Paired with void_shield_held. Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
     },
     {
       "spell": 302072,
@@ -26477,29 +26477,29 @@
       "target": "caster",
       "cast_power": 2000,
       "strike": {
-        "spell": 41394,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 2,
-        "wait_ms": 300,
+        "spell": 66903,
+        "health": 200000,
+        "max_health": 200000,
+        "count": 9,
+        "wait_ms": 100,
         "after_trigger_ms": 500
       },
       "metric": "spell_absorb_total",
       "fields": {
-        "spell": 41394,
+        "spell": 66903,
         "caster": "striker",
         "target": "caster"
       },
-      "before_expected": 803,
-      "expected": 1003.5,
-      "tolerance": 28,
-      "after_at_least": 970,
-      "after_at_most": 1037,
-      "wait_ms": 1500,
+      "before_expected": 100776,
+      "expected": 125970.0,
+      "tolerance": 0.005,
+      "wait_ms": 500,
       "expire_ms": 16000,
       "phase_since": true,
       "void_on_cast_failure": true,
-      "observe_source": "302072 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +25%, mask [0, 536870912, 262144] matching Void Shield 578115 (776..830 at SP 0; Spell.dbc). Struck 2x by Light of the Naaru 41394 (2200 > max shield) with phase_since: control [776..830] (803 +- 28); treatment after real learn of 302072 [970..1037] (1003.5; excludes 0% and +50%). expire_ms 16000 clears 15s Wracked Mind 805801. Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
+      "observe_source": "302072 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +25% (SpellAuraEffects.cpp:635-657 applies after SP scaling), mask [0, 536870912, 262144] matching Void Shield 578115 (BasePoints 775 + DieSides 55 -> [776..830] + 2.0*SP; AscensionCultistData.h:96; Spell.dbc). At player_spell_power 50000: control [100776..100830] (+-0.027%), treatment [int(100776*1.25)..int(100830*1.25)], ratio in [1.2492..1.2508]; expected_ratio 1.25 +- 0.005 deterministically excludes bonuses >=10% off. Struck 9x by deterministic Hammer of the Righteous 66903 (16000 Holy exact, DmgClass 0; 144000 > max shield) with phase_since. expire_ms 16000 clears 15s Wracked Mind 805801. Reference search 2026-11-25: coa-history 302072: 0 events; installed Spell.dbc governs.",
+      "player_spell_power": 50000,
+      "expected_ratio": 1.25
     },
     {
       "spell": 302072,
@@ -26513,33 +26513,33 @@
       "target": "caster",
       "cast_power": 2000,
       "strike": {
-        "spell": 41394,
+        "spell": 66903,
         "health": 100000,
         "max_health": 100000,
         "count": 3,
-        "wait_ms": 300,
+        "wait_ms": 100,
         "after_trigger_ms": 3500
       },
       "metric": "spell_absorb_total",
       "fields": {
-        "spell": 41394,
+        "spell": 66903,
         "caster": "striker",
         "target": "caster"
       },
-      "before_expected": 1032,
-      "expected": 1289.5,
-      "tolerance": 47,
-      "after_at_least": 1232,
-      "after_at_most": 1347,
-      "wait_ms": 1500,
+      "before_expected": 25986,
+      "expected": 32482.5,
+      "tolerance": 0.005,
+      "wait_ms": 500,
       "expire_ms": 1000,
       "phase_since": true,
       "void_on_cast_failure": true,
-      "observe_source": "302072 Effect[1] aura 317 +25% matching Forbidden Ritual 502273 (base absorb 986..1078 at lvl 60, SP 0; Spell.dbc). Struck 3x by 41394 (3300 > max shield) at after_trigger_ms 3500 (past 3000 ms cast) with phase_since: control [986..1078] (1032 +- 47); treatment [1232..1347] (1289.5; excludes 0% and +50%). Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
+      "observe_source": "302072 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +25% (SpellAuraEffects.cpp:635-657 applies after SP scaling) matching Forbidden Ritual 502273 (BaseLvl 58, MaxLvl 62, BasePoints 937, DieSides 93, RPPL 24.2375 -> [986..1078] + 0.5*SP; AscensionCultistData.h:71; Spell.dbc). At player_spell_power 50000: control [25986..26078] (+-0.18%), treatment [int(25986*1.25)..int(26078*1.25)], extreme opposite-roll ratio deviation <= 0.0044 < tol 0.005; expected_ratio 1.25 +- 0.005 deterministically excludes bonuses >=10% off (1.225/1.275). Struck 3x by 66903 (48000 Holy exact > max shield) at after_trigger_ms 3500 (past 3000 ms cast) with phase_since. Reference search 2026-11-25: coa-history 302072: 0 events; installed Spell.dbc governs.",
+      "player_spell_power": 50000,
+      "expected_ratio": 1.25
     },
     {
       "spell": 302919,
-      "name": "Persistent Prayers R2 (Void Shield held at 43.5 sec)",
+      "name": "Persistent Prayers R2 (Void Shield held at 43.9 sec)",
       "kind": "metric_delta",
       "variant": "void_shield_held",
       "label_suffix": "void_shield_held",
@@ -26554,20 +26554,20 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 43500,
+      "wait_ms": 43900,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          43300,
-          43800
+          43800,
+          44200
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 49 + DieSides 1 = +50% ($s1 = 50), mask [0, 536870912, 262144] matching Void Shield 578115 (30000 ms; Spell.dbc): 30000 * 1.50 = 45000 ms. Reads aura 578115 at 43500 ms (> 40500 ms = 0.9 * 45000): control (30000 ms) already expired (0); treatment held (1). Paired with void_shield_gone. Reference search 2026-11-25: coa-history 302919: 0 events (passive); coabuildhub has no rank-2 entry; installed Spell.dbc governs."
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 49 + DieSides 1 = +50% ($s1 = 50), mask [0, 536870912, 262144] matching Void Shield 578115 (30000 ms; Spell.dbc): 30000 * 1.50 = 45000 ms. Reads aura 578115 at 43900 ms (window [43800, 44200] > 43500 ms = 30000 + 0.9 * 15000 and > 40500 ms = 0.9 * 45000): control (30000 ms) already expired (0); treatment held (1). Paired with void_shield_gone. Reference search 2026-11-25: coa-history 302919: 0 events (passive); coabuildhub has no rank-2 entry; installed Spell.dbc governs."
     },
     {
       "spell": 302919,
-      "name": "Persistent Prayers R2 (Void Shield gone at 46.5 sec)",
+      "name": "Persistent Prayers R2 (Void Shield gone at 45.9 sec)",
       "kind": "metric_delta",
       "variant": "void_shield_gone",
       "label_suffix": "void_shield_gone",
@@ -26582,20 +26582,20 @@
       },
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 46500,
+      "wait_ms": 45900,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          46300,
-          46800
+          45750,
+          46150
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% on Void Shield 578115 (45000 ms; Spell.dbc). Reads aura 578115 at 46500 ms (< 49500 ms = 1.1 * 45000): gone (0) in both phases. Paired with void_shield_held. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% on Void Shield 578115 (45000 ms; Spell.dbc). Reads aura 578115 at 45900 ms (window [45750, 46150] < 46500 ms = 30000 + 1.1 * 15000 and < 49500 ms = 1.1 * 45000): gone (0) in both phases. Paired with void_shield_held. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
     },
     {
       "spell": 302919,
-      "name": "Persistent Prayers R2 (Forbidden Ritual held at 17.2 sec)",
+      "name": "Persistent Prayers R2 (Forbidden Ritual held at 17.65 sec)",
       "kind": "metric_delta",
       "variant": "forbidden_ritual_held",
       "label_suffix": "forbidden_ritual_held",
@@ -26610,20 +26610,20 @@
       },
       "before_expected": 0,
       "expected": 1,
-      "wait_ms": 17200,
+      "wait_ms": 17650,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          17100,
-          17450
+          17550,
+          17850
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% matching Forbidden Ritual 502273 (CastTime 3000 ms, Duration 10000 ms; Spell.dbc): 10000 * 1.50 = 15000 ms (expires 18000 ms after cast start). At 17200 ms (14200 ms after cast finish > 13500 ms = 0.9 * 15000): control is expired (0), treatment is held (1). Paired with forbidden_ritual_gone. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% matching Forbidden Ritual 502273 (CastTime 3000 ms, Duration 10000 ms; Spell.dbc): 10000 * 1.50 = 15000 ms (expires 18000 ms after cast start). At 17650 ms (window [17550, 17850], > 17500 ms = 3000 + 10000 + 0.9 * 5000 and > 16500 ms = 3000 + 0.9 * 15000): control is expired (0), treatment is held (1). Paired with forbidden_ritual_gone. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
     },
     {
       "spell": 302919,
-      "name": "Persistent Prayers R2 (Forbidden Ritual gone at 18.7 sec)",
+      "name": "Persistent Prayers R2 (Forbidden Ritual gone at 18.3 sec)",
       "kind": "metric_delta",
       "variant": "forbidden_ritual_gone",
       "label_suffix": "forbidden_ritual_gone",
@@ -26638,16 +26638,16 @@
       },
       "before_expected": 0,
       "expected": 0,
-      "wait_ms": 18700,
+      "wait_ms": 18300,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          18600,
-          18950
+          18150,
+          18450
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% on Forbidden Ritual 502273 (3000 ms cast + 15000 ms = 18000 ms; Spell.dbc). At 18700 ms (15700 ms after cast finish < 16500 ms = 1.1 * 15000): gone (0) in both phases. Paired with forbidden_ritual_held. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% on Forbidden Ritual 502273 (3000 ms cast + 15000 ms = 18000 ms; Spell.dbc). At 18300 ms (window [18150, 18450], < 18500 ms = 3000 + 10000 + 1.1 * 5000 and < 19500 ms = 3000 + 1.1 * 15000): gone (0) in both phases. Paired with forbidden_ritual_held. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
     },
     {
       "spell": 302919,
@@ -26661,29 +26661,29 @@
       "target": "caster",
       "cast_power": 2000,
       "strike": {
-        "spell": 41394,
-        "health": 100000,
-        "max_health": 100000,
-        "count": 2,
-        "wait_ms": 300,
+        "spell": 66903,
+        "health": 200000,
+        "max_health": 200000,
+        "count": 10,
+        "wait_ms": 100,
         "after_trigger_ms": 500
       },
       "metric": "spell_absorb_total",
       "fields": {
-        "spell": 41394,
+        "spell": 66903,
         "caster": "striker",
         "target": "caster"
       },
-      "before_expected": 803,
-      "expected": 1204.5,
-      "tolerance": 28,
-      "after_at_least": 1164,
-      "after_at_most": 1245,
-      "wait_ms": 1500,
+      "before_expected": 100776,
+      "expected": 151164.0,
+      "tolerance": 0.005,
+      "wait_ms": 500,
       "expire_ms": 16000,
       "phase_since": true,
       "void_on_cast_failure": true,
-      "observe_source": "302919 Effect[1] aura 317 +50% matching Void Shield 578115 (776..830 at SP 0; Spell.dbc). Struck 2x by 41394 (2200 > max shield) with phase_since: control [776..830] (803 +- 28); treatment [1164..1245] (1204.5; excludes 0% and +100%). expire_ms 16000 clears 15s Wracked Mind 805801. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+      "observe_source": "302919 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +50% (SpellAuraEffects.cpp:635-657 applies after SP scaling), mask [0, 536870912, 262144] matching Void Shield 578115 (BasePoints 775 + DieSides 55 -> [776..830] + 2.0*SP; AscensionCultistData.h:96; Spell.dbc). At player_spell_power 50000: control [100776..100830] (+-0.027%), treatment [int(100776*1.5)..int(100830*1.5)], ratio in [1.4992..1.5008]; expected_ratio 1.5 +- 0.005 deterministically excludes bonuses >=10% off. Struck 10x by deterministic Hammer of the Righteous 66903 (16000 Holy exact, DmgClass 0; 160000 > max shield) with phase_since. expire_ms 16000 clears 15s Wracked Mind 805801. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs.",
+      "player_spell_power": 50000,
+      "expected_ratio": 1.5
     },
     {
       "spell": 302919,
@@ -26697,29 +26697,29 @@
       "target": "caster",
       "cast_power": 2000,
       "strike": {
-        "spell": 41394,
+        "spell": 66903,
         "health": 100000,
         "max_health": 100000,
         "count": 3,
-        "wait_ms": 300,
+        "wait_ms": 100,
         "after_trigger_ms": 3500
       },
       "metric": "spell_absorb_total",
       "fields": {
-        "spell": 41394,
+        "spell": 66903,
         "caster": "striker",
         "target": "caster"
       },
-      "before_expected": 1032,
-      "expected": 1548,
-      "tolerance": 47,
-      "after_at_least": 1479,
-      "after_at_most": 1617,
-      "wait_ms": 1500,
+      "before_expected": 25986,
+      "expected": 38979.0,
+      "tolerance": 0.006,
+      "wait_ms": 500,
       "expire_ms": 1000,
       "phase_since": true,
       "void_on_cast_failure": true,
-      "observe_source": "302919 Effect[1] aura 317 +50% matching Forbidden Ritual 502273 (986..1078 at lvl 60, SP 0; Spell.dbc). Struck 3x by 41394 (3300 > max shield) at after_trigger_ms 3500 with phase_since: control [986..1078] (1032 +- 47); treatment [1479..1617] (1548; excludes 0% and +100%). Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+      "observe_source": "302919 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +50% (SpellAuraEffects.cpp:635-657 applies after SP scaling) matching Forbidden Ritual 502273 (BaseLvl 58, MaxLvl 62, BasePoints 937, DieSides 93, RPPL 24.2375 -> [986..1078] + 0.5*SP; AscensionCultistData.h:71; Spell.dbc). At player_spell_power 50000: control [25986..26078] (+-0.18%), treatment [int(25986*1.5)..int(26078*1.5)], extreme opposite-roll ratio deviation <= 0.0054 < tol 0.006; expected_ratio 1.5 +- 0.006 deterministically excludes bonuses >=10% off (1.450/1.550). Struck 3x by 66903 (48000 Holy exact > max shield) at after_trigger_ms 3500 (past 3000 ms cast) with phase_since. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs.",
+      "player_spell_power": 50000,
+      "expected_ratio": 1.5
     },
     {
       "spell": 560080,
@@ -27238,7 +27238,38 @@
       "wait_ms": 500,
       "expire_ms": 21000,
       "void_on_cast_failure": true,
-      "observe_source": "807128 AscensionCultistAuras.cpp:93-98 casts 806769 when Herald of the Depths 520326 applies; AscensionCultistContracts.cpp:81-82,121 maps 520326 to creature 250042 (creature_template_model DisplayID 280072, rev_20261031_99_cultist_herald_caster_display.sql:8) and 806769 to creature 250044 (creature_template_model DisplayID 280071, rev_1794304106850624051.sql:5, Faceless Monstrosity). Both phases set 85 Insanity (500706 == 85 and threshold 680604 == 1 read via after_setup_stacks), cast real Herald 520326, and read caster display_id: 280072 before learning 807128 (control), 280071 after. expire_ms 21000 clears 20s Herald. Reference search 2026-11-25: coa-history 806769: 6 applies in 2 logs; coabuildhub 807128 matches verbatim."
+      "observe_source": "807128 AscensionCultistAuras.cpp:93-98 casts 806769 when Herald of the Depths 520326 applies; AscensionCultistContracts.cpp:81-82,121 maps 520326 to creature 250042 (creature_template_model DisplayID 280072, rev_20261031_99_cultist_herald_caster_display.sql:8) and 806769 to creature 250044 (creature_template_model DisplayID 280071, rev_1794304106850624051.sql:5, Faceless Monstrosity). Both phases set 85 Insanity (500706 == 85 and threshold 680604 == 1 read via after_setup_stacks), cast real Herald 520326, and read caster display_id: 280072 before learning 807128 (control), 280071 after. expire_ms 21000 clears 20s Herald. Reference search 2026-11-25: coa-history 806769: 6 applies in 2 logs; coabuildhub 807128 matches verbatim.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald of the Depths 520326 is active in both control and treatment arms."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806769
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 806769 is absent in control and present after learning 807128."
+          }
+        ]
+      }
     },
     {
       "spell": 807128,
@@ -27282,6 +27313,19 @@
       "ally_arm": {
         "allies": 0,
         "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald of the Depths 520326 is active in both control and treatment arms."
+          },
           {
             "actors": [
               "caster"
@@ -27397,7 +27441,7 @@
     },
     {
       "spell": 807128,
-      "name": "Blessing of Yogg-Saron (Herald duration reduced by 5 sec: held at 14.0 sec)",
+      "name": "Blessing of Yogg-Saron (Herald duration reduced by 5 sec: held at 14.6 sec)",
       "kind": "metric_delta",
       "variant": "duration_held",
       "label_suffix": "duration_held",
@@ -27440,20 +27484,20 @@
       },
       "before_expected": 1,
       "expected": 1,
-      "wait_ms": 14000,
-      "expire_ms": 7000,
+      "wait_ms": 14600,
+      "expire_ms": 6400,
       "game_time": {
         "after": [
-          13800,
-          14300
+          14550,
+          14850
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "807128 AscensionCultistAbilities.cpp:112-113 subtracts abs(Amount(806769)) = 5000 ms from Herald 520326 (20000 ms -> 15000 ms; Spell.dbc). Reads aura 520326 at 14000 ms (> 13500 ms = 0.9 * 15000): held (1) in both control (20s) and treatment (15s). Paired with duration_gone. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+      "observe_source": "807128 AscensionCultistAbilities.cpp:112-113 subtracts abs(Amount(806769)) = 5000 ms from Herald 520326 (20000 ms -> 15000 ms; Spell.dbc). Reads aura 520326 at 14600 ms (window [14550, 14850] > 14500 ms = 20000 - 1.1*5000 and > 13500 ms = 0.9*15000): held (1) in both control (20s) and treatment (15s), excluding +-10% of both the -5s delta and 15s duration. Paired with duration_gone. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
     },
     {
       "spell": 807128,
-      "name": "Blessing of Yogg-Saron (Herald duration reduced by 5 sec: gone at 16.0 sec)",
+      "name": "Blessing of Yogg-Saron (Herald duration reduced by 5 sec: gone at 15.4 sec)",
       "kind": "metric_delta",
       "variant": "duration_gone",
       "label_suffix": "duration_gone",
@@ -27496,16 +27540,16 @@
       },
       "before_expected": 1,
       "expected": 0,
-      "wait_ms": 16000,
-      "expire_ms": 5000,
+      "wait_ms": 15400,
+      "expire_ms": 5600,
       "game_time": {
         "after": [
-          15800,
-          16300
+          15150,
+          15450
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "807128 reduces Herald 520326 duration 20000 -> 15000 ms (AscensionCultistAbilities.cpp:112-113; Spell.dbc). Reads aura 520326 at 16000 ms (< 16500 ms = 1.1 * 15000): still present in control without 807128 (1), gone with 807128 (0). Paired with duration_held. Reference search 2026-11-25: coa-history 806769: 6 applies."
+      "observe_source": "807128 reduces Herald 520326 duration 20000 -> 15000 ms (AscensionCultistAbilities.cpp:112-113; Spell.dbc). Reads aura 520326 at 15400 ms (window [15150, 15450] < 15500 ms = 20000 - 0.9*5000 and < 16500 ms = 1.1*15000): still present in control without 807128 (1), gone with 807128 (0), excluding +-10% of both the -5s delta and 15s duration. Paired with duration_held. Reference search 2026-11-25: coa-history 806769: 6 applies."
     },
     {
       "spell": 807128,
@@ -27521,7 +27565,6 @@
       "trigger_spell": 520326,
       "gate_spell": 807128,
       "target": "caster",
-      "select_dummy": true,
       "setup_casts": [
         60235
       ],
@@ -27547,22 +27590,43 @@
           "stacks": 1
         }
       ],
-      "dummy_casts_at_caster": {
-        "spell": 39176,
-        "casts": 1,
-        "gap_ms": 1000,
-        "lead_ms": 500
-      },
       "metric": "aura",
       "fields": {
         "spell": 39176
       },
       "before_expected": 1,
       "expected": 0,
-      "wait_ms": 500,
+      "wait_ms": 300,
       "expire_ms": 21000,
       "void_on_cast_failure": true,
-      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants Immunity(player, Herald, {MECHANIC_FEAR, MECHANIC_HORROR, MECHANIC_POLYMORPH}, true) while Herald 520326 is active. Dummy casts Fear 39176 (Mechanic 5, 0 mana cost, single Fear aura e0=(6,7,6) in Spell.dbc) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants Immunity(player, Herald, {MECHANIC_FEAR, MECHANIC_HORROR, MECHANIC_POLYMORPH}, true) while Herald 520326 is active (verified 520326 == 1 in both arms via ally_arm). Striker (spell_hit_bonus 100, reaction 0) casts Fear 39176 (Mechanic 5, DurationIndex 32 = 6000 ms) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald of the Depths 520326 is active in both control and treatment arms."
+          }
+        ]
+      },
+      "strike": {
+        "spell": 39176,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
     },
     {
       "spell": 807128,
@@ -27578,7 +27642,6 @@
       "trigger_spell": 520326,
       "gate_spell": 807128,
       "target": "caster",
-      "select_dummy": true,
       "setup_casts": [
         60235
       ],
@@ -27604,22 +27667,43 @@
           "stacks": 1
         }
       ],
-      "dummy_casts_at_caster": {
-        "spell": 64044,
-        "casts": 1,
-        "gap_ms": 1000,
-        "lead_ms": 500
-      },
       "metric": "aura",
       "fields": {
         "spell": 64044
       },
       "before_expected": 1,
       "expected": 0,
-      "wait_ms": 500,
+      "wait_ms": 300,
       "expire_ms": 21000,
       "void_on_cast_failure": true,
-      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants MECHANIC_HORROR immunity (and 807312 Effect[1] aura 77 misc 24) while Herald 520326 is active. Dummy casts Psychic Horror 64044 (Mechanic 24, Templar 804228 fixture) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants Immunity(player, Herald, {MECHANIC_FEAR, MECHANIC_HORROR, MECHANIC_POLYMORPH}, true) while Herald 520326 is active (verified 520326 == 1 in both arms via ally_arm). Striker (spell_hit_bonus 100, reaction 0) casts Psychic Horror 64044 (Mechanic 24, DurationIndex 27 = 3000 ms) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald of the Depths 520326 is active in both control and treatment arms."
+          }
+        ]
+      },
+      "strike": {
+        "spell": 64044,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
     },
     {
       "spell": 807128,
@@ -27635,7 +27719,6 @@
       "trigger_spell": 520326,
       "gate_spell": 807128,
       "target": "caster",
-      "select_dummy": true,
       "setup_casts": [
         60235
       ],
@@ -27661,22 +27744,43 @@
           "stacks": 1
         }
       ],
-      "dummy_casts_at_caster": {
-        "spell": 13323,
-        "casts": 1,
-        "gap_ms": 1000,
-        "lead_ms": 500
-      },
       "metric": "aura",
       "fields": {
         "spell": 13323
       },
       "before_expected": 1,
       "expected": 0,
-      "wait_ms": 500,
+      "wait_ms": 300,
       "expire_ms": 21000,
       "void_on_cast_failure": true,
-      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants MECHANIC_POLYMORPH immunity while Herald 520326 is active. Dummy casts Polymorph 13323 (Mechanic 17, 8s) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+      "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants Immunity(player, Herald, {MECHANIC_FEAR, MECHANIC_HORROR, MECHANIC_POLYMORPH}, true) while Herald 520326 is active (verified 520326 == 1 in both arms via ally_arm). Striker (spell_hit_bonus 100, reaction 0) casts Polymorph 13323 (Mechanic 17, DurationIndex 31 = 8000 ms) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald of the Depths 520326 is active in both control and treatment arms."
+          }
+        ]
+      },
+      "strike": {
+        "spell": 13323,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
     },
     {
       "spell": 500719,
@@ -28677,7 +28781,8 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 16000,
-      "observe_source": "502220 Effect[2] periodic trigger casts Withered 706913 (Effect[0] aura 259 SPELL_AURA_MOD_HOT_PCT, BasePoints -6 + DieSides 1 = -5% per stack, $706913s1 = 5, Duration 5000 ms; Spell.dbc). Enemy player (race 2, 0 SP) casts Rejuvenation Rank 9 9840 (78 per 3000 ms tick, 5 ticks = 390; Rift 806250 precedent). Control (no Darkwither): 1 tick lands -> 78; expire_ms 16000 drains remaining 4 ticks (+312 = 390). Treatment: Darkwither cast at t=0, enemy casts 9840 at t=500 ms; 1st Darkwither tick at t=3000 ms applies 1 stack of 706913; 1st 9840 tick at t=3500 ms heals floor(78 * 0.95) = 74 (cumulative 390 + 74 = 464, gain 386 +- 1; excludes 0% gain 390 and -10% gain 382). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+      "observe_source": "502220 Effect[2] periodic trigger casts Withered 706913 (Effect[0] aura 259 SPELL_AURA_MOD_HOT_PCT, BasePoints -6 + DieSides 1 = -5% per stack, $706913s1 = 5, Duration 5000 ms; Spell.dbc). Enemy player (race 2, 0 SP) casts Rejuvenation Rank 9 9840 (78 per 3000 ms tick, 5 ticks = 390; Rift 806250 precedent). Control (no Darkwither): 1 tick lands -> 78; expire_ms 16000 drains remaining 4 ticks (+312 = 390). Treatment: Darkwither cast at t=0, enemy casts 9840 at t=500 ms; 1st Darkwither tick at t=3000 ms applies 1 stack of 706913; 1st 9840 tick at t=3500 ms heals floor(78 * 0.95) = 74 (cumulative 390 + 74 = 464, gain 386 +- 1; excludes 0% gain 390 and -10% gain 382). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 502220,
@@ -28873,14 +28978,14 @@
         "spell": 66903,
         "target": "dummy"
       },
-      "before_expected": 16000,
-      "expected": 34400,
+      "before_expected": 17920,
+      "expected": 38528,
       "expected_ratio": 2.15,
-      "tolerance": 0.02,
+      "tolerance": 0.005,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "704476 Effect[2] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 (all schools), BasePoints 14 + DieSides 1 = +15% ($s3 = 15; Spell.dbc). Grouped ally casts deterministic Hammer of the Righteous 66903 (16000 Holy exact) at dummy before (control: 16000) and after real cast of 704476 on ally (+18400 -> cumulative 34400, ratio 2.15 +- 0.02; excludes 2.00 [0%] and 2.30 [+30%]). Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+      "observe_source": "704476 Effect[2] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 (all schools), BasePoints 14 + DieSides 1 = +15% ($s3 = 15; Spell.dbc). Grouped Cultist ally casts deterministic Hammer of the Righteous 66903 (16000 Holy * 1.12 Cultist tuning aura 887013 = 17920 exact) at dummy before (control: 17920) and after real cast of 704476 on ally (+20608 -> cumulative 38528, exact ratio 2.1500 +- 0.005; excludes 2.00 [0%] and 2.30 [+30%]). Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
     },
     {
       "spell": 704476,
@@ -29152,7 +29257,7 @@
             "before_expected": 182,
             "expected": 182,
             "tolerance": 0,
-            "source": "Dreadnought reference armor 182 = 2*63 Agi (126) + 8 starter cloth + 48 shield 2129 in both phases."
+            "source": "Dreadnought reference armor 182 = 2*63 Agi (126) + 15 starter gear + 41 shield 2129 (mentor-decisions.md:83) in both phases."
           }
         ]
       },
@@ -29453,6 +29558,834 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Wracked Mind 805801 (embedded via @s:805801:0@ in 578115) DurationIndex 8 = 15000 ms ($d = 15 sec; Spell.dbc). Aura 805801 on ally reads 0 before cast, 1 at 14000 ms (window [13700, 14400] > 13500 ms = 0.9 * 15000), and 0 at 16000 ms (window [15700, 16300] < 16500 ms = 1.1 * 15000). Reference search 2026-11-25: coa-history 578115 Void Shield: 59538 events in 23 logs; 805801 Wracked Mind: 23383 events in 14 logs; coabuildhub 578115 matches verbatim."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (normal display when Herald absent and after expiry)",
+      "kind": "metric_delta",
+      "variant": "transform_form_gate",
+      "label_suffix": "transform_form_gate",
+      "quote": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 is absent in before and active in after."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806769
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 806769 is absent without Herald and applied only when Herald activates."
+          }
+        ]
+      },
+      "metric": "display_id",
+      "fields": {},
+      "before_expected": 49,
+      "expected": 280071,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expiry_wait_ms": 15500,
+      "after_expiry_expected": 49,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-gating and expiry control for 807128 transform (AscensionCultistAuras.cpp:93-98,185-189): 807128 learned at start (gate_timing: start, trigger_only_after: true). Before Herald 520326 is cast (520326 == 0, 806769 == 0 read via ally_arm), caster keeps normal Human male display_id 49 (ChrRaces.dbc row 0); after Herald cast (520326 == 1, 806769 == 1), display_id is Faceless Monstrosity 280071; 15500 ms later (t = 16000 ms, past 15000 ms blessed Herald duration), 806769 is removed and display_id reverts to 49. Reference search 2026-11-25: coa-history 806769: 6 applies in 2 logs; coabuildhub 807128 matches verbatim."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (crit chance unboosted when Herald absent and after expiry)",
+      "kind": "metric_delta",
+      "variant": "crit_chance_form_gate",
+      "label_suffix": "crit_chance_form_gate",
+      "quote": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 is absent in before and active in after."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806769
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 806769 is absent without Herald and applied only while Herald is active."
+          }
+        ]
+      },
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 3.4271,
+      "expected": 23.4271,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expiry_wait_ms": 15500,
+      "after_expiry_expected": 3.4271,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-gating and expiry control for 807128 crit chance (AscensionCultistAuras.cpp:95,187): 807128 learned at start (gate_timing: start, trigger_only_after: true). Without Herald 520326 (520326 == 0, 806769 == 0), Cultist Shadow spell_crit_chance at 71 Int stays at base 3.4271% (no +20%); with Herald active (520326 == 1, 806769 == 1), spell_crit_chance rises +20% to 23.4271%; 15500 ms later (t = 16000 ms, past 15000 ms blessed Herald duration), 806769 is removed and spell_crit_chance returns to 3.4271%. Reference search 2026-11-25: coa-history 806769: 6 applies in 2 logs; coabuildhub 807128 matches verbatim."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (no critical healing bonus when Herald absent)",
+      "kind": "metric_delta",
+      "variant": "crit_healing_without_herald",
+      "label_suffix": "crit_healing_without_herald",
+      "quote": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 500711,
+      "gate_spell": 807128,
+      "target": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "force_crit": "spell",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 is absent in both control and treatment arms."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807312
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms 807312 (+20% crit heal) is not granted without Herald active."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500711,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 42100,
+      "expected": 42100,
+      "expected_ratio": 1.0,
+      "tolerance": 0.005,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "phase_since": true,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-absent control for 807128 critical healing (AscensionCultistAuras.cpp:96): contrasts 807128 unlearned vs learned with 85 Insanity (680604 == 1) and NO Herald 520326 cast (520326 == 0 and 807312 == 0 read in both arms via ally_arm). Forced-crit Eldritch Mending 500711 at +50000 SP keeps ratio 1.000 +- 0.005 (excludes +20% ratio 1.20), proving 807128 grants no crit healing without Herald active. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (critical healing bonus ends after Herald expires)",
+      "kind": "metric_delta",
+      "variant": "crit_healing_after_expiry",
+      "label_suffix": "crit_healing_after_expiry",
+      "quote": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 500711,
+      "gate_spell": 807128,
+      "target": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "force_crit": "spell",
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 21000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 has expired in both phases."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807312
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms 807312 (+20% crit heal) was removed when Herald expired."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500711,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 42100,
+      "expected": 42100,
+      "expected_ratio": 1.0,
+      "tolerance": 0.005,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "phase_since": true,
+      "void_on_cast_failure": true,
+      "observe_source": "Post-expiry control for 807128 critical healing (AscensionCultistAuras.cpp:188): both phases set 85 Insanity, cast real Herald 520326 (void_on_cast_failure: true), and wait 21000 ms for Herald to run and expire (after_setup_stacks confirms 520326 == 0 and Insanity 500706 == 0 reset by Herald expiry; ally_arm confirms 807312 == 0). Forced-crit Eldritch Mending 500711 at +50000 SP keeps ratio 1.000 +- 0.005 (excludes +20% ratio 1.20), proving 807312 does not outlive Herald. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (fear lands when Herald absent, blocked when active)",
+      "kind": "metric_delta",
+      "variant": "immune_fear_form_gate",
+      "label_suffix": "immune_fear_form_gate",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 is absent in before and active in after."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 39176
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 8000,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-absent control for 807128 fear immunity (AscensionCultistAuras.cpp:97): 807128 learned at start (gate_timing: start, trigger_only_after: true). Striker (spell_hit_bonus 100, reaction 0) casts Fear 39176 (Mechanic 5, DurationIndex 32 = 6000 ms) at caster: before Herald 520326 is cast (520326 == 0 read via ally_arm), 39176 lands on caster (1); after Herald cast (520326 == 1 read via ally_arm), 39176 is blocked (0). expire_ms 8000 clears before-phase CC. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "strike": {
+        "spell": 39176,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (fear lands again after Herald expires)",
+      "kind": "metric_delta",
+      "variant": "immune_fear_after_expiry",
+      "label_suffix": "immune_fear_after_expiry",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 60235,
+      "gate_spell": 807128,
+      "target": "caster",
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 21000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 has expired in both phases."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 39176
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 8000,
+      "void_on_cast_failure": true,
+      "observe_source": "Post-expiry control for 807128 fear immunity (AscensionCultistAuras.cpp:189): both phases cast real Herald 520326 (void_on_cast_failure: true) and wait 21000 ms for expiry (after_setup_stacks confirms 520326 == 0 and Insanity 500706 == 0 reset by expiry; ally_arm confirms 520326 == 0). Striker (spell_hit_bonus 100, reaction 0) casts Fear 39176 (Mechanic 5, DurationIndex 32 = 6000 ms) at caster: lands in both control (1) and treatment after Herald expiry (1), proving immunity ends when Herald ends. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "strike": {
+        "spell": 39176,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (horrify lands when Herald absent, blocked when active)",
+      "kind": "metric_delta",
+      "variant": "immune_horrify_form_gate",
+      "label_suffix": "immune_horrify_form_gate",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 is absent in before and active in after."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 64044
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-absent control for 807128 horrify immunity (AscensionCultistAuras.cpp:97): 807128 learned at start (gate_timing: start, trigger_only_after: true). Striker (spell_hit_bonus 100, reaction 0) casts Psychic Horror 64044 (Mechanic 24, DurationIndex 27 = 3000 ms) at caster: before Herald 520326 is cast (520326 == 0 read via ally_arm), 64044 lands on caster (1); after Herald cast (520326 == 1 read via ally_arm), 64044 is blocked (0). expire_ms 5000 clears before-phase CC. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "strike": {
+        "spell": 64044,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (horrify lands again after Herald expires)",
+      "kind": "metric_delta",
+      "variant": "immune_horrify_after_expiry",
+      "label_suffix": "immune_horrify_after_expiry",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 60235,
+      "gate_spell": 807128,
+      "target": "caster",
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 21000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 has expired in both phases."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 64044
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 5000,
+      "void_on_cast_failure": true,
+      "observe_source": "Post-expiry control for 807128 horrify immunity (AscensionCultistAuras.cpp:189): both phases cast real Herald 520326 (void_on_cast_failure: true) and wait 21000 ms for expiry (after_setup_stacks confirms 520326 == 0 and Insanity 500706 == 0 reset by expiry; ally_arm confirms 520326 == 0). Striker (spell_hit_bonus 100, reaction 0) casts Psychic Horror 64044 (Mechanic 24, DurationIndex 27 = 3000 ms) at caster: lands in both control (1) and treatment after Herald expiry (1), proving immunity ends when Herald ends. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "strike": {
+        "spell": 64044,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (polymorph lands when Herald absent, blocked when active)",
+      "kind": "metric_delta",
+      "variant": "immune_polymorph_form_gate",
+      "label_suffix": "immune_polymorph_form_gate",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 520326,
+      "gate_spell": 807128,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 85
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 is absent in before and active in after."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 13323
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 10000,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-absent control for 807128 polymorph immunity (AscensionCultistAuras.cpp:97): 807128 learned at start (gate_timing: start, trigger_only_after: true). Striker (spell_hit_bonus 100, reaction 0) casts Polymorph 13323 (Mechanic 17, DurationIndex 31 = 8000 ms) at caster: before Herald 520326 is cast (520326 == 0 read via ally_arm), 13323 lands on caster (1); after Herald cast (520326 == 1 read via ally_arm), 13323 is blocked (0). expire_ms 10000 clears before-phase CC. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "strike": {
+        "spell": 13323,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
+    },
+    {
+      "spell": 807128,
+      "name": "Blessing of Yogg-Saron (polymorph lands again after Herald expires)",
+      "kind": "metric_delta",
+      "variant": "immune_polymorph_after_expiry",
+      "label_suffix": "immune_polymorph_after_expiry",
+      "quote": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+      "learn": [
+        92131,
+        520326
+      ],
+      "trigger_spell": 60235,
+      "gate_spell": 807128,
+      "target": "caster",
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 21000,
+      "phase_auras": [
+        [
+          500706,
+          85,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 520326,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520326
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Herald 520326 has expired in both phases."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 13323
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 10000,
+      "void_on_cast_failure": true,
+      "observe_source": "Post-expiry control for 807128 polymorph immunity (AscensionCultistAuras.cpp:189): both phases cast real Herald 520326 (void_on_cast_failure: true) and wait 21000 ms for expiry (after_setup_stacks confirms 520326 == 0 and Insanity 500706 == 0 reset by expiry; ally_arm confirms 520326 == 0). Striker (spell_hit_bonus 100, reaction 0) casts Polymorph 13323 (Mechanic 17, DurationIndex 31 = 8000 ms) at caster: lands in both control (1) and treatment after Herald expiry (1), proving immunity ends when Herald ends. Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches.",
+      "strike": {
+        "spell": 13323,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      }
     }
   ],
   "player_observations": [],
