@@ -2009,7 +2009,16 @@
     "labels": [
       "561035 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind proves the +25% duration that Teachings of Mythrax 561035 adds to Presence of N'Zoth 803037 and Presence of Y'Shaarj 803035. Attempted with last_application_expiry `feed` (the kind built for a grant that only a rolled proc earns; the Cultist Chance() rolls the raw ProcChance with roll_chance_f, AscensionCultist.cpp:105-115, so forced_roll cannot raise it): the kind learns one `gate_spell` after its control arm and sizes the feed loop from that spell's ProcChance (kinds/last_application_expiry.py:112-117), but the gate of this claim would be 561035 (ProcChance 100, Effect[0] aura 108 ADD_PCT_MODIFIER BP 24) and generation refuses it: '561035 last_application_expiry feed needs a gate spell 561035 with a proc chance between 0 and 100%' (prove run 2026-11-25, entry aura 500707 on the caster, expected 25000 ms). With the rolled Presence 803037 (ProcChance 20) as the gate the talent 561035 would be unlearned in both arms, so the duration read would be the base one; the kind has no option to learn or cast a second spell (561035) beside the gate, and the Presence must also be an active aura on the caster (AscensionCultistEvents.cpp:103-105 needs player->HasAura(803037)). The proc has no ICD (Chance() is called without a cooldown for 803037/803035), so the roll is repeatable; only the two-spell set-up is missing. The Y'Shaarj half (curse 805180 on the target, ModifiedDuration(807632)) has the same limit.",
+      "attempts": [
+        {
+          "agent": "cu-h3c",
+          "report": ".agents/plans/cu-h3c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561335,
