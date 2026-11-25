@@ -47,7 +47,30 @@
     "skill 172": 300.0
   },
   "log_queries": {},
-  "alternate_weapons": [],
+  "alternate_weapons": [
+    {
+      "item": 2092,
+      "slot": 15,
+      "subclass": 15,
+      "min_damage": 1.1607,
+      "max_damage": 3.4821,
+      "speed_ms": 1600,
+      "inventory_type": 13,
+      "normalized_speed": 1.7,
+      "skill_line": 173
+    },
+    {
+      "item": 2209,
+      "slot": 15,
+      "subclass": 15,
+      "min_damage": 15.36,
+      "max_damage": 25.6,
+      "speed_ms": 1600,
+      "inventory_type": 13,
+      "normalized_speed": 1.7,
+      "skill_line": 173
+    }
+  ],
   "off_hand_weapons": [],
   "known_auras": [],
   "probe_auras": [],
@@ -44341,6 +44364,343 @@
         "stop_target": "dummy"
       },
       "observe_source": "Mind Rot 300300 (@s:560714:0@): 'for $560943d.' (560943 DurationIndex -> 10000 ms, Spell.dbc; AscensionCultistEvents.cpp:82,165 procs 560943 on target at 25% raw Chance() on periodic or channeled damage). Trigger Black Prayer 806039 (instant, 0 CD, 9000 ms DoT ticking every 3000 ms) is fed via cast_until_aura with stop_target: 'dummy' (every_ms 3500, 27-cast cap -> residual cap risk <= 0.05%/run; ADR 1297) until 560943 lands on dummy; window_ms 20000 covers up to 6000 ms remaining DoT ticks plus the 10000 ms debuff duration from its last application. Control arm before learning 300300 reads 0 applications of 560943."
+    },
+    {
+      "spell": 574147,
+      "name": "Void Power (healing power rises with main-hand weapon damage)",
+      "kind": "metric_delta",
+      "variant": "healing_weapon_arms",
+      "label_suffix": "healing_weapon_arms",
+      "quote": "Your healing power is increased based on your main-hand weapon damage.",
+      "trigger_spell": 60235,
+      "gate_spell": 574147,
+      "target": "caster",
+      "metric": "healing_power",
+      "fields": {
+        "school": 5
+      },
+      "tolerance": 0.5,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "weapon_damage_arms": {
+        "weapons": [
+          {
+            "item": 2092,
+            "source": "Worn Dagger (alternate_weapons, subclass 15, 1600 ms, 1.1607-3.4821)"
+          },
+          {
+            "item": 2209,
+            "source": "Kris (alternate_weapons, subclass 15, 1600 ms, 15.36-25.6)"
+          },
+          {
+            "item": 2534,
+            "source": "Rondel (weapon_sets.Dreadnought.main_hand, subclass 15, 1600 ms, 28.46-45.46)"
+          }
+        ],
+        "unrelated": {
+          "metric": "combat_rating",
+          "fields": {
+            "rating": 17
+          },
+          "aura": 10033,
+          "stacks": 1,
+          "source": "QA Test +100 Haste Rating (10033, Effect[0] aura 189, misc 917504, +100 Haste Rating, DurationIndex 21)"
+        },
+        "wait_ms": 1000
+      },
+      "observe_source": "Void Power 574147 row 211 (\"Your healing power is increased based on your main-hand weapon damage.\"): unfigured direction-only claim (D-38, ADR 1299). AscensionCultist.cpp:291-292 and AscensionCultistAuras.cpp:135-136 set effect 0 (SPELL_AURA_MOD_HEALING_DONE, all schools) to int32((UNIT_FIELD_MINDAMAGE + UNIT_FIELD_MAXDAMAGE) / 2), refreshed every 500 ms. Because Player::CalculateMinMaxDamage (StatSystem.cpp:693-728) adds unnormalized (BaseAttackTime / 1000) * AP / 14 to weapon damage, weapon_damage_arms enforces equal subclass and unhasted base speed_ms across all arms and equips three white Daggers (subclass 15, 1600 ms, 0 stats: Worn Dagger 2092 1.1607-3.4821, Kris 2209 15.36-25.6, Rondel 2534 28.46-45.46) before and after a real learn of 574147, verifying equipped_item (slot 15), strictly rising weapon_damage_min, equal attack_power across all arms (376.0, no AP/speed/subclass confound), and invariance under an unrelated-stat control (+100 Haste Rating via 10033), judging strictly monotonic healing_power (school 5) gain with no figure asserted."
+    },
+    {
+      "spell": 706177,
+      "name": "Improved Sermon of Dread (Sermon of Dread attack power debuff)",
+      "kind": "effectiveness_delta",
+      "variant": "sermon_attack_power",
+      "label_suffix": "sermon_attack_power",
+      "quote": "Increases the effectiveness of Sermon of Dread by $s1%.",
+      "trigger_spell": 620614,
+      "gate_spell": 706177,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          35785,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 836,
+      "expected": 779,
+      "expected_gain": -57,
+      "tolerance": 0.5,
+      "wait_ms": 1000,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "Improved Sermon of Dread 706177 row 300 (\"Increases the effectiveness of Sermon of Dread by $s1%.\"): Spell.dbc 706177 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 39 + DieSides 1 = +40% ($s1%) on EffectSpellClassMask[2] 0x10000000 matching Sermon of Dread 620614 (SpellFamilyFlags[2] 0x10000000, Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT, BasePoints -141 + DieSides 1 + RealPointsPerLevel -1.0 * (60 - 56) = -144 AP for 30 s, 6% base mana, 10 yd AoE). effectiveness_delta (ADR 1300) casts 620614 in both phases on dummy (buffed with Attack Power 980 35785 to prevent zero-clamping) with 706177 learned between and 31000 ms expiry wait, reading dummy attack_power: -144 without 706177 and int32(-144 * 1.40) = -201 with 706177, additional AP drop expected_gain = -57 within 0.5 (excludes unmodified 0, +30% -43, and doubled -115)."
+    },
+    {
+      "spell": 680609,
+      "name": "Void Strikes (Blade of the Empire defense rating direction)",
+      "kind": "power_term_direction",
+      "label_suffix": "blade_defense_direction",
+      "quote": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
+      "talent": 680609,
+      "cast_spell": 502122,
+      "power_metric": "defense_rating",
+      "power_aura": 24774,
+      "power_aura_source": "Increased Defense 24774 (Spell.dbc Effect[0] aura 189 SPELL_AURA_MOD_RATING misc 2 CR_DEFENSE_SKILL, +180 defense rating, DurationIndex 21)",
+      "casts": 16,
+      "cast_wait_ms": 1600,
+      "power_settle_ms": 3000,
+      "restore_charges": true,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 eliminates Shadow partial resists on dummy"
+        }
+      ],
+      "observe_source": "Void Strikes 680609 row 251 (\"Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.\"): unfigured direction-only claim (D-38, ADR 1301). AscensionCultistAuras.cpp:235-239 refreshes helper 567529 (SPELLMOD_EFFECT1 matching 502122 and 572846) every 2500 ms to CR_DEFENSE_SKILL. power_term_direction varies defense rating (combat_rating 1) via Increased Defense 24774 (+180) with power_settle_ms 3000 and restore_charges true for Blade of the Empire 502122, verifying equal attack_power across all four arms and judging Welch Student-t direction only.",
+      "variant": "blade_defense_direction"
+    },
+    {
+      "spell": 680609,
+      "name": "Void Strikes (Entropic Slam defense rating direction)",
+      "kind": "power_term_direction",
+      "label_suffix": "slam_defense_direction",
+      "quote": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
+      "talent": 680609,
+      "cast_spell": 572846,
+      "power_metric": "defense_rating",
+      "power_aura": 24774,
+      "power_aura_source": "Increased Defense 24774 (Spell.dbc Effect[0] aura 189 SPELL_AURA_MOD_RATING misc 2 CR_DEFENSE_SKILL, +180 defense rating, DurationIndex 21)",
+      "casts": 16,
+      "cast_wait_ms": 1600,
+      "power_settle_ms": 3000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "beeg spellpen 823764 eliminates Shadow partial resists on dummy"
+        },
+        {
+          "spell": 500706,
+          "stacks": 60,
+          "source": "Insanity 500706 precondition (60 stacks >= 40 drained by Entropic Slam 572846)"
+        },
+        {
+          "spell": 680603,
+          "stacks": 1,
+          "source": "Threshold aura 680603 (CasterAuraSpell of Entropic Slam 572846)"
+        }
+      ],
+      "observe_source": "Void Strikes 680609 row 251 (\"Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.\"): Entropic Slam 572846 partner to blade_defense_direction (D-38, ADR 1301). power_term_direction varies defense rating (combat_rating 1) via Increased Defense 24774 (+180) with power_settle_ms 3000 and Insanity/680603 attempt_auras, verifying equal attack_power across all four arms and judging Welch Student-t direction only.",
+      "variant": "slam_defense_direction"
+    },
+    {
+      "spell": 806175,
+      "name": "Dreadfall (charges forward toward enemy dummy at 15 yd)",
+      "kind": "metric_delta",
+      "variant": "charge_displacement",
+      "label_suffix": "charge_displacement",
+      "quote": "Raise your shield and charge towards an enemy",
+      "trigger_spell": 806175,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {
+        "bearing": 0
+      },
+      "before_expected": 0,
+      "expected": 13,
+      "after_at_least": 10.0,
+      "after_at_most": 15.5,
+      "tolerance": 0.5,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 15.0,
+            "expected": 2.0,
+            "tolerance": 2.0,
+            "source": "Caster closes from 15 yd to melee contact (~0-4 yd) of dummy after charging 806175."
+          }
+        ]
+      },
+      "observe_source": "Dreadfall 806175 row 409[2] (\"Raise your shield and charge towards an enemy\"): Effect[0] 149 charges the caster toward dummy at 15 yd (RangeIndex 94: 8-40 yd). displacement with bearing 0 (ADR 1302) verifies 0 yd displacement without cast, 10..15.5 yd forward displacement toward dummy (0 +- 15 deg from start facing) after casting 806175, and ally_arm confirms caster-to-dummy distance_2d closes from 15 yd to melee contact (0..4 yd). The separate pass_through damage alert on row 409[0] stays uncounted."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (teleports to grouped ally at channel expiry when shield holds)",
+      "kind": "metric_delta",
+      "variant": "teleport_holds",
+      "label_suffix": "teleport_holds",
+      "quote": "At the end of the duration, if the shield holds, you teleport to them.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "ally"
+            },
+            "before_expected": 15.0,
+            "expected": 0.0,
+            "tolerance": 0.5,
+            "source": "Caster starts 15 yd from ally and lands at ally position (0 yd) after 520345 expires with shields intact."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 520346,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Caster Dark Veil shield 520346 holds all 5 stacks at expiry."
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 15.0
+      },
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 0,
+      "expected": 15.0,
+      "tolerance": 0.5,
+      "wait_ms": 5600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Veil 520345 row 133 (\"At the end of the duration, if the shield holds, you teleport to them.\"): AscensionCultistAuras.cpp:164-172 calls player->NearTeleportTo(target) on 520345 AURA_REMOVE_BY_EXPIRE when both 520346 shield effects remain > 0. With grouped ally relocated 15 yd away (ally_offsets 15.0, within RangeIndex 14 60 yd) and no incoming damage, caster displacement after the 5 s channel (wait_ms 5600) moves 0 -> 15.0 +- 0.5 yd (ADR 1302), distance_2d to ally drops 15.0 -> 0.0 +- 0.5 yd, and shield 520346 remains present. Paired with teleport_broken_control."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (does not teleport when caster shield is broken before expiry)",
+      "kind": "metric_delta",
+      "variant": "teleport_broken_control",
+      "label_suffix": "teleport_broken_control",
+      "quote": "At the end of the duration, if the shield holds, you teleport to them.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "ally"
+            },
+            "before_expected": 15.0,
+            "expected": 15.0,
+            "tolerance": 0.5,
+            "source": "Caster remains 15 yd from ally when shield 520346 is broken before 520345 expires."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 520346,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster Dark Veil shield 520346 was broken by striker Void Zone 92559 (0 stacks expected; reads 1 stack because 520345 tick #5 at 5000 ms re-applies 520346 right before Remove() checks it)."
+          }
+        ]
+      },
+      "ally_offsets": {
+        "ally": 15.0
+      },
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 6,
+        "wait_ms": 50,
+        "after_trigger_ms": 4200,
+        "reaction": 0
+      },
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 0,
+      "expected": 0.0,
+      "tolerance": 0.5,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Veil 520345 row 133 negative control (\"if the shield holds\"): same 15 yd ally_offsets setup as teleport_holds, but a striker casts 6x Void Zone 92559 (6000 Physical damage > 4 stacks x 969 = 3876 absorb) at caster at 4200 ms, breaking 520346 before channel expiry. After channel end (4200 + 300 + 1200 = 5700 ms > 5000 ms), 520346 is absent, caster displacement stays 0.0 +- 0.5 yd, and distance_2d to ally remains 15.0 +- 0.5 yd."
+    },
+    {
+      "spell": 300278,
+      "name": "Bulwark of Horror (charge restore on avoided swing)",
+      "kind": "avoided_charge_restore",
+      "variant": "avoided_charge_restore",
+      "label_suffix": "avoided_charge_restore",
+      "quote": "Avoiding an attack now has a $h% chance to refresh a charge of Blade of the Empire.",
+      "charge_spell": 502122,
+      "max_charges": 3,
+      "spend_charges": 3,
+      "expected_pct": 40,
+      "striker_entry": 36,
+      "strikers": 1,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852
+      ],
+      "window_ms": 1100,
+      "dodge": 100,
+      "parry": 0,
+      "count_misses": true,
+      "miss_exclusion": {
+        "min_share": 0.04
+      },
+      "dummy_distance": 5.0,
+      "control_cycles": 15,
+      "treatment_cycles": 550,
+      "parts": 22,
+      "observe_source": "Bulwark of Horror 300278 row 25 (\"Avoiding an attack now has a $h% chance to refresh a charge of Blade of the Empire.\"): Spell.dbc 300278 ProcChance 40 ($h = 40%); AscensionCultistEvents.cpp:52,62,155-156 rolls roll_chance_f on avoided (PROC_HIT_DODGE|PROC_HIT_PARRY|PROC_HIT_MISS) and calls RestoreBlade -> RestoreSpellCharge(502122) (3 charges, 6 s recharge). avoided_charge_restore (ADR 1303) runs 1 stationary striker (entry 36 with 42716, 62531, 2116852 -> ~500 ms swing speed, paused by Stun 56 during charge resets, spend casts and reads so each window is atomic) over 1100 ms windows (<= 3 swings/window <= 3 open charge slots after spending all 3 charges of 502122 at dummy 5 yd with ignore_gcd + stop_attack, and << 6000 ms natural recharge), with count_misses true and miss_exclusion min_share 0.04, pooled over 22 parts (~25,000+ treatment swings >= 22,014 exact binomial minimum for G-20 +-2 pt band at 40% with pair false-fail and false-pass <= 0.1%; ~680 unlearned control swings expecting 0 restores)."
     }
   ],
   "player_observations": [],

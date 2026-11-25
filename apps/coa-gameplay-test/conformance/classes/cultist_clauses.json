@@ -278,18 +278,9 @@
     "spell": 300278,
     "clause": "Avoiding an attack now has a $h% chance to refresh a charge of Blade of the Empire.",
     "labels": [
-      "300278 effect_value #0"
+      "300278 behaviour_metric_delta avoided_charge_restore"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind measures a 40% avoided-melee-swing proc that restores a spell charge via direct RestoreBlade -> RestoreSpellCharge (AscensionCultistEvents.cpp:62,155-156; AscensionCultist.cpp:105-116,138-141, raw roll_chance_f ignoring forced_roll): procs.counts_charges (procs.py:468-473) explicitly rejects trigger.action != 'cast' and proc_spell != trigger.spell; avoided_proc_instances / avoided_swing_reads / parried_restore do not read spell_charges; flat_chance_rate has no avoided-swing trigger or spell_charges event metric. Nearest kind: procs (proc_avoided + counts_charges) or new kind avoided_charge_restore.",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 300280,
@@ -1578,17 +1569,12 @@
   {
     "spell": 520345,
     "clause": "At the end of the duration, if the shield holds, you teleport to them.",
-    "labels": [],
+    "labels": [
+      "520345 behaviour_metric_delta teleport_holds",
+      "520345 behaviour_metric_delta teleport_broken_control"
+    ],
     "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind/option counts Dark Veil 520345's teleport to the grouped ally as behaviour evidence under no-tool-code-changes: AscensionCultistAuras.cpp:164-172 calls player->NearTeleportTo(target->...) on 520345 expiry when both 520346 shield effects remain > 0, and metric_delta has ally_arm + ally_offsets + distance_2d / displacement_2d, but coverage.py:530 (STATE_PROMISES['distance_2d'] = r'location|hook\\w*|pull\\w*') and metric_delta_options/displacement.py:8 (STATE_PROMISES['displacement_2d'] = r'dash\\w*|direction|distance|leap\\w*|range|yds?') do not match 'teleport', so coverage.py:831-833 classifies any such entry as data rather than behaviour; nearest_creature_distance (coverage.py:512) only reads a creature entry, not a grouped ally player. Nearest kind: metric_delta with ally_arm, ally_offsets, and distance_2d or displacement (needs 'teleport\\w*' in STATE_PROMISES).",
-      "attempts": [
-        {
-          "agent": "cu-g8c",
-          "report": ".agents/plans/cu-g8c/report.md"
-        }
-      ]
-    }
+    "reason": "Real server alert on the \"if the shield holds\" condition (tool gap closed by ADR 1302): teleport_holds passes (ok/ok: 15.0 yd displacement, distance_2d 15 -> 0, 520346 at 5 stacks), while teleport_broken_control alerts (alert/alert: 6x Void Zone 92559 = 6000 dmg breaks all 4 stacks of 520346 at 4200-4500 ms, yet Aura::UpdateOwner fires tick #5 of 520345 at 5000 ms right before AURA_REMOVE_BY_EXPIRE, re-applying 1 fresh stack of 520346 so AscensionCultistAuras.cpp:167-171 still teleports the caster 15.0 yd to the ally with 520346 at 1 stack). Claim stays uncounted until fixed."
   },
   {
     "spell": 520345,
@@ -2588,21 +2574,10 @@
   {
     "spell": 574147,
     "clause": "Your healing power is increased based on your main-hand weapon damage.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind or metric_delta option varies the equipped main-hand weapon between two or three items of clearly different weapon damage (e.g., Dreadnought 2534 Rondel 28.46-45.46, Heretic 2535 War Staff 84.53-119.41, Godblade 2531 Great Axe 90.86-127.3) at equal attack_power inside one scenario while reading weapon_damage_min, attack_power, and healing_power and judging strictly rising direction with no invented figure (D-38). attack_power_arms confounds attack power with main-hand weapon damage (review I1), without_item only supports cast_failure, and separate per-weapon-set scenarios cannot compare healing_power across scenarios without inventing numeric thresholds forbidden by D-38. Smallest extension: Python-only weapon_damage_arms option on metric_delta (modeled on attack_power_arms, no finished-class impact).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        },
-        {
-          "agent": "cu-t2b",
-          "report": ".agents/plans/cu-t2b/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "574147 behaviour_metric_delta healing_weapon_arms"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 574318,
@@ -3084,17 +3059,11 @@
   {
     "spell": 680609,
     "clause": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Void Strikes 680609 periodically refreshes helper 567529 (AscensionCultistAuras.cpp:171-184) granting flat SPELLMOD_EFFECT1 equal to CR_DEFENSE_SKILL on Blade of the Empire 502122 and Entropic Slam 572846 (unfigured \"based on your defense rating\"). power_term_direction (power_term_direction.py) only allows power_metric in {attack_power, agility, max_health} and has no defense_rating metric (combat_rating 1 / aura 189 misc 2), so no existing unfigured-scaling kind can prove positive defense-rating direction without inventing an expected figure. Extension: add defense_rating to power_term_direction.POWER_METRICS (reading combat_rating 1 and accepting permanent rating-fixture auras such as 24774 +180 defense).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "680609 behaviour_metric_delta blade_defense_direction",
+      "680609 behaviour_metric_delta slam_defense_direction"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 680750,
@@ -3636,18 +3605,9 @@
     "spell": 706177,
     "clause": "Increases the effectiveness of Sermon of Dread by $s1%.",
     "labels": [
-      "706177 effect_value e0 #0"
+      "706177 behaviour_metric_delta sermon_attack_power"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Improved Sermon of Dread 706177 Effect[0] adds +30% SPELLMOD_EFFECT1 (bp=29+1) to Sermon of Dread 620614 (aura 344 flat AP debuff -140-rpl on enemies). effectiveness_delta.READ_METRICS only supports {melee_crit_chance, spell_crit_chance, dodge_chance, parry_chance, armor, spell_power, attack_time_ms, combat_rating} and lacks attack_power, even though the harness already reads attack_power on any unit including dummy (CoAGameplayTest.cpp:4076). Extension: add attack_power to effectiveness_delta.READ_METRICS (with target/actor dummy support for enemy debuffs).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 706179,
@@ -5006,18 +4966,11 @@
       },
       {
         "claim": "Raise your shield and charge towards an enemy",
-        "labels": []
+        "labels": [
+          "806175 behaviour_metric_delta charge_displacement"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "No existing conformance option counts Dreadfall 806175's \"charge towards an enemy\" as behaviour evidence under no-tool-code-changes: metric_delta_options/displacement.py:8 STATE_PROMISES[\"displacement_2d\"] = r\"dash\\w*|direction|distance|leap\\w*|range|yds?\" does not match \"charge\", and coverage.py:530 STATE_PROMISES[\"distance_2d\"] = r\"location|hook\\w*|pull\\w*\" does not match \"charge\", so any displacement/distance_2d entry is classified as data rather than behaviour. Extension: add \"charge\\w*\" to STATE_PROMISES[\"displacement_2d\"]. (Note: 806175 pass_through is a separate real server alert: 807815 retains EffectChainTarget[0]=20 in Spell.dbc, causing UpdateDash casts to chain and double-hit passed-through enemies and overshoot to area2 at 25 yd.)",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 578263,
