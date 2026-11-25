@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Login announces the released Heroic and Mythic dungeon events",
-  "contract": "The client offers Random Classic Dungeon Heroic (1258) and Mythic (2258) only while one of their game events is active (C_LFG.RequiresGameEvent), otherwise it reports the difficulty as not released. Each login sends one active SMSG_GAME_EVENT_INFO (0x09BD) for every Heroic event (394, 395, 396, 436, 437, 447) and every Mythic event (728 to 732, 734). This checks the packets the server builds for a socketless session, not the client's rendering of the Dungeon Finder.",
+  "contract": "The client offers Random Classic Dungeon Heroic (1258) and Mythic (2258) only while one of their game events is active (C_LFG.RequiresGameEvent), otherwise it reports the difficulty as not released; each Burning Crusade dungeon group and random queue needs its own event (C_LFG.lua and Enum.lua in the installed client patches). Each login sends one active SMSG_GAME_EVENT_INFO (0x09BD) for every Heroic event (394, 395, 396, 436, 437, 447; Burning Crusade 339 random, 400 Hellfire, 401 Coilfang, 402 Auchindoun, 403 Tempest Keep, 404 Caverns of Time) and every Mythic event (728 to 732, 734; Burning Crusade 365 random, 221 Hellfire, 222 Coilfang, 223 Auchindoun, 224 Tempest Keep, 225 Caverns of Time). This checks the packets the server builds for a socketless session, not the client's rendering of the Dungeon Finder.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -139,6 +139,126 @@
       "metric": "server_packets",
       "opcode": 2493,
       "row": 734,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Random Burning Crusade Heroic event (339) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 339,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Hellfire Citadel event (400) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 400,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Coilfang Reservoir event (401) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 401,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Auchindoun event (402) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 402,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Tempest Keep event (403) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 403,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Heroic Caverns of Time event (404) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 404,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Random Burning Crusade Mythic event (365) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 365,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Hellfire Citadel event (221) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 221,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Coilfang Reservoir event (222) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 222,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Auchindoun event (223) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 223,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Tempest Keep event (224) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 224,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The client learns that the Mythic Caverns of Time event (225) is active",
+      "actor": "p1",
+      "metric": "server_packets",
+      "opcode": 2493,
+      "row": 225,
       "equals": 1,
       "within_ms": 5000
     }
