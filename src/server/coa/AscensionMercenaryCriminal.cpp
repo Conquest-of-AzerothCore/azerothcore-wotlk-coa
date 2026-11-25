@@ -167,23 +167,34 @@ bool GroupHasCriminal(Player* player)
     return false;
 }
 
+void LeaveBattlegroundQueue(Player* player, uint8 slot, BattlegroundQueueTypeId queueType)
+{
+    BattlegroundQueue& queue = sBattlegroundMgr->GetBattlegroundQueue(queueType);
+    GroupQueueInfo info;
+    bool const rematch = queue.GetPlayerGroupInfoData(player->GetGUID(), &info) && !info.ArenaType;
+    queue.RemovePlayer(player->GetGUID(), true);
+    player->RemoveBattlegroundQueueId(queueType);
+
+    BattlegroundTypeId const type = BattlegroundMgr::BGTemplateId(queueType);
+    Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(type);
+    if (!bg)
+        return;
+
+    WorldPacket data;
+    sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, slot, STATUS_NONE, 0, 0, 0, TEAM_NEUTRAL);
+    player->SendDirectMessage(&data);
+    if (!rematch)
+        return;
+    if (PvPDifficultyEntry const* bracket = GetBattlegroundBracketByLevel(bg->GetMapId(), player->GetLevel()))
+        sBattlegroundMgr->ScheduleQueueUpdate(0, 0, queueType, type, bracket->GetBracketId());
+}
+
 void LeaveEveryQueue(Player* player)
 {
     for (uint8 slot = 0; slot < PLAYER_MAX_BATTLEGROUND_QUEUES; ++slot)
-    {
-        BattlegroundQueueTypeId const queue = player->GetBattlegroundQueueTypeId(slot);
-        if (queue == BATTLEGROUND_QUEUE_NONE)
-            continue;
-
-        sBattlegroundMgr->GetBattlegroundQueue(queue).RemovePlayer(player->GetGUID(), true);
-        player->RemoveBattlegroundQueueId(queue);
-        if (Battleground* bg = sBattlegroundMgr->GetBattlegroundTemplate(BattlegroundMgr::BGTemplateId(queue)))
-        {
-            WorldPacket data;
-            sBattlegroundMgr->BuildBattlegroundStatusPacket(&data, bg, slot, STATUS_NONE, 0, 0, 0, TEAM_NEUTRAL);
-            player->SendDirectMessage(&data);
-        }
-    }
+        if (BattlegroundQueueTypeId const queue = player->GetBattlegroundQueueTypeId(slot);
+            queue != BATTLEGROUND_QUEUE_NONE)
+            LeaveBattlegroundQueue(player, slot, queue);
 
     Group* group = player->GetGroup();
     sLFGMgr->LeaveAllLfgQueues(player->GetGUID(), true, group ? group->GetGUID() : ObjectGuid::Empty);
