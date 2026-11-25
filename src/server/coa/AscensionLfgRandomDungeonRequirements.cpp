@@ -23,7 +23,7 @@ constexpr std::array<RandomDungeonRequirement, 4> RandomDungeonRequirements = {{
     { 1258, 40, 0 },
     { 2258, 58, 350 },
     { 418, 70, 0 },
-    { 419, 108, 350 },
+    { 419, 70, 350 },
 }};
 
 [[nodiscard]] RandomDungeonRequirement const* FindRequirement(uint32 dungeonId)
