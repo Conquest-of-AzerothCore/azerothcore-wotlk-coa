@@ -46006,6 +46006,57 @@
       "learn": [
         808036
       ]
+    },
+    {
+      "spell": 300308,
+      "name": "Abyssal Destruction (casting Obliteration Beam consumes 10 stacks of 300605)",
+      "kind": "metric_delta",
+      "variant": "oblit_consumes_10stacks",
+      "label_suffix": "oblit_consumes_10stacks",
+      "quote": "and grants 1 stack of Abyssal Destruction.@s:300605:0@",
+      "trigger_spell": 806897,
+      "gate_spell": 300308,
+      "target": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        800432
+      ],
+      "setup_wait_ms": 5500,
+      "phase_auras": [
+        [
+          300605,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 300605
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "observe_source": "Owner ruling Q-cu-14 (2026-11-25): 10-stack consumption check for Abyssal Destruction 300605. Psychic Suppression 800432 delivers 10 channeled ticks granting 10 stacks of 300605 (proven +50% on 806897 in oblit_damage_10stacks); casting Obliteration Beam 806897 consumes all stacks of 300605 (0 before in unlearned control, 0 after cast). void_on_cast_failure omitted because 800432 internal sub-aura casts emit benign DONT_REPORT (27)."
     }
   ],
   "player_observations": [],

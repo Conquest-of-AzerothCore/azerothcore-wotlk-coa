@@ -16,7 +16,7 @@
 namespace
 {
 using namespace AscensionCultist;
-constexpr uint32 selected[] = {502133, 301186, 561288, 301259, 806250, 255070, 681794};
+constexpr uint32 selected[] = {502133, 301186, 561288, 301259, 806250, 255070, 681794, 300605};
 bool Select(uint32 id, SpellInfo const* info)
 {
     switch (id)
@@ -28,6 +28,7 @@ bool Select(uint32 id, SpellInfo const* info)
         case 806250: return Named(info, 805116);
         case 255070: return info->Id == 504719;
         case 681794: return info->Id == 680576;
+        case 300605: return Named(info, 805572);
         default: return false;
     }
 }

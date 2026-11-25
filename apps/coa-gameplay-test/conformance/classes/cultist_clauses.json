@@ -603,7 +603,8 @@
     "labels": [
       "300308 behaviour_metric_delta oblit_damage_1stack",
       "300308 behaviour_metric_delta oblit_damage_10stacks",
-      "300308 behaviour_metric_delta oblit_consumes"
+      "300308 behaviour_metric_delta oblit_consumes",
+      "300308 behaviour_metric_delta oblit_consumes_10stacks"
     ],
     "kind": "claim"
   },
