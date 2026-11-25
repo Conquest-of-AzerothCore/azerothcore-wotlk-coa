@@ -1,0 +1,415 @@
+{
+  "schema": 1,
+  "name": "Cultist client texts apply the 2026-11-25 O-18 owner rulings",
+  "contract": [
+    "Owner ruling O-18 (2026-11-25, Cultist ADRs 0020, 0033, 0035): coa_client_spell_description updates ten Cultist",
+    "client tooltip texts (18 rows) in rev_20261125_01_cultist_client_texts.sql: Dark Matter 806382 ($804275d),",
+    "Horrific Revelation 704473 (drops scaling with Insanity), Embrace the Void 300307 (Magic damage dealt), Psychic",
+    "Suppression 800432 (more damage), Madness 804369 (Obliteration Beam unconditional), Darkwither 800446 and",
+    "502213-502220 (7 stacks under Call of C'Thun), Malignant Armor 680569 (100 armor), Void Strength 805121 (spell",
+    "hit rating), Twisted Seal 525065 ToolTip (Deflecting spells and abilities, Description kept verbatim), and Mind",
+    "Rot 300300 (to afflict your target with). Each row carries its new string, drops the replaced phrase, and keeps",
+    "its untouched Description or ToolTip."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8949.95,
+    "y": -132.493,
+    "z": 83.5312,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "cultist",
+      "race": 1,
+      "class": 25,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: existing Void Augmentation 680575 client spell row still carries Eldritch Shock",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 680575,
+      "text": "Eldritch Shock",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dark Matter 806382 uses $804275d (6 sec)",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 806382,
+      "text": "every $807124T2 sec for $804275d.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Dark Matter 806382 no longer uses $807219d",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 806382,
+      "text": "$807219d",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Horrific Revelation 704473 drops scaling with Insanity",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 704473,
+      "text": "Heals a friendly target for ${$m1+0+$SP*0.678496} and increases their critical strike chance by $s2%, stacking $u times, for $d.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Horrific Revelation 704473 no longer mentions scaling with Insanity",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 704473,
+      "text": "scaling with",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Horrific Revelation 704473 keeps its DBC ToolTip",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 704473,
+      "text": "Critical strike chance increased by $S2%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Void 300307 states Magic damage dealt",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 300307,
+      "text": "increases your Magic damage dealt by $573285s1% for $573285d.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Embrace the Void 300307 no longer states unqualified your damage dealt",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 300307,
+      "text": "your damage dealt",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Psychic Suppression 800432 states more damage from all sources",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 800432,
+      "text": "takes $803746s1% more damage from all sources while you are channeling this spell.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Psychic Suppression 800432 no longer states more spell damage",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 800432,
+      "text": "more spell damage",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Psychic Suppression 800432 keeps its DBC ToolTip",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 800432,
+      "text": "Stunned. Taking ${$w1} Shadow damage every $t1 sec.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Madness 804369 shows Obliteration Beam unconditionally",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 804369,
+      "text": "Your |cffffffffGaze of C'thun|r or |cFFFFFFFFObliteration Beam|r causes $s1% increased damage, stacks up to $u times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Madness 804369 no longer gates Obliteration Beam on $?s805606",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 804369,
+      "text": "$?s805606",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Madness 804369 keeps its DBC ToolTip",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 804369,
+      "text": "The Cultist's Gaze of C'thun or Obliteration Beam deals ${$w1}% increased damage to you.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 1 (800446) states 7 stacks with Call of C'Thun",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 800446,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 1 (800446) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 800446,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 2 (502213) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502213,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 2 (502213) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502213,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 3 (502214) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502214,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 3 (502214) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502214,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 4 (502215) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502215,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 4 (502215) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502215,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 5 (502216) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502216,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 5 (502216) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502216,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 6 (502217) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502217,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 6 (502217) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502217,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 7 (502218) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502218,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 7 (502218) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502218,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 8 (502219) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502219,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 8 (502219) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502219,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 9 (502220) states 7 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502220,
+      "text": "stacking up to $?s301317[7][$706913u] times.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 9 (502220) no longer states 8 stacks",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502220,
+      "text": "$?s301317[8]",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Darkwither Rank 9 (502220) keeps its DBC ToolTip",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 502220,
+      "text": "Dealing ${$w1} Shadow damage every $t1 sec. Each tick reduces periodic healing taken.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Malignant Armor 680569 states 2 for every 100 armor",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 680569,
+      "text": "Increases your attack power by 2 for every 100 armor value you have.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Malignant Armor 680569 no longer carries the broken $m2 formula",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 680569,
+      "text": "${($m1*$m2)*2}",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Void Strength 805121 states spell hit rating",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 805121,
+      "text": "and your spell hit rating by $s1% of your Strength.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Void Strength 805121 no longer states spell hit chance",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 805121,
+      "text": "spell hit chance",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Twisted Seal 525065 ToolTip states Deflecting spells and abilities",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 525065,
+      "text": "Deflecting spells and abilities. Enemies who get deflected are also silenced for $525066d.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Twisted Seal 525065 ToolTip no longer states Deflecting spells.",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 525065,
+      "text": "Deflecting spells.",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Twisted Seal 525065 keeps its verbatim spellbook Description",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 525065,
+      "text": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Mind Rot 300300 states to afflict your target with Mind Rot",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 300300,
+      "text": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with |cffffffffMind Rot|r.@s:560714:0@",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Mind Rot 300300 no longer states to curse your target, applying",
+      "actor": "cultist",
+      "metric": "client_spell_row_contains",
+      "spell": 300300,
+      "text": "to curse your target, applying",
+      "equals": 0
+    }
+  ]
+}

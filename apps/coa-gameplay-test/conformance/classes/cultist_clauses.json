@@ -451,14 +451,25 @@
   },
   {
     "spell": 300300,
-    "clause": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
+    "clause": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.",
     "labels": [
       "300300 behaviour_metric_delta periodic",
       "300300 behaviour_metric_delta channeled",
       "300300 behaviour_metric_delta dispel_crit"
     ],
     "kind": "claim",
-    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) for dispel type under owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): Mind Rot 560943 keeps Dispel=1 (Magic) on the server, and client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.' at class end; application is behaviour-proven by periodic/channeled and Magic dispel by dispel_crit (Dispel Magic 988, also linked on r43)."
+    "reason": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic) on the server, and rev_20261125_01_cultist_client_texts.sql updates the streamed Description to 'to afflict your target with Mind Rot.'; application is behaviour-proven by periodic/channeled and Magic dispel by dispel_crit (Dispel Magic 988, also linked on r43).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic); client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.'.",
+      "spell": 300300,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot."
   },
   {
     "spell": 300300,
@@ -477,7 +488,17 @@
           "300300 behaviour_metric_delta mind_rot_duration"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic); client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.'.",
+      "spell": 300300,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 300300,
@@ -498,7 +519,17 @@
           "300300 behaviour_metric_delta dispel_crit_duration"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic); client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.'.",
+      "spell": 300300,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 300302,
@@ -553,11 +584,11 @@
   },
   {
     "spell": 300307,
-    "clause": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+    "clause": "Reaching 60 Insanity increases your Magic damage dealt by $573285s1% for $573285d.",
     "kind": "claim",
     "claims": [
       {
-        "claim": "increases your damage dealt by $573285s1%",
+        "claim": "increases your Magic damage dealt by $573285s1%",
         "labels": [
           "300307 behaviour_hit_ratio shadow_damage",
           "300307 behaviour_hit_ratio melee_damage"
@@ -577,7 +608,18 @@
         ]
       }
     ],
-    "reason": "Claim 0 ('increases your damage dealt by $573285s1%') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-21 (2026-11-25, magic_only) and O-18 (2026-11-25, Cultist ADR 0033): server keeps Magic-only +10% (573285 EffectMiscValue[0]=126, matching live log Devzou Log 141 Shadow 1.095-1.106x vs melee 1.020x), client text updates 'damage dealt' -> 'Magic damage dealt' at class end, and 300307 shadow_damage (+10%) + melee_damage (+0%, expected 1.0) prove both halves in game."
+    "reason": "Owner ruling O-15 Q-cu-21 (2026-11-25, magic_only) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps Magic-only +10% (573285 EffectMiscValue[0]=126, matching live log Devzou Log 141 Shadow 1.095-1.106x vs melee 1.020x), rev_20261125_01_cultist_client_texts.sql updates the streamed Description to 'Magic damage dealt', and 300307 shadow_damage (+10%) + melee_damage (+0%, expected 1.0) prove both halves in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-21 (2026-11-25, magic_only) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Embrace the Void 573285 keeps Magic-only +10% (EffectMiscValue[0]=126); client text updates 'your damage dealt' -> 'your Magic damage dealt'.",
+      "spell": 300307,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d."
   },
   {
     "spell": 300308,
@@ -1332,7 +1374,7 @@
   },
   {
     "spell": 500719,
-    "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+    "clause": "Your Gaze of C'thun or Obliteration Beam causes $s1% increased damage,",
     "kind": "claim",
     "claims": [
       {
@@ -1342,14 +1384,25 @@
         ]
       },
       {
-        "claim": "$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+        "claim": "or Obliteration Beam causes $s1% increased damage,",
         "labels": [
           "500719 behaviour_metric_delta beam_damage_with_805606",
           "500719 behaviour_metric_delta beam_damage_without_805606"
         ]
       }
     ],
-    "reason": "Claim 1 ('$?s805606[ or Obliteration Beam][] causes $s1% increased damage,') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), client text removes the $?s805606 conditional guard on 804369 at class end, and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states."
+    "reason": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), rev_20261125_01_cultist_client_texts.sql removes the $?s805606 conditional guard on 804369 (embedded via @s:804369:0@), and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,"
   },
   {
     "spell": 500719,
@@ -1357,7 +1410,17 @@
     "labels": [
       "500719 behaviour_metric_delta max_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 502122,
@@ -1494,7 +1557,7 @@
   },
   {
     "spell": 500767,
-    "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+    "clause": "Your Gaze of C'thun or Obliteration Beam causes $s1% increased damage,",
     "kind": "claim",
     "claims": [
       {
@@ -1504,14 +1567,25 @@
         ]
       },
       {
-        "claim": "$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+        "claim": "or Obliteration Beam causes $s1% increased damage,",
         "labels": [
           "500767 behaviour_metric_delta beam_damage_with_805606",
           "500767 behaviour_metric_delta beam_damage_without_805606"
         ]
       }
     ],
-    "reason": "Claim 1 ('$?s805606[ or Obliteration Beam][] causes $s1% increased damage,') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), client text removes the $?s805606 conditional guard on 804369 at class end, and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states."
+    "reason": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), rev_20261125_01_cultist_client_texts.sql removes the $?s805606 conditional guard on 804369 (embedded via @s:804369:0@), and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,"
   },
   {
     "spell": 500767,
@@ -1519,7 +1593,17 @@
     "labels": [
       "500767 behaviour_metric_delta max_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 504642,
@@ -1787,32 +1871,44 @@
   },
   {
     "spell": 524877,
-    "clause": "Heals a friendly target for ${$m1+0+$SP*0.678496},",
+    "clause": "Heals a friendly target for ${$m1+0+$SP*0.678496}",
     "labels": [
       "524877 behaviour_metric_delta heal_base",
       "524877 behaviour_metric_delta heal_sp"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Heals a friendly target for ${$m1+0+$SP*0.678496},"
   },
   {
     "spell": 524877,
-    "clause": "scaling with Insanity, and increases their critical strike chance by $s2%,",
+    "clause": "and increases their critical strike chance by $s2%,",
     "kind": "claim",
-    "claims": [
-      {
-        "claim": "increases their critical strike chance by $s2%,",
-        "labels": [
-          "524877 behaviour_metric_delta crit_buff"
-        ]
-      },
-      {
-        "claim": "scaling with Insanity",
-        "labels": [
-          "524877 behaviour_metric_delta no_insanity_scaling"
-        ]
-      }
-    ],
-    "reason": "Claim 1 ('scaling with Insanity') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 0% Insanity scaling on Horrific Revelation 704473 (matching archived live logs: 2 logs, 1 player, flat non-crit heals across 60-100 Insanity), client text removes ', scaling with Insanity,' on 704473 at class end, and 524877 no_insanity_scaling proves the 1.00 +- 0.02 ratio between 0 and 80 Insanity."
+    "reason": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 0% Insanity scaling on Horrific Revelation 704473 (matching archived live logs: 2 logs, 1 player, flat non-crit heals across 60-100 Insanity) and rev_20261125_01_cultist_client_texts.sql drops ', scaling with Insanity,' from 704473 (embedded in 524877 and 704476); the removed sub-claim is retired while 524877 no_insanity_scaling remains linked alongside crit_buff to guard 1.00 +- 0.02 across 0 vs 80 Insanity.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "scaling with Insanity, and increases their critical strike chance by $s2%,",
+    "labels": [
+      "524877 behaviour_metric_delta crit_buff",
+      "524877 behaviour_metric_delta no_insanity_scaling"
+    ]
   },
   {
     "spell": 524877,
@@ -1820,7 +1916,17 @@
     "labels": [
       "524877 behaviour_metric_delta max_stacks"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 524877,
@@ -1828,7 +1934,17 @@
     "labels": [
       "524877 behaviour_metric_delta duration"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 524879,
@@ -1978,7 +2094,17 @@
           "525065 behaviour_metric_delta no_attack_applied"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-16 and O-18 (2026-11-25, Cultist ADR 0020, ADR 0035): Twisted Seal 525065 buff ToolTip updates 'Deflecting spells.' -> 'Deflecting spells and abilities.'; Description kept verbatim.",
+      "spell": 525065,
+      "dbc_differs": "ToolTip differs from Spell.dbc"
+    }
   },
   {
     "spell": 525065,
@@ -1987,7 +2113,17 @@
       "525065 behaviour_metric_delta silence_on_deflect",
       "525065 behaviour_metric_delta no_silence_on_melee_deflect"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-16 and O-18 (2026-11-25, Cultist ADR 0020, ADR 0035): Twisted Seal 525065 buff ToolTip updates 'Deflecting spells.' -> 'Deflecting spells and abilities.'; Description kept verbatim.",
+      "spell": 525065,
+      "dbc_differs": "ToolTip differs from Spell.dbc"
+    }
   },
   {
     "spell": 525078,
@@ -2859,16 +2995,16 @@
   },
   {
     "spell": 680569,
-    "clause": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have.",
+    "clause": "Increases your attack power by 2 for every 100 armor value you have.",
     "kind": "claim",
     "claims": [
       {
-        "claim": "for every ${($m1*$m2)*2} armor value you have",
+        "claim": "for every 100 armor value you have",
         "labels": [
           "680569 behaviour_metric_delta ap_base",
           "680569 behaviour_metric_delta ap_armor"
         ],
-        "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 1 AP per 50 armor (proved in play by ap_base +3 AP at 182 armor and ap_armor +103 AP at 5182 armor) and client text fixes '${($m1*$m2)*2}' -> '100' ('2 for every 100 armor') at class end; coverage.py currently audits claims[0] as data because STATE_PROMISES['attack_power'] matches 'attack power' on claims[1] only."
+        "reason": "Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 1 AP per 50 armor (proved in play by ap_base +3 AP at 182 armor and ap_armor +103 AP at 5182 armor), and rev_20261125_01_cultist_client_texts.sql updates '${($m1*$m2)*2}' -> '100' ('2 for every 100 armor'); coverage.py still audits claims[0] as data because STATE_PROMISES['attack_power'] matches 'attack power' on claims[1] only."
       },
       {
         "claim": "Increases your attack power by 2",
@@ -2876,9 +3012,20 @@
           "680569 behaviour_metric_delta ap_base",
           "680569 behaviour_metric_delta ap_armor"
         ],
-        "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) and behaviour-proven against approved O-18 text '2 for every 100 armor' under owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 1 AP per 50 armor (proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
+        "reason": "Behaviour-proven against the O-18 streamed text '2 for every 100 armor' under owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 1 AP per 50 armor (proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
       }
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Malignant Armor 680569 keeps 1 AP per 50 armor; client text updates '${($m1*$m2)*2}' -> '100' ('2 for every 100 armor').",
+      "spell": 680569,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have."
   },
   {
     "spell": 680570,
@@ -4209,18 +4356,39 @@
           "800432 behaviour_metric_delta stun_duration"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Psychic Suppression 803746 keeps all-school +15% amplification (EffectMiscValue[0]=127); client text removes 'spell ' ('more damage from all sources').",
+      "spell": 800432,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 800432,
-    "clause": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
+    "clause": "The target takes $803746s1% more damage from all sources while you are channeling this spell.",
     "labels": [
       "800432 behaviour_metric_delta spell_amp",
       "800432 behaviour_metric_delta amp_aura",
       "800432 behaviour_metric_delta phys_control"
     ],
     "kind": "claim",
-    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps all-school +15% amplification (803746 EffectMiscValue[0]=127, matching archived live logs: 2 logs, 9 boss windows, Physical 1.142-1.164x), client text removes 'spell ' ('more damage from all sources') at class end, and 800432 spell_amp + phys_control (+15% on Physical too) prove both in game."
+    "reason": "Owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps all-school +15% amplification (803746 EffectMiscValue[0]=127, matching archived live logs: 2 logs, 9 boss windows, Physical 1.142-1.164x), rev_20261125_01_cultist_client_texts.sql removes 'spell ' ('more damage from all sources'), and 800432 spell_amp + phys_control (+15% on Physical too) prove both in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Psychic Suppression 803746 keeps all-school +15% amplification (EffectMiscValue[0]=127); client text removes 'spell ' ('more damage from all sources').",
+      "spell": 800432,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell."
   },
   {
     "spell": 502220,
@@ -4228,7 +4396,17 @@
     "labels": [
       "502220 behaviour_metric_delta insanity"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 502220,
@@ -4247,7 +4425,17 @@
           "502220 behaviour_metric_delta duration"
         ]
       }
-    ]
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 502220,
@@ -4255,17 +4443,38 @@
     "labels": [
       "502220 behaviour_metric_delta hot_reduction"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 502220,
-    "clause": "stacking up to $?s301317[8][$706913u] times.",
+    "clause": "stacking up to $?s301317[7][$706913u] times.",
     "labels": [
       "502220 behaviour_metric_delta stack_cap_base",
       "502220 behaviour_metric_delta stack_cap_301317"
     ],
     "kind": "claim",
-    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 7-stack cap with Call of C'Thun 301317 (4 base + 3 additional = 7, matching archived live logs: 5 logs, 4 players, 740 dose events, 11 at stack 7, 30 refreshes at 7, 0 at 8), client text updates '$?s301317[8]' -> '$?s301317[7]' on all 9 ranks at class end, and 502220 stack_cap_base (4) + stack_cap_301317 (7) prove both caps in game."
+    "reason": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 7-stack cap with Call of C'Thun 301317 (4 base + 3 additional = 7, matching archived live logs: 5 logs, 4 players, 740 dose events, 11 at stack 7, 30 refreshes at 7, 0 at 8), rev_20261125_01_cultist_client_texts.sql updates '$?s301317[8]' -> '$?s301317[7]' on all 9 ranks, and 502220 stack_cap_base (4) + stack_cap_301317 (7) prove both caps in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "stacking up to $?s301317[8][$706913u] times."
   },
   {
     "spell": 800463,
@@ -4797,7 +5006,17 @@
     "clause": "Level 40 Passive",
     "labels": [],
     "kind": "no_claim",
-    "reason": "A level-availability label line, not a gameplay claim."
+    "reason": "A level-availability label line, not a gameplay claim.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Void Strength 805121 keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength); client text updates 'spell hit chance' -> 'spell hit rating'.",
+      "spell": 805121,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 805121,
@@ -4806,16 +5025,37 @@
       "805121 behaviour_metric_delta shadow_sp_base",
       "805121 behaviour_metric_delta shadow_sp_str"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Void Strength 805121 keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength); client text updates 'spell hit chance' -> 'spell hit rating'.",
+      "spell": 805121,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
   },
   {
     "spell": 805121,
-    "clause": "and your spell hit chance by $s1% of your Strength.",
+    "clause": "and your spell hit rating by $s1% of your Strength.",
     "labels": [
       "805121 behaviour_metric_delta spell_hit_str"
     ],
     "kind": "claim",
-    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): server keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength as spell hit rating, proved in game by 805121 spell_hit_str: 10000 -> 10020 at 408 Strength) and client text updates 'spell hit chance' -> 'spell hit rating' at class end; coverage.py audits as data until the O-18 text SQL lands and matches STATE_PROMISES['combat_rating']."
+    "reason": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength as spell hit rating, proved in game by 805121 spell_hit_str: 10000 -> 10020 at 408 Strength) and rev_20261125_01_cultist_client_texts.sql updates 'spell hit chance' -> 'spell hit rating', matching STATE_PROMISES['combat_rating'] and promoting this row from data to behaviour.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Void Strength 805121 keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength); client text updates 'spell hit chance' -> 'spell hit rating'.",
+      "spell": 805121,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "and your spell hit chance by $s1% of your Strength."
   },
   {
     "spell": 805126,
@@ -5036,7 +5276,7 @@
   },
   {
     "spell": 806382,
-    "clause": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+    "clause": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
     "kind": "claim",
     "claims": [
       {
@@ -5054,7 +5294,7 @@
         ]
       },
       {
-        "claim": "for $807219d",
+        "claim": "for $804275d",
         "labels": [
           "806382 behaviour_metric_delta duration"
         ]
@@ -5067,7 +5307,18 @@
         ]
       }
     ],
-    "reason": "Claim 2 ('for $807219d') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-15 (2026-11-25, channel_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps Dark Matter ending with the 6 sec Satiate 804275 channel (matching archived live logs: 32 sessions, max 6.009 s / 6 ticks), client text updates '$807219d' (10 sec) -> '$804275d' (6 sec) at class end, and 806382 duration proves the ruled 6 sec duration in game."
+    "reason": "Owner ruling O-15 Q-cu-15 (2026-11-25, channel_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps Dark Matter ending with the 6 sec Satiate 804275 channel (matching archived live logs: 32 sessions, max 6.009 s / 6 ticks), rev_20261125_01_cultist_client_texts.sql updates '$807219d' (10 sec) -> '$804275d' (6 sec), and 806382 duration proves the ruled 6 sec duration in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-15 (2026-11-25, channel_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Dark Matter 806382 keeps 6 sec duration ending with Satiate 804275; client text updates '$807219d' -> '$804275d'.",
+      "spell": 806382,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d."
   },
   {
     "spell": 806384,
