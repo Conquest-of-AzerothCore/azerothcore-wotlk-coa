@@ -2190,17 +2190,10 @@
   {
     "spell": 572103,
     "clause": "The tentacle gains health based on your Stamina.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Tooltip states no coefficient ('gains health based on your Stamina'; direction-only claim, AscensionCultistSummons.cpp:128 sets player->GetMaxHealth() / 3). No existing kind judges a direction-only Stamina increase on owned_creature_max_health without inventing a server-code expected value (attack_power_arms supports only attack_power; power_term_direction supports only damage or absorb on cast_spell; monotone requires phase_power), and coverage.STATE_PROMISES['owned_creature_max_health'] (coverage.py:496) requires 'maximum health' rather than 'gains health'. Nearest kind: metric_delta with generalized stat_arms (Stamina + owned_creature_max_health) and STATE_PROMISES widened to '(?:maximum )?health'.",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "572103 behaviour_metric_delta stamina_health_arms"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 572103,
@@ -2650,7 +2643,10 @@
   {
     "spell": 680579,
     "clause": "Increases your critical strike rating based on your parry and dodge rating.",
-    "labels": [],
+    "labels": [
+      "680579 behaviour_metric_delta crit_parry_arms",
+      "680579 behaviour_metric_delta crit_dodge_arms"
+    ],
     "kind": "claim"
   },
   {
