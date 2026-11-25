@@ -192,6 +192,38 @@ class OffensiveDispelResistRateTests(unittest.TestCase):
         self.assertEqual(offensive_dispel_resist_verdict(
             base_verdict(exp), seeded_runs(exp.model, {CONTROL: 0.20, TREATMENT: 0.20}, 12), exp.model).status, 'alert')
 
+    def test_gate_auras_sets_precondition_before_required_aura_in_gated_arms_only(self):
+        plain, plain_exp = scenario_of(GATED_ENTRY)
+        gated = {**GATED_ENTRY, 'gate_auras': [[500706, 95]]}
+        scenario, expectations = scenario_of(gated)
+        validated = run.validate(scenario)
+        self.assertEqual([e.label for e in expectations], [e.label for e in plain_exp])
+        steps = validated['steps']
+        insanity_steps = [i for i, s in enumerate(steps)
+                          if s['action'] == 'set_aura' and s.get('spell') == 500706 and s.get('stacks') == 95]
+        self.assertEqual(len(insanity_steps), 2)
+        for idx in insanity_steps:
+            self.assertEqual(steps[idx]['actor'], CASTER)
+            self.assertEqual(steps[idx + 1]['action'], 'set_aura')
+            self.assertEqual(steps[idx + 1]['spell'], 680604)
+            self.assertEqual(steps[idx + 2]['action'], 'cast')
+            self.assertEqual(steps[idx + 2]['spell'], 520326)
+        without_gate_auras = [s for s in steps
+                              if not (s['action'] == 'set_aura' and s.get('spell') == 500706 and s.get('stacks') == 95)]
+        self.assertEqual(without_gate_auras, plain['steps'])
+
+    def test_refuses_invalid_gate_auras_or_gate_auras_without_gate_cast(self):
+        for bad in (
+                {**BASE_ENTRY, 'gate_auras': [[500706, 95]]},
+                {**GATED_ENTRY, 'gate_auras': 500706},
+                {**GATED_ENTRY, 'gate_auras': [[500706]]},
+                {**GATED_ENTRY, 'gate_auras': [[0, 95]]},
+                {**GATED_ENTRY, 'gate_auras': [[500706, -1]]},
+                {**GATED_ENTRY, 'gate_auras': [[True, 95]]},
+                {**GATED_ENTRY, 'gate_auras': [[500706, False]]}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                scenario_of(bad)
+
 
 if __name__ == '__main__':
     unittest.main()
