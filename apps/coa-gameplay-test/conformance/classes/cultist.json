@@ -48622,16 +48622,24 @@
     {
       "spell": 572846,
       "auras": [
-        803061
+        [
+          500706,
+          70
+        ],
+        680603
       ],
-      "reason": "AscensionCultistAbilities.cpp:82-84 rejects Entropic Slam 572846 with SPELL_FAILED_NO_POWER unless Madness 803061 is active or Insanity 500706 >= 60; Total Madness 803061 only increases damage taken by 30% (Effect[0] aura 87; Effect[1] cleared by AscensionCultistContracts.cpp:105-106) and has zero outbound damage modifier, so setting 803061 before each cast allows the hit_mean scenario to cast without affecting hit damage."
+      "reason": "AscensionCultistAbilities.cpp:82-84 rejects Entropic Slam 572846 with SPELL_FAILED_NO_POWER unless Insanity 500706 >= 60 (or Madness 803061), and AscensionCultist.cpp:270-273 Refresh() strips CasterAuraSpell 680603 whenever Insanity < 60; setting [500706, 70] then 680603 before each cast keeps both valid without overlapping 572846's SpellFamilyFlags (ADR 1319)."
     },
     {
       "spell": 806830,
       "auras": [
-        803061
+        [
+          500706,
+          50
+        ],
+        680602
       ],
-      "reason": "AscensionCultistAbilities.cpp:82-84 rejects Hammer of Twilight 806830 with SPELL_FAILED_NO_POWER unless Madness 803061 is active or Insanity 500706 >= 40; Total Madness 803061 only increases damage taken by 30% (Effect[0] aura 87; Effect[1] cleared by AscensionCultistContracts.cpp:105-106) and has zero outbound damage modifier, so setting 803061 before each cast allows the hit_mean scenario to cast without affecting hit damage."
+      "reason": "AscensionCultistAbilities.cpp:82-84 rejects Hammer of Twilight 806830 with SPELL_FAILED_NO_POWER unless Insanity 500706 >= 40 (or Madness 803061), and AscensionCultist.cpp:270-273 Refresh() strips CasterAuraSpell 680602 whenever Insanity < 40; setting [500706, 50] then 680602 before each cast keeps both valid without overlapping 806830's SpellFamilyFlags (ADR 1319)."
     }
   ],
   "hit_casts": [],
