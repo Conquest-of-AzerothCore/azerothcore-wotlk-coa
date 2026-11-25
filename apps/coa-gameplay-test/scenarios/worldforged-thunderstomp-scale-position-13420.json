@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "name": "Worldforged Thunderstomp Scale stands on Un'Goro terrain instead of underground (#13420)",
-  "contract": "#13420 reported the Thunderstomp Scale pickup (Preserved Dermal Plate, gameobject entry 95918, guid 6942322, drops item 515372) in Un'Goro Crater underground and unclickable. The realm-map pass moved (x, y) 6.17 yd north-east to (-7821.700, -917.400) where terrain is -268.4505 while keeping the old z (-269.053), burying it 0.60 yd underground. rev_20261126_13420 restores first-pass realm-dump row 6901316 (-7823.470, -923.311, -269.053; +0.075 yd above terrain). Expected: the pickup stands at that spot on the surface, is not under water, and opens with loot.",
+  "name": "Worldforged Thunderstomp Scale stands on Un'Goro terrain under the fallen log (#13420)",
+  "contract": "#13420 reported the Thunderstomp Scale pickup (Preserved Dermal Plate, gameobject entry 95918, guid 6942322, drops item 515372) in Un'Goro Crater underground and unclickable. The realm-map pass moved (x, y) 6.17 yd north-east to (-7821.700, -917.400) where terrain is -268.4505 while keeping the old z (-269.053), burying it 0.60 yd underground. rev_20261126_13420 restores first-pass realm-dump row 6901316 (-7823.470, -923.311, -269.053; +0.075 yd above .map terrain -269.128), tucked under the overhanging flank of Ashenvaletreelog02.m2 (ID 183066, underside at -267.650, +1.403 yd above the pickup). Because ProbeTerrain queries Map::GetHeight from z + Z_OFFSET_FIND_HEIGHT (+2.0 yd), its downward ray hits that overhanging log surface and spawn_ground_gap reads -1.403 against the log rather than the terrain; do not assert spawn_ground_gap/spawn_placement here. Expected: the pickup stands at (-7823.470, -923.311, -269.053) under the log overhang (headroom ~1.10 yd vs 10.0 yd on the bare slope), is not under water, and opens with loot from open ground 1.60 yd away (6.51 yd from the broken spot).",
   "timeout_ms": 60000,
   "location": {
     "map": 1,
-    "x": -7822.0,
-    "y": -923.3,
-    "z": -269.0,
+    "x": -7825.0,
+    "y": -923.0,
+    "z": -268.72,
     "o": 0
   },
   "players": [
@@ -38,7 +38,7 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the pickup stands at its realm-dump spot (-7823.470, -923.311, -269.053) instead of underground",
+      "label": "DISCRIMINATING: the pickup stands at its realm-dump spot (-7823.470, -923.311, -269.053) instead of 6.17 yd away underground",
       "actor": "p",
       "metric": "spawn_distance",
       "x": -7823.47,
@@ -50,21 +50,11 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: the pickup rests on the terrain surface instead of 0.60 yd below it",
+      "label": "DISCRIMINATING: the pickup sits under the fallen log overhang (~1.10 yd headroom) instead of open sky (10 yd) on the bare slope",
       "actor": "p",
-      "metric": "spawn_ground_gap",
-      "min": -0.1,
-      "max": 0.3,
-      "guid": 6942322,
-      "spawn_type": "gameobject"
-    },
-    {
-      "action": "assert",
-      "label": "the pickup is grounded within 0.8 yd",
-      "actor": "p",
-      "metric": "spawn_placement",
-      "tolerance": 0.8,
-      "equals": 0,
+      "metric": "spawn_headroom",
+      "min": 0.8,
+      "max": 1.5,
       "guid": 6942322,
       "spawn_type": "gameobject"
     },
@@ -74,15 +64,6 @@
       "actor": "p",
       "metric": "spawn_submerged",
       "equals": 0,
-      "guid": 6942322,
-      "spawn_type": "gameobject"
-    },
-    {
-      "action": "assert",
-      "label": "no model surface lies above the pickup",
-      "actor": "p",
-      "metric": "spawn_headroom",
-      "min": 5,
       "guid": 6942322,
       "spawn_type": "gameobject"
     },
@@ -104,7 +85,7 @@
     },
     {
       "action": "assert",
-      "label": "the pickup is within reach and opens",
+      "label": "DISCRIMINATING: the pickup is within reach from beside the log (1.60 yd vs 6.51 yd to the broken spot) and opens",
       "actor": "p",
       "metric": "cast_failure",
       "spell": 3365,
