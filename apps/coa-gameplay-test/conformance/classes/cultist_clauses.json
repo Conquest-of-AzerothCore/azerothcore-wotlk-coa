@@ -1577,7 +1577,7 @@
       "520345 behaviour_metric_delta teleport_broken_control"
     ],
     "kind": "claim",
-    "reason": "Real server alert on the \"if the shield holds\" condition (tool gap closed by ADR 1302): teleport_holds passes (ok/ok: 15.0 yd displacement, distance_2d 15 -> 0, 520346 at 5 stacks), while teleport_broken_control alerts (alert/alert: 6x Void Zone 92559 = 6000 dmg breaks all 4 stacks of 520346 at 4200-4500 ms, yet Aura::UpdateOwner fires tick #5 of 520345 at 5000 ms right before AURA_REMOVE_BY_EXPIRE, re-applying 1 fresh stack of 520346 so AscensionCultistAuras.cpp:167-171 still teleports the caster 15.0 yd to the ally with 520346 at 1 stack). Claim stays uncounted until fixed."
+    "reason": "Proved after server fix (Cultist ADR 0025): on the final tick of Dark Veil 520345, aura_ascension_cultist_lifecycle::Tick skips re-applying 520346 if either shield is already broken. teleport_holds passes (ok/ok: 15.0 yd displacement, distance_2d 15 -> 0, 520346 at 5 stacks) and teleport_broken_control passes (ok/ok: 0.0 yd displacement, distance_2d 15 -> 15, 520346 at 0 stacks)."
   },
   {
     "spell": 520345,
