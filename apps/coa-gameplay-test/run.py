@@ -700,8 +700,8 @@ def validate(scenario, clock=REAL_CLOCK):
         validate_raid_role(player)
     for creature in creatures:
         keys(creature, {'id', 'owner', 'entry'},
-             {'id', 'owner', 'entry', 'distance', 'faction', 'level', 'health', 'reaction', 'spell_hit_bonus',
-              'melee_hit_bonus', 'stationary', 'min_level_armor'},
+             {'id', 'owner', 'entry', 'distance', 'dx', 'dy', 'faction', 'level', 'health', 'reaction',
+              'spell_hit_bonus', 'melee_hit_bonus', 'stationary', 'min_level_armor'},
              'creature')
         identity = creature['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid creature id')
@@ -711,7 +711,15 @@ def validate(scenario, clock=REAL_CLOCK):
         for key, default in (('entry', None), ('faction', 14), ('health', 100000)):
             number(creature.get(key, default), key, 1, 2**31 - 1, True)
         number(creature.get('level', 80), 'creature level', 1, 255, True)
-        number(creature.get('distance', 3), 'distance', 0, 100)
+        if 'dx' in creature or 'dy' in creature:
+            require('distance' not in creature, 'Creature cannot set both distance and dx/dy')
+            dx = creature.get('dx', 0)
+            dy = creature.get('dy', 0)
+            number(dx, 'dx', -100, 100)
+            number(dy, 'dy', -100, 100)
+            require(math.hypot(dx, dy) <= 100, 'Creature offset exceeds 100 yd')
+        else:
+            number(creature.get('distance', 3), 'distance', 0, 100)
         number(creature.get('reaction', 0), 'reaction', 0, 2, True)
         require(type(creature.get('stationary', False)) is bool, 'stationary must be boolean')
         require(type(creature.get('min_level_armor', False)) is bool, 'min_level_armor must be boolean')

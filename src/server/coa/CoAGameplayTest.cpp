@@ -3589,7 +3589,13 @@ private:
                 Require(!_actors.count(id) && !_targets.count(id), "Duplicate actor id");
                 Player* player = GetPlayer(owner);
                 Position position = player->GetPosition();
-                position.m_positionX += definition.get<float>("distance", 3);
+                if (definition.get_optional<float>("dx") || definition.get_optional<float>("dy"))
+                {
+                    position.m_positionX += definition.get<float>("dx", 0.0f);
+                    position.m_positionY += definition.get<float>("dy", 0.0f);
+                }
+                else
+                    position.m_positionX += definition.get<float>("distance", 3);
                 TempSummon* creature = player->SummonCreature(definition.get<uint32>("entry"), position);
                 Require(creature != nullptr, "Could not summon fixture creature: " + id);
                 _targets.emplace(id, Target{ creature->GetMapId(), creature->GetInstanceId(), creature->GetGUID() });

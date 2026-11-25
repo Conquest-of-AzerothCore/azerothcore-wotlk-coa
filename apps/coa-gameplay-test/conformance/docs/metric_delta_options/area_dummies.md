@@ -48,3 +48,26 @@ metric, works with `area_sum`, and refuses `relocate_before_trigger`, `relocate_
 
 Sun Cleric: Hope 680637 `split_radius` (570187 radius 8 yd, dummy entry 36 reach 1.275 yd, leeway: edge 11.935 yd,
 mentor D-259).
+
+## Placed form (ADR 1307, provisional)
+
+`area_dummies` may instead be `{"placed": [{"dx": yd, "dy": yd, "before_expected": num, "expected": num, optional
+"tolerance": num}, ...], optional "casts_before": [spell, ...]}` with 1 to 11 placements, each a non-zero `(dx, dy)`
+offset from the caster (planar distance at most 100 yd, distinct from one another and from the primary dummy), and at
+least one placement expecting a change (`expected != before_expected`). Each extra dummy (`area1`, `area2`, ...) is
+spawned with `dx` and `dy` instead of `distance`. When `casts_before` is named, every placed dummy casts those spells
+before the `before` reading (or before the `before` trigger cast when `cast_in_before` is true) and again before the
+treatment trigger cast, each followed by the standard target-cast settle wait.
+
+Before the treatment trigger cast, `position_x`, `position_y` and `position_z` are read on the caster, the primary
+dummy and every placed dummy; after each phase's primary reading, the entry's metric is read on every placed dummy.
+The judge voids the trial (`unmeasured`) if any dummy's read planar position differs from its planned `(dx, dy)` by
+more than 0.25 yd or its height differs from the caster's by more than 1.0 yd, and alerts if any placed dummy's
+`before` or `after` reading misses its stated expectation and tolerance. When the entry reads `casting`, the option
+stamps `evidence_metric: "area_casting"` (a `state` metric whose `STATE_PROMISES` match `"all enemies"`, `"around
+you"`, `"nearby enemies"`, `"interrupt..."` and `"cast..."`). It refuses `area_sum`, `attack_swings`, relocation
+options (`relocate_before_trigger`, `relocate_during_wait`, `moving_before_trigger`), non-target metrics and a
+conflicting `evidence_metric`.
+
+Cultist: Crushing Dissonance 804056 `interrupt_around` (claim 375.2 `"of all enemies around you"`, 4 dummies placed at
+`(-5, 0)`, `(0, 5)`, `(0, -10.5)` inside the 11.935 yd edge and `(14, 0)` outside, all casting Evocation 12051).
