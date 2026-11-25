@@ -1519,7 +1519,7 @@
         "labels": []
       }
     ],
-    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) \u2014 no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
+    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) — no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
   },
   {
     "spell": 524877,
@@ -3239,11 +3239,37 @@
   {
     "spell": 706911,
     "clause": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
-    "labels": [
-      "706911 behaviour_metric_delta portal_rate",
-      "706911 behaviour_metric_delta portal_casts"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal",
+        "labels": [
+          "706911 behaviour_metric_delta portal_rate"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "706911 behaviour_metric_delta portal_cast_gaze",
+          "706911 behaviour_metric_delta portal_cast_horrorbolt",
+          "706911 behaviour_metric_delta portal_cast_beam",
+          "706911 behaviour_metric_delta portal_casts"
+        ]
+      },
+      {
+        "claim": "before disappearing",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance kind reads two of the properties the tooltip states for Depths of Madness 706911's void portal 533030: (1) exactly one cast per portal and no spell other than Gaze of C'thun, Horrorbolt or Obliteration Beam: the harness cast counter ProcCounter::CastCount is keyed by the creature guid and spell (CoAGameplayTest.cpp:768-783) and owned_creature_spell_cast_count needs a present owned creature (6127-6132), so it reads one portal; the cumulative reads (spell_damage_count with caster_entry, owned_creature_damage_count) count damage events, not casts (Obliteration Beam is a channel, 805572 DurationIndex 285, with several 805573 ticks per cast), and metric_delta compares a reading with an expectation or with one second read (fields_sum is two terms, ratio_to_metric one base), so the portal count (owned_creature_summon_count) cannot be set against the sum of the three spells' casts; flat_chance_rate takes a chance below 100% and judges a band around it, which for one spell would assert its unstated share; (2) 'before disappearing': AscensionCultistSummons.cpp:290-297 despawns the portal 5 s (10 s if channeled) after its cast, inside its 12000 ms summon duration (AscensionCultistEvents.cpp:230-232); proving the despawn follows the cast needs a read of one portal a known time after its cast, but the portal exists only after a 15% roll that Chance() (AscensionCultist.cpp:105-115) takes from roll_chance_f without the chance-of-success modifier forced_roll sets, and a metric_delta reading taken after a fixed series of Gaze casts sees only portals of the last ~7 casts (12 s / 1.7 s), none with probability 0.85^7 = 32%, so a 'gone before 12 s' read cannot be sized to 0.1%. The 706911 portal_casts read (portal damage, none present at 13 s) is the evidence kept under 'casts either ...' only as 'the portals deal damage'; it does not prove 'before disappearing'.",
+      "attempts": [
+        {
+          "agent": "cu-h3c",
+          "report": ".agents/plans/cu-h3c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706915,
