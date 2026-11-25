@@ -8,6 +8,7 @@ class Player;
 namespace AscensionMercenary
 {
 bool Active(Player const* player);
+bool StruckFirst(Player const* attacker, Player const* mercenary);
 }
 
 #endif

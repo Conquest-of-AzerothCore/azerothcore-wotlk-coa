@@ -22,14 +22,12 @@ enum MercenarySpells : uint32
     SPELL_WAR_MODE = 1004119,
     SPELL_PVE = 9931032,
     SPELL_MERCENARY = 9930874,
-    SPELL_MERCENARY_CRIMINAL = 9930862,
     SPELL_FOR_THE_HORDE = 101100,
     SPELL_FOR_THE_ALLIANCE = 101101
 };
 
 constexpr uint8 MERCENARY_MIN_LEVEL = 20;
 constexpr uint32 MERCENARY_FACTION_TEMPLATE = 1163;
-constexpr int32 MERCENARY_CRIMINAL_DURATION = 8 * MINUTE * IN_MILLISECONDS;
 constexpr Milliseconds TEAM_BATTLE_RECHECK_DELAY = 1s;
 thread_local Player const* standingDown = nullptr;
 
@@ -389,8 +387,8 @@ class ascension_mercenary_player : public PlayerScript
 public:
     ascension_mercenary_player()
         : PlayerScript("ascension_mercenary_player", {PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LEVEL_CHANGED,
-                                                      PLAYERHOOK_ON_PVP_KILL, PLAYERHOOK_ON_FFA_PVP_STATE_UPDATE,
-                                                      PLAYERHOOK_ON_MAP_CHANGED, PLAYERHOOK_ON_UPDATE_AREA})
+                                                      PLAYERHOOK_ON_FFA_PVP_STATE_UPDATE, PLAYERHOOK_ON_MAP_CHANGED,
+                                                      PLAYERHOOK_ON_UPDATE_AREA})
     {
     }
 
@@ -412,19 +410,6 @@ public:
     {
         if (!result && player && player != standingDown && ActiveMercenary(player))
             SetMercenaryFreeForAll(player);
-    }
-
-    void OnPlayerPVPKill(Player* killer, Player* killed) override
-    {
-        if (!killer || !killed || !ActiveMercenary(killer) || killer->GetTeamId() != killed->GetTeamId())
-            return;
-
-        killer->CastSpell(killer, SPELL_MERCENARY_CRIMINAL, true);
-        if (Aura* aura = killer->GetAura(SPELL_MERCENARY_CRIMINAL))
-        {
-            aura->SetMaxDuration(MERCENARY_CRIMINAL_DURATION);
-            aura->SetDuration(MERCENARY_CRIMINAL_DURATION);
-        }
     }
 
 private:
@@ -483,6 +468,12 @@ public:
 bool AscensionMercenary::Active(Player const* player)
 {
     return ActiveMercenary(player);
+}
+
+bool AscensionMercenary::StruckFirst(Player const* attacker, Player const* mercenary)
+{
+    Retaliation const* state = attacker->CustomData.Get<Retaliation>(RetaliationKey);
+    return state && state->Mercenaries.contains(mercenary->GetGUID());
 }
 
 void AddSC_AscensionMercenary()

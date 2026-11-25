@@ -1,0 +1,223 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: a Mercenary who defends itself against a same-faction attacker gets no Criminal",
+  "contract": [
+    "Issue #9132. The PR author's ruling (2026-11-25): no Criminal: Blood On Your Hands 9930873 is applied when a",
+    "non-Mercenary player attacks a Mercenary and the Mercenary defends itself, even when it kills the attacker.",
+    "A War Mode Human attacks a High-Risk Human Mercenary in Elwynn Forest, the Mercenary fights back and kills it.",
+    "Dodge and parry are zeroed so the Human's first swing lands: an avoided swing records no attacker."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 600,
+      "expertise_rating": 600
+    },
+    {
+      "id": "innocent",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 600,
+      "expertise_rating": 600
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Stormwind lets the Humans rest",
+      "actor": "innocent",
+      "metric": "resting",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "innocent",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the innocent is in War Mode",
+      "actor": "innocent",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary-to-be is in High-Risk",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and takes up Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "teleport",
+      "actor": "innocent",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive in Elwynn Forest",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "mercenary",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "innocent",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "mercenary",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "innocent",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "innocent",
+      "metric": "melee_attack_count",
+      "save_as": "first_swings"
+    },
+    {
+      "action": "attack",
+      "label": "The War Mode Human attacks the Mercenary first",
+      "actor": "innocent",
+      "target": "mercenary"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Human's swings go out",
+      "actor": "innocent",
+      "metric": "melee_attack_count",
+      "relative_to": "first_swings",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mercenary",
+      "metric": "melee_attack_count",
+      "save_as": "defence_swings"
+    },
+    {
+      "action": "attack",
+      "label": "The Mercenary defends itself",
+      "actor": "mercenary",
+      "target": "innocent"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary's swings go out",
+      "actor": "mercenary",
+      "metric": "melee_attack_count",
+      "relative_to": "defence_swings",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: fighting back gives no Criminal",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 0
+    },
+    {
+      "action": "set_health",
+      "actor": "innocent",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary kills its attacker",
+      "actor": "innocent",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mercenary"
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong Criminal application time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: killing an attacker in self-defence gives no Criminal",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 0
+    }
+  ]
+}
