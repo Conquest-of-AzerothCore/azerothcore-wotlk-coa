@@ -1,0 +1,58 @@
+{
+  "schema": 1,
+  "name": "Cenarion Hold: Halrin Kenari uses textured Cenarion Quartermaster display 17320 (#13151)",
+  "contract": [
+    "Halrin Kenari <Cenarion Circle Quartermaster> (115175) previously used display 55 (raw NightElfMale.mdx with ExtendedDisplayInfoID 0 and no textures) as a stand-in for Ascension's absent display 650603, leaving him untextured in the 3.3.5a client.",
+    "Expected: 115175 uses display 17320 (Fedryen Swiftspear <Cenarion Expedition Quartermaster>, ModelID 55, ExtendedDisplayInfoID 11968, baked texture in stock 3.3.5a).",
+    "Checks both creature_template_model and a spawned instance's active display_id."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -6866.81,
+    "y": 736.435,
+    "z": 45.6623,
+    "o": 5.19951
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "halrin",
+      "owner": "p",
+      "entry": 115175,
+      "faction": 35,
+      "level": 57,
+      "distance": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixtures finish loading",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Halrin Kenari template uses textured display 17320, not untextured 55",
+      "actor": "p",
+      "metric": "creature_model_display",
+      "entry": 115175,
+      "index": 0,
+      "equals": 17320
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: spawned Halrin Kenari displays 17320",
+      "actor": "halrin",
+      "metric": "display_id",
+      "equals": 17320
+    }
+  ]
+}
