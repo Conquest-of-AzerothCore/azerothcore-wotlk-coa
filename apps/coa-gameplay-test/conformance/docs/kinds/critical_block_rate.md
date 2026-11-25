@@ -23,8 +23,9 @@ blocks strictly twice the normal shield block value (`2 * B` against `B`).
   creatures (with haste and AP fixtures so every incoming hit exceeds `2 * B` and never full-blocks), and pauses
   them with Stun `56` during setup and reads.
 - `control` (before `gate_spell` is learned) and `treatment` (after a real learn) each verify `shield_item` in slot
-  `16`, `after_setup_stacks`, and constant `block_value` `B > 0`, then collect incoming blocks across windows with
-  `dodge = 0, parry = 0, block = 100`.
+  `16`, `after_setup_stacks` (at arm start, after every combat window, and at arm end — any missing or drifted stack
+  voids the arm as `unmeasured`), and constant `block_value` `B > 0` (start and end), then collect incoming blocks
+  across windows with `dodge = 0, parry = 0, block = 100`.
 - Control requires `>= min_ctrl` pooled blocks and `0` critical blocks (any critical block alerts).
 - Treatment pools across `parts`, requires `>= min_treat` blocks (exact binomial sample size for G-20 `±2 pt` band
   with pair false-fail and false-pass `<= residual`, default `0.1%`), requires `full == 0` (else `unmeasured`),

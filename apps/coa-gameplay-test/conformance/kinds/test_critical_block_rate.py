@@ -23,6 +23,18 @@ SYMBIOSIS_BASE_ENTRY = {
         {'spell': 573315, 'actor': 'caster', 'stacks': 0},
     ]}
 
+SYMBIOSIS_AT_60_ENTRY = {
+    **SYMBIOSIS_BASE_ENTRY,
+    'variant': 'crit_block_rate_at_60', 'label_suffix': 'crit_block_rate_at_60',
+    'name': 'Shadowy Symbiosis (20% critical block rate at 60 Insanity boundary)',
+    'quote': 'This effect is doubled while above 60 Insanity.',
+    'phase_auras': [[500706, 60, 'caster', 'caster']], 'setup_wait_ms': 1600,
+    'after_setup_stacks': [
+        {'spell': 500706, 'actor': 'caster', 'stacks': 60},
+        {'spell': 680603, 'actor': 'caster', 'stacks': 1},
+        {'spell': 573315, 'actor': 'caster', 'stacks': 0},
+    ]}
+
 SYMBIOSIS_ABOVE_60_ENTRY = {
     **SYMBIOSIS_BASE_ENTRY,
     'variant': 'crit_block_rate_above_60', 'label_suffix': 'crit_block_rate_above_60',
@@ -55,7 +67,7 @@ def seeded_runs(model: dict, ctrl_blocks: int = 100, ctrl_crits: int = 0, treat_
                 (TREATMENT, treat_blocks, treat_crits, treat_other, treat_full)):
             am = model['arms'][arm]
             values[am['shield']] = float(model['shield_item'])
-            for stack in am['stacks']:
+            for stack in (*am['stacks'], *am['window_stacks'], *am['end_stacks']):
                 values[stack['label']] = float(stack['expected'])
             values[am['start']['block_value']] = float(block_value)
             values[am['start']['count_all']] = float(cum_all)
@@ -102,11 +114,19 @@ class CriticalBlockRateTests(unittest.TestCase):
         self.assertEqual(metric_evidence()[TOTAL_METRIC], EVENT)
         for entry, treat_blocks, treat_crits in (
                 (SYMBIOSIS_BASE_ENTRY, 2600, 520),
+                (SYMBIOSIS_AT_60_ENTRY, 2600, 520),
                 (SYMBIOSIS_ABOVE_60_ENTRY, 3000, 1200)):
             with self.subTest(variant=entry['variant']):
                 scenario, [exp] = scenario_of(entry)
                 validated = run.validate(scenario)
                 self.assertEqual(len(validated['creatures']), entry['strikers'])
+                ctrl_m = exp.model['arms'][CONTROL]
+                treat_m = exp.model['arms'][TREATMENT]
+                self.assertEqual(len(ctrl_m['window_stacks']), 0)
+                self.assertEqual(len(ctrl_m['end_stacks']), len(entry['after_setup_stacks']))
+                self.assertEqual(len(treat_m['window_stacks']),
+                                 (entry['treatment_windows'] - 1) * len(entry['after_setup_stacks']))
+                self.assertEqual(len(treat_m['end_stacks']), len(entry['after_setup_stacks']))
                 runs = seeded_runs(exp.model, treat_blocks=treat_blocks, treat_crits=treat_crits)
                 verdict = critical_block_rate_verdict(base_verdict(exp), runs, exp.model)
                 self.assertEqual(verdict.status, 'ok', verdict.explanation)
@@ -153,11 +173,31 @@ class CriticalBlockRateTests(unittest.TestCase):
         for name, patch in (
                 ('wrong_shield', {am['shield']: 9999.0}),
                 ('wrong_insanity_stack', {am['stacks'][0]['label']: 61.0}),
+                ('insanity_drifted_mid_arm', {am['window_stacks'][0]['label']: 58.0}),
+                ('insanity_drifted_at_end', {am['end_stacks'][0]['label']: 58.0}),
                 ('block_value_drifted', {am['end']['block_value']: 60.0}),
                 ('zero_block_value', {am['start']['block_value']: 0.0, am['end']['block_value']: 0.0})):
             with self.subTest(case=name):
                 runs = seeded_runs(exp.model, overrides={0: patch})
                 self.assertEqual(critical_block_rate_verdict(base_verdict(exp), runs, exp.model).status, 'unmeasured')
+        for entry, treat_blocks, treat_crits, drifted in (
+                (SYMBIOSIS_AT_60_ENTRY, 2600, 520, 58.0),
+                (SYMBIOSIS_ABOVE_60_ENTRY, 3000, 1200, 59.0)):
+            _, [exp_i] = scenario_of(entry)
+            treat_i = exp_i.model['arms'][TREATMENT]
+            for name, label in (
+                    (f'{entry["variant"]}_mid_arm_drift', treat_i['window_stacks'][0]['label']),
+                    (f'{entry["variant"]}_end_drift', treat_i['end_stacks'][0]['label'])):
+                with self.subTest(case=name):
+                    runs = seeded_runs(exp_i.model, treat_blocks=treat_blocks, treat_crits=treat_crits,
+                                       overrides={0: {label: drifted}})
+                    verdict = critical_block_rate_verdict(base_verdict(exp_i), runs, exp_i.model)
+                    self.assertEqual(verdict.status, 'unmeasured', f'{name}: {verdict.explanation}')
+            with self.subTest(case=f'{entry["variant"]}_missing_end_stack'):
+                runs = seeded_runs(exp_i.model, treat_blocks=treat_blocks, treat_crits=treat_crits)
+                del runs[0].values[treat_i['end_stacks'][0]['label']]
+                verdict = critical_block_rate_verdict(base_verdict(exp_i), runs, exp_i.model)
+                self.assertEqual(verdict.status, 'unmeasured', verdict.explanation)
 
     def test_refuses_bad_specs(self):
         for bad in (

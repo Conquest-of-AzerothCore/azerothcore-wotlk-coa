@@ -249,18 +249,31 @@ def critical_block_scenario(class_file: dict, spec: CriticalBlockSpec) -> tuple[
         for aura_id, expected_stacks in spec.after_setup_stacks:
             label_name = f'{prefix} {arm} stack {aura_id}'
             steps.append(measurement(label_name, CASTER, 'aura_stacks', spell=aura_id))
-            stack_reads.append({'spell': aura_id, 'expected': expected_stacks, 'label': label_name})
+            stack_reads.append({'spell': aura_id, 'expected': expected_stacks, 'label': label_name, 'moment': 'start'})
         start_steps, start_names = block_reads(prefix, arm, 'start')
         steps += start_steps
+        window_stacks = []
         for window in range(1, windows + 1):
             steps += [{'action': 'set_health', 'actor': CASTER, 'value': STRIKE_HEALTH, 'maximum': STRIKE_HEALTH},
                       {'action': 'set_combat_avoidance', 'actor': CASTER, 'dodge': 0, 'parry': 0, 'block': 100},
                       *pause_steps(strikers, False),
                       {'action': 'wait', 'label': f'{arm} window {window}', 'ms': spec.window_ms},
                       *pause_steps(strikers, True)]
+            if window < windows:
+                for aura_id, expected_stacks in spec.after_setup_stacks:
+                    label_name = f'{prefix} {arm} window {window} stack {aura_id}'
+                    steps.append(measurement(label_name, CASTER, 'aura_stacks', spell=aura_id))
+                    window_stacks.append({'spell': aura_id, 'expected': expected_stacks, 'label': label_name,
+                                          'moment': f'window {window}'})
         end_steps, end_names = block_reads(prefix, arm, 'end')
         steps += end_steps
-        return steps, {'shield': shield_label, 'stacks': stack_reads, 'start': start_names, 'end': end_names}
+        end_stacks = []
+        for aura_id, expected_stacks in spec.after_setup_stacks:
+            label_name = f'{prefix} {arm} end stack {aura_id}'
+            steps.append(measurement(label_name, CASTER, 'aura_stacks', spell=aura_id))
+            end_stacks.append({'spell': aura_id, 'expected': expected_stacks, 'label': label_name, 'moment': 'end'})
+        return steps, {'shield': shield_label, 'stacks': stack_reads, 'window_stacks': window_stacks,
+                       'end_stacks': end_stacks, 'start': start_names, 'end': end_names}
 
     learn_spells = tuple(dict.fromkeys((BLOCK_SPELL, *spec.learn)))
     engage = [{'action': 'set_aura', 'actor': CASTER, 'target': sid, 'caster': sid, 'spell': aura_id, 'stacks': 1}
@@ -305,7 +318,9 @@ def critical_block_scenario(class_file: dict, spec: CriticalBlockSpec) -> tuple[
                      f'{spec.control_windows} window(s) of {spec.window_ms} ms before learning {spec.gate_spell} '
                      f'(must record 0 critical blocks over >= {min_ctrl} pooled blocks); treatment runs '
                      f'{spec.treatment_windows} window(s)/part across {spec.parts} part(s) after a real learn '
-                     f'(>= {min_treat} pooled blocks). Every incoming block must be a partial block with amount '
+                     f'(>= {min_treat} pooled blocks). Precondition aura stacks (after_setup_stacks) are verified at '
+                     f'arm start, after each combat window, and at arm end (any drift voids the arm as unmeasured). '
+                     f'Every incoming block must be a partial block with amount '
                      f'strictly equal to block_value B (normal) or 2*B (critical); any clamped full block voids the '
                      f'run as unmeasured and any non-1x/2x block amount alerts. Residual per counted pair of '
                      f'{PAIR_RUNS} runs (exact binomial at minimum sample): conformant false-fail {ff_pair:.1e}, '
@@ -331,12 +346,13 @@ def extract_arm(run: Run, arm_model: dict, shield_item: int, arm_name: str) -> t
         return None, 'unmeasured', missing_measurement(run, arm_model['shield'])
     if int(round(float(shield_raw))) != shield_item:
         return None, 'unmeasured', f'{arm_name} shield slot read {shield_raw:g}, expected {shield_item}'
-    for stack in arm_model['stacks']:
+    for stack in (*arm_model['stacks'], *arm_model['window_stacks'], *arm_model['end_stacks']):
         val = run.values.get(stack['label'])
         if val is None:
             return None, 'unmeasured', missing_measurement(run, stack['label'])
         if int(round(float(val))) != int(stack['expected']):
-            return None, 'unmeasured', (f'{arm_name} aura {stack["spell"]} stacks read {val:g}, expected '
+            moment = stack.get('moment', 'start')
+            return None, 'unmeasured', (f'{arm_name} {moment} aura {stack["spell"]} stacks read {val:g}, expected '
                                         f'{stack["expected"]}')
     start_vals, end_vals = {}, {}
     for moment, bucket in (('start', start_vals), ('end', end_vals)):

@@ -43,11 +43,13 @@ leaving `r242[0]` and `r243[0]` without a live combat-event proof of `Unit::isBl
      the kind module (zero edits to `coverage.py`).
    - Drives stationary melee strikers with AP/haste fixtures (`35785` ensures raw melee hits exceed `2 * B`, so no
      block is clamped to a full block) under `dodge = 0, parry = 0, block = 100`.
-   - Verifies shield slot, precondition aura stacks (Insanity and threshold markers), and constant `block_value` `B`
-     in both unlearned control and learned treatment arms.
+   - Verifies shield slot, precondition aura stacks (`after_setup_stacks`, including Insanity and threshold markers)
+     at arm start, after every combat window (`window_ms`), and at arm end, and constant `block_value` `B` (start and
+     end) in both unlearned control and learned treatment arms; any missing or drifted stack voids the arm as
+     `unmeasured`.
    - Voids as `unmeasured` on any clamped full block (`full > 0`); alerts on any non-`1x/2x` amount (`other > 0`),
      any amount-ratio deviation from `2.0x`, any control critical block, or a 99% Wilson interval outside the G-20
-     `±2 pt` band over the exact binomial minimum sample (`>= 14,677` at 20%, `>= 22,014` at 40%, pair residual
+     `±2 pt` band over the exact binomial minimum sample (`>= 14,716` at 20%, `>= 22,014` at 40%, pair residual
      false-fail and false-pass `<= 0.1%`).
 
 ## Consequences
