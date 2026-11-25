@@ -32340,6 +32340,930 @@
         2000,
         100000
       ]
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (301067 buff lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "buff_duration",
+      "label_suffix": "buff_duration",
+      "quote": "Casting Wrath of the Black Empire now causes your subsequent Wraths of the Black Empire, within $301067d,",
+      "gate_spell": 301068,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        504904
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 301067,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 17000,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "301068 Sunderer of Realities (AscensionCultistAbilities.cpp:149-155): casting Wrath of the Black Empire 504904 (1500 ms cast, 20 Insanity cost via 503695, CasterAuraSpell 680601) applies 301067 (DurationIndex 8 = 15000 ms, $301067d = 15 sec). Absent before cast (0), present (1) at wait_ms 15500 (14000 ms after 1500 ms cast, > 13500 = 0.9*15000), and gone (0) after expiry_wait_ms 2000 (16000 ms after cast, < 16500 = 1.1*15000), excluding 10% off on both sides. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (2nd Wrath deals +15% more damage)",
+      "kind": "metric_delta",
+      "variant": "wrath_damage_1stack",
+      "label_suffix": "wrath_damage_1stack",
+      "quote": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+      "gate_spell": 301068,
+      "learn": [
+        504904
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        504904
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504904,
+        "target": "dummy"
+      },
+      "before_expected": 46797,
+      "expected": 97103,
+      "expected_gain": 50306,
+      "tolerance": 350,
+      "wait_ms": 3500,
+      "expire_ms": 16500,
+      "void_on_cast_failure": true,
+      "observe_source": "301067 Effect[1] aura 108 SPELLMOD_DAMAGE bp=14+die=1 = +15% per stack ($301067s2 = 15) on Wrath of the Black Empire 504904 (bp=817, die=148 -> [818..965], mean 891.5, SP coef 1.0, Cultist tuning 887013 +12%). At +20000 SP, non-crit (16255=-100), no resist (823764): 1 unbuffed Wrath = (20891.5 +- 74) * 1.12 = 23398.5 +- 83. Each phase casts 504904 twice (setup + trigger, 1700 ms apart): control (before 301068) deals 2 * 23398.5 = 46797 +- 166; treatment (after 301068) deals 1.00 + 1.15 = 2.15 * 23398.5 = 50306 +- 179 (cumulative 97103, expected_gain 50306 +- 350, excluding 0% 46797 and +30% 53816 by > 3150). Paired with wrath_damage_2stacks. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (3rd Wrath deals +30% more damage, stacking +15% each)",
+      "kind": "metric_delta",
+      "variant": "wrath_damage_2stacks",
+      "label_suffix": "wrath_damage_2stacks",
+      "quote": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+      "gate_spell": 301068,
+      "learn": [
+        504904
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        504904,
+        504904
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504904,
+        "target": "dummy"
+      },
+      "before_expected": 70195,
+      "expected": 150920,
+      "expected_gain": 80725,
+      "tolerance": 500,
+      "wait_ms": 3500,
+      "expire_ms": 16500,
+      "void_on_cast_failure": true,
+      "observe_source": "301067 stacks +15% per subsequent Wrath (StackAmount 15). Each phase casts 504904 3 times (setup x2 + trigger): control (before 301068) deals 3 * 23398.5 = 70195 +- 250; treatment (after 301068) deals (1.00 + 1.15 + 1.30) = 3.45 * 23398.5 = 80725 +- 287 (cumulative 150920, expected_gain 80725 +- 500, excluding non-stacking 3.30 * 23398.5 = 77215 by 3510 and 0% 70195 by 10530). Paired with wrath_damage_1stack. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (2nd Wrath spawns 1 Void Portal 533030, 1st spawns 0)",
+      "kind": "metric_delta",
+      "variant": "portal_spawn",
+      "label_suffix": "portal_spawn",
+      "quote": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+      "gate_spell": 301068,
+      "learn": [
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        504904
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 533030
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 3500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAbilities.cpp:149-155: casting Wrath of the Black Empire 504904 with 301068 spawns Void Portal 533030 ONLY when 301067 is already active (i.e. on subsequent Wraths), and then applies 301067. Two 504904 casts (setup + trigger, 1700 ms apart): control (before 301068) spawns 0 portals; treatment (after 301068) has exactly 1 portal present at wait_ms 2000 (proving 1st Wrath spawned 0 and 2nd Wrath spawned 1, not 2). Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (void portal casts Gaze of C'thun)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_gaze",
+      "label_suffix": "portal_cast_gaze",
+      "quote": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+      "gate_spell": 301068,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520332,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Matches merged Depths of Madness 706911 precedent: AscensionCultistSummons.cpp:290-297 picks roots[urand(0,2)] from {500110, 800416, 805572}; Gaze reaches dummy via 500110 -> 520334 -> 520332 (caster_entry 533030). 24 alternating [504904, 500712] setup casts (+20/-20 Insanity neutral) + 1 trigger 504904 = 25 Wrath casts -> 24 deterministic portals (every cast after #1 has 301067 active). Sizing: P(miss one spell in 1 run) = (2/3)^24 = 5.95e-5; union bound over 3 spells x 2 runs of a pair = 6 * (2/3)^24 = 3.57e-4 = 0.036% <= 0.1% per pair. No share asserted. Control (before 301068): 0 events. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (void portal casts Horrorbolt)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_horrorbolt",
+      "label_suffix": "portal_cast_horrorbolt",
+      "quote": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+      "gate_spell": 301068,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800416,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Horrorbolt 800416 (caster_entry 533030) seen at least once over 24 deterministic portals (25 Wrath casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (void portal casts Obliteration Beam)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_beam",
+      "label_suffix": "portal_cast_beam",
+      "quote": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+      "gate_spell": 301068,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805573,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Obliteration Beam 805572 -> 805573 (caster_entry 533030) seen at least once over 24 deterministic portals (25 Wrath casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301068 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301200,
+      "name": "Apocalyptic Skies (Wrath of the Black Empire spawns a Void Portal 533030)",
+      "kind": "metric_delta",
+      "variant": "portal_spawn",
+      "label_suffix": "portal_spawn",
+      "quote": "Casting Wrath of the Black Empire now spawns a void portal",
+      "gate_spell": 301200,
+      "learn": [
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 533030
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 3500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAbilities.cpp:149-152: casting Wrath of the Black Empire 504904 with 301200 Apocalyptic Skies deterministically summons Void Portal 533030 at target for 12000 ms. Control (before learning 301200): 0 portals. Treatment (after real learn of 301200): 1 portal present at wait_ms 2000. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301200,
+      "name": "Apocalyptic Skies (void portal casts Gaze of C'thun)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_gaze",
+      "label_suffix": "portal_cast_gaze",
+      "quote": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+      "gate_spell": 301200,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520332,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Gaze of C'thun 500110 -> 520334 -> 520332 (caster_entry 533030) seen at least once over 24 deterministic portals (24 Wrath 504904 casts, alternating 500712 for Insanity neutrality). Sizing: union bound over 3 spells x 2 runs = 6 * (2/3)^24 = 0.036% <= 0.1% per pair. No share asserted. Control: 0 events. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301200,
+      "name": "Apocalyptic Skies (void portal casts Horrorbolt)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_horrorbolt",
+      "label_suffix": "portal_cast_horrorbolt",
+      "quote": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+      "gate_spell": 301200,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800416,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Horrorbolt 800416 (caster_entry 533030) seen at least once over 24 deterministic portals (24 Wrath 504904 casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301200,
+      "name": "Apocalyptic Skies (void portal casts Obliteration Beam)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_beam",
+      "label_suffix": "portal_cast_beam",
+      "quote": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+      "gate_spell": 301200,
+      "learn": [
+        500712,
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "trigger_spell": 504904,
+      "target": "dummy",
+      "setup_casts": [
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712,
+        504904,
+        500712
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3200,
+      "cast_power": 2000,
+      "refill_power_after_setup_casts": {
+        "power": 0
+      },
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805573,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 14000,
+      "expire_ms": 3500,
+      "observe_source": "Matches merged Depths of Madness 706911 precedent: portal Obliteration Beam 805572 -> 805573 (caster_entry 533030) seen at least once over 24 deterministic portals (24 Wrath 504904 casts, alternating 500712 for Insanity neutrality). Union bound 6 * (2/3)^24 = 0.036% <= 0.1% per pair. Control: 0 events. Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
     }
   ],
   "player_observations": [],

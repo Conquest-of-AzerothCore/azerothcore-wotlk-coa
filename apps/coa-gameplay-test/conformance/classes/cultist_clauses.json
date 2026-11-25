@@ -634,23 +634,63 @@
     "spell": 301068,
     "clause": "Casting Wrath of the Black Empire now causes your subsequent Wraths of the Black Empire, within $301067d,",
     "labels": [
-      "301068 spell_duration 301067 #0"
+      "301068 behaviour_metric_delta buff_duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 301068,
     "clause": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
-    "labels": [
-      "301068 effect_value 301067e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "to deal $301067s2% more damage each",
+        "labels": [
+          "301068 behaviour_metric_delta wrath_damage_1stack",
+          "301068 behaviour_metric_delta wrath_damage_2stacks"
+        ]
+      },
+      {
+        "claim": "and unleash Apocalyptic Skies upon the enemy.",
+        "labels": [
+          "301068 behaviour_metric_delta portal_spawn"
+        ]
+      }
+    ]
   },
   {
     "spell": 301068,
     "clause": "Spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Spawns a void portal",
+        "labels": [
+          "301068 behaviour_metric_delta portal_spawn"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "301068 behaviour_metric_delta portal_cast_gaze",
+          "301068 behaviour_metric_delta portal_cast_horrorbolt",
+          "301068 behaviour_metric_delta portal_cast_beam"
+        ]
+      },
+      {
+        "claim": "before disappearing.",
+        "labels": []
+      }
+    ],
+    "tool_gap": {
+      "reason": "Matches merged Depths of Madness 706911 tool_gap: no existing conformance kind proves two properties of the void portal 533030 (AscensionCultistSummons.cpp:290-297): (1) exactly one cast per portal and no spell other than Gaze of C'thun, Horrorbolt, or Obliteration Beam (owned_creature_spell_cast_count reads one spell on a present portal; cumulative spell_damage_count with caster_entry counts damage ticks rather than casts, and metric_delta cannot assert sum(casts across 3 spells) == owned_creature_summon_count and total casts of all spells == owned_creature_summon_count); (2) \"before disappearing\" as despawn-follows-cast (533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, and proving post-cast disappearance distinct from fixed timer expiry requires a per-portal cast-then-despawn lifecycle read).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301180,
@@ -735,8 +775,36 @@
   {
     "spell": 301200,
     "clause": "Casting Wrath of the Black Empire now spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Wrath of the Black Empire now spawns a void portal",
+        "labels": [
+          "301200 behaviour_metric_delta portal_spawn"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "301200 behaviour_metric_delta portal_cast_gaze",
+          "301200 behaviour_metric_delta portal_cast_horrorbolt",
+          "301200 behaviour_metric_delta portal_cast_beam"
+        ]
+      },
+      {
+        "claim": "before disappearing.",
+        "labels": []
+      }
+    ],
+    "tool_gap": {
+      "reason": "Matches merged Depths of Madness 706911 tool_gap: no existing conformance kind proves two properties of the void portal 533030 (AscensionCultistSummons.cpp:290-297): (1) exactly one cast per portal and no spell other than Gaze of C'thun, Horrorbolt, or Obliteration Beam (owned_creature_spell_cast_count reads one spell on a present portal; cumulative spell_damage_count with caster_entry counts damage ticks rather than casts, and metric_delta cannot assert sum(casts across 3 spells) == owned_creature_summon_count and total casts of all spells == owned_creature_summon_count); (2) \"before disappearing\" as despawn-follows-cast (533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, and proving post-cast disappearance distinct from fixed timer expiry requires a per-portal cast-then-despawn lifecycle read).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301209,
