@@ -418,7 +418,7 @@
       {
         "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
         "labels": [
-          "300300 effect_value 560943e0 #1"
+          "300300 behaviour_metric_delta mind_rot_hit"
         ]
       },
       {
@@ -429,7 +429,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Two gaps on row 42: (1) claim 0 ('Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%'): harness metric spell_hit_bonus_taken (CoAGameplayTest.cpp:4132-4138, run.py:175) already reads the engine modifier on the target (confirmed alert 0% vs +3% on 560943 due to EffectMiscValue[0]=0 in cu-g6b runs 20261125-002625 / -002657), but coverage.METRIC_EVIDENCE (coverage.py:433-486) omits spell_hit_bonus_taken (1-line tool extension); (2) claim 1 ('for $560943d'): 300300 applies 560943 at 25% raw Chance() on periodic/channeled damage, and last_application_expiry feed (cast_until_aura, CoAGameplayTest.cpp:7590, last_application_expiry.py:87,185) stops only on an aura on the caster, never on the dummy, while repeat cannot guarantee a proc within 10000 ms at <=0.1% residual failure.",
+      "reason": "Claim 1 ('for $560943d'): 300300 applies 560943 at 25% raw Chance() on periodic/channeled damage, and last_application_expiry feed (cast_until_aura, CoAGameplayTest.cpp:7590, last_application_expiry.py:87,185) stops only on an aura on the caster, never on the dummy, while repeat cannot guarantee a proc within 10000 ms at <=0.1% residual failure. Claim 0 ('Increases the chance for allies to hit ... by $560943s1%') is now measured by live alert 300300 behaviour_metric_delta mind_rot_hit (runs 20261125-064448 and 20261125-064610: 560943 aura 0 -> 1 confirmed, spell_hit_bonus_taken Shadow 502182 measured 0 before and 0 after against +3 tooltip; fix pending on fix/coa-cultist-conformance-fixes-2).",
       "attempts": [
         {
           "agent": "cu-t3",
@@ -1655,7 +1655,9 @@
       {
         "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
         "labels": [
-          "525049 effect_value 560943e0 #0"
+          "525049 behaviour_metric_delta mind_rot_hit_shadow",
+          "525049 behaviour_metric_delta mind_rot_hit_fire",
+          "525049 behaviour_metric_delta mind_rot_hit_nature"
         ]
       },
       {
@@ -1666,7 +1668,7 @@
         ]
       }
     ],
-    "reason": "Alert (claim 0, uncounted): Mind Rot 560943 Spell.dbc Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE has BasePoints 2 + DieSides 1 (+3%) but EffectMiscValue[0] = 0 (no pending SQL or AscensionCultistContracts.cpp override), so Unit::GetTotalAuraModifierByMiscMask (Unit.cpp:4011, 7194) evaluates 0 & schoolMask == 0. Measured at runtime via coa-verify runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-525049-mind-rot-hit.json, Kobold Vermin 6): before learn 560943 aura=0, spell_hit_bonus_taken=0/0/0; after learn 560943 aura=1, aura_amount=3, spell_hit_bonus_taken=0 (Shadow 502182), 0 (Fire 2136), 0 (Nature 5176) vs tooltip +3% both runs. Not added as a cultist.json entry because spell_hit_bonus_taken is absent from coverage.METRIC_EVIDENCE (coverage.py:433-486), which fails test_coverage.py:975 under the no-tool-code-change rule."
+    "reason": "Alert (claim 0, uncounted): Mind Rot 560943 Spell.dbc Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE has BasePoints 2 + DieSides 1 (+3%) but EffectMiscValue[0] = 0 (fix pending on fix/coa-cultist-conformance-fixes-2), so Unit::GetTotalAuraModifierByMiscMask (Unit.cpp:4011, 7194) returns 0 against tooltip +3%. Measured in runs 20261125-064448 and 20261125-064610 (560943 aura 0 -> 1 confirmed on Kobold Vermin 6): Shadow 502182 = 0/0, Fire 2136 = 0/0, Nature 5176 = 0/0 vs +3 both runs (0 flips). Linked to live alerts 525049 behaviour_metric_delta mind_rot_hit_{shadow,fire,nature} (ADR 1290)."
   },
   {
     "spell": 525049,

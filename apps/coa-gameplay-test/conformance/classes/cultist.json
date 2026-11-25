@@ -29843,6 +29843,276 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Proves shared Old God Tentacle cap across types: Tentacle of Y'shaarj 802044 (entry 50096, 30 s duration, SummonProperties 63) is present (1) before 572103 and replaced (0) after 572103 while 501464 rises 0 -> 1 (~2.6 s << 30 s). Paired with max_one. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 increases Shadow spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit_shadow",
+      "label_suffix": "mind_rot_hit_shadow",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 502182
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on Kobold Vermin 6 before learning 525049 and present after Corrupt Mind 560109 lands with 525049 learned"
+          }
+        ]
+      },
+      "observe_source": "Eldritch Screams 525049 (@s:560714:0@): 'Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%' ($560943s1 = BasePoints 2 + DieSides 1 = 3, Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE; Spell.dbc). Corrupt Mind 560109 on Humanoid Kobold Vermin 6 (1500 ms cast + flight, wait 2200 ms) applies Mind Rot 560943 after real learn of 525049 (confirmed 0 -> 1 via ally_arm). Reads live target spell_hit_bonus_taken (Unit::GetTotalAuraModifierByMiscMask called by Unit::MagicSpellHitResult, Unit.cpp:4011; G-21 pt 2, ADR 1290) for Shadow (Horrorbolt 502182, SchoolMask 32): expected 0 before learn and +3 after learn. Paired with mind_rot_hit_fire and mind_rot_hit_nature. Reference search 2026-11-25: coa-history 560943: 0 events; coabuildhub spells_master_index.json 525049 matches verbatim."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 increases Fire spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit_fire",
+      "label_suffix": "mind_rot_hit_fire",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 2136
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on Kobold Vermin 6 before learning 525049 and present after Corrupt Mind 560109 lands with 525049 learned"
+          }
+        ]
+      },
+      "observe_source": "Fire school arm for Eldritch Screams 525049 ('all spells', $560943s1 = 3): reads live target spell_hit_bonus_taken for Fire Blast 2136 (SchoolMask 4, Fire), expected 0 before learn and +3 after learn. Reference search 2026-11-25: see mind_rot_hit_shadow."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 increases Nature spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit_nature",
+      "label_suffix": "mind_rot_hit_nature",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 5176
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on Kobold Vermin 6 before learning 525049 and present after Corrupt Mind 560109 lands with 525049 learned"
+          }
+        ]
+      },
+      "observe_source": "Nature school arm for Eldritch Screams 525049 ('all spells', $560943s1 = 3): reads live target spell_hit_bonus_taken for Wrath 5176 (SchoolMask 8, Nature), expected 0 before learn and +3 after learn. Reference search 2026-11-25: see mind_rot_hit_shadow."
+    },
+    {
+      "spell": 300300,
+      "name": "Mind Rot (560943 increases Shadow spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit",
+      "label_suffix": "mind_rot_hit",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
+      "trigger_spell": 800432,
+      "gate_spell": 300300,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        502220,
+        806039,
+        572103,
+        800432,
+        800432,
+        800432
+      ],
+      "setup_wait_ms": 1550,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 502182
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 5200,
+      "expire_ms": 16000,
+      "trigger_reset_after_setup": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on dummy before learning 300300 and applied by the 28 periodic/channeled ticks within the last 10 s after learning 300300 (0.75^28 = 0.032% miss per run, 0.063% per pair <= 0.1%)"
+          }
+        ]
+      },
+      "observe_source": "Mind Rot 300300 (@s:560714:0@): 'Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%' ($560943s1 = BasePoints 2 + DieSides 1 = 3, Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE; Spell.dbc). Overlapping Darkwither 502220 (3 ticks in window), Black Prayer 806039 (3 ticks), Tentacle of N'Zoth 572103 (3 ticks) and four Psychic Suppression 800432 channels (3+3+3+10 ticks, trigger_reset_after_setup true so the 4th 800432 resets its 90 s cooldown, precondition fixtures 500706 x20 + 680601 + 823764) deliver 28 periodic/channeled ticks inside 560943's 10 s duration (residual miss probability 0.75^28 = 0.032% per run, 0.063% per pair <= 0.1%). void_on_cast_failure is omitted because 800432's aura handler (AscensionCultistAuras.cpp:66-70) emits benign SPELL_FAILED_DONT_REPORT (27) on visual helpers 802789/803746; ally_arm confirms 560943 aura 0 -> 1 directly. Reads live target spell_hit_bonus_taken (Unit::GetTotalAuraModifierByMiscMask, Unit.cpp:4011; G-21 pt 2, ADR 1290) for Shadow (502182): expected 0 before learn and +3 after learn. Reference search 2026-11-25: coa-history 560943: 0 events; coabuildhub spells_master_index.json 300300 matches verbatim."
     }
   ],
   "player_observations": [],
