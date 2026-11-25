@@ -131,6 +131,7 @@ namespace CoAPetBattles::Store
         pet.picks = ValidPicks(picks) ? picks : std::array<uint8_t, 3> { 1, 1, 1 };
         pet.quality = std::clamp<uint8_t>(quality, 1, MaxQuality);
         pet.display = display;
+        _fed.erase(species);
         Keep(pet);
         return true;
     }
@@ -207,6 +208,7 @@ namespace CoAPetBattles::Store
         {
             pet.health = 0;
             pet.healthAt = 0;
+            _fed.erase(species);
         }
         Keep(pet);
         return XpGain { gain, pet.level, static_cast<uint8_t>(pet.level - start) };
@@ -231,7 +233,34 @@ namespace CoAPetBattles::Store
         Settings const& settings = _catalog->Config();
         uint64_t const ticks = settings.regenSeconds ? (now - pet.healthAt) / settings.regenSeconds : 0;
         uint64_t const perTick = std::max<uint64_t>(1, uint64_t(max) * settings.regenPercent / 100);
-        return static_cast<uint32_t>(std::min<uint64_t>(max, pet.health + ticks * perTick));
+        uint64_t health = pet.health + ticks * perTick;
+        auto const fed = _fed.find(pet.species);
+        if (fed != _fed.end() && fed->second.first == pet.healthAt && settings.fedStepSeconds)
+        {
+            uint64_t const until = std::min<uint64_t>(now, fed->second.second);
+            uint64_t const steps =
+                until > fed->second.first ? (until - fed->second.first) / settings.fedStepSeconds : 0;
+            health += steps * (uint64_t(max) * settings.fedPercent / 100);
+        }
+        return static_cast<uint32_t>(std::min<uint64_t>(max, health));
+    }
+
+    FeedResult Journal::Feed(uint32_t species, uint8_t foodLevel, uint32_t now)
+    {
+        OwnedPet const* owned = Pet(species);
+        if (!owned)
+            return FeedResult::NotOwned;
+        uint32_t const current = CurrentHealth(*owned, now);
+        if (current >= MaxHealth(*owned))
+            return FeedResult::FullHealth;
+        if (foodLevel < owned->level)
+            return FeedResult::TooWeak;
+        OwnedPet pet = *owned;
+        pet.health = current;
+        pet.healthAt = now;
+        Keep(pet);
+        _fed[species] = { now, now + _catalog->Config().fedSeconds };
+        return FeedResult::Fed;
     }
 
     bool Journal::SetHealth(uint32_t species, uint32_t health, uint32_t now)
@@ -240,6 +269,7 @@ namespace CoAPetBattles::Store
         if (!owned)
             return false;
         OwnedPet pet = *owned;
+        _fed.erase(species);
         uint32_t const value = std::max<uint32_t>(1, health);
         if (value >= MaxHealth(pet))
         {
@@ -263,6 +293,7 @@ namespace CoAPetBattles::Store
             OwnedPet copy = pet;
             copy.health = 0;
             copy.healthAt = 0;
+            _fed.erase(species);
             healed.push_back(copy);
         }
         for (OwnedPet const& pet : healed)

@@ -13,6 +13,15 @@ namespace CoAPetBattles::Battle
     {
         constexpr uint32_t IdleTimeoutSeconds = 300;
         constexpr uint32_t PreviewBase = 9100000;
+        constexpr uint32_t SpawnEffect = 52096;
+        constexpr uint32_t PoofEffect = 12244;
+        constexpr uint32_t LevelUpEffect = 47292;
+        constexpr uint32_t UtilityGlow = 60957;
+        constexpr uint32_t CrateObject = 193761;
+        constexpr uint32_t Wound = 33;
+        constexpr uint32_t Death = 34;
+        constexpr uint32_t Hop = 4;
+        constexpr uint64_t AuraMs = 2400;
         constexpr size_t MaxEnemies = 3;
 
         std::string TypeIcon(std::string const& family, std::string const& fallback)
@@ -91,6 +100,53 @@ namespace CoAPetBattles::Battle
             return _handles[0] != 0 || _handles[1] != 0;
         }
 
+        void Show(CueKind kind, Side side, uint32_t value = 0, Side target = Side::P, bool ranged = false,
+            bool heal = false)
+        {
+            if (!Present(side))
+                return;
+            Cue cue;
+            cue.kind = kind;
+            cue.side = side;
+            cue.target = target;
+            cue.value = value;
+            cue.ranged = ranged;
+            cue.heal = heal;
+            if (kind == CueKind::Health)
+                _health[Index(side)] = value;
+            uint64_t const other = kind == CueKind::Cast ? _handles[Index(target)] : 0;
+            _world.Show(_handles[Index(side)], other, cue);
+        }
+
+        void FaceAll()
+        {
+            for (Side side : { Side::P, Side::E })
+                Show(CueKind::Face, side);
+        }
+
+        void Back(Side side)
+        {
+            if (!_lunged[Index(side)])
+                return;
+            _lunged[Index(side)] = false;
+            bool const hop = _hop[Index(side)];
+            _hop[Index(side)] = false;
+            Show(hop ? CueKind::Jump : CueKind::Back, side);
+            std::shared_ptr<Session> self = shared_from_this();
+            _battles.GetScheduler().After(hop ? 900 : 450, [self, side] { self->Show(CueKind::Face, side); });
+        }
+
+        void ShowCrateGone()
+        {
+            if (!_world.Online(_character))
+                return;
+            Cue cue;
+            cue.kind = CueKind::Uncrate;
+            cue.side = Side::E;
+            cue.value = CrateObject;
+            _world.Show(_handles[Index(Side::E)], 0, cue);
+        }
+
         void SpawnPet(Side side, int32_t index)
         {
             if (_over)
@@ -112,17 +168,22 @@ namespace CoAPetBattles::Battle
                 if (side == Side::P)
                     if (Store::Journal* journal = _world.JournalOf(_character))
                     {
-                        journal->SetDisplayOnce(pet.species, *worn);
+                        if (journal->SetDisplayOnce(pet.species, *worn))
+                            _world.Prime(_character, pet.species, pet.species, *worn);
                         _world.Flush(*journal);
                     }
             }
             else if (!display)
                 display = *worn;
             _world.Scale(spawned->handle, _battles.GetScale().ScaleOf(pet.species, display));
+            Show(CueKind::Health, side, 1000);
+            Show(CueKind::Effect, side, SpawnEffect);
         }
 
-        void Despawn(Side side)
+        void Despawn(Side side, bool effect = false)
         {
+            if (effect)
+                Show(CueKind::Effect, side, PoofEffect);
             if (_handles[Index(side)])
                 _world.Despawn(_handles[Index(side)]);
             _handles[Index(side)] = 0;
@@ -178,6 +239,8 @@ namespace CoAPetBattles::Battle
             Engine::Pet const& pet = _eng.At(side, index);
             uint32_t const entry = pet.display ? PreviewBase + pet.display : pet.species;
             double const scale = _battles.GetScale().ScaleOf(pet.species, pet.display);
+            if (pet.display && _world.Online(_character))
+                _world.Prime(_character, entry, pet.species, pet.display);
             Send("st", Engine::SideName(side) + "," + std::to_string(index) + "," + Protocol::Integer(pet.level) + "," +
                 Protocol::Integer(pet.hp) + "," + Protocol::Integer(pet.max) + "," + TypeIcon(pet.family, pet.icon) +
                 "," + Protocol::Integer(pet.quality) + "," + std::to_string(entry) + "," +
@@ -212,6 +275,15 @@ namespace CoAPetBattles::Battle
 
         void SendTurn(bool force)
         {
+            FaceAll();
+            {
+                std::shared_ptr<Session> self = shared_from_this();
+                _battles.GetScheduler().After(500, [self]
+                {
+                    if (!self->_over)
+                        self->FaceAll();
+                });
+            }
             Engine::Pet const& pet = _eng.Current(Side::P);
             _waiting = true;
             _lastAct = _world.UnixNow();
@@ -262,10 +334,30 @@ namespace CoAPetBattles::Battle
 
         uint64_t Support(Engine::Event const& event, std::string const& mode)
         {
+            Side const side = SideOf(event, "side");
+            Side const other = Engine::Other(side);
+            uint32_t const spell = static_cast<uint32_t>(event.Number("vis"));
             if (mode == "aura")
+            {
+                Show(CueKind::Aura, side, spell);
+                uint64_t const handle = _handles[Index(side)];
+                std::shared_ptr<Session> self = shared_from_this();
+                _battles.GetScheduler().After(AuraMs, [self, side, spell, handle]
+                {
+                    if (self->_handles[Index(side)] == handle)
+                        self->Show(CueKind::Unaura, side, spell);
+                });
                 return 1500;
+            }
             if (mode == "target")
-                return Present(Engine::Other(SideOf(event, "side"))) ? 1300 : 600;
+            {
+                if (!Present(other))
+                    return 600;
+                Show(CueKind::Cast, side, spell, other, true);
+                Show(CueKind::Health, other, _health[Index(other)]);
+                return 1300;
+            }
+            Show(CueKind::Cast, side, spell, side, false, true);
             return 1500;
         }
 
@@ -298,6 +390,8 @@ namespace CoAPetBattles::Battle
             for (uint8_t& pick : picks)
                 pick = static_cast<uint8_t>(_battles.GetRng().Roll(1, 2));
             journal->Capture(pet.species, level, picks, quality, pet.display);
+            if (pet.display)
+                _world.Prime(_character, pet.species, pet.species, pet.display);
             _world.Flush(*journal);
             if (Store::OwnedPet const* stored = journal->Pet(pet.species))
                 Direct("pbj", "pet", Protocol::PetMessage(_catalog, *journal, *stored, _world.UnixNow()));
@@ -338,25 +432,48 @@ namespace CoAPetBattles::Battle
                 bool const hitMode = mode == "melee" || mode == "ranged";
                 _vis = hitMode && e.Has("vis") ? std::optional<double>(e.Number("vis")) : std::nullopt;
                 _ranged = mode == "ranged";
+                _hop[Index(side)] = e.Flag("vhop");
                 bool const support = e.Has("vis") && (mode == "self" || mode == "target" || mode == "aura");
                 bool const attack = e.Flag("dmg") || _vis.has_value();
+                if (e.Has("vpre"))
+                    Show(CueKind::Cast, side, static_cast<uint32_t>(e.Number("vpre")), side, false, true);
                 if (support && Present(side))
                     next(Support(e, mode) + (e.Flag("dmg") ? 300 : 0));
                 else if (attack && _vis && _ranged)
                     next(500);
                 else if (attack)
+                {
+                    if (Present(Engine::Other(side)))
+                        Show(CueKind::Lunge, side);
+                    _lunged[Index(side)] = true;
+                    uint32_t const swing = Engine::FamilyInfo(_eng.At(side,
+                        static_cast<int32_t>(e.Number("idx"))).family).name == "Humanoid" ? 26 : 35;
+                    std::shared_ptr<Session> self = shared_from_this();
+                    _battles.GetScheduler().After(650, [self, side, swing]
+                    {
+                        self->Show(CueKind::Emote, side, swing);
+                    });
                     next(1000);
+                }
                 else
+                {
+                    Show(CueKind::Effect, side, UtilityGlow);
                     next(900);
+                }
             }
             else if (kind == "trap")
             {
                 int32_t const enemy = static_cast<int32_t>(e.Number("idx"));
                 Send("msg", _eng.At(Side::E, enemy).name + " is being captured...");
+                bool const crate = Present(Side::E);
+                if (crate)
+                    Show(CueKind::Crate, Side::E, CrateObject);
                 std::shared_ptr<Session> self = shared_from_this();
-                _battles.GetScheduler().After(2200, [self, enemy]
+                _battles.GetScheduler().After(2200, [self, enemy, crate]
                 {
-                    self->Despawn(Side::E);
+                    if (crate)
+                        self->ShowCrateGone();
+                    self->Despawn(Side::E, true);
                     if (self->_world.Online(self->_character))
                         self->Capture(enemy);
                     self->Send("fnt", "E," + std::to_string(enemy));
@@ -365,6 +482,7 @@ namespace CoAPetBattles::Battle
             }
             else if (kind == "dmg" && (e.Flag("recoil") || e.Flag("reflect")))
             {
+                Show(CueKind::Emote, SideOf(e, "tside"), Wound);
                 Send("hp", HealthLine(e, "tside", "tidx") + ",-" + N(e.Number("dmg")));
                 next(700);
             }
@@ -380,12 +498,34 @@ namespace CoAPetBattles::Battle
             }
             else if (kind == "dmg")
             {
+                Side const side = SideOf(e, "side");
+                Side const target = SideOf(e, "tside");
+                Show(CueKind::Emote, target, Wound);
+                if (_vis && Present(target) && Present(side))
+                {
+                    Show(CueKind::Cast, side, static_cast<uint32_t>(*_vis), target, _ranged);
+                    double const ratio = e.Number("hp") / std::max(1.0, e.Number("max")) * 1000 + 0.5;
+                    Show(CueKind::Health, target, static_cast<uint32_t>(std::floor(ratio)));
+                }
                 Send("hp", HealthLine(e, "tside", "tidx") + ",-" + N(e.Number("dmg")) + (e.Flag("crit") ? "!" : ""));
+                if (!e.Flag("more"))
+                {
+                    std::shared_ptr<Session> self = shared_from_this();
+                    _battles.GetScheduler().After(600, [self, side] { self->Back(side); });
+                }
                 next(e.Flag("more") ? (_vis ? 1000 : 650) : 1000);
             }
             else if (kind == "dodge")
             {
+                if (!e.Has("text") || e.Text("text") != "Burrowed!")
+                    Show(CueKind::Emote, SideOf(e, "side"), Hop);
                 Send("hp", HealthLine(e, "side", "idx") + "," + (e.Has("text") ? e.Text("text") : std::string("Dodge!")));
+                if (!e.Flag("more"))
+                {
+                    Side const from = SideOf(e, "from");
+                    std::shared_ptr<Session> self = shared_from_this();
+                    _battles.GetScheduler().After(500, [self, from] { self->Back(from); });
+                }
                 next(e.Flag("more") ? 650 : 1000);
             }
             else if (kind == "buff" || kind == "debuff")
@@ -408,6 +548,7 @@ namespace CoAPetBattles::Battle
             }
             else if (kind == "dot")
             {
+                Show(CueKind::Emote, SideOf(e, "side"), Wound);
                 Send("hp", HealthLine(e, "side", "idx") + ",-" + N(e.Number("dmg")));
                 SendTags(Side::P, e);
                 SendTags(Side::E, e);
@@ -417,10 +558,12 @@ namespace CoAPetBattles::Battle
             {
                 Side const side = SideOf(e, "side");
                 std::string const payload = e.Text("side") + "," + N(e.Number("idx"));
+                Show(CueKind::Emote, side, Death);
+                Back(Engine::Other(side));
                 std::shared_ptr<Session> self = shared_from_this();
                 _battles.GetScheduler().After(1000, [self, side, payload]
                 {
-                    self->Despawn(side);
+                    self->Despawn(side, true);
                     self->Send("fnt", payload);
                 });
                 next(1700);
@@ -431,7 +574,7 @@ namespace CoAPetBattles::Battle
                 int32_t const index = static_cast<int32_t>(e.Number("idx"));
                 std::string const& name = _eng.At(side, index).name;
                 Send("msg", (side == Side::P && !e.Flag("forced")) ? "Go, " + name + "!" : name + " is forced into battle!");
-                Despawn(side);
+                Despawn(side, true);
                 std::shared_ptr<Session> self = shared_from_this();
                 _battles.GetScheduler().After(700, [self, side, index]
                 {
@@ -468,6 +611,7 @@ namespace CoAPetBattles::Battle
             if (_over)
                 return;
             _over = true;
+            _world.Suppress(_character, false);
             Engine::Finish(_eng);
             Store::Journal* journal = _world.JournalOf(_character);
             if (journal)
@@ -487,14 +631,19 @@ namespace CoAPetBattles::Battle
             _battles.GetScheduler().After(win ? 600 : 1200, [self, win]
             {
                 if (!win)
-                    self->Despawn(Side::P);
-                self->Despawn(Side::E);
+                    self->Despawn(Side::P, true);
+                self->Despawn(Side::E, true);
                 bool leveled = false;
                 if (win && self->_world.Online(self->_character) && self->_eng.captured.empty())
                     leveled = self->GrantExperience();
+                if (leveled)
+                    self->Show(CueKind::Effect, Side::P, LevelUpEffect);
                 self->Direct("pbt", "done", "");
                 if (win)
-                    self->_battles.GetScheduler().After(leveled ? 2600 : 500, [self] { self->Despawn(Side::P); });
+                    self->_battles.GetScheduler().After(leveled ? 2600 : 500, [self]
+                    {
+                        self->Despawn(Side::P, true);
+                    });
             });
         }
 
@@ -594,13 +743,13 @@ namespace CoAPetBattles::Battle
             });
         }
 
-        void Abandon(bool notify)
+        void Abandon(bool notify, bool effect = false)
         {
             if (notify && !_over)
                 Send("end", "interrupted");
             _over = true;
-            Despawn(Side::P);
-            Despawn(Side::E);
+            Despawn(Side::P, effect);
+            Despawn(Side::E, effect);
         }
 
     private:
@@ -622,6 +771,9 @@ namespace CoAPetBattles::Battle
         std::array<bool, 8> _acted {};
         std::optional<double> _vis;
         bool _ranged = false;
+        std::array<bool, 2> _lunged { false, false };
+        std::array<bool, 2> _hop { false, false };
+        std::array<uint32_t, 2> _health { 1000, 1000 };
         std::map<std::string, std::string> _tipSent;
     };
 
@@ -657,6 +809,36 @@ namespace CoAPetBattles::Battle
         _lingering.erase(character);
     }
 
+    void Battles::FedRefresh(uint64_t character, uint32_t species, uint32_t remaining, uint64_t stepMs)
+    {
+        _scheduler.After(stepMs, [this, character, species, remaining, stepMs]
+        {
+            if (_world.Online(character))
+                if (Store::Journal* journal = _world.JournalOf(character))
+                    if (Store::OwnedPet const* pet = journal->Pet(species))
+                        _world.Send(character, "pbj", "pet", Protocol::PetMessage(*_catalog, *journal, *pet,
+                            _world.UnixNow()));
+            if (remaining > 1)
+                FedRefresh(character, species, remaining - 1, stepMs);
+        });
+    }
+
+    uint32_t Battles::Clean(uint64_t character)
+    {
+        auto const found = _sessions.find(character);
+        if (found != _sessions.end())
+        {
+            std::shared_ptr<Session> const session = found->second;
+            _sessions.erase(found);
+            session->Abandon(false, true);
+        }
+        _world.Suppress(character, false);
+        _world.Send(character, "pbt", "end", "interrupted");
+        uint32_t const removed = _world.SweepStandIns(character, 200);
+        _world.Send(character, "pbt", "msg", "Removed " + std::to_string(removed) + " leftover pets nearby.");
+        return removed;
+    }
+
     void Battles::UseCatalog(std::shared_ptr<Engine::Catalog const> catalog)
     {
         _catalog = std::move(catalog);
@@ -690,7 +872,7 @@ namespace CoAPetBattles::Battle
         {
             std::shared_ptr<Session> const previous = old->second;
             _sessions.erase(old);
-            previous->Abandon(false);
+            previous->Abandon(false, true);
         }
         if (_world.InCombat(character) || !_world.Alive(character))
         {
@@ -771,11 +953,13 @@ namespace CoAPetBattles::Battle
                 pet.display = displays[static_cast<size_t>(_rng.Roll(1, static_cast<int32_t>(displays.size()))) - 1];
                 if (side == Side::P && journal)
                 {
-                    journal->SetDisplayOnce(pet.species, pet.display);
+                    if (journal->SetDisplayOnce(pet.species, pet.display))
+                        _world.Prime(character, pet.species, pet.species, pet.display);
                     _world.Flush(*journal);
                 }
             }
         _world.MarkOrigin(character);
+        _world.Suppress(character, true);
         _sessions[character] = session;
         session->Begin(journal);
         return true;
@@ -870,6 +1054,8 @@ namespace CoAPetBattles::Battle
                 Command(character, payload);
             else if (action == "quit")
                 Quit(character);
+            else if (action == "clean")
+                Clean(character);
             return;
         }
         if (module != "pbj")
@@ -882,6 +1068,18 @@ namespace CoAPetBattles::Battle
         reply.send = [this, character](std::string_view replyModule, std::string_view replyAction,
             std::string const& replyPayload) { _world.Send(character, replyModule, replyAction, replyPayload); };
         reply.syncCompanions = [this, character] { _world.SyncCompanions(character); };
+        reply.foodLevel = [this](uint32_t item) { return _world.FoodLevel(item); };
+        reply.hasItem = [this, character](uint32_t item) { return _world.HasItem(character, item); };
+        reply.takeItem = [this, character](uint32_t item) { _world.TakeItem(character, item); };
+        reply.inBattle = [this, character] { return InBattle(character); };
+        reply.fedRefresh = [this, character](uint32_t species, uint32_t steps, uint64_t stepMs)
+        {
+            FedRefresh(character, species, steps, stepMs);
+        };
+        reply.summon = [this, character](uint32_t species) { _world.Summon(character, species); };
+        reply.dismiss = [this, character] { _world.Dismiss(character); };
+        reply.follower = [this, character] { return _world.Follower(character); };
+        reply.prime = [this, character] { return _world.PrimeAll(character); };
         Protocol::HandleJournalMessage(*_catalog, *journal, action, payload, reply);
         _world.Flush(*journal);
     }

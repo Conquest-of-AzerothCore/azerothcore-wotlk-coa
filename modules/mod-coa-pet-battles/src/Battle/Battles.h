@@ -23,6 +23,18 @@ namespace CoAPetBattles::Battle
         uint32_t display = 0;
     };
 
+    enum class CueKind { Cast, Effect, Aura, Unaura, Emote, Face, Lunge, Back, Jump, Health, Crate, Uncrate };
+
+    struct Cue
+    {
+        CueKind kind = CueKind::Effect;
+        Side side = Side::P;
+        Side target = Side::P;
+        uint32_t value = 0;
+        bool ranged = false;
+        bool heal = false;
+    };
+
     class World
     {
     public:
@@ -44,6 +56,17 @@ namespace CoAPetBattles::Battle
         virtual Store::Journal* JournalOf(uint64_t character) = 0;
         virtual void Flush(Store::Journal& journal) = 0;
         virtual void SyncCompanions(uint64_t character) = 0;
+        virtual void Show(uint64_t handle, uint64_t other, Cue const& cue) = 0;
+        virtual void Prime(uint64_t character, uint32_t entry, uint32_t species, uint32_t display) = 0;
+        virtual std::optional<uint32_t> PrimeAll(uint64_t character) = 0;
+        virtual std::optional<uint8_t> FoodLevel(uint32_t item) = 0;
+        virtual bool HasItem(uint64_t character, uint32_t item) = 0;
+        virtual void TakeItem(uint64_t character, uint32_t item) = 0;
+        virtual void Summon(uint64_t character, uint32_t species) = 0;
+        virtual void Dismiss(uint64_t character) = 0;
+        virtual uint32_t Follower(uint64_t character) = 0;
+        virtual void Suppress(uint64_t character, bool on) = 0;
+        virtual uint32_t SweepStandIns(uint64_t character, float yards) = 0;
     };
 
     struct EnemySpec
@@ -69,6 +92,7 @@ namespace CoAPetBattles::Battle
         bool Challenge(uint64_t character, std::string const& payload);
         void Logout(uint64_t character);
         void Abandon(uint64_t character);
+        uint32_t Clean(uint64_t character);
         void Watchdog();
         bool InBattle(uint64_t character) const;
         void EndAll();
@@ -86,6 +110,7 @@ namespace CoAPetBattles::Battle
         void Quit(uint64_t character);
         bool OtherCharacterFighting(uint64_t character) const;
         void ClearLingering(uint64_t character);
+        void FedRefresh(uint64_t character, uint32_t species, uint32_t remaining, uint64_t stepMs);
 
         std::shared_ptr<Engine::Catalog const> _catalog;
         PetScale _scale;

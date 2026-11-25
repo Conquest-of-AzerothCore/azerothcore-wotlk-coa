@@ -1,5 +1,6 @@
 #include "Battle/Battles.h"
 #include "FixtureReader.h"
+#include "Follow/Followers.h"
 #include "Protocol/AddonMessage.h"
 #include <gtest/gtest.h>
 #include <algorithm>
@@ -41,6 +42,8 @@ namespace
         std::vector<JournalRow> after;
         std::vector<Engine::RecordedRoll> rolls;
         std::vector<Record> records;
+        std::map<uint32_t, uint8_t> foods;
+        std::map<uint64_t, std::map<uint32_t, uint32_t>> items;
     };
 
     struct WorldFixture
@@ -79,7 +82,13 @@ namespace
             {
                 std::vector<std::string> const f = Fixtures::SplitLine(line);
                 if (f[0] == "SESSION")
-                    list.push_back({ f[2], {}, {}, {}, {}, {} });
+                    list.push_back({ f[2], {}, {}, {}, {}, {}, {}, {} });
+                else if (f[0] == "FOOD")
+                    list.back().foods[static_cast<uint32_t>(std::stoul(f[1]))] =
+                        static_cast<uint8_t>(std::stoul(f[2]));
+                else if (f[0] == "ITEM")
+                    list.back().items[Low(f[1])][static_cast<uint32_t>(std::stoul(f[2]))] =
+                        static_cast<uint32_t>(std::stoul(f[3]));
                 else if (f[0] == "PLAYER")
                     list.back().players.push_back({ Low(f[1]), static_cast<uint32_t>(std::stoul(f[2])),
                         std::stoi(f[3]), f[4] == "1" });
@@ -151,7 +160,7 @@ namespace
         return catalog;
     }
 
-    class ReplayWorld : public CoAPetBattles::Battle::World
+    class ReplayWorld : public CoAPetBattles::Battle::World, public Follow::FollowerWorld
     {
     public:
         struct State
@@ -165,9 +174,11 @@ namespace
             bool away = false;
         };
 
-        explicit ReplayWorld(Scheduler& scheduler) : _scheduler(scheduler) { }
+        explicit ReplayWorld(Scheduler& scheduler) : _scheduler(scheduler), followers(*this, scheduler) { }
 
         std::map<uint64_t, State> players;
+        std::map<uint32_t, uint8_t> foods;
+        std::map<uint64_t, std::map<uint32_t, uint32_t>> items;
         std::map<uint32_t, std::unique_ptr<Store::Journal>> journals;
         std::vector<std::string> produced;
 
@@ -215,8 +226,111 @@ namespace
         void Flush(Store::Journal& journal) override { journal.TakeWrites(); }
         void SyncCompanions(uint64_t) override { }
 
+        void Show(uint64_t, uint64_t, Cue const& cue) override
+        {
+            static char const* const names[] = { "cast", "effect", "aura", "unaura", "emote", "face", "lunge", "back",
+                "jump", "health", "crate", "uncrate" };
+            std::string line = "WORLD " + std::to_string(_scheduler.Now()) + " cue " +
+                names[static_cast<size_t>(cue.kind)] + " " + Engine::SideName(cue.side) + " " +
+                std::to_string(cue.value);
+            if (cue.kind == CueKind::Cast)
+                line += " " + Engine::SideName(cue.target) + (cue.ranged ? " ranged" : "") + (cue.heal ? " heal" : "");
+            produced.push_back(line);
+        }
+
+        void Prime(uint64_t, uint32_t entry, uint32_t species, uint32_t display) override
+        {
+            uint32_t shown = display;
+            if (!shown)
+            {
+                auto const found = WorldData().displays.find(species);
+                shown = found == WorldData().displays.end() || found->second.empty() ? 0 : found->second.front();
+            }
+            produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " prime " + std::to_string(entry) + " " +
+                std::to_string(shown));
+        }
+
+        std::optional<uint32_t> PrimeAll(uint64_t character) override
+        {
+            uint32_t const now = UnixNow();
+            auto const last = _primed.find(character);
+            if (last != _primed.end() && now - last->second < 5)
+                return std::nullopt;
+            _primed[character] = now;
+            Store::Journal* journal = JournalOf(character);
+            uint32_t count = 0;
+            for (auto const& [species, row] : Data().species)
+            {
+                if (!WorldData().displays.count(species))
+                    continue;
+                ++count;
+                Store::OwnedPet const* owned = journal ? journal->Pet(species) : nullptr;
+                Prime(character, species, species, owned ? owned->display : 0);
+            }
+            return count;
+        }
+        std::optional<uint8_t> FoodLevel(uint32_t item) override
+        {
+            auto const found = foods.find(item);
+            return found == foods.end() ? std::nullopt : std::optional<uint8_t>(found->second);
+        }
+        bool HasItem(uint64_t character, uint32_t item) override { return items[character][item] > 0; }
+        void TakeItem(uint64_t character, uint32_t item) override
+        {
+            --items[character][item];
+            produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " item take " + std::to_string(item));
+        }
+        void Summon(uint64_t character, uint32_t species) override { followers.Summon(character, species); }
+        void Dismiss(uint64_t character) override { followers.Dismiss(character); }
+        uint32_t Follower(uint64_t character) override { return followers.Follower(character); }
+        void Suppress(uint64_t character, bool on) override { followers.Suppress(character, on); }
+        uint32_t SweepStandIns(uint64_t, float) override { return 0; }
+
+        bool Wanted(uint64_t character) const override { return players.at(character).alive; }
+        bool Owns(uint64_t character, uint32_t species) const override
+        {
+            auto const found = journals.find(players.at(character).account);
+            return found != journals.end() && found->second->Owns(species);
+        }
+        std::optional<uint64_t> SpawnFollower(uint64_t character, uint32_t species) override
+        {
+            produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " follow spawn " +
+                std::to_string(species));
+            Store::Journal* journal = JournalOf(character);
+            Store::OwnedPet const* pet = journal ? journal->Pet(species) : nullptr;
+            auto const displays = WorldData().displays.find(species);
+            if (pet && !pet->display && displays != WorldData().displays.end() && !displays->second.empty() &&
+                journal->SetDisplayOnce(species, displays->second.front()))
+                Prime(character, species, species, displays->second.front());
+            return ++_followerHandles;
+        }
+        void DespawnFollower(uint64_t) override
+        {
+            produced.push_back("WORLD " + std::to_string(_scheduler.Now()) + " follow despawn");
+        }
+        bool Near(uint64_t, uint64_t) const override { return true; }
+        void Pace(uint64_t, uint64_t) override { }
+        void SendFollow(uint64_t character, uint32_t species) override
+        {
+            Send(character, "pbj", "follow", std::to_string(species));
+        }
+        void Save(uint64_t character, uint32_t species) override { _saved[character] = species; }
+        std::optional<uint32_t> Saved(uint64_t character) override
+        {
+            auto const found = _saved.find(character);
+            return found == _saved.end() ? std::nullopt : std::optional<uint32_t>(found->second);
+        }
+
     private:
         Scheduler& _scheduler;
+
+    public:
+        Follow::Registry followers;
+
+    private:
+        std::map<uint64_t, uint32_t> _primed;
+        std::map<uint64_t, uint32_t> _saved;
+        uint64_t _followerHandles = 0;
         std::map<uint64_t, uint32_t> _spawned;
         uint64_t _handles = 0;
     };
@@ -295,6 +409,8 @@ namespace
         Outcome outcome;
         Scheduler scheduler;
         ReplayWorld world(scheduler);
+        world.foods = session.foods;
+        world.items = session.items;
         Engine::ReplayRng rng(session.rolls);
         std::map<uint32_t, std::vector<Store::OwnedPet>> owned;
         for (PlayerRow const& player : session.players)
@@ -355,7 +471,29 @@ namespace
                     else if (event == "logout")
                     {
                         battles.Logout(character);
+                        world.followers.Logout(character);
                         state.online = false;
+                    }
+                    else if (event == "login")
+                    {
+                        state.online = true;
+                        world.followers.Login(character);
+                    }
+                    else if (event.rfind("grant ", 0) == 0)
+                    {
+                        std::istringstream words(event.substr(6));
+                        uint32_t species = 0;
+                        uint32_t level = 0;
+                        words >> species >> level;
+                        world.JournalOf(character)->Add(species, static_cast<uint8_t>(level), { 1, 1, 1 }, 1, 0);
+                    }
+                    else if (event.rfind("sethp ", 0) == 0)
+                    {
+                        std::istringstream words(event.substr(6));
+                        uint32_t species = 0;
+                        uint32_t health = 0;
+                        words >> species >> health;
+                        world.JournalOf(character)->SetHealth(species, health, world.UnixNow());
                     }
                     continue;
                 }

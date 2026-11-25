@@ -77,6 +77,8 @@ namespace CoAPetBattles::Store
     uint32_t XpReward(Engine::Catalog const& catalog, uint8_t petLevel, uint8_t enemyLevel);
     uint32_t XpNeeded(Engine::Catalog const& catalog, uint8_t level);
 
+    enum class FeedResult { Fed, NotOwned, FullHealth, TooWeak };
+
     class Journal
     {
     public:
@@ -102,6 +104,7 @@ namespace CoAPetBattles::Store
         uint32_t CurrentHealth(OwnedPet const& pet, uint32_t now) const;
         bool SetHealth(uint32_t species, uint32_t health, uint32_t now);
         size_t HealAll();
+        FeedResult Feed(uint32_t species, uint8_t foodLevel, uint32_t now);
 
         TeamResult SetTeam(uint8_t team, std::array<uint32_t, 3> slots);
         bool SetActiveTeam(uint8_t team);
@@ -131,6 +134,7 @@ namespace CoAPetBattles::Store
         uint32_t _revision = 0;
         std::vector<std::string> _rejected;
         std::vector<RowWrite> _writes;
+        std::map<uint32_t, std::pair<uint32_t, uint32_t>> _fed;
     };
 }
 

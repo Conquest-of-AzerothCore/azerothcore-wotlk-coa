@@ -216,6 +216,19 @@ namespace CoAPetBattles::Battle
             sPetJournals->SyncCompanions(Find(character));
         }
 
+        void Show(uint64_t, uint64_t, Cue const&) override { }
+
+        void Prime(uint64_t, uint32_t, uint32_t, uint32_t) override { }
+        std::optional<uint32_t> PrimeAll(uint64_t) override { return std::nullopt; }
+        std::optional<uint8_t> FoodLevel(uint32_t) override { return std::nullopt; }
+        bool HasItem(uint64_t, uint32_t) override { return false; }
+        void TakeItem(uint64_t, uint32_t) override { }
+        void Summon(uint64_t, uint32_t) override { }
+        void Dismiss(uint64_t) override { }
+        uint32_t Follower(uint64_t) override { return 0; }
+        void Suppress(uint64_t, bool) override { }
+        uint32_t SweepStandIns(uint64_t, float) override { return 0; }
+
         size_t StandIns(uint64_t character) const
         {
             Player* player = Find(character);
@@ -234,7 +247,7 @@ namespace CoAPetBattles::Battle
         }
 
     private:
-        struct Summon
+        struct StandInRecord
         {
             uint64_t character = 0;
             ObjectGuid guid;
@@ -252,7 +265,7 @@ namespace CoAPetBattles::Battle
         }
 
         std::map<uint64_t, Place> _places;
-        std::map<uint64_t, Summon> _summons;
+        std::map<uint64_t, StandInRecord> _summons;
         uint64_t _lastHandle = 0;
     };
 

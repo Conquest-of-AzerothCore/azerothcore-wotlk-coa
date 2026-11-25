@@ -45,6 +45,8 @@ namespace
         std::vector<std::string> sent;
         uint64_t spawned = 0;
         std::vector<uint32_t> displays;
+        std::vector<uint64_t> shownTo;
+        std::vector<uint64_t> stale;
 
         void Send(uint64_t, std::string_view module, std::string_view action, std::string const& payload) override
         {
@@ -70,6 +72,22 @@ namespace
         Store::Journal* JournalOf(uint64_t) override { return online ? journal.get() : nullptr; }
         void Flush(Store::Journal& target) override { target.TakeWrites(); }
         void SyncCompanions(uint64_t) override { }
+        void Show(uint64_t handle, uint64_t, Cue const&) override
+        {
+            shownTo.push_back(handle);
+            if (!live.count(handle))
+                stale.push_back(handle);
+        }
+        void Prime(uint64_t, uint32_t, uint32_t, uint32_t) override { }
+        std::optional<uint32_t> PrimeAll(uint64_t) override { return std::nullopt; }
+        std::optional<uint8_t> FoodLevel(uint32_t) override { return std::nullopt; }
+        bool HasItem(uint64_t, uint32_t) override { return false; }
+        void TakeItem(uint64_t, uint32_t) override { }
+        void Summon(uint64_t, uint32_t) override { }
+        void Dismiss(uint64_t) override { }
+        uint32_t Follower(uint64_t) override { return 0; }
+        void Suppress(uint64_t, bool) override { }
+        uint32_t SweepStandIns(uint64_t, float) override { return 0; }
 
         bool Sent(std::string const& text) const
         {
@@ -196,4 +214,18 @@ TEST(CoAPetBattlesLifecycle, WildEnemyWearsTheGivenDisplay)
     ASSERT_TRUE(arena.battles.Start(7, std::vector<EnemySpec> { enemy }));
     arena.RunFor(3000);
     EXPECT_NE(std::find(arena.world.displays.begin(), arena.world.displays.end(), 4321u), arena.world.displays.end());
+}
+
+TEST(CoAPetBattlesLifecycle, CuesForADespawnedStandInAreDropped)
+{
+    Arena arena;
+    arena.Start();
+    arena.RunFor(3000);
+    ASSERT_FALSE(arena.world.shownTo.empty());
+    arena.battles.Message(7, "pbt", "cmd", "A1");
+    arena.RunFor(700);
+    arena.battles.Message(7, "pbt", "quit", "");
+    arena.RunFor(10000);
+    EXPECT_TRUE(arena.world.live.empty());
+    EXPECT_TRUE(arena.world.stale.empty());
 }

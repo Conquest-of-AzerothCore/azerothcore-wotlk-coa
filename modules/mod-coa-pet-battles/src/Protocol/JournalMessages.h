@@ -4,6 +4,7 @@
 #include "Engine/Catalog.h"
 #include "Store/Journal.h"
 #include <functional>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -13,6 +14,15 @@ namespace CoAPetBattles::Protocol
     {
         std::function<void(std::string_view module, std::string_view action, std::string const& payload)> send;
         std::function<void()> syncCompanions;
+        std::function<std::optional<uint8_t>(uint32_t item)> foodLevel;
+        std::function<bool(uint32_t item)> hasItem;
+        std::function<void(uint32_t item)> takeItem;
+        std::function<bool()> inBattle;
+        std::function<void(uint32_t species, uint32_t steps, uint64_t stepMs)> fedRefresh;
+        std::function<void(uint32_t species)> summon;
+        std::function<void()> dismiss;
+        std::function<uint32_t()> follower;
+        std::function<std::optional<uint32_t>()> prime;
         uint32_t now = 0;
     };
 
