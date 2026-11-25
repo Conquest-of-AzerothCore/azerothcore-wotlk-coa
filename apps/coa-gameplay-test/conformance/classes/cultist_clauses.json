@@ -1428,13 +1428,17 @@
       {
         "claim": "heals the lowest health ally for $s1% of the damage dealt",
         "labels": [
-          "524887 effect_value e0 #0"
+          "524887 behaviour_metric_delta heal_base",
+          "524887 behaviour_metric_delta heal_sp",
+          "524887 behaviour_metric_delta heal_ap"
         ]
       },
       {
         "claim": "plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}",
         "labels": [
-          "524887 effect_value #1"
+          "524887 behaviour_metric_delta heal_base",
+          "524887 behaviour_metric_delta heal_sp",
+          "524887 behaviour_metric_delta heal_ap"
         ]
       }
     ]
@@ -1529,13 +1533,17 @@
       {
         "claim": "heals the lowest health ally for $s1% of the damage dealt",
         "labels": [
-          "525078 effect_value e0 #0"
+          "525078 behaviour_metric_delta heal_base",
+          "525078 behaviour_metric_delta heal_sp",
+          "525078 behaviour_metric_delta heal_ap"
         ]
       },
       {
         "claim": "plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}",
         "labels": [
-          "525078 effect_value #1"
+          "525078 behaviour_metric_delta heal_base",
+          "525078 behaviour_metric_delta heal_sp",
+          "525078 behaviour_metric_delta heal_ap"
         ]
       }
     ]
@@ -1681,7 +1689,10 @@
     "claims": [
       {
         "claim": "allowing the next use regardless of the target's health",
-        "labels": []
+        "labels": [
+          "561288 cast_gate bypassed",
+          "560320 behaviour_metric_delta bypass_next_use"
+        ]
       },
       {
         "claim": "for $561288d",
@@ -2622,7 +2633,7 @@
     "spell": 704871,
     "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
     "labels": [
-      "704871 trigger_magnitude_ratio"
+      "704871 behaviour_metric_delta ratio"
     ],
     "kind": "claim"
   },
@@ -3046,7 +3057,7 @@
     "spell": 707749,
     "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
     "labels": [
-      "707749 trigger_magnitude_ratio"
+      "707749 behaviour_metric_delta ratio"
     ],
     "kind": "claim"
   },
@@ -3110,7 +3121,7 @@
     "spell": 707785,
     "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
     "labels": [
-      "707785 trigger_magnitude_ratio"
+      "707785 behaviour_metric_delta ratio"
     ],
     "kind": "claim"
   },
@@ -3798,13 +3809,15 @@
       {
         "claim": "$s2% Weapon Damage",
         "labels": [
-          "578263 effect_value e1 #0"
+          "578263 behaviour_metric_delta damage_base",
+          "578263 behaviour_metric_delta damage_ap"
         ]
       },
       {
         "claim": "${$m1+0} Shadow damage",
         "labels": [
-          "578263 effect_value e0 #1"
+          "578263 behaviour_metric_delta damage_base",
+          "578263 behaviour_metric_delta damage_ap"
         ]
       }
     ]
