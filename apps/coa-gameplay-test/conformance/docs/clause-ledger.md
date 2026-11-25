@@ -293,7 +293,12 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `stat_gain` verdict gets it from its judge under attribution reads and names its read, ADR 0258), and the clause
   text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor", `spell_power` "spell power" or
   "spell damage"; `max_power` takes the power names of `passives.POWER_NAMES` and `combat_rating` "rating" or a
-  `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A metric in `coverage.CONTRAST_PROOF` (kind modules add rows) is behaviour only when `detail.contrast` equals its
+  `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A `stat_exact` read in a learned or
+  own-cast `behaviour_metric_delta` contrast also counts as behaviour for a clause naming `primary attributes`
+  (`coverage.PRIMARY_ATTRIBUTES_WORDS`, ADR 1304), only when the claim's own conformant `stat_exact` verdicts cover
+  all five primary attributes (`0..4`: Strength, Agility, Stamina, Intellect, Spirit) via stamped `detail.stat`; a
+  claim measuring fewer than all five stays data conformant. A metric in `coverage.CONTRAST_PROOF` (kind modules add
+  rows) is behaviour only when `detail.contrast` equals its
   row's contrast, whatever the claim words say (ADR 0616), unless the metric also has a `STATE_PROMISES` row: then the
   clause or its row must use those words. A readback metric has such a row only to gate its contrast proof, as
   `spell_done_crit_chance` does with the crit words (ADR 0691), `spell_taken_crit_chance`, the target-side

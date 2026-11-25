@@ -731,9 +731,29 @@ def metric_class(verdict: Verdict) -> str:
 
 NO_STACK_WORDS = r'do(?:es)? not stack'
 CONDITION_WORDS = r'while|whenever|as long as'
+PRIMARY_ATTRIBUTES_WORDS = r'primary attributes'
+PRIMARY_STAT_IDS = frozenset({0, 1, 2, 3, 4})
 
 
-def promised_state(verdict: Verdict, clause: str, promise: str = '', promises: dict[str, str] | None = None) -> bool:
+def primary_attributes_measured(verdict: Verdict, clause: str, promise: str,
+                                claim_verdicts: tuple[Verdict, ...]) -> bool:
+    detail = verdict.detail or {}
+    if (verdict.check != BEHAVIOUR_METRIC_DELTA or detail.get(PASSIVE_METRIC) != 'stat_exact'
+            or detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST)):
+        return False
+    if re.search(rf'\b(?:{PRIMARY_ATTRIBUTES_WORDS})\b', f'{clause} {promise}', re.IGNORECASE) is None:
+        return False
+    measured = {(other.detail or {}).get('stat') for other in claim_verdicts
+                if other.status in CONFORMANT and other.status != 'closed'
+                and other.check == BEHAVIOUR_METRIC_DELTA
+                and (other.detail or {}).get(PASSIVE_METRIC) == 'stat_exact'
+                and (other.detail or {}).get(CONTRAST) in (LEARNED_CONTRAST, OWN_CAST_CONTRAST)
+                and not (other.detail or {}).get(DATA_ONLY)}
+    return PRIMARY_STAT_IDS <= measured
+
+
+def promised_state(verdict: Verdict, clause: str, promise: str = '', promises: dict[str, str] | None = None,
+                   claim_verdicts: tuple[Verdict, ...] = ()) -> bool:
     detail = verdict.detail or {}
     if verdict.check == BEHAVIOUR_GROUP_STACK_CAP:
         return (detail.get(STACKED_SAME) is True
@@ -746,7 +766,9 @@ def promised_state(verdict: Verdict, clause: str, promise: str = '', promises: d
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST):
         return False
     words = (state_promises() if promises is None else promises).get(detail[PASSIVE_METRIC])
-    return words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None
+    if words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None:
+        return True
+    return primary_attributes_measured(verdict, clause, promise, claim_verdicts)
 
 
 def conditional_text(text: str) -> bool:
@@ -804,7 +826,8 @@ def judged_sentence(clause: str, sentence: str) -> str:
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
                      seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset(),
                      row: str = '', promise: str = '', partners: tuple[Verdict, ...] = (),
-                     sentence: str | None = None, promises: dict[str, str] | None = None) -> str:
+                     sentence: str | None = None, promises: dict[str, str] | None = None,
+                     claim_verdicts: tuple[Verdict, ...] = ()) -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = evidence_classes()[verdict.check]
@@ -831,7 +854,7 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     words = EVENT_PROMISES.get((verdict.detail or {}).get(PASSIVE_METRIC))
     if words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is None:
         return DATA
-    if observed == EVENT or (observed == STATE and promised_state(verdict, clause, promise, promises)):
+    if observed == EVENT or (observed == STATE and promised_state(verdict, clause, promise, promises, claim_verdicts)):
         return BEHAVIOUR
     return DATA
 
@@ -875,7 +898,8 @@ def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str
         return UNPROVEN
     partners = tuple(matched) if row_labels is None else row_verdicts(row_labels, by_label, statuses)
     found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise,
-                              partners=partners, sentence=sentence, promises=claim_state_promises(claim))
+                              partners=partners, sentence=sentence, promises=claim_state_promises(claim),
+                              claim_verdicts=tuple(matched))
              for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 

@@ -2224,6 +2224,9 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     model = {'kind': 'metric_delta', 'before_label': before_label, 'after_label': after_label,
              'expected': spec.expected, 'before_expected': spec.before_expected, 'metric': spec.metric,
              'contrast': metric_delta_contrast(spec), 'quote': entry.quote}
+    if (spec.metric == 'stat_exact' and 'stat' in spec.fields
+            and re.search(r'\bprimary attributes\b', entry.quote, re.IGNORECASE)):
+        model['stat'] = int(spec.fields['stat'])
     if spec.evidence_metric is not None:
         model['evidence_metric'] = spec.evidence_metric
     if spec.tolerance is not None:

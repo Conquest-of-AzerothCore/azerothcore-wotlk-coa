@@ -4676,7 +4676,8 @@ def observed(expectation: Expectation) -> dict:
     model = expectation.model or {}
     found = {PASSIVE_METRIC: model.get('evidence_metric', model.get('metric', model.get('observe_metric'))),
              CONTRAST: model.get(CONTRAST),
-             FORCED_CHANCE: (model.get(FORCED_CHANCE) or {}).get('talent')}
+             FORCED_CHANCE: (model.get(FORCED_CHANCE) or {}).get('talent'),
+             'stat': model.get('stat')}
     return {key: value for key, value in found.items() if value is not None}
 
 
