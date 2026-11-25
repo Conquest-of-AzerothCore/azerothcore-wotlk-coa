@@ -1,0 +1,156 @@
+{
+  "schema": 1,
+  "name": "Shy-Rotam calls Sian-Rotam once, not again after an evade (#13690, #13606)",
+  "contract": "#13690 and #13606: during Shy-Rotam (quest 5056), Shy-Rotam (10737) called a further Sian-Rotam (10741) each time she was engaged again. Her SmartAI row 3 summons Sian-Rotam in combat with the No Repeat flag, but SmartScript::OnReset re-arms every event without SMART_EVENT_FLAG_DONT_RESET on an evade. Here a bait player pulls an unowned Shy-Rotam beside the Stone of Shy-Rotam, Sian-Rotam arrives and is killed, the bait dies and Shy-Rotam evades. A second player, who waited on the far side of the map, then engages her. Expected: no second Sian-Rotam appears.",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 1,
+    "x": 8071.34,
+    "y": -3846.02,
+    "z": 691.5,
+    "o": 0.0
+  },
+  "players": [
+    {
+      "id": "bait",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "hunter",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "teleport",
+      "label": "the hunter waits in Auberdine, far from the fight",
+      "actor": "hunter",
+      "map": 1,
+      "x": 6514.71,
+      "y": 484.541,
+      "z": 7.139
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "summon",
+      "actor": "bait",
+      "as": "sr",
+      "entry": 10737,
+      "distance": 3,
+      "unowned": true
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "bait",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "attack",
+      "actor": "bait",
+      "target": "sr"
+    },
+    {
+      "action": "assert",
+      "actor": "sr",
+      "label": "CONTROL: Shy-Rotam is in combat",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "bait",
+      "label": "CONTROL: Shy-Rotam calls one Sian-Rotam in her first fight",
+      "metric": "nearby_creature_count",
+      "entry": 10741,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "bait",
+      "entry": 10741,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "actor": "bait",
+      "label": "CONTROL: Sian-Rotam is dead",
+      "metric": "nearby_creature_count",
+      "entry": 10741,
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "die",
+      "actor": "bait"
+    },
+    {
+      "action": "assert",
+      "actor": "sr",
+      "label": "CONTROL: Shy-Rotam leaves combat after the bait dies",
+      "metric": "combat",
+      "equals": 0,
+      "within_ms": 20000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "hunter",
+      "map": 1,
+      "x": 8071.34,
+      "y": -3846.02,
+      "z": 691.5
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "hunter",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "attack",
+      "actor": "hunter",
+      "target": "sr"
+    },
+    {
+      "action": "assert",
+      "actor": "sr",
+      "label": "CONTROL: Shy-Rotam is in combat again",
+      "metric": "combat",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "hunter",
+      "label": "DISCRIMINATING: no second Sian-Rotam joins the new fight",
+      "metric": "nearby_creature_count",
+      "entry": 10741,
+      "equals": 0
+    }
+  ]
+}
