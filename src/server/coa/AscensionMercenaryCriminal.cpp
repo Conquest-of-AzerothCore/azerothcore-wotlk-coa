@@ -41,7 +41,7 @@ Player* MercenaryStriking(Unit* attacker, Unit* victim, Player*& innocent)
     innocent = victim ? victim->ToPlayer() : nullptr;
     if (!mercenary || !innocent || mercenary == innocent || !AscensionMercenary::Active(mercenary) ||
         AscensionMercenary::Active(innocent) || mercenary->GetTeamId() != innocent->GetTeamId() ||
-        (mercenary->duel && mercenary->duel->Opponent == innocent))
+        (mercenary->duel && mercenary->duel->Opponent == innocent) || innocent->pvpInfo.IsInFFAPvPArea)
         return nullptr;
     return mercenary;
 }
