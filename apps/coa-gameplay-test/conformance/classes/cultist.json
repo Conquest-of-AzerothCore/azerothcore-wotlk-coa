@@ -45947,6 +45947,58 @@
       "expire_ms": 7000,
       "void_on_cast_failure": true,
       "observe_source": "Regression for Dark Matter 806382 AoE heal count with 3 inside + 1 outside (Cultist ADR 0023): Spell.dbc 807219 is TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ALLY (30.0 yd). On the 1000 ms tick of 807124 (read at 1500 ms), ally (10 yd), ally2 (20 yd), and ally3 (28.5 yd) each receive exactly 1 heal (0 before learning 806382, 1 after), while outer ally4 (31.5 yd) receives 0."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (two Tentacle slams across UpdateTargetMap interval reduce Obelisk cooldown by 4 sec once each)",
+      "kind": "metric_delta",
+      "variant": "obelisk_cd_gaze",
+      "label_suffix": "obelisk_cd_gaze",
+      "quote": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+      "trigger_spell": 500110,
+      "gate_spell": 520405,
+      "target": "dummy",
+      "setup_casts": [
+        502182,
+        560321,
+        802044
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Tentacle of Y'shaarj 50096 deals 1 summon slam plus 1 Gaze-commanded slam after 3000 ms in each phase"
+          }
+        ]
+      },
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 560321
+      },
+      "before_expected": 172900,
+      "expected": 168900,
+      "expected_gain": -4000,
+      "tolerance": 300,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Regression for Twilight Domination 520405 (Cultist ADR 0015): summons Tentacle of Y'shaarj 802044 (summon slam at +100 ms), waits 3000 ms (> 500 ms UpdateTargetMap interval of 520405 Effect[1]), then commands a second slam with Gaze of C'Thun 500110. Verifies both hits reduce Eldritch Obelisk 560321 cooldown by 2000 ms each (-4000 +- 300 ms total) with no double-proc after UpdateTargetMap. void_on_cast_failure omitted because Gaze 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from unused ally effect 520335."
     }
   ],
   "player_observations": [],

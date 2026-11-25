@@ -355,6 +355,8 @@ public:
             for (Unit* ally : Allies(player, creature, 40))
                 if (ally->HasAura(BlackBlood, player->GetGUID()))
                     Copy(player, ally, 500773, CalculatePct(std::min(damage, victim->GetHealth()), Amount(706187)));
+        if (Tentacle(creature->GetEntry()) && player->HasAura(520405))
+            Reduce(player, 560321, std::abs(Amount(520872)));
         State(player).event = false;
     }
 };
