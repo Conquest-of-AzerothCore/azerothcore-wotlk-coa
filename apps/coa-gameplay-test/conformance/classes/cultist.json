@@ -3896,7 +3896,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "300304 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 24 (SPELLMOD_SPELL_BONUS_DAMAGE), EffectBasePoints[1] 9 + EffectDieSides[1] 1 = +10% ($s2 = 10), EffectSpellClassMask[3..5] [0, 16, 524288] matching Horrorbolt 502182 (SpellFamilyFlags[1] 16, SP coef 0.714 in AscensionCultistData.h:40; Spell.dbc). At +50000 SP precondition fixture, SP bonus 35700 dominates base ~620 so +10% SP bonus yields hit ratio 1.0983 inside the G-19 band [1.08, 1.12]. Precondition fixtures: 823764 (spellpen), 500706 cleared to 0, +50000 SP. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 300304 matches +10% Horrorbolt / +20% Wrath (older state omitting Eldritch Shock; installed Spell.dbc governs, G-9)."
+      "observe_source": "300304 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 24 (SPELLMOD_BONUS_MULTIPLIER), EffectBasePoints[1] 9 + EffectDieSides[1] 1 = +10% ($s2 = 10), EffectSpellClassMask[3..5] [0, 16, 524288] matching Horrorbolt 502182 (SpellFamilyFlags[1] 16, SP coef 0.714 in AscensionCultistData.h:40, scaled via SPELLMOD_BONUS_MULTIPLIER in AscensionCultistContracts.cpp:284-289, Cultist ADR 0004; Spell.dbc). At +50000 SP precondition fixture, SP bonus 35700 dominates base ~620 so +10% SP bonus yields hit ratio 1.0983 inside the G-19 band [1.08, 1.12]. Precondition fixtures: 823764 (spellpen), 500706 cleared to 0, +50000 SP. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 300304 matches +10% Horrorbolt / +20% Wrath (older state omitting Eldritch Shock; installed Spell.dbc governs, G-9)."
     },
     {
       "spell": 300304,
@@ -3943,7 +3943,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "300304 Effect[1] aura 108 SPELLMOD_SPELL_BONUS_DAMAGE +10% ($s2 = 10), EffectSpellClassMask[5] 524288 matching Eldritch Shock damage 808043 (cast via 808036). At +50000 SP precondition fixture, SP bonus dominates base ~354 so +10% SP bonus yields hit ratio ~1.098 inside the G-19 band [1.08, 1.12]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 is an older state; installed Spell.dbc governs (G-9)."
+      "observe_source": "300304 Effect[1] aura 108 SPELLMOD_BONUS_MULTIPLIER +10% ($s2 = 10), EffectSpellClassMask[5] 524288 matching Eldritch Shock damage 808043 (cast via 808036, SP coef 0.4641 scaled in AscensionCultistContracts.cpp:284-289, Cultist ADR 0004). At +50000 SP precondition fixture, SP bonus dominates base ~354 so +10% SP bonus yields hit ratio ~1.098 inside the G-19 band [1.08, 1.12]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 is an older state; installed Spell.dbc governs (G-9)."
     },
     {
       "spell": 300304,
@@ -3996,7 +3996,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "300304 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 24 (SPELLMOD_SPELL_BONUS_DAMAGE), EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20% ($s1 = 20), EffectSpellClassMask[1] 32 matching Wrath of the Black Empire 502172 (SpellFamilyFlags[1] 288, SP coef 1.0 in AscensionCultistData.h:30, CasterAuraSpell 680601; Spell.dbc). At +50000 SP precondition fixture, SP bonus 50000 dominates base ~780 so +20% SP bonus yields hit ratio 1.1969 inside the G-19 band [1.18, 1.22]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 matches +20% Wrath."
+      "observe_source": "300304 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 24 (SPELLMOD_BONUS_MULTIPLIER), EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20% ($s1 = 20), EffectSpellClassMask[1] 32 matching Wrath of the Black Empire 502172 (SpellFamilyFlags[1] 288, SP coef 1.0 in AscensionCultistData.h:30, scaled via SPELLMOD_BONUS_MULTIPLIER in AscensionCultistContracts.cpp:284-289, Cultist ADR 0004, CasterAuraSpell 680601; Spell.dbc). At +50000 SP precondition fixture, SP bonus 50000 dominates base ~780 so +20% SP bonus yields hit ratio 1.1969 inside the G-19 band [1.18, 1.22]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 matches +20% Wrath."
     },
     {
       "spell": 301255,

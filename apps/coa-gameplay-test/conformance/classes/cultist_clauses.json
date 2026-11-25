@@ -435,7 +435,8 @@
     "spell": 300304,
     "clause": "Increases the spell damage bonus of Horrorbolt and Eldritch Shock by $s2%",
     "labels": [
-      "300304 effect_value e1 #0"
+      "300304 behaviour_hit_ratio horrorbolt_sp",
+      "300304 behaviour_hit_ratio eldritch_shock_sp"
     ],
     "kind": "claim"
   },
@@ -443,7 +444,7 @@
     "spell": 300304,
     "clause": "and Wrath of the Empire by $s1%.",
     "labels": [
-      "300304 effect_value e0 #1"
+      "300304 behaviour_hit_ratio wrath_sp"
     ],
     "kind": "claim"
   },
