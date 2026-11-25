@@ -586,6 +586,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `restore_charges` | Player `actor`, `spell`: restore the native charge pool between independent cases. Separate from ordinary cooldowns. |
 | `cast_until_aura` | Player `actor`, `spell`, `aura`, `every_ms`, `max_casts`; optional `target`, `stop_target` (scenario unit checked for `aura`, default `actor`; ADR 1297), `cast_power` (with optional `power`, default 0) and `reset_cooldown`: every `every_ms` of game time while `stop_target` lacks `aura`, run the fixtures and submit the same cast as `cast`; stop at the first poll that reads the aura or once the last of `max_casts` casts had its `every_ms`. The step never sets the aura; its record carries `attempts` and `stopped` (`aura` or `cap`), and a judged read of the aura must follow it (ADR 1195). |
 | `cast_until_owned_creature` | Player `actor`, `spell`, `entry`, `every_ms`, `max_casts`; optional `target`, `cast_power` (with optional `power`, default 0) and `reset_cooldown`: every `every_ms` of game time while no living owned creature of `entry` is present, run the fixtures and submit the same cast as `cast`; stop at the first poll that reads a living owned creature of `entry` or once the last of `max_casts` casts had its `every_ms`. The step never spawns the creature; its record carries `attempts` and `stopped` (`creature` or `cap`), and a judged read of `owned_creature_count` must follow it (ADR 1296). |
+| `attack_until_swings` | Player `actor`, `target`, `swings` (1..50), `timeout_ms`; optional `hand` (0 main hand, 1 off hand, default 0): starts melee auto-attack (`SubmitAttackSwing`), polls `meleeAttacksByHand[hand]` on every world update, and sends `CMSG_ATTACKSTOP` on the first tick that reaches `swings` (or at `timeout_ms`). Records `swings` and `stopped` (`swings` or `timeout`) (ADR 1309). |
 | `wait` | `ms`: let the world continue updating for that much game time. |
 | `snapshot` | `actor`, `metric`, `save_as`: remember a numeric observation. |
 | `assert` | `actor`, `metric`, `equals` and/or `min`/`max`: check an observation. |
@@ -1183,6 +1184,9 @@ non-triggered casts so triggered sub-effects do not inflate a single cast) and o
 `false`; `true` reads the cumulative count across all summons of `entry` owned by `actor`, remaining readable after
 despawn); returns `-1` when `cumulative` is `false` and no living owned creature of `entry` is present (read only,
 ADR 1296).
+`owned_creature_copy_x` and `owned_creature_copy_y` read the X and Y world coordinates of the `index`-th (`0..31`)
+living owned creature of `entry` sorted ascending by GUID (returning `NaN` when fewer than `index + 1` living copies
+exist; read only, ADR 1311).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
 (`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
 `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,
@@ -1200,6 +1204,11 @@ entry `item`.
 `owned_creature_react_state` reads the same creature's `GetReactState()` (0 passive, 1 defensive, 2 aggressive).
 `owned_creature_avoided_count` counts the swings of creatures of `entry` that their victim dodged or parried, from the
 victim state of every `SMSG_ATTACKERSTATEUPDATE` the actor received.
+`melee_blocks_taken_count` and `melee_blocks_taken_total` count and sum `blocked_amount` on incoming
+`SMSG_ATTACKERSTATEUPDATE` hits carrying `HITINFO_BLOCK` for the player `actor`, with optional `block_kind`
+(`all` default, `normal` partial block equal to `GetShieldBlockValue()`, `critical` partial block equal to
+`2 * GetShieldBlockValue()`, `other` partial block with any other amount, and `full` for `VICTIMSTATE_BLOCKS` on
+`melee_blocks_taken_count` only; reads only, ADR 1310).
 `owned_creature_threat_multiplier` and `threat_multiplier` (the actor) read the threat multiplier the threat manager
 applies for `school_mask` (default Physical), `GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT)`.
 `owned_creature_spell_crit_chance` reads the owned creature's base spell crit chance (`m_baseSpellCritChance`).

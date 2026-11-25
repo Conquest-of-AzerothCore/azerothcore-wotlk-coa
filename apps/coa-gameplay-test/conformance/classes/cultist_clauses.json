@@ -989,26 +989,17 @@
       {
         "claim": "$n attacks",
         "labels": [
-          "301262 behaviour_metric_delta initial_charges"
+          "301262 behaviour_metric_delta initial_charges",
+          "301262 behaviour_metric_delta swing_charges"
         ]
       },
       {
         "claim": "or $n attacks",
         "labels": [
-          "301262 effect_value #3"
+          "301262 behaviour_metric_delta swing_charges"
         ]
       }
-    ],
-    "reason": "Claim '$n attacks' proves the initial charge count 10 against 9/11 at runtime via aura_charges (301262 behaviour_metric_delta initial_charges, readback / data evidence class in coverage.py:454). Split claim 'or $n attacks' (appended at end) is a tool gap for proving Saronite Blessing 600327 actually ends on the 10th auto-attack before its 15000 ms duration: attack_swings waits un-hasted reference intervals without exact per-swing counting, Heretic staff 2535 (3300 ms / 2640 ms hasted) delivers <= 6 swings in 15000 ms, melee crits refresh 600327 back to 10 charges, fed_charge_casts is cast-time-only, and block_charge_strikes is block-only.",
-    "tool_gap": {
-      "reason": "No existing conformance kind proves Saronite Blessing 600327 ends on the 10th auto-attack before its 15000 ms duration ('or $n attacks', claims[2]): attack_swings waits un-hasted reference intervals without exact per-swing counting, Heretic staff 2535 (3300 ms / 2640 ms hasted) delivers <= 6 swings in 15000 ms, melee crits refresh 600327 back to 10 charges, fed_charge_casts is cast-time-only, and block_charge_strikes is block-only. Initial charge count 10 is verified as data via 301262 initial_charges (aura_charges readback).",
-      "attempts": [
-        {
-          "agent": "cu-g6",
-          "report": ".agents/plans/cu-g6/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 301315,
@@ -2213,7 +2204,9 @@
       },
       {
         "claim": "that run in a random direction",
-        "labels": []
+        "labels": [
+          "560301 behaviour_metric_delta copies_random_run"
+        ]
       },
       {
         "claim": "and may briefly trick enemies into ignoring you.",
@@ -2223,16 +2216,7 @@
         ]
       }
     ],
-    "reason": "Claim 3 ('and may briefly trick enemies into ignoring you.') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat, Cultist ADR 0032): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control) covers 'and may briefly trick enemies into ignoring you.' with no server or client text change. Copy movement direction ('that run in a random direction') remains a tool gap.",
-    "tool_gap": {
-      "reason": "No existing conformance metric/kind reads an owned creature's movement path or heading to prove that Hallucination 560301's 3 copies (entry 840025, AscensionCultistSummons.cpp:278-283 Wander(me) -> MovePoint at a random angle) run in a random direction (owned_creature_distance_2d only measures scalar distance from the caster and has no STATE_PROMISES entry).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "reason": "Claim 3 ('and may briefly trick enemies into ignoring you.') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat, Cultist ADR 0032): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control) covers 'and may briefly trick enemies into ignoring you.' with no server or client text change."
   },
   {
     "spell": 560301,
@@ -2935,23 +2919,10 @@
     "spell": 680574,
     "clause": "Your successful blocks now have a $s2% chance to critically block for twice the normal amount.",
     "labels": [
-      "680574 effect_value e1 #0",
+      "680574 behaviour_metric_delta crit_block_rate_base",
       "680574 behaviour_metric_delta crit_block_base"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind counts Shadowy Symbiosis 680574 clause 1 (\"Your successful blocks now have a $s2% chance to critically block for twice the normal amount.\") as behaviour evidence under no-tool-code-changes: (1) metric_delta critical_block_chance (crit_block_base measures 0 -> 20.0 ok) is a READBACK metric (coverage.py:461) that does not match coverage.py:524 STATE_PROMISES[\"critical_block_chance\"] = r\"critical block\" against \"critically block\", requires a zero-gain partner in PARTNERED_CONTRASTS (coverage.py:570,757-765), and does not test \"for twice the normal amount\"; (2) Unit::isBlockCritical (Unit.cpp:3721) uses roll_chance_i (not forceable by forced_roll) and no pooled crit_blocked combat-event metric/kind exists to sample a 20% critical-block rate directly (~19,386 blocked strikes). Nearest kind: metric_delta critical_block_chance or a pooled blocked-strike critical-block rate kind.",
-      "attempts": [
-        {
-          "agent": "cu-h2",
-          "report": ".agents/plans/cu-h2/report.md"
-        },
-        {
-          "agent": "cu-h2b",
-          "report": ".agents/plans/cu-h2b/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 680574,
@@ -2959,7 +2930,9 @@
     "labels": [
       "680574 behaviour_metric_delta crit_block_at_59",
       "680574 behaviour_metric_delta crit_block_at_60",
-      "680574 behaviour_metric_delta crit_block_above_60"
+      "680574 behaviour_metric_delta crit_block_above_60",
+      "680574 behaviour_metric_delta crit_block_rate_at_60",
+      "680574 behaviour_metric_delta crit_block_rate_above_60"
     ],
     "kind": "claim"
   },

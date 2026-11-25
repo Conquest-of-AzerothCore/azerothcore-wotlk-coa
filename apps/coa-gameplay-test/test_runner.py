@@ -284,6 +284,44 @@ class RunnerTests(unittest.TestCase):
                                    'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
                                    'cumulative': True, 'save_as': 'bad'})
 
+    def test_attack_until_swings_action_fields(self):
+        step = {'action': 'attack_until_swings', 'actor': 'caster', 'target': 'target',
+                'swings': 9, 'timeout_ms': 12000}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'hand': 0})
+        self.assert_step_validates({**step, 'hand': 1})
+        for change in ({'actor': 'target'}, {'swings': 0}, {'swings': 51}, {'swings': True},
+                       {'timeout_ms': 0}, {'timeout_ms': 90001}, {'hand': 2}, {'hand': True}):
+            self.assert_step_rejected({**step, **change})
+        for field in ('target', 'swings', 'timeout_ms'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def test_melee_blocks_taken_metric_fields(self):
+        for metric in ('melee_blocks_taken_count', 'melee_blocks_taken_total'):
+            step = {'action': 'snapshot', 'actor': 'caster', 'metric': metric, 'save_as': 'blocks'}
+            self.assert_step_validates(step)
+            for kind in ('all', 'normal', 'critical', 'other'):
+                self.assert_step_validates({**step, 'block_kind': kind})
+            self.assert_step_rejected({**step, 'block_kind': 'bogus'})
+            self.assert_step_rejected({**step, 'actor': 'target'})
+        self.assert_step_validates({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_blocks_taken_count',
+                                    'block_kind': 'full', 'save_as': 'full'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_blocks_taken_total',
+                                   'block_kind': 'full', 'save_as': 'bad'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                   'block_kind': 'normal', 'save_as': 'bad'})
+
+    def test_owned_creature_copy_coordinate_metric_fields(self):
+        for metric in ('owned_creature_copy_x', 'owned_creature_copy_y'):
+            step = {'action': 'snapshot', 'actor': 'caster', 'metric': metric, 'entry': 840025,
+                    'index': 0, 'save_as': 'coord'}
+            self.assert_step_validates(step)
+            self.assert_step_validates({**step, 'index': 2})
+            for change in ({'actor': 'target'}, {'entry': 0}, {'index': -1}, {'index': 32}, {'index': True}):
+                self.assert_step_rejected({**step, **change})
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'index'})
+
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
         self.assert_step_validates(step)

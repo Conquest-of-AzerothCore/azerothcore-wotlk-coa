@@ -48073,6 +48073,197 @@
       "expire_ms": 9000,
       "void_on_cast_failure": true,
       "observe_source": "Tentacle of N'Zoth 572103 (AscensionCultistSummons.cpp:178-186,216-219): JustDied calls ClearThoughtseize() with graceMs=0, immediately removing Thoughtseize 806596 (silence) from the dummy. Both phases summon 501464 (8000 ms duration, ~700 HP = player->GetMaxHealth()/3) which applies 806596 to dummy at t=0. Control (before, no strike because strike.owned_entry strikes in after phase only; ADR 0530, modelled on necromancer.json 504866 ghoul_shield): at t=2500 ms tentacle is alive (owned_creature_count == 1) and 806596 is present (1). After 9000 ms expiry, treatment (after) summons a fresh tentacle, waits 1000 ms, then striker casts Hammer of the Righteous 66903 (16000 Holy, 0 resist) x1 at owned_entry 501464, killing it: by t=2800 ms (well inside 8000 ms) owned_creature_count == 0 and 806596 is removed (0). Reference search 2026-11-25: see 572103 damage_base."
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (ends on 10th melee auto-attack before 15 sec duration)",
+      "kind": "swing_charge_consumption",
+      "variant": "swing_charges",
+      "label_suffix": "swing_charges",
+      "quote": "Lasts for $d or $n attacks.",
+      "quote_spell": 600327,
+      "gate_spell": 301262,
+      "trigger_spell": 502122,
+      "aura": 600327,
+      "haste_auras": [
+        62531,
+        2116852
+      ],
+      "no_crit_aura": 64481,
+      "no_crit_amount": -10000,
+      "force_crit": "melee",
+      "cast_power": 2000,
+      "observe_source": "Saronite Blessing 301262 (embedded 600327, Spell.dbc DurationIndex 8 = 15000 ms, ProcCharges = 10; AscensionCultistContracts.cpp:242-243, AscensionCultistEvents.cpp:109-110,290-293). swing_charge_consumption (ADR 1309) equips Heretic staff 2535 (3300 ms), applies haste fixtures 62531 (+100% melee haste) and 2116852 (+100% melee/ranged haste) -> ~660 ms swings with 600327 (+25%), triggers 600327 via forced-crit Blade of the Empire 502122, applies 64481 with no_crit_amount -10000 override so auto-attacks cannot crit and refresh 600327, verifies control 0/0, start 1/10, penultimate after 9 non-crit swings 1/1, 0 off-hand swings, and removal on swing 10 (0/0) strictly within 12350 ms (+ 400 ms trigger settle < 12750 ms = 0.85 * 15000 ms). Reference search 2026-11-24: coa-history 600327: 172 applies / 172 removes in 3 logs; coabuildhub 301262 matches verbatim ('Lasts for 15 sec or 10 attacks.')."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (20% critical block rate and exact 2x blocked amount at 0 Insanity)",
+      "kind": "critical_block_rate",
+      "variant": "crit_block_rate_base",
+      "label_suffix": "crit_block_rate_base",
+      "quote": "Your successful blocks now have a $s2% chance to critically block for twice the normal amount.",
+      "gate_spell": 680574,
+      "expected_pct": 20,
+      "shield_item": 2129,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852,
+        35785
+      ],
+      "window_ms": 10000,
+      "control_windows": 1,
+      "treatment_windows": 15,
+      "parts": 6,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "observe_source": "Shadowy Symbiosis 680574 (Spell.dbc Effect[1] aura 253 BasePoints 19 + DieSides 1 = 20%, Cultist ADR 0010; Unit.cpp:2081-2084,3719-3721). critical_block_rate (ADR 1310) equips Dreadnought shield 2129 (slot 16 verified in both arms), sets 0 Insanity (500706=0, 680603=0, 573315=0 verified at arm start, after every combat window, and at arm end), and collects >= 14,716 pooled partial blocks across 6 parts from 10 stationary strikers (entry 36 with 42716 root, 62531 +100% melee haste, 2116852 +100% melee/ranged haste, 35785 +980 AP so every hit exceeds 2*block_value and never full-blocks). Proves 0 critical blocks in unlearned control, 20% +- 2 pts (99% Wilson CI, exact binomial pair false-fail and false-pass <= 0.1%) after learning 680574, and exact 2.0x blocked amount (crit == 2*B, normal == B, other == 0). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub matches verbatim."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (20% critical block rate at 60 Insanity boundary)",
+      "kind": "critical_block_rate",
+      "variant": "crit_block_rate_at_60",
+      "label_suffix": "crit_block_rate_at_60",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "gate_spell": 680574,
+      "expected_pct": 20,
+      "shield_item": 2129,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852,
+        35785
+      ],
+      "window_ms": 10000,
+      "control_windows": 1,
+      "treatment_windows": 15,
+      "parts": 6,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "observe_source": "Shadowy Symbiosis 680574 boundary arm at 60 Insanity (500706=60, 680603=1, 573315=0 verified at arm start, after every combat window, and at arm end; AscensionCultist.cpp:291 doubles only when stacks > 60, Cultist ADR 0010). critical_block_rate (ADR 1310) collects >= 14,716 pooled partial blocks across 6 parts, proving 0 critical blocks in unlearned control, 20% +- 2 pts (not doubled 40%; exact binomial pair residual <= 0.1%) after learning 680574, and exact 2.0x blocked amount. Reference search 2026-11-25: coa-history 680574 0 events; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (40% doubled critical block rate at 61 Insanity)",
+      "kind": "critical_block_rate",
+      "variant": "crit_block_rate_above_60",
+      "label_suffix": "crit_block_rate_above_60",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "gate_spell": 680574,
+      "expected_pct": 40,
+      "shield_item": 2129,
+      "striker_entry": 36,
+      "strikers": 10,
+      "striker_auras": [
+        42716,
+        62531,
+        2116852,
+        35785
+      ],
+      "window_ms": 10000,
+      "control_windows": 1,
+      "treatment_windows": 16,
+      "parts": 8,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "observe_source": "Shadowy Symbiosis 680574 above-60 arm at 61 Insanity (500706=61, 680603=1, 573315=1 verified at arm start, after every combat window, and at arm end; AscensionCultist.cpp:291 doubles 680574 Effect[1] to 40% when stacks > 60, Cultist ADR 0010). critical_block_rate (ADR 1310) collects >= 22,014 pooled partial blocks across 8 parts, proving 0 critical blocks in unlearned control, 40% +- 2 pts (doubled from 20%; exact binomial pair residual <= 0.1%) after learning 680574, and exact 2.0x blocked amount. Reference search 2026-11-25: coa-history 680574 0 events; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 560301,
+      "name": "Hallucination (3 copies run in random directions)",
+      "kind": "summon_random_direction",
+      "variant": "copies_random_run",
+      "label_suffix": "copies_random_run",
+      "quote": "that run in a random direction",
+      "trigger_spell": 560301,
+      "entry": 840025,
+      "copies": 3,
+      "casts": 8,
+      "parts": 1,
+      "duration_spell": 706932,
+      "start_wait_ms": 50,
+      "run_ms": 1500,
+      "despawn_wait_ms": 2000,
+      "min_run_yd": 5.0,
+      "cast_power": 2000,
+      "observe_source": "Hallucination 560301 row 179[2] ('that run in a random direction', DurationIndex 27 = 3000 ms on 706932; AscensionCultistAbilities.cpp:495-497 spawns 3 copies of entry 840025; AscensionCultistSummons.cpp:29-33,58-59 Wander calls MovePoint(1, GetNearPosition(20, frand(0, 2*pi)), FORCED_MOVEMENT_RUN)). summon_random_direction (ADR 1311, D-38) checks uncast control (0 copies), then across 8 independent casts (24 total copies) reads GUID-sorted (x, y) at +50 ms and +1550 ms (< 3000 ms) with 2000 ms despawn gap: every copy must displace >= 5.0 yd (excluding stationary 0 yd and walk ~3.75 yd against run ~12.0 yd), mean resultant length R <= 0.65 (catching single-direction / narrow-cone), and occupied 45-deg sectors >= 5/8 (catching deterministic 1/2/3/4-way fans; uniform false-fail bound <= 8.8e-5 per 2-run pair <= 0.1%). Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub matches verbatim."
     }
   ],
   "player_observations": [],

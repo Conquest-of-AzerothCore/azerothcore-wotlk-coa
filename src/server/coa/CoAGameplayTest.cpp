@@ -1180,6 +1180,13 @@ struct MeleeHitEvent
     uint64 atMs = 0;
 };
 
+struct IncomingBlockEvent
+{
+    uint32 blockedAmount = 0;
+    uint32 damage = 0;
+    uint8 victimState = 0;
+};
+
 struct MeleeOutcomes
 {
     uint32 swings = 0;
@@ -1255,6 +1262,7 @@ struct Actor
     std::map<ObjectGuid, uint32> meleeAttacksTakenFrom;
     std::map<std::pair<ObjectGuid, uint8>, uint32> meleeVictimStatesTakenFrom;
     std::map<ObjectGuid, uint32> meleeMissesTakenFrom;
+    std::vector<IncomingBlockEvent> meleeBlocksTaken;
     std::map<uint8, uint64> meleeLastTakenMsByVictimState;
     std::optional<uint64> meleeLastTakenMs;
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
@@ -1880,6 +1888,12 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             response.read_skip(size_t(subDamages) * sizeof(uint32));
         uint8 victimState = 0;
         response >> victimState;
+        uint32 unknownAttackerState = 0;
+        uint32 meleeSpellId = 0;
+        response >> unknownAttackerState >> meleeSpellId;
+        uint32 blockedAmount = 0;
+        if (hitInfo & HITINFO_BLOCK)
+            response >> blockedAmount;
         if (victim == actor.guid)
         {
             ++actor.meleeAttacksTakenFrom[attacker];
@@ -1888,6 +1902,8 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
             actor.meleeLastTakenMs = GameNowMs();
             if (hitInfo & HITINFO_MISS)
                 ++actor.meleeMissesTakenFrom[attacker];
+            if (hitInfo & HITINFO_BLOCK)
+                actor.meleeBlocksTaken.push_back({ blockedAmount, damage, victimState });
         }
         MeleeOutcomes& outcome = actor.meleeOutcomesByAttacker[attacker];
         outcome.attackerEntry = ResolveLiveEntry(observer, attacker);
@@ -3211,6 +3227,21 @@ private:
                 return creature;
 
         return nullptr;
+    }
+
+    std::vector<Creature*> GetOwnedCreaturesSorted(Player* player, uint32 entry)
+    {
+        std::list<Creature*> listed;
+        player->GetCreatureListWithEntryInGrid(listed, entry, 100.0f);
+        std::vector<Creature*> creatures;
+        for (Creature* creature : listed)
+            if (IsLivingSummonOf(player, creature))
+                creatures.push_back(creature);
+        std::sort(creatures.begin(), creatures.end(), [](Creature const* left, Creature const* right)
+        {
+            return left->GetGUID().GetRawValue() < right->GetGUID().GetRawValue();
+        });
+        return creatures;
     }
 
     static AscensionWildcard::Slot WildcardSlot(Player const* player, uint32 slot)
@@ -5353,6 +5384,37 @@ private:
                 total += count;
             return total;
         }
+        if (metric == "melee_blocks_taken_count" || metric == "melee_blocks_taken_total")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            std::string const kind = step.get<std::string>("block_kind", "all");
+            Require(kind == "all" || kind == "normal" || kind == "critical" || kind == "other" || kind == "full",
+                "Unknown block_kind in melee_blocks_taken metric");
+            Require(metric == "melee_blocks_taken_count" || kind != "full",
+                "block_kind full applies only to melee_blocks_taken_count");
+            uint32 const baseBlock = player->GetShieldBlockValue();
+            uint64 total = 0;
+            for (IncomingBlockEvent const& event : actor.meleeBlocksTaken)
+            {
+                bool match = false;
+                if (kind == "all")
+                    match = true;
+                else if (kind == "full")
+                    match = event.victimState == VICTIMSTATE_BLOCKS;
+                else if (kind == "normal")
+                    match = event.victimState != VICTIMSTATE_BLOCKS && baseBlock > 0 &&
+                        event.blockedAmount == baseBlock;
+                else if (kind == "critical")
+                    match = event.victimState != VICTIMSTATE_BLOCKS && baseBlock > 0 &&
+                        event.blockedAmount == baseBlock * 2;
+                else
+                    match = event.victimState != VICTIMSTATE_BLOCKS &&
+                        (!baseBlock || (event.blockedAmount != baseBlock && event.blockedAmount != baseBlock * 2));
+                if (match)
+                    total += metric == "melee_blocks_taken_count" ? 1 : event.blockedAmount;
+            }
+            return double(total);
+        }
         if (metric == "pet_melee_swings" || metric == "pet_melee_crits" || metric == "pet_melee_glancing" ||
             metric == "pet_melee_plain_count" || metric == "pet_melee_plain_damage" || metric == "pet_melee_damage" ||
             metric == "pet_melee_hits" || metric == "pet_melee_blocked")
@@ -6318,6 +6380,17 @@ private:
                 return double(creature->GetCombatReach());
             return double(metric == "owned_creature_position_x" ? creature->GetPositionX() :
                 metric == "owned_creature_position_y" ? creature->GetPositionY() : creature->GetPositionZ());
+        }
+        if (metric == "owned_creature_copy_x" || metric == "owned_creature_copy_y")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint32 const index = step.get<uint32>("index");
+            Require(sObjectMgr->GetCreatureTemplate(entry) != nullptr, "Unknown creature entry in metric");
+            std::vector<Creature*> const creatures = GetOwnedCreaturesSorted(player, entry);
+            if (index >= creatures.size())
+                return std::numeric_limits<double>::quiet_NaN();
+            return double(metric == "owned_creature_copy_x"
+                ? creatures[index]->GetPositionX() : creatures[index]->GetPositionY());
         }
         if (metric == "owned_creature_weapon_damage_min")
         {
@@ -7660,6 +7733,11 @@ private:
             if (!CastUntilOwnedCreature(step, record))
                 return;
         }
+        else if (action == "attack_until_swings")
+        {
+            if (!AttackUntilSwings(step, record))
+                return;
+        }
         else if (action == "forget_vanity" && !VanityRowStored(step))
             return;
         else
@@ -7766,6 +7844,33 @@ private:
         }
         record.put("attempts", _untilAuraAttempts);
         record.put("stopped", present ? "creature" : "cap");
+        return true;
+    }
+
+    bool AttackUntilSwings(Tree const& step, Tree& record)
+    {
+        std::string const actorId = step.get<std::string>("actor");
+        Actor const& actor = _actors.at(actorId);
+        Player* player = GetPlayer(actorId);
+        Unit* target = GetUnit(step.get<std::string>("target"));
+        uint32 const wanted = step.get<uint32>("swings");
+        uint64 const timeoutMs = step.get<uint32>("timeout_ms");
+        uint32 const hand = step.get<uint32>("hand", 0);
+        Require(wanted > 0 && hand < 2, "Invalid attack_until_swings parameters");
+        if (!_swingWaitStarted)
+        {
+            Require(player->IsValidAttackTarget(target), "Invalid melee attack target");
+            _swingWaitStarted = true;
+            _swingStartCount = actor.meleeAttacksByHand[hand];
+            SubmitAttackSwing(player, target);
+        }
+        uint32 const done = actor.meleeAttacksByHand[hand] - _swingStartCount;
+        if (done < wanted && GameElapsed(_stepTime) < timeoutMs)
+            return false;
+        WorldPacket packet(CMSG_ATTACKSTOP, 0);
+        player->GetSession()->HandleAttackStopOpcode(packet);
+        record.put("swings", done);
+        record.put("stopped", done >= wanted ? "swings" : "timeout");
         return true;
     }
 
@@ -9696,6 +9801,8 @@ private:
         ++_completed;
         _stepStarted = false;
         _untilAuraAttempts = 0;
+        _swingWaitStarted = false;
+        _swingStartCount = 0;
         _talentRequestSent = false;
         _characterQueueMarked = false;
         _characterQueueReached = false;
@@ -9708,6 +9815,8 @@ private:
     bool _targetsCreated = false;
     bool _stepStarted = false;
     uint32 _untilAuraAttempts = 0;
+    bool _swingWaitStarted = false;
+    uint32 _swingStartCount = 0;
     std::unordered_map<ObjectGuid, int32> _blockRatingFixtures;
     bool _talentRequestSent = false;
     uint32 _talentResultsBefore = 0;

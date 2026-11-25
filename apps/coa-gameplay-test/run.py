@@ -139,6 +139,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
     'owned_creature_distance_2d', 'owned_creature_combat_reach', 'owned_creature_position_x',
     'owned_creature_position_y', 'owned_creature_position_z',
+    'owned_creature_copy_x', 'owned_creature_copy_y',
     'charm_entry', 'charm_distance', 'charm_aura_stacks', 'controls_self', 'charmed', 'viewpoint_entry', 'seer_entry', 'private_instance',
     'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms', 'dynamic_object_height',
     'dynamic_object_radius', 'dynamic_object_size', 'gossip_options', 'gossip_option_text',
@@ -201,6 +202,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'spell_immune', 'spell_effect_immune', 'melee_attack_count',
     'melee_attacks_taken', 'melee_missed_taken', 'melee_attack_taken_last_ms',
+    'melee_blocks_taken_count', 'melee_blocks_taken_total',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
@@ -256,6 +258,7 @@ PLAYER_STAT_METRICS = {
     'block_chance', 'block_value', 'critical_block_chance', 'spell_critical_damage', 'armor_reduced_damage',
     'aoe_damage_taken', 'reputation', 'reputation_gain', 'melee_attack_count',
     'melee_attacks_taken', 'melee_missed_taken', 'melee_attack_taken_last_ms',
+    'melee_blocks_taken_count', 'melee_blocks_taken_total',
     'spell_damage_count', 'spell_damage_total', 'spell_log_count', 'spell_absorb_total', 'spell_resist_total',
     'spell_damage_with_resist_total',
     'spell_resist_chance', 'spell_uses_armor',
@@ -285,7 +288,8 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster',
                  'chat_type', 'chat_text', 'chat_target', 'chat_channel', 'chat_subject', 'chat_emote', 'chat_name',
                  'chat_target_name', *CHAT_LOG_FLAGS,
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
-                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered', 'cumulative'} \
+                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered', 'cumulative',
+                  'block_kind'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -335,6 +339,8 @@ ACTIONS = {
     'cast_until_owned_creature': ({'actor', 'spell', 'entry', 'every_ms', 'max_casts'},
                                   {'actor', 'spell', 'target', 'entry', 'every_ms', 'max_casts', 'cast_power', 'power',
                                    'reset_cooldown'}),
+    'attack_until_swings': ({'actor', 'target', 'swings', 'timeout_ms'},
+                            {'actor', 'target', 'swings', 'timeout_ms', 'hand'}),
     'creature_attack': ({'actor'}, {'actor', 'target', 'stop'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
@@ -1032,6 +1038,12 @@ def validate(scenario, clock=REAL_CLOCK):
                 require('cast_power' in step, f'{where}: power selects the type of cast_power')
             if 'reset_cooldown' in step:
                 require(type(step['reset_cooldown']) is bool, f'{where}: reset_cooldown must be boolean')
+        if action == 'attack_until_swings':
+            require(step['actor'] in player_ids, f'{where}: attack_until_swings needs a player')
+            number(step['swings'], f'{where}.swings', 1, 50, True)
+            number(step['timeout_ms'], f'{where}.timeout_ms', 1, scenario.get('timeout_ms', 90000), True)
+            if 'hand' in step:
+                number(step['hand'], f'{where}.hand', 0, 1, True)
         if action in {'set_skill', 'gather_skill'}:
             number(step['skill'], f'{where}.skill', 1, 65535, True)
         if action == 'set_skill':
@@ -1446,6 +1458,12 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(metric in ('melee_attacks_taken', 'melee_attack_taken_last_ms'),
                         f'{where}: victim_state only filters melee attacks taken')
                 number(step['victim_state'], f'{where}.victim_state', 0, MAX_VICTIM_STATE, True)
+            if 'block_kind' in step:
+                require(metric in ('melee_blocks_taken_count', 'melee_blocks_taken_total'),
+                        f'{where}: block_kind only filters melee_blocks_taken metrics')
+                allowed_kinds = {'all', 'normal', 'critical', 'other', 'full'} if metric == 'melee_blocks_taken_count' \
+                    else {'all', 'normal', 'critical', 'other'}
+                require(step['block_kind'] in allowed_kinds, f'{where}: invalid block_kind')
             for key in ('glancing', 'blocked'):
                 if key in step:
                     require(metric in MELEE_OUTCOME_METRICS or (key == 'blocked' and metric in SPELL_DAMAGE_METRICS),
@@ -1639,8 +1657,12 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_power', 'owned_creature_threat_multiplier',
                           'owned_creature_spell_crit_chance', 'owned_creature_react_state',
                           'owned_creature_school_spell_crit_chance', 'owned_creature_combat_reach',
-                          'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z'}:
+                          'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z',
+                          'owned_creature_copy_x', 'owned_creature_copy_y'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
+            if metric in {'owned_creature_copy_x', 'owned_creature_copy_y'}:
+                require('index' in step, f'{where}: owned_creature_copy metric needs index')
+                number(step['index'], f'{where}.index', 0, 31, True)
             if metric == 'owned_creature_school_spell_crit_chance':
                 require('spell' in step, f'{where}: metric needs a magic probe spell')
             if metric in {'owned_creature_crit_chance', 'owned_creature_threat', 'melee_crit_chance_against'}:
@@ -1784,6 +1806,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_spell_crit_chance', 'owned_creature_react_state',
                           'owned_creature_school_spell_crit_chance', 'owned_creature_combat_reach',
                           'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z',
+                          'owned_creature_copy_x', 'owned_creature_copy_y',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',
