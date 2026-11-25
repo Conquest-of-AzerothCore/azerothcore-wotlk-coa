@@ -13,7 +13,7 @@ stats, since the value depends on them. The scenario learns the rank, then measu
 | `effect_value` of another spell | `spell_effect_value` of the effect of the token's first `$<id>sN`/`$<id>mN`, `model` `{'effect_spell': id, 'effect': n}` | the tooltip token, label `<rank> effect_value <id>e<n> #<ordinal>` |
 | `max_stacks` | `spell_max_stacks` of spell `<id>` of a `$<id>u` token, `model` `{'effect_spell': id}` | `StackAmount` of that spell, compared exactly |
 | `spell_duration` | `spell_duration_ms` of spell `<id>` of a `$<id>d` token, `model` `{'effect_spell': id}`, label `<rank> spell_duration <id> #<ordinal>` | the token: `Duration` of that spell, capped by `MaxDuration` |
-| `power_cost` | `spell_power_cost` before any cast | `ManaCost` divided by the client display divisor of the power type (1, 10 rage and runic power, 1000 happiness) |
+| `power_cost` | `spell_power_cost` before any cast | `ManaCost` (or `ManaCost + floor(base_mana.value * ManaCostPercentage / 100)` for `PowerType == 0` when `"base_mana_power_cost": true`, ADR 1318) divided by the client display divisor of the power type (1, 10 rage and runic power, 1000 happiness) |
 | `cooldown_ms` | `cooldown_ms` right after the cast | `max(RecoveryTime, CategoryRecoveryTime)`, as the client tooltip |
 | `aura_amount` | `aura_amount` of the effect after the cast | the same tooltip token as `effect_value`, for an effect that applies an aura |
 | `aura_duration_ms` | `aura_duration_ms` after the cast | the `$d` token of the rank, for an instant spell that applies an aura |
@@ -79,7 +79,8 @@ Necromancer: Glacial Impact 704355 (frozen), Death's Due 808016 (below 20%).
 A value that cannot be compared is never dropped; its `rule` starts with a stable prefix:
 `unreadable: <entry>` for a part the reader could not evaluate (the scenario measures the spell's first active effect
 beside it, which is not the token's own effect),
-`unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give,
+`unreadable: ManaCostPercentage ...` (when `base_mana_power_cost` is not enabled or `PowerType` is not mana) or
+`unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give,
 `generic: tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")` for an empty readout
 (an `unreadable: tooltip without value` row before this item; never a number either way, so classified `unmodelled`
 rather than left for the reader to keep re-investigating),

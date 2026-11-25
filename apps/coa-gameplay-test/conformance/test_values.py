@@ -1178,5 +1178,43 @@ class HonourMinRangeTest(unittest.TestCase):
                 honour_min_range({HONOUR_MIN_RANGE_KEY: bad})
 
 
+VOIDBORNE = 681104
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class BaseManaPowerCostTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cultist = load_class_file(CULTIST_CLASS_ID)
+        cls.dreadfall = ClassSpell(DREADFALL, 'Dreadfall', (DREADFALL,), DREADFALL, 0, False)
+        cls.voidborne = ClassSpell(VOIDBORNE, 'Voidborne', (VOIDBORNE,), VOIDBORNE, 0, False)
+
+    def test_base_mana_power_cost_judges_mana_percent_spells_only_when_opted_in(self):
+        from values import BASE_MANA_POWER_COST_KEY
+        without = {key: value for key, value in self.cultist.items() if key != BASE_MANA_POWER_COST_KEY}
+        with_opt = {**without, BASE_MANA_POWER_COST_KEY: True}
+        _, exp_plain, _ = value_scenario(without, self.dreadfall, DREADFALL)
+        _, exp_opt, _ = value_scenario(with_opt, self.dreadfall, DREADFALL)
+        pc_plain = next(item for item in exp_plain if item.check == 'power_cost')
+        pc_opt = next(item for item in exp_opt if item.check == 'power_cost')
+        self.assertTrue(pc_plain.rule.startswith(UNREADABLE))
+        self.assertEqual(pc_opt.displayed, '181')
+        self.assertEqual(pc_opt.rule, 'ManaCost 0 + 12% of base_mana 1512 divisor 1')
+        _, exp_health, _ = value_scenario(with_opt, self.voidborne, VOIDBORNE)
+        pc_health = next(item for item in exp_health if item.check == 'power_cost')
+        self.assertTrue(pc_health.rule.startswith(UNREADABLE))
+
+    def test_invalid_base_mana_power_cost_config_is_refused(self):
+        from values import BASE_MANA_POWER_COST_KEY, base_mana_for_power_cost
+        for bad in (
+                {BASE_MANA_POWER_COST_KEY: 1},
+                {BASE_MANA_POWER_COST_KEY: True},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 1, 'value': 1512}},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 0}},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': True}}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                base_mana_for_power_cost(bad)
+
+
 if __name__ == '__main__':
     unittest.main()

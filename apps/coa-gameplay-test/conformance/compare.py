@@ -123,6 +123,7 @@ PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit
 TRUNCATED_READ = 1.0
 BONUS_DATA = 'bonus_data'
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
+BASE_MANA_COST_DIVISOR = re.compile(r'ManaCost \d+ \+ \d+% of base_mana \d+ divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
 ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 'measured', 'expected', 'low', 'high',
                  'deviation', 'explanation', 'server_commit', 'build', 'runs')
@@ -5945,7 +5946,7 @@ def judge_expectation(manifest: dict, entry: dict, run: Run | None, expectation:
         return replace(base, status=status, measured=measured, expected=1.0, low=1.0, high=1.0,
                        explanation=f'known aura {expectation.spell_id} on the reference character')
     if check == 'power_cost':
-        divisor = COST_DIVISOR.fullmatch(rule)
+        divisor = COST_DIVISOR.fullmatch(rule) or BASE_MANA_COST_DIVISOR.fullmatch(rule)
         if divisor:
             shown = measured / int(divisor.group(1))
             return deterministic(base, shown, shown, float(expectation.displayed),

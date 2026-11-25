@@ -1095,6 +1095,17 @@ class CompareTest(unittest.TestCase):
                                   [assert_step(label, '150')], constant_reader())
         self.assertEqual((verdicts[label].status, verdicts[label].measured), ('ok', 15.0))
 
+    def test_base_mana_percent_power_cost_is_compared_and_alerts_on_mismatch(self):
+        label = '1001 power_cost'
+        rule = 'ManaCost 0 + 12% of base_mana 1512 divisor 1'
+        ok = self.value_run([expectation(label, 'power_cost', '181', rule)], [],
+                            [assert_step(label, '181')], constant_reader())
+        self.assertEqual((ok[label].status, ok[label].measured, ok[label].expected), ('ok', 181.0, 181.0))
+        self.fresh()
+        bad = self.value_run([expectation(label, 'power_cost', '181', rule)], [],
+                             [assert_step(label, '196')], constant_reader())
+        self.assertEqual(bad[label].status, 'alert')
+
     def test_known_aura_absent_is_an_alert(self):
         label = 'known_aura 887007'
         self.workspace.scenario(VALUE_KEY, 'value', [Expectation(label, 'known_aura', 887007, 887007, None, '887007',

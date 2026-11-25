@@ -27,6 +27,7 @@ RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 ALLY_CASTS_KEY = 'value_ally_casts'
 HONOUR_MIN_RANGE_KEY = 'honour_min_range'
+BASE_MANA_POWER_COST_KEY = 'base_mana_power_cost'
 ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
@@ -513,14 +514,36 @@ def per_tick_ticks(records: Records, spell_id: int, effect: int) -> float:
     return int(ticks) if ticks.is_integer() else ticks
 
 
-def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts) -> Expectation:
+def base_mana_for_power_cost(class_file: dict | None) -> int | None:
+    if class_file is None or BASE_MANA_POWER_COST_KEY not in class_file:
+        return None
+    enabled = class_file[BASE_MANA_POWER_COST_KEY]
+    if type(enabled) is not bool:
+        raise ValueError(f'{BASE_MANA_POWER_COST_KEY} must be a boolean')
+    if not enabled:
+        return None
+    base = class_file.get('base_mana')
+    if (not isinstance(base, dict) or base.get('power') != MANA
+            or type(base.get('value')) is not int or base['value'] <= 0):
+        raise ValueError(f'{BASE_MANA_POWER_COST_KEY} requires base_mana with power {MANA} and a positive integer value')
+    return base['value']
+
+
+def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts,
+                           base_mana: int | None = None) -> Expectation:
     divisor = POWER_DISPLAY_DIVISOR.get(facts.power_type, 1)
     if facts.mana_cost_per_level:
         displayed = f'{facts.mana_cost} + {facts.mana_cost_per_level} per level'
         rule = UNREADABLE + f'ManaCostPerlevel {facts.mana_cost_per_level} scales with the spell rank of the client'
     elif facts.mana_cost_percentage:
-        displayed = f'{facts.mana_cost} + {facts.mana_cost_percentage}% of base power'
-        rule = UNREADABLE + f'ManaCostPercentage {facts.mana_cost_percentage} needs the base power of the caster'
+        if base_mana is not None and facts.power_type == MANA:
+            expected = facts.mana_cost + (base_mana * facts.mana_cost_percentage) // 100
+            displayed = str(expected // divisor)
+            rule = (f'ManaCost {facts.mana_cost} + {facts.mana_cost_percentage}% of base_mana {base_mana} '
+                    f'divisor {divisor}')
+        else:
+            displayed = f'{facts.mana_cost} + {facts.mana_cost_percentage}% of base power'
+            rule = UNREADABLE + f'ManaCostPercentage {facts.mana_cost_percentage} needs the base power of the caster'
     else:
         displayed = str(facts.mana_cost // divisor)
         rule = f'ManaCost divisor {divisor}'
@@ -825,7 +848,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     if not facts.passive:
         label = f'{rank_id} power_cost'
         measured.append(measurement(label, CASTER, 'spell_power_cost', spell=rank_id))
-        expectations.append(power_cost_expectation(label, spell.spell_id, rank_id, facts))
+        expectations.append(power_cost_expectation(label, spell.spell_id, rank_id, facts,
+                                                   base_mana_for_power_cost(class_file)))
         if facts.recast_ms > 0:
             label = f'{rank_id} cooldown_ms'
             after_cast.append(measurement(label, CASTER, 'cooldown_ms', spell=rank_id))
