@@ -66,7 +66,7 @@ def seeded_run(model: dict, ctrl_swings=2, ctrl_restores=0, treat_swings=2, trea
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
 class AvoidedChargeRestoreTests(unittest.TestCase):
     def test_generates_valid_scenario_and_registers_event_evidence(self):
-        from coverage import BEHAVIOUR, EVENT, METRIC_EVIDENCE, metric_evidence, verdict_evidence
+        from coverage import EVENT, METRIC_EVIDENCE, metric_evidence
         scenario, [exp] = build_entry()
         valid = run.validate(scenario, run.SIMULATED_CLOCK)
         self.assertEqual(exp.label, '300278 behaviour_metric_delta avoided_charge_restore')
@@ -78,32 +78,31 @@ class AvoidedChargeRestoreTests(unittest.TestCase):
         self.assertEqual(valid['creatures'][0]['distance'], 20.0)
         restores = [step for step in valid['steps'] if step['action'] == 'restore_charges']
         self.assertEqual(len(restores), 60)
-        fake_ok = base_verdict(exp)
-        self.assertEqual(verdict_evidence(fake_ok), BEHAVIOUR)
 
     def test_pooled_ok_alert_mutant_and_miss_exclusion(self):
-        _, [exp] = build_entry(control_cycles=30, treatment_cycles=50)
-        model = {**exp.model, 'min_control_trials': 50, 'min_treatment_trials': 200}
-        runs_ok = [seeded_run(model, treat_swings=2, treat_restores_seq=[1, 1, 0, 1, 1], miss_every=5)
-                   for _ in range(3)]
+        from coverage import BEHAVIOUR, verdict_evidence
+        _, [exp] = build_entry(control_cycles=10, treatment_cycles=50)
+        model = {**exp.model, 'min_control_trials': 50, 'min_treatment_trials': 22014}
+        one_ok = seeded_run(model, treat_swings=2, treat_restores_seq=[1, 1, 0, 1, 1], miss_every=5)
+        runs_ok = [one_ok] * 250
         ok_verdict = avoided_charge_restore_verdict(base_verdict(exp), runs_ok, model)
         self.assertEqual(ok_verdict.status, 'ok')
+        self.assertEqual(verdict_evidence(ok_verdict, ENTRY['quote'], {}), BEHAVIOUR)
 
         mutant_model = {**model, 'expected_rate': 0.50}
         self.assertEqual(avoided_charge_restore_verdict(base_verdict(exp), runs_ok, mutant_model).status, 'alert')
 
-        runs_zero = [seeded_run(model, treat_swings=2, treat_restores_seq=[0], miss_every=5) for _ in range(3)]
+        runs_zero = [seeded_run(model, treat_swings=2, treat_restores_seq=[0], miss_every=5)] * 250
         self.assertEqual(avoided_charge_restore_verdict(base_verdict(exp), runs_zero, model).status, 'alert')
 
         runs_ctrl_proc = [seeded_run(model, ctrl_restores=1, treat_swings=2, treat_restores_seq=[1, 1, 0, 1, 1],
-                                     miss_every=5) for _ in range(3)]
+                                     miss_every=5)] * 250
         self.assertEqual(avoided_charge_restore_verdict(base_verdict(exp), runs_ctrl_proc, model).status, 'alert')
 
         runs_extra_restore = [seeded_run(model, treat_swings=1, treat_restores_seq=[2], miss_every=5)]
         self.assertEqual(avoided_charge_restore_verdict(base_verdict(exp), runs_extra_restore, model).status, 'alert')
 
-        runs_low_miss = [seeded_run(model, treat_swings=2, treat_restores_seq=[1, 1, 0, 1, 1], miss_every=0)
-                         for _ in range(3)]
+        runs_low_miss = [seeded_run(model, treat_swings=2, treat_restores_seq=[1, 1, 0, 1, 1], miss_every=0)] * 250
         self.assertEqual(avoided_charge_restore_verdict(base_verdict(exp), runs_low_miss, model).status, 'unmeasured')
 
     def test_unmeasured_on_capping_risk_guard_failure_imbalance_or_missing_read(self):

@@ -140,7 +140,7 @@ class EffectivenessDeltaTests(unittest.TestCase):
         from coverage import STATE, metric_evidence, promised_state
         entry = {'spell': 706177, 'name': 'Improved Sermon of Dread (Sermon of Dread attack power debuff)',
                  'kind': 'effectiveness_delta', 'label_suffix': 'sermon_attack_power',
-                 'quote': 'Increases the effectiveness of |cFFFFFFFFSermon of Dread|r by $s1%.',
+                 'quote': 'Increases the effectiveness of Sermon of Dread by $s1%.',
                  'trigger_spell': 620614, 'gate_spell': 706177, 'target': 'dummy', 'measure_actor': 'dummy',
                  'cast_power': 2000, 'phase_auras': [[35785, 1, 'dummy', 'dummy']],
                  'metric': 'attack_power', 'fields': {}, 'before_expected': 900, 'expected': 843,

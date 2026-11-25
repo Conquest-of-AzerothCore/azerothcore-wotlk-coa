@@ -370,7 +370,7 @@ def avoided_charge_restore_verdict(base: Verdict, runs: list[Run], model: dict) 
     ctrl = totals[CONTROL]
     treat = totals[TREATMENT]
     min_ctrl, min_treat = int(model['min_control_trials']), int(model['min_treatment_trials'])
-    detail = {'control': ctrl, 'treatment': treat, 'parts': len(runs)}
+    detail = {**(base.detail or {}), 'metric': METRIC, 'control': ctrl, 'treatment': treat, 'parts': len(runs)}
     if ctrl['trials'] < min_ctrl:
         return replace(base, status='insufficient_trials', detail=detail,
                        explanation=f'control saw {ctrl["trials"]} avoided swings, below minimum {min_ctrl}')
