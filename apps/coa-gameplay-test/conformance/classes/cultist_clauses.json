@@ -1169,7 +1169,10 @@
     "spell": 520345,
     "clause": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
     "labels": [
-      "520345 effect_value #3"
+      "520345 behaviour_metric_delta absorb_caster_base",
+      "520345 behaviour_metric_delta absorb_caster_sp",
+      "520345 behaviour_metric_delta absorb_caster_ap",
+      "520345 behaviour_metric_delta absorb_ally_base"
     ],
     "kind": "claim"
   },
@@ -1177,7 +1180,7 @@
     "spell": 520345,
     "clause": "stacking $520346u times,",
     "labels": [
-      "520345 max_stacks 520346 #0"
+      "520345 behaviour_metric_delta stacks"
     ],
     "kind": "claim"
   },
@@ -1189,13 +1192,14 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "520345 aura_amplitude_ms #1"
+          "520345 behaviour_metric_delta period_early",
+          "520345 behaviour_metric_delta period_late"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "520345 aura_duration_ms #2"
+          "520345 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -1209,13 +1213,19 @@
   {
     "spell": 520345,
     "clause": "While channeling you are immune to stuns and silences.",
-    "labels": [],
+    "labels": [
+      "520345 behaviour_metric_delta immune_stun",
+      "520345 behaviour_metric_delta immune_silence"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520345,
     "clause": "Not usable on yourself.",
-    "labels": [],
+    "labels": [
+      "520345 behaviour_metric_delta no_self_cast",
+      "520345 behaviour_metric_delta ally_cast_allowed"
+    ],
     "kind": "claim"
   },
   {
@@ -1286,7 +1296,10 @@
     "spell": 520682,
     "clause": "Your Dark Veil now performs its effect $s1% faster.",
     "labels": [
-      "520682 effect_value e0 #0"
+      "520682 behaviour_metric_delta faster_period_early",
+      "520682 behaviour_metric_delta faster_period_late",
+      "520682 behaviour_metric_delta faster_duration",
+      "520682 behaviour_metric_delta duration_contrast"
     ],
     "kind": "claim"
   },
@@ -1346,7 +1359,10 @@
   {
     "spell": 524877,
     "clause": "Every 1 sec while Hand of Yogg-Saron is active,",
-    "labels": [],
+    "labels": [
+      "524877 behaviour_metric_delta period_early",
+      "524877 behaviour_metric_delta period_late"
+    ],
     "kind": "claim"
   },
   {
@@ -1366,16 +1382,25 @@
   {
     "spell": 524877,
     "clause": "scaling with Insanity, and increases their critical strike chance by $s2%,",
-    "labels": [
-      "524877 effect_value 704473e1 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases their critical strike chance by $s2%,",
+        "labels": [
+          "524877 behaviour_metric_delta crit_buff"
+        ]
+      },
+      {
+        "claim": "scaling with Insanity",
+        "labels": []
+      }
+    ]
   },
   {
     "spell": 524877,
     "clause": "stacking $u times,",
     "labels": [
-      "524877 max_stacks 704473 #2"
+      "524877 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -1383,7 +1408,7 @@
     "spell": 524877,
     "clause": "for $d.",
     "labels": [
-      "524877 spell_duration 704473 #3"
+      "524877 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },

@@ -6024,6 +6024,1005 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "525065 aura_ascension_cultist_event (AscensionCultistEvents.cpp:67, 199) casts 525066 (DurationIndex 27 = 3000 ms, $525066d, aura 27 SPELL_AURA_MOD_SILENCE, Mechanic 9) at the deflected attacker. Dummy casts untriggered Damage 100 (TEST) 2653 (0 mana, DmgClass 1 Fire) at caster at t=500 ms (lead_ms 500 + gap_ms 1000): before 525065 no silence (0); after 525065 deflected cast applies 525066 present at t=3250 ms (~2750 ms after cast > 2700 ms = 0.9*3000) and gone at t=3750 ms (~3250 ms after cast < 3300 ms = 1.1*3000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spells 525065 and 525066: 0 events in 186 logs (positive control 582591 Embrace the Void: 18 casts in 11 logs); coabuildhub spells_master_index.json entry 525065 says 'deflecting all spells for 5 seconds, but making you unable to attack or cast spells. Casters whose magic is deflected are silenced for 3 seconds', while installed server Spell.dbc says 'deflecting all spells and abilities for $d' ($d = 5000 ms, $525066d = 3000 ms) and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (caster absorbs 969 on 1st tick at SP 0, AP 376)",
+      "kind": "metric_delta",
+      "variant": "absorb_caster_base",
+      "label_suffix": "absorb_caster_base",
+      "quote": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 2,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 92559,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 969,
+      "tolerance": 1,
+      "wait_ms": 150,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520346 Effect[0] (ally) & Effect[1] (caster, synced by AscensionCultistContracts.cpp:169-174): EffectBasePoints 799 + DieSides 1 = 800, EffectRealPointsPerLevel 3.0, BaseLevel 35, SpellLevel 35, MaxLevel 0, no SkillLineAbility row -> at level 60: 800 + (60-35)*3.0 = 875; CultistCoefficients (AscensionCultistData.h:81-82) +1.0*bh + 0.25*AP. At Heretic reference stats (bh 0, AP 376): 875 + 94 = 969 per stack. After tick 1 (1500 ms), 2x Void Zone 92559 (1954 Physical > 969) breaks the 1-stack shield before tick 2 (2000 ms): spell_absorb_total reads 0 before (control) and 969 after. Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (caster absorb scales +1.0*bh at +2000 SP: 2969)",
+      "kind": "metric_delta",
+      "variant": "absorb_caster_sp",
+      "label_suffix": "absorb_caster_sp",
+      "quote": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "player_spell_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 4,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 92559,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2969,
+      "tolerance": 1,
+      "wait_ms": 100,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520346 at player_spell_power 2000 (bh 2000, AP 376): 875 + 2000*1.0 + 376*0.25 = 2969 per stack. 4x Void Zone 92559 (3908 Physical > 2969) at 1500 ms breaks the 1-stack shield before tick 2 (2000 ms): spell_absorb_total reads 0 before (control) and 2969 after, proving +1.0*bh scaling. Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (caster absorb scales +0.25*AP under +980 AP: 1214)",
+      "kind": "metric_delta",
+      "variant": "absorb_caster_ap",
+      "label_suffix": "absorb_caster_ap",
+      "quote": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          35785,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1
+      },
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 2,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 92559,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1214,
+      "tolerance": 1,
+      "wait_ms": 150,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520346 with precondition fixture Attack Power 980 (35785, AP 376 -> 1356, bh 0): 875 + 1356*0.25 = 1214 per stack (+245 over 969). 2x Void Zone 92559 (1954 > 1214) at 1500 ms reads 0 before (control) and 1214 after, proving +0.25*AP scaling. Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (ally absorbs 969 on 1st tick)",
+      "kind": "metric_delta",
+      "variant": "absorb_ally_base",
+      "label_suffix": "absorb_ally_base",
+      "quote": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          10000,
+          10000
+        ],
+        "ally_strikes": true
+      },
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 2,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 8046,
+      "expected": 9015,
+      "tolerance": 2,
+      "wait_ms": 150,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520346 Effect[0] shields the ally for 969 at reference stats (bh 0, AP 376). 2x Void Zone 92559 (977 Physical each on level-60 Cultist, total 1954) strike ally in both phases (ally_strikes): before (no Dark Veil) ally health drops 10000 -> 8046; after tick 1 (1500 ms) 1 stack of 520346 absorbs 969 so ally health drops 10000 -> 9015 (saving 969 health). Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (stacks 5 times on both caster and ally)",
+      "kind": "metric_delta",
+      "variant": "stacks",
+      "label_suffix": "stacks",
+      "quote": "stacking $520346u times,",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 520346,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "520346 StackAmount 5 ($520346u = 5): ally reaches 5 stacks after 5 ticks of 520345."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520346,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 5200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520346 StackAmount 5 ($520346u = 5), DurationIndex 39 = 2000 ms (Spell.dbc); 520345 ticks 5 times over 5000 ms (1000..5000 ms). At 5200 ms (within 2000 ms of final tick), aura_stacks of 520346 reads 0 before and 5 after on both caster and ally. Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (ticks every 1 sec, early bracket: 3 stacks at 3.2 sec)",
+      "kind": "metric_delta",
+      "variant": "period_early",
+      "label_suffix": "period_early",
+      "quote": "every $t1 sec for $d.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520346,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3100,
+          3290
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520345 EffectAmplitude[0] = 1000 ms ($t1 = 1 sec, Spell.dbc). At game_time [3100, 3290] ms, 1000 ms period has ticked 3 times (1000, 2000, 3000 -> 3 stacks), excluding +10% slow 1100 ms (3rd tick at 3300 ms -> only 2 stacks). Paired with period_late to bracket 1000 ms within +-10% on both sides. Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (ticks every 1 sec, late bracket: 4 stacks at 4.6 sec)",
+      "kind": "metric_delta",
+      "variant": "period_late",
+      "label_suffix": "period_late",
+      "quote": "every $t1 sec for $d.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520346,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520345 EffectAmplitude[0] = 1000 ms ($t1 = 1 sec, Spell.dbc). At game_time [4550, 4800] ms, 1000 ms period has ticked 4 times (1000..4000 -> 4 stacks), excluding -10% fast 900 ms (5th tick at 4500 ms -> 5 stacks). Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (channel lasts 5 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "every $t1 sec for $d.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "ally",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520345,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4600,
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4800
+        ],
+        "expired": [
+          5200,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520345 DurationIndex 28 = 5000 ms ($d = 5 sec, SpellDuration.dbc). Reads aura 520345 on ally absent before cast (0), present at 4600 ms (game_time [4550, 4800] > 4500 ms), and gone at 5400 ms (game_time [5200, 5450] < 5500 ms), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (immune to stuns while channeling)",
+      "kind": "metric_delta",
+      "variant": "immune_stun",
+      "label_suffix": "immune_stun",
+      "quote": "While channeling you are immune to stuns and silences.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520345,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dark Veil 520345 channel is active on ally during the stun attempt (0 before, 1 after)."
+          }
+        ]
+      },
+      "strike": {
+        "spell": 56,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 56
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 4000,
+      "void_on_cast_failure": true,
+      "observe_source": "520345 Apply handler (AscensionCultistAuras.cpp:71-72) grants MECHANIC_STUN and MECHANIC_SILENCE immunity while channeling. Striker casts Stun 56 (Mechanic 12, DurationIndex 27 = 3000 ms) at caster in both phases: before (no Dark Veil) Stun 56 lands (1); after 4000 ms expiry, during Dark Veil channel (1500 ms in, ally holds 520345 = 1), Stun 56 is resisted (0). Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (immune to silences while channeling)",
+      "kind": "metric_delta",
+      "variant": "immune_silence",
+      "label_suffix": "immune_silence",
+      "quote": "While channeling you are immune to stuns and silences.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520345,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dark Veil 520345 channel is active on ally during the silence attempt (0 before, 1 after)."
+          }
+        ]
+      },
+      "strike": {
+        "spell": 15487,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 15487
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "observe_source": "520345 Apply handler (AscensionCultistAuras.cpp:71-72) grants MECHANIC_SILENCE immunity while channeling. Striker casts Silence 15487 (Mechanic 9, DurationIndex 28 = 5000 ms) at caster in both phases: before (no Dark Veil) Silence 15487 lands (1); after 6000 ms expiry, during Dark Veil channel (1500 ms in, ally holds 520345 = 1), Silence 15487 is resisted (0). Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (refused on self)",
+      "kind": "metric_delta",
+      "variant": "no_self_cast",
+      "label_suffix": "no_self_cast",
+      "quote": "Not usable on yourself.",
+      "trigger_spell": 520345,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 520345
+      },
+      "before_expected": 0,
+      "expected": 12,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "520345 OnSpellCheckCast (AscensionCultistAbilities.cpp:56-57) refuses self-cast with SPELL_FAILED_BAD_TARGETS (12, SharedDefines.h:1062). Reads cast_failure of 520345: 0 before cast (control) and 12 when attempted on caster; paired with ally_cast_allowed (0 on ally). Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520345,
+      "name": "Dark Veil (allowed on ally, control for no_self_cast)",
+      "kind": "metric_delta",
+      "variant": "ally_cast_allowed",
+      "label_suffix": "ally_cast_allowed",
+      "quote": "Not usable on yourself.",
+      "trigger_spell": 520345,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520345,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dark Veil 520345 lands on ally when cast at ally (0 before, 1 after)."
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 520345
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Positive control for no_self_cast: casting 520345 at a grouped ally succeeds (cast_failure 0, aura 520345 applied to ally 0 -> 1). Reference search 2026-11-24: coa-history spell 520345: 2 casts and 4 aura applied/removed in 2 logs; coabuildhub spells_master_index.json entry 520345 says '800+4.0 Points Per Level+Heal*1+AP*.25' (older state, G-9), while installed server Spell.dbc 520346 carries EffectBasePoints[0] 799 + DieSides 1 = 800, EffectRealPointsPerLevel[0] 3.0 (BaseLevel 35, SpellLevel 35, MaxLevel 0 -> +75 at level 60 = 875), StackAmount 5, 1000 ms period, 5000 ms duration and governs."
+    },
+    {
+      "spell": 520682,
+      "name": "Tales of Woe (Dark Veil ticks every 0.5 sec, early bracket: 2 vs 4 stacks at 2.1 sec)",
+      "kind": "metric_delta",
+      "variant": "faster_period_early",
+      "label_suffix": "faster_period_early",
+      "quote": "Your Dark Veil now performs its effect $s1% faster.",
+      "trigger_spell": 520345,
+      "gate_spell": 520682,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520346,
+        "caster": "caster"
+      },
+      "before_expected": 2,
+      "expected": 4,
+      "wait_ms": 2100,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "observe_source": "520682 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 19 (-50% period: 1000 ms -> 500 ms), routed to 520345 at SpellInfo.cpp:1615. At game_time [2050, 2180] ms after casting 520345 at ally: without 520682 (1000 ms period), 2 ticks have fired (1000, 2000 ms -> 2 stacks); with 520682 (500 ms period), 4 ticks have fired (500, 1000, 1500, 2000 ms -> 4 stacks), excluding +10% slow 550 ms (4th tick at 2200 ms -> 3 stacks). Paired with faster_period_late to bracket 500 ms within +-10% on both sides. Reference search 2026-11-24: coa-history spell 520682: 0 events in 186 logs (passive; positive control 520345 Dark Veil: 2 casts in 2 logs); coabuildhub spells_master_index.json entry 520682 says 'Your Dark Veil now performs its effect -50% faster.' matching installed Spell.dbc.",
+      "game_time": {
+        "after": [
+          2050,
+          2180
+        ]
+      }
+    },
+    {
+      "spell": 520682,
+      "name": "Tales of Woe (Dark Veil ticks every 0.5 sec, late bracket: 1 vs 3 stacks at 1.9 sec)",
+      "kind": "metric_delta",
+      "variant": "faster_period_late",
+      "label_suffix": "faster_period_late",
+      "quote": "Your Dark Veil now performs its effect $s1% faster.",
+      "trigger_spell": 520345,
+      "gate_spell": 520682,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 520346,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 1900,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "observe_source": "520682 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 19 (-50% period: 1000 ms -> 500 ms), routed to 520345 at SpellInfo.cpp:1615. At game_time [1820, 1960] ms after casting 520345 at ally: without 520682 (1000 ms period), 1 tick has fired (1000 ms -> 1 stack); with 520682 (500 ms period), 3 ticks have fired (500, 1000, 1500 ms -> 3 stacks), excluding -10% fast 450 ms (4th tick at 1800 ms -> 4 stacks). Reference search 2026-11-24: coa-history spell 520682: 0 events in 186 logs (passive; positive control 520345 Dark Veil: 2 casts in 2 logs); coabuildhub spells_master_index.json entry 520682 says 'Your Dark Veil now performs its effect -50% faster.' matching installed Spell.dbc.",
+      "game_time": {
+        "after": [
+          1820,
+          1960
+        ]
+      }
+    },
+    {
+      "spell": 520682,
+      "name": "Tales of Woe (Dark Veil duration halved: 5 sec to 2.5 sec)",
+      "kind": "metric_delta",
+      "variant": "faster_duration",
+      "label_suffix": "faster_duration",
+      "quote": "Your Dark Veil now performs its effect $s1% faster.",
+      "trigger_spell": 520345,
+      "gate_spell": 520682,
+      "target": "ally",
+      "measure_actor": "ally",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520345,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2300,
+      "expiry_wait_ms": 400,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2260,
+          2440
+        ],
+        "expired": [
+          2560,
+          2740
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520682 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 1 (SPELLMOD_DURATION, -50%: 5000 ms -> 2500 ms), routed to 520345 at SpellInfo.cpp:1615. Reads aura 520345 on ally absent before cast (0), present at 2300 ms (game_time [2260, 2440] > 2250 ms = 0.9*2500), and gone at 2700 ms (game_time [2560, 2740] < 2750 ms = 1.1*2500), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spell 520682: 0 events in 186 logs (passive; positive control 520345 Dark Veil: 2 casts in 2 logs); coabuildhub spells_master_index.json entry 520682 says 'Your Dark Veil now performs its effect -50% faster.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 520682,
+      "name": "Tales of Woe (Dark Veil duration contrast at 2.8 sec: 1 without vs 0 with)",
+      "kind": "metric_delta",
+      "variant": "duration_contrast",
+      "label_suffix": "duration_contrast",
+      "quote": "Your Dark Veil now performs its effect $s1% faster.",
+      "trigger_spell": 520345,
+      "gate_spell": 520682,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520345,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 2800,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "observe_source": "Contrast arm for faster_duration: at 2800 ms after casting 520345 at ally, aura 520345 is still active (1) without 520682 (5000 ms base) and already ended (0) after real learn of 520682 (2500 ms). Reference search 2026-11-24: coa-history spell 520682: 0 events in 186 logs (passive; positive control 520345 Dark Veil: 2 casts in 2 logs); coabuildhub spells_master_index.json entry 520682 says 'Your Dark Veil now performs its effect -50% faster.' matching installed Spell.dbc."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (every 1 sec, early bracket: 3 stacks at 3.2 sec)",
+      "kind": "metric_delta",
+      "variant": "period_early",
+      "label_suffix": "period_early",
+      "quote": "Every 1 sec while Hand of Yogg-Saron is active,",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 704473,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 3200,
+      "expire_ms": 35000,
+      "game_time": {
+        "after": [
+          3100,
+          3290
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "524877 Effect[0] SPELLMOD_DOT/AMPLITUDE -14000 ms reduces Hand of Yogg-Saron 704476 EffectAmplitude[0] from 15000 ms to 1000 ms; AscensionCultistAuras.cpp:220-224 triggers 704473 on ally each tick. At game_time [3100, 3290] ms, 0 stacks before learn and 3 stacks after (excluding +10% slow 1100 ms). Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (every 1 sec, late bracket: 4 stacks at 4.6 sec)",
+      "kind": "metric_delta",
+      "variant": "period_late",
+      "label_suffix": "period_late",
+      "quote": "Every 1 sec while Hand of Yogg-Saron is active,",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 704473,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 4600,
+      "expire_ms": 35000,
+      "game_time": {
+        "after": [
+          4550,
+          4800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "524877 reduces 704476 period to 1000 ms. At game_time [4550, 4800] ms, 0 stacks before learn and 4 stacks after (excluding -10% fast 900 ms which would already reach 5 stacks at 4500 ms). Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (triggers Horrific Revelation on ally and generates 5 Insanity)",
+      "kind": "metric_delta",
+      "variant": "trigger_and_insanity",
+      "label_suffix": "trigger_and_insanity",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 704473,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tick 1 of Hand of Yogg-Saron 704476 at 1000 ms triggers Horrific Revelation 704473 on ally (0 -> 1)."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "wait_ms": 1500,
+      "expire_ms": 70000,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionCultistAuras.cpp:220-224: on tick 1 (1000 ms) of 704476, casts 704473 on GetTarget() and calls Resource(player, Insanity, 5). Because 704476 Effect[0] has EffectImplicitTargetA 21 (TARGET_UNIT_TARGET_ALLY) and EffectImplicitTargetB 1 (TARGET_UNIT_CASTER) in Spell.dbc, the aura applies and ticks on both ally and caster, generating 10 Insanity per sec instead of the stated 5 (alerts honestly). Sanity 500727 decay amplitude is 10000 ms, so zero decay at 1500 ms. Reads Insanity 500706 stacks on caster (0 before learn -> expected 5 after) and 704473 on ally (0 -> 1). Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (Horrific Revelation heal at SP 0)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          10000
+        ]
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704473,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 147,
+      "after_at_least": 144,
+      "after_at_most": 150,
+      "wait_ms": 1500,
+      "expire_ms": 35000,
+      "void_on_cast_failure": true,
+      "observe_source": "704473 tooltip states '${$m1+0+$SP*0.678496}' (embedded via @s:704473:0@): BasePoints 143, DieSides 7 -> [144..150] at SP 0. SkillLineAbility.dbc has no row for 704473, BaseLevel 0, SpellLevel 0, MaxLevel 0, EffectRealPointsPerLevel[0] 2.5, and the tooltip omits $ppl1 (+0+): per Felsworn ADR 0006 and owner ruling O-37 the client displays base-only [144..150], while server SpellEffectInfo::CalcValue adds int(60*2.5) = +150 ([294..300], alerts honestly). Precondition fixture 16255 at -100 suppresses spell crit. Measures tick 1 (1500 ms, phase_since true) spell_heal_total of 704473 on ally: 0 before learn, expected [144..150]. Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc.",
+      "phase_since": true
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (Horrific Revelation heal at +2000 SP)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          10000
+        ]
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704473,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1504,
+      "after_at_least": 1500,
+      "after_at_most": 1508,
+      "wait_ms": 1500,
+      "expire_ms": 35000,
+      "void_on_cast_failure": true,
+      "observe_source": "704473 tooltip '${$m1+0+$SP*0.678496}' (SkillLineAbility.dbc: no row for 704473, BaseLevel 0, SpellLevel 0, MaxLevel 0, RPPL 2.5; Felsworn ADR 0006 / owner ruling O-37 displayed base-only) at player_spell_power 2000 (hit_arm): [144..150] + 2000*0.678496 = 1500.99..1506.99 -> [1500..1508] (alerts honestly if server adds +150 per-level points -> [1650..1657]). Precondition fixture 16255 at -100 suppresses spell crit. Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc.",
+      "phase_since": true
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (Horrific Revelation scales with Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity_scaling",
+      "label_suffix": "insanity_scaling",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          10000
+        ]
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704473,
+        "target": "ally"
+      },
+      "phase_since": true,
+      "before_expected": 144,
+      "expected": 216,
+      "expected_ratio": 1.5,
+      "tolerance": 0.4,
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "704473 tooltip states 'scaling with Insanity'. Compares tick-1 heal of 704473 with 524877 learned at 0 Insanity (before) vs 80 Insanity (after, fixture 500706 80 stacks), phase_since true, 16255 -100 crit suppression. Expects strictly higher heal at 80 Insanity (ratio in [1.10, 1.90] (strictly above 704473 DieSides 7 noise max 300/294 = 1.0204)); alerts if ratio ~1.0 (no Insanity scaling implemented). Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (increases ally critical strike chance by 1% per stack)",
+      "kind": "metric_delta",
+      "variant": "crit_buff",
+      "label_suffix": "crit_buff",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0.01,
+      "wait_ms": 1500,
+      "expire_ms": 35000,
+      "void_on_cast_failure": true,
+      "observe_source": "704473 Effect[1] aura 290 SPELL_AURA_MOD_CRIT_PCT BasePoints 0 + DieSides 1 = +1% ($s2 = 1), MiscValue 127 (all schools, Spell.dbc). Reads ally spell_crit_chance (school 5 Shadow) at 1500 ms (1 tick = 1 stack of 704473): expected_gain +1.0% after real learn of 524877 vs before. Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (stacks up to 15 times)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 704473,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 15,
+      "wait_ms": 15500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "704473 StackAmount 15 ($u = 15, Spell.dbc). Over the full 15000 ms duration of Hand of Yogg-Saron 704476 (15 ticks at 1000..15000 ms), aura_stacks of 704473 on ally reads 0 before learn and 15 at 15500 ms after real learn of 524877. Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (Horrific Revelation lasts 15 sec after final tick)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "ally",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 704476,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Hand of Yogg-Saron 704476 expired at 15000 ms (0 at 29000 ms), so nothing refreshes 704473 after t=15000 ms."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 704473,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 29000,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          28800,
+          29300
+        ],
+        "expired": [
+          30800,
+          31300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "704473 DurationIndex 8 = 15000 ms ($d = 15 sec, SpellDuration.dbc). Final tick of Hand of Yogg-Saron 704476 fires at 15000 ms and refreshes 704473 to expire at 30000 ms (704476 read 0 on ally). Reads 704473 absent before cast (0), present at 29000 ms (14000 ms after final tick > 13500 ms = 0.9*15000), and gone at 31000 ms (16000 ms after final tick < 16500 ms = 1.1*15000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spell 524877: 0 events in 186 logs (passive; positive control 704476 Hand of Yogg-Saron: 124 casts in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL events, 32 AURA_APPLIED, 448 AURA_APPLIED_DOSE in 3 logs); coabuildhub spells_master_index.json entry 524877 matches installed Spell.dbc."
     }
   ],
   "player_observations": [],
