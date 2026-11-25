@@ -3112,7 +3112,7 @@
       "680750 behaviour_metric_delta min_speed_late"
     ],
     "kind": "claim",
-    "reason": "Alert (uncounted): 567524 Dreadnought lasts 20 sec (DurationIndex 18 = 20000 ms) and triggers companion aura 567525 (80% minimum speed) which has DurationIndex 8 = 15000 ms in Spell.dbc with no SQL or C++ override. min_speed holds 0.80 at 14.2 s, while min_speed_late alerts at 19.2 s (speed drops to 0.70 and 567525 == 0 while 567524 == 1)."
+    "reason": "Proved after Cultist ADR 0028 (owner ruling O-15 Q-cu-27, 2026-11-25): companion aura 567525 uses DurationIndex 18 (20000 ms) matching Dreadnought 567524. Counted pair 20261125-091709 / 20261125-091744 (build 0189984a6fb8, 0 flips): min_speed (14.2 s) and min_speed_late (19.2 s / 20.8 s) both ok/ok (run_speed_rate 0.70 -> 0.80 -> 0.70, 567525 == 1 at 19.2 s)."
   },
   {
     "spell": 680750,
@@ -3122,7 +3122,7 @@
       "680750 behaviour_metric_delta min_speed_late"
     ],
     "kind": "claim",
-    "reason": "Alert (uncounted): Dreadnought form 567524 lasts 20 sec (duration passes at 19.2 s / 20.8 s), but companion minimum-speed aura 567525 has DurationIndex 8 = 15000 ms in Spell.dbc and expires 5 sec early (min_speed_late alerts at 19.2 s with run_speed_rate 0.70 and 567525 == 0)."
+    "reason": "Proved after Cultist ADR 0028 (owner ruling O-15 Q-cu-27, 2026-11-25): companion aura 567525 uses DurationIndex 18 (20000 ms) matching Dreadnought 567524. Counted pair 20261125-091709 / 20261125-091744 (build 0189984a6fb8, 0 flips): duration and min_speed_late both ok/ok (567524 == 1 and 567525 == 1 at 19.2 s, both expired by 20.8 s)."
   },
   {
     "spell": 680750,
