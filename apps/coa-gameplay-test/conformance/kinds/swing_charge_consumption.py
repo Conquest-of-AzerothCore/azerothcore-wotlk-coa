@@ -7,7 +7,7 @@ from compare import Run, Verdict, describe_failures, failure_reasons, missing_me
 from hits import creature_fixture, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import Expectation, FORCED_CRIT_RATING, TARGET, armed_for, dataset, facts_of
+from values import Expectation, FORCED_CRIT_RATING, GCD_WAIT_MS, TARGET, armed_for, dataset, facts_of
 
 KIND = 'swing_charge_consumption'
 ORDER = 58
@@ -18,8 +18,8 @@ MIN_TRIGGER_WAIT_MS = 100
 MIN_FINAL_TIMEOUT_MS = 500
 FIELDS = frozenset({
     'spell', 'name', 'kind', 'variant', 'label_suffix', 'quote', 'quote_spell', 'gate_spell', 'trigger_spell',
-    'aura', 'haste_auras', 'no_crit_aura', 'force_crit', 'cast_power', 'trigger_wait_ms', 'final_timeout_ms',
-    'learn', 'hand', 'observe_source'})
+    'aura', 'haste_auras', 'no_crit_aura', 'no_crit_amount', 'force_crit', 'cast_power', 'trigger_wait_ms',
+    'final_timeout_ms', 'learn', 'hand', 'observe_source'})
 
 
 @dataclass(frozen=True)
@@ -32,6 +32,7 @@ class SwingChargeSpec:
     aura: int
     haste_auras: tuple[int, ...]
     no_crit_aura: int | None
+    no_crit_amount: int | None
     force_crit: str | None
     cast_power: int | None
     trigger_wait_ms: int
@@ -58,6 +59,11 @@ def swing_charge_spec(entry: dict) -> SwingChargeSpec:
     if no_crit_raw is not None and (isinstance(no_crit_raw, bool) or not isinstance(no_crit_raw, int)
                                     or no_crit_raw < 1):
         raise ValueError(f'{spell} {KIND} no_crit_aura must be a positive spell id')
+    no_crit_amount = entry.get('no_crit_amount')
+    if no_crit_amount is not None:
+        if (no_crit_raw is None or isinstance(no_crit_amount, bool) or not isinstance(no_crit_amount, int)
+                or no_crit_amount >= 0):
+            raise ValueError(f'{spell} {KIND} no_crit_amount must be a negative integer with no_crit_aura')
     force_crit = entry.get('force_crit')
     if force_crit is not None and force_crit not in FORCE_CRIT_RATINGS:
         raise ValueError(f'{spell} {KIND} unknown force_crit {force_crit!r}')
@@ -91,7 +97,7 @@ def swing_charge_spec(entry: dict) -> SwingChargeSpec:
         raise ValueError(f'{spell} {KIND} hand must be 0 or 1')
     return SwingChargeSpec(
         spell, entry['name'], entry['quote'], gate_spell, trigger_spell, aura, tuple(haste_raw),
-        no_crit_raw, force_crit, cast_power_raw, trigger_wait_ms, final_timeout_ms, quote_spell,
+        no_crit_raw, no_crit_amount, force_crit, cast_power_raw, trigger_wait_ms, final_timeout_ms, quote_spell,
         learn, hand, entry.get('label_suffix', KIND))
 
 
@@ -158,6 +164,7 @@ def swing_charge_scenario(class_file: dict, spec: SwingChargeSpec) -> tuple[dict
                           'value': spec.cast_power})
         steps += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.trigger_spell},
                   {'action': 'cast', 'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET},
+                  {'action': 'stop_attack', 'actor': CASTER},
                   {'action': 'wait', 'label': 'trigger settle', 'ms': spec.trigger_wait_ms}]
         return steps
 
@@ -173,10 +180,15 @@ def swing_charge_scenario(class_file: dict, spec: SwingChargeSpec) -> tuple[dict
              + prepare_trigger()
              + [measurement(control_aura, CASTER, 'aura', spell=spec.aura),
                 measurement(control_charges, CASTER, 'aura_charges', spell=spec.aura),
-                {'action': 'learn', 'actor': CASTER, 'spell': spec.gate_spell}]
+                {'action': 'learn', 'actor': CASTER, 'spell': spec.gate_spell},
+                {'action': 'wait', 'label': 'clear gcd before treatment', 'ms': GCD_WAIT_MS}]
              + prepare_trigger())
     if spec.no_crit_aura is not None:
-        steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.no_crit_aura, 'stacks': 1})
+        no_crit_step = {'action': 'set_aura', 'actor': CASTER, 'spell': spec.no_crit_aura, 'stacks': 1}
+        if spec.no_crit_amount is not None:
+            no_crit_step['effect'] = 0
+            no_crit_step['amount'] = spec.no_crit_amount
+        steps.append(no_crit_step)
     steps += (start_steps
               + [{'action': 'attack_until_swings', 'label': 'consume N-1 charges', 'actor': CASTER, 'target': TARGET,
                   'swings': charges - 1, 'timeout_ms': max_window_ms, 'hand': spec.hand}]

@@ -12,7 +12,7 @@ SARONITE_ENTRY = {
     'name': 'Saronite Blessing (ends on 10th melee auto-attack before 15 sec duration)',
     'quote': 'Lasts for $d or $n attacks.', 'quote_spell': 600327,
     'gate_spell': 301262, 'trigger_spell': 502122, 'aura': 600327,
-    'haste_auras': [62531, 2116852], 'no_crit_aura': 64481, 'force_crit': 'melee',
+    'haste_auras': [62531, 2116852], 'no_crit_aura': 64481, 'no_crit_amount': -10000, 'force_crit': 'melee',
     'cast_power': 2000}
 
 
@@ -110,7 +110,9 @@ class SwingChargeConsumptionTests(unittest.TestCase):
                 {**SARONITE_ENTRY, 'trigger_wait_ms': 50},
                 {**SARONITE_ENTRY, 'final_timeout_ms': 100},
                 {**SARONITE_ENTRY, 'haste_auras': [0]},
-                {**SARONITE_ENTRY, 'no_crit_aura': 0}):
+                {**SARONITE_ENTRY, 'no_crit_aura': 0},
+                {**SARONITE_ENTRY, 'no_crit_amount': 0},
+                {**SARONITE_ENTRY, 'no_crit_aura': None, 'no_crit_amount': -100}):
             with self.subTest(bad=bad):
                 with self.assertRaises(ValueError):
                     swing_charge_spec(bad)

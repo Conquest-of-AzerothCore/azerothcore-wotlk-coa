@@ -20,7 +20,8 @@ after `N - 1` non-critical melee auto-attacks, and is removed on the `N`th melee
   `aura == 0` and `aura_charges == 0`.
 - `treatment`: learns `gate_spell`, applies `haste_auras` (for example `62531` and `2116852` so `N` swings finish
   well before `duration_ms`), triggers `aura` with `trigger_spell` (optional `force_crit`), applies `no_crit_aura`
-  (for example `64481`) so auto-attacks cannot crit and refresh `aura`, reads `start` (`aura == 1`,
+  (for example `64481`, with optional negative `no_crit_amount` such as `-10000` when overriding `FORCED_CRIT_RATING`)
+  so auto-attacks cannot crit and refresh `aura`, reads `start` (`aura == 1`,
   `aura_charges == N`), executes `attack_until_swings(swings = N - 1)` and reads `penultimate` (`aura == 1`,
   `aura_charges == 1`), then executes `attack_until_swings(swings = 1)` and reads `final` (`aura == 0`,
   `aura_charges == 0`) with elapsed game time `< 0.85 * duration_ms`.
