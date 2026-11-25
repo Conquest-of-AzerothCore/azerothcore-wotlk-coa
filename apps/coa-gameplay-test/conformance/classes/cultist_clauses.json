@@ -454,10 +454,11 @@
     "clause": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
     "labels": [
       "300300 behaviour_metric_delta periodic",
-      "300300 behaviour_metric_delta channeled"
+      "300300 behaviour_metric_delta channeled",
+      "300300 behaviour_metric_delta dispel_crit"
     ],
     "kind": "claim",
-    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) for dispel type under owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): Mind Rot 560943 keeps Dispel=1 (Magic) on the server, and client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.' at class end; application is behaviour-proven by periodic/channeled and Magic dispel by dispel_crit (Dispel Magic 988)."
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) for dispel type under owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): Mind Rot 560943 keeps Dispel=1 (Magic) on the server, and client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.' at class end; application is behaviour-proven by periodic/channeled and Magic dispel by dispel_crit (Dispel Magic 988, also linked on r43)."
   },
   {
     "spell": 300300,

@@ -31,8 +31,9 @@ records the remaining four server-kept, no-client-text-change rulings together w
   `Effect[1] = APPLY_AURA` (`aura 87`, `-10%` Holy) in SQL `spell_group 2000185` (`stack_rule = 3`), so a Holy hit on
   the caster (`41394`, 1100 Holy) took `-10.0%` (`990/1100 = 0.90`) rather than multiplicative `-3%` and `-10%`
   (`0.97 * 0.90 = 0.873`).
-- **Live evidence (strength: none / tooltip-punctuation ruling):** Not queried in combat logs; settled from the tooltip
-  sentence structure and the direct server measurement (`-3.07%` Physical, `-10.0%` Holy).
+- **Live evidence (strength: none / tooltip-punctuation ruling):** `NO LIVE EVIDENCE` — `coa-history` recorded 0 events
+  (passive) across 186 combat logs; settled from the tooltip sentence structure and the direct server measurement
+  (`-3.07%` Physical, `-10.0%` Holy).
 - **Owner's choice (`O-12`):** `keep` `-10%` on Holy (`0.90`), no server change and no client text change. A new
   sentence beginning `"In addition"` states a distinct effect rather than numeric stacking onto the previous sentence.
 

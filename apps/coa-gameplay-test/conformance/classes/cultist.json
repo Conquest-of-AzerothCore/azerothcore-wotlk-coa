@@ -20997,9 +20997,10 @@
         ]
       },
       "critical": false,
+      "refresh": true,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "Physical-school negative check for 300307 Embrace the Void under owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only 573285 Effect[0] EffectMiscValue[0] = 126 (excluding Physical bit 1) and update client text to 'Magic damage dealt'. Uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup verified by companion 300307 reach_60: Physical white swings expect 1.0 (+0%, excluding +10%), proving Physical is not boosted while companion shadow_damage proves +10% Magic. Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
+      "observe_source": "Physical-school negative check for 300307 Embrace the Void under owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only 573285 Effect[0] EffectMiscValue[0] = 126 (excluding Physical bit 1) and update client text to 'Magic damage dealt'. Uses refresh: true so every swing trial resets 500706=50 and casts 806897 (+10 -> 60, verified by companion 300307 reach_60 and 300307 duration 10 s >> 3.4 s swing+settle), keeping 573285 active across all 20 swings (with void_on_cast_failure: true guarding every 806897 cast). Physical white swings expect 1.0 (+0%, excluding +10%), proving Physical is not boosted while companion shadow_damage proves +10% Magic. Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
     },
     {
       "spell": 301181,
