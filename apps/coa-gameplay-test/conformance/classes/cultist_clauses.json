@@ -1889,20 +1889,52 @@
       {
         "claim": "for $706932d",
         "labels": [
-          "560301 spell_duration 706932 #0"
+          "560301 behaviour_metric_delta copies_duration"
         ]
       },
       {
         "claim": "Create 3 copies of yourself",
+        "labels": [
+          "560301 behaviour_metric_delta copies_duration"
+        ]
+      },
+      {
+        "claim": "that run in a random direction",
+        "labels": []
+      },
+      {
+        "claim": "and may briefly trick enemies into ignoring you.",
         "labels": []
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "No existing conformance metric/kind reads an owned creature's movement path or heading to prove that Hallucination 560301's 3 copies (entry 840025, AscensionCultistSummons.cpp:278-283 Wander(me) -> MovePoint at a random angle) run in a random direction (owned_creature_distance_2d only measures scalar distance from the caster and has no STATE_PROMISES entry). In addition, 840025 has no taunt/aggro-redirect script in AscensionCultistSummons.cpp:278-283 (only player->GetThreatMgr().RemoveMeFromThreatLists() on cast in AscensionCultistAbilities.cpp:448), so \"may briefly trick enemies into ignoring you\" is recorded as an owner question.",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 560301,
     "clause": "Significantly reduces your threat and removes all movement impairing effects from you.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Significantly reduces your threat",
+        "labels": [
+          "560301 behaviour_metric_delta threat_reduce"
+        ]
+      },
+      {
+        "claim": "and removes all movement impairing effects from you.",
+        "labels": [
+          "560301 behaviour_metric_delta removes_movement_impairing"
+        ]
+      }
+    ]
   },
   {
     "spell": 560320,
@@ -2632,10 +2664,29 @@
   {
     "spell": 680600,
     "clause": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1% and they now generates a large amount of threat.",
-    "labels": [
-      "680600 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1%",
+        "labels": [
+          "680600 behaviour_hit_ratio hammer_damage",
+          "680600 behaviour_hit_ratio slam_damage"
+        ]
+      },
+      {
+        "claim": "and they now generates a large amount of threat.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "Two blockers on \"and they now generates a large amount of threat.\": (1) Owner question: Eldritch Strength 680600 Effect[1] adds +15% SPELLMOD_THREAT (bp=14+1) to Hammer of Twilight 806830 and Entropic Slam 572846; the wording is not the Templar \"High Threat\" x2 phrase (ADR 0296) and +15% is far below x2, so owner confirmation is needed on whether +15% satisfies \"generates a large amount of threat\"; (2) Tool gap: metric_delta option threat_above_control does not support gate_spell (passive learn contrast) or Insanity phase_auras (500706 + 680602/680603), so a passive threat modifier on Insanity-gated spells cannot be run under threat_above_control without extending threat_above_control.",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680607,
@@ -2655,7 +2706,16 @@
     "spell": 680609,
     "clause": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Void Strikes 680609 periodically refreshes helper 567529 (AscensionCultistAuras.cpp:171-184) granting flat SPELLMOD_EFFECT1 equal to CR_DEFENSE_SKILL on Blade of the Empire 502122 and Entropic Slam 572846 (unfigured \"based on your defense rating\"). power_term_direction (power_term_direction.py) only allows power_metric in {attack_power, agility, max_health} and has no defense_rating metric (combat_rating 1 / aura 189 misc 2), so no existing unfigured-scaling kind can prove positive defense-rating direction without inventing an expected figure. Extension: add defense_rating to power_term_direction.POWER_METRICS (reading combat_rating 1 and accepting permanent rating-fixture auras such as 24774 +180 defense).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680750,
@@ -3146,7 +3206,16 @@
     "labels": [
       "706177 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Improved Sermon of Dread 706177 Effect[0] adds +30% SPELLMOD_EFFECT1 (bp=29+1) to Sermon of Dread 620614 (aura 344 flat AP debuff -140-rpl on enemies). effectiveness_delta.READ_METRICS only supports {melee_crit_chance, spell_crit_chance, dodge_chance, parry_chance, armor, spell_power, attack_time_ms, combat_rating} and lacks attack_power, even though the harness already reads attack_power on any unit including dummy (CoAGameplayTest.cpp:4076). Extension: add attack_power to effectiveness_delta.READ_METRICS (with target/actor dummy support for enemy debuffs).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706179,
@@ -4419,10 +4488,36 @@
   {
     "spell": 806175,
     "clause": "Raise your shield and charge towards an enemy, dealing ${$AP*0.5} Shadow damage to enemies you pass through, generating additional threat.",
-    "labels": [
-      "806175 effect_value #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$AP*0.5} Shadow damage to enemies you pass through",
+        "labels": [
+          "806175 behaviour_metric_delta damage_ref",
+          "806175 behaviour_metric_delta damage_ap",
+          "806175 behaviour_metric_delta pass_through"
+        ]
+      },
+      {
+        "claim": "generating additional threat.",
+        "labels": [
+          "806175 behaviour_metric_delta threat_above_control"
+        ]
+      },
+      {
+        "claim": "Raise your shield and charge towards an enemy",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance option counts Dreadfall 806175's \"charge towards an enemy\" as behaviour evidence under no-tool-code-changes: metric_delta_options/displacement.py:8 STATE_PROMISES[\"displacement_2d\"] = r\"dash\\w*|direction|distance|leap\\w*|range|yds?\" does not match \"charge\", and coverage.py:530 STATE_PROMISES[\"distance_2d\"] = r\"location|hook\\w*|pull\\w*\" does not match \"charge\", so any displacement/distance_2d entry is classified as data rather than behaviour. Extension: add \"charge\\w*\" to STATE_PROMISES[\"displacement_2d\"]. (Note: 806175 pass_through is a separate real server alert: 807815 retains EffectChainTarget[0]=20 in Spell.dbc, causing UpdateDash casts to chain and double-hit passed-through enemies and overshoot to area2 at 25 yd.)",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 578263,

@@ -30034,6 +30034,458 @@
       "relocate_before_trigger": {
         "dx": -13
       }
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (Hammer of Twilight +25% damage)",
+      "kind": "hit_ratio",
+      "variant": "hammer_damage",
+      "label_suffix": "hammer_damage",
+      "quote": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1%",
+      "expected": 1.25,
+      "observe_spell": 806830,
+      "learn": [
+        806830
+      ],
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            680602,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680600
+        ],
+        "auras": [
+          [
+            500706,
+            40
+          ],
+          [
+            680602,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "680600 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[2] 16384 matching Hammer of Twilight 806830 SpellFamilyFlags[2] 16384 (Spell.dbc). Dreadnought weapon set (2534 + 2129), +20000 AP, non-critical, spell pen 823764, Insanity fixture 500706=40 + 680602=1 in both arms. Reference search 2026-11-25: coa-history 680600: 0 events in 186 logs (passive; 806830: 2079 casts); coabuildhub 680600 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (Entropic Slam +25% damage)",
+      "kind": "hit_ratio",
+      "variant": "slam_damage",
+      "label_suffix": "slam_damage",
+      "quote": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1%",
+      "expected": 1.25,
+      "observe_spell": 572846,
+      "learn": [
+        572846
+      ],
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680600
+        ],
+        "auras": [
+          [
+            500706,
+            60
+          ],
+          [
+            680603,
+            1
+          ],
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "expected_source": "680600 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 0 (SPELLMOD_DAMAGE), EffectBasePoints[0] 24 + EffectDieSides[0] 1 = +25% ($s1 = 25), EffectSpellClassMask[0] 128 matching Entropic Slam 572846 SpellFamilyFlags[0] 128 (Spell.dbc). Dreadnought weapon set (2534 + 2129), +20000 AP, non-critical, spell pen 823764, Insanity fixture 500706=60 + 680603=1 in both arms. Reference search 2026-11-25: coa-history 680600: 0 events in 186 logs (passive; 572846: 1018 casts); coabuildhub 680600 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 806175,
+      "name": "Dreadfall (Shadow damage at reference AP on charge target)",
+      "kind": "metric_delta",
+      "variant": "damage_ref",
+      "label_suffix": "damage_ref",
+      "quote": "dealing ${$AP*0.5} Shadow damage to enemies you pass through",
+      "trigger_spell": 806175,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807815,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 211,
+      "tolerance": 2,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806175 Dreadfall dashes toward dummy at 15 yd (RangeIndex 94 = 8-40 yd) and UpdateDash (AscensionCultistSummons.cpp:95-104) casts 807815 (AscensionCultistData.h:120 ap=0.50; Spell.dbc bp0=0+ds1=1, Cultist tuning 887013 +12%). At Dreadnought ref AP 376: tooltip 0.5*376*1.12 = 210.56 (server (1+188)*1.12 = 211.68 -> 211..212; tolerance 2). Non-crit (16255=-100), no resist (823764), uncast control = 0. Paired with damage_ap (+20000 AP) and pass_through. Reference search 2026-11-25: coa-history 806175/807815: 0 events; coabuildhub 806175 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 806175,
+      "name": "Dreadfall (Shadow damage at +20000 AP: 0.5 * AP scaling)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "dealing ${$AP*0.5} Shadow damage to enemies you pass through",
+      "trigger_spell": 806175,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 807815,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 11411,
+      "tolerance": 3,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP contrast arm for 806175 Dreadfall: player_attack_power +20000 (total AP 20376 -> 0.5*20376*1.12 = 11410.56; server (1+10188)*1.12 = 11411.68, tolerance 3), vs 211 at ref AP 376 (proves 0.50 AP coefficient). Non-crit (16255=-100), no resist (823764), uncast control = 0. Reference search 2026-11-25: coa-history 806175/807815: 0 events; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 806175,
+      "name": "Dreadfall (strikes enemies passed through along charge path, not enemies past target)",
+      "kind": "metric_delta",
+      "variant": "pass_through",
+      "label_suffix": "pass_through",
+      "quote": "dealing ${$AP*0.5} Shadow damage to enemies you pass through",
+      "trigger_spell": 806175,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "area_dummies": [
+        7.5,
+        25.0
+      ],
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 807815,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 807815,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Primary charge target dummy at 15 yd is hit once by 807815"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 807815,
+              "target": "area2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "area2 at 25 yd (beyond the 15 yd charge target, not passed through) is not hit"
+          }
+        ]
+      },
+      "observe_source": "Pass-through geometry check for 806175 Dreadfall (AscensionCultistSummons.cpp:95-104 hits every valid enemy within 2 yd of the dash segment). Dummy stands at 15 yd, area1 on the charge line at 7.5 yd (passed through), area2 beyond the target at 25 yd (not passed through). Uncast control = 0 hits on all; after casting 806175 at dummy: area1 takes 1 hit, dummy takes 1 hit, area2 takes 0 hits. Reference search 2026-11-25: coa-history 806175/807815: 0 events; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 806175,
+      "name": "Dreadfall (additional threat per damage strictly above Horrorbolt control)",
+      "kind": "threat_above_control",
+      "label_suffix": "threat_above_control",
+      "quote": "generating additional threat.",
+      "hit_spell": 807815,
+      "control_spell": 502182,
+      "samples": 5,
+      "settle_ms": 500,
+      "observe_source": "Direction-only threat proof (ADR 1280 threat_above_control, Felsworn Fel Torpedo 500610 precedent D-106; tooltip states no threat multiplier). Dreadfall damage spell 807815 (Spell.dbc Effect[1] SPELL_EFFECT_THREAT +20, SpellLevel 24, pending SQL rev_20261026_20_coa_tank_ability_threat.sql pctMod 1.2, AscensionCultistContracts.cpp:19-20 clears SPELL_ATTR1_NO_THREAT) vs level-60 Shadow control Horrorbolt 502182 (no SPELL_EFFECT_THREAT, no spell_threat row, SpellLevel 60, Speed 25 -> 500 ms settle). Five alternated casts each at fresh dummies 10 yd apart: every 807815 threat/damage sample lies strictly above every 502182 control sample, asserting no multiplier. Reference search 2026-11-25: coa-history 806175/807815: 0 events; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 560301,
+      "name": "Hallucination (creates 3 copies lasting 3 sec)",
+      "kind": "metric_delta",
+      "variant": "copies_duration",
+      "label_suffix": "copies_duration",
+      "quote": "Create 3 copies of yourself that run in a random direction for $706932d",
+      "trigger_spell": 560301,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 840025
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 2750,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2710,
+          2900
+        ],
+        "expired": [
+          3100,
+          3290
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "560301 Hallucination summons 3 copies of Hallucination entry 840025 for 706932 DurationIndex 27 = 3000 ms ($706932d = 3 sec; Spell.dbc; AscensionCultistAbilities.cpp:445-452, AscensionCultistSummons.cpp:37-38). Uncast control reads 0 copies; after casting 560301, owned_creature_count(840025) reads 3 at 2750 ms (game_time [2710, 2900] > 2700 ms = -10%) and 0 at 3250 ms (game_time [3100, 3290] < 3300 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub 560301 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 560301,
+      "name": "Hallucination (reduces threat on engaged enemy)",
+      "kind": "metric_delta",
+      "variant": "threat_reduce",
+      "label_suffix": "threat_reduce",
+      "quote": "Significantly reduces your threat",
+      "trigger_spell": 560301,
+      "learn": [
+        800416
+      ],
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800416
+      ],
+      "setup_target": "dummy",
+      "setup_in_before": true,
+      "setup_wait_ms": 2200,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 31,
+      "expected": 0,
+      "tolerance": 4,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "560301 Hallucination calls player->GetThreatMgr().RemoveMeFromThreatLists() (AscensionCultistAbilities.cpp:448). Both phases cast Horrorbolt 800416 (Rank 1, MaxLevel 12) at dummy (non-crit 16255=-100, no resist 823764 -> ~29 damage + 2 threat = 31 threat). Control (no 560301): dummy threat on caster reads 31. Treatment (560301 cast): dummy threat on caster drops to 0. Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 560301,
+      "name": "Hallucination (removes snare and root movement impairing effects)",
+      "kind": "metric_delta",
+      "variant": "removes_movement_impairing",
+      "label_suffix": "removes_movement_impairing",
+      "quote": "and removes all movement impairing effects from you.",
+      "trigger_spell": 560301,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          116,
+          1,
+          "caster",
+          "dummy"
+        ],
+        [
+          122,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 116
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 122
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Frost Nova 122 root (aura 26 SPELL_AURA_MOD_ROOT) present in control (1) and removed by 560301 in treatment (0)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "rooted",
+            "fields": {},
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster rooted state is 1 in control and 0 after 560301"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "run_speed_rate",
+            "fields": {},
+            "before_expected": 0.6,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "source": "Frostbolt 116 -40% snare reduces run_speed_rate to 0.6 in control; 560301 restores it to 1.0"
+          }
+        ]
+      },
+      "observe_source": "560301 Effect[2] aura 147 SPELL_AURA_MECHANIC_IMMUNITY_MASK misc 65 = (1<<6)|(1<<0) grants SPELL_AURA_MOD_DECREASE_SPEED + SPELL_AURA_MOD_ROOT immunity (SpellInfo.cpp:2752-2757), removing existing snares and roots on cast. Dummy applies Frostbolt 116 (snare -40%) and Frost Nova 122 (root) as precondition fixtures in both phases. Control (uncast): both auras present (1), rooted=1, run_speed_rate=0.6. Treatment (560301 cast): both auras removed (0), rooted=0, run_speed_rate=1.0. Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub matches verbatim."
     }
   ],
   "player_observations": [],
