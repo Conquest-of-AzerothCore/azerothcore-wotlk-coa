@@ -2,7 +2,8 @@
 
 - Status: proposed (provisional number, renumbered at merge)
 - Date: 2026-11-25
-- Rulings: Cultist orchestrator D-39 (revisited under G-25); G-39 harness note (read-only counters + opt-in spawn orientation)
+- Rulings: Cultist orchestrator D-39 (revisited under G-25); G-39 harness note (read-only counters + opt-in spawn
+  orientation)
 
 ## Context
 
@@ -17,11 +18,11 @@ Cultist (class 25) level-20 Heretic passive Shadow Training `805607` (`Spell.dbc
 `flags_extra = 0`), `ClassicPlusCombat` grants `5%` base miss, `5%` base dodge, and `5%` base parry when the target
 faces the attacker (`Unit.cpp:3411`).
 
-Earlier triage (`cu-rt3/review.md:175-180,205`, D-39) deferred this single claim on estimated C++ footprint. Re-inspecting
-`CoAGameplayTest.cpp:1855-1895` shows `ObservePacket` already decodes `SMSG_ATTACKERSTATEUPDATE` completely (`hitInfo`,
-`attacker`, `victim`, `damage`, and `victimState`), so recording outgoing miss, dodge, and parry counts and orienting a
-creature fixture toward its owner requires only ~30 lines of opt-in, read-only harness C++ with zero gameplay side
-effects.
+Earlier triage (`cu-rt3/review.md:175-180,205`, D-39) deferred this single claim on estimated C++ footprint.
+Re-inspecting `CoAGameplayTest.cpp:1855-1895` shows `ObservePacket` already decodes `SMSG_ATTACKERSTATEUPDATE`
+completely (`hitInfo`, `attacker`, `victim`, `damage`, and `victimState`), so recording outgoing miss, dodge, and parry
+counts and orienting a creature fixture toward its owner requires only ~30 lines of opt-in, read-only harness C++ with
+zero gameplay side effects.
 
 ## Options
 
@@ -32,8 +33,8 @@ effects.
 
 ## Decision
 
-1. **Opt-in creature spawn orientation `face_caster`** (`CoAGameplayTest.cpp` `CreateTargets`, `run.py`, `test_runner.py`,
-   `README.md`):
+1. **Opt-in creature spawn orientation `face_caster`** (`CoAGameplayTest.cpp` `CreateTargets`, `run.py`,
+   `test_runner.py`, `README.md`):
    - Optional boolean `face_caster` (default `false`) on creature fixtures sets `SetOrientation`, `SetFacingToObject`,
      and home orientation toward the owner player at spawn. Default spawn orientation is unchanged when omitted.
 2. **Read-only outgoing melee avoidance metrics** (`CoAGameplayTest.cpp` `Actor`/`ObservePacket`/`Measure`, `run.py`):
@@ -44,9 +45,9 @@ effects.
    - Registers `METRIC_EVIDENCE` (`event`) for all three metrics inside the kind module (zero edits to `coverage.py` or
      `behaviours.py`).
    - Runs an unlearned control arm and a learned treatment arm sequentially against the same stationary facing dummy
-     under identical haste fixtures (`[62531, 2116852]`), resetting dummy health between arms and checking `knows_spell`,
-     `alive`, `distance_2d`, dummy `position_o` facing error (`<= 0.15 rad`), haste auras, and post-`stop_attack`
-     stillness at both start and end of every arm.
+     under identical haste fixtures (`[62531, 2116852]`), resetting dummy health between arms and checking
+     `knows_spell`, `alive`, `distance_2d`, dummy `position_o` facing error (`<= 0.15 rad`), haste auras, and
+     post-`stop_attack` stillness at both start and end of every arm.
    - Enforces exact binomial minimum sample size `required_min_swings(rate, residual)`: at `rate = 0.05`,
      `residual = 0.001`, `N >= 170` per arm per run (`N = 200` on `805607`: control pair union-bound false-fail
      `<= 6 * 0.95^200 = 0.021%`, treatment pair union-bound false-pass `<= 3 * 0.95^400 = 3.7e-9`, and `<= 0.093%` even
@@ -59,7 +60,12 @@ effects.
 - Strictly opt-in: finished classes regenerate byte-identical (`coverage.py` and `behaviours.py` untouched).
 - Closes Cultist Shadow Training `805607` row 408 with combat-event `behaviour` evidence across all three avoidance
   outcomes.
-- Seeded tests in `test_outgoing_avoidance_elimination.py` cover generation, evidence registration, `ok`, mutants (single
-  treatment miss/dodge/parry, unaccounted non-damaging hit, missing control miss/dodge/parry), `unmeasured` (start/end
-  facing drift, death, lost haste, wrong `knows_spell`, stray post-stop swing, missing read), `insufficient_trials`, and
-  spec refusals.
+- Scope boundaries: directly exercises white melee auto-attacks (`hand: 0`, War Staff `2535` on `805607`) against a
+  facing level-60 dummy (`face_caster: true` is a test-setup condition required for control parry under `Unit.cpp:3411`,
+  not a tooltip restriction; `805607`'s DBC auras `333`/`240` also cover melee special abilities, off-hand swings, and
+  spell hit). The `damaging_hits == swings` check assumes no full block reduces hit damage to `0` (verified for War
+  Staff `2535` vs entry `36`: `0` full blocks across `1744` swings).
+- Seeded tests in `test_outgoing_avoidance_elimination.py` cover generation, evidence registration, `ok`, mutants
+  (single treatment miss/dodge/parry, unaccounted non-damaging hit, missing control miss/dodge/parry), `unmeasured`
+  (start/end facing drift, death, lost haste, wrong `knows_spell`, stray post-stop swing, missing read),
+  `insufficient_trials`, and spec refusals.
