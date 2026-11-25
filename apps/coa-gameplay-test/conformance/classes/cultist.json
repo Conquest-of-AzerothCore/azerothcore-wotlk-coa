@@ -14541,6 +14541,2503 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Spell.dbc 707785 Effect[0] aura 354 EffectBasePoints[0] 29 + EffectDieSides[0] 1 = 30% ($s1). AscensionCultistEvents.cpp:109-110,282 casts Copy(player, target, 707750, CalculatePct(damage, Amount(707785))) on each damaging main-hand auto attack (Godblade item 2531 Great Axe, 2H melee, speed 3600 ms). 707750 is in CultistCopies (CANT_CRIT | IGNORE_CASTER_MODIFIERS | IGNORE_DAMAGE_TAKEN_MODIFIERS | IGNORE_ARMOR, SchoolMask 32 Shadow). Precondition fixture 823764 eliminates dummy monster Shadow partial resistance in both phases, and +2000 AP keeps per-swing integer truncation below 0.001. Control (before learning 707785): 0. Treatment (10 swing intervals): spell_damage_total(707750) / melee_damage_total(hand 0) = 0.3 +- 0.015 (strictly excludes -10% = 0.27 and +10% = 0.33, as well as 0 and 2x). Reference search 2026-11-24: coa-history spell 707785 has 0 events (passive; 707750 has SPELL_DAMAGE in 14 logs); coabuildhub spells_master_index.json has no entry for 707785; installed Spell.dbc governs."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (duration 30 min on ally)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Link yourself to an ally for $d,",
+      "trigger_spell": 500751,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 500751,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 1725000,
+      "expiry_wait_ms": 120000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1710000,
+          1790000
+        ],
+        "expired": [
+          1810000,
+          1890000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 500751 DurationIndex 30 = 1800000 ms ($d, 30 min), instant cast, 14% base mana. Casts 500751 at grouped ally (control: uncast before phase reads 0). Reads aura 500751 on ally present (1) at 1725000 ms (game_time [1710000, 1790000], above 1620000 ms = -10%) and expired (0) at 1845000 ms (game_time [1810000, 1890000], below 1980000 ms = +10%), excluding 10% off on both sides (ADR 0139 accelerated clock precedent). Reference search 2026-11-24: coa-history spell 500751: 148 casts, 92 applies, 88 removals in 25-27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (transfers 10% of ally damage taken to caster)",
+      "kind": "metric_delta",
+      "variant": "damage_transfer",
+      "label_suffix": "damage_transfer",
+      "quote": "transfering $s3% of all damage taken by them to you",
+      "trigger_spell": 500751,
+      "cast_in_before": false,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 3,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "health",
+            "before_expected": 6700,
+            "expected": 7030,
+            "tolerance": 0,
+            "source": "Spell.dbc 500751 Effect[2] SPELL_AURA_SPLIT_DAMAGE_PCT (81) BasePoints 9 + DieSides 1 = 10% (all schools 127): 3 strikes of Light of the Naaru 41394 (1100 Holy each = 3300) leave ally at 6700 without 500751 and 7030 (+330 spared = 10%) with 500751."
+          }
+        ]
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 6700,
+      "expected": 6370,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 500751 Effect[2] SPELL_AURA_SPLIT_DAMAGE_PCT (81), EffectBasePoints 9 + EffectDieSides 1 = 10%, MiscValue 127 (all schools), Unit.cpp:2927-2965 transfers CalculatePct(damage, 10) from ally to caster. Striker casts Light of the Naaru 41394 (1100 Holy, 3 times = 3300) at caster (base strike) and at grouped ally (ally_strikes) from 10000/10000 health with regeneration off. Control (before casting 500751): caster ends at 6700 (3300 taken), ally ends at 6700 (3300 taken). Treatment (after casting 500751 on ally): caster ends at 6370 (3300 + 330 transferred = 3630), ally ends at 7030 (3300 - 330 = 2970); tol 0 excludes 0%, 9%, 11%, and 20%. Reference search 2026-11-24: coa-history spell 500751: 37328 enemy DAMAGE_SPLIT events in 27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (converts 20% of damage dealt into healing for ally)",
+      "kind": "metric_delta",
+      "variant": "damage_to_heal",
+      "label_suffix": "damage_to_heal",
+      "quote": "causing $300295s1% of all damage you deal to be converted into healing for them.",
+      "trigger_spell": 500751,
+      "cast_in_before": false,
+      "learn": [
+        502182
+      ],
+      "select_dummy": true,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502182,
+          "delay_ms": 2000,
+          "target": "dummy"
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500862,
+              "target": "ally"
+            },
+            "source": "Spell.dbc 300295 Effect[0] aura 354 triggers 500862 healing on covenanted ally (AscensionCultistEvents.cpp:258-265)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "source": "Horrorbolt 502182 Shadow damage dealt by caster to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500862,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Abyssal Covenant 500751 triggers exactly 1 heal of 500862 on ally when Horrorbolt 502182 hits the dummy."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.2,
+            "tolerance": 0.005,
+            "floor_count": 0,
+            "source": "Spell.dbc 300295 Effect[0] BasePoints 19 + DieSides 1 = 20% ($300295s1); CalculatePct(damage, 20) truncates up to 1 per event (AscensionCultistEvents.cpp:262)."
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 502182,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 300295 Effect[0] aura 354 BasePoints 19 + DieSides 1 = 20% ($300295s1), triggers 500862 heal on covenanted ally (AscensionCultistAuras.cpp:49-57, AscensionCultistEvents.cpp:258-265). Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000 (large denominator so uint32 truncation is <0.03%). Casts 500751 at grouped ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy: 0 heals of 500862 before (uncast control; paired with damage_to_heal_control casting 502182 without 500751), 1 heal of 500862 after with ratio 500862_heal / 502182_damage = 0.20 +- 0.005 (floor_count 0, excluding 0%, 10%, 18%, 22%, 40%). Reference search 2026-11-24: coa-history spell 500862: 55154 SPELL_HEAL events in 27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (single ally limit)",
+      "kind": "single_target",
+      "quote": "Can only be applied to 1 ally at a time.",
+      "observe_source": "Spell.dbc 500751 tooltip states \"Can only be applied to 1 ally at a time.\"; AscensionCultistAuras.cpp:49-55 removes 500751 from the previous covenanted ally when applied to a new ally. Casts 500751 on ally (present), waits GCD, casts 500751 on ally2 (removed from ally, present on ally2). Reference search 2026-11-24: coa-history spell 500751: 148 casts, 92 applies, 88 removals in 25-27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 704884,
+      "name": "Lead the Covenant (replicates 50% of Abyssal Covenant healing to caster)",
+      "kind": "metric_delta",
+      "variant": "replicated_heal",
+      "label_suffix": "replicated_heal",
+      "quote": "$s1% of all healing done to allies through Abyssal Covenant is now replicated to you.",
+      "gate_spell": 704884,
+      "learn": [
+        500751
+      ],
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "ally_casts": [
+          500751
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 707185,
+              "target": "caster"
+            },
+            "source": "Spell.dbc 704884 Effect[0] triggers 707185 healing on caster (AscensionCultistAbilities.cpp:222-224)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500862,
+              "target": "ally"
+            },
+            "source": "Abyssal Covenant 500862 effective healing on ally (2000/20000 health, no overheal) in the same window."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.5,
+            "tolerance": 0.005,
+            "floor_count": 0,
+            "source": "Spell.dbc 704884 Effect[0] BasePoints 49 + DieSides 1 = 50% ($s1); CalculatePct(healing, 50) truncates up to 1 per event (AscensionCultistAbilities.cpp:223)."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 707185,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 704884 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 707185; AscensionCultistAbilities.cpp:215,222-224 replicates CalculatePct(healing, 50) of 500862 ally healing to caster via 707185 (note: gated on effective healing m_healing rather than overheal, so this entry tests effective healing at 2000/20000 ally health; overheal behaviour is untested pending any Cultist overheal ruling). Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000, ally at 2000/20000 health so 500862 never overheals. Both phases cast 500751 on ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy: control (before learning 704884) yields 0 heals of 707185 on caster; treatment (after real learn of 704884) yields 1 heal of 707185 on caster at ratio 707185 / 500862 = 0.50 +- 0.005 (floor_count 0, excluding 0%, 45%, 55%, 100%). Reference search 2026-11-24: coa-history spell 704884/707185: 0 events in 186 logs (positive control 500862: 55154 heals in 27 logs); coabuildhub spells_master_index.json entry 704884 matches verbatim."
+    },
+    {
+      "spell": 704897,
+      "name": "Dark Protection (+20% healing taken from caster on Abyssal Covenant ally)",
+      "kind": "hit_ratio",
+      "variant": "healing_taken",
+      "label_suffix": "healing_taken",
+      "quote": "Allies affected by Abyssal Covenant now also take $s1% increased healing from you.",
+      "expected": 1.2,
+      "metric": "spell_heal_total",
+      "observe_spell": 502234,
+      "learn": [
+        502234,
+        500751
+      ],
+      "target": "ally",
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 5000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          704897
+        ]
+      },
+      "critical": false,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 704897 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 12 (SPELLMOD_EFFECT2), BasePoints 19 + DieSides 1 = +20 ($s1), EffectSpellClassMask[0] 2147483648 = SpellFamilyFlags[0] of Abyssal Covenant 500751, raising 500751 Effect[1] SPELL_AURA_MOD_HEALING_RECEIVED (283, Unit.cpp:11086-11091 checks caster GUID == aurEff caster GUID) from 0% to +20%. Observes non-critical Eldritch Mending 502234 heals cast by caster at grouped ally with 500751 recast on ally in each arm (+5000 SP fixture so die variance is ~1%): control without 704897 vs treatment after real learn of 704897, expected ratio 1.20 (+20%, G-19 band +18% to +22%). Note: an unlinked-ally +0% negative arm is omitted because 704897 is a pure DBC SPELLMOD_EFFECT2 modifier scoped to 500751 via EffectSpellClassMask[0] 2147483648. Reference search 2026-11-24: coa-history spell 704897: 0 events in 186 logs (passive; positive control 500751: 148 casts in 26 logs); coabuildhub spells_master_index.json entry 704897 matches verbatim.",
+      "warmup": [
+        500751
+      ],
+      "warmup_power": 2000,
+      "trials": 25
+    },
+    {
+      "spell": 806384,
+      "name": "Visions of the Empire (+10% Abyssal Covenant damage-to-heal conversion)",
+      "kind": "metric_delta",
+      "variant": "conversion_bonus",
+      "label_suffix": "conversion_bonus",
+      "quote": "Increases the damage converted into healing through Abyssal Covenant by $s1%.",
+      "gate_spell": 806384,
+      "learn": [
+        500751
+      ],
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "ally_casts": [
+          500751
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 500862,
+        "target": "ally"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 502182,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0.2,
+      "expected": 0.3,
+      "tolerance": 0.005,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 806384 Effect[0] BasePoints 9 + DieSides 1 = 10% ($s1); AscensionCultistEvents.cpp:262 adds Amount(806384) to Amount(300295) = 20% -> 30% of damage dealt converted to 500862 healing on covenanted ally. Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit), player_spell_power 5000 (denominator ~4700 so truncation <0.03%). Both phases cast 500751 on ally then Horrorbolt 502182 (2500 ms cast, wait 3000 ms) at dummy, reading incremental ratio spell_heal_total(500862, ally) / spell_damage_total(502182, dummy): 0.20 before learning 806384 (control) and 0.30 after a real learn of 806384 (tol 0.005 excludes 0.20, 0.29, 0.31, and 0.40). Reference search 2026-11-24: coa-history spell 806384: 0 events in 186 logs (passive; positive control 500862: 55154 heals in 27 logs); coabuildhub spells_master_index.json entry 806384 matches verbatim."
+    },
+    {
+      "spell": 500751,
+      "name": "Abyssal Covenant (control: no 500862 heal on ally without Abyssal Covenant)",
+      "kind": "metric_delta",
+      "variant": "damage_to_heal_control",
+      "label_suffix": "damage_to_heal_control",
+      "quote": "causing $300295s1% of all damage you deal to be converted into healing for them.",
+      "trigger_spell": 502182,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Witnesses that Horrorbolt 502182 landed on the dummy while Abyssal Covenant 500751 was absent."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500862,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for 500751 damage_to_heal: learns 500751 without casting it, casts Horrorbolt 502182 at dummy (witnessed by spell_damage_count 0 -> 1), and confirms 500862 heal count on grouped ally stays 0. Reference search 2026-11-24: coa-history spell 500862: 55154 heals in 27 logs; coabuildhub spells_master_index.json entry 500751 matches verbatim."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Generates 10 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "quote": "Generates 10 Insanity",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 502241 (Rank 8 of 500714, CastingTimeIndex 16 = 1500 ms) tooltip states \"Generates 10 Insanity\"; AscensionClassContracts19To25Data.h:54 and AscensionCustomResourceData.h:280 grant 10 stacks of Insanity 500706 on cast. Precondition fixtures: 823764 (spellpen), 500706 cleared to 0. Reads aura_stacks of 500706 on caster before (0, uncast control) and 2000 ms after cast start (500 ms past 1500 ms cast: 10). Reference search 2026-11-24: coa-history spell 502241: 4480 SPELL_CAST_START and 4206 SPELL_DAMAGE in 19 logs; coabuildhub spells_master_index.json has no 502241 entry; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Shadow damage at reference AP/SP)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Smash an enemy with eldritch force, dealing ${$m1+0+$AP*0.1+$SP*.52} Shadow damage",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502241,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 395,
+      "after_at_least": 379,
+      "after_at_most": 411,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 502241 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE (Shadow, BaseLevel 60, SpellLevel 60, MaxLevel 60, SkillLineAbility 85897), EffectBasePoints 301, EffectDieSides 28, EffectRealPointsPerLevel 0.65 -> at level 60 raw roll [302..329]. Reference AP 376, SP 0 (AscensionCultistData.h:58 ap 0.10, sp 0.52): [302..329] + 37.6 = [339.6..366.6], times Cultist class tuning aura 887013 (+12%, floor) = [379..411]. Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit). Paired with damage_sp (+20000 SP) and damage_ap (+20000 AP). Reference search 2026-11-24: coa-history spell 502241: 4206 SPELL_DAMAGE in 19 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Shadow damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Smash an enemy with eldritch force, dealing ${$m1+0+$AP*0.1+$SP*.52} Shadow damage",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502241,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 12043,
+      "after_at_least": 12027,
+      "after_at_most": 12059,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP contrast arm for 502241 (${$m1+0+$AP*0.1+$SP*.52}, AscensionCultistData.h:58 sp 0.52): player_spell_power 20000 (hit_arm: true) adds 20000 * 0.52 = +10400 to [339.6..366.6] -> [10739.6..10766.6], times Cultist tuning 887013 (+12%) = [12027..12059]. Paired with damage_base and damage_ap. Reference search 2026-11-24: coa-history spell 502241: 4206 SPELL_DAMAGE in 19 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Shadow damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Smash an enemy with eldritch force, dealing ${$m1+0+$AP*0.1+$SP*.52} Shadow damage",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502241,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2635,
+      "after_at_least": 2619,
+      "after_at_most": 2651,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP contrast arm for 502241 (${$m1+0+$AP*0.1+$SP*.52}, AscensionCultistData.h:58 ap 0.10): player_attack_power 20000 adds +20000 AP (total 20376, CoAGameplayTest.cpp:3070) -> +2000 to [339.6..366.6] = [2339.6..2366.6], times Cultist tuning 887013 (+12%) = [2619..2651]. Paired with damage_base and damage_sp. Reference search 2026-11-24: coa-history spell 502241: 4206 SPELL_DAMAGE in 19 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (applies Black Blood to 5 nearby allies)",
+      "kind": "metric_delta",
+      "variant": "black_blood_targets",
+      "label_suffix": "black_blood_targets",
+      "quote": "and applying Black Blood to $804113i nearby allies,",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 6,
+        "ally_health": [
+          5000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "reach_source": "AscensionCultist.cpp:243 Allies() selects units matching IsInRaidWith (reaching raid subgroup-2 allies ally5 and ally6) and AscensionCultistAbilities.cpp:264,277 caps Black Blood 804153 at MaxAffectedTargets (5).",
+            "source": "Spell.dbc 804113/804153 MaxAffectedTargets = 5 ($804113i): exactly 5 of 7 grouped candidates receive Black Blood 804153."
+          },
+          {
+            "actors": [
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5",
+              "ally6"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "reach_source": "AscensionCultist.cpp:243 IsInRaidWith reaches ally5 and ally6; all 6 allies at 50% health rank ahead of full-health caster (AscensionCultistAbilities.cpp:275).",
+            "source": "Confirms 5 grouped allies (not just the caster) receive Black Blood 804153."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 804153,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 804113 and 804153 MaxAffectedTargets = 5 ($804113i), RadiusIndex 10 (30 yd); AscensionCultistAbilities.cpp:262-288 applies Black Blood 804153 to up to 5 lowest-health grouped raid allies. Six grouped allies at 5000/10000 health stand with full-health caster (7 candidates total): 0 have 804153 before cast (control), exactly 5 of 6 allies (and 5 of 7 total) have 804153 2000 ms after cast start (500 ms past 1500 ms cast), excluding 0, 1, 6, and 7. Reference search 2026-11-24: coa-history spell 804153: 12941 applies in 28 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Black Blood heal per tick at reference AP)",
+      "kind": "metric_delta",
+      "variant": "black_blood_heal_base",
+      "label_suffix": "black_blood_heal_base",
+      "quote": "healing them for ${$m2+0+$AP*0.1},",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 804153,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms exactly 1 periodic tick of Black Blood 804153 landed on ally at 5500 ms (1500 ms cast + 3000 ms first period)."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 804153,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 173,
+      "after_at_least": 173,
+      "after_at_most": 174,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 502241 Effect[1] BasePoints 135 + DieSides 1 = 136 exact (BaseLevel 60, SpellLevel 60, MaxLevel 60, SkillLineAbility 85897); AscensionCultistData.h:111 gives 804153 ap 0.10 (887013 tuning healing mod is 0%). At reference AP 376: 136 + 37.6 = 173.6 ([173..174]). Precondition fixtures: 823764 (no partial resist), 16255 amount -100 (no crit). Reads 804153 spell_heal_total on grouped ally at 5500 ms (1500 ms cast + 3000 ms first tick + 1000 ms margin; spell_heal_count arm confirms 1 tick): 0 before cast, [173..174] after (excludes 0, 136 without AP, and 347 double). Paired with black_blood_heal_ap (+20000 AP). Reference search 2026-11-24: coa-history spell 804153: 73694 SPELL_PERIODIC_HEAL in 30 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Black Blood heal per tick at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "black_blood_heal_ap",
+      "label_suffix": "black_blood_heal_ap",
+      "quote": "healing them for ${$m2+0+$AP*0.1},",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 804153,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms exactly 1 periodic tick of Black Blood 804153 landed on ally at 5500 ms."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 804153,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 2173,
+      "after_at_least": 2173,
+      "after_at_most": 2174,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP contrast arm for Black Blood heal (${$m2+0+$AP*0.1}, AscensionCultistData.h:111 ap 0.10): player_attack_power 20000 (total AP 20376) adds +2000 to 173.6 -> 2173.6 ([2173..2174]) for 1 tick of 804153 on grouped ally at 5500 ms. Paired with black_blood_heal_base (AP 376, [173..174]). Reference search 2026-11-24: coa-history spell 804153: 73694 SPELL_PERIODIC_HEAL in 30 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Black Blood ticks every 3 sec)",
+      "kind": "metric_delta",
+      "variant": "black_blood_period",
+      "label_suffix": "black_blood_period",
+      "quote": "repeating every $804153t1 sec for $804153D.",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ]
+      },
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_heal",
+        "spell": 804153,
+        "target": "ally",
+        "since_spell": 502241
+      },
+      "before_expected": 3000,
+      "expected": 3000,
+      "tolerance": 150,
+      "wait_ms": 14500,
+      "expire_ms": 13000,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 804153 Effect[0] SPELL_AURA_PERIODIC_HEAL EffectAmplitude 3000 ms ($804153t1), DurationIndex 29 = 12000 ms; Malevolence 502241 CastingTimeIndex 16 = 1500 ms. Reads event_interval_median_ms of 804153 spell_heal events on grouped ally since 502241 cast after 14500 ms (4 ticks = 3 intervals of 3000 ms): 3000 +- 150 ms in both phases (5% band excludes 2700 and 3300 ms, 10% off on both sides; no-cast control is black_blood_heal_base). Reference search 2026-11-24: coa-history spell 804153: 73694 SPELL_PERIODIC_HEAL in 30 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (Black Blood lasts 12 sec)",
+      "kind": "metric_delta",
+      "variant": "black_blood_duration",
+      "label_suffix": "black_blood_duration",
+      "quote": "repeating every $804153t1 sec for $804153D.",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 804153,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 12900,
+      "expiry_wait_ms": 1200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          12700,
+          13200
+        ],
+        "expired": [
+          13900,
+          14500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 804153 DurationIndex 29 = 12000 ms ($804153D); Malevolence 502241 CastingTimeIndex 16 = 1500 ms. Reads aura 804153 on grouped ally absent before cast (control: 0), present (1) at 12900 ms after cast start (11400 ms after 1500 ms cast, game_time [12700, 13200], above 12300 ms = 1500 + 0.9*12000) and expired (0) at 14100 ms (12600 ms after cast, game_time [13900, 14500], below 14700 ms = 1500 + 1.1*12000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spell 804153: 12941 applies / 12855 removals in 28-29 logs; installed Spell.dbc governs.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (usable while moving)",
+      "kind": "metric_delta",
+      "variant": "moving_cast",
+      "label_suffix": "moving_cast",
+      "quote": "Usable while moving.",
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "moving_before_trigger": {
+        "flag": "forward"
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502241,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Malevolence 502241 completed its 1500 ms cast and landed on dummy while moving forward."
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502241
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "observe_source": "Spell.dbc 502241 CastingTimeIndex 16 = 1500 ms, InterruptFlags 0 (bit 0x01 SPELL_INTERRUPT_FLAG_MOVEMENT cleared), tooltip \"Usable while moving.\". Sets moving_before_trigger forward before casting 502241 and reads at 2000 ms (past 1500 ms cast): cast_failure = 0 (not 51 SPELL_FAILED_MOVING or 40 SPELL_FAILED_INTERRUPTED) and spell_damage_count 0 -> 1. Paired with moving_cast_control (Horrorbolt 502182 fails with 51 under identical movement flag). Reference search 2026-11-24: coa-history spell 502241: 4480 casts in 19 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 502241,
+      "name": "Malevolence (control: Horrorbolt refused while moving)",
+      "kind": "metric_delta",
+      "variant": "moving_cast_control",
+      "label_suffix": "moving_cast_control",
+      "quote": "Usable while moving.",
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "moving_before_trigger": {
+        "flag": "forward"
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 502182
+      },
+      "before_expected": 51,
+      "expected": 51,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "observe_source": "Control arm for moving_cast with identical moving_before_trigger forward: Horrorbolt 502182 (CastingTimeIndex 19 = 2500 ms, InterruptFlags 43 with bit 0x01 SPELL_INTERRUPT_FLAG_MOVEMENT set; Spell.dbc) is refused with SPELL_FAILED_MOVING (51) in both phases, proving the harness movement flag blocks non-movable casts. Reference search 2026-11-24: coa-history spell 502241: 4480 casts in 19 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 525307,
+      "name": "Shadow Pennant r2 (heals lowest-health Black Blood ally for 100% of auto attack damage)",
+      "kind": "metric_delta",
+      "variant": "auto_heal",
+      "label_suffix": "auto_heal",
+      "quote": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+      "gate_spell": 525307,
+      "trigger_spell": 500773,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "attack_swings": 3,
+      "phase_auras": [
+        [
+          804153,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "caster"
+            },
+            "source": "Shadow Pennant 500773 healing on Black Blood unit (caster) during 3 auto-attack swings (AscensionCultistEvents.cpp:266-276)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {
+              "hand": 0
+            },
+            "source": "Caster main-hand auto-attack damage dealt to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Grouped ally lacks Black Blood 804153 and must receive 0 heals of 500773."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "floor_count": 0,
+            "source": "Spell.dbc 525307 Effect[0] BasePoints 99 + DieSides 1 = 100% ($s1); CalculatePct(damage, 100) truncates up to 1 per swing."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 5,
+      "wait_ms": 200,
+      "expire_ms": 3000,
+      "observe_source": "Spell.dbc 525307 Effect[0] aura 354 BasePoints 99 + DieSides 1 = 100% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 heals lowest-health ally in Allies(player, player, 40) with Black Blood 804153 for CalculatePct(damage, 100) via 500773 (CultistCopies: no crit/mods). Proves the 100% auto-attack damage scaling and Black Blood gating: Black Blood 804153 (12000 ms) is set on caster via phase_auras (caster is in Allies() per AscensionCultist.cpp:239-244), while grouped ally without 804153 receives 0 heals. Reach on grouped allies and lowest-health selection among >=2 Black Blood allies are split to their own claim with a tool_gap on ledger row 166 (behaviours.py:1800,2103-2129 and ally_arm.py:334-335 do not support ally auras or distinct per-ally health fixtures with passive attack_swings). Three main-hand swings (Heretic staff 3300 ms speed -> 9900 ms + 200 ms < 12000 ms 804153 duration): 0 heals before learning 525307 (control), 2..5 heals after a real learn at ratio 500773_heal / melee_damage_total = 1.00 +- 0.01 (floor_count 0, excludes 0%, 10% off on both sides, and wrong rank). Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+    },
+    {
+      "spell": 706926,
+      "name": "Shadow Pennant r1 (heals lowest-health Black Blood ally for 50% of auto attack damage)",
+      "kind": "metric_delta",
+      "variant": "auto_heal",
+      "label_suffix": "auto_heal",
+      "quote": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+      "gate_spell": 706926,
+      "trigger_spell": 500773,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "attack_swings": 3,
+      "phase_auras": [
+        [
+          804153,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "caster"
+            },
+            "source": "Shadow Pennant 500773 healing on Black Blood unit (caster) during 3 auto-attack swings (AscensionCultistEvents.cpp:266-276)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_total",
+            "count_metric": "melee_damage_count",
+            "fields": {
+              "hand": 0
+            },
+            "source": "Caster main-hand auto-attack damage dealt to dummy in the same window."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Grouped ally lacks Black Blood 804153 and must receive 0 heals of 500773."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 0.5,
+            "tolerance": 0.01,
+            "floor_count": 0,
+            "source": "Spell.dbc 706926 Effect[0] BasePoints 49 + DieSides 1 = 50% ($s1); CalculatePct(damage, 50) truncates up to 1 per swing."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "after_at_least": 2,
+      "after_at_most": 5,
+      "wait_ms": 200,
+      "expire_ms": 3000,
+      "observe_source": "Spell.dbc 706926 Effect[0] aura 354 BasePoints 49 + DieSides 1 = 50% ($s1), EffectTriggerSpell 500773; AscensionCultistEvents.cpp:109-110,266-276 heals lowest-health ally in Allies(player, player, 40) with Black Blood 804153 for CalculatePct(damage, 50) via 500773 (CultistCopies: no crit/mods). Proves the 50% auto-attack damage scaling and Black Blood gating: Black Blood 804153 (12000 ms) is set on caster via phase_auras (caster is in Allies() per AscensionCultist.cpp:239-244), while grouped ally without 804153 receives 0 heals. Reach on grouped allies and lowest-health selection among >=2 Black Blood allies are split to their own claim with a tool_gap on ledger row 327 (behaviours.py:1800,2103-2129 and ally_arm.py:334-335 do not support ally auras or distinct per-ally health fixtures with passive attack_swings). Three main-hand swings (Heretic staff 3300 ms speed -> 9900 ms + 200 ms < 12000 ms 804153 duration): 0 heals before learning 706926 (control), 2..5 heals after a real learn at ratio 500773_heal / melee_damage_total = 0.50 +- 0.01 (floor_count 0, excludes 0%, 10% off on both sides, and wrong rank). Reference search 2026-11-24: coa-history spell 500773: 10567 SPELL_HEAL in 29 logs; coabuildhub spells_master_index.json 706926 matches verbatim; installed Spell.dbc governs."
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (direct healing applies Void-Touched 301982)",
+      "kind": "metric_delta",
+      "variant": "apply",
+      "label_suffix": "apply",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "gate_spell": 300286,
+      "trigger_spell": 502234,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 301982,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 300286 Effect[0] EffectTriggerSpell 301982; AscensionCultistEvents.cpp:80-81,164 applies 301982 on non-periodic heal done. Casts direct heal Eldritch Mending 502234 (2000 ms cast, wait 2500 ms) at grouped ally (2000/20000 health) before learning 300286 (control: aura 301982 = 0) and after a real learn of 300286 (aura 301982 = 1). Reference search 2026-11-24: coa-history spell 301982: 12933 applies and 37853 dose applies in 27 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim."
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (301982 lasts 30 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "trigger_spell": 502234,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 301982,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 30500,
+      "expiry_wait_ms": 3000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          30200,
+          31000
+        ],
+        "expired": [
+          33200,
+          34200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Ledger clause 27 (\"Marks the ally for $d,\", embedded via @s:301982:0@; quote uses 300286 own text). Spell.dbc 301982 DurationIndex 9 = 30000 ms ($d); Eldritch Mending 502234 cast time 2000 ms. Reads aura 301982 on ally absent before learning 300286 (control: 0), present (1) at 30500 ms after cast start (28500 ms after 2000 ms cast, game_time [30200, 31000], above 29000 ms = 2000 + 0.9*30000) and expired (0) at 33500 ms (31500 ms after cast, game_time [33200, 34200], below 35000 ms = 2000 + 1.1*30000), excluding 10% off on both sides. Reference search 2026-11-24: coa-history spell 301982: 12933 applies / 12955 removals in 27-28 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (301982 reaches 10 stacks after 10 direct heals)",
+      "kind": "metric_delta",
+      "variant": "max_stacks_ten",
+      "label_suffix": "max_stacks_ten",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "gate_spell": 300286,
+      "trigger_spell": 502234,
+      "setup_casts": [
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036
+      ],
+      "setup_wait_ms": 1800,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 808050,
+              "target": "ally"
+            },
+            "before_expected": 9,
+            "expected": 18,
+            "tolerance": 0,
+            "source": "Confirms all 9 Eldritch Shock 808036 setup casts landed direct heal 808050 on ally in each phase (9 before, 18 cumulative after; AscensionCultistAbilities.cpp:425-431)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 502234,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms the 10th direct heal Eldritch Mending 502234 (2000 ms cast, wait_ms 2600) landed on ally in each phase (1 before, 2 cumulative after)."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 301982,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 2600,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Ledger clause 31 (\"stacking $301982u times.\", embedded via @s:301982:0@; quote uses 300286 own text). Spell.dbc 301982 StackAmount = 10 ($301982u). Performs 9 instant Eldritch Shock 808036 setup casts (1800 ms apart, each casting direct heal 808050 on ally per AscensionCultistAbilities.cpp:425-431; phase_auras sets 100 Insanity 500706 so Refresh preserves 680601) plus 1 trigger cast of Eldritch Mending 502234 (2000 ms cast, read at wait_ms 2600 = 18.8 s total < 30 s duration): ally_arm confirms 9 landed 808050 heals (9 before, 18 after) and 1 landed 502234 heal (1 before, 2 after) = 10 landed direct heals per phase, reaching 10 stacks of 301982 (0 control before learn -> 10 after learn). Paired with max_stacks (11 landed direct heals still capped at 10). Reference search 2026-11-24: coa-history spell 301982: 37853 SPELL_AURA_APPLIED_DOSE in 27 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (301982 stacks cap at 10 after 11 direct heals)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "gate_spell": 300286,
+      "trigger_spell": 502234,
+      "setup_casts": [
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036,
+        808036
+      ],
+      "setup_wait_ms": 1800,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 808050,
+              "target": "ally"
+            },
+            "before_expected": 10,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Confirms all 10 Eldritch Shock 808036 setup casts landed direct heal 808050 on ally in each phase (10 before, 20 cumulative after; AscensionCultistAbilities.cpp:425-431)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 502234,
+              "target": "ally"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms the 11th direct heal Eldritch Mending 502234 (2000 ms cast, wait_ms 2600) landed on ally in each phase (1 before, 2 cumulative after), so 11 direct heals landed while 301982 capped at 10 stacks."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 301982,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 2600,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Ledger clause 31 (\"stacking $301982u times.\", embedded via @s:301982:0@; quote uses 300286 own text). Spell.dbc 301982 StackAmount = 10 ($301982u). Performs 10 instant Eldritch Shock 808036 setup casts (1800 ms apart, each casting direct heal 808050 on ally per AscensionCultistAbilities.cpp:425-431; phase_auras sets 100 Insanity 500706 so Refresh preserves 680601) plus 1 trigger cast of Eldritch Mending 502234 (SpellCastTimes CastingTimeIndex 5 = 2000 ms cast, read at wait_ms 2600 = 20.6 s total < 30 s duration): ally_arm confirms 10 landed 808050 heals (10 before, 20 after) and 1 landed 502234 heal (1 before, 2 after) = 11 landed direct heals per phase, while aura_stacks of 301982 stays capped at 10 (0 before learn -> 10 after learn, excluding 0, 9, and 11). Paired with max_stacks_ten (10 landed heals -> 10 stacks). Reference search 2026-11-24: coa-history spell 301982: 37853 SPELL_AURA_APPLIED_DOSE in 27 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "phase_auras": [
+        [
+          500706,
+          100,
+          "caster",
+          "caster"
+        ]
+      ]
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (Gaze of CThun consumes stacks and heals at 1 stack, 0 SP)",
+      "kind": "metric_delta",
+      "variant": "gaze_consume_base",
+      "label_suffix": "gaze_consume_base",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 301982,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Tooltip promises \"all stacks are consumed\" when Gaze of CThun 500110 is cast."
+          }
+        ],
+        "ally_casts": [
+          808036
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 301983,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 364,
+      "after_at_least": 364,
+      "after_at_most": 365,
+      "wait_ms": 1000,
+      "expire_ms": 11000,
+      "observe_source": "Ledger clause 32 (Gaze of CThun 500110 consumes Void-Touched 301982 to heal allies via 301983 for ${$301983m1+$301983ppl1+$BH*0.35}, increased by stacks). Spell.dbc 301983 BasePoints 99 + DieSides 1 = 100, PPL 4.75, BaseLevel 17, MaxLevel 0 -> at level 60: 100 + floor(43 * 4.75) = 304; 301982 Effect[0] aura 283 (+20% healing received per stack on 301983 mask 1048576): 1 stack = 304 * 1.20 = 364.8 ([364..365]). Both phases cast instant direct heal Eldritch Shock 808036 at grouped ally (2000/20000 health) then Gaze of CThun 500110 at dummy: before learning 300286 (control) 0 stacks of 301982 and 0 heals of 301983; after real learn of 300286, 1 stack of 301982 is earned and consumed by Gaze 500110 (checking 301983 heal [364..365] and that 301982 stacks return to 0). Note: void_on_cast_failure is omitted because 500110 Gaze of CThun's internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub 300286 matches verbatim.",
+      "gate_spell": 300286,
+      "learn": [
+        808036
+      ]
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (Gaze of CThun heal at 1 stack, +2000 SP)",
+      "kind": "metric_delta",
+      "variant": "gaze_consume_sp",
+      "label_suffix": "gaze_consume_sp",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "ally_casts": [
+          808036
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 301983,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1204,
+      "after_at_least": 1204,
+      "after_at_most": 1205,
+      "wait_ms": 1000,
+      "expire_ms": 11000,
+      "observe_source": "SP contrast arm for 301983 (${$301983m1+$301983ppl1+$BH*0.35}, AscensionCultistAbilities.cpp:70-71): player_spell_power 2000 (hit_arm: true) adds 2000 * 0.35 = +700 to 304 -> 1004; times 1.20 (1 stack of 301982) = 1204.8 ([1204..1205]). Paired with gaze_consume_base and gaze_consume_5stacks. Note: void_on_cast_failure is omitted because 500110 Gaze of CThun's internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "gate_spell": 300286,
+      "learn": [
+        808036
+      ]
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (Gaze of CThun heal scales at 5 stacks, 0 SP)",
+      "kind": "metric_delta",
+      "variant": "gaze_consume_5stacks",
+      "label_suffix": "gaze_consume_5stacks",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "ally_casts": [
+          808036,
+          808036,
+          808036,
+          808036,
+          808036
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 301983,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 608,
+      "after_at_least": 608,
+      "after_at_most": 609,
+      "wait_ms": 1000,
+      "expire_ms": 11000,
+      "observe_source": "Stack-scaling arm for 301983 (\"increased based on how many stacks were on them\"): 5 stacks of 301982 (precondition fixture, +20% per stack = 2.00x) multiply base 304 to 608 exact (contrasting with 364 at 1 stack). Note: void_on_cast_failure is omitted because 500110 Gaze of CThun's internal sub-spells (520334/520335/804095) emit native SPELL_FAILED_DONT_REPORT (27); ally_casts asserts each 808036 via spell_go_count. Reference search 2026-11-24: coa-history spell 301983: 6594 SPELL_HEAL in 25 logs; coabuildhub spells_master_index.json entry 300286 matches verbatim.",
+      "gate_spell": 300286,
+      "learn": [
+        808036
+      ]
+    },
+    {
+      "spell": 570249,
+      "name": "Dark Infusion (3 charges, 30 sec recharge)",
+      "kind": "charge_recharge",
+      "quote": "3 Charges, 30 sec recharge",
+      "max_charges": 3,
+      "recharge_ms": 30000,
+      "target": "ally",
+      "observe_source": "SpellCharges.dbc row 570249 -> SpellChargesCategory.dbc row 325 (MaxCharges 3, RecoveryTime 30000 ms). Spends all 3 charges casting 570249 at grouped ally, confirms 4th cast refused at 0 charges, and brackets recharge at 5% (28500 ms still 0, 31500 ms back to 1), excluding 10% off (27000 and 33000 ms) on both sides. Reference search 2026-11-24: coa-history spell 570249: 579 SPELL_CAST_SUCCESS in 17 logs; coabuildhub spells_master_index.json has no 570249 entry; installed Spell.dbc/SpellCharges.dbc govern."
+    },
+    {
+      "spell": 570249,
+      "name": "Dark Infusion (heals infused ally for 207 on damage taken)",
+      "kind": "metric_delta",
+      "variant": "trigger_heal",
+      "label_suffix": "trigger_heal",
+      "quote": "Infuse an ally with dark energy, healing them for $s1 the next time they take damage.",
+      "trigger_spell": 570249,
+      "cast_in_before": false,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": {
+          "health": 5000
+        },
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570249,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Dark Infusion 570249 is consumed when the ally takes damage (AscensionCultistEvents.cpp:135)."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 570263,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 207,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 570249 Effect[0] BasePoints 206 + DieSides 1 = 207 ($s1), EffectTriggerSpell 570263; AscensionCultistEvents.cpp:128-136 removes 570249 and heals recipient for 207 via 570263 when struck. Precondition fixture: 16255 amount -100 (no crit). Control (before casting 570249): ally struck by Light of the Naaru 41394 receives 0 heals of 570263. Treatment (after casting 570249 on ally): ally struck receives 207 exact of 570263 and aura 570249 is consumed (0). Reference search 2026-11-24: coa-history spell 570263: 5438 SPELL_HEAL in 18 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 570249,
+      "name": "Dark Infusion (consumed and expands to two lowest-health raid members)",
+      "kind": "metric_delta",
+      "variant": "expand_two",
+      "label_suffix": "expand_two",
+      "quote": "When the heal occurs, Dark Infusion is consumed and expands to the two lowest-health nearby party or raid members.",
+      "trigger_spell": 570249,
+      "cast_in_before": false,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 5,
+        "ally_health": [
+          4000,
+          10000
+        ],
+        "ally_strikes": {
+          "health": 5000
+        },
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570249,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Primary Dark Infusion 570249 is consumed on ally when triggered."
+          },
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 570254
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "reach_source": "AscensionCultist.cpp:243 Allies() filters by IsInRaidWith (reaching raid subgroup-2 ally5) and AscensionCultistEvents.cpp:139-148 expands 570254 to MiscValueB (2) lowest-health raid allies.",
+            "source": "Spell.dbc 570249 Effect[0] MiscValue 570254, MiscValueB 2: exactly 2 lowest-health allies receive secondary infusion 570254."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 570254
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Caster (89% health, lowest GUID) is skipped in favour of 40%-health raid allies, proving lowest-health ordering."
+          }
+        ]
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 570254
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 570249 Effect[0] MiscValue 570254 (secondary infusion), MiscValueB 2; AscensionCultistEvents.cpp:128-149 consumes 570249 on ally when damaged and casts 570254 on the 2 lowest-health raid allies within 20 yd. Five grouped allies (converting party to raid, ally5 in subgroup 2) start at 40% health while caster ends its strike at 89% health (lowest GUID): before casting 570249 (control) 0 casts of 570254; after casting 570249 on ally and striking ally, 570249 is consumed (0), 570254 is cast exactly 2 times (aura_apply_count 2 total, 0 on 89%-health caster), excluding 0, 1, 3, and 4. Reference search 2026-11-24: coa-history spell 570254: 940 applies/removals in 17 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 570249,
+      "name": "Dark Infusion (secondary infusions heal and expand to three allies each)",
+      "kind": "metric_delta",
+      "variant": "secondary_expand_three",
+      "label_suffix": "secondary_expand_three",
+      "quote": "Each secondary infusion heals when triggered, then expands to three nearby allies.",
+      "trigger_spell": 570249,
+      "cast_in_before": false,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 5,
+        "ally_health": [
+          4000,
+          10000
+        ],
+        "ally_strikes": {
+          "health": 5000
+        },
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 570263,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 207,
+            "tolerance": 0,
+            "source": "Secondary infusion 570254 on ally2 heals ally2 for 207 via 570263 when struck."
+          },
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 570259
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "reach_source": "AscensionCultist.cpp:243 IsInRaidWith reaches raid subgroup-2 ally5; each of the 2 secondary infusions 570254 expands 570259 to 3 nearby allies (2 * 3 = 6).",
+            "source": "Spell.dbc 570254 Effect[0] MiscValue 570259, MiscValueB 3: 2 triggered secondary infusions apply tertiary 570259 6 times total."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 570266
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Without Ancient Rituals 807877, tertiary infusion 570259 does not expand to fourth-tier 570266."
+          }
+        ]
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 570259
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 570254 Effect[0] BasePoints 206 + DieSides 1 = 207, MiscValue 570259 (tertiary infusion), MiscValueB 3; AscensionCultistEvents.cpp:128-149. Precondition fixture: 16255 amount -100 (no crit). When ally is struck, 570249 expands 570254 to ally2 and ally3; striking ally2 heals ally2 for 207 and expands 570259 to 3 allies (ally3, ally4, ally5); striking ally3 triggers its 570254 (and 570259) and expands 570259 to the 3 remaining units without 570259 (ally, ally2, caster) = 6 casts/applies of 570259 total (2 * 3), while 570266 stays 0 without 807877. Control (uncast before phase): 0 heals and 0 casts. Reference search 2026-11-24: coa-history spell 570254: 940 applies, 570263: 5438 heals in 17-18 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 807877,
+      "name": "Ancient Rituals (Satiate refreshes Black Blood inside 30 yd)",
+      "kind": "metric_delta",
+      "variant": "satiate_refresh",
+      "label_suffix": "satiate_refresh",
+      "quote": "Casting Satiate now refreshes the duration of Black Blood on all allies within $807878a1 yds.",
+      "gate_spell": 807877,
+      "trigger_spell": 804275,
+      "setup_casts": [
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 8000,
+      "select_dummy": true,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_offsets": {
+        "ally": 31.5
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 31.5,
+            "expected": 31.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets moves ally 31.5 yd along x from caster (dz 0; inside 33.0 yd effective edge = 30 yd + 3.0 yd combat reaches, > 30.0 yd = -10%)."
+          },
+          {
+            "actors": [
+              "caster",
+              "ally"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.02,
+            "precondition": true,
+            "source": "Player combat reach is 1.5 yd each (sum 3.0 yd) entering AnyUnitInObjectRangeCheck::IsWithinDistInMap."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 804153,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 8000,
+      "expire_ms": 13000,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 807878 EffectRadiusIndex 10 = 30.0 yd ($807878a1); AscensionCultistAbilities.cpp:181-186 refreshes Black Blood 804153 (12000 ms) on all Allies(player, player, 30.0) when Satiate 804275 is cast (effective edge 30.0 + 1.5 + 1.5 = 33.0 yd; -10% edge 30.0 yd). Grouped ally stands at 31.5 yd (verified by distance_2d and combat_reach precondition arms). Both phases cast Malevolence 502241 at dummy (applying 804153 to ally at t=1500 ms), wait 8000 ms (6500 ms elapsed on 804153), cast Satiate 804275, then wait 8000 ms (14500 ms after apply > 12000 ms original duration, 8000 ms after Satiate < 12000 ms refreshed duration): aura 804153 on ally is 0 without 807877 (control: expired) and 1 with 807877 (refreshed). Paired with satiate_refresh_radius_out (34.5 yd outer bracket). Reference search 2026-11-24: coa-history spell 807877/807878: 0 events (passive), 804275: 59 casts in 17 logs; coabuildhub spells_master_index.json entry 807877 matches verbatim."
+    },
+    {
+      "spell": 807877,
+      "name": "Ancient Rituals (Satiate does not refresh Black Blood outside 30 yd)",
+      "kind": "metric_delta",
+      "variant": "satiate_refresh_radius_out",
+      "label_suffix": "satiate_refresh_radius_out",
+      "quote": "Casting Satiate now refreshes the duration of Black Blood on all allies within $807878a1 yds.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 804275,
+      "setup_casts": [
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 8000,
+      "select_dummy": true,
+      "target": "caster",
+      "measure_actor": "ally2",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_offsets": {
+        "ally": 13.5,
+        "ally2": 16.5
+      },
+      "relocate_before_trigger": {
+        "dx": -18
+      },
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Inner ally (31.5 yd after -18 yd relocate) is refreshed by Satiate 804275 and still carries 804153 at 14500 ms."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 804153,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Witnesses that ally2 received Black Blood 804153 from 502241 and ticked all 4 original ticks before expiring unrefreshed."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 13.5,
+            "expected": 31.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally stands at 13.5 yd during 502241 and 31.5 yd during Satiate (inside 33.0 yd edge)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 16.5,
+            "expected": 34.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally2 stands at 16.5 yd during 502241 and 34.5 yd during Satiate (outside 33.0 yd edge, < 36.0 yd = +10%)."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 804153,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 8000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Outer 30 yd radius bracket for 807877 (effective edge 33.0 yd, +10% edge 36.0 yd). Malevolence 502241 is cast at x=0 applying Black Blood 804153 to both ally (13.5 yd) and ally2 (16.5 yd); after 8000 ms, relocate_before_trigger moves caster -18 yd so ally is 31.5 yd (inside) and ally2 is 34.5 yd (outside), then Satiate 804275 is cast; 8000 ms later ally keeps 804153 (1) while ally2 has expired (0) after ticking its 4 original ticks (witnessed by spell_heal_count 4). Paired with satiate_refresh. Reference search 2026-11-24: coa-history spell 804275: 59 casts in 17 logs; coabuildhub 807877 matches verbatim."
+    },
+    {
+      "spell": 807877,
+      "name": "Ancient Rituals (Dark Infusion bounces an extra time after third infusion)",
+      "kind": "metric_delta",
+      "variant": "dark_infusion_bounce",
+      "label_suffix": "dark_infusion_bounce",
+      "quote": "Dark Infusion bounces one additional time after its third infusion, expanding to the three lowest-health nearby party or raid members.",
+      "gate_spell": 807877,
+      "trigger_spell": 570249,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 5,
+        "ally_health": [
+          4000,
+          10000
+        ],
+        "ally_strikes": {
+          "health": 5000
+        },
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 570259
+            },
+            "before_expected": 6,
+            "expected": 12,
+            "tolerance": 0,
+            "source": "Witnesses tertiary infusion 570259 fired 6 times in both phases (cumulative 6 -> 12)."
+          },
+          {
+            "actors": [
+              "caster",
+              "ally",
+              "ally2",
+              "ally3",
+              "ally4",
+              "ally5"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 570266
+            },
+            "before_expected": 0,
+            "expected": 7,
+            "tolerance": 0,
+            "reach_source": "AscensionCultist.cpp:243 IsInRaidWith reaches raid subgroup-2 ally5; AscensionCultistEvents.cpp:133-148 expands 570259 to 570266 on up to 3 lowest-health raid allies not carrying 570266 when 807877 is known.",
+            "source": "Fourth-tier infusion 570266 applies 0 times without 807877 and 7 times with 807877 (3 from ally3 + 3 from ally4 + 1 remaining unbuffed from ally5)."
+          }
+        ]
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 570266
+      },
+      "before_expected": 0,
+      "expected": 7,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 570259 Effect[0] MiscValue 570266, MiscValueB 3; 570266 MiscValue 0; AscensionCultistEvents.cpp:133-148 expands tertiary 570259 into 570266 on up to 3 lowest-health raid allies not already carrying 570266 only when player->HasAura(807877). Both phases cast 570249 on ally and strike caster then ally..ally5 (expire_ms 31000 clears all 30000 ms infusions between phases): before learning 807877 (control) 570259 runs 6 times and 570266 is cast 0 times; after a real learn of 807877, 570259 expands 570266 7 times (3 from ally3, 3 from ally4, 1 remaining unbuffed from ally5). Reference search 2026-11-24: coa-history spell 807877: 0 events (passive; positive control 570254: 940 applies in 17 logs); coabuildhub spells_master_index.json entry 807877 matches verbatim."
+    },
+    {
+      "spell": 806382,
+      "name": "Dark Matter (heals allies within 30 yd while channeling Satiate)",
+      "kind": "metric_delta",
+      "variant": "radius",
+      "label_suffix": "radius",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "gate_spell": 806382,
+      "trigger_spell": 804275,
+      "target": "caster",
+      "measure_actor": "caster",
+      "ally_offsets": {
+        "ally": 28.5,
+        "ally2": 31.5
+      },
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Outer ally2 at 31.5 yd (beyond 30.0 yd exact AoE radius of 807219, < 33.0 yd = +10%) receives 0 heals of 807219."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 28.5,
+            "expected": 28.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets moves ally 28.5 yd along x from caster (inside 30.0 yd exact AoE radius of 807219, > 27.0 yd = -10%)."
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 31.5,
+            "expected": 31.5,
+            "tolerance": 0.25,
+            "precondition": true,
+            "source": "ally_offsets moves ally2 31.5 yd along x from caster (outside 30.0 yd exact AoE radius of 807219, < 33.0 yd = +10%)."
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807219,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 807219 Effect[0] EffectRadiusIndex 10 = 30.0 yd ($807219a1), TARGET_SRC_CASTER (22) + TARGET_UNIT_SRC_AREA_ALLY (30) -> WorldObjectSpellAreaTargetCheck checks exact center-to-center distance <= 30.0 yd for players (Spell.cpp:9450-9454). Grouped ally stands at 28.5 yd (inside, > 27.0 yd = -10%) and ally2 at 31.5 yd (outside, < 33.0 yd = +10%), verified by distance_2d preconditions. Over 1500 ms (1 tick of 807124 at 1000 ms), ally expects 1 heal of 807219 (fails 0 and fails 2+) and ally2 expects 0. Reference search 2026-11-24: coa-history spell 807219: 2871 events; coabuildhub spells_master_index.json entry 806382 matches verbatim.",
+      "tolerance": 0,
+      "note": "Spell.dbc 807219 Effect[0] RadiusIndex 10 = 30 yd ($807219a1), TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ALLY (player-to-player center-to-center 30.0 yd in Spell.cpp:9450-9454). ally at 28.5 yd (> 27.0 yd = -10%) receives 1 heal per tick at 1500 ms; ally2 at 31.5 yd (< 33.0 yd = +10%) receives 0."
+    },
+    {
+      "spell": 806382,
+      "name": "Dark Matter (heals every 1 sec while channeling Satiate)",
+      "kind": "metric_delta",
+      "variant": "period",
+      "label_suffix": "period",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "gate_timing": "start",
+      "trigger_spell": 804275,
+      "target": "caster",
+      "measure_actor": "caster",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ]
+      },
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_heal",
+        "spell": 807219,
+        "target": "ally",
+        "since_spell": 804275
+      },
+      "before_expected": 1000,
+      "expected": 1000,
+      "tolerance": 50,
+      "wait_ms": 5500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 807124 Effect[1] EffectAmplitude 1000 ms ($807124T2); AscensionCultistAuras.cpp:225-234 triggers 807219 every 1000 ms during 6000 ms Satiate channel. Reads event_interval_median_ms of 807219 spell_heal events on grouped ally since 804275 cast after 5500 ms (5 ticks = 4 intervals): 1000 +- 50 ms in both phases (5% band excludes 900 and 1100 ms, 10% off on both sides; unlearned control is heal_base). Reference search 2026-11-24: coa-history spell 807124: 41 applies/removals in 10 logs, 807219: 2871 heals in 10 logs; coabuildhub entry 806382 matches verbatim."
+    },
+    {
+      "spell": 806382,
+      "name": "Dark Matter (heal per tick at 0 SP)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "gate_spell": 806382,
+      "trigger_spell": 804275,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms exactly 1 tick of Dark Matter 807219 landed on ally at 1500 ms."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807219,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 208,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 807219 Effect[0] SPELL_EFFECT_HEAL BasePoints 64 + DieSides 1 = 65, PPL 5.5, BaseLevel 34, SpellLevel 34, MaxLevel 0 (no SkillLineAbility row) -> at level 60: 65 + floor((60 - 34) * 5.5) = 65 + 143 = 208 exact (887013 tuning healing mod is 0%). Precondition fixture: 16255 amount -100 (no crit). Control (before learning 806382): 0 heals of 807219. Treatment (after real learn of 806382): 1 tick of 807219 on grouped ally at 1500 ms = 208 exact (tol 0). Paired with heal_sp (+2000 SP). Reference search 2026-11-24: coa-history spell 807219: 2871 heals in 10 logs; coabuildhub entry 806382 matches verbatim."
+    },
+    {
+      "spell": 806382,
+      "name": "Dark Matter (heal per tick at +2000 SP)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "gate_spell": 806382,
+      "trigger_spell": 804275,
+      "target": "caster",
+      "measure_actor": "caster",
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms exactly 1 tick of Dark Matter 807219 landed on ally at 1500 ms."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807219,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 608,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "SP contrast arm for Dark Matter 807219 (${$807219m1+$807219ppl1+$bh*.2}, AscensionCultistData.h:118 healing coeff 0.20): player_spell_power 2000 (hit_arm: true) adds 2000 * 0.20 = +400 to 208 -> 608 exact (tol 0) for 1 tick of 807219 on grouped ally at 1500 ms. Paired with heal_base (0 SP, 208). Reference search 2026-11-24: coa-history spell 807219: 2871 heals in 10 logs; coabuildhub entry 806382 matches verbatim."
+    },
+    {
+      "spell": 806382,
+      "name": "Dark Matter (duration 10 sec per $807219d)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 804275,
+      "target": "caster",
+      "measure_actor": "caster",
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 807219,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 9,
+            "tolerance": 1,
+            "source": "Tooltip promises 1 sec ticks for $807219d = 10 sec (9..10 ticks over 9500 ms)."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 807124
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9500,
+      "expiry_wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9200,
+          9800
+        ],
+        "expired": [
+          10200,
+          10800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Spell.dbc 806382 tooltip promises \"every $807124T2 sec for $807219d\" ($807219d = DurationIndex 1 = 10000 ms). Reads Dark Matter driver aura 807124 on caster at 9500 ms (expected 1 if 10000 ms, game_time [9200, 9800]) and 10500 ms (expected 0, game_time [10200, 10800]), plus 807219 tick count on ally (expected 9..10). Note: Satiate 804275 has DurationIndex 32 = 6000 ms, 807124 has DurationIndex 31 = 8000 ms, and AscensionCultistAuras.cpp:195-198 removes 807124 when Satiate ends at 6000 ms. Reference search 2026-11-24: coa-history spell 807124: 41 applies/removals in 10 logs, 807219: 2871 heals in 10 logs; coabuildhub entry 806382 matches verbatim."
     }
   ],
   "player_observations": [],

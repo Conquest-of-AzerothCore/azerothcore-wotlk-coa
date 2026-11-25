@@ -251,14 +251,16 @@
   {
     "spell": 300286,
     "clause": "Direct healing done now applies Void-Touched.",
-    "labels": [],
+    "labels": [
+      "300286 behaviour_metric_delta apply"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300286,
     "clause": "Marks the ally for $d,",
     "labels": [
-      "300286 spell_duration 301982 #0"
+      "300286 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -266,7 +268,8 @@
     "spell": 300286,
     "clause": "stacking $301982u times.",
     "labels": [
-      "300286 max_stacks 301982 #1"
+      "300286 behaviour_metric_delta max_stacks_ten",
+      "300286 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -274,7 +277,9 @@
     "spell": 300286,
     "clause": "When you cast Gaze of C'Thun, all stacks are consumed to heal all allies affected by Void-Touched for ${$301983m1+$301983ppl1+$BH*0.35}, increased based on how many stacks were on them.",
     "labels": [
-      "300286 effect_value #2"
+      "300286 behaviour_metric_delta gaze_consume_base",
+      "300286 behaviour_metric_delta gaze_consume_sp",
+      "300286 behaviour_metric_delta gaze_consume_5stacks"
     ],
     "kind": "claim"
   },
@@ -988,14 +993,18 @@
   {
     "spell": 502241,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "502241 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
     "spell": 502241,
     "clause": "Smash an enemy with eldritch force, dealing ${$m1+0+$AP*0.1+$SP*.52} Shadow damage",
     "labels": [
-      "502241 effect_value e0 #0"
+      "502241 behaviour_metric_delta damage_base",
+      "502241 behaviour_metric_delta damage_sp",
+      "502241 behaviour_metric_delta damage_ap"
     ],
     "kind": "claim"
   },
@@ -1003,7 +1012,7 @@
     "spell": 502241,
     "clause": "and applying Black Blood to $804113i nearby allies,",
     "labels": [
-      "502241 effect_value #1"
+      "502241 behaviour_metric_delta black_blood_targets"
     ],
     "kind": "claim"
   },
@@ -1011,7 +1020,8 @@
     "spell": 502241,
     "clause": "healing them for ${$m2+0+$AP*0.1},",
     "labels": [
-      "502241 effect_value e1 #2"
+      "502241 behaviour_metric_delta black_blood_heal_base",
+      "502241 behaviour_metric_delta black_blood_heal_ap"
     ],
     "kind": "claim"
   },
@@ -1023,13 +1033,14 @@
       {
         "claim": "every $804153t1 sec",
         "labels": [
-          "502241 aura_amplitude_ms #3"
+          "502241 behaviour_metric_delta black_blood_period",
+          "502241 behaviour_metric_delta black_blood_heal_base"
         ]
       },
       {
         "claim": "for $804153D",
         "labels": [
-          "502241 spell_duration 804153 #4"
+          "502241 behaviour_metric_delta black_blood_duration"
         ]
       }
     ]
@@ -1037,7 +1048,10 @@
   {
     "spell": 502241,
     "clause": "Usable while moving.",
-    "labels": [],
+    "labels": [
+      "502241 behaviour_metric_delta moving_cast",
+      "502241 behaviour_metric_delta moving_cast_control"
+    ],
     "kind": "claim"
   },
   {
@@ -1137,41 +1151,48 @@
   {
     "spell": 570249,
     "clause": "3 Charges,",
-    "labels": [],
+    "labels": [
+      "570249 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 570249,
     "clause": "30 sec recharge",
-    "labels": [],
+    "labels": [
+      "570249 behaviour_charge_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 570249,
     "clause": "Infuse an ally with dark energy, healing them for $s1 the next time they take damage.",
     "labels": [
-      "570249 effect_value e0 #0",
-      "570249 aura_amount e0 #0"
+      "570249 behaviour_metric_delta trigger_heal"
     ],
     "kind": "claim"
   },
   {
     "spell": 570249,
     "clause": "When the heal occurs, Dark Infusion is consumed and expands to the two lowest-health nearby party or raid members.",
-    "labels": [],
+    "labels": [
+      "570249 behaviour_metric_delta expand_two"
+    ],
     "kind": "claim"
   },
   {
     "spell": 570249,
     "clause": "Each secondary infusion heals when triggered, then expands to three nearby allies.",
-    "labels": [],
+    "labels": [
+      "570249 behaviour_metric_delta secondary_expand_three"
+    ],
     "kind": "claim"
   },
   {
     "spell": 500751,
     "clause": "Link yourself to an ally for $d,",
     "labels": [
-      "500751 aura_duration_ms #0"
+      "500751 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -1183,14 +1204,14 @@
       {
         "claim": "transfering $s3% of all damage taken by them to you",
         "labels": [
-          "500751 effect_value e2 #1",
-          "500751 aura_amount e2 #1"
+          "500751 behaviour_metric_delta damage_transfer"
         ]
       },
       {
         "claim": "causing $300295s1% of all damage you deal to be converted into healing for them",
         "labels": [
-          "500751 effect_value 300295e0 #2"
+          "500751 behaviour_metric_delta damage_to_heal",
+          "500751 behaviour_metric_delta damage_to_heal_control"
         ]
       }
     ]
@@ -1198,7 +1219,9 @@
   {
     "spell": 500751,
     "clause": "Can only be applied to 1 ally at a time.",
-    "labels": [],
+    "labels": [
+      "500751 behaviour_single_target"
+    ],
     "kind": "claim"
   },
   {
@@ -1629,10 +1652,28 @@
   {
     "spell": 525307,
     "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
-    "labels": [
-      "525307 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "affected by Black Blood for $s1% of your auto attack damage.",
+        "labels": [
+          "525307 behaviour_metric_delta auto_heal"
+        ]
+      },
+      {
+        "claim": "heal the lowest health ally affected by Black Blood",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance kind can prove Shadow Pennant 525307 reach on grouped allies and lowest-health selection among >=2 Black Blood allies (with a reverse arm) during melee auto-attacks: (1) 525307 is a passive triggered only by melee auto-attack damage (AscensionCultistEvents.cpp:109-110,266-276) targeting Allies(player, player, 40) filtered by ally->HasAura(804153, player->GetGUID()) and sorted by health pct (AscensionCultist.cpp:245-249, includes caster); (2) in metric_delta with attack_swings (behaviours.py:2103-2129), phase_auras only allows caster/dummy/striker (behaviours.py:1800), ally_arm.ally_casts is forbidden with attack_swings (ally_arm.py:334-335), setup_casts requires gate_cast (which cannot cast passive 525307, and attack_setup_cast_steps casts only at caster, behaviours.py:1819, while 804153 is TARGET_UNIT_TARGET_ALLY per AscensionCultistContracts.cpp:138 and 502241 Malevolence requires an enemy target), and option_phase_steps is never called in attack_swings (ally_arm.ally_health is neither emitted nor per-ally distinct); (3) no other existing kind combines melee auto-attacks against a dummy with grouped allies carrying a caster-applied aura at distinct per-ally health percentages. Nearest kind: metric_delta with attack_swings and ally_arm (needs ally phase_auras or setup casts before swings plus distinct per-ally health fixtures).",
+      "attempts": [
+        {
+          "agent": "cu-g7c",
+          "report": ".agents/plans/cu-g7c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 527268,
@@ -2823,7 +2864,7 @@
     "spell": 704884,
     "clause": "$s1% of all healing done to allies through Abyssal Covenant is now replicated to you.",
     "labels": [
-      "704884 effect_value e0 #0"
+      "704884 behaviour_metric_delta replicated_heal"
     ],
     "kind": "claim"
   },
@@ -2884,7 +2925,7 @@
     "spell": 704897,
     "clause": "Allies affected by Abyssal Covenant now also take $s1% increased healing from you.",
     "labels": [
-      "704897 effect_value e0 #0"
+      "704897 behaviour_hit_ratio healing_taken"
     ],
     "kind": "claim"
   },
@@ -3148,10 +3189,28 @@
   {
     "spell": 706926,
     "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
-    "labels": [
-      "706926 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "affected by Black Blood for $s1% of your auto attack damage.",
+        "labels": [
+          "706926 behaviour_metric_delta auto_heal"
+        ]
+      },
+      {
+        "claim": "heal the lowest health ally affected by Black Blood",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance kind can prove Shadow Pennant 706926 reach on grouped allies and lowest-health selection among >=2 Black Blood allies (with a reverse arm) during melee auto-attacks: (1) 706926 is a passive triggered only by melee auto-attack damage (AscensionCultistEvents.cpp:109-110,266-276) targeting Allies(player, player, 40) filtered by ally->HasAura(804153, player->GetGUID()) and sorted by health pct (AscensionCultist.cpp:245-249, includes caster); (2) in metric_delta with attack_swings (behaviours.py:2103-2129), phase_auras only allows caster/dummy/striker (behaviours.py:1800), ally_arm.ally_casts is forbidden with attack_swings (ally_arm.py:334-335), setup_casts requires gate_cast (which cannot cast passive 706926, and attack_setup_cast_steps casts only at caster, behaviours.py:1819, while 804153 is TARGET_UNIT_TARGET_ALLY per AscensionCultistContracts.cpp:138 and 502241 Malevolence requires an enemy target), and option_phase_steps is never called in attack_swings (ally_arm.ally_health is neither emitted nor per-ally distinct); (3) no other existing kind combines melee auto-attacks against a dummy with grouped allies carrying a caster-applied aura at distinct per-ally health percentages. Nearest kind: metric_delta with attack_swings and ally_arm (needs ally phase_auras or setup casts before swings plus distinct per-ally health fixtures).",
+      "attempts": [
+        {
+          "agent": "cu-g7c",
+          "report": ".agents/plans/cu-g7c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706928,
@@ -4131,25 +4190,26 @@
       {
         "claim": "within $807219a1 yds",
         "labels": [
-          "806382 effect_radius 807219e0 #0"
+          "806382 behaviour_metric_delta radius"
         ]
       },
       {
         "claim": "every $807124T2 sec",
         "labels": [
-          "806382 aura_amplitude_ms #1"
+          "806382 behaviour_metric_delta period"
         ]
       },
       {
         "claim": "for $807219d",
         "labels": [
-          "806382 spell_duration 807219 #2"
+          "806382 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "for ${$807219m1+$807219ppl1+$bh*.2}",
         "labels": [
-          "806382 effect_value #3"
+          "806382 behaviour_metric_delta heal_base",
+          "806382 behaviour_metric_delta heal_sp"
         ]
       }
     ]
@@ -4158,7 +4218,7 @@
     "spell": 806384,
     "clause": "Increases the damage converted into healing through Abyssal Covenant by $s1%.",
     "labels": [
-      "806384 effect_value e0 #0"
+      "806384 behaviour_metric_delta conversion_bonus"
     ],
     "kind": "claim"
   },
@@ -4232,14 +4292,17 @@
     "spell": 807877,
     "clause": "Casting Satiate now refreshes the duration of Black Blood on all allies within $807878a1 yds.",
     "labels": [
-      "807877 effect_radius 807878e0 #0"
+      "807877 behaviour_metric_delta satiate_refresh",
+      "807877 behaviour_metric_delta satiate_refresh_radius_out"
     ],
     "kind": "claim"
   },
   {
     "spell": 807877,
     "clause": "Dark Infusion bounces one additional time after its third infusion, expanding to the three lowest-health nearby party or raid members.",
-    "labels": [],
+    "labels": [
+      "807877 behaviour_metric_delta dark_infusion_bounce"
+    ],
     "kind": "claim"
   },
   {
