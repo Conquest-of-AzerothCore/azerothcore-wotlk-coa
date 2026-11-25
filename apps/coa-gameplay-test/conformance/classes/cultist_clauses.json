@@ -3852,14 +3852,18 @@
   {
     "spell": 806897,
     "clause": "While above 60 Insanity,",
-    "labels": [],
+    "labels": [
+      "806897 behaviour_metric_delta above_60",
+      "806897 behaviour_metric_delta at_60"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806897,
     "clause": "deals $573315s2% more damage.",
     "labels": [
-      "806897 effect_value 573315e1 #1"
+      "806897 behaviour_metric_delta above_60",
+      "806897 behaviour_metric_delta damage_base"
     ],
     "kind": "claim"
   },
