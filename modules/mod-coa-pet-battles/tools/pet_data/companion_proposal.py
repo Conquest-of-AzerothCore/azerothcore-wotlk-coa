@@ -84,6 +84,8 @@ def load(args):
 
 def build(args):
     tables, review, retail = load(args)
+    picks = {norm(row['name']): row for row in csv.DictReader(open(HERE / 'companion_picks.tsv', encoding='utf-8'),
+                                                                 delimiter='\t')}
     ability_names = {row[0]: row[1] for row in tables['coa_pet_ability']}
     kit_rows = collections.defaultdict(list)
     for kit, slot, unlock, ability in tables['coa_pet_kit_ability']:
@@ -170,12 +172,18 @@ def build(args):
                               'kit': f'generate ({family})', 'abilities': '', 'source': f'keyword "{keyword}"',
                               'note': 'kit to be generated for the family'})
             continue
+        pick = picks.get(norm(row['name']))
+        if pick:
+            proposals.append({**base, 'rule': '5 picked', 'confidence': 'low', 'family': pick['family'],
+                              'kit': f"generate ({pick['family']})", 'abilities': '', 'source': 'companion_picks.tsv',
+                              'note': pick['reason']})
+            continue
         proposals.append({**base, 'rule': '5 decision', 'confidence': 'none', 'family': '', 'kit': '', 'abilities': '',
-                          'source': '', 'note': 'needs a family from you'})
+                          'source': '', 'note': 'needs a family'})
     for row in unmappable:
         proposals.append({'spell': row['spell'], 'creature': row['creature'], 'name': row['name'], 'rule': '6 no creature',
                           'confidence': 'none', 'family': '', 'kit': '', 'abilities': '', 'missing_abilities': '',
-                          'source': '', 'stand_in': '', 'note': 'the summoned creature is not in the database'})
+                          'source': '', 'stand_in': '', 'note': 'ignored: the summoned creature is not in the database'})
     return proposals
 
 

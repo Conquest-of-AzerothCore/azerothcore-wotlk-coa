@@ -1080,622 +1080,622 @@ spell	creature	name	rule	confidence	family	kit	abilities	missing_abilities	sourc
 942100	942100	World First Lady Vashj Ascended (25 Player)	4 keyword	low	Humanoid	generate (Humanoid)			"keyword ""lady"""	needs new stand-in id	kit to be generated for the family
 9934209	11000152	Yellow Slyvern Pup	4 keyword	low	Beast	generate (Beast)			"keyword ""pup"""	needs new stand-in id	kit to be generated for the family
 364405	373564	Yellow Wonka Hatchling	4 keyword	low	Dragonkin	generate (Dragonkin)			"keyword ""hatchling"""	needs new stand-in id	kit to be generated for the family
-84130	45894	8th Legion Marine	5 decision	none						fits	needs a family from you
-83809	45573	Abhorrent Aberration	5 decision	none						fits	needs a family from you
-934154	122985	Addie	5 decision	none						needs new stand-in id	needs a family from you
-498784	499456	Aeon	5 decision	none						needs new stand-in id	needs a family from you
-82509	44276	Anzu	5 decision	none						fits	needs a family from you
-84312	46076	Archaeologist Everit	5 decision	none						fits	needs a family from you
-84165	45929	Ava	5 decision	none						fits	needs a family from you
-81863	43634	Avatar of Hakkar	5 decision	none						fits	needs a family from you
-82181	43953	Ayamiss the Hunter	5 decision	none						fits	needs a family from you
-84256	46020	Ayamiss the Hunter	5 decision	none						fits	needs a family from you
-934500	220053	Azure Cinderkin	5 decision	none						needs new stand-in id	needs a family from you
-800555	800555	Baby Vilemus	5 decision	none						needs new stand-in id	needs a family from you
-1157056	54906	Baixue	5 decision	none						needs new stand-in id	needs a family from you
-82203	43972	Battleguard Sartura	5 decision	none						fits	needs a family from you
-84264	46028	Battleguard Sartura	5 decision	none						fits	needs a family from you
-414200	75118	Beginner's Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-499908	75137	Bloody Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-750750	57500	Book of Artisans	5 decision	none						needs new stand-in id	needs a family from you
-979602	75115	Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-105307	108587	Book of Conquest	5 decision	none						needs new stand-in id	needs a family from you
-800827	98479	Boomer	5 decision	none						needs new stand-in id	needs a family from you
-1243339	376518	Brass Mechanized Hand	5 decision	none						needs new stand-in id	needs a family from you
-982307	4767	Bufftalon	5 decision	none						fits	needs a family from you
-81931	43702	Burning Felguard	5 decision	none						fits	needs a family from you
-82182	43954	Buru the Gorger	5 decision	none						fits	needs a family from you
-84257	46021	Buru the Gorger	5 decision	none						fits	needs a family from you
-934157	122988	Button	5 decision	none						needs new stand-in id	needs a family from you
-82218	43987	C'Thun	5 decision	none						fits	needs a family from you
-9934065	11000122	Candy	5 decision	none						needs new stand-in id	needs a family from you
-13977831	11000017	Cap'n Berry	5 decision	none						needs new stand-in id	needs a family from you
-84096	45860	Captain Sayana Stormrunner	5 decision	none						fits	needs a family from you
-354551	254517	Captain Taveir	5 decision	none						needs new stand-in id	needs a family from you
-9934022	11000021	Carna	5 decision	none						needs new stand-in id	needs a family from you
-93417	80918	Celestial Treasure Keeper	5 decision	none						needs new stand-in id	needs a family from you
-93198	80890	Challenger's Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-102105	102105	Champion of the Alliance	5 decision	none						needs new stand-in id	needs a family from you
-102106	102106	Champion of the Horde	5 decision	none						needs new stand-in id	needs a family from you
-13977830	11000015	Chase	5 decision	none						needs new stand-in id	needs a family from you
-930668	116013	Cheeky Palamanther	5 decision	none						needs new stand-in id	needs a family from you
-982556	116818	Chibee	5 decision	none						needs new stand-in id	needs a family from you
-958880	62467	Chirpy Mandrake	5 decision	none						needs new stand-in id	needs a family from you
-1157057	54907	Cindara	5 decision	none						needs new stand-in id	needs a family from you
-1243340	376519	Cobalt Mechanized Hand	5 decision	none						needs new stand-in id	needs a family from you
-93418	80919	Cogsley	5 decision	none						needs new stand-in id	needs a family from you
-94058	94059	Corrupted Primrose	5 decision	none						needs new stand-in id	needs a family from you
-83678	45442	Cucurbitus	5 decision	none						fits	needs a family from you
-354536	254489	Cynfael	5 decision	none						needs new stand-in id	needs a family from you
-83897	45661	Dar'Khos	5 decision	none						fits	needs a family from you
-364314	373262	Dark Blue Azzar Crawler	5 decision	none						needs new stand-in id	needs a family from you
-997198	108312	Destined Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-9934266	11000177	Dismembered Claw	5 decision	none						needs new stand-in id	needs a family from you
-982407	70132	Dottle	5 decision	none						needs new stand-in id	needs a family from you
-999315	98598	Drafted Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-933226	366	Drogok	5 decision	none						fits	needs a family from you
-354535	254488	Dryn Miel	5 decision	none						needs new stand-in id	needs a family from you
-9934275	11000185	Ducky	5 decision	none						needs new stand-in id	needs a family from you
-991356	98475	Dwayne	5 decision	none						needs new stand-in id	needs a family from you
-9931336	10960	Eliza Narsingway	5 decision	none						fits	needs a family from you
-933222	5322	Elusive Slumbertooth	5 decision	none						fits	needs a family from you
-9934063	11000120	Elvis	5 decision	none						needs new stand-in id	needs a family from you
-82172	43944	Emperor Vek'lor	5 decision	none						fits	needs a family from you
-84250	46014	Emperor Vek'lor	5 decision	none						fits	needs a family from you
-82171	43943	Emperor Vek'nilash	5 decision	none						fits	needs a family from you
-84249	46013	Emperor Vek'nilash	5 decision	none						fits	needs a family from you
-997344	216247	Enthralled Gravewing	5 decision	none						needs new stand-in id	needs a family from you
-82517	44284	Essence of Anger	5 decision	none						fits	needs a family from you
-91258	44115	Essence of Desire	5 decision	none						fits	needs a family from you
-91257	44114	Essence of Suffering	5 decision	none						fits	needs a family from you
-364763	379427	Faire Bomby	5 decision	none						needs new stand-in id	needs a family from you
-93762	81032	Fangus	5 decision	none						needs new stand-in id	needs a family from you
-82201	43970	Fankriss the Unyielding	5 decision	none						fits	needs a family from you
-84166	45930	Fazethan	5 decision	none						fits	needs a family from you
-92981	80879	Fix-o-Tron 5000	5 decision	none						needs new stand-in id	needs a family from you
-1000016	1000014	Flounce	5 decision	none						needs new stand-in id	needs a family from you
-982303	4763	Flufftalon	5 decision	none						fits	needs a family from you
-93763	81033	Fluffus	5 decision	none						needs new stand-in id	needs a family from you
-809919	519907	Frightened Bush Chicken	5 decision	none						needs new stand-in id	needs a family from you
-82364	44133	Fulgorge	5 decision	none						fits	needs a family from you
-82253	44007	G'eras	5 decision	none						fits	needs a family from you
-82164	43936	Gahz'ranka	5 decision	none						fits	needs a family from you
-81813	43584	Gahz'rilla	5 decision	none						fits	needs a family from you
-82178	43950	General Rajaxx	5 decision	none						fits	needs a family from you
-82894	44659	General Vezax	5 decision	none						fits	needs a family from you
-930671	116016	Gentle Palamanther	5 decision	none						needs new stand-in id	needs a family from you
-81645	43416	Gesharahan	5 decision	none						fits	needs a family from you
-9934032	11000083	Gibgle, the Pursuer	5 decision	none						needs new stand-in id	needs a family from you
-83087	79027	Gimbly	5 decision	none						needs new stand-in id	needs a family from you
-9934034	11000090	Glrgky, the Pursuer	5 decision	none						needs new stand-in id	needs a family from you
-825124	207015	Godrifa, the Shieldmaiden	5 decision	none						needs new stand-in id	needs a family from you
-982302	4762	Gooftalon	5 decision	none						fits	needs a family from you
-982305	4765	Grufftalon	5 decision	none						fits	needs a family from you
-83322	45082	Grut'ak	5 decision	none						fits	needs a family from you
-82152	43924	Hakkar	5 decision	none						fits	needs a family from you
-82450	44217	Harbinger Skyriss	5 decision	none						fits	needs a family from you
-911161	73427	Harlequin's Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-13977829	11000016	Havoc	5 decision	none						needs new stand-in id	needs a family from you
-969362	109695	Hayburt	5 decision	none						needs new stand-in id	needs a family from you
-13977850	11000052	Hazel	5 decision	none						needs new stand-in id	needs a family from you
-82702	44469	Herald Volazj	5 decision	none						fits	needs a family from you
-982309	4769	Hufftalon	5 decision	none						fits	needs a family from you
-965641	100008	Il'ixx the Terrible	5 decision	none						needs new stand-in id	needs a family from you
-9934021	11000022	Infernando	5 decision	none						needs new stand-in id	needs a family from you
-9934023	11000020	Ingie	5 decision	none						needs new stand-in id	needs a family from you
-1243342	376521	Iron Mechanized Hand	5 decision	none						needs new stand-in id	needs a family from you
-364802	379445	Iron Starlet	5 decision	none						needs new stand-in id	needs a family from you
-81809	43580	Ironaya	5 decision	none						fits	needs a family from you
-83895	45659	Keeper of Chaos	5 decision	none						fits	needs a family from you
-354549	254515	Kelivex Autumnvale	5 decision	none						needs new stand-in id	needs a family from you
-354537	254490	Kurgoth Doomreaver	5 decision	none						needs new stand-in id	needs a family from you
-82179	43951	Kurinnaxx	5 decision	none						fits	needs a family from you
-84255	46019	Kurinnaxx	5 decision	none						fits	needs a family from you
-254617	454009	Lesser Psychophage	5 decision	none						needs new stand-in id	needs a family from you
-84184	80051	Lil' Al'ar	5 decision	none						needs new stand-in id	needs a family from you
-93182	80883	Lil' Bangalash	5 decision	none						needs new stand-in id	needs a family from you
-84200	79055	Lil' Chromaggus	5 decision	none						needs new stand-in id	needs a family from you
-93183	80884	Lil' Hogger	5 decision	none						needs new stand-in id	needs a family from you
-1934204	454021	Little Zanzrakka	5 decision	none						needs new stand-in id	needs a family from you
-933233	2196	Lively Kelpfin	5 decision	none						fits	needs a family from you
-82678	44445	Loken	5 decision	none						fits	needs a family from you
-9934277	11000187	Lucky-Dee	5 decision	none						needs new stand-in id	needs a family from you
-82642	44409	Maiden of Grief	5 decision	none						fits	needs a family from you
-94059	94058	Mechatron	5 decision	none						needs new stand-in id	needs a family from you
-934155	122986	Mia	5 decision	none						needs new stand-in id	needs a family from you
-935561	116305	Midnight Flutterling	5 decision	none						needs new stand-in id	needs a family from you
-13977833	11000000	Miimii (Purple)	5 decision	none						needs new stand-in id	needs a family from you
-13977832	11000001	Miimii (Red)	5 decision	none						needs new stand-in id	needs a family from you
-1226027	420972	Mischievous Meadow	5 decision	none						needs new stand-in id	needs a family from you
-82177	43949	Moam	5 decision	none						fits	needs a family from you
-84253	46017	Moam	5 decision	none						fits	needs a family from you
-9934201	11000051	Mocha	5 decision	none						needs new stand-in id	needs a family from you
-958883	62470	Mochi	5 decision	none						needs new stand-in id	needs a family from you
-958884	62471	Moxie	5 decision	none						needs new stand-in id	needs a family from you
-1014232	104865	Mr. Giggles	5 decision	none						needs new stand-in id	needs a family from you
-9934033	11000089	Murgglgles, the Pursuer	5 decision	none						needs new stand-in id	needs a family from you
-254161	254057	Mystic Dreamfoal	5 decision	none						needs new stand-in id	needs a family from you
-979043	98501	Necrotic Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-84105	45869	Neptune	5 decision	none						fits	needs a family from you
-979042	98500	Nightmarish Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-94055	94055	Noctura	5 decision	none						needs new stand-in id	needs a family from you
-9934064	11000121	Nugget	5 decision	none						needs new stand-in id	needs a family from you
-94054	94054	Nyx	5 decision	none						needs new stand-in id	needs a family from you
-82176	43948	Ossirian the Unscarred	5 decision	none						fits	needs a family from you
-82204	43973	Ouro	5 decision	none						fits	needs a family from you
-935558	116302	Pearlescent Flutterling	5 decision	none						needs new stand-in id	needs a family from you
-965640	100007	Phinny	5 decision	none						needs new stand-in id	needs a family from you
-991537	98477	Pip	5 decision	none						needs new stand-in id	needs a family from you
-9934276	11000186	Plucky	5 decision	none						needs new stand-in id	needs a family from you
-982301	4761	Pooftalon	5 decision	none						fits	needs a family from you
-1101863	34396	Pricklepuff	5 decision	none						fits	needs a family from you
-82200	43969	Princess Huhuran	5 decision	none						fits	needs a family from you
-82205	43974	Princess Yauj	5 decision	none						fits	needs a family from you
-83880	45644	Professor Slate	5 decision	none						fits	needs a family from you
-84311	46075	Prognar	5 decision	none						fits	needs a family from you
-982304	4764	Pufftalon	5 decision	none						fits	needs a family from you
-81710	43481	Qirot	5 decision	none						fits	needs a family from you
-1101864	34397	Quillbert	5 decision	none						fits	needs a family from you
-1101861	34394	Quillby	5 decision	none						fits	needs a family from you
-1101862	34395	Quilliana	5 decision	none						fits	needs a family from you
-1226029	420974	Radiant Rosebud	5 decision	none						needs new stand-in id	needs a family from you
-984918	110273	Ratticus	5 decision	none						needs new stand-in id	needs a family from you
-84287	80054	Reborn Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-13977849	11000046	Remornia	5 decision	none						needs new stand-in id	needs a family from you
-82132	43904	Rex Ashil	5 decision	none						fits	needs a family from you
-391379	453247	Rockling	5 decision	none						needs new stand-in id	needs a family from you
-93765	81035	Ruffin	5 decision	none						needs new stand-in id	needs a family from you
-9931390	48107	Rustberg Seagull	5 decision	none						fits	needs a family from you
-999615	98499	Ruthless Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-1019250	207016	S.A.V.I.O.R.	5 decision	none						needs new stand-in id	needs a family from you
-1019625	430306	Sacrolash	5 decision	none						needs new stand-in id	needs a family from you
-267049	163810	Satiated Tick	5 decision	none						needs new stand-in id	needs a family from you
-84103	45867	Scourge Overlord animator PH hyjal	5 decision	none						fits	needs a family from you
-1101872	75139	Scribe's Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-1021577	139981	Scribe's Kooky Quill	5 decision	none						needs new stand-in id	needs a family from you
-956928	7086920	Scribe's Quirky Quill	5 decision	none						needs new stand-in id	needs a family from you
-82838	44604	Seething Hate	5 decision	none						fits	needs a family from you
-915393	148911	Seraph's Hilt	5 decision	none						needs new stand-in id	needs a family from you
-9934265	11000176	Severed Claw	5 decision	none						needs new stand-in id	needs a family from you
-83326	79037	Skibble	5 decision	none						needs new stand-in id	needs a family from you
-9934035	11000091	Slrgles, the Pursuer	5 decision	none						needs new stand-in id	needs a family from you
-81644	43415	Sludge Beast	5 decision	none						fits	needs a family from you
-82122	43894	Sludginn	5 decision	none						fits	needs a family from you
-1014234	104867	Snarla	5 decision	none						needs new stand-in id	needs a family from you
-982306	4766	Snooftalon	5 decision	none						fits	needs a family from you
-933224	5324	Snowfluff Slumbertooth	5 decision	none						fits	needs a family from you
-9934066	11000123	Snowy	5 decision	none						needs new stand-in id	needs a family from you
-364747	379411	Sparky	5 decision	none						needs new stand-in id	needs a family from you
-935559	116303	Spring Flutterling	5 decision	none						needs new stand-in id	needs a family from you
-933225	5325	Springtide Slumbertooth	5 decision	none						fits	needs a family from you
-800829	98481	Steel Spinner	5 decision	none						needs new stand-in id	needs a family from you
-9934193	11000045	Stella	5 decision	none						needs new stand-in id	needs a family from you
-9934274	11000184	Stormy	5 decision	none						needs new stand-in id	needs a family from you
-354938	254575	Takan Velor	5 decision	none						needs new stand-in id	needs a family from you
-83899	45663	Tarphel The Animator	5 decision	none						fits	needs a family from you
-267050	163811	Tentacular Manifestation	5 decision	none						needs new stand-in id	needs a family from you
-84310	46074	The Harbringer	5 decision	none						fits	needs a family from you
-83878	45642	The Nightmare Before Winter Veil	5 decision	none						fits	needs a family from you
-82110	43882	The Ongar	5 decision	none						fits	needs a family from you
-82170	43942	The Prophet Skeram	5 decision	none						fits	needs a family from you
-81839	43610	The Reak	5 decision	none						fits	needs a family from you
-82079	43851	The Rot	5 decision	none						fits	needs a family from you
-354538	254491	The Vestige of Sinners	5 decision	none						needs new stand-in id	needs a family from you
-84167	45931	Tilian	5 decision	none						fits	needs a family from you
-985356	10111377	Treasure Keeper	5 decision	none						needs new stand-in id	needs a family from you
-982308	4768	Tufftalon	5 decision	none						fits	needs a family from you
-1014235	104868	Tumble	5 decision	none						needs new stand-in id	needs a family from you
-9931566	988501	Unleashed Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-83101	79033	Unstable Lightwell	5 decision	none						needs new stand-in id	needs a family from you
-1157055	54905	Veluna	5 decision	none						needs new stand-in id	needs a family from you
-82206	43975	Vem	5 decision	none						fits	needs a family from you
-979615	75119	Verdant Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-934505	220058	Vermilion Cinderkin	5 decision	none						needs new stand-in id	needs a family from you
-933230	2193	Vibrant Kelpfin	5 decision	none						fits	needs a family from you
-934504	220057	Violet Cinderkin	5 decision	none						needs new stand-in id	needs a family from you
-82173	43945	Viscidus	5 decision	none						fits	needs a family from you
-84251	46015	Viscidus	5 decision	none						fits	needs a family from you
-13977852	11000047	Walnut	5 decision	none						needs new stand-in id	needs a family from you
-105306	108586	Warcraft Reborn Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-364313	373261	White Azzar Crawler	5 decision	none						needs new stand-in id	needs a family from you
-979616	75136	Wild Book of Ascension	5 decision	none						needs new stand-in id	needs a family from you
-499763	499754	Wisper	5 decision	none						needs new stand-in id	needs a family from you
-842008	42008	World First Archimonde	5 decision	none						fits	needs a family from you
-2141694	42008	World First Archimonde	5 decision	none						fits	needs a family from you
-842014	42014	World First Ascended Bronzebeard Blackwing Lair (25 Player)	5 decision	none						fits	needs a family from you
-2141956	492179	World First Chromius	5 decision	none						needs new stand-in id	needs a family from you
-842001	42001	World First Gruul the Dragonkiller Ascended	5 decision	none						fits	needs a family from you
-842009	42009	World First Illidan Stormrage	5 decision	none						fits	needs a family from you
-842105	842009	World First Illidan Stormrage	5 decision	none						needs new stand-in id	needs a family from you
-842007	42007	World First Kael'thas Sunstrider (Ascended 10)	5 decision	none						fits	needs a family from you
-1842007	842007	World First Kael'thas Sunstrider (Ascended 25)	5 decision	none						needs new stand-in id	needs a family from you
-842010	42010	World First Kil'Jaeden	5 decision	none						fits	needs a family from you
-942010	842010	World First Kil'Jaeden	5 decision	none						needs new stand-in id	needs a family from you
-842004	42004	World First Magtheridon Ascended	5 decision	none						fits	needs a family from you
-842104	42104	World First Magtheridon Ascended	5 decision	none						fits	needs a family from you
-842003	42003	World First Nightbane	5 decision	none						fits	needs a family from you
-842002	42002	World First Prince Malchezaar Ascended	5 decision	none						fits	needs a family from you
-842005	42005	World First Zul'Jin (Ascended 10 Player)	5 decision	none						fits	needs a family from you
-1842005	842005	World First Zul'Jin (Ascended 25 Player)	5 decision	none						needs new stand-in id	needs a family from you
-982406	70131	Wottle	5 decision	none						needs new stand-in id	needs a family from you
-9934020	11000023	Xanthous	5 decision	none						needs new stand-in id	needs a family from you
-94056	94056	Xyron the Corruptor	5 decision	none						needs new stand-in id	needs a family from you
-84206	45970	Yoarg Spellfist	5 decision	none						fits	needs a family from you
-82895	44660	Yogg-Saron	5 decision	none						fits	needs a family from you
-83308	45068	Zaytoven	5 decision	none						fits	needs a family from you
-82131	43903	Zora	5 decision	none						fits	needs a family from you
-50030	500151		6 no creature	none							the summoned creature is not in the database
-79023	79003		6 no creature	none							the summoned creature is not in the database
-79084	79015		6 no creature	none							the summoned creature is not in the database
-79085	79016		6 no creature	none							the summoned creature is not in the database
-79086	79017		6 no creature	none							the summoned creature is not in the database
-81025	43291		6 no creature	none							the summoned creature is not in the database
-81042	43292		6 no creature	none							the summoned creature is not in the database
-81060	43293		6 no creature	none							the summoned creature is not in the database
-81062	43294		6 no creature	none							the summoned creature is not in the database
-81629	43400		6 no creature	none							the summoned creature is not in the database
-81792	43563		6 no creature	none							the summoned creature is not in the database
-81825	43596		6 no creature	none							the summoned creature is not in the database
-81842	43613		6 no creature	none							the summoned creature is not in the database
-81917	43688		6 no creature	none							the summoned creature is not in the database
-82003	43774		6 no creature	none							the summoned creature is not in the database
-82010	43781		6 no creature	none							the summoned creature is not in the database
-82016	43787		6 no creature	none							the summoned creature is not in the database
-82021	43792		6 no creature	none							the summoned creature is not in the database
-82022	43793		6 no creature	none							the summoned creature is not in the database
-82023	43794		6 no creature	none							the summoned creature is not in the database
-82026	43797		6 no creature	none							the summoned creature is not in the database
-82028	43799		6 no creature	none							the summoned creature is not in the database
-82039	43811		6 no creature	none							the summoned creature is not in the database
-82046	43818		6 no creature	none							the summoned creature is not in the database
-82054	43826		6 no creature	none							the summoned creature is not in the database
-82089	43861		6 no creature	none							the summoned creature is not in the database
-82123	43895		6 no creature	none							the summoned creature is not in the database
-82128	43900		6 no creature	none							the summoned creature is not in the database
-82153	43925		6 no creature	none							the summoned creature is not in the database
-82154	43926		6 no creature	none							the summoned creature is not in the database
-82155	43927		6 no creature	none							the summoned creature is not in the database
-82156	43928		6 no creature	none							the summoned creature is not in the database
-82157	43929		6 no creature	none							the summoned creature is not in the database
-82168	43940		6 no creature	none							the summoned creature is not in the database
-82195	43965		6 no creature	none							the summoned creature is not in the database
-82215	43984		6 no creature	none							the summoned creature is not in the database
-82246	44015		6 no creature	none							the summoned creature is not in the database
-82252	44021		6 no creature	none							the summoned creature is not in the database
-82279	44049		6 no creature	none							the summoned creature is not in the database
-82302	44072		6 no creature	none							the summoned creature is not in the database
-82316	44086		6 no creature	none							the summoned creature is not in the database
-82317	44087		6 no creature	none							the summoned creature is not in the database
-82318	44088		6 no creature	none							the summoned creature is not in the database
-82320	44090		6 no creature	none							the summoned creature is not in the database
-82328	44098		6 no creature	none							the summoned creature is not in the database
-82366	44135		6 no creature	none							the summoned creature is not in the database
-82375	44144		6 no creature	none							the summoned creature is not in the database
-82384	44153		6 no creature	none							the summoned creature is not in the database
-82399	44166		6 no creature	none							the summoned creature is not in the database
-82405	44172		6 no creature	none							the summoned creature is not in the database
-82456	44223		6 no creature	none							the summoned creature is not in the database
-82460	44227		6 no creature	none							the summoned creature is not in the database
-82461	44228		6 no creature	none							the summoned creature is not in the database
-82462	44229		6 no creature	none							the summoned creature is not in the database
-82879	44645		6 no creature	none							the summoned creature is not in the database
-82917	44682		6 no creature	none							the summoned creature is not in the database
-82945	44710		6 no creature	none							the summoned creature is not in the database
-82989	44754		6 no creature	none							the summoned creature is not in the database
-83159	44919		6 no creature	none							the summoned creature is not in the database
-83163	44923		6 no creature	none							the summoned creature is not in the database
-83164	44924		6 no creature	none							the summoned creature is not in the database
-83213	44973		6 no creature	none							the summoned creature is not in the database
-83311	45071		6 no creature	none							the summoned creature is not in the database
-83315	45075		6 no creature	none							the summoned creature is not in the database
-83316	45076		6 no creature	none							the summoned creature is not in the database
-83317	45077		6 no creature	none							the summoned creature is not in the database
-83318	45078		6 no creature	none							the summoned creature is not in the database
-83325	45085		6 no creature	none							the summoned creature is not in the database
-83497	45259		6 no creature	none							the summoned creature is not in the database
-83504	45266		6 no creature	none							the summoned creature is not in the database
-83505	45267		6 no creature	none							the summoned creature is not in the database
-83506	45268		6 no creature	none							the summoned creature is not in the database
-83507	45269		6 no creature	none							the summoned creature is not in the database
-83508	45270		6 no creature	none							the summoned creature is not in the database
-83886	45650		6 no creature	none							the summoned creature is not in the database
-83894	45658		6 no creature	none							the summoned creature is not in the database
-83896	1145660		6 no creature	none							the summoned creature is not in the database
-83902	45666		6 no creature	none							the summoned creature is not in the database
-84102	45866		6 no creature	none							the summoned creature is not in the database
-84107	45871		6 no creature	none							the summoned creature is not in the database
-84108	45872		6 no creature	none							the summoned creature is not in the database
-84109	45873		6 no creature	none							the summoned creature is not in the database
-84110	45874		6 no creature	none							the summoned creature is not in the database
-84111	45875		6 no creature	none							the summoned creature is not in the database
-84112	45876		6 no creature	none							the summoned creature is not in the database
-84113	45877		6 no creature	none							the summoned creature is not in the database
-84114	45878		6 no creature	none							the summoned creature is not in the database
-84116	45880		6 no creature	none							the summoned creature is not in the database
-84120	45884		6 no creature	none							the summoned creature is not in the database
-84121	1145885		6 no creature	none							the summoned creature is not in the database
-84122	45886		6 no creature	none							the summoned creature is not in the database
-84124	1145888		6 no creature	none							the summoned creature is not in the database
-84125	45889		6 no creature	none							the summoned creature is not in the database
-84126	45890		6 no creature	none							the summoned creature is not in the database
-84162	45926		6 no creature	none							the summoned creature is not in the database
-84164	45928		6 no creature	none							the summoned creature is not in the database
-84172	45936		6 no creature	none							the summoned creature is not in the database
-84173	45937		6 no creature	none							the summoned creature is not in the database
-84174	45938		6 no creature	none							the summoned creature is not in the database
-84175	45939		6 no creature	none							the summoned creature is not in the database
-84195	45959		6 no creature	none							the summoned creature is not in the database
-84208	45972		6 no creature	none							the summoned creature is not in the database
-84209	45973		6 no creature	none							the summoned creature is not in the database
-84213	45977		6 no creature	none							the summoned creature is not in the database
-84215	45979		6 no creature	none							the summoned creature is not in the database
-84216	45980		6 no creature	none							the summoned creature is not in the database
-84217	1145981		6 no creature	none							the summoned creature is not in the database
-84218	1145982		6 no creature	none							the summoned creature is not in the database
-84219	1145983		6 no creature	none							the summoned creature is not in the database
-84220	45984		6 no creature	none							the summoned creature is not in the database
-84222	45986		6 no creature	none							the summoned creature is not in the database
-84224	45988		6 no creature	none							the summoned creature is not in the database
-84226	1145990		6 no creature	none							the summoned creature is not in the database
-84227	45991		6 no creature	none							the summoned creature is not in the database
-84228	45992		6 no creature	none							the summoned creature is not in the database
-84229	45993		6 no creature	none							the summoned creature is not in the database
-84230	45994		6 no creature	none							the summoned creature is not in the database
-84231	1145995		6 no creature	none							the summoned creature is not in the database
-84232	45996		6 no creature	none							the summoned creature is not in the database
-84235	45999		6 no creature	none							the summoned creature is not in the database
-84236	1146000		6 no creature	none							the summoned creature is not in the database
-84237	46001		6 no creature	none							the summoned creature is not in the database
-84238	46002		6 no creature	none							the summoned creature is not in the database
-84242	1146006		6 no creature	none							the summoned creature is not in the database
-84245	1146009		6 no creature	none							the summoned creature is not in the database
-84247	1146011		6 no creature	none							the summoned creature is not in the database
-84248	46012		6 no creature	none							the summoned creature is not in the database
-84252	46016		6 no creature	none							the summoned creature is not in the database
-84254	1146018		6 no creature	none							the summoned creature is not in the database
-84258	1146022		6 no creature	none							the summoned creature is not in the database
-84259	1146023		6 no creature	none							the summoned creature is not in the database
-84260	46024		6 no creature	none							the summoned creature is not in the database
-84261	46025		6 no creature	none							the summoned creature is not in the database
-84262	1146026		6 no creature	none							the summoned creature is not in the database
-84263	1146027		6 no creature	none							the summoned creature is not in the database
-84265	1146029		6 no creature	none							the summoned creature is not in the database
-84266	46030		6 no creature	none							the summoned creature is not in the database
-84267	46031		6 no creature	none							the summoned creature is not in the database
-84268	46032		6 no creature	none							the summoned creature is not in the database
-84269	46033		6 no creature	none							the summoned creature is not in the database
-84292	46056		6 no creature	none							the summoned creature is not in the database
-84294	46058		6 no creature	none							the summoned creature is not in the database
-84296	46060		6 no creature	none							the summoned creature is not in the database
-84297	46061		6 no creature	none							the summoned creature is not in the database
-84299	46063		6 no creature	none							the summoned creature is not in the database
-84300	46064		6 no creature	none							the summoned creature is not in the database
-84301	1146065		6 no creature	none							the summoned creature is not in the database
-84302	1146066		6 no creature	none							the summoned creature is not in the database
-84303	46067		6 no creature	none							the summoned creature is not in the database
-84304	1146068		6 no creature	none							the summoned creature is not in the database
-84305	46069		6 no creature	none							the summoned creature is not in the database
-84317	46081		6 no creature	none							the summoned creature is not in the database
-84318	46082		6 no creature	none							the summoned creature is not in the database
-84319	46083		6 no creature	none							the summoned creature is not in the database
-84326	1146090		6 no creature	none							the summoned creature is not in the database
-84330	1146094		6 no creature	none							the summoned creature is not in the database
-84338	46102		6 no creature	none							the summoned creature is not in the database
-84340	46104		6 no creature	none							the summoned creature is not in the database
-84342	46106		6 no creature	none							the summoned creature is not in the database
-84343	1146107		6 no creature	none							the summoned creature is not in the database
-84344	46108		6 no creature	none							the summoned creature is not in the database
-84357	46121		6 no creature	none							the summoned creature is not in the database
-84358	46122		6 no creature	none							the summoned creature is not in the database
-84363	46127		6 no creature	none							the summoned creature is not in the database
-84776	79057		6 no creature	none							the summoned creature is not in the database
-86595	80236		6 no creature	none							the summoned creature is not in the database
-91723	46413		6 no creature	none							the summoned creature is not in the database
-91726	46416		6 no creature	none							the summoned creature is not in the database
-93766	81036		6 no creature	none							the summoned creature is not in the database
-93781	147		6 no creature	none							the summoned creature is not in the database
-100330	0		6 no creature	none							the summoned creature is not in the database
-101500	500750		6 no creature	none							the summoned creature is not in the database
-101501	500751		6 no creature	none							the summoned creature is not in the database
-102840	40608		6 no creature	none							the summoned creature is not in the database
-103076	0		6 no creature	none							the summoned creature is not in the database
-109384	1009099		6 no creature	none							the summoned creature is not in the database
-109385	1009100		6 no creature	none							the summoned creature is not in the database
-109386	1009101		6 no creature	none							the summoned creature is not in the database
-109387	1009102		6 no creature	none							the summoned creature is not in the database
-111375	111375		6 no creature	none							the summoned creature is not in the database
-200000	500158		6 no creature	none							the summoned creature is not in the database
-200665	500159		6 no creature	none							the summoned creature is not in the database
-200666	500160		6 no creature	none							the summoned creature is not in the database
-200667	500161		6 no creature	none							the summoned creature is not in the database
-354550	254516		6 no creature	none							the summoned creature is not in the database
-355514	255105		6 no creature	none							the summoned creature is not in the database
-355515	255106		6 no creature	none							the summoned creature is not in the database
-355516	255107		6 no creature	none							the summoned creature is not in the database
-355517	255111		6 no creature	none							the summoned creature is not in the database
-355518	255108		6 no creature	none							the summoned creature is not in the database
-355519	255109		6 no creature	none							the summoned creature is not in the database
-355520	255110		6 no creature	none							the summoned creature is not in the database
-355521	255112		6 no creature	none							the summoned creature is not in the database
-355522	255113		6 no creature	none							the summoned creature is not in the database
-355523	255114		6 no creature	none							the summoned creature is not in the database
-355524	255115		6 no creature	none							the summoned creature is not in the database
-355525	255116		6 no creature	none							the summoned creature is not in the database
-355690	255454		6 no creature	none							the summoned creature is not in the database
-355691	255455		6 no creature	none							the summoned creature is not in the database
-355692	255456		6 no creature	none							the summoned creature is not in the database
-355693	255457		6 no creature	none							the summoned creature is not in the database
-355694	255458		6 no creature	none							the summoned creature is not in the database
-355695	255459		6 no creature	none							the summoned creature is not in the database
-355696	255460		6 no creature	none							the summoned creature is not in the database
-355697	255461		6 no creature	none							the summoned creature is not in the database
-355698	255462		6 no creature	none							the summoned creature is not in the database
-355847	255555		6 no creature	none							the summoned creature is not in the database
-364319	373267		6 no creature	none							the summoned creature is not in the database
-364320	373268		6 no creature	none							the summoned creature is not in the database
-364321	373269		6 no creature	none							the summoned creature is not in the database
-364322	373270		6 no creature	none							the summoned creature is not in the database
-364327	373275		6 no creature	none							the summoned creature is not in the database
-364328	373276		6 no creature	none							the summoned creature is not in the database
-364329	373277		6 no creature	none							the summoned creature is not in the database
-364330	373278		6 no creature	none							the summoned creature is not in the database
-364331	373279		6 no creature	none							the summoned creature is not in the database
-364332	373280		6 no creature	none							the summoned creature is not in the database
-364333	373281		6 no creature	none							the summoned creature is not in the database
-364334	373282		6 no creature	none							the summoned creature is not in the database
-364335	373283		6 no creature	none							the summoned creature is not in the database
-364336	373284		6 no creature	none							the summoned creature is not in the database
-364337	373285		6 no creature	none							the summoned creature is not in the database
-364341	373405		6 no creature	none							the summoned creature is not in the database
-393610	378784		6 no creature	none							the summoned creature is not in the database
-499934	499934		6 no creature	none							the summoned creature is not in the database
-500325	500152		6 no creature	none							the summoned creature is not in the database
-500360	500153		6 no creature	none							the summoned creature is not in the database
-500375	500154		6 no creature	none							the summoned creature is not in the database
-500401	500156		6 no creature	none							the summoned creature is not in the database
-500403	500157		6 no creature	none							the summoned creature is not in the database
-648742	600053		6 no creature	none							the summoned creature is not in the database
-649378	600054		6 no creature	none							the summoned creature is not in the database
-649577	600055		6 no creature	none							the summoned creature is not in the database
-650132	600056		6 no creature	none							the summoned creature is not in the database
-842011	42011		6 no creature	none							the summoned creature is not in the database
-842012	42012		6 no creature	none							the summoned creature is not in the database
-842013	42013		6 no creature	none							the summoned creature is not in the database
-842015	42015		6 no creature	none							the summoned creature is not in the database
-842016	42016		6 no creature	none							the summoned creature is not in the database
-842017	42017		6 no creature	none							the summoned creature is not in the database
-900928	509907		6 no creature	none							the summoned creature is not in the database
-910195	178952		6 no creature	none							the summoned creature is not in the database
-910196	178953		6 no creature	none							the summoned creature is not in the database
-910197	178954		6 no creature	none							the summoned creature is not in the database
-910198	178955		6 no creature	none							the summoned creature is not in the database
-910199	178956		6 no creature	none							the summoned creature is not in the database
-910200	178957		6 no creature	none							the summoned creature is not in the database
-912612	125325		6 no creature	none							the summoned creature is not in the database
-926131	123378		6 no creature	none							the summoned creature is not in the database
-930667	116012		6 no creature	none							the summoned creature is not in the database
-930669	116014		6 no creature	none							the summoned creature is not in the database
-930670	116015		6 no creature	none							the summoned creature is not in the database
-930914	116160		6 no creature	none							the summoned creature is not in the database
-933221	5321		6 no creature	none							the summoned creature is not in the database
-933223	5323		6 no creature	none							the summoned creature is not in the database
-933227	367		6 no creature	none							the summoned creature is not in the database
-933228	368		6 no creature	none							the summoned creature is not in the database
-933229	369		6 no creature	none							the summoned creature is not in the database
-933231	2194		6 no creature	none							the summoned creature is not in the database
-933232	2195		6 no creature	none							the summoned creature is not in the database
-934501	220054		6 no creature	none							the summoned creature is not in the database
-934502	220055		6 no creature	none							the summoned creature is not in the database
-934503	220056		6 no creature	none							the summoned creature is not in the database
-935560	116304		6 no creature	none							the summoned creature is not in the database
-958875	62462		6 no creature	none							the summoned creature is not in the database
-958876	62463		6 no creature	none							the summoned creature is not in the database
-958877	62464		6 no creature	none							the summoned creature is not in the database
-958881	62468		6 no creature	none							the summoned creature is not in the database
-958882	62469		6 no creature	none							the summoned creature is not in the database
-966035	100015		6 no creature	none							the summoned creature is not in the database
-979802	75116		6 no creature	none							the summoned creature is not in the database
-979803	75117		6 no creature	none							the summoned creature is not in the database
-982408	70133		6 no creature	none							the summoned creature is not in the database
-982559	116821		6 no creature	none							the summoned creature is not in the database
-982560	116822		6 no creature	none							the summoned creature is not in the database
-982786	866930		6 no creature	none							the summoned creature is not in the database
-984914	110269		6 no creature	none							the summoned creature is not in the database
-984915	110270		6 no creature	none							the summoned creature is not in the database
-984916	110271		6 no creature	none							the summoned creature is not in the database
-984917	110272		6 no creature	none							the summoned creature is not in the database
-984919	110274		6 no creature	none							the summoned creature is not in the database
-984920	110275		6 no creature	none							the summoned creature is not in the database
-984921	110276		6 no creature	none							the summoned creature is not in the database
-984922	110277		6 no creature	none							the summoned creature is not in the database
-985358	99493		6 no creature	none							the summoned creature is not in the database
-991355	98474		6 no creature	none							the summoned creature is not in the database
-995356	499991		6 no creature	none							the summoned creature is not in the database
-995412	223547		6 no creature	none							the summoned creature is not in the database
-997342	216245		6 no creature	none							the summoned creature is not in the database
-997343	216246		6 no creature	none							the summoned creature is not in the database
-999643	45129		6 no creature	none							the summoned creature is not in the database
-999644	45130		6 no creature	none							the summoned creature is not in the database
-1000008	1000008		6 no creature	none							the summoned creature is not in the database
-1000010	1000010		6 no creature	none							the summoned creature is not in the database
-1000023	400983		6 no creature	none							the summoned creature is not in the database
-1000025	400985		6 no creature	none							the summoned creature is not in the database
-1000026	400986		6 no creature	none							the summoned creature is not in the database
-1000454	30168		6 no creature	none							the summoned creature is not in the database
-1008018	0		6 no creature	none							the summoned creature is not in the database
-1008021	1008025		6 no creature	none							the summoned creature is not in the database
-1011510	108934		6 no creature	none							the summoned creature is not in the database
-1011511	108936		6 no creature	none							the summoned creature is not in the database
-1011512	108937		6 no creature	none							the summoned creature is not in the database
-1011513	108938		6 no creature	none							the summoned creature is not in the database
-1014231	104864		6 no creature	none							the summoned creature is not in the database
-1014236	104869		6 no creature	none							the summoned creature is not in the database
-1019626	430307		6 no creature	none							the summoned creature is not in the database
-1101865	34398		6 no creature	none							the summoned creature is not in the database
-1106575	118588		6 no creature	none							the summoned creature is not in the database
-1106576	118589		6 no creature	none							the summoned creature is not in the database
-1106577	118590		6 no creature	none							the summoned creature is not in the database
-1106578	118591		6 no creature	none							the summoned creature is not in the database
-1158688	321265		6 no creature	none							the summoned creature is not in the database
-1226025	420970		6 no creature	none							the summoned creature is not in the database
-1226026	420971		6 no creature	none							the summoned creature is not in the database
-1226028	420973		6 no creature	none							the summoned creature is not in the database
-1226030	420975		6 no creature	none							the summoned creature is not in the database
-1226031	420976		6 no creature	none							the summoned creature is not in the database
-1243341	376520		6 no creature	none							the summoned creature is not in the database
-1243346	376525		6 no creature	none							the summoned creature is not in the database
-1243348	376527		6 no creature	none							the summoned creature is not in the database
-1934501	220061		6 no creature	none							the summoned creature is not in the database
-9931404	11000009		6 no creature	none							the summoned creature is not in the database
-9931478	81052		6 no creature	none							the summoned creature is not in the database
-9931479	81053		6 no creature	none							the summoned creature is not in the database
-9931481	81060		6 no creature	none							the summoned creature is not in the database
-9931482	81061		6 no creature	none							the summoned creature is not in the database
-9931483	81062		6 no creature	none							the summoned creature is not in the database
-9931484	81063		6 no creature	none							the summoned creature is not in the database
-9931486	81065		6 no creature	none							the summoned creature is not in the database
-9931487	81066		6 no creature	none							the summoned creature is not in the database
-9931488	81067		6 no creature	none							the summoned creature is not in the database
-9931489	81068		6 no creature	none							the summoned creature is not in the database
-9931490	81069		6 no creature	none							the summoned creature is not in the database
-9931491	81071		6 no creature	none							the summoned creature is not in the database
-9931492	81072		6 no creature	none							the summoned creature is not in the database
-9931493	81073		6 no creature	none							the summoned creature is not in the database
-9931494	81074		6 no creature	none							the summoned creature is not in the database
-9931495	81070		6 no creature	none							the summoned creature is not in the database
-9931496	81075		6 no creature	none							the summoned creature is not in the database
-9931497	81076		6 no creature	none							the summoned creature is not in the database
-9931498	81077		6 no creature	none							the summoned creature is not in the database
-9931499	81078		6 no creature	none							the summoned creature is not in the database
-9931500	81079		6 no creature	none							the summoned creature is not in the database
-9931503	81083		6 no creature	none							the summoned creature is not in the database
-9931504	81084		6 no creature	none							the summoned creature is not in the database
-9931505	81085		6 no creature	none							the summoned creature is not in the database
-9931506	81086		6 no creature	none							the summoned creature is not in the database
-9931508	81087		6 no creature	none							the summoned creature is not in the database
-9931509	81088		6 no creature	none							the summoned creature is not in the database
-9931510	81090		6 no creature	none							the summoned creature is not in the database
-9931511	81091		6 no creature	none							the summoned creature is not in the database
-9931512	81092		6 no creature	none							the summoned creature is not in the database
-9931513	81093		6 no creature	none							the summoned creature is not in the database
-9931514	81094		6 no creature	none							the summoned creature is not in the database
-9931516	81096		6 no creature	none							the summoned creature is not in the database
-9931517	81097		6 no creature	none							the summoned creature is not in the database
-9931518	81098		6 no creature	none							the summoned creature is not in the database
-9934001	11000063		6 no creature	none							the summoned creature is not in the database
-9934002	11000064		6 no creature	none							the summoned creature is not in the database
-9934003	11000065		6 no creature	none							the summoned creature is not in the database
-9934004	11000066		6 no creature	none							the summoned creature is not in the database
-9934026	11000082		6 no creature	none							the summoned creature is not in the database
-9934078	11000112		6 no creature	none							the summoned creature is not in the database
-9934079	11000111		6 no creature	none							the summoned creature is not in the database
-9934267	11000178		6 no creature	none							the summoned creature is not in the database
-9934341	11001001		6 no creature	none							the summoned creature is not in the database
-9934342	11001002		6 no creature	none							the summoned creature is not in the database
-9934343	11001003		6 no creature	none							the summoned creature is not in the database
-9934344	11001004		6 no creature	none							the summoned creature is not in the database
-9934345	11001005		6 no creature	none							the summoned creature is not in the database
-9934346	11001006		6 no creature	none							the summoned creature is not in the database
-9934347	11001007		6 no creature	none							the summoned creature is not in the database
-13977824	81054		6 no creature	none							the summoned creature is not in the database
-13977826	81056		6 no creature	none							the summoned creature is not in the database
+84130	45894	8th Legion Marine	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+83809	45573	Abhorrent Aberration	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+934154	122985	Addie	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+498784	499456	Aeon	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+82509	44276	Anzu	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+84312	46076	Archaeologist Everit	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+84165	45929	Ava	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+81863	43634	Avatar of Hakkar	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	fits	undead, vampire, maw guard, val'kyr, mummy or lich
+82181	43953	Ayamiss the Hunter	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+84256	46020	Ayamiss the Hunter	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+934500	220053	Azure Cinderkin	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+800555	800555	Baby Vilemus	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+1157056	54906	Baixue	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+82203	43972	Battleguard Sartura	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+84264	46028	Battleguard Sartura	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+414200	75118	Beginner's Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+499908	75137	Bloody Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+750750	57500	Book of Artisans	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+979602	75115	Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+105307	108587	Book of Conquest	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+800827	98479	Boomer	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+1243339	376518	Brass Mechanized Hand	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+982307	4767	Bufftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+81931	43702	Burning Felguard	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+82182	43954	Buru the Gorger	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+84257	46021	Buru the Gorger	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+934157	122988	Button	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+82218	43987	C'Thun	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+9934065	11000122	Candy	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+13977831	11000017	Cap'n Berry	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	needs new stand-in id	bird, bat, butterfly, phoenix or silithid wasp
+84096	45860	Captain Sayana Stormrunner	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+354551	254517	Captain Taveir	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+9934022	11000021	Carna	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+93417	80918	Celestial Treasure Keeper	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+93198	80890	Challenger's Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+102105	102105	Champion of the Alliance	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+102106	102106	Champion of the Horde	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+13977830	11000015	Chase	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+930668	116013	Cheeky Palamanther	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+982556	116818	Chibee	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+958880	62467	Chirpy Mandrake	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	needs new stand-in id	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+1157057	54907	Cindara	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+1243340	376519	Cobalt Mechanized Hand	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+93418	80919	Cogsley	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+94058	94059	Corrupted Primrose	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	needs new stand-in id	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+83678	45442	Cucurbitus	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	fits	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+354536	254489	Cynfael	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+83897	45661	Dar'Khos	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+364314	373262	Dark Blue Azzar Crawler	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+997198	108312	Destined Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+9934266	11000177	Dismembered Claw	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+982407	70132	Dottle	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+999315	98598	Drafted Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+933226	366	Drogok	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+354535	254488	Dryn Miel	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	needs new stand-in id	humanoid model or character
+9934275	11000185	Ducky	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+991356	98475	Dwayne	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	needs new stand-in id	humanoid model or character
+9931336	10960	Eliza Narsingway	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+933222	5322	Elusive Slumbertooth	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9934063	11000120	Elvis	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+82172	43944	Emperor Vek'lor	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+84250	46014	Emperor Vek'lor	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+82171	43943	Emperor Vek'nilash	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+84249	46013	Emperor Vek'nilash	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+997344	216247	Enthralled Gravewing	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	needs new stand-in id	bird, bat, butterfly, phoenix or silithid wasp
+82517	44284	Essence of Anger	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+91258	44115	Essence of Desire	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+91257	44114	Essence of Suffering	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+364763	379427	Faire Bomby	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+93762	81032	Fangus	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+82201	43970	Fankriss the Unyielding	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+84166	45930	Fazethan	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+92981	80879	Fix-o-Tron 5000	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+1000016	1000014	Flounce	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+982303	4763	Flufftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+93763	81033	Fluffus	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+809919	519907	Frightened Bush Chicken	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	needs new stand-in id	bird, bat, butterfly, phoenix or silithid wasp
+82364	44133	Fulgorge	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+82253	44007	G'eras	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+82164	43936	Gahz'ranka	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+81813	43584	Gahz'rilla	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+82178	43950	General Rajaxx	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+82894	44659	General Vezax	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+930671	116016	Gentle Palamanther	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+81645	43416	Gesharahan	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+9934032	11000083	Gibgle, the Pursuer	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+83087	79027	Gimbly	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+9934034	11000090	Glrgky, the Pursuer	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+825124	207015	Godrifa, the Shieldmaiden	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+982302	4762	Gooftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+982305	4765	Grufftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+83322	45082	Grut'ak	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+82152	43924	Hakkar	5 picked	low	Dragonkin	generate (Dragonkin)			companion_picks.tsv	fits	dragon or serpent
+82450	44217	Harbinger Skyriss	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+911161	73427	Harlequin's Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+13977829	11000016	Havoc	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+969362	109695	Hayburt	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+13977850	11000052	Hazel	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+82702	44469	Herald Volazj	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+982309	4769	Hufftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+965641	100008	Il'ixx the Terrible	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9934021	11000022	Infernando	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9934023	11000020	Ingie	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+1243342	376521	Iron Mechanized Hand	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+364802	379445	Iron Starlet	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+81809	43580	Ironaya	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	fits	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+83895	45659	Keeper of Chaos	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	fits	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+354549	254515	Kelivex Autumnvale	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+354537	254490	Kurgoth Doomreaver	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+82179	43951	Kurinnaxx	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+84255	46019	Kurinnaxx	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+254617	454009	Lesser Psychophage	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+84184	80051	Lil' Al'ar	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	needs new stand-in id	bird, bat, butterfly, phoenix or silithid wasp
+93182	80883	Lil' Bangalash	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+84200	79055	Lil' Chromaggus	5 picked	low	Dragonkin	generate (Dragonkin)			companion_picks.tsv	needs new stand-in id	dragon or serpent
+93183	80884	Lil' Hogger	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	needs new stand-in id	humanoid model or character
+1934204	454021	Little Zanzrakka	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+933233	2196	Lively Kelpfin	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+82678	44445	Loken	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	fits	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+9934277	11000187	Lucky-Dee	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+82642	44409	Maiden of Grief	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	fits	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+94059	94058	Mechatron	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+934155	122986	Mia	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+935561	116305	Midnight Flutterling	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	needs new stand-in id	bird, bat, butterfly, phoenix or silithid wasp
+13977833	11000000	Miimii (Purple)	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+13977832	11000001	Miimii (Red)	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+1226027	420972	Mischievous Meadow	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	needs new stand-in id	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+82177	43949	Moam	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	fits	robot, construct or machine model
+84253	46017	Moam	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	fits	robot, construct or machine model
+9934201	11000051	Mocha	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+958883	62470	Mochi	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+958884	62471	Moxie	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+1014232	104865	Mr. Giggles	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9934033	11000089	Murgglgles, the Pursuer	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+254161	254057	Mystic Dreamfoal	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+979043	98501	Necrotic Book of Ascension	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+84105	45869	Neptune	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+979042	98500	Nightmarish Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+94055	94055	Noctura	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+9934064	11000121	Nugget	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+94054	94054	Nyx	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+82176	43948	Ossirian the Unscarred	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+82204	43973	Ouro	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+935558	116302	Pearlescent Flutterling	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	needs new stand-in id	bird, bat, butterfly, phoenix or silithid wasp
+965640	100007	Phinny	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+991537	98477	Pip	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+9934276	11000186	Plucky	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+982301	4761	Pooftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+1101863	34396	Pricklepuff	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	fits	small critter model, or no readable model
+82200	43969	Princess Huhuran	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+82205	43974	Princess Yauj	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+83880	45644	Professor Slate	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+84311	46075	Prognar	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+982304	4764	Pufftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+81710	43481	Qirot	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+1101864	34397	Quillbert	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	fits	small critter model, or no readable model
+1101861	34394	Quillby	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	fits	small critter model, or no readable model
+1101862	34395	Quilliana	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	fits	small critter model, or no readable model
+1226029	420974	Radiant Rosebud	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	needs new stand-in id	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+984918	110273	Ratticus	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+84287	80054	Reborn Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+13977849	11000046	Remornia	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+82132	43904	Rex Ashil	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+391379	453247	Rockling	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	needs new stand-in id	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+93765	81035	Ruffin	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9931390	48107	Rustberg Seagull	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+999615	98499	Ruthless Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+1019250	207016	S.A.V.I.O.R.	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+1019625	430306	Sacrolash	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+267049	163810	Satiated Tick	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+84103	45867	Scourge Overlord animator PH hyjal	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	fits	undead, vampire, maw guard, val'kyr, mummy or lich
+1101872	75139	Scribe's Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+1021577	139981	Scribe's Kooky Quill	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+956928	7086920	Scribe's Quirky Quill	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+82838	44604	Seething Hate	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+915393	148911	Seraph's Hilt	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+9934265	11000176	Severed Claw	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+83326	79037	Skibble	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+9934035	11000091	Slrgles, the Pursuer	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+81644	43415	Sludge Beast	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+82122	43894	Sludginn	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+1014234	104867	Snarla	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+982306	4766	Snooftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+933224	5324	Snowfluff Slumbertooth	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9934066	11000123	Snowy	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+364747	379411	Sparky	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+935559	116303	Spring Flutterling	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	needs new stand-in id	bird, bat, butterfly, phoenix or silithid wasp
+933225	5325	Springtide Slumbertooth	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+800829	98481	Steel Spinner	5 picked	low	Mechanical	generate (Mechanical)			companion_picks.tsv	needs new stand-in id	robot, construct or machine model
+9934193	11000045	Stella	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9934274	11000184	Stormy	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+354938	254575	Takan Velor	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	needs new stand-in id	humanoid model or character
+83899	45663	Tarphel The Animator	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	fits	undead, vampire, maw guard, val'kyr, mummy or lich
+267050	163811	Tentacular Manifestation	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+84310	46074	The Harbringer	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+83878	45642	The Nightmare Before Winter Veil	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+82110	43882	The Ongar	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+82170	43942	The Prophet Skeram	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+81839	43610	The Reak	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+82079	43851	The Rot	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+354538	254491	The Vestige of Sinners	5 picked	low	Undead	generate (Undead)			companion_picks.tsv	needs new stand-in id	undead, vampire, maw guard, val'kyr, mummy or lich
+84167	45931	Tilian	5 picked	low	Elemental	generate (Elemental)			companion_picks.tsv	fits	plant, stone, water or titanic construct (retail mandrakes and plants are Elemental)
+985356	10111377	Treasure Keeper	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	needs new stand-in id	humanoid model or character
+982308	4768	Tufftalon	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+1014235	104868	Tumble	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+9931566	988501	Unleashed Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+83101	79033	Unstable Lightwell	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+1157055	54905	Veluna	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+82206	43975	Vem	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	fits	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+979615	75119	Verdant Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+934505	220058	Vermilion Cinderkin	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+933230	2193	Vibrant Kelpfin	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+934504	220057	Violet Cinderkin	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+82173	43945	Viscidus	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+84251	46015	Viscidus	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	fits	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+13977852	11000047	Walnut	5 picked	low	Critter	generate (Critter)			companion_picks.tsv	needs new stand-in id	small critter model, or no readable model
+105306	108586	Warcraft Reborn Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+364313	373261	White Azzar Crawler	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+979616	75136	Wild Book of Ascension	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+499763	499754	Wisper	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+842008	42008	World First Archimonde	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+2141694	42008	World First Archimonde	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+842014	42014	World First Ascended Bronzebeard Blackwing Lair (25 Player)	5 picked	low	Dragonkin	generate (Dragonkin)			companion_picks.tsv	fits	dragon or serpent
+2141956	492179	World First Chromius	5 picked	low	Dragonkin	generate (Dragonkin)			companion_picks.tsv	needs new stand-in id	dragon or serpent
+842001	42001	World First Gruul the Dragonkiller Ascended	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+842009	42009	World First Illidan Stormrage	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+842105	842009	World First Illidan Stormrage	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+842007	42007	World First Kael'thas Sunstrider (Ascended 10)	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+1842007	842007	World First Kael'thas Sunstrider (Ascended 25)	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	needs new stand-in id	humanoid model or character
+842010	42010	World First Kil'Jaeden	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+942010	842010	World First Kil'Jaeden	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+842004	42004	World First Magtheridon Ascended	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+842104	42104	World First Magtheridon Ascended	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+842003	42003	World First Nightbane	5 picked	low	Dragonkin	generate (Dragonkin)			companion_picks.tsv	fits	dragon or serpent
+842002	42002	World First Prince Malchezaar Ascended	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+842005	42005	World First Zul'Jin (Ascended 10 Player)	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+1842005	842005	World First Zul'Jin (Ascended 25 Player)	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	needs new stand-in id	humanoid model or character
+982406	70131	Wottle	5 picked	low	Aquatic	generate (Aquatic)			companion_picks.tsv	needs new stand-in id	model is a murloc, naga, crab, tortollan, hydra, shark or ooze (retail oozes are Aquatic)
+9934020	11000023	Xanthous	5 picked	low	Beast	generate (Beast)			companion_picks.tsv	needs new stand-in id	model is an animal (dog, owlbear, fox, raptor, hyena, silithid, worm, panda...)
+94056	94056	Xyron the Corruptor	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	needs new stand-in id	demon, book, void, Old God, naaru or arcane object
+84206	45970	Yoarg Spellfist	5 picked	low	Humanoid	generate (Humanoid)			companion_picks.tsv	fits	humanoid model or character
+82895	44660	Yogg-Saron	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+83308	45068	Zaytoven	5 picked	low	Magic	generate (Magic)			companion_picks.tsv	fits	demon, book, void, Old God, naaru or arcane object
+82131	43903	Zora	5 picked	low	Flying	generate (Flying)			companion_picks.tsv	fits	bird, bat, butterfly, phoenix or silithid wasp
+50030	500151		6 no creature	none							ignored: the summoned creature is not in the database
+79023	79003		6 no creature	none							ignored: the summoned creature is not in the database
+79084	79015		6 no creature	none							ignored: the summoned creature is not in the database
+79085	79016		6 no creature	none							ignored: the summoned creature is not in the database
+79086	79017		6 no creature	none							ignored: the summoned creature is not in the database
+81025	43291		6 no creature	none							ignored: the summoned creature is not in the database
+81042	43292		6 no creature	none							ignored: the summoned creature is not in the database
+81060	43293		6 no creature	none							ignored: the summoned creature is not in the database
+81062	43294		6 no creature	none							ignored: the summoned creature is not in the database
+81629	43400		6 no creature	none							ignored: the summoned creature is not in the database
+81792	43563		6 no creature	none							ignored: the summoned creature is not in the database
+81825	43596		6 no creature	none							ignored: the summoned creature is not in the database
+81842	43613		6 no creature	none							ignored: the summoned creature is not in the database
+81917	43688		6 no creature	none							ignored: the summoned creature is not in the database
+82003	43774		6 no creature	none							ignored: the summoned creature is not in the database
+82010	43781		6 no creature	none							ignored: the summoned creature is not in the database
+82016	43787		6 no creature	none							ignored: the summoned creature is not in the database
+82021	43792		6 no creature	none							ignored: the summoned creature is not in the database
+82022	43793		6 no creature	none							ignored: the summoned creature is not in the database
+82023	43794		6 no creature	none							ignored: the summoned creature is not in the database
+82026	43797		6 no creature	none							ignored: the summoned creature is not in the database
+82028	43799		6 no creature	none							ignored: the summoned creature is not in the database
+82039	43811		6 no creature	none							ignored: the summoned creature is not in the database
+82046	43818		6 no creature	none							ignored: the summoned creature is not in the database
+82054	43826		6 no creature	none							ignored: the summoned creature is not in the database
+82089	43861		6 no creature	none							ignored: the summoned creature is not in the database
+82123	43895		6 no creature	none							ignored: the summoned creature is not in the database
+82128	43900		6 no creature	none							ignored: the summoned creature is not in the database
+82153	43925		6 no creature	none							ignored: the summoned creature is not in the database
+82154	43926		6 no creature	none							ignored: the summoned creature is not in the database
+82155	43927		6 no creature	none							ignored: the summoned creature is not in the database
+82156	43928		6 no creature	none							ignored: the summoned creature is not in the database
+82157	43929		6 no creature	none							ignored: the summoned creature is not in the database
+82168	43940		6 no creature	none							ignored: the summoned creature is not in the database
+82195	43965		6 no creature	none							ignored: the summoned creature is not in the database
+82215	43984		6 no creature	none							ignored: the summoned creature is not in the database
+82246	44015		6 no creature	none							ignored: the summoned creature is not in the database
+82252	44021		6 no creature	none							ignored: the summoned creature is not in the database
+82279	44049		6 no creature	none							ignored: the summoned creature is not in the database
+82302	44072		6 no creature	none							ignored: the summoned creature is not in the database
+82316	44086		6 no creature	none							ignored: the summoned creature is not in the database
+82317	44087		6 no creature	none							ignored: the summoned creature is not in the database
+82318	44088		6 no creature	none							ignored: the summoned creature is not in the database
+82320	44090		6 no creature	none							ignored: the summoned creature is not in the database
+82328	44098		6 no creature	none							ignored: the summoned creature is not in the database
+82366	44135		6 no creature	none							ignored: the summoned creature is not in the database
+82375	44144		6 no creature	none							ignored: the summoned creature is not in the database
+82384	44153		6 no creature	none							ignored: the summoned creature is not in the database
+82399	44166		6 no creature	none							ignored: the summoned creature is not in the database
+82405	44172		6 no creature	none							ignored: the summoned creature is not in the database
+82456	44223		6 no creature	none							ignored: the summoned creature is not in the database
+82460	44227		6 no creature	none							ignored: the summoned creature is not in the database
+82461	44228		6 no creature	none							ignored: the summoned creature is not in the database
+82462	44229		6 no creature	none							ignored: the summoned creature is not in the database
+82879	44645		6 no creature	none							ignored: the summoned creature is not in the database
+82917	44682		6 no creature	none							ignored: the summoned creature is not in the database
+82945	44710		6 no creature	none							ignored: the summoned creature is not in the database
+82989	44754		6 no creature	none							ignored: the summoned creature is not in the database
+83159	44919		6 no creature	none							ignored: the summoned creature is not in the database
+83163	44923		6 no creature	none							ignored: the summoned creature is not in the database
+83164	44924		6 no creature	none							ignored: the summoned creature is not in the database
+83213	44973		6 no creature	none							ignored: the summoned creature is not in the database
+83311	45071		6 no creature	none							ignored: the summoned creature is not in the database
+83315	45075		6 no creature	none							ignored: the summoned creature is not in the database
+83316	45076		6 no creature	none							ignored: the summoned creature is not in the database
+83317	45077		6 no creature	none							ignored: the summoned creature is not in the database
+83318	45078		6 no creature	none							ignored: the summoned creature is not in the database
+83325	45085		6 no creature	none							ignored: the summoned creature is not in the database
+83497	45259		6 no creature	none							ignored: the summoned creature is not in the database
+83504	45266		6 no creature	none							ignored: the summoned creature is not in the database
+83505	45267		6 no creature	none							ignored: the summoned creature is not in the database
+83506	45268		6 no creature	none							ignored: the summoned creature is not in the database
+83507	45269		6 no creature	none							ignored: the summoned creature is not in the database
+83508	45270		6 no creature	none							ignored: the summoned creature is not in the database
+83886	45650		6 no creature	none							ignored: the summoned creature is not in the database
+83894	45658		6 no creature	none							ignored: the summoned creature is not in the database
+83896	1145660		6 no creature	none							ignored: the summoned creature is not in the database
+83902	45666		6 no creature	none							ignored: the summoned creature is not in the database
+84102	45866		6 no creature	none							ignored: the summoned creature is not in the database
+84107	45871		6 no creature	none							ignored: the summoned creature is not in the database
+84108	45872		6 no creature	none							ignored: the summoned creature is not in the database
+84109	45873		6 no creature	none							ignored: the summoned creature is not in the database
+84110	45874		6 no creature	none							ignored: the summoned creature is not in the database
+84111	45875		6 no creature	none							ignored: the summoned creature is not in the database
+84112	45876		6 no creature	none							ignored: the summoned creature is not in the database
+84113	45877		6 no creature	none							ignored: the summoned creature is not in the database
+84114	45878		6 no creature	none							ignored: the summoned creature is not in the database
+84116	45880		6 no creature	none							ignored: the summoned creature is not in the database
+84120	45884		6 no creature	none							ignored: the summoned creature is not in the database
+84121	1145885		6 no creature	none							ignored: the summoned creature is not in the database
+84122	45886		6 no creature	none							ignored: the summoned creature is not in the database
+84124	1145888		6 no creature	none							ignored: the summoned creature is not in the database
+84125	45889		6 no creature	none							ignored: the summoned creature is not in the database
+84126	45890		6 no creature	none							ignored: the summoned creature is not in the database
+84162	45926		6 no creature	none							ignored: the summoned creature is not in the database
+84164	45928		6 no creature	none							ignored: the summoned creature is not in the database
+84172	45936		6 no creature	none							ignored: the summoned creature is not in the database
+84173	45937		6 no creature	none							ignored: the summoned creature is not in the database
+84174	45938		6 no creature	none							ignored: the summoned creature is not in the database
+84175	45939		6 no creature	none							ignored: the summoned creature is not in the database
+84195	45959		6 no creature	none							ignored: the summoned creature is not in the database
+84208	45972		6 no creature	none							ignored: the summoned creature is not in the database
+84209	45973		6 no creature	none							ignored: the summoned creature is not in the database
+84213	45977		6 no creature	none							ignored: the summoned creature is not in the database
+84215	45979		6 no creature	none							ignored: the summoned creature is not in the database
+84216	45980		6 no creature	none							ignored: the summoned creature is not in the database
+84217	1145981		6 no creature	none							ignored: the summoned creature is not in the database
+84218	1145982		6 no creature	none							ignored: the summoned creature is not in the database
+84219	1145983		6 no creature	none							ignored: the summoned creature is not in the database
+84220	45984		6 no creature	none							ignored: the summoned creature is not in the database
+84222	45986		6 no creature	none							ignored: the summoned creature is not in the database
+84224	45988		6 no creature	none							ignored: the summoned creature is not in the database
+84226	1145990		6 no creature	none							ignored: the summoned creature is not in the database
+84227	45991		6 no creature	none							ignored: the summoned creature is not in the database
+84228	45992		6 no creature	none							ignored: the summoned creature is not in the database
+84229	45993		6 no creature	none							ignored: the summoned creature is not in the database
+84230	45994		6 no creature	none							ignored: the summoned creature is not in the database
+84231	1145995		6 no creature	none							ignored: the summoned creature is not in the database
+84232	45996		6 no creature	none							ignored: the summoned creature is not in the database
+84235	45999		6 no creature	none							ignored: the summoned creature is not in the database
+84236	1146000		6 no creature	none							ignored: the summoned creature is not in the database
+84237	46001		6 no creature	none							ignored: the summoned creature is not in the database
+84238	46002		6 no creature	none							ignored: the summoned creature is not in the database
+84242	1146006		6 no creature	none							ignored: the summoned creature is not in the database
+84245	1146009		6 no creature	none							ignored: the summoned creature is not in the database
+84247	1146011		6 no creature	none							ignored: the summoned creature is not in the database
+84248	46012		6 no creature	none							ignored: the summoned creature is not in the database
+84252	46016		6 no creature	none							ignored: the summoned creature is not in the database
+84254	1146018		6 no creature	none							ignored: the summoned creature is not in the database
+84258	1146022		6 no creature	none							ignored: the summoned creature is not in the database
+84259	1146023		6 no creature	none							ignored: the summoned creature is not in the database
+84260	46024		6 no creature	none							ignored: the summoned creature is not in the database
+84261	46025		6 no creature	none							ignored: the summoned creature is not in the database
+84262	1146026		6 no creature	none							ignored: the summoned creature is not in the database
+84263	1146027		6 no creature	none							ignored: the summoned creature is not in the database
+84265	1146029		6 no creature	none							ignored: the summoned creature is not in the database
+84266	46030		6 no creature	none							ignored: the summoned creature is not in the database
+84267	46031		6 no creature	none							ignored: the summoned creature is not in the database
+84268	46032		6 no creature	none							ignored: the summoned creature is not in the database
+84269	46033		6 no creature	none							ignored: the summoned creature is not in the database
+84292	46056		6 no creature	none							ignored: the summoned creature is not in the database
+84294	46058		6 no creature	none							ignored: the summoned creature is not in the database
+84296	46060		6 no creature	none							ignored: the summoned creature is not in the database
+84297	46061		6 no creature	none							ignored: the summoned creature is not in the database
+84299	46063		6 no creature	none							ignored: the summoned creature is not in the database
+84300	46064		6 no creature	none							ignored: the summoned creature is not in the database
+84301	1146065		6 no creature	none							ignored: the summoned creature is not in the database
+84302	1146066		6 no creature	none							ignored: the summoned creature is not in the database
+84303	46067		6 no creature	none							ignored: the summoned creature is not in the database
+84304	1146068		6 no creature	none							ignored: the summoned creature is not in the database
+84305	46069		6 no creature	none							ignored: the summoned creature is not in the database
+84317	46081		6 no creature	none							ignored: the summoned creature is not in the database
+84318	46082		6 no creature	none							ignored: the summoned creature is not in the database
+84319	46083		6 no creature	none							ignored: the summoned creature is not in the database
+84326	1146090		6 no creature	none							ignored: the summoned creature is not in the database
+84330	1146094		6 no creature	none							ignored: the summoned creature is not in the database
+84338	46102		6 no creature	none							ignored: the summoned creature is not in the database
+84340	46104		6 no creature	none							ignored: the summoned creature is not in the database
+84342	46106		6 no creature	none							ignored: the summoned creature is not in the database
+84343	1146107		6 no creature	none							ignored: the summoned creature is not in the database
+84344	46108		6 no creature	none							ignored: the summoned creature is not in the database
+84357	46121		6 no creature	none							ignored: the summoned creature is not in the database
+84358	46122		6 no creature	none							ignored: the summoned creature is not in the database
+84363	46127		6 no creature	none							ignored: the summoned creature is not in the database
+84776	79057		6 no creature	none							ignored: the summoned creature is not in the database
+86595	80236		6 no creature	none							ignored: the summoned creature is not in the database
+91723	46413		6 no creature	none							ignored: the summoned creature is not in the database
+91726	46416		6 no creature	none							ignored: the summoned creature is not in the database
+93766	81036		6 no creature	none							ignored: the summoned creature is not in the database
+93781	147		6 no creature	none							ignored: the summoned creature is not in the database
+100330	0		6 no creature	none							ignored: the summoned creature is not in the database
+101500	500750		6 no creature	none							ignored: the summoned creature is not in the database
+101501	500751		6 no creature	none							ignored: the summoned creature is not in the database
+102840	40608		6 no creature	none							ignored: the summoned creature is not in the database
+103076	0		6 no creature	none							ignored: the summoned creature is not in the database
+109384	1009099		6 no creature	none							ignored: the summoned creature is not in the database
+109385	1009100		6 no creature	none							ignored: the summoned creature is not in the database
+109386	1009101		6 no creature	none							ignored: the summoned creature is not in the database
+109387	1009102		6 no creature	none							ignored: the summoned creature is not in the database
+111375	111375		6 no creature	none							ignored: the summoned creature is not in the database
+200000	500158		6 no creature	none							ignored: the summoned creature is not in the database
+200665	500159		6 no creature	none							ignored: the summoned creature is not in the database
+200666	500160		6 no creature	none							ignored: the summoned creature is not in the database
+200667	500161		6 no creature	none							ignored: the summoned creature is not in the database
+354550	254516		6 no creature	none							ignored: the summoned creature is not in the database
+355514	255105		6 no creature	none							ignored: the summoned creature is not in the database
+355515	255106		6 no creature	none							ignored: the summoned creature is not in the database
+355516	255107		6 no creature	none							ignored: the summoned creature is not in the database
+355517	255111		6 no creature	none							ignored: the summoned creature is not in the database
+355518	255108		6 no creature	none							ignored: the summoned creature is not in the database
+355519	255109		6 no creature	none							ignored: the summoned creature is not in the database
+355520	255110		6 no creature	none							ignored: the summoned creature is not in the database
+355521	255112		6 no creature	none							ignored: the summoned creature is not in the database
+355522	255113		6 no creature	none							ignored: the summoned creature is not in the database
+355523	255114		6 no creature	none							ignored: the summoned creature is not in the database
+355524	255115		6 no creature	none							ignored: the summoned creature is not in the database
+355525	255116		6 no creature	none							ignored: the summoned creature is not in the database
+355690	255454		6 no creature	none							ignored: the summoned creature is not in the database
+355691	255455		6 no creature	none							ignored: the summoned creature is not in the database
+355692	255456		6 no creature	none							ignored: the summoned creature is not in the database
+355693	255457		6 no creature	none							ignored: the summoned creature is not in the database
+355694	255458		6 no creature	none							ignored: the summoned creature is not in the database
+355695	255459		6 no creature	none							ignored: the summoned creature is not in the database
+355696	255460		6 no creature	none							ignored: the summoned creature is not in the database
+355697	255461		6 no creature	none							ignored: the summoned creature is not in the database
+355698	255462		6 no creature	none							ignored: the summoned creature is not in the database
+355847	255555		6 no creature	none							ignored: the summoned creature is not in the database
+364319	373267		6 no creature	none							ignored: the summoned creature is not in the database
+364320	373268		6 no creature	none							ignored: the summoned creature is not in the database
+364321	373269		6 no creature	none							ignored: the summoned creature is not in the database
+364322	373270		6 no creature	none							ignored: the summoned creature is not in the database
+364327	373275		6 no creature	none							ignored: the summoned creature is not in the database
+364328	373276		6 no creature	none							ignored: the summoned creature is not in the database
+364329	373277		6 no creature	none							ignored: the summoned creature is not in the database
+364330	373278		6 no creature	none							ignored: the summoned creature is not in the database
+364331	373279		6 no creature	none							ignored: the summoned creature is not in the database
+364332	373280		6 no creature	none							ignored: the summoned creature is not in the database
+364333	373281		6 no creature	none							ignored: the summoned creature is not in the database
+364334	373282		6 no creature	none							ignored: the summoned creature is not in the database
+364335	373283		6 no creature	none							ignored: the summoned creature is not in the database
+364336	373284		6 no creature	none							ignored: the summoned creature is not in the database
+364337	373285		6 no creature	none							ignored: the summoned creature is not in the database
+364341	373405		6 no creature	none							ignored: the summoned creature is not in the database
+393610	378784		6 no creature	none							ignored: the summoned creature is not in the database
+499934	499934		6 no creature	none							ignored: the summoned creature is not in the database
+500325	500152		6 no creature	none							ignored: the summoned creature is not in the database
+500360	500153		6 no creature	none							ignored: the summoned creature is not in the database
+500375	500154		6 no creature	none							ignored: the summoned creature is not in the database
+500401	500156		6 no creature	none							ignored: the summoned creature is not in the database
+500403	500157		6 no creature	none							ignored: the summoned creature is not in the database
+648742	600053		6 no creature	none							ignored: the summoned creature is not in the database
+649378	600054		6 no creature	none							ignored: the summoned creature is not in the database
+649577	600055		6 no creature	none							ignored: the summoned creature is not in the database
+650132	600056		6 no creature	none							ignored: the summoned creature is not in the database
+842011	42011		6 no creature	none							ignored: the summoned creature is not in the database
+842012	42012		6 no creature	none							ignored: the summoned creature is not in the database
+842013	42013		6 no creature	none							ignored: the summoned creature is not in the database
+842015	42015		6 no creature	none							ignored: the summoned creature is not in the database
+842016	42016		6 no creature	none							ignored: the summoned creature is not in the database
+842017	42017		6 no creature	none							ignored: the summoned creature is not in the database
+900928	509907		6 no creature	none							ignored: the summoned creature is not in the database
+910195	178952		6 no creature	none							ignored: the summoned creature is not in the database
+910196	178953		6 no creature	none							ignored: the summoned creature is not in the database
+910197	178954		6 no creature	none							ignored: the summoned creature is not in the database
+910198	178955		6 no creature	none							ignored: the summoned creature is not in the database
+910199	178956		6 no creature	none							ignored: the summoned creature is not in the database
+910200	178957		6 no creature	none							ignored: the summoned creature is not in the database
+912612	125325		6 no creature	none							ignored: the summoned creature is not in the database
+926131	123378		6 no creature	none							ignored: the summoned creature is not in the database
+930667	116012		6 no creature	none							ignored: the summoned creature is not in the database
+930669	116014		6 no creature	none							ignored: the summoned creature is not in the database
+930670	116015		6 no creature	none							ignored: the summoned creature is not in the database
+930914	116160		6 no creature	none							ignored: the summoned creature is not in the database
+933221	5321		6 no creature	none							ignored: the summoned creature is not in the database
+933223	5323		6 no creature	none							ignored: the summoned creature is not in the database
+933227	367		6 no creature	none							ignored: the summoned creature is not in the database
+933228	368		6 no creature	none							ignored: the summoned creature is not in the database
+933229	369		6 no creature	none							ignored: the summoned creature is not in the database
+933231	2194		6 no creature	none							ignored: the summoned creature is not in the database
+933232	2195		6 no creature	none							ignored: the summoned creature is not in the database
+934501	220054		6 no creature	none							ignored: the summoned creature is not in the database
+934502	220055		6 no creature	none							ignored: the summoned creature is not in the database
+934503	220056		6 no creature	none							ignored: the summoned creature is not in the database
+935560	116304		6 no creature	none							ignored: the summoned creature is not in the database
+958875	62462		6 no creature	none							ignored: the summoned creature is not in the database
+958876	62463		6 no creature	none							ignored: the summoned creature is not in the database
+958877	62464		6 no creature	none							ignored: the summoned creature is not in the database
+958881	62468		6 no creature	none							ignored: the summoned creature is not in the database
+958882	62469		6 no creature	none							ignored: the summoned creature is not in the database
+966035	100015		6 no creature	none							ignored: the summoned creature is not in the database
+979802	75116		6 no creature	none							ignored: the summoned creature is not in the database
+979803	75117		6 no creature	none							ignored: the summoned creature is not in the database
+982408	70133		6 no creature	none							ignored: the summoned creature is not in the database
+982559	116821		6 no creature	none							ignored: the summoned creature is not in the database
+982560	116822		6 no creature	none							ignored: the summoned creature is not in the database
+982786	866930		6 no creature	none							ignored: the summoned creature is not in the database
+984914	110269		6 no creature	none							ignored: the summoned creature is not in the database
+984915	110270		6 no creature	none							ignored: the summoned creature is not in the database
+984916	110271		6 no creature	none							ignored: the summoned creature is not in the database
+984917	110272		6 no creature	none							ignored: the summoned creature is not in the database
+984919	110274		6 no creature	none							ignored: the summoned creature is not in the database
+984920	110275		6 no creature	none							ignored: the summoned creature is not in the database
+984921	110276		6 no creature	none							ignored: the summoned creature is not in the database
+984922	110277		6 no creature	none							ignored: the summoned creature is not in the database
+985358	99493		6 no creature	none							ignored: the summoned creature is not in the database
+991355	98474		6 no creature	none							ignored: the summoned creature is not in the database
+995356	499991		6 no creature	none							ignored: the summoned creature is not in the database
+995412	223547		6 no creature	none							ignored: the summoned creature is not in the database
+997342	216245		6 no creature	none							ignored: the summoned creature is not in the database
+997343	216246		6 no creature	none							ignored: the summoned creature is not in the database
+999643	45129		6 no creature	none							ignored: the summoned creature is not in the database
+999644	45130		6 no creature	none							ignored: the summoned creature is not in the database
+1000008	1000008		6 no creature	none							ignored: the summoned creature is not in the database
+1000010	1000010		6 no creature	none							ignored: the summoned creature is not in the database
+1000023	400983		6 no creature	none							ignored: the summoned creature is not in the database
+1000025	400985		6 no creature	none							ignored: the summoned creature is not in the database
+1000026	400986		6 no creature	none							ignored: the summoned creature is not in the database
+1000454	30168		6 no creature	none							ignored: the summoned creature is not in the database
+1008018	0		6 no creature	none							ignored: the summoned creature is not in the database
+1008021	1008025		6 no creature	none							ignored: the summoned creature is not in the database
+1011510	108934		6 no creature	none							ignored: the summoned creature is not in the database
+1011511	108936		6 no creature	none							ignored: the summoned creature is not in the database
+1011512	108937		6 no creature	none							ignored: the summoned creature is not in the database
+1011513	108938		6 no creature	none							ignored: the summoned creature is not in the database
+1014231	104864		6 no creature	none							ignored: the summoned creature is not in the database
+1014236	104869		6 no creature	none							ignored: the summoned creature is not in the database
+1019626	430307		6 no creature	none							ignored: the summoned creature is not in the database
+1101865	34398		6 no creature	none							ignored: the summoned creature is not in the database
+1106575	118588		6 no creature	none							ignored: the summoned creature is not in the database
+1106576	118589		6 no creature	none							ignored: the summoned creature is not in the database
+1106577	118590		6 no creature	none							ignored: the summoned creature is not in the database
+1106578	118591		6 no creature	none							ignored: the summoned creature is not in the database
+1158688	321265		6 no creature	none							ignored: the summoned creature is not in the database
+1226025	420970		6 no creature	none							ignored: the summoned creature is not in the database
+1226026	420971		6 no creature	none							ignored: the summoned creature is not in the database
+1226028	420973		6 no creature	none							ignored: the summoned creature is not in the database
+1226030	420975		6 no creature	none							ignored: the summoned creature is not in the database
+1226031	420976		6 no creature	none							ignored: the summoned creature is not in the database
+1243341	376520		6 no creature	none							ignored: the summoned creature is not in the database
+1243346	376525		6 no creature	none							ignored: the summoned creature is not in the database
+1243348	376527		6 no creature	none							ignored: the summoned creature is not in the database
+1934501	220061		6 no creature	none							ignored: the summoned creature is not in the database
+9931404	11000009		6 no creature	none							ignored: the summoned creature is not in the database
+9931478	81052		6 no creature	none							ignored: the summoned creature is not in the database
+9931479	81053		6 no creature	none							ignored: the summoned creature is not in the database
+9931481	81060		6 no creature	none							ignored: the summoned creature is not in the database
+9931482	81061		6 no creature	none							ignored: the summoned creature is not in the database
+9931483	81062		6 no creature	none							ignored: the summoned creature is not in the database
+9931484	81063		6 no creature	none							ignored: the summoned creature is not in the database
+9931486	81065		6 no creature	none							ignored: the summoned creature is not in the database
+9931487	81066		6 no creature	none							ignored: the summoned creature is not in the database
+9931488	81067		6 no creature	none							ignored: the summoned creature is not in the database
+9931489	81068		6 no creature	none							ignored: the summoned creature is not in the database
+9931490	81069		6 no creature	none							ignored: the summoned creature is not in the database
+9931491	81071		6 no creature	none							ignored: the summoned creature is not in the database
+9931492	81072		6 no creature	none							ignored: the summoned creature is not in the database
+9931493	81073		6 no creature	none							ignored: the summoned creature is not in the database
+9931494	81074		6 no creature	none							ignored: the summoned creature is not in the database
+9931495	81070		6 no creature	none							ignored: the summoned creature is not in the database
+9931496	81075		6 no creature	none							ignored: the summoned creature is not in the database
+9931497	81076		6 no creature	none							ignored: the summoned creature is not in the database
+9931498	81077		6 no creature	none							ignored: the summoned creature is not in the database
+9931499	81078		6 no creature	none							ignored: the summoned creature is not in the database
+9931500	81079		6 no creature	none							ignored: the summoned creature is not in the database
+9931503	81083		6 no creature	none							ignored: the summoned creature is not in the database
+9931504	81084		6 no creature	none							ignored: the summoned creature is not in the database
+9931505	81085		6 no creature	none							ignored: the summoned creature is not in the database
+9931506	81086		6 no creature	none							ignored: the summoned creature is not in the database
+9931508	81087		6 no creature	none							ignored: the summoned creature is not in the database
+9931509	81088		6 no creature	none							ignored: the summoned creature is not in the database
+9931510	81090		6 no creature	none							ignored: the summoned creature is not in the database
+9931511	81091		6 no creature	none							ignored: the summoned creature is not in the database
+9931512	81092		6 no creature	none							ignored: the summoned creature is not in the database
+9931513	81093		6 no creature	none							ignored: the summoned creature is not in the database
+9931514	81094		6 no creature	none							ignored: the summoned creature is not in the database
+9931516	81096		6 no creature	none							ignored: the summoned creature is not in the database
+9931517	81097		6 no creature	none							ignored: the summoned creature is not in the database
+9931518	81098		6 no creature	none							ignored: the summoned creature is not in the database
+9934001	11000063		6 no creature	none							ignored: the summoned creature is not in the database
+9934002	11000064		6 no creature	none							ignored: the summoned creature is not in the database
+9934003	11000065		6 no creature	none							ignored: the summoned creature is not in the database
+9934004	11000066		6 no creature	none							ignored: the summoned creature is not in the database
+9934026	11000082		6 no creature	none							ignored: the summoned creature is not in the database
+9934078	11000112		6 no creature	none							ignored: the summoned creature is not in the database
+9934079	11000111		6 no creature	none							ignored: the summoned creature is not in the database
+9934267	11000178		6 no creature	none							ignored: the summoned creature is not in the database
+9934341	11001001		6 no creature	none							ignored: the summoned creature is not in the database
+9934342	11001002		6 no creature	none							ignored: the summoned creature is not in the database
+9934343	11001003		6 no creature	none							ignored: the summoned creature is not in the database
+9934344	11001004		6 no creature	none							ignored: the summoned creature is not in the database
+9934345	11001005		6 no creature	none							ignored: the summoned creature is not in the database
+9934346	11001006		6 no creature	none							ignored: the summoned creature is not in the database
+9934347	11001007		6 no creature	none							ignored: the summoned creature is not in the database
+13977824	81054		6 no creature	none							ignored: the summoned creature is not in the database
+13977826	81056		6 no creature	none							ignored: the summoned creature is not in the database
