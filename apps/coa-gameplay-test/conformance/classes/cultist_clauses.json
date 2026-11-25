@@ -98,14 +98,14 @@
       {
         "claim": "increasing damage ... by $s3%",
         "labels": [
-          "92131 behaviour_hit_ratio damage_shadow",
-          "92131 behaviour_hit_ratio damage_melee"
+          "92131 behaviour_metric_delta damage_shadow",
+          "92131 behaviour_metric_delta damage_melee"
         ]
       },
       {
         "claim": "and healing done by $s3%",
         "labels": [
-          "92131 behaviour_hit_ratio healing_done"
+          "92131 behaviour_metric_delta healing_done"
         ]
       }
     ]
@@ -1900,7 +1900,8 @@
           "560109 behaviour_metric_delta player_duration"
         ]
       }
-    ]
+    ],
+    "reason": "Alert (claim 1 '8 sec vs players', uncounted; supported by cu-rt1 review): Spell.dbc 560109 has DurationIndex 64 = 40000 ms, Mechanic 5 (FEAR), and no pending_db_world override; SpellMgr.cpp:342-415 lacks an 8000 ms PvP cap for 560109 and falls through to the 10000 ms DIMINISHING_FEAR cap, so player_duration reads 560109 still active (1) at ~8.49 s post-apply."
   },
   {
     "spell": 560109,
@@ -1925,10 +1926,11 @@
     "spell": 560109,
     "clause": "Damage dealt may end this effect.",
     "labels": [
-      "560109 behaviour_metric_delta broken",
-      "560109 behaviour_metric_delta unbroken"
+      "560109 behaviour_metric_delta damage_breaks",
+      "560109 behaviour_metric_delta damage_holds"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (stock deterministic HandleBreakableCCAuraProc cumulative damage cap BaseHealth(60)/4.75 = 1048 at SpellAuraEffects.cpp:548-562,7245-7253, no break probability asserted): both entries read aura 560109 PRESENT == 1 on dummy before the damage hit (after_setup_stacks + before_expected 1); damage_holds proves a ~620 Shadow hit leaves 560109 active (1 -> 1) and damage_breaks proves a ~31000 Shadow hit ends 560109 (1 -> 0)."
   },
   {
     "spell": 560301,
@@ -2084,9 +2086,10 @@
       {
         "claim": "and guarantees it to critically strike when used with at least 60 Insanity.",
         "labels": [
-          "560977 behaviour_metric_delta crit_at_60",
-          "560977 behaviour_metric_delta crit_below_60",
-          "560977 behaviour_metric_delta crit_heal_at_60"
+          "560977 behaviour_crit_rate crit_at_60",
+          "560977 behaviour_crit_rate crit_below_60",
+          "560977 behaviour_hit_ratio crit_shock_at_60",
+          "560977 behaviour_hit_ratio crit_heal_at_60"
         ]
       }
     ]
@@ -2735,17 +2738,21 @@
     "spell": 680750,
     "clause": "Protects movement speed from going below $567525s2% of normal speed.",
     "labels": [
-      "680750 behaviour_metric_delta min_speed"
+      "680750 behaviour_metric_delta min_speed",
+      "680750 behaviour_metric_delta min_speed_late"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Alert (uncounted): 567524 Dreadnought lasts 20 sec (DurationIndex 18 = 20000 ms) and triggers companion aura 567525 (80% minimum speed) which has DurationIndex 8 = 15000 ms in Spell.dbc with no SQL or C++ override. min_speed holds 0.80 at 14.2 s, while min_speed_late alerts at 19.2 s (speed drops to 0.70 and 567525 == 0 while 567524 == 1)."
   },
   {
     "spell": 680750,
     "clause": "Lasts $d.",
     "labels": [
-      "680750 behaviour_metric_delta duration"
+      "680750 behaviour_metric_delta duration",
+      "680750 behaviour_metric_delta min_speed_late"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Alert (uncounted): Dreadnought form 567524 lasts 20 sec (duration passes at 19.2 s / 20.8 s), but companion minimum-speed aura 567525 has DurationIndex 8 = 15000 ms in Spell.dbc and expires 5 sec early (min_speed_late alerts at 19.2 s with run_speed_rate 0.70 and 567525 == 0)."
   },
   {
     "spell": 680750,
@@ -3735,18 +3742,23 @@
       {
         "claim": "that slows enemies' movement speed while inside.",
         "labels": [
-          "800430 behaviour_metric_delta slows_inside"
+          "800430 behaviour_metric_delta slows_inside",
+          "800430 behaviour_metric_delta slows_outside"
         ]
       }
-    ]
+    ],
+    "reason": "Orchestrator decision D-38 (direction-only ruling for unfigured slow): slows_inside proves dummy inside the 10 yd void zone is strictly slowed (no percentage asserted) and slows_outside proves an enemy outside the zone (13 yd from center) suffers zero slow."
   },
   {
     "spell": 800430,
     "clause": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
     "labels": [
-      "800430 behaviour_metric_delta slow_gradient"
+      "800430 behaviour_metric_delta slow_gradient",
+      "800430 behaviour_metric_delta slow_gradient_inner",
+      "800430 behaviour_metric_delta slows_outside"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Orchestrator decision D-38 (direction-only ruling for unfigured gradient): three inside distances strictly monotonic (speed at 2 yd < 5 yd < 8 yd via slow_gradient + slow_gradient_inner) plus outside-zone no-slow control (slows_outside at 13 yd), all run_speed_rate behaviour reads, no slope, ratio, or endpoint value asserted."
   },
   {
     "spell": 800432,
