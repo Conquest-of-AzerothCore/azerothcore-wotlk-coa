@@ -7367,6 +7367,27 @@
       "observe_source": "807701 Effect[0] bp 99 + die 1 = +100% ($807701s1 = 100; Spell.dbc). aura_ascension_cultist_shadow_training (AscensionCultistAbilities.cpp:510-542) attaches a +100% SPELLMOD_PCT SPELLMOD_DAMAGE modifier to Gaze of C'Thun heal 520333 (triggered when casting 500110 on friendly target). Control casts 500110 at caster (+20000 SP, non-crit) without 805607; treatment learns 805607 (expected ratio 2.0). Reference search 2026-11-24: coa-history spell 520333: 2853 SPELL_HEAL events in 42 logs; coabuildhub spells_master_index.json entry 805607 matches installed Spell.dbc verbatim. void_on_cast_failure omitted because 500110 Effect[0] enemy damage sub-trigger 520334 always returns SPELL_FAILED_DONT_REPORT (27) on friendly casts while Effect[1] 520335 -> 520333 heals every trial."
     },
     {
+      "spell": 805607,
+      "name": "Shadow Training (cannot miss, be parried or dodged)",
+      "kind": "outgoing_avoidance_elimination",
+      "variant": "outgoing_avoidance",
+      "label_suffix": "outgoing_avoidance",
+      "quote": "In addition, you are now unable to miss your attacks and you cannot be parried or dodged.",
+      "window_ms": 180000,
+      "min_swings": 200,
+      "min_control_rate": 0.05,
+      "residual": 0.001,
+      "haste_auras": [
+        62531,
+        2116852
+      ],
+      "dummy_entry": 36,
+      "dummy_distance": 3.0,
+      "dummy_health": 500000,
+      "hand": 0,
+      "observe_source": "805607 Effect[0] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT bp 99 + die 1 = +100% hit (HandleAscensionModHitChanceAll -> HandleModHitChance -> MeleeSpellMissChance) and Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE bp 99 + die 1 = +100 expertise (GetExpertiseDodgeOrParryReduction -25% dodge and parry in RollMeleeOutcomeAgainst, Unit.cpp:3384,3420; Spell.dbc). Against level-60 Harvest Golem 36 (flags_extra 0, face_caster true, stationary true, 5% base miss/dodge/parry each under ClassicPlusCombat), unlearned control swings >= 200 times and must observe >= 1 miss, >= 1 dodge and >= 1 parry; learned treatment swings >= 200 times under identical haste fixtures [62531, 2116852] and must observe 0 misses, 0 dodges, 0 parries and damaging_hits == swings (ADR 1312; pair control false-fail <= 0.021%, treatment false-pass <= 3.7e-9 at 5% and <= 0.093% at 2%). Reference search 2026-11-25: see mending_heal."
+    },
+    {
       "spell": 802049,
       "name": "Eldritch Eye (15 sec duration)",
       "kind": "metric_delta",
@@ -31305,6 +31326,32 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Proves shared Old God Tentacle cap across types: Tentacle of Y'shaarj 802044 (entry 50096, 30 s duration, SummonProperties 63) is present (1) before 572103 and replaced (0) after 572103 while 501464 rises 0 -> 1 (~2.6 s << 30 s). Paired with max_one. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (retargets when primary runs out of range)",
+      "kind": "summon_retarget_out_of_range",
+      "variant": "retarget_out_of_range",
+      "label_suffix": "retarget_out_of_range",
+      "quote": "If your target runs out of range, the tentacle will seek a new target.",
+      "entry": 501464,
+      "effect_aura": 806596,
+      "primary_dx": 3.0,
+      "primary_dy": 0.0,
+      "secondary_dx": 3.0,
+      "secondary_dy": 8.0,
+      "move_dx": 50.0,
+      "move_dy": 0.0,
+      "max_range_yd": 40.0,
+      "secondary_max_range_yd": 30.0,
+      "speed_aura": 11305,
+      "initial_wait_ms": 300,
+      "pre_pulse_wait_ms": 4500,
+      "post_pulse_wait_ms": 2000,
+      "expire_wait_ms": 2500,
+      "cast_power": 2000,
+      "dummy_entry": 36,
+      "observe_source": "Tentacle of N'Zoth 572103 (entry 501464, 8000 ms duration) sets command = dummy and applies Thoughtseize 806596 on summon (DoAction(3)) then pulses at 6000 ms (AscensionCultistSummons.cpp:72-75,220-239,255-260,335,363). Target() retains command while within 40 yd and falls back to Nearby(me, 30) in combat with player once command exceeds 40 yd. Control holds movable dummy at (3, 0) while stationary area1 at (3, 8) is engaged with caster via creature_attack (Sprint 11305 applied symmetrically to dummy in both arms) and verifies area1 stays at 806596 == 0 past 6000 ms; after despawn cleanup, treatment moves dummy by dx=50 yd via move_point, verifies dummy > 40 yd from 501464 before the 6000 ms pulse, and verifies area1 receives 806596 == 1 at 6800 ms (ADR 1313). Reference search 2026-11-25: see damage_base."
     },
     {
       "spell": 92131,
