@@ -1260,6 +1260,9 @@ struct Actor
     std::map<ObjectGuid, MeleeOutcomes> meleeOutcomesByAttacker;
     std::array<uint32, 2> meleeDamageByHand{};
     std::array<uint64, 2> meleeDamageTotalByHand{};
+    std::array<uint32, 2> meleeMissesDealtByHand{};
+    std::array<uint32, 2> meleeDodgesDealtByHand{};
+    std::array<uint32, 2> meleeParriesDealtByHand{};
     std::vector<MeleeHitEvent> meleeHits;
     uint64 castPushbackMs = 0;
     std::vector<SpellCastEvent> spellCasts;
@@ -1906,6 +1909,16 @@ void ObservePacket(Actor& actor, WorldPacket const& packet)
         }
         if (damage && (hitInfo & HITINFO_BLOCK))
             ++outcome.blocked;
+        if (attacker == actor.guid)
+        {
+            uint8 const hand = hitInfo & HITINFO_OFFHAND ? OFF_ATTACK : BASE_ATTACK;
+            if ((hitInfo & HITINFO_MISS) && victimState != VICTIMSTATE_EVADES)
+                ++actor.meleeMissesDealtByHand[hand];
+            if (victimState == VICTIMSTATE_DODGE)
+                ++actor.meleeDodgesDealtByHand[hand];
+            if (victimState == VICTIMSTATE_PARRY)
+                ++actor.meleeParriesDealtByHand[hand];
+        }
     }
 
     ++actor.packetOrdinal;
@@ -3632,6 +3645,14 @@ private:
                     creature->m_modSpellHitChance = *bonus;
                 if (auto bonus = definition.get_optional<float>("melee_hit_bonus"))
                     creature->m_modMeleeHitChance = *bonus;
+                if (definition.get<bool>("face_caster", false))
+                {
+                    float const angle = creature->GetAngle(player);
+                    creature->SetOrientation(angle);
+                    creature->SetFacingToObject(player);
+                    creature->SetHomePosition(creature->GetPositionX(), creature->GetPositionY(),
+                        creature->GetPositionZ(), angle);
+                }
             }
         }
         _targetsCreated = true;
@@ -5424,6 +5445,18 @@ private:
                 return double(actor.meleeDamageTotalByHand[BASE_ATTACK] + actor.meleeDamageTotalByHand[OFF_ATTACK]);
             }
             auto const& counts = metric == "melee_attack_count" ? actor.meleeAttacksByHand : actor.meleeDamageByHand;
+            if (auto hand = step.get_optional<uint32>("hand"))
+            {
+                Require(*hand < 2, "Melee hand must be main hand or off hand");
+                return counts[*hand];
+            }
+            return counts[BASE_ATTACK] + counts[OFF_ATTACK];
+        }
+        if (metric == "melee_misses_dealt" || metric == "melee_dodges_dealt" || metric == "melee_parries_dealt")
+        {
+            Actor const& actor = _actors.at(step.get<std::string>("actor"));
+            auto const& counts = metric == "melee_misses_dealt" ? actor.meleeMissesDealtByHand
+                : metric == "melee_dodges_dealt" ? actor.meleeDodgesDealtByHand : actor.meleeParriesDealtByHand;
             if (auto hand = step.get_optional<uint32>("hand"))
             {
                 Require(*hand < 2, "Melee hand must be main hand or off hand");

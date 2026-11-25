@@ -507,6 +507,32 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_creature_face_caster_validation(self):
+        for value in (True, False):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0]['face_caster'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value in (1, 0, 'true', None):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0]['face_caster'] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                run.validate(scenario)
+
+    def test_melee_avoidance_dealt_validation(self):
+        for metric in ('melee_misses_dealt', 'melee_dodges_dealt', 'melee_parries_dealt'):
+            for extra in ({}, {'hand': 0}, {'hand': 1}):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0, **extra})
+                with self.subTest(metric=metric, extra=extra):
+                    self.assertIs(run.validate(scenario), scenario)
+            for bad in ({'actor': 'target'}, {'hand': 2}, {'hand': -1}, {'hand': True},
+                        {'victim_state': 3}, {'glancing': False}, {'blocked': False}):
+                scenario = copy.deepcopy(self.scenario)
+                step = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0, **bad}
+                scenario['steps'].append(step)
+                with self.subTest(metric=metric, bad=bad), self.assertRaises(ValueError):
+                    run.validate(scenario)
+
     def test_creature_actor_spell_immunity_metrics(self):
         for step in ({'metric': 'spell_immune', 'spell': 853},
                      {'metric': 'spell_effect_immune', 'spell': 61391, 'effect': 0}):
