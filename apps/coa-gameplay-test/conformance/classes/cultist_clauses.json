@@ -741,14 +741,28 @@
   {
     "spell": 301209,
     "clause": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies and healing done by Black Blood can now critically strike.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies",
+        "labels": [
+          "301209 behaviour_metric_delta covenant_2_lowest_allies",
+          "301209 behaviour_metric_delta covenant_2_lowest_caster"
+        ]
+      },
+      {
+        "claim": "and healing done by Black Blood can now critically strike.",
+        "labels": [
+          "301209 behaviour_metric_delta black_blood_crit"
+        ]
+      }
+    ]
   },
   {
     "spell": 301209,
     "clause": "@ext:Healing done in this way can affect the original target.:ext@",
     "labels": [
-      "301209 effect_value #0"
+      "301209 behaviour_metric_delta covenant_2_lowest_allies"
     ],
     "kind": "claim"
   },
@@ -1372,22 +1386,27 @@
     "spell": 520388,
     "clause": "Behold a vision of doom, causing direct damage or healing done to apply Vision of Doom to nearby targets for $520450d.",
     "labels": [
-      "520388 spell_duration 520450 #0"
+      "520388 behaviour_metric_delta apply_enemy_duration",
+      "520388 behaviour_metric_delta apply_ally_duration",
+      "520388 behaviour_metric_delta damage_100pct"
     ],
     "kind": "claim"
   },
   {
     "spell": 520388,
     "clause": "Can only occur once every 3 sec.",
-    "labels": [],
+    "labels": [
+      "520388 behaviour_metric_delta icd_closed",
+      "520388 behaviour_metric_delta icd_open"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520388,
     "clause": "At the end of the duration, they are damaged or healed for $s1% of the damage or healing that doomed them.",
     "labels": [
-      "520388 effect_value e0 #1",
-      "520388 aura_amount e0 #1"
+      "520388 behaviour_metric_delta damage_100pct",
+      "520388 behaviour_metric_delta heal_100pct"
     ],
     "kind": "claim"
   },
@@ -1399,13 +1418,14 @@
       {
         "claim": "Lasts for $d",
         "labels": [
-          "520388 aura_duration_ms #2"
+          "520388 behaviour_metric_delta buff_duration"
         ]
       },
       {
         "claim": "$n instances of damage or healing",
         "labels": [
-          "520388 effect_value #3"
+          "520388 behaviour_metric_delta four_instances_hold",
+          "520388 behaviour_metric_delta five_instances_consume"
         ]
       }
     ]
@@ -1413,8 +1433,24 @@
   {
     "spell": 520388,
     "clause": "Doomed enemies are unable to be healed and the damage or healing done by this effect can critically strike.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Doomed enemies are unable to be healed",
+        "labels": [
+          "520388 behaviour_metric_delta heal_block"
+        ]
+      },
+      {
+        "claim": "and the damage or healing done by this effect can critically strike.",
+        "labels": [
+          "520388 behaviour_metric_delta damage_can_crit",
+          "520388 behaviour_metric_delta damage_no_crit_control",
+          "520388 behaviour_metric_delta heal_can_crit",
+          "520388 behaviour_metric_delta heal_no_crit_control"
+        ]
+      }
+    ]
   },
   {
     "spell": 520405,

@@ -31041,6 +31041,1305 @@
       "expire_ms": 10500,
       "void_on_cast_failure": true,
       "observe_source": "AscensionCultistAbilities.cpp:190-195: both Abyssal Ward 804670 and Black Ward 804711 trigger Void Tolerance 680571 (+100% critical block for 10 sec) when Void Tolerance 680570 is known. Control (before learning 680570): casting 804711 leaves 680571 absent (0). Treatment (after learning 680570): casting 804711 grants 680571 (1). Paired with scales_shroud_of_pride. Reference search 2026-11-25: coabuildhub 706182 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301209,
+      "name": "Dark Prophet (Abyssal Covenant heals 2 lowest-health allies including original target, skips higher-health caster)",
+      "kind": "metric_delta",
+      "variant": "covenant_2_lowest_allies",
+      "label_suffix": "covenant_2_lowest_allies",
+      "quote": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies",
+      "gate_spell": 301209,
+      "learn": [
+        500751
+      ],
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "caster_health": [
+        90000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          30000,
+          100000
+        ],
+        "ally_casts": [
+          500751
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 301211,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Second lowest-health nearby ally (ally2, 30% HP) receives 1 Dark Prophet 301211 heal after learning 301209"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 301211,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Higher-health caster (90% HP) is not selected among the 2 lowest-health nearby allies"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 301211,
+              "target": "ally"
+            },
+            "source": "Dark Prophet 301211 heal total on original covenant target ally"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500862,
+              "target": "ally"
+            },
+            "source": "Abyssal Covenant 500862 effective heal on ally in the same window"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 2,
+            "denominator": 3,
+            "expected": 1.0,
+            "tolerance": 0.005,
+            "floor_count": 0,
+            "source": "301211 copies 100% of 500862 Abyssal Covenant healing (AscensionCultistAbilities.cpp:219-221)"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301211,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "301209 Dark Prophet (AscensionCultistAbilities.cpp:215-221): when 500862 Abyssal Covenant heals ally, copies healing via 301211 to Allies(player, target, Radius(301211)=40, 2) sorted by lowest health pct (including original target). With ally & ally2 at 30% HP (30000/100000) and caster at 90% HP (90000/100000): control (before 301209) yields 0 heals of 301211; treatment yields 1 heal on original target ally (proving \"Healing done in this way can affect the original target\" at 100% of 500862), 1 heal on ally2, and 0 on higher-health caster. Paired with covenant_2_lowest_caster. Reference search 2026-11-25: coabuildhub 301209 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301209,
+      "name": "Dark Prophet (picks caster when caster has lowest health, still capped at 2 targets)",
+      "kind": "metric_delta",
+      "variant": "covenant_2_lowest_caster",
+      "label_suffix": "covenant_2_lowest_caster",
+      "quote": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies",
+      "gate_spell": 301209,
+      "learn": [
+        500751
+      ],
+      "trigger_spell": 502182,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "caster_health": [
+        20000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          80000,
+          100000
+        ],
+        "ally_casts": [
+          500751
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 301211
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Total 301211 heal events across all 3 injured candidates (caster 20%, ally 80%, ally2 80%) is exactly 2"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 301211,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Inverted health contrast for 301209 Dark Prophet: caster at 20% HP (20000/100000) and ally/ally2 at 80% HP (80000/100000). Control (before 301209): 0 heals of 301211. Treatment (after 301209): caster receives 1 heal of 301211 (proving lowest-health selection follows health pct) and total 301211 heals across all 3 injured group members is exactly 2. Paired with covenant_2_lowest_allies. Reference search 2026-11-25: coabuildhub 301209 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 301209,
+      "name": "Dark Prophet (Black Blood periodic healing can now critically strike)",
+      "kind": "metric_delta",
+      "variant": "black_blood_crit",
+      "label_suffix": "black_blood_crit",
+      "quote": "and healing done by Black Blood can now critically strike.",
+      "gate_spell": 301209,
+      "trigger_spell": 502241,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 804153,
+              "target": "ally"
+            },
+            "before_expected": 4,
+            "expected": 8,
+            "tolerance": 0,
+            "source": "Confirms all 4 periodic ticks of Black Blood 804153 landed on ally in control (4) and 4 more in treatment (cumulative 8)"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 804153,
+        "target": "ally",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 14500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "301209 Dark Prophet Effect[1] aura 286 SPELL_AURA_ABILITY_PERIODIC_CRIT on EffectSpellClassMask[4]=32768 matching Black Blood 804153 (Spell.dbc; 12 sec duration, 3 sec period = 4 ticks). Under force_crit spell (100% spell crit; 0% residual failure probability on both arms), Malevolence 502241 applies 804153 to injured ally (2000/20000 HP). Control (before learning 301209): 4 ticks land, 0 critically strike. Treatment (after real learn of 301209): 4 more ticks land (cumulative 8), all 4 critically strike (0 -> 4). Exact Witch Hunter 805758 precedent. Reference search 2026-11-25: coabuildhub 301209 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (direct damage applies 520450 to nearby enemies for 3 sec)",
+      "kind": "metric_delta",
+      "variant": "apply_enemy_duration",
+      "label_suffix": "apply_enemy_duration",
+      "quote": "causing direct damage or healing done to apply Vision of Doom to nearby targets for $520450d.",
+      "trigger_spell": 520388,
+      "learn": [
+        800416
+      ],
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 520450,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4250,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom (AscensionCultistEvents.cpp:176-182): direct damage applies 520450 (DurationIndex 27 = 3000 ms, RadiusIndex 8 = 5 yd) to enemies within 5 yd of target. After casting 520388, Horrorbolt 800416 (1500 ms cast) hits dummy: at wait_ms 4250 (2750 ms after hit, > 2700 = 0.9*3000), 520450 is present (1) on dummy and area1 (3 yd away), absent (0) on area2 (11 yd away); after expiry_wait_ms 500 (3250 ms after hit, < 3300 = 1.1*3000), 520450 is gone (0). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (direct healing applies 520497 to nearby allies for 3 sec)",
+      "kind": "metric_delta",
+      "variant": "apply_ally_duration",
+      "label_suffix": "apply_ally_duration",
+      "quote": "causing direct damage or healing done to apply Vision of Doom to nearby targets for $520450d.",
+      "trigger_spell": 520388,
+      "learn": [
+        574325
+      ],
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "caster_health": [
+        2000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 574325,
+          "target": "caster",
+          "delay_ms": 1600
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          20000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 520497,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Nearby ally caster (within 5 yd 520497 radius of healed ally) also receives Vision of Doom 520497"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520497,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4750,
+      "expiry_wait_ms": 500,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom (AscensionCultistEvents.cpp:183-185): direct effective healing applies 520497 (DurationIndex 27 = 3000 ms, RadiusIndex 8 = 5 yd) to allies within 5 yd of healed target. Eldritch Mending 574325 (2000 ms cast) heals injured ally (20000/100000 HP): at wait_ms 4750 (2750 ms after heal, > 2700 = 0.9*3000), 520497 is present (1) on ally and nearby caster; after expiry_wait_ms 500 (3250 ms after heal, < 3300 = 1.1*3000), 520497 is gone (0). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (3 sec internal cooldown blocks 2nd proc at 2.75 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_closed",
+      "label_suffix": "icd_closed",
+      "quote": "Can only occur once every 3 sec.",
+      "trigger_spell": 520388,
+      "learn": [
+        800416
+      ],
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 2750
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms both Horrorbolt 800416 hits landed on dummy"
+          }
+        ]
+      },
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 520450,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom (AscensionCultistEvents.cpp:85-86): Chance(player, id, 3000) enforces a 3000 ms ICD. Two Horrorbolt 800416 casts (1500 ms each) start 2750 ms apart (hits land 2750 ms apart, > 2700 = 0.9*3000 and < 3000 ms): both hits land (spell_damage_count=2) but 520450 is applied only once (aura_apply_count=1). Paired with icd_open (3250 ms apart -> 2 applications). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (3 sec internal cooldown allows 2nd proc at 3.25 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_open",
+      "label_suffix": "icd_open",
+      "quote": "Can only occur once every 3 sec.",
+      "trigger_spell": 520388,
+      "learn": [
+        800416
+      ],
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 1600
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3250
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms both Horrorbolt 800416 hits landed on dummy"
+          }
+        ]
+      },
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 520450,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom 3000 ms ICD open arm: two Horrorbolt 800416 casts start 3250 ms apart (hits land 3250 ms apart, > 3000 ms and < 3300 = 1.1*3000): both hits land (spell_damage_count=2) and 520450 is applied twice (aura_apply_count=2). Together with icd_closed (2750 ms -> 1), brackets the 3000 ms ICD within 10% on both sides. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (deals 100% of triggering direct damage at expiry)",
+      "kind": "metric_delta",
+      "variant": "damage_100pct",
+      "label_suffix": "damage_100pct",
+      "quote": "At the end of the duration, they are damaged or healed for $s1% of the damage or healing that doomed them.",
+      "trigger_spell": 520388,
+      "learn": [
+        502182
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502182,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 520450,
+              "target": "dummy"
+            },
+            "source": "Vision of Doom 520450 damage tick at 3 sec expiry"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 502182,
+              "target": "dummy"
+            },
+            "source": "Triggering direct Horrorbolt 502182 damage"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 520450,
+              "target": "area1"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Nearby enemy area1 (3 yd from dummy <= 5 yd 520450 radius) also receives 520450 damage"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 520450,
+              "target": "area2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Far enemy area2 (11 yd from dummy > 5 yd 520450 radius) does not receive 520450"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.005,
+            "floor_count": 0,
+            "source": "520388 Effect[0] bp=99+die=1 = 100% ($s1) of triggering direct damage"
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520450,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom Effect[0] BasePoints 99 + DieSides 1 = 100% ($s1); AscensionCultistEvents.cpp:179-181 calls Copy(player, enemy, 520450, CalculatePct(damage, 100)). Non-crit (16255=-100), no partial resist (823764), +5000 SP: Horrorbolt 502182 (2500 ms cast) dooms dummy; at wait_ms 6500 (after 2500 + 3000 ms), 520450 ticks once for 100% of 502182 damage (ratio 1.0 +- 0.005). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "dummy_distance": 4.0,
+      "area_dummies": [
+        7.0,
+        15.0
+      ]
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (heals for 100% of triggering direct healing at expiry)",
+      "kind": "metric_delta",
+      "variant": "heal_100pct",
+      "label_suffix": "heal_100pct",
+      "quote": "At the end of the duration, they are damaged or healed for $s1% of the damage or healing that doomed them.",
+      "trigger_spell": 520388,
+      "learn": [
+        574325
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": 5000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 574325,
+          "target": "caster",
+          "delay_ms": 1600
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 520497,
+              "target": "caster"
+            },
+            "source": "Vision of Doom 520497 heal tick on ally at 3 sec expiry"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_effective_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 574325,
+              "target": "caster"
+            },
+            "source": "Triggering direct Eldritch Mending 574325 effective heal on ally"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 0,
+            "denominator": 1,
+            "expected": 1.0,
+            "tolerance": 0.005,
+            "floor_count": 0,
+            "source": "520388 Effect[0] bp=99+die=1 = 100% ($s1) of triggering direct effective healing"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520497,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom Effect[0] 100% ($s1); AscensionCultistEvents.cpp:183-185 calls Copy(player, ally, 520497, CalculatePct(healing, 100)). Non-crit (16255=-100), +5000 SP, injured ally (2000/100000 HP): Eldritch Mending 574325 (2000 ms cast) dooms ally; at wait_ms 6000 (after 2000 + 3000 ms), 520497 ticks once for 100% of 574325 effective healing (ratio 1.0 +- 0.005). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "caster_health": [
+        2000,
+        100000
+      ]
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (buff lasts 60 sec)",
+      "kind": "metric_delta",
+      "variant": "buff_duration",
+      "label_suffix": "buff_duration",
+      "quote": "Lasts for $d or $n instances of damage or healing.",
+      "trigger_spell": 520388,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 520388,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 55000,
+      "expiry_wait_ms": 8000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          54500,
+          56000
+        ],
+        "expired": [
+          62500,
+          64500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom DurationIndex 3 = 60000 ms ($d = 1 min, SpellDuration.dbc). Reads 520388 absent before cast (0), present (1) at 55000 ms (game_time [54500, 56000] > 54000 = 0.9*60000), and gone (0) at 63000 ms (game_time [62500, 64500] < 66000 = 1.1*60000), excluding 10% off on both sides. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (holds after 4 instances of damage)",
+      "kind": "metric_delta",
+      "variant": "four_instances_hold",
+      "label_suffix": "four_instances_hold",
+      "quote": "Lasts for $d or $n instances of damage or healing.",
+      "trigger_spell": 800416,
+      "learn": [
+        800416
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 520450,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Confirms all 4 Horrorbolt 800416 casts triggered Vision of Doom 520450"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520388,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom ProcCharges = 5 ($n = 5, Spell.dbc; AscensionCultistAuras.cpp:106-107 SetCharges(5)). After 4 Horrorbolt 800416 procs spaced 3300 ms apart (> 3000 ms ICD; aura_apply_count of 520450 = 4), 520388 remains active on caster (1). Paired with five_instances_consume. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "setup_casts": [
+        520388
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (consumed after 5 instances, 6th does not proc)",
+      "kind": "metric_delta",
+      "variant": "five_instances_consume",
+      "label_suffix": "five_instances_consume",
+      "quote": "Lasts for $d or $n instances of damage or healing.",
+      "trigger_spell": 800416,
+      "learn": [
+        800416
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        },
+        {
+          "spell": 800416,
+          "target": "dummy",
+          "delay_ms": 3300
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 520450,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Exactly 5 of 6 Horrorbolt 800416 casts trigger 520450; 6th cast does not proc after 520388 expires"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800416,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 7,
+            "tolerance": 0,
+            "source": "Confirms 1 Horrorbolt 800416 landed in control (no 520388 -> 0 procs) and 6 more landed in treatment (cumulative 7 -> exactly 5 procs)"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 520388,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520388 Vision of Doom ProcCharges = 5 ($n = 5). After 6 Horrorbolt 800416 casts spaced 3300 ms apart (all 6 land), 520388 must be consumed on the 5th proc (aura=0, 520450 applied exactly 5 times, 6th cast does not proc). Paired with four_instances_hold. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "setup_casts": [
+        520388
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (doomed enemy is unable to be healed)",
+      "kind": "metric_delta",
+      "variant": "heal_block",
+      "label_suffix": "heal_block",
+      "quote": "Doomed enemies are unable to be healed",
+      "trigger_spell": 502182,
+      "learn": [
+        502182,
+        520388
+      ],
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "cast_in_before": true,
+      "setup_casts": [
+        520388
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "player_spell_power": 1500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "enemy_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 23783,
+        "target": "enemy"
+      },
+      "before_expected": 1500,
+      "expected": 1500,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 3000,
+      "expire_ms": 3500,
+      "void_on_cast_failure": true,
+      "observe_source": "520450 Vision of Doom applies 520498 (AscensionCultistAuras.cpp:73-74; Spell.dbc Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT bp=-101+die=1 = -100% healing received for 3000 ms). Horrorbolt 502182 (2500 ms cast, +1500 SP, ~2000 damage, no delayed explosion so enemy player stays alive) damages enemy player (race 2) in both phases; at wait_ms 3000 (500 ms after 502182 lands, inside 520498 3000 ms window) enemy casts Gift of Life 23783 (1500 heal) on itself. Control (no 520388): 23783 heals 1500. Treatment (520388 active -> 520450 + 520498 applied): 23783 heals 0 (cumulative 1500, expected_gain 0). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (520450 damage critically strikes under forced spell crit)",
+      "kind": "metric_delta",
+      "variant": "damage_can_crit",
+      "label_suffix": "damage_can_crit",
+      "quote": "and the damage or healing done by this effect can critically strike.",
+      "trigger_spell": 520388,
+      "learn": [
+        502182
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502182,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 520450,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 520450 damage tick landed"
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520450,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520450 Vision of Doom (AscensionCultistContracts.cpp:61-65 clears SPELL_ATTR2_CANT_CRIT; AscensionCultistAuras.cpp:77-79 sets tick->SetCritChance(PLAYER_SPELL_CRIT_PERCENTAGE1 + SHADOW)). Treatment arm under force_crit spell (100% spell crit; 0% residual miss probability): 520450 lands once and critically strikes (critical=true count 0 -> 1). Paired with damage_no_crit_control (0% crit -> 0 crits). Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (control: 520450 damage never crits at 0% spell crit)",
+      "kind": "metric_delta",
+      "variant": "damage_no_crit_control",
+      "label_suffix": "damage_no_crit_control",
+      "quote": "and the damage or healing done by this effect can critically strike.",
+      "trigger_spell": 520388,
+      "learn": [
+        502182
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502182,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 520450,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 520450 damage tick landed non-crit"
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520450,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm for damage_can_crit: at 0% spell crit (16255=-100; 0% residual false-crit probability), 520450 lands once (spell_damage_count=1) with 0 critical strikes (critical=true count 0 -> 0). Together with damage_can_crit (100% crit -> 1/1 crits), proves 520450 responds to spell crit chance. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (520497 healing critically strikes under forced spell crit)",
+      "kind": "metric_delta",
+      "variant": "heal_can_crit",
+      "label_suffix": "heal_can_crit",
+      "quote": "and the damage or healing done by this effect can critically strike.",
+      "trigger_spell": 520388,
+      "learn": [
+        574325
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "spell",
+      "after_trigger_casts": [
+        {
+          "spell": 574325,
+          "target": "caster",
+          "delay_ms": 1600
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 520497,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 520497 heal tick landed on ally"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520497,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "520497 Vision of Doom (AscensionCultistContracts.cpp:61-65 clears SPELL_ATTR2_CANT_CRIT; AscensionCultistAuras.cpp:77-79 sets tick->SetCritChance(PLAYER_SPELL_CRIT_PERCENTAGE1 + SHADOW)). Treatment arm under force_crit spell (100% spell crit; 0% residual): 520497 lands once on injured ally and critically strikes (critical=true count 0 -> 1). Paired with heal_no_crit_control. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "caster_health": [
+        2000,
+        100000
+      ]
+    },
+    {
+      "spell": 520388,
+      "name": "Vision of Doom (control: 520497 healing never crits at 0% spell crit)",
+      "kind": "metric_delta",
+      "variant": "heal_no_crit_control",
+      "label_suffix": "heal_no_crit_control",
+      "quote": "and the damage or healing done by this effect can critically strike.",
+      "trigger_spell": 520388,
+      "learn": [
+        574325
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 574325,
+          "target": "caster",
+          "delay_ms": 1600
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 520497,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 520497 heal tick landed non-crit on ally"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520497,
+        "target": "caster",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Control arm for heal_can_crit: at 0% spell crit (16255=-100; 0% residual), 520497 lands once on injured ally (spell_heal_count=1) with 0 critical strikes (critical=true count 0 -> 0). Together with heal_can_crit (100% crit -> 1/1 crits), proves 520497 responds to spell crit chance. Reference search 2026-11-25: coabuildhub 520388 matches Spell.dbc verbatim.",
+      "caster_health": [
+        2000,
+        100000
+      ]
     }
   ],
   "player_observations": [],
