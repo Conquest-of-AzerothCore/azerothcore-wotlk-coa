@@ -42,18 +42,39 @@ class LastApplicationSpec:
     feed_every_ms: int | None = None
     feed_stop_aura: int | None = None
     feed_stop_target: str | None = None
+    feed_proc_spell: int | None = None
     force_crit: str | None = None
     quote_spell: int | None = None
     trigger_target: str = TARGET
     poll_before_cast: bool = False
     same_stamp_applies: bool = False
+    control_expected_ms: int | None = None
+    base_learn: tuple[int, ...] = ()
+    base_casts: tuple[int, ...] = ()
 
 
 AURA_HOLDERS = {False: TARGET, True: CASTER}
 
 
+def spell_list_of(spell: int, raw, name: str) -> tuple[int, ...]:
+    if raw is None:
+        return ()
+    if not isinstance(raw, list) or not raw or any(
+            isinstance(item, bool) or not isinstance(item, int) or item <= 0 for item in raw):
+        raise ValueError(f'{spell} last_application_expiry {name} must be a non-empty list of spell ids, not {raw!r}')
+    if len(set(raw)) != len(raw):
+        raise ValueError(f'{spell} last_application_expiry {name} must not repeat spell ids: {raw!r}')
+    return tuple(raw)
+
+
 def last_application_spec(entry: dict) -> LastApplicationSpec:
-    spec = LastApplicationSpec(int(entry['spell']), entry['name'], entry['quote'], int(entry['gate_spell']),
+    spell = int(entry['spell'])
+    raw_ctrl_expected = entry.get('control_expected_ms')
+    if raw_ctrl_expected is not None and (isinstance(raw_ctrl_expected, bool)
+                                          or not isinstance(raw_ctrl_expected, int) or raw_ctrl_expected <= 0):
+        raise ValueError(f'{spell} last_application_expiry control_expected_ms must be a positive int, '
+                         f'not {raw_ctrl_expected!r}')
+    spec = LastApplicationSpec(spell, entry['name'], entry['quote'], int(entry['gate_spell']),
                                int(entry['trigger_spell']), int(entry['aura']), int(entry['expected_ms']),
                                int(entry['control_window_ms']), int(entry['window_ms']),
                                int(entry['trigger_power']) if entry.get('trigger_power') is not None else None,
@@ -65,7 +86,10 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
                                entry.get('force_crit'),
                                int(entry['quote_spell']) if 'quote_spell' in entry else None,
                                entry.get('trigger_target', TARGET), entry.get('poll_before_cast', False),
-                               entry.get('same_stamp_applies', False))
+                               entry.get('same_stamp_applies', False),
+                               raw_ctrl_expected,
+                               spell_list_of(spell, entry.get('base_learn'), 'base_learn'),
+                               spell_list_of(spell, entry.get('base_casts'), 'base_casts'))
     if spec.trigger_target not in (TARGET, CASTER):
         raise ValueError(f'{spec.spell} last_application_expiry casts its trigger at {TARGET} or {CASTER}')
     if not all(isinstance(flag, bool) for flag in (spec.caster, spec.no_refresh, spec.poll_before_cast,
@@ -91,6 +115,30 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
                              f'stop_aura when the judged aura is on the {AURA_HOLDERS[spec.caster]}')
         if spec.feed_every_ms < GCD_WAIT_MS:
             raise ValueError(f'{spec.spell} last_application_expiry feed casts at least {GCD_WAIT_MS} ms apart')
+    if spec.control_expected_ms is None:
+        if spec.feed_proc_spell is not None or spec.base_learn or spec.base_casts:
+            raise ValueError(f'{spec.spell} last_application_expiry feed.proc_spell, base_learn and base_casts '
+                             f'require control_expected_ms')
+    else:
+        if spec.feed_every_ms is None or spec.feed_proc_spell is None or spec.same_stamp_applies:
+            raise ValueError(f'{spec.spell} last_application_expiry control_expected_ms requires feed with proc_spell '
+                             f'and refuses same_stamp_applies')
+        if spec.feed_proc_spell == spec.gate_spell:
+            raise ValueError(f'{spec.spell} last_application_expiry feed.proc_spell {spec.feed_proc_spell} must '
+                             f'differ from gate_spell {spec.gate_spell}')
+        if spec.feed_proc_spell not in spec.base_learn or spec.gate_spell in spec.base_learn \
+                or spec.trigger_spell in spec.base_learn:
+            raise ValueError(f'{spec.spell} last_application_expiry base_learn must include proc_spell and omit '
+                             f'gate_spell and trigger_spell')
+        if not set(spec.base_casts) <= set(spec.base_learn):
+            raise ValueError(f'{spec.spell} last_application_expiry base_casts must be learned in base_learn')
+        bands = bonus_band(spec.control_expected_ms) + bonus_band(spec.expected_ms)
+        if abs(spec.expected_ms - spec.control_expected_ms) <= bands:
+            raise ValueError(f'{spec.spell} last_application_expiry control_expected_ms {spec.control_expected_ms} '
+                             f'and expected_ms {spec.expected_ms} do not have disjoint G-19 bands')
+        if spec.control_window_ms <= spec.control_expected_ms + bonus_band(spec.control_expected_ms):
+            raise ValueError(f'{spec.spell} last_application_expiry control_window_ms must exceed '
+                             f'control_expected_ms plus its G-19 band')
     if spec.repeat is not None and spec.repeat[0] * spec.repeat[1] >= spec.expected_ms:
         raise ValueError(f'{spec.spell} last_application_expiry repeats its trigger past the stated duration')
     if spec.poll_ms < 10 or spec.expected_ms <= 0 or spec.window_ms <= spec.expected_ms + bonus_band(spec.expected_ms):
@@ -101,16 +149,19 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
     return spec
 
 
-def feed_of(entry: dict) -> tuple[int | None, int | None, str | None]:
+def feed_of(entry: dict) -> tuple[int | None, int | None, str | None, int | None]:
     raw = entry.get('feed')
     if raw is None:
-        return None, None, None
-    if not isinstance(raw, dict) or not {'every_ms'} <= set(raw) <= {'every_ms', 'stop_aura', 'stop_target'}:
+        return None, None, None, None
+    allowed = {'every_ms', 'stop_aura', 'stop_target', 'proc_spell'}
+    if not isinstance(raw, dict) or not {'every_ms'} <= set(raw) <= allowed:
         raise ValueError(f'last_application_expiry feed is {{"every_ms": ms, "stop_aura": spell, '
-                         f'"stop_target": "caster"|"dummy"}} (stop_aura and stop_target optional), not {raw!r}')
+                         f'"stop_target": "caster"|"dummy", "proc_spell": spell}} '
+                         f'(stop_aura, stop_target and proc_spell optional), not {raw!r}')
     every_ms = raw['every_ms']
     stop_aura = raw.get('stop_aura')
     stop_target = raw.get('stop_target')
+    proc_spell = raw.get('proc_spell')
     if not isinstance(every_ms, int) or isinstance(every_ms, bool) or every_ms <= 0:
         raise ValueError(f'last_application_expiry feed every_ms must be a positive int, not {every_ms!r}')
     if stop_aura is not None and (not isinstance(stop_aura, int) or isinstance(stop_aura, bool) or stop_aura <= 0):
@@ -118,15 +169,20 @@ def feed_of(entry: dict) -> tuple[int | None, int | None, str | None]:
     if stop_target is not None and stop_target not in (CASTER, TARGET):
         raise ValueError(f'last_application_expiry feed stop_target must be {CASTER!r} or {TARGET!r}, '
                          f'not {stop_target!r}')
-    return every_ms, stop_aura, stop_target
+    if proc_spell is not None and (not isinstance(proc_spell, int) or isinstance(proc_spell, bool) or proc_spell <= 0):
+        raise ValueError(f'last_application_expiry feed proc_spell must be a positive int, not {proc_spell!r}')
+    return every_ms, stop_aura, stop_target, proc_spell
 
 
 def feed_casts(records: Records, spec: LastApplicationSpec) -> int:
-    chance = records.field('Spell', spec.gate_spell, 'ProcChance') / 100
+    proc_spell = spec.feed_proc_spell if spec.feed_proc_spell is not None else spec.gate_spell
+    chance = records.field('Spell', proc_spell, 'ProcChance') / 100
     if not 0 < chance < 1:
-        raise ValueError(f'{spec.spell} last_application_expiry feed needs a gate spell {spec.gate_spell} with a '
+        role = 'proc spell' if spec.feed_proc_spell is not None else 'gate spell'
+        raise ValueError(f'{spec.spell} last_application_expiry feed needs a {role} {proc_spell} with a '
                          f'proc chance between 0 and 100%')
-    return math.ceil(math.log(FEED_RESIDUAL) / math.log(1 - chance))
+    residual = FEED_RESIDUAL / 2 if spec.control_expected_ms is not None else FEED_RESIDUAL
+    return math.ceil(math.log(residual) / math.log(1 - chance))
 
 
 def repeat_of(raw) -> tuple[int, int] | None:
@@ -154,9 +210,11 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
     facts = facts_of(records, spec.trigger_spell)
     reads = {}
     feeding = spec.feed_every_ms is not None
+    two_duration = spec.control_expected_ms is not None
     max_casts = feed_casts(records, spec) if feeding else 0
     stop_aura = (spec.feed_stop_aura or spec.aura) if feeding else None
     feed_reads = {}
+    shared_start = {}
 
     def arm(name: str, window_ms: int) -> list[dict]:
         power = spec.trigger_power if spec.trigger_power is not None else facts.mana_cost
@@ -178,9 +236,11 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
                      measurement(row[2], holder, 'aura', spell=spec.aura)]
             return reads + ([measurement(row[3], holder, 'aura_stacks', spell=spec.aura)] if spec.no_refresh else [])
 
-        stamped = feeding and name == ARMS[1]
-        if stamped:
+        stamped = feeding and (two_duration or name == ARMS[1])
+        opens_timeline = feeding and (name == ARMS[0] if two_duration else name == ARMS[1])
+        if opens_timeline:
             start = last_application_label(spec, f'{name} timeline start')
+            shared_start['start'] = start
             steps += [measurement(start, CASTER, 'game_time_ms'),
                       {'action': 'encounter_start', 'actor': CASTER, 'boss_entry': DUMMY_ENTRY}]
         if spec.no_refresh or feeding or spec.poll_before_cast:
@@ -203,10 +263,19 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
             steps.append(cast)
         if stamped:
             applied = {'event': 'aura_applied', 'spell': spec.aura, 'target_actors': [holder]}
-            stamps = {stamp: last_application_label(spec, f'{name} timeline {stamp}') for stamp in FEED_STAMPS}
-            feed_reads[name] |= {'stamps': {'start': start, **stamps}}
-            steps += [measurement(stamps['applies'], CASTER, 'timeline_count', **applied),
-                      measurement(stamps['first'], CASTER, 'timeline_first_ms', **applied)]
+            if two_duration and name == ARMS[1]:
+                applies_label = last_application_label(spec, f'{name} timeline applies')
+                interval_label = last_application_label(spec, f'{name} timeline interval')
+                feed_reads[name] |= {'stamps': {'start': shared_start['start'], 'applies': applies_label,
+                                                'first': feed_reads[ARMS[0]]['stamps']['first'],
+                                                'interval': interval_label}}
+                steps += [measurement(applies_label, CASTER, 'timeline_count', **applied),
+                          measurement(interval_label, CASTER, 'timeline_interval_max_ms', **applied)]
+            else:
+                stamps = {stamp: last_application_label(spec, f'{name} timeline {stamp}') for stamp in FEED_STAMPS}
+                feed_reads[name] |= {'stamps': {'start': shared_start['start'], **stamps}}
+                steps += [measurement(stamps['applies'], CASTER, 'timeline_count', **applied),
+                          measurement(stamps['first'], CASTER, 'timeline_first_ms', **applied)]
         while elapsed <= window_ms:
             while recasts and recasts[0] <= elapsed:
                 recasts.pop(0)
@@ -218,6 +287,11 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
         reads[name] = rows
         return steps
 
+    setup_base = [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in spec.base_learn]
+    for stance in spec.base_casts:
+        setup_base += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': stance},
+                       {'action': 'cast', 'actor': CASTER, 'spell': stance, 'target': CASTER},
+                       {'action': 'wait', 'label': f'stance {stance} settle', 'ms': GCD_WAIT_MS}]
     pre_learn_clear = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.trigger_spell, 'stacks': 0,
                          'target': TARGET, 'caster': CASTER}]
                        if spec.feed_stop_target == TARGET and feeding and spec.trigger_target == TARGET else [])
@@ -233,6 +307,7 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
         cleared = [{'action': 'cancel_aura', 'actor': CASTER, 'spell': aura}
                    for aura in dict.fromkeys((stop_aura, spec.aura)) if feeding and (aura == stop_aura or spec.caster)]
     steps = (base_steps(class_file)
+             + setup_base
              + ([{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] if feeding else [])
              + arm(ARMS[0], spec.control_window_ms)
              + pre_learn_clear
@@ -262,7 +337,27 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
                                  f'arms.')
     if spec.caster:
         scenario['contract'] += ' The aura is read on the caster, not the dummy.'
-    if feeding:
+    if feeding and two_duration:
+        stop_holder = spec.feed_stop_target or CASTER
+        scenario['contract'] = scenario['contract'].replace(
+            f'cast at the dummy before {spec.gate_spell} is learned (control: refused, no {spec.aura}) and after it',
+            f'known in both arms beside base_learn {list(spec.base_learn)}'
+            + (f' (cast on caster: {list(spec.base_casts)})' if spec.base_casts else '')
+            + f'; {spec.gate_spell} is learned after the control arm (control expects {spec.control_expected_ms} ms, '
+              f'treatment expects {spec.expected_ms} ms)')
+        scenario['contract'] += (
+            f' Two-duration rolled-feed contrast: each arm casts {spec.trigger_spell} every {spec.feed_every_ms} ms '
+            f'(power and cooldown reset before each cast), at most {max_casts} casts per arm, until {stop_aura} is on '
+            f'the {stop_holder}: one roll per cast at the ProcChance of {spec.feed_proc_spell} leaves at most '
+            f'{FEED_RESIDUAL / 2:.3%} per fed arm ({FEED_RESIDUAL * 2:.2%} union bound across 4 fed arms in a pair) '
+            f'without the grant after {max_casts} casts. One encounter timeline opens before the control feed (after '
+            f'a game time read) and stays open across both arms: control requires 1 stamped apply with age at most '
+            f'{FEED_STAMP_MS} ms (timeline_first_ms) and expiry inside the G-19 band around '
+            f'{spec.control_expected_ms} ms; treatment requires 2 total stamped applies with age at most '
+            f'{FEED_STAMP_MS} ms (timeline_first_ms + timeline_interval_max_ms) and expiry inside the disjoint G-19 '
+            f'band around {spec.expected_ms} ms. The timeline is process global, so the scenario runs exclusive in a '
+            f'batch.')
+    elif feeding:
         stop_holder = spec.feed_stop_target or CASTER
         scenario['contract'] = scenario['contract'].replace(
             f'cast at the dummy before {spec.gate_spell} is learned (control: refused, no {spec.aura}) and after it',
@@ -301,6 +396,8 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
                                  'timed from that first application.')
     model = {'kind': KIND, 'metric': 'aura_apply_count', 'quote': entry.quote, 'reads': reads,
              'expected': spec.expected_ms}
+    if two_duration:
+        model['control_expected'] = spec.control_expected_ms
     if spec.no_refresh:
         model['no_refresh'] = True
     if feeding:
@@ -389,6 +486,79 @@ def fed_age_void(run, stamps: dict, first_read: float, remaining: float, stamp_m
     return ''
 
 
+def two_duration_age_void(run, arm_name: str, stamps: dict, first_read: float, remaining: float,
+                          stamp_ms: float, expected_applies: int) -> str:
+    read = {name: run.values.get(label) for name, label in stamps.items()}
+    unreadable = [name for name, value in read.items() if value is None or not math.isfinite(float(value))]
+    if unreadable or remaining <= 0:
+        return (f'{arm_name}: the aura\'s age at the first read is unreadable '
+                f'({", ".join(unreadable) or "no aura"} at the stop), so the stamped bracket is not proven')
+    if read['applies'] != expected_applies:
+        return (f'{arm_name}: {read["applies"]:g} stamped applies, expected {expected_applies}, so the last '
+                f'application is not the stamped one and the stamped bracket is not proven')
+    offset = read['first'] + read['interval'] if 'interval' in read else read['first']
+    age = first_read - read['start'] - offset
+    if age > stamp_ms:
+        return (f'{arm_name}: the aura is up to {age:g} ms old at the first read, above {stamp_ms:g} ms, so the '
+                f'stamped bracket is not proven')
+    return ''
+
+
+def judge_two_duration_arm(run, arm_name: str, arm_rows: list[tuple[float, float, float]], expected: float,
+                           feed: dict, expected_applies: int) -> tuple[str, tuple[float, float] | None, str]:
+    band = bonus_band(expected)
+    reads = feed['reads'][arm_name]
+    stop, remaining = run.values[reads['stop']], run.values[reads['remaining']]
+    if arm_rows[0][2]:
+        return 'unmeasured', None, f'{arm_name}: the aura is on before the feed'
+    if not stop:
+        return ('unmeasured', None,
+                f'{arm_name}: the feed reached its cap of {feed["max_casts"]} casts without {feed["stop_aura"]} '
+                f'(a void trial, neither a pass nor a fail)')
+    shifted = [(arm_rows[1][0] - feed['stamp_ms'], *arm_rows[0][1:])] + arm_rows[1:]
+    age_void = two_duration_age_void(run, arm_name, reads['stamps'], shifted[1][0], remaining, feed['stamp_ms'],
+                                     expected_applies)
+    bracket = last_application_bracket([row[:3] for row in shifted])
+    if isinstance(bracket, str):
+        held = shifted[-1][0] - shifted[0][0]
+        status = 'alert' if bracket.startswith('the aura is still on') and held > expected + band else 'unmeasured'
+        return status, None, f'{arm_name}: {bracket}'
+    low, high = bracket
+    applications = shifted[-1][1] - shifted[0][1]
+    detail = (f'{arm_name}: {applications:g} applications, lasted [{low:g}, {high:g}] ms vs {expected:g} +- {band:g} '
+              f'(remaining {remaining:g} ms)')
+    if expected - band <= low and high <= expected + band:
+        if age_void:
+            return 'unmeasured', bracket, f'{age_void} ({detail})'
+        return 'ok', bracket, detail
+    if high < expected - band or low > expected + band:
+        return 'alert', bracket, detail
+    return 'unmeasured', bracket, detail
+
+
+def two_duration_reading(base, run, model: dict, rows: dict):
+    feed = model['feed']
+    ctrl_expected = float(model['control_expected'])
+    treat_expected = float(model['expected'])
+    treat_band = bonus_band(treat_expected)
+    ctrl_status, ctrl_bracket, ctrl_text = judge_two_duration_arm(run, ARMS[0], rows[ARMS[0]], ctrl_expected, feed, 1)
+    treat_status, treat_bracket, treat_text = judge_two_duration_arm(run, ARMS[1], rows[ARMS[1]], treat_expected,
+                                                                     feed, 2)
+    explanation = f'{ctrl_text}; {treat_text}'
+    measured = (treat_bracket[0] + treat_bracket[1]) / 2 if treat_bracket is not None else None
+    if 'alert' in (ctrl_status, treat_status):
+        return replace(base, status='alert', measured=measured, expected=treat_expected,
+                       low=treat_expected - treat_band, high=treat_expected + treat_band, explanation=explanation)
+    if 'unmeasured' in (ctrl_status, treat_status):
+        return replace(base, status='unmeasured', measured=measured, expected=treat_expected,
+                       low=treat_expected - treat_band, high=treat_expected + treat_band, explanation=explanation)
+    separated = (ctrl_bracket[1] < treat_bracket[0] if treat_expected > ctrl_expected
+                 else treat_bracket[1] < ctrl_bracket[0])
+    status = 'ok' if separated else 'alert'
+    return replace(base, status=status, measured=measured, expected=treat_expected,
+                   low=treat_expected - treat_band, high=treat_expected + treat_band, explanation=explanation)
+
+
 def last_application_reading(base, run, model: dict):
     from compare import missing_measurement
     feed = model.get('feed')
@@ -399,6 +569,8 @@ def last_application_reading(base, run, model: dict):
     if missing is not None:
         return replace(base, explanation=missing_measurement(run, missing))
     rows = {name: [tuple(run.values[label] for label in row) for row in model['reads'][name]] for name in ARMS}
+    if 'control_expected' in model:
+        return two_duration_reading(base, run, model, rows)
     expected = float(model['expected'])
     band = bonus_band(expected)
     control = rows['control']

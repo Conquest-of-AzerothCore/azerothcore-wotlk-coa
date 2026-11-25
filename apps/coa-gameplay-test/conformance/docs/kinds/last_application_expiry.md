@@ -101,3 +101,29 @@ summon that casts it inside an instant trigger) is seen as a rise from that read
 first poll follows the cast as before (`no_refresh` always reads that poll).
 
 Witch Doctor: The True Spirit 802268 `true_lasts` (The True God 681233 from the Serpent Ward summon).
+
+## Two-duration rolled-feed contrast (opt-in, ADR 1308, provisional)
+
+When a passive modifier (`gate_spell`, such as one with `ProcChance = 100`) changes the duration of an aura rolled by a
+separate baseline proc (`feed.proc_spell`), rather than gating `0 -> 1` application, set:
+
+- `control_expected_ms`: expected baseline duration (ms) in the control arm before `gate_spell` is learned. Its G-19
+  band must be strictly disjoint from `expected_ms`'s G-19 band, and `control_window_ms` must exceed
+  `control_expected_ms + bonus_band(control_expected_ms)`.
+- `feed.proc_spell`: the spell whose DBC `ProcChance` in `(0, 100)` sizes both arms' `cast_until_aura` cap at
+  `FEED_RESIDUAL / 2 = 0.00025` per arm (at most `0.1%` pair union bound across 4 fed arms in a 2-run pair). Must
+  differ from `gate_spell` and appear in `base_learn`.
+- `base_learn`: non-empty list of distinct spell ids learned before the control arm (omitting `gate_spell` and
+  `trigger_spell`).
+- `base_casts`: optional non-empty subset of `base_learn` cast on the caster before the control arm (for active stances
+  that must be active in both arms).
+
+One encounter timeline opens before the control feed and remains open across both arms: control verifies `1` stamped
+apply (`timeline_first_ms`, age `<= 100 ms`) and an expiry bracket inside `control_expected_ms +- band`; after
+`gate_spell` is learned, treatment verifies `2` total stamped applies (`timeline_first_ms + timeline_interval_max_ms`,
+age `<= 100 ms`) and an expiry bracket inside `expected_ms +- band`, strictly separated from control. Any cap hit,
+pre-existing aura, bad stamp count or stale age voids as `unmeasured`; either arm missing its band alerts. Absent,
+existing single-duration `feed` entries regenerate byte-identical.
+
+Cultist: Teachings of Mythrax `561035` (`nzoth_duration`: Presence of N'Zoth `803037` `500707` `8000 -> 10000 ms` on
+caster; `yshaarj_duration`: Presence of Y'Shaarj `803035` `805180` `12000 -> 15000 ms` on dummy).
