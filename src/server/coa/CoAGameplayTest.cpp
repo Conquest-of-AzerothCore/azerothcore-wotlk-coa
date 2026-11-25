@@ -7654,6 +7654,11 @@ private:
             if (!CastUntilOwnedCreature(step, record))
                 return;
         }
+        else if (action == "attack_until_swings")
+        {
+            if (!AttackUntilSwings(step, record))
+                return;
+        }
         else if (action == "forget_vanity" && !VanityRowStored(step))
             return;
         else
@@ -7760,6 +7765,33 @@ private:
         }
         record.put("attempts", _untilAuraAttempts);
         record.put("stopped", present ? "creature" : "cap");
+        return true;
+    }
+
+    bool AttackUntilSwings(Tree const& step, Tree& record)
+    {
+        std::string const actorId = step.get<std::string>("actor");
+        Actor const& actor = _actors.at(actorId);
+        Player* player = GetPlayer(actorId);
+        Unit* target = GetUnit(step.get<std::string>("target"));
+        uint32 const wanted = step.get<uint32>("swings");
+        uint64 const timeoutMs = step.get<uint32>("timeout_ms");
+        uint32 const hand = step.get<uint32>("hand", 0);
+        Require(wanted > 0 && hand < 2, "Invalid attack_until_swings parameters");
+        if (!_swingWaitStarted)
+        {
+            Require(player->IsValidAttackTarget(target), "Invalid melee attack target");
+            _swingWaitStarted = true;
+            _swingStartCount = actor.meleeAttacksByHand[hand];
+            SubmitAttackSwing(player, target);
+        }
+        uint32 const done = actor.meleeAttacksByHand[hand] - _swingStartCount;
+        if (done < wanted && GameElapsed(_stepTime) < timeoutMs)
+            return false;
+        WorldPacket packet(CMSG_ATTACKSTOP, 0);
+        player->GetSession()->HandleAttackStopOpcode(packet);
+        record.put("swings", done);
+        record.put("stopped", done >= wanted ? "swings" : "timeout");
         return true;
     }
 
@@ -9690,6 +9722,8 @@ private:
         ++_completed;
         _stepStarted = false;
         _untilAuraAttempts = 0;
+        _swingWaitStarted = false;
+        _swingStartCount = 0;
         _talentRequestSent = false;
         _characterQueueMarked = false;
         _characterQueueReached = false;
@@ -9702,6 +9736,8 @@ private:
     bool _targetsCreated = false;
     bool _stepStarted = false;
     uint32 _untilAuraAttempts = 0;
+    bool _swingWaitStarted = false;
+    uint32 _swingStartCount = 0;
     std::unordered_map<ObjectGuid, int32> _blockRatingFixtures;
     bool _talentRequestSent = false;
     uint32 _talentResultsBefore = 0;

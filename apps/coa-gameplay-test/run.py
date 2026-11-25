@@ -335,6 +335,8 @@ ACTIONS = {
     'cast_until_owned_creature': ({'actor', 'spell', 'entry', 'every_ms', 'max_casts'},
                                   {'actor', 'spell', 'target', 'entry', 'every_ms', 'max_casts', 'cast_power', 'power',
                                    'reset_cooldown'}),
+    'attack_until_swings': ({'actor', 'target', 'swings', 'timeout_ms'},
+                            {'actor', 'target', 'swings', 'timeout_ms', 'hand'}),
     'creature_attack': ({'actor'}, {'actor', 'target', 'stop'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
@@ -1024,6 +1026,12 @@ def validate(scenario, clock=REAL_CLOCK):
                 require('cast_power' in step, f'{where}: power selects the type of cast_power')
             if 'reset_cooldown' in step:
                 require(type(step['reset_cooldown']) is bool, f'{where}: reset_cooldown must be boolean')
+        if action == 'attack_until_swings':
+            require(step['actor'] in player_ids, f'{where}: attack_until_swings needs a player')
+            number(step['swings'], f'{where}.swings', 1, 50, True)
+            number(step['timeout_ms'], f'{where}.timeout_ms', 1, scenario.get('timeout_ms', 90000), True)
+            if 'hand' in step:
+                number(step['hand'], f'{where}.hand', 0, 1, True)
         if action in {'set_skill', 'gather_skill'}:
             number(step['skill'], f'{where}.skill', 1, 65535, True)
         if action == 'set_skill':

@@ -284,6 +284,18 @@ class RunnerTests(unittest.TestCase):
                                    'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
                                    'cumulative': True, 'save_as': 'bad'})
 
+    def test_attack_until_swings_action_fields(self):
+        step = {'action': 'attack_until_swings', 'actor': 'caster', 'target': 'target',
+                'swings': 9, 'timeout_ms': 12000}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'hand': 0})
+        self.assert_step_validates({**step, 'hand': 1})
+        for change in ({'actor': 'target'}, {'swings': 0}, {'swings': 51}, {'swings': True},
+                       {'timeout_ms': 0}, {'timeout_ms': 90001}, {'hand': 2}, {'hand': True}):
+            self.assert_step_rejected({**step, **change})
+        for field in ('target', 'swings', 'timeout_ms'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
         self.assert_step_validates(step)
