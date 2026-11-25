@@ -13,17 +13,21 @@ only the marked one gains the attacker bonus (`ap_melee_area`, `ap_melee_area_un
 
 ## Cone form (ADR 1224)
 
-`area_dummies` may instead be `{"cone": {"angle": degrees, "radius": yd, "source": text, optional "offset" (yd, default
-6), "margin_pct" (default 10), "behind" (degrees, default 135)}}`. `source` cites the data or the code line that sets the
-angle, never a reading. The dummy (the primary, struck), `area1` (just outside the edge) and `area2` (behind the
-caster) are placed on the line, and the caster is moved off it by a `relocate` step so they stand at bearings
-`angle/2 less margin_pct`, `angle/2 plus margin_pct` and `behind` from its facing. The entry judges the dummy's
-`spell_damage_count` of the hit spell (expected 1); the option reads the positions and the caster's orientation,
-recomputes every bearing, voids the trial (`unmeasured`) when one is more than 1 degree off its plan, a height is more
-than 1 yd off the caster's or a distance lies outside 4 yd and `radius`, and alerts when `area1` or `area2` is struck.
-It refuses a setup cast, `area_sum`, `relocate_before_trigger` and a trigger cast in the before phase.
+`area_dummies` may instead be `{"cone": {"angle": degrees, "radius": yd, "source": text, optional "offset" (yd, 0.5 to
+12, default 6), "margin_pct" (default 10), "behind" (degrees, default 135)}}`. `source` cites the data or the code line
+that sets the angle, never a reading. The dummy (the primary, struck), `area1` (just outside the edge) and `area2`
+(behind the caster) are placed on the line, and the caster is moved off it by a `relocate` step so they stand at
+bearings `angle/2 less margin_pct`, `angle/2 plus margin_pct` and `behind` from its facing. The entry judges the
+dummy's `spell_damage_count` of the hit spell (expected 1); the option reads the positions and the caster's
+orientation, recomputes every bearing, voids the trial (`unmeasured`) when one is more than 1 degree off its plan, a
+height is more than 1 yd off the caster's or a distance lies outside 4 yd and `radius`, and alerts when `area1` or
+`area2` is struck. It refuses `area_sum`, `relocate_before_trigger`, a trigger cast in the before phase, and any
+`setup_casts` that repeat the trigger or hit spell or run in `setup_in_before`/`setup_only_after`; treatment-only
+`setup_casts` targeting the dummy run before the cone relocation (ADR 1293).
 
 Sun Cleric: Shield Radiance 504580 `cone_edge` (90 degrees from `spell_cone` 800654, Spell.cpp:1277-1279).
+Cultist: Eldritch Force 681474 `cone_edge` (24 degrees, 8 yd, offset 1.0 yd, behind 166 degrees, with 5 Ancient Curse
+500712 crit setup casts before relocation, ADR 1293).
 
 ## Edge form (ADR 1224 addendum)
 

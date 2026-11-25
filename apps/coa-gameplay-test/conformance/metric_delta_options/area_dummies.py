@@ -51,9 +51,9 @@ def parse_cone(raw: dict) -> ConeDummies:
     half = cone['angle'] / 2
     outside = half * (1 + cone['margin_pct'] / 100)
     if not (20 <= cone['angle'] <= 160 and 0 < cone['margin_pct'] <= 50 and outside < 85
-            and 100 <= cone['behind'] <= 170 and 2 <= cone['offset'] <= 12 and cone['radius'] > 0):
+            and 100 <= cone['behind'] <= 170 and 0.5 <= cone['offset'] <= 12 and cone['radius'] > 0):
         raise ValueError(f'area_dummies cone {cone!r} needs an angle of 20 to 160 degrees with its outside bearing '
-                         f'under 85, a margin_pct of at most 50, a behind bearing of 100 to 170, an offset of 2 to 12 '
+                         f'under 85, a margin_pct of at most 50, a behind bearing of 100 to 170, an offset of 0.5 to 12 '
                          f'yd and a positive radius')
     plan = cone_plan(cone)
     if any(not CONE_MIN_DISTANCE_YD <= distance <= cone['radius'] - 1 for distance in plan['distance'].values()) \
@@ -130,12 +130,16 @@ def check(spec, distances):
                              f'must stand where the geometry is read')
     if hasattr(distances, 'cone'):
         options = dict(spec.options)
+        bad_setup = bool(spec.setup_casts) and (
+            spec.setup_only_after or spec.setup_in_before or spec.trigger_spell in spec.setup_casts
+            or spec.fields.get('spell') in spec.setup_casts)
         if spec.metric != 'spell_damage_count' or spec.target != TARGET or spec.fields.get('target') != TARGET \
-                or not isinstance(spec.fields.get('spell'), int) or spec.setup_casts or 'area_sum' in options \
+                or not isinstance(spec.fields.get('spell'), int) or bad_setup or 'area_sum' in options \
                 or 'relocate_before_trigger' in options or spec.cast_in_before:
             raise ValueError(f'{spec.spell} area_dummies cone judges the dummy\'s spell_damage_count of the hit '
-                             f'spell, with no setup cast, no area_sum, no relocate_before_trigger, and the trigger '
-                             f'cast only after the learn (cast_in_before false)')
+                             f'spell, with no area_sum, no relocate_before_trigger, the trigger cast only after the '
+                             f'learn (cast_in_before false), and any setup_casts distinct from the trigger and hit '
+                             f'spells running only in the treatment phase')
 
 
 def fixtures(class_file: dict, spec, distances: tuple[float, ...], scenario: dict):
@@ -196,7 +200,8 @@ def cone_fixtures(spec, cone: dict, primary: dict, names: list[str], scenario: d
         f'{plan["bearing"]["outside"]:g}) and area2 (behind the caster: {plan["bearing"]["behind"]:g}). Each bearing '
         f'is recomputed from the read positions and orientation; a dummy more than {CONE_BEARING_TOLERANCE_DEG:g} '
         f'degree off its planned bearing, or a height more than {CONE_HEIGHT_TOLERANCE_YD:g} yd off the caster\'s, '
-        f'voids the trial.')
+        f'voids the trial.'
+        + (' Setup casts run at the dummy before the cone relocation.' if spec.setup_casts else ''))
 
 
 def edge_label(spec, read: str) -> str:
