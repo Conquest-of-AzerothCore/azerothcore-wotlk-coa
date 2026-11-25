@@ -121,8 +121,14 @@ void SetOutlawed(Player* player, bool outlawed)
 {
     for (uint32 faction : CapitalFactions(player->GetTeamId()))
         player->GetReputationMgr().ApplyForceReaction(faction, REP_HOSTILE, outlawed);
-    if (player->IsInWorld())
-        player->GetReputationMgr().SendForceReactions();
+    if (!player->IsInWorld())
+        return;
+
+    player->GetReputationMgr().SendForceReactions();
+    if (!outlawed)
+        for (uint32 faction : CapitalFactions(player->GetTeamId()))
+            if (player->GetReputationRank(faction) >= REP_FRIENDLY)
+                player->StopAttackFaction(faction);
 }
 
 bool IsCriminal(Player const* player)
@@ -201,8 +207,9 @@ public:
 
     void OnAuraApply(Unit* unit, Aura* aura) override
     {
-        Unit* caster = aura->GetCaster();
-        if (caster != unit && !aura->GetSpellInfo()->IsPositive())
+        if (!unit->IsPlayer() || aura->GetSpellInfo()->IsPositive())
+            return;
+        if (Unit* caster = aura->GetCaster(); caster != unit)
             StrikeInnocent(caster, unit);
     }
 
