@@ -1407,7 +1407,7 @@
     "spell": 520405,
     "clause": "In addition, increases the effectiveness of Eldritch Obelisk by $s1%.",
     "labels": [
-      "520405 effect_value e0 #1"
+      "520405 behaviour_metric_delta obelisk_effectiveness"
     ],
     "kind": "claim"
   },
@@ -1967,19 +1967,28 @@
   {
     "spell": 560715,
     "clause": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
-    "labels": [],
+    "labels": [
+      "560715 behaviour_metric_delta summon_duration",
+      "560715 behaviour_metric_delta no_talent",
+      "560715 behaviour_metric_delta threshold_above_35"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560715,
     "clause": "which will attack enemies and heal you for 5% of your base health.",
-    "labels": [],
+    "labels": [
+      "560715 behaviour_metric_delta attack_and_heal"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560715,
     "clause": "Can ony occur once every 2 minutes.",
-    "labels": [],
+    "labels": [
+      "560715 behaviour_metric_delta icd_blocked",
+      "560715 behaviour_metric_delta icd_reopened"
+    ],
     "kind": "claim"
   },
   {
@@ -2753,7 +2762,9 @@
     "spell": 681425,
     "clause": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
     "labels": [
-      "681425 spell_duration 680573 #0"
+      "681425 behaviour_metric_delta duration",
+      "681425 behaviour_metric_delta no_talent",
+      "681425 behaviour_metric_delta non_crit"
     ],
     "kind": "claim"
   },
@@ -2761,7 +2772,7 @@
     "spell": 681425,
     "clause": "which will attack enemies and heal you for $681275s1% of your base health.",
     "labels": [
-      "681425 effect_value 681275e0 #1"
+      "681425 behaviour_metric_delta attack_and_heal"
     ],
     "kind": "claim"
   },

@@ -20869,6 +20869,454 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "Eternal Grasp 704879 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DURATION +50% ($s1 = 50; Spell.dbc) matching Tentacle of Y'shaarj 802044 (SpellFamilyFlags[2]=536870912, base 30000 ms -> expected 45000 ms). Brackets owned_creature_count(50096) at 42s (present) and 48s (absent), excluding +-10% (40500 / 49500 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (ability crit summons Manifestation of Y'shaarj for 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+      "trigger_spell": 502122,
+      "gate_spell": 681425,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "force_crit": "melee",
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10500,
+          10950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Entities 681425 (AscensionCultistEvents.cpp:96,219-221): on player non-periodic ability critical strike, summons Manifestation of Y'shaarj 397771 for 680573 duration (DurationIndex 1 = 10000 ms, $680573d; Spell.dbc). Blade of the Empire 502122 with force_crit melee (precondition fixture) brackets owned_creature_count(397771) in game time: 0 before cast, 1 at [9100..9600] ms (>9000 ms -10%), 0 at [10500..10950] ms (<11000 ms +10%). Reference search 2026-11-25: coa-history 680573 has 277 summons; coabuildhub spells_master_index.json matches; installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (control: ability crit does not summon without 681425)",
+      "kind": "metric_delta",
+      "variant": "no_talent",
+      "label_suffix": "no_talent",
+      "quote": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+      "trigger_spell": 502122,
+      "gate_spell": 681425,
+      "target": "dummy",
+      "force_crit": "melee",
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Learned contrast for Eldritch Entities 681425: forced-crit Blade of the Empire 502122 summons 0 Manifestations 397771 before learning 681425 and 1 after learning 681425. Reference search 2026-11-25: coa-history 680573 has 277 summons; installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (control: non-critical ability hit does not summon)",
+      "kind": "metric_delta",
+      "variant": "non_crit",
+      "label_suffix": "non_crit",
+      "quote": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+      "trigger_spell": 502182,
+      "gate_spell": 681425,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "uncritical_casts": {
+        "casts": 2,
+        "min_uncritical": 2
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Non-crit gate for Eldritch Entities 681425: Horrorbolt 502182 with spell pen 823764 and -100 spell crit 16255 (precondition fixtures, verified non-critical by uncritical_casts 2/2) summons 0 Manifestations 397771 both before and after learning 681425. Reference search 2026-11-25: coa-history 680573 has 277 summons; installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (Manifestation attacks enemy and heals caster for 5% base health per hit)",
+      "kind": "metric_delta",
+      "variant": "attack_and_heal",
+      "label_suffix": "attack_and_heal",
+      "quote": "which will attack enemies and heal you for $681275s1% of your base health.",
+      "trigger_spell": 502122,
+      "gate_spell": 681425,
+      "target": "dummy",
+      "force_crit": "melee",
+      "cast_power": 2000,
+      "caster_health": [
+        500,
+        2278
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 70,
+      "after_at_least": 70,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_count",
+        "fields": {
+          "entry": 397771
+        },
+        "ratio": 70.0,
+        "tolerance": 1.0,
+        "least": 1,
+        "source": "681275 $s1 = 5% of base health (Spell.dbc); AscensionCultistSummons.cpp:352-353 heals caster via 680769 for player->GetCreateHealth() / 20 (level-60 Cultist basehp 1418 / 20 = 70 HP) per Manifestation 397771 melee hit"
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681275 Effect[0] BasePoints 4 + DieSides 1 = 5% ($681275s1 = 5; Spell.dbc). AscensionCultistSummons.cpp:309-313,352-353: Manifestation 397771 melee-attacks the enemy and heals caster via 680769 (CultistCopies, CANT_CRIT, IGNORE_CASTER_MODIFIERS) for GetCreateHealth() / 20 = 1418 / 20 = 70 HP per hit. Control (before 681425): 0 heals; treatment: owned_creature_damage_count(397771) >= 1 and spell_heal_total(680769) / owned_creature_damage_count(397771) == 70.0 within 1.0. Reference search 2026-11-25: coa-history 681275 has 848 heals (mean 129 across levels); coabuildhub older snapshot had 2%, installed Spell.dbc 5% governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (damage below 35% health summons 3 Manifestations for 10 sec)",
+      "kind": "metric_delta",
+      "variant": "summon_duration",
+      "label_suffix": "summon_duration",
+      "quote": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        34000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 92559,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 9100,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9150,
+          9650
+        ],
+        "expired": [
+          10700,
+          11090
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Calling 560715 (AscensionCultistEvents.cpp:66,205-208): taking damage while health < 35% summons 3 Manifestations of Y'shaarj 397771 for 10000 ms. Striker casts Void Zone 92559 (1000 Physical) at +100 ms on caster at 34000/100000 HP (<35%): owned_creature_count(397771) reads 0 before, 3 at [9150..9650] ms (~9200 ms after strike, >9000 ms -10%), and 0 at [10700..11090] ms (~10800 ms after strike, <11000 ms +10%). Reference search 2026-11-25: coa-history 680573 has 277 summons; coabuildhub older snapshot had 2%, installed Spell.dbc 5% governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (control: damage below 35% does not summon without 560715)",
+      "kind": "metric_delta",
+      "variant": "no_talent",
+      "label_suffix": "no_talent",
+      "quote": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "target": "caster",
+      "strike": {
+        "spell": 92559,
+        "health": 34000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Learned contrast for Dark Calling 560715: taking Void Zone 92559 at 34000/100000 HP (<35%) summons 0 Manifestations 397771 before learning 560715 and 3 after learning 560715. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (control: taking damage at 36% >= 35% health does not summon)",
+      "kind": "metric_delta",
+      "variant": "threshold_above_35",
+      "label_suffix": "threshold_above_35",
+      "quote": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "target": "caster",
+      "strike": {
+        "spell": 92559,
+        "health": 37000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold contrast for Dark Calling 560715 (<35% health): starting at 37000/100000 HP, Void Zone 92559 (~977 damage) leaves caster at ~36% >= 35%, so owned_creature_count(397771) stays 0 both before and after learning 560715. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (Manifestations attack enemy and heal caster for 5% base health per hit)",
+      "kind": "metric_delta",
+      "variant": "attack_and_heal",
+      "label_suffix": "attack_and_heal",
+      "quote": "which will attack enemies and heal you for 5% of your base health.",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "target": "caster",
+      "strike": {
+        "spell": 92559,
+        "health": 34000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 70,
+      "after_at_least": 70,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_count",
+        "fields": {
+          "entry": 397771
+        },
+        "ratio": 70.0,
+        "tolerance": 1.0,
+        "least": 1,
+        "source": "Dark Calling 560715 heals caster via 680769 for player->GetCreateHealth() / 20 (5% of level-60 Cultist basehp 1418 = 70 HP) per Manifestation 397771 hit (AscensionCultistSummons.cpp:352-353)"
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Calling 560715 Manifestations 397771 attack striker and heal caster via 680769 for GetCreateHealth() / 20 = 70 HP per hit (AscensionCultistSummons.cpp:309-313,352-353). Control (before 560715): 0 heals; treatment: owned_creature_damage_count(397771) >= 1 and spell_heal_total(680769) / owned_creature_damage_count(397771) == 70.0 within 1.0. Reference search 2026-11-25: coabuildhub older snapshot had 2%, installed Spell.dbc 5% governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (2 min ICD blocks re-trigger through 112 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_blocked",
+      "label_suffix": "icd_blocked",
+      "quote": "Can ony occur once every 2 minutes.",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 92559,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 1000,
+      "expiry_wait_ms": 111000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1000,
+          1600
+        ],
+        "expired": [
+          111500,
+          113500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Lower bracket of Dark Calling 560715 2-minute ICD (AscensionCultistEvents.cpp:66: Chance(player, 560715, 120000)). Void Zone 92559 at 20000/100000 HP (<35%) triggers 560715, verified 3 active Manifestations at +1.2s (game_time [1000..1600]); Manifestations engage the REACT_DEFENSIVE striker, which continues melee-hitting caster (<35% HP) after the 10s wave despawns, yet owned_creature_count(397771) remains 0 at +112.2s (game_time [111500..113500], strictly above 108000 ms = -10% of 120000 ms). Paired with icd_reopened (reads 3 at +124.2s) to bracket 120s inside +-10%. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (2 min ICD reopens by 124 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_reopened",
+      "label_suffix": "icd_reopened",
+      "quote": "Can ony occur once every 2 minutes.",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 92559,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 124000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          123800,
+          125500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket of Dark Calling 560715 2-minute ICD (AscensionCultistEvents.cpp:66: Chance(player, 560715, 120000)). Void Zone 92559 at 20000/100000 HP triggers the initial wave (despawns at 10s, stays 0 through 112s per icd_blocked); once the 120s ICD expires, ongoing hits from the engaged REACT_DEFENSIVE striker re-trigger 560715 so owned_creature_count(397771) reads 3 at +124.2s (game_time [123800..125500], strictly below 132000 ms = +10% of 120000 ms). Paired with icd_blocked (0 at +112.2s) to bracket 120s inside +-10%. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (Tentacle damage reduces Eldritch Obelisk cooldown by 2 sec)",
+      "kind": "metric_delta",
+      "variant": "obelisk_cd",
+      "label_suffix": "obelisk_cd",
+      "quote": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+      "trigger_spell": 802044,
+      "gate_spell": 520405,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        502182,
+        560321
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Tentacle of Y'shaarj 50096 deals 1 slam hit in each phase"
+          }
+        ]
+      },
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 560321
+      },
+      "before_expected": 175900,
+      "expected": 173900,
+      "expected_gain": -2000,
+      "tolerance": 300,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Twilight Domination 520405 + 520872 Effect[0] BasePoints -2001 + DieSides 1 = -2000 ms ($/1000;520872s1 = 2 sec; Spell.dbc). Both phases engage dummy with Horrorbolt 502182, cast Eldritch Obelisk 560321 (180000 ms RecoveryTime, reset before cast), wait 3000 ms, then cast Tentacle of Y'shaarj 802044 (verified 1 slam hit per phase via ally_arm owned_creature_damage_count 50096) and read cooldown_ms of 560321 1000 ms later: expected gain -2000 ms within 300 ms after learning 520405. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (+25% Eldritch Obelisk effectiveness: ally speed +40% -> +50%)",
+      "kind": "effectiveness_delta",
+      "variant": "obelisk_effectiveness",
+      "label_suffix": "obelisk_effectiveness",
+      "quote": "In addition, increases the effectiveness of Eldritch Obelisk by $s1%.",
+      "trigger_spell": 560321,
+      "gate_spell": 520405,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.4,
+      "expected": 1.5,
+      "tolerance": 0.001,
+      "wait_ms": 1500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Twilight Domination 520405 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 24 + DieSides 1 = +25% ($s1 = 25), SpellClassMask[1] 65536 matching Eldritch Obelisk 560322 SpellFamilyFlags[1] 65536 (Spell.dbc). Grouped ally inside 15 yd of Eldritch Obelisk reads run_speed_rate 1.40 (+40%) before learning 520405 and 1.50 (+50% = 40% * 1.25) after learning 520405 (21000 ms expire_ms clears the 20000 ms Obelisk between phases). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events). Installed Spell.dbc governs (G-9)."
     }
   ],
   "player_observations": [],
