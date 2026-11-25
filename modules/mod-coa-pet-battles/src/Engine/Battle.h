@@ -1,7 +1,7 @@
 #ifndef COA_PET_BATTLE_ENGINE_BATTLE_H
 #define COA_PET_BATTLE_ENGINE_BATTLE_H
 
-#include "Event.h"
+#include "BattleEvent.h"
 #include "BattleTypes.h"
 #include <array>
 #include <map>
