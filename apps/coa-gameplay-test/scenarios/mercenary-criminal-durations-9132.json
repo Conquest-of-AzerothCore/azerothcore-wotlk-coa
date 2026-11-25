@@ -10,7 +10,8 @@
     "timer up to 3 minutes when less is left. The tooltip names the Mercenary's own faction, so a Horde War Mode",
     "player hit by an Alliance Mercenary gives nothing. Two War Mode Humans and a High-Risk Human Mercenary pick",
     "their rulesets in Stormwind and fight in Elwynn Forest with a War Mode Orc. Dodge and parry are zeroed on",
-    "the victims so every timed hit lands; all victims stand in front of the Mercenary."
+    "the victims so every timed hit lands; all victims stand in front of the Mercenary. Per the PR author's",
+    "ruling (2026-11-25) the debuff ends when its bearer dies."
   ],
   "timeout_ms": 240000,
   "players": [
@@ -412,6 +413,20 @@
       "spell": 9930873,
       "min": 460000,
       "max": 480000
+    },
+    {
+      "action": "die",
+      "label": "The Criminal Mercenary dies",
+      "actor": "mercenary"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: death removes Criminal",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 0,
+      "within_ms": 1000
     }
   ]
 }

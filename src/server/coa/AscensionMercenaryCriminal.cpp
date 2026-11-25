@@ -217,7 +217,12 @@ public:
             StrikeInnocent(caster, unit);
     }
 
-    void OnUnitDeath(Unit* unit, Unit* killer) override { KillInnocent(killer, unit); }
+    void OnUnitDeath(Unit* unit, Unit* killer) override
+    {
+        KillInnocent(killer, unit);
+        if (unit->IsPlayer())
+            unit->RemoveAurasDueToSpell(SPELL_CRIMINAL);
+    }
 
     void OnUnitExitCombat(Unit* unit) override
     {
