@@ -29843,6 +29843,51 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Proves shared Old God Tentacle cap across types: Tentacle of Y'shaarj 802044 (entry 50096, 30 s duration, SummonProperties 63) is present (1) before 572103 and replaced (0) after 572103 while 501464 rises 0 -> 1 (~2.6 s << 30 s). Paired with max_one. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 804633,
+      "name": "Void-Enchanted Armor (+20% offensive dispel resist)",
+      "kind": "offensive_dispel_resist_rate",
+      "variant": "dispel_resist",
+      "label_suffix": "dispel_resist",
+      "quote": "Increases your chance to resist dispel effects by $s1%.",
+      "buff_spell": 48161,
+      "buff_source": "Power Word: Fortitude 48161 (Dispel 1 Magic, DurationIndex 30)",
+      "treatment_resist_pct": 20,
+      "parts": 6,
+      "observe_source": "Void-Enchanted Armor 804633: shipped Spell.dbc has EffectBasePoints[0]=-21 (-20), overridden by data/sql/updates/pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql to EffectBasePoints_1=19, EffectDieSides_1=1 -> effective +20 SPELL_AURA_MOD_DISPEL_RESIST (aura 235). Aura::CalcDispelChance (SpellAuras.cpp:1153-1178) clamps resistChance to [0, 100] and returns 100 - resistChance: 0% survive before learn, 20% survive after real learn of 804633 under hostile Dispel Magic 527 against Power Word: Fortitude 48161 (pooled over 6 parts, residual <= 0.1% per pair)."
+    },
+    {
+      "spell": 300287,
+      "name": "Forbidden Resilience (+25% offensive dispel resist while Herald of the Depths is active)",
+      "kind": "offensive_dispel_resist_rate",
+      "variant": "dispel_resist",
+      "label_suffix": "dispel_resist",
+      "quote": "and have a $s1% increased chance to resist dispel effects.",
+      "buff_spell": 48161,
+      "buff_source": "Power Word: Fortitude 48161 (Dispel 1 Magic, DurationIndex 30)",
+      "treatment_resist_pct": 25,
+      "learn": [
+        92131,
+        520326
+      ],
+      "gate_cast": 520326,
+      "parts": 15,
+      "observe_source": "Forbidden Resilience 300287 Effect[0] BasePoints 24 + DieSides 1 = +25 ($s1 = 25; Spell.dbc); AscensionCultistContracts.cpp:110-111 sets SPELL_AURA_MOD_DISPEL_RESIST +25, gated on Herald of the Depths 520326 in AscensionCultist.cpp:294 and AscensionCultistAuras.cpp:137-138. Aura::CalcDispelChance (SpellAuras.cpp:1153-1178): 0% survive before learning 300287 with Herald active, 25% survive after real learn with Herald active, and 0% survive in gate_off with 300287 learned and Herald removed (pooled over 15 parts so every part finishes well within Herald's 20 s duration, residual <= 0.1% per pair)."
+    },
+    {
+      "spell": 525060,
+      "name": "Crystalline Reflection (+50% Void Shield dispel resist on allies)",
+      "kind": "offensive_dispel_resist_rate",
+      "variant": "dispel_resist",
+      "label_suffix": "dispel_resist",
+      "quote": "Increases the chance for Void Shield to resist dispel effects on allies by $s2%",
+      "buff_spell": 578115,
+      "buff_source": "Void Shield 578115 (Dispel 1 Magic, SpellFamilyFlags[1]=536870912)",
+      "target": "ally",
+      "treatment_resist_pct": 50,
+      "parts": 6,
+      "observe_source": "Crystalline Reflection 525060 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue[1]=28 (SPELLMOD_RESIST_DISPEL_CHANCE), BasePoints 49 + DieSides 1 = +50 ($s2 = 50; Spell.dbc), EffectSpellClassMask[4]=536870912 matching Void Shield 578115 SpellFamilyFlags[1]. Aura::CalcDispelChance (SpellAuras.cpp:1153-1178) reads SPELLMOD_RESIST_DISPEL_CHANCE from GetCaster()->GetSpellModOwner(): 0% survive before learn, 50% survive after real learn of 525060 on Void Shield 578115 applied by caster to a grouped ally (pooled over 6 parts, residual <= 0.1% per pair)."
     }
   ],
   "player_observations": [],

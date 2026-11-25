@@ -309,18 +309,10 @@
     "spell": 300287,
     "clause": "and have a $s1% increased chance to resist dispel effects.",
     "labels": [
-      "300287 effect_value e0 #1"
+      "300287 behaviour_metric_delta dispel_resist",
+      "300287 behaviour_metric_delta dispel_resist_gate_off"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind runs a pooled hostile offensive-dispel survival trial loop against a re-applied positive Magic buff on the caster while Herald of the Depths 520326 is active (AscensionCultistContracts.cpp:110-111, AscensionCultist.cpp:294 grants +25% SPELL_AURA_MOD_DISPEL_RESIST gated on Herald): dispel_removal/dispel_count test debuff removal by the caster, and debuff_resist_rate tests incoming debuff application resist. Nearest kind: new kind offensive_dispel_resist_rate (shared with 804633 and 525060, with a Herald-off control arm).",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 300290,
@@ -1691,22 +1683,9 @@
     "spell": 525060,
     "clause": "Increases the chance for Void Shield to resist dispel effects on allies by $s2%",
     "labels": [
-      "525060 effect_value e1 #0"
+      "525060 behaviour_metric_delta dispel_resist"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind runs a pooled hostile-dispel-resist trial loop against a re-applied positive buff (Void Shield 578115) on a grouped ally: SpellAuras.cpp:1153-1178 (Aura::CalcDispelChance, called from SpellEffects.cpp:3656) applies 525060 Effect[1] SPELLMOD_RESIST_DISPEL_CHANCE (+50% on 578115 class mask 536870912), but dispel_removal and dispel_count (behaviours.py:2433-2539,9767-9822) only test the caster dispelling debuffs, and debuff_resist_rate (kinds/debuff_resist_rate.py) requires 0 < base_chance_pct < 50, applies harmful debuffs rather than offensive dispels against a friendly buff on an ally, and hardcodes a 3-arm low_health_pct structure. Nearest kind: debuff_resist_rate / dispel_count (needs hostile dispel survival trial loop on an ally's positive aura).",
-      "attempts": [
-        {
-          "agent": "cu-g8c",
-          "report": ".agents/plans/cu-g8c/report.md"
-        },
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 525060,
@@ -4204,19 +4183,9 @@
     "spell": 804633,
     "clause": "Increases your chance to resist dispel effects by $s1%.",
     "labels": [
-      "804633 effect_value e0 #0"
+      "804633 behaviour_metric_delta dispel_resist"
     ],
-    "kind": "claim",
-    "reason": "Tool gap (uncounted, not a server defect): shipped Spell.dbc carries EffectBasePoints[0] = -21 (-20), but data/sql/updates/pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql overrides spell_dbc ID 804633 to EffectBasePoints_1 = 19, EffectDieSides_1 = 1 (+20% SPELL_AURA_MOD_DISPEL_RESIST, verified live in coa_test_00353e74d42a_world.spell_dbc), retracting cu-g1 Alert 3. Stays uncounted because no existing conformance kind measures offensive dispel resist rate on a caster's positive buff (taken_hit resist_rate and debuff_resist_rate test incoming debuff application resist, not dispel survival of a buff).",
-    "tool_gap": {
-      "reason": "No existing conformance kind runs a pooled hostile offensive-dispel survival trial loop against a re-applied positive Magic buff on the caster (SpellAuras.cpp:1152-1178 Aura::CalcDispelChance consuming SPELL_AURA_MOD_DISPEL_RESIST +20% via pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql): dispel_removal/dispel_count test the caster dispelling debuffs, and debuff_resist_rate / taken_hit resist_rate test incoming debuff application resist, not dispel survival of a positive buff. Nearest kind: debuff_resist_rate / new kind offensive_dispel_resist_rate (shared with 300287 and 525060).",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 804670,
