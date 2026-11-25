@@ -296,8 +296,10 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A metric in `coverage.CONTRAST_PROOF` (kind modules add rows) is behaviour only when `detail.contrast` equals its
   row's contrast, whatever the claim words say (ADR 0616), unless the metric also has a `STATE_PROMISES` row: then the
   clause or its row must use those words. A readback metric has such a row only to gate its contrast proof, as
-  `spell_done_crit_chance` does with the crit words (ADR 0691), and `spell_taken_crit_chance`, the target-side
-  chance with the attacker's conditional rules, the same way (ADR 0800). `spell_done_crit_chance_scripted`, the done
+  `spell_done_crit_chance` does with the crit words (ADR 0691), `spell_taken_crit_chance`, the target-side
+  chance with the attacker's conditional rules, the same way (ADR 0800), and `spell_hit_bonus_taken`, the target's
+  `SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE` modifier queried by `Unit::MagicSpellHitResult`, with the hit-chance words
+  and a real learned contrast (ADR 1290). `spell_done_crit_chance_scripted`, the done
   chance passed through the CoA crit hook (`ScriptMgr::OnSpellCritChance`), takes the same row and crit words plus a
   partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1188): its learned verdict is behaviour only when the ledger row's
   conformant learned verdicts of the metric hold a non-zero expected gain and, unless every row of the spell joined is
