@@ -14,8 +14,8 @@ from hits import (ARMOR_LABEL, DAMAGE_TAKEN, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MA
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
 from kinds import kind_module, kind_names
 from metric_delta_options import shield_after_learn
-from metric_delta_options import (checked_options, option_after_trigger_steps, option_fixtures, option_model,
-                                  option_phase_steps, option_setup_cast_steps,
+from metric_delta_options import (checked_options, forbids_expected, option_after_trigger_steps, option_fixtures,
+                                  option_model, option_phase_steps, option_setup_cast_steps,
                                   option_setup_cast_target, parsed_options)
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
@@ -1563,11 +1563,11 @@ class MetricDeltaSpec:
     spell: int
     name: str
     quote: str
-    expected: float
+    expected: float | None
     trigger_spell: int
     metric: str
     fields: dict
-    before_expected: float
+    before_expected: float | None
     wait_ms: int = DEFAULT_METRIC_DELTA_WAIT_MS
     expire_ms: int = DEFAULT_METRIC_DELTA_EXPIRE_MS
     target: str = CASTER
@@ -1952,7 +1952,8 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
     checked_options(spec)
     records = Records(dataset(Path(class_file.get('dbc_dir', DBC_DIR))))
     require_scripted_crit_probe(records, spec)
-    entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote, spec.expected)
+    entry = behaviour_entry(records, spec.spell, spec.name, 'metric_delta', spec.quote,
+                            0.0 if spec.expected is None else spec.expected)
     facts = facts_of(records, spec.trigger_spell)
     class_file = armed_for(class_file, records, spec.trigger_spell)
 
@@ -2252,14 +2253,21 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if spec.game_time[1] is not None:
             model['game_time'].update({'expired_label': expired_stamp, 'expired_window': list(spec.game_time[1])})
     model.update(option_model(spec))
+    displayed = 'direction' if spec.expected is None else str(spec.expected)
     expectation = Expectation(label, BEHAVIOUR_METRIC_DELTA, spec.spell, spec.trigger_spell, None,
-                              str(spec.expected), prose_rule(entry.quote, spec.spell), model)
+                              displayed, prose_rule(entry.quote, spec.spell), model)
     return scenario, [expectation]
 
 
 def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
-    return MetricDeltaSpec(entry['spell'], entry['name'], entry['quote'], entry['expected'], entry['trigger_spell'],
-                           entry['metric'], entry['fields'], entry['before_expected'],
+    if forbids_expected(entry):
+        if 'expected' in entry or 'before_expected' in entry:
+            raise ValueError(f'{entry["spell"]} metric_delta direction option forbids expected and before_expected')
+        expected, before_expected = None, None
+    else:
+        expected, before_expected = entry['expected'], entry['before_expected']
+    return MetricDeltaSpec(entry['spell'], entry['name'], entry['quote'], expected, entry['trigger_spell'],
+                           entry['metric'], entry['fields'], before_expected,
                            entry.get('wait_ms', DEFAULT_METRIC_DELTA_WAIT_MS),
                            entry.get('expire_ms', DEFAULT_METRIC_DELTA_EXPIRE_MS), entry.get('target', CASTER),
                            entry.get('disable_regeneration', False), tuple(entry.get('setup_casts', ())),

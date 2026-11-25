@@ -3704,6 +3704,9 @@ def judged_metric_delta(base: Verdict, run: Run, model: dict) -> Verdict:
     if before is None or after is None:
         return replace(base, explanation=missing_measurement(run, model['before_label'] if before is None
                                                               else model['after_label']))
+    if model.get('expected') is None or model.get('before_expected') is None:
+        return replace(base, status='alert', measured=after, expected=None,
+                       explanation=f'{model["metric"]} measured {before:g} before and {after:g} after (direction only)')
     before_expected = float(model['before_expected'])
     expected = float(model['expected'])
     tolerance = float(model.get('tolerance', METRIC_DELTA_FLOAT_TOLERANCE))

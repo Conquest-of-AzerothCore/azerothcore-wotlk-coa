@@ -2351,6 +2351,9 @@ Options with a module:
 - [`attack_power_arms`](metric_delta_options/attack_power_arms.md): a control and a learned arm read again at a
   higher attack power (a fixture aura, its gain read), the learned gain positive and strictly larger at the higher
   attack power, no coefficient (ADR 1284, provisional)
+- [`stat_arms`](metric_delta_options/stat_arms.md): direction-only strict monotonicity over three or more measured stat
+  values with an unrelated-stat control in `passive` or `active_recast` mode, forbidding any expected figure (ADR 1295,
+  provisional)
 - [`stack_feed`](metric_delta_options/stack_feed.md): a stack cap fed by chance, judged over repeated trials polled
   after every feed cast, a trial without cap + 1 applications inside the duration void (ADR 1249, provisional)
 - [`after_gate_cast`](metric_delta_options/after_gate_cast.md): a real cast of the gate at the caster at the start of
