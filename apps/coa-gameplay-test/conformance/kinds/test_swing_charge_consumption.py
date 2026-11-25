@@ -20,7 +20,7 @@ def scenario_of(entry: dict):
     return behaviour_scenario(load_class_file(25), entry)
 
 
-def seeded_run(model: dict, overrides: dict | None = None, failures: list[dict] | None = None) -> FakeRun:
+def seeded_run(model: dict, overrides: dict | None = None, cast_failures: dict | None = None) -> FakeRun:
     reads = model['reads']
     expected = int(model['expected_charges'])
     values = {
@@ -47,7 +47,9 @@ def seeded_run(model: dict, overrides: dict | None = None, failures: list[dict] 
     }
     if overrides:
         values.update(overrides)
-    return FakeRun(values, failures=failures or [])
+    fake = FakeRun(values)
+    fake.cast_failures = dict(cast_failures or {})
+    return fake
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
@@ -86,7 +88,7 @@ class SwingChargeConsumptionTests(unittest.TestCase):
         reads = exp.model['reads']
         self.assertEqual(swing_charge_verdict(base_verdict(exp), FakeRun({}), exp.model).status, 'unmeasured')
         self.assertEqual(
-            swing_charge_verdict(base_verdict(exp), seeded_run(exp.model, failures=[{'spell': 502122, 'reason': 1}]),
+            swing_charge_verdict(base_verdict(exp), seeded_run(exp.model, cast_failures={502122: [1]}),
                                  exp.model).status,
             'unmeasured')
         for name, overrides in (

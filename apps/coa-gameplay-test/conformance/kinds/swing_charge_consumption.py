@@ -3,7 +3,7 @@ from pathlib import Path
 
 from behaviours import (BEHAVIOUR_METRIC_DELTA, FORCE_CRIT_RATINGS, behaviour_entry, cleaned_tooltip, prose_rule,
                         waited_ms)
-from compare import Run, Verdict, describe_failures, missing_measurement
+from compare import Run, Verdict, describe_failures, failure_reasons, missing_measurement
 from hits import creature_fixture, timed
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
@@ -219,9 +219,10 @@ def swing_charge_scenario(class_file: dict, spec: SwingChargeSpec) -> tuple[dict
 
 
 def swing_charge_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
-    if run.failures:
-        return replace(base, status='unmeasured',
-                       explanation=f'refused cast voids swing charge proof: {describe_failures(run.failures)}')
+    refused = '; '.join(f'{spell}: {describe_failures(reasons)}' for spell, reasons
+                        in ((spell, failure_reasons(run, spell)) for spell in run.cast_failures) if reasons)
+    if refused:
+        return replace(base, status='unmeasured', explanation=f'refused cast voids swing charge proof: {refused}')
     reads = model['reads']
     all_labels = [label for group in reads.values() for label in group.values()]
     missing = next((label for label in all_labels if run.values.get(label) is None), None)
