@@ -1461,13 +1461,16 @@
       {
         "claim": "dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage",
         "labels": [
-          "572141 effect_value e0 #0"
+          "572141 behaviour_metric_delta damage_base",
+          "572141 behaviour_metric_delta damage_sp",
+          "572141 behaviour_metric_delta damage_ap",
+          "572141 behaviour_metric_delta no_shield"
         ]
       },
       {
         "claim": "to up to $x1 enemies",
         "labels": [
-          "572141 effect_value #2"
+          "572141 behaviour_metric_delta target_cap"
         ]
       }
     ]
@@ -1476,7 +1479,8 @@
     "spell": 572141,
     "clause": "reduced by ${($f1-1)*100* -1}% with each jump.",
     "labels": [
-      "572141 effect_value #3"
+      "572141 behaviour_metric_delta bounce_2",
+      "572141 behaviour_metric_delta bounce_3"
     ],
     "kind": "claim"
   },
@@ -1484,7 +1488,8 @@
     "spell": 572141,
     "clause": "Damage increased by $500706s1% for each stack of Insanity.",
     "labels": [
-      "572141 effect_value 500706e0 #1"
+      "572141 behaviour_metric_delta insanity_20",
+      "572141 behaviour_metric_delta insanity_50"
     ],
     "kind": "claim"
   },
@@ -1818,7 +1823,8 @@
     "spell": 560091,
     "clause": "Increases your Armor contribution from your shield by $s1%",
     "labels": [
-      "560091 effect_value e0 #0"
+      "560091 behaviour_metric_delta shield_armor",
+      "560091 behaviour_metric_delta no_shield_armor"
     ],
     "kind": "claim"
   },
@@ -1826,7 +1832,7 @@
     "spell": 560091,
     "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
     "labels": [
-      "560091 effect_value #1"
+      "560091 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim"
   },
@@ -1943,14 +1949,20 @@
   {
     "spell": 560502,
     "clause": "While above 60 Insanity,",
-    "labels": [],
+    "labels": [
+      "560502 behaviour_metric_delta shieldtoss_at_60",
+      "560502 behaviour_metric_delta gaze_at_60"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560502,
     "clause": "the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by $630891s1%.",
     "labels": [
-      "560502 effect_value 630891e0 #0"
+      "560502 behaviour_metric_delta shieldtoss_late",
+      "560502 behaviour_metric_delta shieldtoss_early",
+      "560502 behaviour_metric_delta gaze_late",
+      "560502 behaviour_metric_delta gaze_early"
     ],
     "kind": "claim"
   },
@@ -2031,7 +2043,8 @@
     "spell": 561336,
     "clause": "Increases your Armor contribution from your shield by $s1%",
     "labels": [
-      "561336 effect_value e0 #0"
+      "561336 behaviour_metric_delta shield_armor",
+      "561336 behaviour_metric_delta no_shield_armor"
     ],
     "kind": "claim"
   },
@@ -2039,7 +2052,7 @@
     "spell": 561336,
     "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
     "labels": [
-      "561336 effect_value #1"
+      "561336 behaviour_metric_delta reset_rate"
     ],
     "kind": "claim"
   },
@@ -2379,15 +2392,19 @@
     "spell": 680555,
     "clause": "Increases your block value by $s1%.",
     "labels": [
-      "680555 effect_value e0 #0"
+      "680555 behaviour_metric_delta block_value_base"
     ],
     "kind": "claim"
   },
   {
     "spell": 680555,
     "clause": "While above 60 Insanity, the value of this effect is doubled.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "680555 behaviour_metric_delta block_value_at_60",
+      "680555 behaviour_metric_delta block_value_above_60"
+    ],
+    "kind": "claim",
+    "promise_of": "Increases your block value by $s1%."
   },
   {
     "spell": 680557,
@@ -2408,7 +2425,7 @@
     "spell": 680558,
     "clause": "Increases your block chance by $s2%,",
     "labels": [
-      "680558 effect_value e1 #0"
+      "680558 behaviour_metric_delta block_base"
     ],
     "kind": "claim"
   },
@@ -2420,14 +2437,18 @@
       {
         "claim": "plus an additional $680608s1%",
         "labels": [
-          "680558 effect_value 680608e0 #1"
+          "680558 behaviour_metric_delta block_above_40"
         ]
       },
       {
         "claim": "while above 40 Insanity",
-        "labels": []
+        "labels": [
+          "680558 behaviour_metric_delta block_at_40",
+          "680558 behaviour_metric_delta block_above_40"
+        ]
       }
-    ]
+    ],
+    "promise_of": "Increases your block chance by $s2%,"
   },
   {
     "spell": 680569,
@@ -2450,7 +2471,7 @@
     "spell": 680570,
     "clause": "Increases your chance to block by $s2%",
     "labels": [
-      "680570 effect_value e1 #0"
+      "680570 behaviour_metric_delta block_chance"
     ],
     "kind": "claim"
   },
@@ -2462,13 +2483,14 @@
       {
         "claim": "increases your chance to critically block by $680571s1%",
         "labels": [
-          "680570 effect_value 680571e0 #1"
+          "680570 behaviour_metric_delta crit_block_damage",
+          "680570 behaviour_metric_delta crit_block_no_ward"
         ]
       },
       {
         "claim": "for $680571d",
         "labels": [
-          "680570 spell_duration 680571 #2"
+          "680570 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -2479,19 +2501,38 @@
     "labels": [
       "680574 effect_value e1 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind counts Shadowy Symbiosis 680574 clause 1 (\"Your successful blocks now have a $s2% chance to critically block for twice the normal amount.\") as behaviour evidence under no-tool-code-changes: (1) metric_delta critical_block_chance (crit_block_base measures 0 -> 20.0 ok) is a READBACK metric (coverage.py:461) that does not match coverage.py:524 STATE_PROMISES[\"critical_block_chance\"] = r\"critical block\" against \"critically block\", requires a zero-gain partner in PARTNERED_CONTRASTS (coverage.py:570,757-765), and does not test \"for twice the normal amount\"; (2) Unit::isBlockCritical (Unit.cpp:3721) uses roll_chance_i (not forceable by forced_roll) and no pooled crit_blocked combat-event metric/kind exists to sample a 20% critical-block rate directly (~19,386 blocked strikes). Nearest kind: metric_delta critical_block_chance or a pooled blocked-strike critical-block rate kind.",
+      "attempts": [
+        {
+          "agent": "cu-h2",
+          "report": ".agents/plans/cu-h2/report.md"
+        },
+        {
+          "agent": "cu-h2b",
+          "report": ".agents/plans/cu-h2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680574,
     "clause": "This effect is doubled while above 60 Insanity.",
-    "labels": [],
+    "labels": [
+      "680574 behaviour_metric_delta crit_block_at_59",
+      "680574 behaviour_metric_delta crit_block_at_60",
+      "680574 behaviour_metric_delta crit_block_above_60"
+    ],
     "kind": "claim"
   },
   {
     "spell": 680575,
     "clause": "While Dreadnought is active, your Twilight Shieldtoss has a $/1000;s1 sec reduced cooldown.",
     "labels": [
-      "680575 effect_value e0 #0"
+      "680575 behaviour_metric_delta cd_late",
+      "680575 behaviour_metric_delta cd_early",
+      "680575 behaviour_metric_delta cd_no_dreadnought"
     ],
     "kind": "claim",
     "text_source": {
@@ -2508,7 +2549,9 @@
   {
     "spell": 680575,
     "clause": "In addition, your Eldritch Shock now strikes 2 additional enemies near the primary target.",
-    "labels": [],
+    "labels": [
+      "680575 behaviour_metric_delta shock_cleave"
+    ],
     "kind": "claim",
     "text_source": {
       "table": "coa_client_spell_description",
@@ -2539,7 +2582,8 @@
     "spell": 680581,
     "clause": "Dealing damage with Twilight Shieldtoss now heals you for $680581s1% of the damage dealt.",
     "labels": [
-      "680581 effect_value e0 #0"
+      "680581 behaviour_metric_delta heal_ratio_base",
+      "680581 behaviour_metric_delta heal_ratio_sp"
     ],
     "kind": "claim"
   },
@@ -2623,7 +2667,9 @@
   {
     "spell": 681087,
     "clause": "Damage dealt by Twilight Shieldtoss now generates 3 Insanity.",
-    "labels": [],
+    "labels": [
+      "681087 behaviour_metric_delta insanity_gain"
+    ],
     "kind": "claim"
   },
   {
@@ -3873,10 +3919,21 @@
   {
     "spell": 803236,
     "clause": "Increases the damage dealt by your Twilight Shieldtoss by $s1% but it to no longer bounces.",
-    "labels": [
-      "803236 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage dealt by your Twilight Shieldtoss by $s1%",
+        "labels": [
+          "803236 behaviour_hit_ratio damage_double"
+        ]
+      },
+      {
+        "claim": "but it to no longer bounces.",
+        "labels": [
+          "803236 behaviour_metric_delta no_bounce"
+        ]
+      }
+    ]
   },
   {
     "spell": 803283,

@@ -23488,6 +23488,2542 @@
       "expire_ms": 1000,
       "void_on_cast_failure": true,
       "observe_source": "572846 Entropic Slam (rank of 804152, SkillLineAbility Cultist) Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG +98 (${$m1+0} = 98), Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE 130% ($s2 = 130), Shadow school 32, DmgClass 2 (Spell.dbc). Godblade 2H Axe 2531 (90.86..127.3, normalized 3.3 s), +20000 AP (total AP 20376 -> W = 4893.7743..4930.2143), Cultist tuning 887013 (+12%), non-crit (16255 -100), no resist (823764). Tooltip per-hit mean (1.30 * W + 98) * 1.12 = 7261.6 (range [7235.1..7288.2], std 15.32); 8-hit sum mean = 58093 (std 43.33), band [57953..58233] (+-140 = +-3.23 sigma, < 0.12% false-alert when fixed; excludes 0 flat 57215, 2x flat 58971, 100% weapon 44687). Control reads 500706 == 0, 680603 == 0; treatment sets 500706=90 via after_auras, waits 1000 ms for Refresh, reads exact 500706 == 90 and 680603 == 1 (after_setup_stacks), lands 8 hits of 572846 (verified by ally_arm count == 8). Server defect note: Effect[0] (121) precedes Effect[1] (31) and AscensionCultistContracts.cpp never sets AscensionFlatAfterWeaponPercent on 804152, so SpellEffects.cpp:4732-4748 multiplies +98 by 130% (+32.93/hit -> 8-hit mean 58357, +264 = +6.09 sigma above tooltip mean, alerting deterministically). Reference search 2026-11-25: coa-history 572846: 5366 hits in 12 logs; coabuildhub spells_master_index.json 572846 matches verbatim."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (Shadow damage at reference AP/SP, 0 Insanity)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 761.5,
+      "after_at_least": 707,
+      "after_at_most": 817,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; equipped_item slot 16 == 2129 read via shield_after_learn in both phases). Spell.dbc 572141 (BaseLevel 58, SpellLevel 58, MaxLevel 66, no SkillLineAbility.dbc row) Effect[0] SCHOOL_DAMAGE (SchoolMask 32 Shadow, DmgClass 3, EquippedItemClass 4 SubClassMask 64), EffectBasePoints 592, EffectDieSides 98, EffectRealPointsPerLevel 2.5 -> at level 60 int((60-58)*2.5)=5 -> m1 = [598..695]. AscensionCultistData.h:91 adds 0.23*SP + 0.09*AP; at reference AP 376.0 and SP 0 raw is [631.84..728.84], times Cultist class tuning 887013 (+12%, floor) = [707..817]. Precondition fixtures: 823764 (no resist), 16255=-100 (no crit), neutral setup 804056 + after_setup_stacks confirms Insanity 500706=0 and threshold 680601=0 in both arms. Control: uncast before (0). Paired with damage_sp and damage_ap. Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (Shadow damage at +20000 SP, 0 Insanity)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 5914,
+      "after_at_least": 5859,
+      "after_at_most": 5969,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). SP contrast arm for 572141 (${$m1+$AP*0.09+$SP*0.23}): +20000 SP (hit_arm: true) adds 20000*0.23 = +4600 raw -> [5231.84..5328.84], times 887013 (+12%) = [5859..5969] (excludes 0 SP and 2x SP). 500706=0 and 680601=0 read in both arms. Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (Shadow damage at +20000 AP, 0 Insanity)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2778,
+      "after_at_least": 2723,
+      "after_at_most": 2833,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). AP contrast arm for 572141 (${$m1+$AP*0.09+$SP*0.23}): +20000 AP adds 20000*0.09 = +1800 raw -> [2431.84..2528.84], times 887013 (+12%) = [2723..2833] (excludes 0 AP and 2x AP). 500706=0 and 680601=0 read in both arms. Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (refused without a shield equipped)",
+      "kind": "metric_delta",
+      "variant": "no_shield",
+      "label_suffix": "no_shield",
+      "quote": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_power": 2000,
+      "learn": [
+        572141
+      ],
+      "cast_in_before": true,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 572141
+      },
+      "before_expected": 0,
+      "expected": 29,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "without_item": {
+        "item": 2129,
+        "source": "572141 EquippedItemClass 4 with EquippedItemSubClassMask 64 (shield, server Spell.dbc), refused through Spell::CheckItems HasItemFitToSpellRequirements, Spell.cpp:7539-7541, as SPELL_FAILED_EQUIPPED_ITEM_CLASS 29 (SharedDefines.h:1079)"
+      },
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield). Control cast with shield 2129 equipped reads cast_failure 0; after reset_cooldown and destroy_item 2129 (without_item), second cast reads 29 (SPELL_FAILED_EQUIPPED_ITEM_CLASS, Spell.cpp:7539-7541), proving the shield requirement. Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (hits up to 3 enemies out of 5 in jump radius)",
+      "kind": "metric_delta",
+      "variant": "target_cap",
+      "label_suffix": "target_cap",
+      "quote": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0
+      ],
+      "area_sum": true,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 572141 EffectChainTarget[0] = 3 ($x1 = 3), DmgClass 3 RANGED (7.5 yd jump radius, Spell.cpp:2215-2217). Primary dummy at 3 yd + 4 area_dummies at 3.5..5.0 yd (5 enemies within 2 yd of primary): area_sum spell_damage_count reads 0 before and exactly 3 after (leaving 2 in-range dummies untouched, proving cap == 3). Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (jump 1 falloff 20% across 2 enemies at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "bounce_2",
+      "label_suffix": "bounce_2",
+      "quote": "reduced by ${($f1-1)*100* -1}% with each jump.",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "area_dummies": [
+        3.5
+      ],
+      "area_sum": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10645,
+      "after_at_least": 10545,
+      "after_at_most": 10744,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 572141 EffectDamageMultiplier[0] = 0.8 (${($f1-1)*100*-1} = 20% reduction per jump). At +20000 SP (single target [5859..5969], mean 5914), 2 targets (primary + 1 bounce at 3.5 yd) sum to (1 + 0.8) = 1.8x -> [10546..10744]. Strictly excludes no falloff (2.0x = 11828), 18% falloff (1.82x = 10763) and 22% falloff (1.78x = 10527), i.e. 10% off 20% on both sides. Paired with damage_sp (1 target) and bounce_3 (3 targets). Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (geometric 20% jump falloff across 3 enemies at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "bounce_3",
+      "label_suffix": "bounce_3",
+      "quote": "reduced by ${($f1-1)*100* -1}% with each jump.",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "area_dummies": [
+        3.5,
+        4.0
+      ],
+      "area_sum": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 14430,
+      "after_at_least": 14294,
+      "after_at_most": 14565,
+      "wait_ms": 800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 572141 EffectDamageMultiplier[0] = 0.8: at +20000 SP (single target [5859..5969], mean 5914), 3 targets (primary + 2 bounces at 3.5, 4.0 yd) sum to (1 + 0.8 + 0.64) = 2.44x -> [14295..14564]. Strictly excludes no falloff (3.0x = 17742), linear 20% falloff (2.40x = 14194), 18% falloff (2.4924x = 14740) and 22% falloff (2.3884x = 14125). Paired with damage_sp and bounce_2. Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (+20% damage at 20 Insanity stacks)",
+      "kind": "metric_delta",
+      "variant": "insanity_20",
+      "label_suffix": "insanity_20",
+      "quote": "Damage increased by $500706s1% for each stack of Insanity.",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 20
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "phase_auras": [
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 7097,
+      "after_at_least": 7030,
+      "after_at_most": 7164,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Insanity 500706 Effect[0] aura 108 SPELLMOD_DAMAGE bp=0+die=1 = +1% per stack on SpellFamilyFlags[1] 16384 (572141). Precondition fixture sets 500706 to 20 stacks; neutral setup 804056 + 1000 ms wait lets Refresh set 680601; after_setup_stacks reads 500706 == 20 and 680601 == 1 in both phases. At +20000 SP: 1.20 * [5859..5969] = [7030..7163] (excludes +18% 6979 and +22% 7215). Paired with damage_sp (0 Insanity) and insanity_50 (50 Insanity). Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 572141,
+      "name": "Twilight Shieldtoss (+50% damage at 50 Insanity stacks)",
+      "kind": "metric_delta",
+      "variant": "insanity_50",
+      "label_suffix": "insanity_50",
+      "quote": "Damage increased by $500706s1% for each stack of Insanity.",
+      "trigger_spell": 572141,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 50
+        },
+        {
+          "spell": 680602,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "phase_auras": [
+        [
+          500706,
+          50,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 8871,
+      "after_at_least": 8787,
+      "after_at_most": 8955,
+      "wait_ms": 800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Precondition fixture sets 500706 to 50 stacks; after_setup_stacks reads 500706 == 50 and 680602 == 1 in both phases. At +20000 SP: 1.50 * [5859..5969] = [8788..8954] (excludes +47% 8694 and +53% 9048, and separates linear per-stack scaling from a flat bonus across 0, 20, and 50 stacks). Reference search 2026-11-25: coa-history spell 572141 records 4 casts / 4 SPELL_DAMAGE events (min 2011, max 3734, mean 2812.0, 1 crit) in 1 log and rank 1 524876 records 6 casts / 8 SPELL_DAMAGE events in 2 logs; coabuildhub spells_master_index.json 524876 matches the formula shape ('40 Shadow damage to up to 3 enemies, reduced by 20% with each jump. Damage increased by 1% for each stack of Insanity.'); installed server Spell.dbc governs (no pending_db_world spell_dbc override; rev_20260909_12_cultist_completion.sql zeroes spell_bonus_data for 572141)."
+    },
+    {
+      "spell": 680581,
+      "name": "General of Y'shaarj (heals caster for 10% of Twilight Shieldtoss damage at base SP)",
+      "kind": "metric_delta",
+      "variant": "heal_ratio_base",
+      "label_suffix": "heal_ratio_base",
+      "quote": "Dealing damage with Twilight Shieldtoss now heals you for $680581s1% of the damage dealt.",
+      "trigger_spell": 572141,
+      "gate_spell": 680581,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health_pct": 50,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.1,
+      "tolerance": 0.005,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 680581 Effect[0] bp=9+die=1 = 10% ($680581s1 = 10); AscensionCultistEvents.cpp:111,281 triggers Copy(player, player, 680769, CalculatePct(damage, 10)) on Twilight Shieldtoss 572141 damage. ratio_to_metric (increments: true) divides 680769 spell_heal_total on caster by 572141 spell_damage_total on dummy in the same cast: 0 before learning 680581 (control), 0.10 +- 0.005 after (excludes 0.09 and 0.11, i.e. 10% off 10% on both sides). Paired with heal_ratio_sp (+20000 SP). Reference search 2026-11-25: coa-history spell 680581 has 0 events (passive), triggered 680769 has 4 SPELL_HEAL events (min 201, max 373, mean 281.0 = exact 10% of 572141 2011..3734 mean 2812.0); coabuildhub spells_master_index.json 680581 matches verbatim."
+    },
+    {
+      "spell": 680581,
+      "name": "General of Y'shaarj (heals caster for 10% of Twilight Shieldtoss damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "heal_ratio_sp",
+      "label_suffix": "heal_ratio_sp",
+      "quote": "Dealing damage with Twilight Shieldtoss now heals you for $680581s1% of the damage dealt.",
+      "trigger_spell": 572141,
+      "gate_spell": 680581,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "caster_health_pct": 50,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.1,
+      "tolerance": 0.005,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). High-damage contrast arm (+20000 SP, ~5914 dmg -> ~591 heal) for 680581, separating 10% of damage dealt from a flat heal (~76 vs ~591): 0 in unlearned control, 0.10 +- 0.005 after learning 680581. Reference search 2026-11-25: coa-history 680769 4 heals (mean 281.0 = 10% of 572141 2812.0); coabuildhub 680581 matches verbatim."
+    },
+    {
+      "spell": 681087,
+      "name": "Twilight Incarnate (Twilight Shieldtoss damage generates 3 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity_gain",
+      "label_suffix": "insanity_gain",
+      "quote": "Damage dealt by Twilight Shieldtoss now generates 3 Insanity.",
+      "trigger_spell": 572141,
+      "gate_spell": 681087,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 681087 Effect[0] triggers 520773 (Effect[1] 175 MiscValue 3 TriggerSpell 500706) and AscensionCustomResourceData.h:311-312 grants +3 Insanity 500706 on EachSuccessfulDamagingHit of 572141 when 681087 is known. Casts 572141 at single dummy before learning 681087 (control: 0 Insanity stacks) and after learning 681087 (exact 3 Insanity stacks, tol 0). Reference search 2026-11-25: coa-history 681087/520773 0 events (passive/internal); coabuildhub spells_master_index.json 681087 matches verbatim."
+    },
+    {
+      "spell": 803236,
+      "name": "Y'Shaarj's Enforcer (+100% Twilight Shieldtoss damage)",
+      "kind": "hit_ratio",
+      "variant": "damage_double",
+      "label_suffix": "damage_double",
+      "quote": "Increases the damage dealt by your Twilight Shieldtoss by $s1%",
+      "expected": 2.0,
+      "observe_spell": 572141,
+      "cast_power": 2000,
+      "cast_wait_ms": 500,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          803236
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; 572141 EquippedItemClass 4 SubClassMask 64 requires shield to cast, and void_on_cast_failure voids any refused cast; sibling no_bounce also reads equipped_item slot 16 == 2129). 803236 Effect[0] aura 108 SPELLMOD_DAMAGE bp=99+die=1 = +100% ($s1 = 100) on SpellFamilyFlags[1] 16384 (572141). Control leaves 803236 unlearned; treatment learns 803236; both cast 572141 at dummy with +20000 SP and 823764 (no resist), counting non-critical hits: treatment/control mean ratio must match 2.0 (+100%, G-19 +-5% = [1.95..2.05]). Reference search 2026-11-25: coa-history 803236 0 events (passive); coabuildhub spells_master_index.json 803236 matches verbatim."
+    },
+    {
+      "spell": 803236,
+      "name": "Y'Shaarj's Enforcer (Twilight Shieldtoss no longer bounces)",
+      "kind": "metric_delta",
+      "variant": "no_bounce",
+      "label_suffix": "no_bounce",
+      "quote": "but it to no longer bounces.",
+      "trigger_spell": 572141,
+      "gate_spell": 803236,
+      "target": "dummy",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5
+      ],
+      "area_sum": true,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572141,
+        "target": "dummy"
+      },
+      "before_expected": 3,
+      "expected": 4,
+      "expected_gain": 1,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 803236 Effect[1] aura 107 SPELLMOD_JUMP_TARGETS (MiscValue 17) bp=-4+die=1 = -3 on SpellFamilyFlags[1] 16384 (572141 EffectChainTarget 3 -> 0). Primary dummy at 3 yd + 3 area_dummies at 3.5..4.5 yd (4 enemies in jump radius): before learning 803236 (control) 572141 bounces and strikes 3 enemies (before_expected 3); after learning 803236, 572141 strikes only the primary target (cumulative 4, expected_gain 1, tol 0). Reference search 2026-11-25: coa-history 803236 0 events; coabuildhub 803236 matches verbatim."
+    },
+    {
+      "spell": 680555,
+      "name": "Void-Enhanced Shield (+25% block value at 0 Insanity)",
+      "kind": "metric_delta",
+      "variant": "block_value_base",
+      "label_suffix": "block_value_base",
+      "quote": "Increases your block value by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 680555,
+      "target": "caster",
+      "cast_power": 2000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "block_value",
+      "fields": {},
+      "before_expected": 45,
+      "expected": 56,
+      "expected_gain": 11,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read via shield_after_learn in both phases). 680555 Effect[0] aura 150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT bp=24+1=25% ($s1=25); AscensionCultist.cpp:279-280 sets 25% when 500706 <= 60. Level-60 Cultist base block value (Player.cpp:5614): (1 shield + 108*0.5 Str - 10) = 45; +25% = int(45*1.25) = 56, gain +11 (tol 0.5 excludes 10 = 22.2% and 12 = 26.7%). 500706=0, 680603=0, and 573315=0 (>60 marker, AscensionCultist.cpp:288) read in both arms. Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
+    },
+    {
+      "spell": 680555,
+      "name": "Void-Enhanced Shield (+25% block value at 60 Insanity boundary)",
+      "kind": "metric_delta",
+      "variant": "block_value_at_60",
+      "label_suffix": "block_value_at_60",
+      "quote": "While above 60 Insanity, the value of this effect is doubled.",
+      "trigger_spell": 60235,
+      "gate_spell": 680555,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "block_value",
+      "fields": {},
+      "before_expected": 45,
+      "expected": 56,
+      "expected_gain": 11,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Boundary arm at exactly 60 Insanity (500706=60, 680603=1, and 573315=0 (>60 marker, AscensionCultist.cpp:288) read via after_setup_stacks in both phases): stacks > 60 is false so 680555 stays +25% (45 -> 56, gain +11 +- 0.5, excluding doubled +50% = +22). Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
+    },
+    {
+      "spell": 680555,
+      "name": "Void-Enhanced Shield (+50% doubled block value at 61 Insanity)",
+      "kind": "metric_delta",
+      "variant": "block_value_above_60",
+      "label_suffix": "block_value_above_60",
+      "quote": "While above 60 Insanity, the value of this effect is doubled.",
+      "trigger_spell": 60235,
+      "gate_spell": 680555,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "block_value",
+      "fields": {},
+      "before_expected": 45,
+      "expected": 67,
+      "expected_gain": 22,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-60 arm at 61 Insanity (500706=61, 680603=1, and 573315=1 (>60 marker, AscensionCultist.cpp:288) read via after_setup_stacks in both phases; 1000 ms wait lets Refresh double 680555 to +50% at AscensionCultist.cpp:279-280): int(45*1.50) = 67, gain +22 (tol 0.5 excludes 21 = 46.7%, 23 = 51.1%, and undoubled +11). Reference search 2026-11-25: coa-history 680555 0 events (passive); coabuildhub spells_master_index.json 680555 says 20% (older patch state, G-9); installed server Spell.dbc (EffectBasePoints 24+1=25%, doubled above 60 Insanity) governs."
+    },
+    {
+      "spell": 680558,
+      "name": "Bulwark of Y'shaarj (+5% block chance at 0 Insanity)",
+      "kind": "metric_delta",
+      "variant": "block_base",
+      "label_suffix": "block_base",
+      "quote": "Increases your block chance by $s2%,",
+      "trigger_spell": 60235,
+      "gate_spell": 680558,
+      "target": "caster",
+      "cast_power": 2000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680602,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680608,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "block_chance",
+      "fields": {},
+      "before_expected": 5,
+      "expected": 10,
+      "expected_gain": 5,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases; level-60 Cultist knows Block 107). 680558 Effect[1] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT bp=4+1=+5% ($s2=5). 500706=0, 680602=0, 680608=0 read in both arms: PLAYER_BLOCK_PERCENTAGE rises from 5.0% to 10.0% (gain +5.0 +- 0.05). Reference search 2026-11-25: coa-history 680558/680608 0 events (passive/helper); coabuildhub spells_master_index.json 680558 matches verbatim ('block chance by 5%, plus an additional 10% while above 40 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680558,
+      "name": "Bulwark of Y'shaarj (+5% block chance at 40 Insanity boundary, no +10% helper)",
+      "kind": "metric_delta",
+      "variant": "block_at_40",
+      "label_suffix": "block_at_40",
+      "quote": "plus an additional $680608s1% while above 40 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680558,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 40
+        },
+        {
+          "spell": 680602,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680608,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "block_chance",
+      "fields": {},
+      "before_expected": 5,
+      "expected": 10,
+      "expected_gain": 5,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Boundary arm at 40 Insanity (500706=40, 680602=1, 680608=0 read in both phases): AscensionCultistData.h:143 {680558, 680608, 40} requires stacks > 40, so 680608 stays absent and block_chance gains +5.0% only (5 -> 10, excluding +15%). Reference search 2026-11-25: coa-history 680558/680608 0 events (passive/helper); coabuildhub spells_master_index.json 680558 matches verbatim ('block chance by 5%, plus an additional 10% while above 40 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680558,
+      "name": "Bulwark of Y'shaarj (+15% block chance at 41 Insanity with 680608 helper)",
+      "kind": "metric_delta",
+      "variant": "block_above_40",
+      "label_suffix": "block_above_40",
+      "quote": "plus an additional $680608s1% while above 40 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680558,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          41,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 41
+        },
+        {
+          "spell": 680602,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_auras_present": [
+        {
+          "aura": 680608,
+          "source": "AscensionCultistData.h:143 {680558, 680608, 40} grants 680608 during Refresh when 680558 is learned and 500706 > 40"
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "block_chance",
+      "fields": {},
+      "before_expected": 5,
+      "expected": 20,
+      "expected_gain": 15,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-40 arm at 41 Insanity (500706=41 and 680602=1 read in both phases; ally_arm confirms helper 680608 absent (0) in control and present (1) in treatment alongside after_auras_present). 680608 Effect[0] aura 107 SPELLMOD_EFFECT1 (+10) raises 680558 Effect[0] aura 51 from 0 to +10% (SpellAuraEffects.cpp:969-972), giving +5% + 10% = +15% total block_chance (5 -> 20, gain +15.0 +- 0.05). Reference search 2026-11-25: coa-history 680558/680608 0 events (passive/helper); coabuildhub spells_master_index.json 680558 matches verbatim ('block chance by 5%, plus an additional 10% while above 40 Insanity.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680608
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:143 {680558, 680608, 40}: threshold helper 680608 reads 0 in control (680558 unlearned) and 1 in treatment (680558 learned) at 41 Insanity"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680570,
+      "name": "Void Tolerance (+10% block chance with shield equipped)",
+      "kind": "metric_delta",
+      "variant": "block_chance",
+      "label_suffix": "block_chance",
+      "quote": "Increases your chance to block by $s2%",
+      "trigger_spell": 804056,
+      "gate_spell": 680570,
+      "target": "caster",
+      "cast_power": 2000,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "block_chance",
+      "fields": {},
+      "before_expected": 5,
+      "expected": 15,
+      "expected_gain": 10,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 680570 Effect[1] aura 51 SPELL_AURA_MOD_BLOCK_PERCENT bp=9+1=+10% ($s2=10): block_chance rises from 5.0% to 15.0% (gain +10.0 +- 0.05). Reference search 2026-11-25: coa-history 680570/680571 0 events (passive/proc; 804670 Abyssal Ward 53 casts in 19 logs); coabuildhub spells_master_index.json 680570 is an older rework ('Reduces the cooldown of Abyssal Ward by -30 sec', G-9); installed server Spell.dbc (680570 +10% block, 680571 +100% crit block for 10 sec on Abyssal Ward) governs."
+    },
+    {
+      "spell": 680570,
+      "name": "Void Tolerance (Abyssal Ward grants 100% critical block across 75 blocked strikes, doubling blocked damage reduction)",
+      "kind": "metric_delta",
+      "variant": "crit_block_damage",
+      "label_suffix": "crit_block_damage",
+      "quote": "and casting Abyssal Ward now increases your chance to critically block by $680571s1% for $680571d.",
+      "trigger_spell": 804670,
+      "gate_spell": 680570,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "striker",
+          "striker"
+        ],
+        [
+          804670,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          680571,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 998374,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 75,
+        "wait_ms": 50,
+        "after_trigger_ms": 200
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0,
+        "block": 100
+      },
+      "after_auras_present": [
+        {
+          "aura": 680571,
+          "source": "AscensionCultistAbilities.cpp:194-195 casts 680571 (+100% crit block) on 804670 cast when 680570 is learned"
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 998374,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 18100,
+      "expected": 33069.5,
+      "expected_gain": 14969.5,
+      "tolerance": 112.0,
+      "wait_ms": 500,
+      "expire_ms": 11000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 680570 triggers 680571 (aura 253 SPELL_AURA_MOD_BLOCK_CRIT_CHANCE bp=99+1=+100%, 10000 ms) on Abyssal Ward 804670 cast (AscensionCultistAbilities.cpp:194-195); ally_arm confirms 680571 absent (0) in control and present (1) in treatment, and after_auras_present reconfirms 680571 in treatment. Striker in front at 3 yd casts 998374 (DmgClass 2 Physical [300..309], 0 CD, NO_ATTACK_MISS; 16255=-100 prevents crits) N=75 times at 50 ms spacing (200 + 3750 + 500 = 4450 ms < 10000 ms 680571 duration) with caster_avoidance block=100 (verified 75 blocked / 0 unblocked in control, 150 blocked / 0 unblocked cumulative in treatment). Armor 182 = 2*63 Agi (126) + 8 Cultist starter cloth (2000057/2000058/2000059, rev_1787754600000000000.sql:317-319,408-410) + 48 shield 2129 (ItemAddon.dbc field 43): ClassicPlusCombat::ArmorConstant(60) = 5500 gives mitigation 182/5682 = 3.2031% (Unit.cpp:2552-2559, ceil). Abyssal Ward 804670 5 stacks decay -10%/hit across strikes 1..5 (mults 0.5, 0.6, 0.7, 0.8, 0.9), then 70 full strikes at 1.0: control normal block (-45/hit) mean 18345 (before_expected floor 18100); treatment 100% critical block (-90/hit, Unit.cpp:1769-1770) expected_gain 14969.5 +- 112.0 (sd 24.47, 4.58 sigma, false-fail 4.6e-6/run). Residual false-pass probability per pair (2 runs): at p=0.90 (10% off 100%) P(pass|p=0.90)^2 = 0.01993^2 = 0.000397 (0.040% <= 0.1%); at p=0.50, 2.11e-37. Reference search 2026-11-25: coa-history 680570/680571 0 events (804670 53 casts in 19 logs); coabuildhub 680570 is an older rework (G-9); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680571
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:194-195: 680571 (+100% crit block) is absent (0) in control (680570 unlearned) and present (1) in treatment (680570 learned) after 804670 cast"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680570,
+      "name": "Void Tolerance (no critical block across 75 blocked strikes without casting Abyssal Ward)",
+      "kind": "metric_delta",
+      "variant": "crit_block_no_ward",
+      "label_suffix": "crit_block_no_ward",
+      "quote": "and casting Abyssal Ward now increases your chance to critically block by $680571s1% for $680571d.",
+      "trigger_spell": 804056,
+      "gate_spell": 680570,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "striker",
+          "striker"
+        ],
+        [
+          680571,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 998374,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 75,
+        "wait_ms": 50,
+        "after_trigger_ms": 200
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0,
+        "block": 100
+      },
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 998374,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 18600,
+      "expected": 37387.5,
+      "expected_gain": 18787.5,
+      "tolerance": 112.0,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). Condition-off arm for 680570: casts neutral 804056 instead of Abyssal Ward 804670; ally_arm confirms 680571 stays absent (0) in both control and treatment. Striker in front at 3 yd casts 998374 ([300..309], 16255=-100 no crit) N=75 times at 50 ms spacing with caster_avoidance block=100 (verified 75 blocked / 0 unblocked in control, 150 blocked / 0 unblocked cumulative in treatment). At 182 armor (2*63 Agi + 8 starter cloth + 48 shield; ClassicPlusCombat::ArmorConstant(60)=5500 -> -3.2031%, ceil), each normal block (-45) deals [246..255] (mean 250.5): 75 strikes mean 18787.5 +- 112.0 (sd 24.87, 4.50 sigma, before_expected floor 18600). Residual false-pass probability per pair (2 runs) at 10% spurious critical block (p=0.10): P(pass|p=0.10)^2 = 0.02003^2 = 0.000401 (0.040% <= 0.1%). Reference search 2026-11-25: coa-history 680570/680571 0 events (804670 53 casts in 19 logs); coabuildhub 680570 is an older rework (G-9); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680571
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultistAbilities.cpp:194-195: without casting Abyssal Ward 804670, 680571 remains absent (0) in both control and treatment"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 680570,
+      "name": "Void Tolerance (680571 critical block buff lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and casting Abyssal Ward now increases your chance to critically block by $680571s1% for $680571d.",
+      "trigger_spell": 804670,
+      "gate_spell": 680570,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 680571,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10400,
+          10900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 680571 DurationIndex 1 = 10000 ms ($680571d = 10 sec). Control (before learning 680570): casting 804670 leaves 680571 absent (0). Treatment (after learning 680570): 680571 is present (1) at 9200 ms (game_time [9100..9600] > 9000 ms) and gone (0) at 10800 ms (game_time [10400..10900] < 11000 ms), excluding 10% off 10000 ms on both sides. Reference search 2026-11-25: coa-history 680570/680571 0 events (passive/proc; 804670 Abyssal Ward 53 casts in 19 logs); coabuildhub spells_master_index.json 680570 is an older rework ('Reduces the cooldown of Abyssal Ward by -30 sec', G-9); installed server Spell.dbc (680570 +10% block, 680571 +100% crit block for 10 sec on Abyssal Ward) governs."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+20% critical block chance at 0 Insanity)",
+      "kind": "metric_delta",
+      "variant": "crit_block_base",
+      "label_suffix": "crit_block_base",
+      "quote": "Your successful blocks now have a $s2% chance to critically block for twice the normal amount.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 680574 Effect[1] aura 253 SPELL_AURA_MOD_BLOCK_CRIT_CHANCE bp=19+1=20% ($s2=20, AscensionCultistContracts.cpp:155-158, AscensionCultist.cpp:289). 500706=0 and 680603=0 read in both arms: critical_block_chance (Unit::isBlockCritical total, CoAGameplayTest.cpp:5229) moves 0 -> 20 (+-0.05). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+20% critical block chance at 59 Insanity below threshold)",
+      "kind": "metric_delta",
+      "variant": "crit_block_at_59",
+      "label_suffix": "crit_block_at_59",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          59,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 59
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Below-60 arm at 59 Insanity (500706=59, 680603=0, 573315=0 read in both phases): neither 680603 (>=60) nor stacks > 60 doubling applies, so critical_block_chance moves 0 -> 20 (+-0.05), contrasting with 60 Insanity (alerts at 40 vs 20) and 61 Insanity (alerts at 60 vs 40). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+20% critical block chance at 60 Insanity boundary)",
+      "kind": "metric_delta",
+      "variant": "crit_block_at_60",
+      "label_suffix": "crit_block_at_60",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Boundary arm at 60 Insanity (500706=60 and 680603=1 read in both phases): stacks > 60 is false, so critical_block_chance moves 0 -> 20 (not doubled 40). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680574,
+      "name": "Shadowy Symbiosis (+40% doubled critical block chance at 61 Insanity)",
+      "kind": "metric_delta",
+      "variant": "crit_block_above_60",
+      "label_suffix": "crit_block_above_60",
+      "quote": "This effect is doubled while above 60 Insanity.",
+      "trigger_spell": 60235,
+      "gate_spell": 680574,
+      "target": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 573315,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "critical_block_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 40,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Above-60 arm at 61 Insanity (500706=61 and 680603=1 read in both phases; 1000 ms wait lets Refresh double 680574 Effect[1] to 40 at AscensionCultist.cpp:289): critical_block_chance moves 0 -> 40 (+-0.05). Reference search 2026-11-25: coa-history 680574 0 events (passive); coabuildhub spells_master_index.json 680574 matches verbatim ('20% chance to critically block for twice the normal amount. This effect is doubled while above 60 Insanity.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 560502,
+      "name": "Wavering Hope (Twilight Shieldtoss -25% CD above 60 Insanity: ready at 6150 ms)",
+      "kind": "metric_delta",
+      "variant": "shieldtoss_late",
+      "label_suffix": "shieldtoss_late",
+      "quote": "the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by $630891s1%.",
+      "trigger_spell": 572141,
+      "gate_spell": 560502,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_auras_present": [
+        {
+          "aura": 630891,
+          "source": "AscensionCultistData.h:142 {560502, 630891, 60} grants 630891 during Refresh when 560502 is learned and 500706 > 60"
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 572141,
+          "delay_ms": 6150,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572141
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 800,
+      "expire_ms": 9000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 560502 grants helper 630891 (-25% CD aura 108 MiscValue 11 on 572141/500110) when 500706 > 60 (AscensionCultistData.h:142). 500706=61 and 680603=1 read in both arms; ally_arm confirms helper 630891 absent (0) in control and present (1) in treatment alongside after_auras_present. 572141 base CD 8000 ms -> -25% = 6000 ms (cut 2000 ms). Second attempt at 6150 ms (reset_cooldown false): refused in control (1 cast), accepted in treatment (1 + 2 = 3 casts), excluding 10% under the 2000 ms cut (6200 ms). Paired with shieldtoss_early and shieldtoss_at_60. Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 560502,
+      "name": "Wavering Hope (Twilight Shieldtoss -25% CD above 60 Insanity: still refused at 5850 ms)",
+      "kind": "metric_delta",
+      "variant": "shieldtoss_early",
+      "label_suffix": "shieldtoss_early",
+      "quote": "the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by $630891s1%.",
+      "trigger_spell": 572141,
+      "gate_spell": 560502,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_auras_present": [
+        {
+          "aura": 630891,
+          "source": "AscensionCultistData.h:142 {560502, 630891, 60} grants 630891 during Refresh when 560502 is learned and 500706 > 60"
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 572141,
+          "delay_ms": 5850,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572141
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 800,
+      "expire_ms": 9000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Lower-bound bracket for 560502 on 572141 (8000 -> 6000 ms) at 61 Insanity (500706=61, 680603=1, 630891 read 0 in control and 1 in treatment via ally_arm + after_auras_present): second attempt at 5850 ms is refused in both control (1) and treatment (1 + 1 = 2), excluding 10% over the 2000 ms cut (5800 ms) and full CD removal. Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 560502,
+      "name": "Wavering Hope (Twilight Shieldtoss CD unchanged at 60 Insanity boundary)",
+      "kind": "metric_delta",
+      "variant": "shieldtoss_at_60",
+      "label_suffix": "shieldtoss_at_60",
+      "quote": "While above 60 Insanity,",
+      "trigger_spell": 572141,
+      "gate_spell": 560502,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 630891,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 572141,
+          "delay_ms": 6150,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572141
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 800,
+      "expire_ms": 9000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Insanity threshold boundary arm at 60 Insanity (500706=60, 680603=1, 630891=0 read in both arms): 630891 is not granted at 60, so 572141 keeps its full 8000 ms CD and the 6150 ms attempt stays refused even after learning 560502 (1 -> 2). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 560502,
+      "name": "Wavering Hope (Gaze of C'Thun -25% CD above 60 Insanity: ready at 7700 ms)",
+      "kind": "metric_delta",
+      "variant": "gaze_late",
+      "label_suffix": "gaze_late",
+      "quote": "the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by $630891s1%.",
+      "trigger_spell": 500110,
+      "gate_spell": 560502,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_auras_present": [
+        {
+          "aura": 630891,
+          "source": "AscensionCultistData.h:142 {560502, 630891, 60} grants 630891 during Refresh when 560502 is learned and 500706 > 60"
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500110,
+          "delay_ms": 7700,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 500110
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 800,
+      "expire_ms": 11000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 500110 Gaze of C'Thun base CD 10000 ms -> -25% = 7500 ms (cut 2500 ms). At 61 Insanity (500706=61, 680603=1, 630891 read 0 in control and 1 in treatment via ally_arm + after_auras_present), second attempt at 7700 ms is refused in control (1) and succeeds in treatment (1 + 2 = 3), excluding 10% under the 2500 ms cut (7750 ms). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 560502,
+      "name": "Wavering Hope (Gaze of C'Thun -25% CD above 60 Insanity: still refused at 7300 ms)",
+      "kind": "metric_delta",
+      "variant": "gaze_early",
+      "label_suffix": "gaze_early",
+      "quote": "the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by $630891s1%.",
+      "trigger_spell": 500110,
+      "gate_spell": 560502,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          61,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 61
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_auras_present": [
+        {
+          "aura": 630891,
+          "source": "AscensionCultistData.h:142 {560502, 630891, 60} grants 630891 during Refresh when 560502 is learned and 500706 > 60"
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500110,
+          "delay_ms": 7300,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 500110
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 800,
+      "expire_ms": 11000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Lower-bound bracket for 560502 on 500110 (10000 -> 7500 ms) at 61 Insanity (500706=61, 680603=1, 630891 read 0 in control and 1 in treatment via ally_arm + after_auras_present): second attempt at 7300 ms is refused in both control (1) and treatment (1 + 1 = 2), excluding 10% over the 2500 ms cut (7250 ms). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 630891
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:142 {560502, 630891, 60}: threshold helper 630891 reads 0 in control (560502 unlearned) and 1 in treatment (560502 learned) at 61 Insanity"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 560502,
+      "name": "Wavering Hope (Gaze of C'Thun CD unchanged at 60 Insanity boundary)",
+      "kind": "metric_delta",
+      "variant": "gaze_at_60",
+      "label_suffix": "gaze_at_60",
+      "quote": "While above 60 Insanity,",
+      "trigger_spell": 500110,
+      "gate_spell": 560502,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 60
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 630891,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500110,
+          "delay_ms": 7700,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 500110
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 800,
+      "expire_ms": 11000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Boundary arm at 60 Insanity (500706=60, 680603=1, 630891=0 read in both arms): 500110 keeps its 10000 ms CD and 7700 ms attempt stays refused (1 -> 2). Reference search 2026-11-25: coa-history 560502/630891 0 events (passive/helper; 572141 4 casts, 500110 4 casts); coabuildhub spells_master_index.json 560502 matches verbatim ('While above 60 Insanity, the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by -25%.'); installed Spell.dbc governs."
+    },
+    {
+      "spell": 680575,
+      "name": "Void Augmentation (Twilight Shieldtoss -3 sec CD while Dreadnought active: ready at 5250 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_late",
+      "label_suffix": "cd_late",
+      "quote": "While Dreadnought is active, your Twilight Shieldtoss has a $/1000;s1 sec reduced cooldown.",
+      "trigger_spell": 572141,
+      "gate_spell": 680575,
+      "learn": [
+        680750
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        567524
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 567524,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 567525,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 572141,
+          "delay_ms": 5250,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572141
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 800,
+      "expire_ms": 9000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). 680575 Effect[0] aura 107 MiscValue 23 (SPELLMOD_EFFECT3) bp=-3001+1=-3000 ms ($/1000;s1=3) on SpellFamilyFlags[1] 1024 (Dreadnought SLS 567525, triggered by Dreadnought 567524; 567525 Effect[2] aura 107 SPELLMOD_COOLDOWN on 572141). Both phases clear stale 567524/567525, set Insanity 500706=80 (precondition to cast 567524), cast 567524 for real (learn 680750), and confirm 567524=1 and 567525=1 via after_setup_stacks. Second 572141 attempt at 5250 ms (base 8000 -> 5000 ms): refused in control (1), succeeds in treatment (1 + 2 = 3), excluding 10% under the 3000 ms cut (5300 ms). Paired with cd_early and cd_no_dreadnought. Reference search 2026-11-25: coa-history 680575 0 events (passive; 567524 Dreadnought 1 cast, 808036 Eldritch Shock 2 casts, 572141 4 casts); coabuildhub spells_master_index.json 680575 matches clause 1 ('While Dreadnought is active, your Twilight Shieldtoss has a -3 sec reduced cooldown.'); streamed coa_client_spell_description rev_20261007_58_void_augmentation_tooltip.sql matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 680575,
+      "name": "Void Augmentation (Twilight Shieldtoss -3 sec CD while Dreadnought active: still refused at 4750 ms)",
+      "kind": "metric_delta",
+      "variant": "cd_early",
+      "label_suffix": "cd_early",
+      "quote": "While Dreadnought is active, your Twilight Shieldtoss has a $/1000;s1 sec reduced cooldown.",
+      "trigger_spell": 572141,
+      "gate_spell": 680575,
+      "learn": [
+        680750
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        567524
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 567524,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 567525,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 572141,
+          "delay_ms": 4750,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572141
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 800,
+      "expire_ms": 9000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Lower-bound bracket for 680575 on 572141 (8000 -> 5000 ms) while Dreadnought 567524/567525 active (567524=1 and 567525=1 verified in both arms): second attempt at 4750 ms is refused in both control (1) and treatment (1 + 1 = 2), excluding 10% over the 3000 ms cut (4700 ms). Reference search 2026-11-25: coa-history 680575 0 events (passive; 567524 Dreadnought 1 cast, 808036 Eldritch Shock 2 casts, 572141 4 casts); coabuildhub spells_master_index.json 680575 matches clause 1 ('While Dreadnought is active, your Twilight Shieldtoss has a -3 sec reduced cooldown.'); streamed coa_client_spell_description rev_20261007_58_void_augmentation_tooltip.sql matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 680575,
+      "name": "Void Augmentation (Twilight Shieldtoss CD unchanged when Dreadnought is not active)",
+      "kind": "metric_delta",
+      "variant": "cd_no_dreadnought",
+      "label_suffix": "cd_no_dreadnought",
+      "quote": "While Dreadnought is active, your Twilight Shieldtoss has a $/1000;s1 sec reduced cooldown.",
+      "trigger_spell": 572141,
+      "gate_spell": 680575,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          567524,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          567525,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        804056
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 567524,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 567525,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 572141,
+          "delay_ms": 5250,
+          "target": "dummy",
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572141
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 800,
+      "expire_ms": 9000,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; slot 16 == 2129 read in both phases). Condition-off arm for 680575: Dreadnought 567524/567525 confirmed absent (0) in both arms; 572141 keeps its 8000 ms CD and the 5250 ms attempt remains refused even after learning 680575 (1 -> 2). Reference search 2026-11-25: coa-history 680575 0 events (passive; 567524 Dreadnought 1 cast, 808036 Eldritch Shock 2 casts, 572141 4 casts); coabuildhub spells_master_index.json 680575 matches clause 1 ('While Dreadnought is active, your Twilight Shieldtoss has a -3 sec reduced cooldown.'); streamed coa_client_spell_description rev_20261007_58_void_augmentation_tooltip.sql matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 680575,
+      "name": "Void Augmentation (Eldritch Shock strikes 2 additional nearby enemies)",
+      "kind": "metric_delta",
+      "variant": "shock_cleave",
+      "label_suffix": "shock_cleave",
+      "quote": "In addition, your Eldritch Shock now strikes 2 additional enemies near the primary target.",
+      "trigger_spell": 808036,
+      "gate_spell": 680575,
+      "target": "dummy",
+      "cast_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "before_trigger_reads": [
+        {
+          "spell": 500706,
+          "expected": 1,
+          "actor": "caster"
+        },
+        {
+          "spell": 680601,
+          "expected": 1,
+          "actor": "caster"
+        }
+      ],
+      "area_dummies": [
+        3.5,
+        4.0,
+        4.5,
+        5.0
+      ],
+      "area_sum": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 808043,
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 4,
+      "expected_gain": 3,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 + 2129; Eldritch Shock 808036 has EquippedItemClass -1). 680575 Effect[1] aura 107 SPELLMOD_JUMP_TARGETS (MiscValue 17) bp=2+1=+3 on SpellFamilyFlags[2] 524288 (808043 Eldritch Shock Damage, base EffectChainTarget 0 -> 0 + 3 = 3 total targets = primary + 2 additional enemies, Spell.cpp:1930-1944). Both phases set 500706=20 and confirm 500706 and 680601 present via before_trigger_reads across 5 dummies (dummy at 3 yd + 4 area_dummies at 3.5..5.0 yd): control without 680575 strikes 1 enemy (before_expected 1); treatment with 680575 strikes 3 enemies (cumulative 4, expected_gain 3, leaving 2 in-range dummies untouched). Reference search 2026-11-25: coa-history 680575 0 events (passive; 567524 Dreadnought 1 cast, 808036 Eldritch Shock 2 casts, 572141 4 casts); coabuildhub spells_master_index.json 680575 matches clause 1 ('While Dreadnought is active, your Twilight Shieldtoss has a -3 sec reduced cooldown.'); streamed coa_client_spell_description rev_20261007_58_void_augmentation_tooltip.sql matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 560091,
+      "name": "Eldritch Bastion R1 (+15% armor contribution from shield 2129)",
+      "kind": "metric_delta",
+      "variant": "shield_armor",
+      "label_suffix": "shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 804056,
+      "gate_spell": 560091,
+      "target": "caster",
+      "cast_power": 2000,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 182,
+      "expected": 189,
+      "expected_gain": 7,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 560091 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 (armor) MiscValueB 64 (1<<ITEM_SUBCLASS_ARMOR_SHIELD), bp=14+1=+15% ($s1=15; SpellInfo.cpp:388-391, StatSystem.cpp:390). ItemAddon.dbc field 43 gives item 2129 Reborn armor = 48; base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410) + shield 48 = 182. 15% of 48 = 7.2 -> int(182 + 7.2) = 189, gain +7 (tol 0.5 excludes 6 = 12.5% and 8 = 16.7%, i.e. 10% off 15%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+    },
+    {
+      "spell": 560091,
+      "name": "Eldritch Bastion R1 (no armor gain without a shield equipped)",
+      "kind": "metric_delta",
+      "variant": "no_shield_armor",
+      "label_suffix": "no_shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 578263,
+      "gate_spell": 560091,
+      "target": "dummy",
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 134,
+      "expected": 134,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "No-shield control arm: trigger_spell 578263 Netherstrike (2H weapon required; dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield in slot 16). With no shield equipped (48 shield armor absent), base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410); learning 560091 adds 0 armor (134 -> 134 +- 0.5), proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+    },
+    {
+      "spell": 560091,
+      "name": "Eldritch Bastion R1 (5% chance on Shadow damage to reset Twilight Shieldtoss CD)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+      "talent": 560091,
+      "trigger_spell": 806830,
+      "reset_spell": 572141,
+      "chance_pct": 5,
+      "control_casts": 50,
+      "casts": 1500,
+      "parts": 4,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89)"
+        },
+        {
+          "spell": 680602,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680602 (40 Insanity helper marker) required by Hammer of Twilight 806830 (Spell.dbc)"
+        },
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: removes Shadow full resists on Hammer of Twilight 806830 so every cast lands Shadow damage"
+        }
+      ],
+      "observe_source": "Dreadnought weapon set (2534 Rondel dagger satisfies 806830 EquippedItemSubClassMask 173555; 2129 shield equipped via for_entry). $h = 5 (560091 Spell.dbc ProcChance 5; AscensionCultistEvents.cpp:90,200 checks dealt && Shadow && Chance(player, 560091) via roll_chance_f and calls Reduce(player, 524876, INT32_MAX) -> RemoveSpellCooldown(572141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (SchoolMask 32 Shadow, 0 mana, instant, 1500 ms GCD). Control: 50 casts x 4 parts = 200 hits unlearned (0 resets). Treatment: 4 pooled parts x 1500 casts = 6000 damaging Shadow hits (>= 5755 needed for residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 5%). Reference search 2026-11-25: coa-history 560091/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json 560091 carries an older version ('Increases your Armor contribution from your shield by 15%.', omitting the reset clause, G-9); installed server Spell.dbc (15% shield armor, 5% Shadow damage reset) governs."
+    },
+    {
+      "spell": 561336,
+      "name": "Eldritch Bastion R2 (+30% armor contribution from shield 2129)",
+      "kind": "metric_delta",
+      "variant": "shield_armor",
+      "label_suffix": "shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 804056,
+      "gate_spell": 561336,
+      "target": "caster",
+      "cast_power": 2000,
+      "shield_after_learn": {
+        "item": 2129,
+        "slot": 16,
+        "rejected_before": false
+      },
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 182,
+      "expected": 196,
+      "expected_gain": 14,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dreadnought weapon set (2534 Rondel + 2129 Large Round Shield; slot 16 == 2129 read via shield_after_learn in both phases). 561336 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 MiscValueB 64, bp=29+1=+30% ($s1=30; SpellInfo.cpp:388-391, StatSystem.cpp:390). Item 2129 Reborn armor = 48 (ItemAddon.dbc field 43); base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410) + shield 48 = 182; 30% of 48 = 14.4 -> int(182 + 14.4) = 196, gain +14 (tol 0.5 excludes 13 = 27.1% and 15 = 31.3%, strictly inside +-10% of 30%). Paired with no_shield_armor control. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+    },
+    {
+      "spell": 561336,
+      "name": "Eldritch Bastion R2 (no armor gain without a shield equipped)",
+      "kind": "metric_delta",
+      "variant": "no_shield_armor",
+      "label_suffix": "no_shield_armor",
+      "quote": "Increases your Armor contribution from your shield by $s1%",
+      "trigger_spell": 578263,
+      "gate_spell": 561336,
+      "target": "dummy",
+      "phase_target_health_pct": [
+        30,
+        25
+      ],
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 134,
+      "expected": 134,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "No-shield control arm: trigger_spell 578263 (dummy held at 30%/25% HP with disable_regeneration for TargetAuraState 13) switches armed_for to Godblade (2531 Great Axe, no shield). Armor (base armor 134 = 2*63 Agility (126) + 8 Cultist starter cloth (2000057 Eldritch Pants 3 + 2000058 Eldritch Boots 2 + 2000059 Eldritch Robes 3, data/sql/updates/pending_db_world/rev_1787754600000000000.sql:317-319,408-410)) remains 134 -> 134 (+-0.5) before and after learning 561336, proving the bonus applies only to shield armor. Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+    },
+    {
+      "spell": 561336,
+      "name": "Eldritch Bastion R2 (10% chance on Shadow damage to reset Twilight Shieldtoss CD)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+      "talent": 561336,
+      "trigger_spell": 806830,
+      "reset_spell": 572141,
+      "chance_pct": 10,
+      "control_casts": 50,
+      "casts": 1800,
+      "parts": 7,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "attempt_auras": [
+        {
+          "spell": 500706,
+          "stacks": 40,
+          "source": "precondition fixture: Hammer of Twilight 806830 requires >= 40 Insanity and drains 40 Insanity on cast (AscensionCultistAbilities.cpp:53-54,88-89)"
+        },
+        {
+          "spell": 680602,
+          "stacks": 1,
+          "source": "precondition fixture: CasterAuraSpell 680602 (40 Insanity helper marker) required by Hammer of Twilight 806830 (Spell.dbc)"
+        },
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "precondition fixture: removes Shadow full resists on Hammer of Twilight 806830 so every cast lands Shadow damage"
+        }
+      ],
+      "observe_source": "Dreadnought weapon set (2534 Rondel dagger satisfies 806830; 2129 shield equipped via for_entry). $h = 10 (561336 Spell.dbc ProcChance 10; AscensionCultistEvents.cpp:90,200 checks dealt && Shadow && Chance(player, 561336) via roll_chance_f and calls Reduce(player, 524876, INT32_MAX) -> RemoveSpellCooldown(572141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (SchoolMask 32 Shadow, 0 mana, instant, 1500 ms GCD). Control: 50 casts x 7 parts = 350 hits unlearned (0 resets). Treatment: 7 pooled parts x 1800 casts = 12600 damaging Shadow hits (>= 10905 needed for residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 10%). Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
     }
   ],
   "player_observations": [],
