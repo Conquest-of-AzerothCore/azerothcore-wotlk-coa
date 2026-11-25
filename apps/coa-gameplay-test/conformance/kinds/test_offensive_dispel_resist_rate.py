@@ -192,7 +192,7 @@ class OffensiveDispelResistRateTests(unittest.TestCase):
         self.assertEqual(offensive_dispel_resist_verdict(
             base_verdict(exp), seeded_runs(exp.model, {CONTROL: 0.20, TREATMENT: 0.20}, 12), exp.model).status, 'alert')
 
-    def test_gate_auras_sets_precondition_before_required_aura_in_gated_arms_only(self):
+    def test_gate_auras_sets_precondition_symmetrically_across_all_arms(self):
         plain, plain_exp = scenario_of(GATED_ENTRY)
         gated = {**GATED_ENTRY, 'gate_auras': [[500706, 95]]}
         scenario, expectations = scenario_of(gated)
@@ -201,13 +201,19 @@ class OffensiveDispelResistRateTests(unittest.TestCase):
         steps = validated['steps']
         insanity_steps = [i for i, s in enumerate(steps)
                           if s['action'] == 'set_aura' and s.get('spell') == 500706 and s.get('stacks') == 95]
-        self.assertEqual(len(insanity_steps), 2)
-        for idx in insanity_steps:
+        self.assertEqual(len(insanity_steps), 3)
+        for idx in insanity_steps[:2]:
             self.assertEqual(steps[idx]['actor'], CASTER)
             self.assertEqual(steps[idx + 1]['action'], 'set_aura')
             self.assertEqual(steps[idx + 1]['spell'], 680604)
             self.assertEqual(steps[idx + 2]['action'], 'cast')
             self.assertEqual(steps[idx + 2]['spell'], 520326)
+        gate_off_idx = insanity_steps[2]
+        self.assertEqual(steps[gate_off_idx]['actor'], CASTER)
+        self.assertEqual(steps[gate_off_idx - 1],
+                         {'action': 'set_aura', 'actor': CASTER, 'spell': 520326, 'stacks': 0})
+        self.assertEqual(steps[gate_off_idx + 1]['action'], 'wait')
+        self.assertEqual(steps[gate_off_idx + 1]['label'], 'offensive_dispel_resist_rate gate off settle')
         without_gate_auras = [s for s in steps
                               if not (s['action'] == 'set_aura' and s.get('spell') == 500706 and s.get('stacks') == 95)]
         self.assertEqual(without_gate_auras, plain['steps'])

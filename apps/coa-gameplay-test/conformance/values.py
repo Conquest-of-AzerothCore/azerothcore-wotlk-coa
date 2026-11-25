@@ -612,8 +612,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         if carried_by_summon(carrier_effect):
             summon_reads = True
             return summon_aura_measurement(label, metric, rank_id, summon_carrier)
+        use_ally_cast = ally_cast is not None and not is_hostile(facts) and not targets_resurrect(facts)
         return measurement(label, metric=metric, spell=rank_id,
-                           **aura_carrier(facts, carrier_effect, ally_cast is not None), **fields)
+                           **aura_carrier(facts, carrier_effect, use_ally_cast), **fields)
 
     def summon_gap(carrier_effect: int, metric: str) -> str:
         return summon_aura_gap(metric) if carried_by_summon(carrier_effect) else ''
