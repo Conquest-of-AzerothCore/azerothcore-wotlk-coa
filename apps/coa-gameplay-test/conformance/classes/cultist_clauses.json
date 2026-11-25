@@ -3644,18 +3644,10 @@
     "spell": 706177,
     "clause": "Increases the effectiveness of Sermon of Dread by $s1%.",
     "labels": [
-      "706177 effect_value e0 #0"
+      "706177 effect_value e0 #0",
+      "706177 behaviour_metric_delta sermon_attack_power"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Improved Sermon of Dread 706177 Effect[0] adds +30% SPELLMOD_EFFECT1 (bp=29+1) to Sermon of Dread 620614 (aura 344 flat AP debuff -140-rpl on enemies). effectiveness_delta.READ_METRICS only supports {melee_crit_chance, spell_crit_chance, dodge_chance, parry_chance, armor, spell_power, attack_time_ms, combat_rating} and lacks attack_power, even though the harness already reads attack_power on any unit including dummy (CoAGameplayTest.cpp:4076). Extension: add attack_power to effectiveness_delta.READ_METRICS (with target/actor dummy support for enemy debuffs).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 706179,

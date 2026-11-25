@@ -44216,6 +44216,37 @@
         "wait_ms": 1000
       },
       "observe_source": "Void Power 574147 row 211 (\"Your healing power is increased based on your main-hand weapon damage.\"): unfigured direction-only claim (D-38, ADR 1299). AscensionCultist.cpp:291-292 and AscensionCultistAuras.cpp:135-136 set effect 0 (SPELL_AURA_MOD_HEALING_DONE, all schools) to int32((UNIT_FIELD_MINDAMAGE + UNIT_FIELD_MAXDAMAGE) / 2), refreshed every 500 ms. weapon_damage_arms equips three white main-hand weapons declared in weapon_sets (Dreadnought Rondel 2534, Heretic War Staff 2535, Godblade Great Axe 2531) before and after a real learn of 574147, verifying equipped_item (slot 15), strictly rising weapon_damage_min, equal attack_power across all arms (376.0, no AP confound), and invariance under an unrelated-stat control (+100 Haste Rating via 10033), judging strictly monotonic healing_power (school 5) gain with no figure asserted."
+    },
+    {
+      "spell": 706177,
+      "name": "Improved Sermon of Dread (Sermon of Dread attack power debuff)",
+      "kind": "effectiveness_delta",
+      "variant": "sermon_attack_power",
+      "label_suffix": "sermon_attack_power",
+      "quote": "Increases the effectiveness of Sermon of Dread by $s1%.",
+      "trigger_spell": 620614,
+      "gate_spell": 706177,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          35785,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 836,
+      "expected": 779,
+      "expected_gain": -57,
+      "tolerance": 0.5,
+      "wait_ms": 1000,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "Improved Sermon of Dread 706177 row 300 (\"Increases the effectiveness of Sermon of Dread by $s1%.\"): Spell.dbc 706177 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 39 + DieSides 1 = +40% ($s1%) on EffectSpellClassMask[2] 0x10000000 matching Sermon of Dread 620614 (SpellFamilyFlags[2] 0x10000000, Effect[0] aura 344 SPELL_AURA_ASCENSION_MOD_ATTACK_POWER_FLAT, BasePoints -141 + DieSides 1 + RealPointsPerLevel -1.0 * (60 - 56) = -144 AP for 30 s, 6% base mana, 10 yd AoE). effectiveness_delta (ADR 1300) casts 620614 in both phases on dummy (buffed with Attack Power 980 35785 to prevent zero-clamping) with 706177 learned between and 31000 ms expiry wait, reading dummy attack_power: -144 without 706177 and int32(-144 * 1.40) = -201 with 706177, additional AP drop expected_gain = -57 within 0.5 (excludes unmodified 0, +30% -43, and doubled -115)."
     }
   ],
   "player_observations": [],
