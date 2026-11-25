@@ -161,7 +161,8 @@ class EffectivenessDeltaTests(unittest.TestCase):
                 values[model['before_label']] = before
             if after is not None:
                 values[model['after_label']] = after
-            return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+            return judge_behaviour(replace(base_verdict(expectation), status='unmeasured'), FakeRun(values),
+                                   expectation)
 
         self.assertEqual(judged(900.0, 843.0).status, 'ok')
         self.assertEqual(judged(900.0, 900.0).status, 'alert')
