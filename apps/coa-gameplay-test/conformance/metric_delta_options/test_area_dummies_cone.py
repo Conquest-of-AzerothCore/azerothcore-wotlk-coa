@@ -59,13 +59,44 @@ class AreaDummiesConeTests(unittest.TestCase):
         good = {'angle': 90, 'radius': 12, 'source': SOURCE}
         for cone in ({**good, 'source': 'first read'}, {**good, 'angle': 170}, {**good, 'radius': 6},
                      {key: value for key, value in good.items() if key != 'source'}, {**good, 'behind': 90},
-                     {**good, 'margin_pct': 0}, {**good, 'offset': 1}):
+                     {**good, 'margin_pct': 0}, {**good, 'offset': 1}, {**good, 'offset': 0.4},
+                     {'angle': 24, 'radius': 8, 'offset': 0.4, 'behind': 166, 'source': SOURCE}):
             with self.subTest(cone=cone), self.assertRaises(ValueError):
                 self.build(area_dummies={'cone': cone})
         with self.assertRaises(ValueError):
             self.build(area_dummies={'cone': good, 'extra': 1})
         with self.assertRaises(ValueError):
             self.build(metric='spell_damage_total')
+        with self.assertRaises(ValueError):
+            self.build(setup_casts=[504580])
+        with self.assertRaises(ValueError):
+            self.build(setup_casts=[500712], setup_in_before=True)
+        with self.assertRaises(ValueError):
+            self.build(setup_casts=[500712], setup_only_after=True)
+
+    def test_narrow_cone_accepts_sub_two_yard_offset_and_setup_casts_before_relocation(self):
+        narrow = {'angle': 24, 'radius': 8, 'offset': 1.0, 'behind': 166, 'source': SOURCE}
+        scenario, [expectation] = self.build(area_dummies={'cone': narrow}, setup_casts=[500712], setup_wait_ms=1600)
+        steps = run.validate(scenario)['steps']
+        plan = expectation.model['area_dummies']['cone']['plan']
+        self.assertEqual(plan['offset'], 1.0)
+        self.assertEqual(plan['bearing'], {'inside': 10.8, 'outside': 13.2, 'behind': 166.0})
+        self.assertTrue(all(4.0 <= distance <= 7.0 for distance in plan['distance'].values()))
+        setup = next(index for index, step in enumerate(steps) if step.get('action') == 'cast'
+                     and step.get('spell') == 500712)
+        relocate = next(index for index, step in enumerate(steps) if step.get('action') == 'relocate')
+        trigger = next(index for index, step in enumerate(steps) if step.get('action') == 'cast'
+                       and step.get('spell') == 504580)
+        self.assertLess(setup, relocate)
+        self.assertLess(relocate, trigger)
+        ok_verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(expectation)), expectation)
+        self.assertEqual(ok_verdict.status, 'ok', ok_verdict.explanation)
+        mutant_verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(expectation, outside=1.0)),
+                                         expectation)
+        self.assertEqual(mutant_verdict.status, 'alert', mutant_verdict.explanation)
+        unmeasured_verdict = judge_behaviour(base_verdict(expectation), FakeRun(self.values(expectation, skew=2.0)),
+                                             expectation)
+        self.assertEqual(unmeasured_verdict.status, 'unmeasured', unmeasured_verdict.explanation)
 
     def values(self, expectation, inside=1.0, outside=0.0, behind=0.0, orientation=0.0, skew=0.0):
         model = expectation.model['area_dummies']

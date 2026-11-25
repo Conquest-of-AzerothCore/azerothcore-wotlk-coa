@@ -1015,11 +1015,12 @@ class EvidenceTablesTest(unittest.TestCase):
         states = {metric for metric, kind in METRIC_EVIDENCE.items() if kind == STATE}
         self.assertEqual({metric for metric in STATE_PROMISES if metric not in states},
                          {'spell_done_crit_chance', 'spell_done_crit_chance_scripted', 'spell_taken_crit_chance',
-                          'critical_block_chance'})
+                          'spell_hit_bonus_taken', 'critical_block_chance'})
         self.assertEqual(METRIC_EVIDENCE['critical_block_chance'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_done_crit_chance_scripted'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['spell_taken_crit_chance'], READBACK)
+        self.assertEqual(METRIC_EVIDENCE['spell_hit_bonus_taken'], READBACK)
         self.assertEqual(METRIC_EVIDENCE['aura'], EVENT)
 
 
@@ -1112,6 +1113,27 @@ class ContrastProofTest(unittest.TestCase):
     def test_a_taken_crit_read_does_not_prove_a_claim_that_does_not_promise_crit(self):
         damage = 'Increases the damage of Damnation against Undead and Demons by $s1%.'
         self.assertEqual(self.evidence(damage, 'spell_taken_crit_chance', contrast=LEARNED_CONTRAST), [DATA])
+
+    def test_a_taken_hit_bonus_read_proves_a_hit_chance_claim_only_with_the_learned_contrast(self):
+        hit = 'Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%.'
+        self.assertEqual(METRIC_EVIDENCE['spell_hit_bonus_taken'], READBACK)
+        self.assertEqual(CONTRAST_PROOF['spell_hit_bonus_taken'], LEARNED_CONTRAST)
+        self.assertEqual(self.evidence(hit, 'spell_hit_bonus_taken', contrast=LEARNED_CONTRAST), [BEHAVIOUR])
+        self.assertEqual(self.evidence(hit, 'spell_hit_bonus_taken', contrast=CONDITION_CONTRAST), [DATA])
+        self.assertEqual(self.evidence(hit, 'spell_hit_bonus_taken'), [DATA])
+        for status in ('alert', 'unmeasured'):
+            with self.subTest(status=status):
+                verdicts = [judged(self.LABEL, BEHAVIOUR_METRIC_DELTA, 'spell_hit_bonus_taken', status=status,
+                                   contrast=LEARNED_CONTRAST)]
+                self.assertEqual(evidence_of([claim(hit, self.LABEL)], verdicts)[0], [UNPROVEN])
+        unclassed = {key: kind for key, kind in METRIC_EVIDENCE.items() if key != 'spell_hit_bonus_taken'}
+        with mock.patch.dict(METRIC_EVIDENCE, unclassed, clear=True), self.assertRaises(EvidenceError):
+            self.evidence(hit, 'spell_hit_bonus_taken', contrast=LEARNED_CONTRAST)
+
+    def test_a_taken_hit_bonus_read_does_not_prove_a_claim_that_does_not_promise_hit_chance(self):
+        for text in ('Increases the damage of Horrorbolt by 3%.', 'Increases your critical strike chance by 3%.'):
+            with self.subTest(text=text):
+                self.assertEqual(self.evidence(text, 'spell_hit_bonus_taken', contrast=LEARNED_CONTRAST), [DATA])
 
     def test_a_ranged_crit_read_is_a_state_that_proves_a_crit_chance_claim_only_with_the_learned_contrast(self):
         crit = 'Increases your critical strike chance by $s2%.'

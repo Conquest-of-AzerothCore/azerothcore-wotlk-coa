@@ -69,17 +69,10 @@
   {
     "spell": 92131,
     "clause": "Teaches you Herald of the Depths.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Automatic Level 10 specialization passive 92131 teaches 520326 via SynchronizeTaughtAbilities (AscensionTaughtAbilityData.h:35, SpecId=40, RequiredLevel=10). Nearest existing option metric_delta specialization (ORDER 26) switches to spec 40 at level 60 during before, which runs SynchronizeAutomaticTalents + SynchronizeTaughtAbilities and auto-learns both 92131 and 520326 before the control read (knows_spell reads 1 in before); unlearn_before runs at ORDER 20 (before specialization) and cannot clear them after the spec switch. Smallest extension: Python-only opt-in unlearn_after_specialization (ORDER > 26) or between-phase specialization switch on metric_delta.",
-      "attempts": [
-        {
-          "agent": "cu-t1",
-          "report": ".agents/plans/cu-t1/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "92131 behaviour_metric_delta teaches_herald"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 92131,
@@ -485,7 +478,7 @@
       {
         "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
         "labels": [
-          "300300 effect_value 560943e0 #1"
+          "300300 behaviour_metric_delta mind_rot_hit"
         ]
       },
       {
@@ -496,7 +489,7 @@
       }
     ],
     "tool_gap": {
-      "reason": "Two gaps on row 42: (1) claim 0 ('Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%'): harness metric spell_hit_bonus_taken (CoAGameplayTest.cpp:4132-4138, run.py:175) already reads the engine modifier on the target (confirmed alert 0% vs +3% on 560943 due to EffectMiscValue[0]=0 in cu-g6b runs 20261125-002625 / -002657), but coverage.METRIC_EVIDENCE (coverage.py:433-486) omits spell_hit_bonus_taken (1-line tool extension); (2) claim 1 ('for $560943d'): 300300 applies 560943 at 25% raw Chance() on periodic/channeled damage, and last_application_expiry feed (cast_until_aura, CoAGameplayTest.cpp:7590, last_application_expiry.py:87,185) stops only on an aura on the caster, never on the dummy, while repeat cannot guarantee a proc within 10000 ms at <=0.1% residual failure.",
+      "reason": "Claim 1 ('for $560943d'): 300300 applies 560943 at 25% raw Chance() on periodic/channeled damage, and last_application_expiry feed (cast_until_aura, CoAGameplayTest.cpp:7590, last_application_expiry.py:87,185) stops only on an aura on the caster, never on the dummy, while repeat cannot guarantee a proc within 10000 ms at <=0.1% residual failure. Claim 0 ('Increases the chance for allies to hit ... by $560943s1%') is now measured by live alert 300300 behaviour_metric_delta mind_rot_hit (runs 20261125-064448 and 20261125-064610: 560943 aura 0 -> 1 confirmed, spell_hit_bonus_taken Shadow 502182 measured 0 before and 0 after against +3 tooltip; fix pending on fix/coa-cultist-conformance-fixes-2).",
       "attempts": [
         {
           "agent": "cu-t3",
@@ -1930,7 +1923,9 @@
       {
         "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
         "labels": [
-          "525049 effect_value 560943e0 #0"
+          "525049 behaviour_metric_delta mind_rot_hit_shadow",
+          "525049 behaviour_metric_delta mind_rot_hit_fire",
+          "525049 behaviour_metric_delta mind_rot_hit_nature"
         ]
       },
       {
@@ -1941,7 +1936,7 @@
         ]
       }
     ],
-    "reason": "Alert (claim 0, uncounted): Mind Rot 560943 Spell.dbc Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE has BasePoints 2 + DieSides 1 (+3%) but EffectMiscValue[0] = 0 (no pending SQL or AscensionCultistContracts.cpp override), so Unit::GetTotalAuraModifierByMiscMask (Unit.cpp:4011, 7194) evaluates 0 & schoolMask == 0. Measured at runtime via coa-verify runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-525049-mind-rot-hit.json, Kobold Vermin 6): before learn 560943 aura=0, spell_hit_bonus_taken=0/0/0; after learn 560943 aura=1, aura_amount=3, spell_hit_bonus_taken=0 (Shadow 502182), 0 (Fire 2136), 0 (Nature 5176) vs tooltip +3% both runs. Not added as a cultist.json entry because spell_hit_bonus_taken is absent from coverage.METRIC_EVIDENCE (coverage.py:433-486), which fails test_coverage.py:975 under the no-tool-code-change rule."
+    "reason": "Alert (claim 0, uncounted): Mind Rot 560943 Spell.dbc Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE has BasePoints 2 + DieSides 1 (+3%) but EffectMiscValue[0] = 0 (fix pending on fix/coa-cultist-conformance-fixes-2), so Unit::GetTotalAuraModifierByMiscMask (Unit.cpp:4011, 7194) returns 0 against tooltip +3%. Measured in runs 20261125-064448 and 20261125-064610 (560943 aura 0 -> 1 confirmed on Kobold Vermin 6): Shadow 502182 = 0/0, Fire 2136 = 0/0, Nature 5176 = 0/0 vs +3 both runs (0 flips). Linked to live alerts 525049 behaviour_metric_delta mind_rot_hit_{shadow,fire,nature} (ADR 1290)."
   },
   {
     "spell": 525049,
@@ -2118,19 +2113,20 @@
     "spell": 560002,
     "clause": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
     "labels": [
-      "560002 effect_value #1"
+      "560002 behaviour_metric_delta res_holy",
+      "560002 behaviour_metric_delta res_fire",
+      "560002 behaviour_metric_delta res_nature",
+      "560002 behaviour_metric_delta res_frost",
+      "560002 behaviour_metric_delta res_shadow",
+      "560002 behaviour_metric_delta res_arcane",
+      "560002 behaviour_metric_delta res_holy_l50",
+      "560002 behaviour_metric_delta res_fire_l50",
+      "560002 behaviour_metric_delta res_nature_l50",
+      "560002 behaviour_metric_delta res_frost_l50",
+      "560002 behaviour_metric_delta res_shadow_l50",
+      "560002 behaviour_metric_delta res_arcane_l50"
     ],
-    "kind": "claim",
-    "reason": "Tool gap (uncounted): level-60 resistance +19 across all 6 magic schools (floor(5 + 0.5 * (60 - 31)), Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel = SpellLevel = 31, MaxLevel 0, SkillLineAbility 23039) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level arm (e.g. level 50 expecting floor(5 + 0.5 * (50 - 31)) = +14). No existing conformance kind/option sets a single caster level for a passive metric_delta resistance check: phase_caster_level requires two distinct levels per phase for cast buffs while Player::GiveLevel (Player.cpp:2623-2728 / StatSystem.cpp:344-369) does not recalculate already-applied passive aura amounts; hit_ratio.level only measures hits; shifted_control.caster_level only measures dummy spell_resist_chance. Because the amount and 'scaling with level' share one combined claim row, the claim stays uncounted until metric_delta supports a single caster_level option.",
-    "tool_gap": {
-      "reason": "Level-60 resistance (+19 across all 6 magic schools) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level passive arm (e.g. level 50 -> +14). No existing metric_delta option sets a single caster_level for a passive resistance check: phase_caster_level (phase_caster_level.py:8,17) requires two distinct levels with cast_in_before:true, and Player::GiveLevel does not recalculate already-applied passive auras. Nearest kind: metric_delta with a single-level caster_level option.",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 560080,
@@ -3163,17 +3159,10 @@
   {
     "spell": 680750,
     "clause": "Teaches you Dreadnought.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "Automatic Level 10 specialization passive 680750 teaches 567524 via SynchronizeTaughtAbilities (AscensionTaughtAbilityData.h:36, SpecId=96, RequiredLevel=10). Same ORDER gap as 92131: specialization (ORDER 26) auto-learns 680750 + 567524 at level 60 before the control read, while unlearn_before runs at ORDER 20. Smallest extension: Python-only opt-in unlearn_after_specialization (ORDER > 26) or between-phase specialization switch on metric_delta.",
-      "attempts": [
-        {
-          "agent": "cu-t1",
-          "report": ".agents/plans/cu-t1/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "680750 behaviour_metric_delta teaches_dreadnought"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 680750,
@@ -3427,18 +3416,11 @@
       },
       {
         "claim": "to enemies in front of you",
-        "labels": []
+        "labels": [
+          "681474 behaviour_metric_delta cone_edge"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "Claim 3 ('to enemies in front of you'): Eldritch Force 680576 is a narrow 24-degree, 8 yd cone (TARGET_UNIT_CONE_ENEMY_24, Spell.cpp:1289-1291, RadiusIndex 14 = 8 yd) reached only after 5 crit setup_casts transforming Gaze of C'Thun (681794). area_dummies.cone (area_dummies.py:54,59,134) enforces offset >= 2 yd (at 10.8 deg inside bearing, 2/sin(10.8 deg) = 10.67 yd > radius - 1 = 7 yd) and refuses setup_casts; fixed_count cannot place a just-outside-cone dummy at ~13.2 deg with verified position/bearing reads. Nearest kind: metric_delta with generalized position-aware multi-target area_dummies (shared with 804056).",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 704434,

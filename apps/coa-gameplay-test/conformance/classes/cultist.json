@@ -43446,6 +43446,531 @@
       "wait_ms": 14000,
       "expire_ms": 3500,
       "observe_source": "Exclusivity check for 301200 Apocalyptic Skies void portal 533030 (C1): over 25 deterministic portals (starting Insanity 500706=60, oscillating 60->40->60 with void_on_cast_failure: true and 500706/680601 reads at start, after setup, and at end of both arms), checks that (1) all three named spells land at least once (ratio-only count_metric > 0 for 520332, 800416, 805573; union bound with sibling entries 12*(2/3)^25 = 0.048% <= 0.1% per pair), (2) owned_creature_damage_total(533030) / (dmg_520332 + dmg_800416 + dmg_805573) == 1.0 exact (tolerance 0; any other damaging spell or melee swing alerts), and (3) owned_creature_heal_total(533030) / spell_heal_total(520333, caster_entry=533030) == 1.0 exact (Gaze of C'thun 500110 triggers both damage 520332 and ally heal 520333, Spell.dbc; any other healing spell alerts). Control (before 301200): 0 portal damage hits. Per-portal exact-one-cast and post-cast despawn remain in the ledger tool_gap (\"before disappearing.\"). Reference search 2026-11-25: coabuildhub 301200 matches Spell.dbc verbatim."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 increases Shadow spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit_shadow",
+      "label_suffix": "mind_rot_hit_shadow",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 502182
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on Kobold Vermin 6 before learning 525049 and present after Corrupt Mind 560109 lands with 525049 learned"
+          }
+        ]
+      },
+      "observe_source": "Eldritch Screams 525049 (@s:560714:0@): 'Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%' ($560943s1 = BasePoints 2 + DieSides 1 = 3, Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE; Spell.dbc). Corrupt Mind 560109 on Humanoid Kobold Vermin 6 (1500 ms cast + flight, wait 2200 ms) applies Mind Rot 560943 after real learn of 525049 (confirmed 0 -> 1 via ally_arm). Reads live target spell_hit_bonus_taken (Unit::GetTotalAuraModifierByMiscMask called by Unit::MagicSpellHitResult, Unit.cpp:4011; G-21 pt 2, ADR 1290) for Shadow (Horrorbolt 502182, SchoolMask 32): expected 0 before learn and +3 after learn. Paired with mind_rot_hit_fire and mind_rot_hit_nature. Reference search 2026-11-25: coa-history 560943: 0 events; coabuildhub spells_master_index.json 525049 matches verbatim."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 increases Fire spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit_fire",
+      "label_suffix": "mind_rot_hit_fire",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 2136
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on Kobold Vermin 6 before learning 525049 and present after Corrupt Mind 560109 lands with 525049 learned"
+          }
+        ]
+      },
+      "observe_source": "Fire school arm for Eldritch Screams 525049 ('all spells', $560943s1 = 3): reads live target spell_hit_bonus_taken for Fire Blast 2136 (SchoolMask 4, Fire), expected 0 before learn and +3 after learn. Reference search 2026-11-25: see mind_rot_hit_shadow."
+    },
+    {
+      "spell": 525049,
+      "name": "Eldritch Screams (Mind Rot 560943 increases Nature spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit_nature",
+      "label_suffix": "mind_rot_hit_nature",
+      "quote": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.@s:560714:0@",
+      "trigger_spell": 560109,
+      "gate_spell": 525049,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 5176
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on Kobold Vermin 6 before learning 525049 and present after Corrupt Mind 560109 lands with 525049 learned"
+          }
+        ]
+      },
+      "observe_source": "Nature school arm for Eldritch Screams 525049 ('all spells', $560943s1 = 3): reads live target spell_hit_bonus_taken for Wrath 5176 (SchoolMask 8, Nature), expected 0 before learn and +3 after learn. Reference search 2026-11-25: see mind_rot_hit_shadow."
+    },
+    {
+      "spell": 300300,
+      "name": "Mind Rot (560943 increases Shadow spell hit chance taken by 3%)",
+      "kind": "metric_delta",
+      "variant": "mind_rot_hit",
+      "label_suffix": "mind_rot_hit",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
+      "trigger_spell": 800432,
+      "gate_spell": 300300,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "setup_casts": [
+        502220,
+        806039,
+        572103,
+        800432,
+        800432,
+        800432
+      ],
+      "setup_wait_ms": 1550,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          560943,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_hit_bonus_taken",
+      "fields": {
+        "spell": 502182
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0,
+      "wait_ms": 5200,
+      "expire_ms": 16000,
+      "trigger_reset_after_setup": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 560943
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Mind Rot 560943 is absent on dummy before learning 300300 and applied by the 28 periodic/channeled ticks within the last 10 s after learning 300300 (0.75^28 = 0.032% miss per run, 0.063% per pair <= 0.1%)"
+          }
+        ]
+      },
+      "observe_source": "Mind Rot 300300 (@s:560714:0@): 'Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%' ($560943s1 = BasePoints 2 + DieSides 1 = 3, Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE; Spell.dbc). Overlapping Darkwither 502220 (3 ticks in window), Black Prayer 806039 (3 ticks), Tentacle of N'Zoth 572103 (3 ticks) and four Psychic Suppression 800432 channels (3+3+3+10 ticks, trigger_reset_after_setup true so the 4th 800432 resets its 90 s cooldown, precondition fixtures 500706 x20 + 680601 + 823764) deliver 28 periodic/channeled ticks inside 560943's 10 s duration (residual miss probability 0.75^28 = 0.032% per run, 0.063% per pair <= 0.1%). void_on_cast_failure is omitted because 800432's aura handler (AscensionCultistAuras.cpp:66-70) emits benign SPELL_FAILED_DONT_REPORT (27) on visual helpers 802789/803746; ally_arm confirms 560943 aura 0 -> 1 directly. Reads live target spell_hit_bonus_taken (Unit::GetTotalAuraModifierByMiscMask, Unit.cpp:4011; G-21 pt 2, ADR 1290) for Shadow (502182): expected 0 before learn and +3 after learn. Reference search 2026-11-25: coa-history 560943: 0 events; coabuildhub spells_master_index.json 300300 matches verbatim."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (holy resistance +14 at level 50)",
+      "kind": "metric_delta",
+      "variant": "res_holy_l50",
+      "label_suffix": "res_holy_l50",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "caster_level": 50,
+      "metric": "resistance",
+      "fields": {
+        "school": 1
+      },
+      "before_expected": 0,
+      "expected": 14,
+      "expected_gain": 14,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, MiscValue 126 (schools 1..6), BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel 31, SpellLevel 31, MaxLevel 0, SkillLineAbility 23039 (Spell.dbc). Second-level arm (caster_level 50, ADR 1291, G-32): floor(5 + 0.5 * (50 - 31)) = floor(14.5) = +14 holy resistance (school 1) vs 0 control, paired with +19 at level 60 (res_holy). Reference search 2026-11-25: see res_holy."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (fire resistance +14 at level 50)",
+      "kind": "metric_delta",
+      "variant": "res_fire_l50",
+      "label_suffix": "res_fire_l50",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "caster_level": 50,
+      "metric": "resistance",
+      "fields": {
+        "school": 2
+      },
+      "before_expected": 0,
+      "expected": 14,
+      "expected_gain": 14,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE at caster_level 50 (ADR 1291, G-32): floor(5 + 0.5 * (50 - 31)) = +14 fire resistance (school 2) vs 0 control, paired with +19 at level 60 (res_fire). Reference search 2026-11-25: see res_holy."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (nature resistance +14 at level 50)",
+      "kind": "metric_delta",
+      "variant": "res_nature_l50",
+      "label_suffix": "res_nature_l50",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "caster_level": 50,
+      "metric": "resistance",
+      "fields": {
+        "school": 3
+      },
+      "before_expected": 0,
+      "expected": 14,
+      "expected_gain": 14,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE at caster_level 50 (ADR 1291, G-32): floor(5 + 0.5 * (50 - 31)) = +14 nature resistance (school 3) vs 0 control, paired with +19 at level 60 (res_nature). Reference search 2026-11-25: see res_holy."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (frost resistance +14 at level 50)",
+      "kind": "metric_delta",
+      "variant": "res_frost_l50",
+      "label_suffix": "res_frost_l50",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "caster_level": 50,
+      "metric": "resistance",
+      "fields": {
+        "school": 4
+      },
+      "before_expected": 0,
+      "expected": 14,
+      "expected_gain": 14,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE at caster_level 50 (ADR 1291, G-32): floor(5 + 0.5 * (50 - 31)) = +14 frost resistance (school 4) vs 0 control, paired with +19 at level 60 (res_frost). Reference search 2026-11-25: see res_holy."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (shadow resistance +14 at level 50)",
+      "kind": "metric_delta",
+      "variant": "res_shadow_l50",
+      "label_suffix": "res_shadow_l50",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "caster_level": 50,
+      "metric": "resistance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 14,
+      "expected_gain": 14,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE at caster_level 50 (ADR 1291, G-32): floor(5 + 0.5 * (50 - 31)) = +14 shadow resistance (school 5) vs 0 control, paired with +19 at level 60 (res_shadow). Reference search 2026-11-25: see res_holy."
+    },
+    {
+      "spell": 560002,
+      "name": "Voidwarding (arcane resistance +14 at level 50)",
+      "kind": "metric_delta",
+      "variant": "res_arcane_l50",
+      "label_suffix": "res_arcane_l50",
+      "quote": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+      "trigger_spell": 60235,
+      "gate_spell": 560002,
+      "target": "caster",
+      "caster_level": 50,
+      "metric": "resistance",
+      "fields": {
+        "school": 6
+      },
+      "before_expected": 0,
+      "expected": 14,
+      "expected_gain": 14,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560002 Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE at caster_level 50 (ADR 1291, G-32): floor(5 + 0.5 * (50 - 31)) = +14 arcane resistance (school 6) vs 0 control, paired with +19 at level 60 (res_arcane). Reference search 2026-11-25: see res_holy."
+    },
+    {
+      "spell": 92131,
+      "name": "Herald of the Depths (teaches active spell 520326)",
+      "kind": "metric_delta",
+      "variant": "teaches_herald",
+      "label_suffix": "teaches_herald",
+      "quote": "Teaches you Herald of the Depths.",
+      "trigger_spell": 60235,
+      "gate_spell": 92131,
+      "target": "caster",
+      "cast_in_before": false,
+      "specialization": 40,
+      "unlearn_after_specialization": [
+        92131,
+        520326
+      ],
+      "metric": "knows_spell",
+      "fields": {
+        "spell": 520326
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Herald of the Depths 92131 (level-10 automatic passive of specialization 40 Heretic, AscensionTaughtAbilityData.h:35 {25, 40, 10, 92131, 520326}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1082-1104) teaches active spell Herald of the Depths 520326 when 92131 is learned in specialization 40. Switches to spec 40 (specialization 40, ADR 1102), then unlearns auto-learned [92131, 520326] via unlearn_after_specialization (ADR 1292) so control arm reads knows_spell(520326) == 0; real learn of 92131 between phases teaches 520326 (after == 1). Self-contained entry with no dependency on other 92131 entries. Reference search 2026-11-25: coa-history 520326: active form casts present; coabuildhub spells_master_index.json 92131 matches verbatim ('Teaches you Herald of the Depths.')."
+    },
+    {
+      "spell": 680750,
+      "name": "Dreadnought (teaches active spell 567524)",
+      "kind": "metric_delta",
+      "variant": "teaches_dreadnought",
+      "label_suffix": "teaches_dreadnought",
+      "quote": "Teaches you Dreadnought.",
+      "trigger_spell": 60235,
+      "gate_spell": 680750,
+      "target": "caster",
+      "cast_in_before": false,
+      "specialization": 96,
+      "unlearn_after_specialization": [
+        680750,
+        567524
+      ],
+      "metric": "knows_spell",
+      "fields": {
+        "spell": 567524
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Dreadnought 680750 (level-10 automatic passive of specialization 96 Dreadnought, AscensionTaughtAbilityData.h:36 {25, 96, 10, 680750, 567524}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1082-1104) teaches active spell Dreadnought 567524 when 680750 is learned in specialization 96. Switches to spec 96 (specialization 96, ADR 1102), then unlearns auto-learned [680750, 567524] via unlearn_after_specialization (ADR 1292) so control arm reads knows_spell(567524) == 0; real learn of 680750 between phases teaches 567524 (after == 1). Self-contained entry with no dependency on other 680750 entries. Reference search 2026-11-25: coabuildhub spells_master_index.json 680750 matches verbatim ('Teaches you Dreadnought.')."
+    },
+    {
+      "spell": 681474,
+      "name": "Eldritch Force (680576 24-degree 8 yd cone hits inside, spares outside and behind)",
+      "kind": "metric_delta",
+      "variant": "cone_edge",
+      "label_suffix": "cone_edge",
+      "quote": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+      "trigger_spell": 680576,
+      "gate_spell": 681474,
+      "target": "dummy",
+      "learn": [
+        502141
+      ],
+      "setup_casts": [
+        500712,
+        500712,
+        500712,
+        500712,
+        500712
+      ],
+      "setup_wait_ms": 1600,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "cone": {
+          "angle": 24,
+          "radius": 8,
+          "offset": 1.0,
+          "behind": 166,
+          "source": "Eldritch Force 680576 EffectImplicitTargetA[0]=24 (TARGET_UNIT_CONE_ENEMY_24, 24 deg at Spell.cpp:1289-1291) and EffectRadiusIndex[0]=14 (8 yd in SpellRadius.dbc)"
+        }
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 680576,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Force 681474 -> 680576 ('to enemies in front of you', EffectImplicitTargetA[0] = 24 TARGET_UNIT_CONE_ENEMY_24 = 24 degrees at Spell.cpp:1289-1291, EffectRadiusIndex[0] = 14 = 8 yd in SpellRadius.dbc). Five forced spell crits of Ancient Curse 500712 (instant, 30 yd range, single-target, hits dummy at 13.25 yd before cone relocation) earn 681794 and teach 680576 (AscensionCultist.cpp:313-324); precondition fixtures 823764 (spell pen) and 500706=0 (Insanity clear). area_dummies.cone (offset 1.0 yd, behind 166 deg, ADR 1293) relocates the caster before 680576 so dummy stands at 10.8 deg / 5.34 yd (inside cone, struck: 0 -> 1), area1 at 13.2 deg / 4.38 yd (just outside cone, 0 hits), and area2 at 166 deg / 4.13 yd (behind caster, 0 hits), verified from read positions and caster orientation. Reference search 2026-11-25: see transform_5th."
     }
   ],
   "player_observations": [],
