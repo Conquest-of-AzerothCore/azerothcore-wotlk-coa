@@ -2,12 +2,14 @@
   "schema": 1,
   "name": "Criminal: Blood On Your Hands refuses travel teleports and summons but not Blink (#9132)",
   "contract": [
-    "Issue #9132. The 9930873 tooltip says its bearer cannot retreat using teleport spells or hearthstones, and the",
-    "PR author's ruling (2026-11-25) blocks every travel teleport, vanity items included, while combat movement",
-    "stays. Hearthstone 8690 (SPELL_EFFECT_TELEPORT_UNITS to the home bind) and Teleport: Stormwind 3561 (to a",
-    "spell_target_position) fail with SPELL_FAILED_NOT_HERE (60) and leave the Criminal in place; an accepted",
-    "Call To Arms 804723 summon does not move it; Blink 1953 (a leap, not a fixed-destination teleport) is cast",
-    "without a failure. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
+    "Issue #9132. The 9930873 tooltip says its bearer cannot retreat using teleport spells or hearthstones, and",
+    "the PR author's ruling (2026-11-25) blocks every travel teleport, vanity items included, while combat",
+    "movement stays. Hearthstone 8690 (SPELL_EFFECT_TELEPORT_UNITS to the home bind) and Teleport: Stormwind 3561",
+    "(to a spell_target_position) fail silently (SPELL_FAILED_DONT_REPORT, 27) and leave the Criminal in place;",
+    "as in original Ascension footage the PR author reviewed on 2026-11-25, the player is told 'You cannot escape",
+    "while the No Retreat debuff is active!' (SMSG_NOTIFICATION) for every refused teleport; an accepted Call To",
+    "Arms 804723 summon does not move it; Blink 1953 (a leap, not a fixed-destination teleport) is cast without a",
+    "failure. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
   ],
   "timeout_ms": 120000,
   "players": [
@@ -112,8 +114,18 @@
       "actor": "mage",
       "metric": "cast_failure",
       "spell": 8690,
-      "equals": 60,
+      "equals": 27,
       "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "with the No Retreat message",
+      "actor": "mage",
+      "metric": "server_packet_contains",
+      "opcode": 459,
+      "row": 544567129,
+      "text": "You cannot escape while the No Retreat debuff is active!",
+      "equals": 1
     },
     {
       "action": "cast",
@@ -127,8 +139,18 @@
       "actor": "mage",
       "metric": "cast_failure",
       "spell": 3561,
-      "equals": 60,
+      "equals": 27,
       "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "with the No Retreat message",
+      "actor": "mage",
+      "metric": "server_packet_contains",
+      "opcode": 459,
+      "row": 544567129,
+      "text": "You cannot escape while the No Retreat debuff is active!",
+      "equals": 1
     },
     {
       "action": "wait",
@@ -189,6 +211,14 @@
       "within_ms": 7000
     },
     {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_summon"
+    },
+    {
       "action": "client_packet",
       "label": "The Criminal accepts the summon (CMSG_SUMMON_RESPONSE)",
       "actor": "mage",
@@ -215,6 +245,16 @@
       "metric": "distance",
       "target": "g",
       "min": 50
+    },
+    {
+      "action": "assert",
+      "label": "and the Criminal is told why",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "relative_to": "before_summon",
+      "min": 1
     },
     {
       "action": "cast",

@@ -3,6 +3,7 @@
 #include "AscensionMercenary.h"
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
+#include "Chat.h"
 #include "DBCStores.h"
 #include "DataMap.h"
 #include "Group.h"
@@ -24,6 +25,7 @@ namespace
 constexpr uint32 SPELL_CRIMINAL = 9930873;
 constexpr int32 CRIMINAL_HIT_DURATION = 3 * MINUTE * IN_MILLISECONDS;
 constexpr int32 CRIMINAL_KILL_DURATION = 8 * MINUTE * IN_MILLISECONDS;
+constexpr char NoRetreatMessage[] = "You cannot escape while the No Retreat debuff is active!";
 constexpr char const* AggressionKey = "ascension_mercenary_criminal_aggression";
 
 struct Aggression final : DataMap::Base
@@ -135,6 +137,11 @@ bool TravelsCasterAway(SpellInfo const* info)
     return false;
 }
 
+void RefuseRetreat(Player* player)
+{
+    ChatHandler(player->GetSession()).SendNotification(NoRetreatMessage);
+}
+
 bool SummonedByPlayer(Player const* player, Unit const* summoner)
 {
     Player const* other = summoner ? summoner->ToPlayer() : nullptr;
@@ -235,11 +242,15 @@ public:
     ascension_mercenary_criminal_no_retreat_spells()
         : AllSpellScript("ascension_mercenary_criminal_no_retreat_spells", {ALLSPELLHOOK_ON_SPELL_CHECK_CAST}) { }
 
-    void OnSpellCheckCast(Spell* spell, bool, SpellCastResult& result) override
+    void OnSpellCheckCast(Spell* spell, bool strict, SpellCastResult& result) override
     {
-        if (result == SPELL_CAST_OK && IsCriminal(spell->GetCaster()->ToPlayer()) &&
-            TravelsCasterAway(spell->GetSpellInfo()))
-            result = SPELL_FAILED_NOT_HERE;
+        Player* player = spell->GetCaster()->ToPlayer();
+        if (result != SPELL_CAST_OK || !IsCriminal(player) || !TravelsCasterAway(spell->GetSpellInfo()))
+            return;
+
+        result = SPELL_FAILED_DONT_REPORT;
+        if (strict)
+            RefuseRetreat(player);
     }
 };
 
@@ -252,7 +263,11 @@ public:
 
     bool OnPlayerBeforeTeleport(Player* player, uint32, float, float, float, float, uint32, Unit* target) override
     {
-        return !IsCriminal(player) || !SummonedByPlayer(player, target);
+        if (!IsCriminal(player) || !SummonedByPlayer(player, target))
+            return true;
+
+        RefuseRetreat(player);
+        return false;
     }
 
     bool OnPlayerCanLfgTeleport(Player* player) override { return !IsCriminal(player); }
