@@ -39,4 +39,4 @@ with `window_ms` below a single striker's swing period guarantees at most `strik
 - **Evidence class:** declares `METRIC_EVIDENCE = {'avoided_charge_restore_rate': 'event'}` (counted as `behaviour`).
 
 Cultist: Bulwark of Horror 300278 (40% chance to refresh a charge of Blade of the Empire 502122, 1 striker with
-`[42716, 62531, 2116852]`, `window_ms: 1100`, `count_misses: true`, `miss_exclusion: {"min_share": 0.04}`, 18 parts).
+`[42716, 62531, 2116852]`, `window_ms: 1100`, `count_misses: true`, `miss_exclusion: {"min_share": 0.04}`, 22 parts).

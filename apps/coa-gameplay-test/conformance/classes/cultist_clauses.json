@@ -278,18 +278,9 @@
     "spell": 300278,
     "clause": "Avoiding an attack now has a $h% chance to refresh a charge of Blade of the Empire.",
     "labels": [
-      "300278 effect_value #0"
+      "300278 behaviour_metric_delta avoided_charge_restore"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind measures a 40% avoided-melee-swing proc that restores a spell charge via direct RestoreBlade -> RestoreSpellCharge (AscensionCultistEvents.cpp:62,155-156; AscensionCultist.cpp:105-116,138-141, raw roll_chance_f ignoring forced_roll): procs.counts_charges (procs.py:468-473) explicitly rejects trigger.action != 'cast' and proc_spell != trigger.spell; avoided_proc_instances / avoided_swing_reads / parried_restore do not read spell_charges; flat_chance_rate has no avoided-swing trigger or spell_charges event metric. Nearest kind: procs (proc_avoided + counts_charges) or new kind avoided_charge_restore.",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 300280,

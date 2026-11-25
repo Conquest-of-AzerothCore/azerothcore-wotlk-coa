@@ -50,8 +50,8 @@ Add `kinds/avoided_charge_restore.py`
 ## Consequences
 
 - Purely opt-in new kind auto-discovered by `kinds/__init__.py`; zero finished-class impact.
-- Closes Cultist Bulwark of Horror 300278 row 25 (`expected_pct: 40`, 3 strikers with `[42716, 62531, 2116852]`,
-  `window_ms: 400`, `count_misses: true`, `miss_exclusion: {"min_share": 0.04}`, 16 parts).
+- Closes Cultist Bulwark of Horror 300278 row 25 (`expected_pct: 40`, 1 striker with `[42716, 62531, 2116852]`,
+  `window_ms: 1100`, `count_misses: true`, `miss_exclusion: {"min_share": 0.04}`, 22 parts).
 - Seeded tests cover generation, event evidence registration, pooled `ok`, mutant wrong rate (`50%`), zero-proc alert,
   control-proc alert, extra-restore alert, miss-exclusion, capping-risk void, guard failure, cast failure, attack
   imbalance, missing read, insufficient trials and spec refusals.
