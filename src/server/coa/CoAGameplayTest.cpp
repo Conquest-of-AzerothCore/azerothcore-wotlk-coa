@@ -7625,7 +7625,9 @@ private:
         uint32 const maxCasts = step.get<uint32>("max_casts");
         uint64 const everyMs = step.get<uint32>("every_ms");
         uint64 const elapsed = GameElapsed(_stepTime);
-        bool const present = player->HasAura(aura);
+        Unit* stopUnit = step.get_optional<std::string>("stop_target")
+            ? GetUnit(step.get<std::string>("stop_target")) : player;
+        bool const present = stopUnit->HasAura(aura);
         if (!present && (_untilAuraAttempts < maxCasts || elapsed < _untilAuraAttempts * everyMs))
         {
             if (_untilAuraAttempts < maxCasts && elapsed >= _untilAuraAttempts * everyMs)

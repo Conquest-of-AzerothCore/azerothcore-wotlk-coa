@@ -442,3 +442,55 @@ class PollBeforeCastTests(unittest.TestCase):
     def test_the_option_is_a_boolean(self):
         with self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), {**PRE_POLL, 'poll_before_cast': 'yes'})
+
+
+TARGET_FED = {**ENTRY, 'label_suffix': 'target_fed', 'gate_spell': 801899, 'expected_ms': 3000, 'window_ms': 4000,
+              'poll_ms': 25, 'caster': False, 'feed': {'every_ms': 1700, 'stop_target': 'dummy'}}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class StopTargetFeedTests(unittest.TestCase):
+    judged = FeedTests.judged
+
+    def test_stop_target_dummy_emits_loop_field_target_stop_read_and_target_clear(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), TARGET_FED)
+        run.validate(scenario)
+        steps = scenario['steps']
+        loops = [step for step in steps if step['action'] == 'cast_until_aura']
+        self.assertEqual(len(loops), 2)
+        self.assertTrue(all(step.get('stop_target') == 'dummy' and step['aura'] == 707010 for step in loops))
+        stop_labels = {expectation.model['feed']['reads'][arm]['stop'] for arm in ('control', 'treatment')}
+        stop_reads = [step for step in steps if step.get('label') in stop_labels]
+        self.assertEqual(len(stop_reads), 2)
+        self.assertTrue(all(step['actor'] == 'dummy' and step['metric'] == 'aura' for step in stop_reads))
+        clears = [step for step in steps if step['action'] == 'set_aura' and step.get('spell') == 707010]
+        self.assertEqual(len(clears), 1)
+        self.assertEqual((clears[0]['target'], clears[0]['stacks']), ('dummy', 0))
+        self.assertIn('until 707010 is on the dummy', scenario['contract'])
+
+    def test_without_stop_target_loop_omits_stop_target_and_reads_caster(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), FED)
+        loops = [step for step in scenario['steps'] if step['action'] == 'cast_until_aura']
+        self.assertTrue(all('stop_target' not in step for step in loops))
+        stop_label = expectation.model['feed']['reads']['treatment']['stop']
+        stop_step = next(step for step in scenario['steps'] if step.get('label') == stop_label)
+        self.assertEqual(stop_step['actor'], 'caster')
+
+    def test_seeded_ok_alert_unmeasured_and_mutant_on_target_feed(self):
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED).status, 'ok')
+        self.assertEqual(self.judged(3900.0, entry=TARGET_FED).status, 'alert')
+        self.assertEqual(self.judged(2100.0, entry=TARGET_FED).status, 'alert')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, control_applied=True).status, 'alert')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, stop=0.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, before=1.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, age=200.0).status, 'unmeasured')
+        mutant = {**TARGET_FED, 'expected_ms': 4000, 'window_ms': 5500}
+        self.assertEqual(self.judged(3000.0, entry=mutant).status, 'alert')
+
+    def test_stop_target_refusals(self):
+        for bad in (
+                {**TARGET_FED, 'feed': {'every_ms': 1700, 'stop_target': 'ally'}},
+                {**TARGET_FED, 'feed': {'every_ms': 1700, 'stop_target': 1}},
+                {**TARGET_FED, 'caster': True, 'feed': {'every_ms': 1700, 'stop_target': 'dummy'}}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), bad)

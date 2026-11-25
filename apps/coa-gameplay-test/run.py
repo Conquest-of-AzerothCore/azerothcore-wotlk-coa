@@ -331,7 +331,7 @@ ACTIONS = {
                                   'allowed_refusal', 'destination_unit', 'triggered'}),
     'cast_until_aura': ({'actor', 'spell', 'aura', 'every_ms', 'max_casts'},
                         {'actor', 'spell', 'target', 'aura', 'every_ms', 'max_casts', 'cast_power', 'power',
-                         'reset_cooldown'}),
+                         'reset_cooldown', 'stop_target'}),
     'cast_until_owned_creature': ({'actor', 'spell', 'entry', 'every_ms', 'max_casts'},
                                   {'actor', 'spell', 'target', 'entry', 'every_ms', 'max_casts', 'cast_power', 'power',
                                    'reset_cooldown'}),
@@ -1009,6 +1009,8 @@ def validate(scenario, clock=REAL_CLOCK):
                 require('cast_power' in step, f'{where}: power selects the type of cast_power')
             if 'reset_cooldown' in step:
                 require(type(step['reset_cooldown']) is bool, f'{where}: reset_cooldown must be boolean')
+            if 'stop_target' in step:
+                require(step['stop_target'] in actor_ids, f'{where}: unknown stop_target')
         if action == 'cast_until_owned_creature':
             number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
             number(step['entry'], f'{where}.entry', 1, 2**31 - 1, True)

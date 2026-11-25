@@ -244,8 +244,11 @@ class RunnerTests(unittest.TestCase):
                 'aura': 807299, 'every_ms': 4300, 'max_casts': 10, 'cast_power': 2272, 'reset_cooldown': True}
         self.assert_step_validates(step)
         self.assert_step_validates({**step, 'power': 0})
+        self.assert_step_validates({**step, 'stop_target': 'target'})
+        self.assert_step_validates({**step, 'stop_target': 'caster'})
         for change in ({'max_casts': 0}, {'max_casts': 201}, {'every_ms': 0}, {'every_ms': 9001}, {'aura': 0},
-                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100}):
+                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100},
+                       {'stop_target': 'ghost'}, {'stop_target': 1}):
             self.assert_step_rejected({**step, **change})
         self.assert_step_rejected({key: value for key, value in step.items() if key != 'cast_power'} | {'power': 0})
         for field in ('spell', 'aura', 'every_ms', 'max_casts'):

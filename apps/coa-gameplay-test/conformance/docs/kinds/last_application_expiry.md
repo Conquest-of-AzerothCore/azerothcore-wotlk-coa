@@ -62,6 +62,12 @@ apply), or the remaining duration is not above 0 (mentor D-21, Felsworn ADR 0004
 proven. A failing bracket still alerts. The timeline is process global, so a fed scenario runs exclusive in a batch.
 `feed` excludes `repeat`, `forced_roll` and `no_refresh`.
 
+`stop_target: "dummy"` inside `feed` (opt-in; ADR 1297, provisional) passes `stop_target` to `cast_until_aura`, reads
+the stop `aura` on `"dummy"`, and clears `stop_aura` on `"dummy"` via `set_aura` before the treatment arm, so a rolled
+debuff applied directly to the dummy with no caster companion aura can stop its own feed loop. When omitted, `feed`
+checks the caster and emits no `stop_target` field (byte-identical for all earlier entries). Cultist: Mind Rot `300300`
+(`806039` Black Prayer feeding `560943` Mind Rot on the dummy, `10000 ms`).
+
 `same_stamp_applies: true` (with `feed` only; ADR 1289, provisional, mentor D-116 and D-117) accepts a stamped apply
 count of two or more when the run's recorded timeline (`result.json` `timeline`, read into the run by `compare`) holds
 exactly that many `aura_applied` events of `aura` on the holder and they all share one `at_ms`: the age is then taken
