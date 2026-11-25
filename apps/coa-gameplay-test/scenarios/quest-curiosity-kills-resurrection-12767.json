@@ -1,0 +1,115 @@
+{
+  "schema": 1,
+  "name": "Curiosity Kills (255126): Cleric Abigail resurrects the player after drinking the Bottle of Poison (#12767)",
+  "contract": [
+    "Curiosity Kills (255126) gives the Bottle of Poison (item 355220, spell 355722), which hits Cleric Abigail (312414, spawn 9951028) and kills the caster with Effect[1] SPELL_EFFECT_INSTAKILL inside the Tarren Mill Graveyard focus (GO 255073, focus 1705).",
+    "Previously Abigail only granted quest credit (312414) on spellhit 355722 and never cast her companion Resurrection spell 355721 (Spell.dbc: 2 s cast, Effect[0] SPELL_EFFECT_RESURRECT_NEW, Effect[2] SPELL_EFFECT_KILL_CREDIT 312414).",
+    "Expected: after using item 355220 in phase 1 beside Abigail, the player dies, receives quest completion credit for 255126, receives SMSG_RESURRECT_REQUEST (opcode 347) from Abigail, and comes back alive after accepting with CMSG_RESURRECT_RESPONSE (opcode 348)."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -59.2,
+    "y": -787.2,
+    "z": 58.6,
+    "o": 4.71
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 5,
+      "class": 1,
+      "level": 30
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Join the world phase of Cleric Abigail (9951028) and Tarren Mill Graveyard focus (9001652)",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the world spawns settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Cleric Abigail is present at the graveyard",
+      "actor": "p",
+      "metric": "nearby_creature_count",
+      "entry": 312414,
+      "min": 1
+    },
+    {
+      "action": "prepare_quest",
+      "label": "SETUP: carry Curiosity Kills (255126) open",
+      "actor": "p",
+      "quest": 255126,
+      "complete": false
+    },
+    {
+      "action": "add_item",
+      "label": "SETUP: hold the Bottle of Poison (355220)",
+      "actor": "p",
+      "item": 355220
+    },
+    {
+      "action": "use_item",
+      "label": "Drink the Bottle of Poison beside Cleric Abigail",
+      "actor": "p",
+      "item": 355220,
+      "spell": 355722
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: drinking the poison kills the player",
+      "actor": "p",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Curiosity Kills (255126) is credited and complete",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 255126,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Cleric Abigail casts Resurrection (355721) and sends SMSG_RESURRECT_REQUEST",
+      "actor": "p",
+      "metric": "server_packets",
+      "opcode": 347,
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "client_packet",
+      "label": "Accept Cleric Abigail's resurrection offer",
+      "actor": "p",
+      "opcode": 348,
+      "fields": [
+        {
+          "nearest_creature_guid": 312414
+        },
+        {
+          "u8": 1
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player returns to life after accepting Abigail's resurrection",
+      "actor": "p",
+      "metric": "alive",
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}
