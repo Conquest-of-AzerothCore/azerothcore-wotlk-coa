@@ -1177,24 +1177,49 @@
   {
     "spell": 500719,
     "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
-    "labels": [
-      "500719 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Obliteration Beam by $s2%",
+        "labels": [
+          "500719 cost_gate 806897 cooldown without",
+          "500719 cost_gate 806897 cooldown with",
+          "500719 cost_gate 806897 cooldown beyond"
+        ]
+      },
+      {
+        "claim": "and it now applies Madness to all targets struck.",
+        "labels": [
+          "500719 behaviour_metric_delta applies_madness_all"
+        ]
+      }
+    ]
   },
   {
     "spell": 500719,
     "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
-    "labels": [
-      "500719 effect_value 804369e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Gaze of C'thun",
+        "labels": [
+          "500719 behaviour_metric_delta gaze_damage"
+        ]
+      },
+      {
+        "claim": "$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+        "labels": [
+          "500719 behaviour_metric_delta beam_damage_with_805606",
+          "500719 behaviour_metric_delta beam_damage_without_805606"
+        ]
+      }
+    ]
   },
   {
     "spell": 500719,
     "clause": "stacks up to $u times.",
     "labels": [
-      "500719 max_stacks 804369 #2"
+      "500719 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -1313,24 +1338,49 @@
   {
     "spell": 500767,
     "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
-    "labels": [
-      "500767 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Obliteration Beam by $s2%",
+        "labels": [
+          "500767 cost_gate 806897 cooldown without",
+          "500767 cost_gate 806897 cooldown with",
+          "500767 cost_gate 806897 cooldown beyond"
+        ]
+      },
+      {
+        "claim": "and it now applies Madness to all targets struck.",
+        "labels": [
+          "500767 behaviour_metric_delta applies_madness_all"
+        ]
+      }
+    ]
   },
   {
     "spell": 500767,
     "clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
-    "labels": [
-      "500767 effect_value 804369e0 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Gaze of C'thun",
+        "labels": [
+          "500767 behaviour_metric_delta gaze_damage"
+        ]
+      },
+      {
+        "claim": "$?s805606[ or Obliteration Beam][] causes $s1% increased damage,",
+        "labels": [
+          "500767 behaviour_metric_delta beam_damage_with_805606",
+          "500767 behaviour_metric_delta beam_damage_without_805606"
+        ]
+      }
+    ]
   },
   {
     "spell": 500767,
     "clause": "stacks up to $u times.",
     "labels": [
-      "500767 max_stacks 804369 #2"
+      "500767 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -3786,7 +3836,9 @@
   {
     "spell": 502220,
     "clause": "Generates 10 Insanity",
-    "labels": [],
+    "labels": [
+      "502220 behaviour_metric_delta insanity"
+    ],
     "kind": "claim"
   },
   {
@@ -3797,13 +3849,13 @@
       {
         "claim": "dealing $o1 Shadow damage",
         "labels": [
-          "502220 effect_value #0"
+          "502220 behaviour_metric_delta damage_base"
         ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "502220 aura_duration_ms #1"
+          "502220 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -3812,7 +3864,7 @@
     "spell": 502220,
     "clause": "Each instance of damage reduces their periodic healing taken by $706913s1%,",
     "labels": [
-      "502220 effect_value 706913e0 #2"
+      "502220 behaviour_metric_delta hot_reduction"
     ],
     "kind": "claim"
   },
@@ -3820,7 +3872,8 @@
     "spell": 502220,
     "clause": "stacking up to $?s301317[8][$706913u] times.",
     "labels": [
-      "502220 max_stacks 706913 #3"
+      "502220 behaviour_metric_delta stack_cap_base",
+      "502220 behaviour_metric_delta stack_cap_301317"
     ],
     "kind": "claim"
   },

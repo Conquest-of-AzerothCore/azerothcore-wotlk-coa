@@ -27677,6 +27677,1117 @@
       "expire_ms": 21000,
       "void_on_cast_failure": true,
       "observe_source": "807128 AscensionCultistAuras.cpp:97,189 grants MECHANIC_POLYMORPH immunity while Herald 520326 is active. Dummy casts Polymorph 13323 (Mechanic 17, 8s) at caster 500 ms after Herald cast: lands in control without 807128 (1), blocked after real learn of 807128 (0). Reference search 2026-11-25: coa-history 806769: 6 applies; coabuildhub 807128 matches."
+    },
+    {
+      "spell": 500719,
+      "name": "Glimpse of Madness R1 (Obliteration Beam cooldown -20%)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+      "gated_spell": 806897,
+      "resource": "cooldown",
+      "reduction": 4000,
+      "target": "dummy",
+      "cast_power": 2000,
+      "margin_ms": 250,
+      "observe_source": "500719 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[1] -21 + DieSides 1 = -20% ($s2 = 20), EffectSpellClassMask[0] 8 = SpellFamilyFlags[0] 8 of Obliteration Beam 806897 (CategoryRecoveryTime 20000 ms; Spell.dbc). -20% of 20000 ms = -4000 ms -> 16000 ms reduced cooldown; margin_ms 250 brackets within [15750, 16250] ms, excluding 10% off both the 4000 ms cut and the 16000 ms reduced cooldown. Reference search 2026-11-25: coa-history 500719: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500719 matches verbatim."
+    },
+    {
+      "spell": 500719,
+      "name": "Glimpse of Madness R1 (Obliteration Beam applies Madness to all struck targets)",
+      "kind": "metric_delta",
+      "variant": "applies_madness_all",
+      "label_suffix": "applies_madness_all",
+      "quote": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+      "trigger_spell": 806897,
+      "gate_spell": 500719,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "area_dummies": [
+        5.0,
+        7.0,
+        20.0
+      ],
+      "area_sum": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804369,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "500719 AscensionCultistEvents.cpp:87,187 casts Madness 804369 on each target struck by Obliteration Beam 805573 (8 yd dest-area around primary dummy at 3 yd). area_dummies at 5.0, 7.0 yd (inside 8 yd) and 20.0 yd (outside 8 yd): area_sum of aura 804369 across dummy + area1..area3 reads 0 before learn and 3 after real learn of 500719 (primary + 2 nearby struck; far dummy untouched). Reference search 2026-11-25: coa-history 500719: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500719 matches verbatim. expire_ms 21000 clears 806897's 20 s category cooldown before the after cast."
+    },
+    {
+      "spell": 500719,
+      "name": "Glimpse of Madness R1 (Madness increases Gaze of C'thun damage by 3%)",
+      "kind": "metric_delta",
+      "variant": "gaze_damage",
+      "label_suffix": "gaze_damage",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 500110,
+      "gate_spell": 500719,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms setup cast of 806897 applies 0 stacks of Madness 804369 in control and 1 stack after learning 500719."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520332,
+        "target": "dummy"
+      },
+      "before_expected": 25000,
+      "expected": 25750,
+      "expected_ratio": 1.03,
+      "tolerance": 0.003,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_since": true,
+      "observe_source": "Madness 804369 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER BasePoints 2 + DieSides 1 = +3% ($s1 = 3), EffectSpellClassMask[2] 1073741824 matching Gaze of C'Thun 520332 (Spell.dbc). Setup cast of 806897 applies 0 stacks of 804369 before learning 500719 and 1 stack after (verified via ally_arm). Non-crit unresisted Gaze 500110 -> 520332 at +50000 SP (823764 + 16255 -100): ratio 1.03 +- 0.003 (excludes 1.00 and 1.06). void_on_cast_failure omitted because dual-target 500110 emits benign 27 on unused sub-casts. Reference search 2026-11-25: coa-history 500719: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500719 matches verbatim."
+    },
+    {
+      "spell": 500719,
+      "name": "Glimpse of Madness R1 (Madness increases Obliteration Beam damage by 3% with 805606)",
+      "kind": "metric_delta",
+      "variant": "beam_damage_with_805606",
+      "label_suffix": "beam_damage_with_805606",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500719,
+      "learn": [
+        92130
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 9500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805606
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms conditioning spell 805606 (from Corrupting Whispers 92130, AscensionCultist.cpp:286) is active in both phases."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms 804369 is 0 in control and 2 after setup+trigger casts of 806897 with 500719 learned (1 stack active during trigger hit)."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 70000,
+      "expected": 141050,
+      "expected_ratio": 2.015,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 9500,
+      "void_on_cast_failure": true,
+      "observe_source": "True branch of conditional $?s805606[ or Obliteration Beam][] in Madness 804369: learns Corrupting Whispers 92130 (sets helper aura 805606 == 1 via AscensionCultist.cpp:286, verified by ally_arm). Setup cast of 806897 applies 1 stack of 804369 after learning 500719 (0 in control); setup_wait_ms 9500 lets any 8000 ms Corrupting Whispers 706725 proc expire cleanly while 20000 ms 804369 remains active. Non-crit unresisted Obliteration Beam 806897 -> 805573 at +50000 SP (823764 + 16255 -100, Insanity < 60): expected ratio 1.03 +- 0.003 (excludes 1.00 and 1.06). Reference search 2026-11-25: coa-history 500719: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500719 matches verbatim. Cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X -> ratio 2.015 +- 0.002 (excludes 2.000 [0%] and 2.030 [+6%]); expire_ms 9500 also drains any 8000 ms 706725 proc between phases.",
+      "select_dummy": true
+    },
+    {
+      "spell": 500719,
+      "name": "Glimpse of Madness R1 (Obliteration Beam unboosted without 805606)",
+      "kind": "metric_delta",
+      "variant": "beam_damage_without_805606",
+      "label_suffix": "beam_damage_without_805606",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500719,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805606
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms conditioning spell 805606 is absent in both phases (false branch of $?s805606)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms 804369 applies on dummy (0 -> 2 after setup+trigger 806897) with 500719 learned."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 70000,
+      "expected": 140000,
+      "expected_ratio": 2.0,
+      "tolerance": 0.003,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "False branch of conditional $?s805606[ or Obliteration Beam][] in Madness 804369: without 805606 (verified 0 in both phases via ally_arm), tooltip reads 'Your Gaze of C'thun causes 3% increased damage,' omitting Obliteration Beam, so 805573 damage must remain unchanged (expected_ratio 1.00 +- 0.005). Server defect note: 804369 Effect[0] EffectSpellClassMask[0] = 131072 statically includes 805573 unconditionally in Spell.dbc, so if the server applies +3% without 805606 this alerts honestly. Reference search 2026-11-25: coa-history 500719: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500719 matches verbatim. Cumulative 2 hits in control (2.00*X) vs 4 unboosted hits (4.00*X) -> expected_ratio 2.000 +- 0.003 (excludes 2.015 [+3%]).",
+      "select_dummy": true
+    },
+    {
+      "spell": 500719,
+      "name": "Glimpse of Madness R1 (Madness caps at 5 stacks after 6 casts)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500719,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        806897,
+        806897,
+        806897,
+        806897,
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Confirms 6 casts of 806897 trigger 6 applications of 804369 on dummy after learning 500719 (0 before)."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804369
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Madness 804369 StackAmount = 5 ($u = 5, DurationIndex 18 = 20000 ms; Spell.dbc). Six setup casts of 806897 (each with reset_cooldown, followed by harmless trigger_spell 60235) (6 casts in ~8.5 s << 20 s) trigger 6 applications of 804369 (verified via ally_arm aura_apply_count 0 -> 6) while aura_stacks caps at 5 (0 before learn). Reference search 2026-11-25: coa-history 500719: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500719 matches verbatim.",
+      "select_dummy": true
+    },
+    {
+      "spell": 500767,
+      "name": "Glimpse of Madness R2 (Obliteration Beam cooldown -40%)",
+      "kind": "cost_gate",
+      "variant": "cooldown",
+      "label_suffix": "cooldown",
+      "quote": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+      "gated_spell": 806897,
+      "resource": "cooldown",
+      "reduction": 8000,
+      "target": "dummy",
+      "cast_power": 2000,
+      "margin_ms": 250,
+      "observe_source": "500767 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 11 (SPELLMOD_COOLDOWN), EffectBasePoints[1] -41 + DieSides 1 = -40% ($s2 = 40), EffectSpellClassMask[0] 8 = SpellFamilyFlags[0] 8 of Obliteration Beam 806897 (CategoryRecoveryTime 20000 ms; Spell.dbc). -40% of 20000 ms = -8000 ms -> 12000 ms reduced cooldown; margin_ms 250 brackets within [11750, 12250] ms, excluding 10% off both the 8000 ms cut and the 12000 ms reduced cooldown. Reference search 2026-11-25: coa-history 500767: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500767 matches verbatim."
+    },
+    {
+      "spell": 500767,
+      "name": "Glimpse of Madness R2 (Obliteration Beam applies Madness to all struck targets)",
+      "kind": "metric_delta",
+      "variant": "applies_madness_all",
+      "label_suffix": "applies_madness_all",
+      "quote": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+      "trigger_spell": 806897,
+      "gate_spell": 500767,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "area_dummies": [
+        5.0,
+        7.0,
+        20.0
+      ],
+      "area_sum": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804369,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "500767 AscensionCultistEvents.cpp:87,187 casts Madness 804369 on each target struck by Obliteration Beam 805573 (8 yd dest-area around primary dummy at 3 yd). area_dummies at 5.0, 7.0 yd (inside 8 yd) and 20.0 yd (outside 8 yd): area_sum of aura 804369 across dummy + area1..area3 reads 0 before learn and 3 after real learn of 500767 (primary + 2 nearby struck; far dummy untouched). Reference search 2026-11-25: coa-history 500767: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500767 matches verbatim. expire_ms 21000 clears 806897's 20 s category cooldown before the after cast."
+    },
+    {
+      "spell": 500767,
+      "name": "Glimpse of Madness R2 (Madness increases Gaze of C'thun damage by 3%)",
+      "kind": "metric_delta",
+      "variant": "gaze_damage",
+      "label_suffix": "gaze_damage",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 500110,
+      "gate_spell": 500767,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms setup cast of 806897 applies 0 stacks of Madness 804369 in control and 1 stack after learning 500767."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 520332,
+        "target": "dummy"
+      },
+      "before_expected": 25000,
+      "expected": 25750,
+      "expected_ratio": 1.03,
+      "tolerance": 0.003,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "phase_since": true,
+      "observe_source": "Madness 804369 Effect[0] aura 271 SPELL_AURA_MOD_DAMAGE_FROM_CASTER BasePoints 2 + DieSides 1 = +3% ($s1 = 3), EffectSpellClassMask[2] 1073741824 matching Gaze of C'Thun 520332 (Spell.dbc). Setup cast of 806897 applies 0 stacks of 804369 before learning 500767 and 1 stack after (verified via ally_arm). Non-crit unresisted Gaze 500110 -> 520332 at +50000 SP (823764 + 16255 -100): ratio 1.03 +- 0.003 (excludes 1.00 and 1.06). void_on_cast_failure omitted because dual-target 500110 emits benign 27 on unused sub-casts. Reference search 2026-11-25: coa-history 500767: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500767 matches verbatim."
+    },
+    {
+      "spell": 500767,
+      "name": "Glimpse of Madness R2 (Madness increases Obliteration Beam damage by 3% with 805606)",
+      "kind": "metric_delta",
+      "variant": "beam_damage_with_805606",
+      "label_suffix": "beam_damage_with_805606",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500767,
+      "learn": [
+        92130
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 9500,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805606
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms conditioning spell 805606 (from Corrupting Whispers 92130, AscensionCultist.cpp:286) is active in both phases."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms 804369 is 0 in control and 2 after setup+trigger casts of 806897 with 500767 learned (1 stack active during trigger hit)."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 70000,
+      "expected": 141050,
+      "expected_ratio": 2.015,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 9500,
+      "void_on_cast_failure": true,
+      "observe_source": "True branch of conditional $?s805606[ or Obliteration Beam][] in Madness 804369: learns Corrupting Whispers 92130 (sets helper aura 805606 == 1 via AscensionCultist.cpp:286, verified by ally_arm). Setup cast of 806897 applies 1 stack of 804369 after learning 500767 (0 in control); setup_wait_ms 9500 lets any 8000 ms Corrupting Whispers 706725 proc expire cleanly while 20000 ms 804369 remains active. Non-crit unresisted Obliteration Beam 806897 -> 805573 at +50000 SP (823764 + 16255 -100, Insanity < 60): expected ratio 1.03 +- 0.003 (excludes 1.00 and 1.06). Reference search 2026-11-25: coa-history 500767: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500767 matches verbatim. Cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X -> ratio 2.015 +- 0.002 (excludes 2.000 [0%] and 2.030 [+6%]); expire_ms 9500 also drains any 8000 ms 706725 proc between phases.",
+      "select_dummy": true
+    },
+    {
+      "spell": 500767,
+      "name": "Glimpse of Madness R2 (Obliteration Beam unboosted without 805606)",
+      "kind": "metric_delta",
+      "variant": "beam_damage_without_805606",
+      "label_suffix": "beam_damage_without_805606",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500767,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 50000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805606
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms conditioning spell 805606 is absent in both phases (false branch of $?s805606)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms 804369 applies on dummy (0 -> 2 after setup+trigger 806897) with 500767 learned."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 805573,
+        "target": "dummy"
+      },
+      "before_expected": 70000,
+      "expected": 140000,
+      "expected_ratio": 2.0,
+      "tolerance": 0.003,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "False branch of conditional $?s805606[ or Obliteration Beam][] in Madness 804369: without 805606 (verified 0 in both phases via ally_arm), tooltip reads 'Your Gaze of C'thun causes 3% increased damage,' omitting Obliteration Beam, so 805573 damage must remain unchanged (expected_ratio 1.00 +- 0.005). Server defect note: 804369 Effect[0] EffectSpellClassMask[0] = 131072 statically includes 805573 unconditionally in Spell.dbc, so if the server applies +3% without 805606 this alerts honestly. Reference search 2026-11-25: coa-history 500767: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500767 matches verbatim. Cumulative 2 hits in control (2.00*X) vs 4 unboosted hits (4.00*X) -> expected_ratio 2.000 +- 0.003 (excludes 2.015 [+3%]).",
+      "select_dummy": true
+    },
+    {
+      "spell": 500767,
+      "name": "Glimpse of Madness R2 (Madness caps at 5 stacks after 6 casts)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "and it now applies Madness to all targets struck. @s:804369:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500767,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "setup_casts": [
+        806897,
+        806897,
+        806897,
+        806897,
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 804369
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Confirms 6 casts of 806897 trigger 6 applications of 804369 on dummy after learning 500767 (0 before)."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 804369
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Madness 804369 StackAmount = 5 ($u = 5, DurationIndex 18 = 20000 ms; Spell.dbc). Six setup casts of 806897 (each with reset_cooldown, followed by harmless trigger_spell 60235) (6 casts in ~8.5 s << 20 s) trigger 6 applications of 804369 (verified via ally_arm aura_apply_count 0 -> 6) while aura_stacks caps at 5 (0 before learn). Reference search 2026-11-25: coa-history 500767: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500767 matches verbatim.",
+      "select_dummy": true
+    },
+    {
+      "spell": 502220,
+      "name": "Darkwither (generates 10 Insanity)",
+      "kind": "metric_delta",
+      "variant": "insanity",
+      "label_suffix": "insanity",
+      "quote": "Generates 10 Insanity",
+      "trigger_spell": 502220,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "502220 AscensionCustomResourceData.h:282 grants +10 Insanity (500706) on cast. Clears 500706 to 0 in both phases; reads 0 in uncast control and 10 after one real cast of 502220 (wait_ms 500 << 10000 ms Sanity decay period). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+    },
+    {
+      "spell": 502220,
+      "name": "Darkwither (total Shadow damage over 15 sec at SP 0)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Wither an enemy, dealing $o1 Shadow damage over $d.",
+      "trigger_spell": 502220,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 502220,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Confirms Darkwither 502220 deals 5 periodic Shadow ticks over 15000 ms (3000 ms period)."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 502220,
+        "target": "dummy",
+        "periodic": true
+      },
+      "before_expected": 0,
+      "expected": 1145,
+      "tolerance": 5,
+      "wait_ms": 15800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "502220 Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, BasePoints 204 + DieSides 1 = 205 at BaseLevel 60, DurationIndex 8 = 15000 ms, Amplitude 3000 ms = 5 ticks ($o1 = 1025 raw; Spell.dbc). With Cultist level-60 class tuning aura 887013 (+12% all damage), each non-crit unresisted tick at SP 0 is floor(205 * 1.12) = 229 -> 5 ticks = 1145 exact (tol 5 excludes 4 ticks 916 and 6 ticks 1374). Preconditions: 823764 (no partial resist), 16255 amount -100 (no crit), 500706 cleared. Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+    },
+    {
+      "spell": 502220,
+      "name": "Darkwither (duration 15 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Wither an enemy, dealing $o1 Shadow damage over $d.",
+      "trigger_spell": 502220,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 502220,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          13900,
+          14600
+        ],
+        "expired": [
+          15500,
+          16200
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "502220 DurationIndex 8 = 15000 ms ($d = 15 sec; Spell.dbc). Aura 502220 on dummy reads 0 before cast, 1 at 14200 ms (window [13900, 14600] > 13500 ms = 0.9 * 15000), and 0 at 15800 ms (window [15500, 16200] < 16500 ms = 1.1 * 15000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+    },
+    {
+      "spell": 502220,
+      "name": "Darkwither (Withered reduces enemy periodic healing taken by 5% per stack)",
+      "kind": "metric_delta",
+      "variant": "hot_reduction",
+      "label_suffix": "hot_reduction",
+      "quote": "Each instance of damage reduces their periodic healing taken by $706913s1%,",
+      "trigger_spell": 502220,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "cast_in_before": false,
+      "enemy_casts_in_before": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "enemy_casts": [
+        9840
+      ],
+      "enemy_cast_wait_ms": 3500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 9840,
+        "target": "enemy"
+      },
+      "before_expected": 78,
+      "expected": 464,
+      "expected_gain": 386,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "observe_source": "502220 Effect[2] periodic trigger casts Withered 706913 (Effect[0] aura 259 SPELL_AURA_MOD_HOT_PCT, BasePoints -6 + DieSides 1 = -5% per stack, $706913s1 = 5, Duration 5000 ms; Spell.dbc). Enemy player (race 2, 0 SP) casts Rejuvenation Rank 9 9840 (78 per 3000 ms tick, 5 ticks = 390; Rift 806250 precedent). Control (no Darkwither): 1 tick lands -> 78; expire_ms 16000 drains remaining 4 ticks (+312 = 390). Treatment: Darkwither cast at t=0, enemy casts 9840 at t=500 ms; 1st Darkwither tick at t=3000 ms applies 1 stack of 706913; 1st 9840 tick at t=3500 ms heals floor(78 * 0.95) = 74 (cumulative 390 + 74 = 464, gain 386 +- 1; excludes 0% gain 390 and -10% gain 382). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+    },
+    {
+      "spell": 502220,
+      "name": "Darkwither (Withered stacks up to 4 without Call of C'Thun 301317)",
+      "kind": "metric_delta",
+      "variant": "stack_cap_base",
+      "label_suffix": "stack_cap_base",
+      "quote": "stacking up to $?s301317[8][$706913u] times.",
+      "trigger_spell": 502220,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 301317
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Call of C'Thun 301317 is absent (false branch of $?s301317)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 706913
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "Confirms 5 ticks of Darkwither trigger 5 applications of Withered 706913 on dummy."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706913
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "False branch of conditional $?s301317[8][$706913u]: without Call of C'Thun 301317 (verified 0 via ally_arm), Withered 706913 StackAmount = 4 ($706913u = 4; Spell.dbc). Five ticks of 502220 over 15500 ms apply 706913 5 times (ally_arm aura_apply_count 0 -> 5) while aura_stacks caps at 4 (0 in uncast control). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+    },
+    {
+      "spell": 502220,
+      "name": "Darkwither (Withered stack cap with Call of C'Thun 301317: tooltip 8 vs server 7)",
+      "kind": "metric_delta",
+      "variant": "stack_cap_301317",
+      "label_suffix": "stack_cap_301317",
+      "quote": "stacking up to $?s301317[8][$706913u] times.",
+      "trigger_spell": 502220,
+      "gate_spell": 301317,
+      "learn": [
+        300306
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706913
+      },
+      "before_expected": 4,
+      "expected": 8,
+      "tolerance": 0,
+      "wait_ms": 23000,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "observe_source": "True branch of conditional $?s301317[8][$706913u]: with Call of C'Thun 301317 learned, Darkwither's tooltip states hardcoded literal '8' times (expected 8). Precondition 300306 extends Darkwither to 24 s (10 ticks with 301317, same pattern as 301317 withered_stacks). Server defect/tooltip mismatch note: 301317 Effect[0] SPELLMOD_MAX_AURA_STACKS adds +3 to base 4 -> 7 stacks, contradicting Darkwither's hardcoded literal 8 (alerts honestly). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
     }
   ],
   "player_observations": [],
