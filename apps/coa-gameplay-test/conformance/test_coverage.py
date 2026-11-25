@@ -612,16 +612,18 @@ class EvidenceStatusTest(unittest.TestCase):
         from test_behaviours import FakeRun, base_verdict
         if not DBC_DIR.is_dir():
             self.skipTest(f'server DBC set not found at {DBC_DIR}')
-        felsworn = load_fixture_class_file(14)
-        single = next(entry for entry in felsworn['behaviours'] if entry.get('metric') == 'stat_exact')
-        _, [single_exp] = behaviour_scenario(felsworn, single)
+        templar = load_fixture_class_file(19)
+        base_stat = next(entry for entry in templar['behaviours']
+                         if entry.get('spell') == 300923 and entry.get('metric') == 'stat')
+        single = {**base_stat, 'metric': 'stat_exact'}
+        _, [single_exp] = behaviour_scenario(templar, single)
         self.assertNotIn('stat', single_exp.model)
         primary = {**single, 'quote': 'Increases all primary attributes by $s1%.'}
         with mock.patch('behaviours.behaviour_entry') as mocked:
             from behaviours import BehaviourEntry
             mocked.return_value = BehaviourEntry(single['spell'], single['name'], 'metric_delta',
                                                  'Increases all primary attributes by $s1%.', single['expected'])
-            _, [primary_exp] = behaviour_scenario(felsworn, primary)
+            _, [primary_exp] = behaviour_scenario(templar, primary)
         self.assertEqual(primary_exp.model['stat'], single['fields']['stat'])
         run_values = {primary_exp.model['before_label']: float(single['before_expected']),
                       primary_exp.model['after_label']: float(single['expected'])}

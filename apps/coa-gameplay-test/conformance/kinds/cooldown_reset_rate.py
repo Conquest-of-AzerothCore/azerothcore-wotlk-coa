@@ -333,7 +333,7 @@ def cooldown_reset_rate_pooled_verdict(base: Verdict, runs: list[Run], model: di
         found = {mark: run.values.get(label) for mark, label in reads.items()}
         missing = next((mark for mark, value in found.items() if value is None), None)
         if missing:
-            return replace(base, explanation=missing_measurement(run, reads[missing]))
+            return replace(base, status='unmeasured', explanation=missing_measurement(run, reads[missing]))
         if not two_rate and found['control resets'] != fixtures['control']:
             where = f' in {run.key}' if len(runs) > 1 else ''
             if fixtures['control']:
