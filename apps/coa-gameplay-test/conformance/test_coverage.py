@@ -621,7 +621,8 @@ class EvidenceStatusTest(unittest.TestCase):
         primary = {**single, 'quote': 'Increases all primary attributes by $s1%.'}
         with mock.patch('behaviours.behaviour_entry') as mocked:
             from behaviours import BehaviourEntry
-            mocked.return_value = BehaviourEntry(single['spell'], single['name'], 'metric_delta',
+            mocked.return_value = BehaviourEntry(single['spell'], single['name'],
+                                                 'Increases all primary attributes by $s1%.', 'metric_delta',
                                                  'Increases all primary attributes by $s1%.', single['expected'])
             _, [primary_exp] = behaviour_scenario(templar, primary)
         self.assertEqual(primary_exp.model['stat'], single['fields']['stat'])
