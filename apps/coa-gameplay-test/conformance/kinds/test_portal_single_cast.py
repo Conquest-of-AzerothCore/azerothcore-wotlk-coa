@@ -1,7 +1,7 @@
 import unittest
 
 from behaviours import behaviour_scenario
-from coverage import BEHAVIOUR, BY_METRIC, EVENT, METRIC_EVIDENCE, metric_evidence, verdict_evidence
+from coverage import BEHAVIOUR, BY_METRIC, EVENT, EVIDENCE, METRIC_EVIDENCE, metric_evidence, verdict_evidence
 from kinds.portal_single_cast import (KIND, METRIC, control_label, portal_single_cast_spec,
                                       portal_single_cast_verdict, trial_label)
 from profile import DBC_DIR, load_class_file
@@ -97,8 +97,8 @@ class PortalSingleCastTests(unittest.TestCase):
                                              seeded_runs(exp.model, [500110, 800416, 805572]), exp.model)
         self.assertEqual(verdict.status, 'ok')
         self.assertEqual(verdict.detail['metric'], METRIC)
+        self.assertEqual(EVIDENCE[verdict.check], BY_METRIC)
         self.assertEqual(verdict_evidence(verdict, APOCALYPTIC_ENTRY['quote'], {}), BEHAVIOUR)
-        self.assertEqual(BY_METRIC, 'by_metric')
 
     def test_seeded_ok_for_direct_and_channeled_despawn_branches(self):
         _, [exp] = scenario_of(APOCALYPTIC_ENTRY)
