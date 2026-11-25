@@ -281,6 +281,12 @@ public:
                 if (player->HasAura(300284) && (Named(info, 500711) || Any(info, {808050, 808051, 808052})))
                     healing *= 1 + Amount(300284) / 100.0f;
                 float sp = row.sp;
+                if (Any(info, {800416, 800413, 808043, 808044, 808045}))
+                {
+                    float percent = sp * 100.0f;
+                    player->ApplySpellMod(info->Id, SPELLMOD_BONUS_MULTIPLIER, percent);
+                    sp = percent / 100.0f;
+                }
                 if (Named(info, 500715) && index == 0 && player->HasAura(681088))
                     value *= 1 + Amount(681088) / 100.0f;
                 if (Named(info, 500720) && player->HasAura(803339))

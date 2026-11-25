@@ -105,11 +105,13 @@ void Mana(Player* player, uint32 amount)
 bool Chance(Player* player, uint32 id, uint32 cooldown)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(id);
-    float chance = info ? float(info->ProcChance) : 0;
+    if (!player || !info || !player->HasAura(id) || State(player).timers.HasTimeUntilEvent(id))
+        return false;
+    float chance = float(info->ProcChance);
+    player->ApplySpellMod(id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
     if ((id == 300313 || id == 706245) && Count(player, Insanity) > 40 && player->HasAura(707753))
         chance += Amount(707753);
-    if (!info || !player->HasAura(id) || State(player).timers.HasTimeUntilEvent(id) ||
-        !roll_chance_f(std::clamp(chance, 0.0f, 100.0f)))
+    if (!roll_chance_f(std::clamp(chance, 0.0f, 100.0f)))
         return false;
     if (cooldown)
         State(player).timers.ScheduleEvent(id, Milliseconds(cooldown));

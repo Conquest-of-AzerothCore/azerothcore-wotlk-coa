@@ -4045,7 +4045,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "300304 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 24 (SPELLMOD_SPELL_BONUS_DAMAGE), EffectBasePoints[1] 9 + EffectDieSides[1] 1 = +10% ($s2 = 10), EffectSpellClassMask[3..5] [0, 16, 524288] matching Horrorbolt 502182 (SpellFamilyFlags[1] 16, SP coef 0.714 in AscensionCultistData.h:40; Spell.dbc). At +50000 SP precondition fixture, SP bonus 35700 dominates base ~620 so +10% SP bonus yields hit ratio 1.0983 inside the G-19 band [1.08, 1.12]. Precondition fixtures: 823764 (spellpen), 500706 cleared to 0, +50000 SP. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 300304 matches +10% Horrorbolt / +20% Wrath (older state omitting Eldritch Shock; installed Spell.dbc governs, G-9)."
+      "observe_source": "300304 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[1] 24 (SPELLMOD_BONUS_MULTIPLIER), EffectBasePoints[1] 9 + EffectDieSides[1] 1 = +10% ($s2 = 10), EffectSpellClassMask[3..5] [0, 16, 524288] matching Horrorbolt 502182 (SpellFamilyFlags[1] 16, SP coef 0.714 in AscensionCultistData.h:40, scaled via SPELLMOD_BONUS_MULTIPLIER in AscensionCultistContracts.cpp:284-289, Cultist ADR 0004; Spell.dbc). At +50000 SP precondition fixture, SP bonus 35700 dominates base ~620 so +10% SP bonus yields hit ratio 1.0983 inside the G-19 band [1.08, 1.12]. Precondition fixtures: 823764 (spellpen), 500706 cleared to 0, +50000 SP. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs (passive; positive control 502182 Horrorbolt: 27 casts); coabuildhub spells_master_index.json entry 300304 matches +10% Horrorbolt / +20% Wrath (older state omitting Eldritch Shock; installed Spell.dbc governs, G-9)."
     },
     {
       "spell": 300304,
@@ -4092,7 +4092,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "300304 Effect[1] aura 108 SPELLMOD_SPELL_BONUS_DAMAGE +10% ($s2 = 10), EffectSpellClassMask[5] 524288 matching Eldritch Shock damage 808043 (cast via 808036). At +50000 SP precondition fixture, SP bonus dominates base ~354 so +10% SP bonus yields hit ratio ~1.098 inside the G-19 band [1.08, 1.12]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 is an older state; installed Spell.dbc governs (G-9)."
+      "observe_source": "300304 Effect[1] aura 108 SPELLMOD_BONUS_MULTIPLIER +10% ($s2 = 10), EffectSpellClassMask[5] 524288 matching Eldritch Shock damage 808043 (cast via 808036, SP coef 0.4641 scaled in AscensionCultistContracts.cpp:284-289, Cultist ADR 0004). At +50000 SP precondition fixture, SP bonus dominates base ~354 so +10% SP bonus yields hit ratio ~1.098 inside the G-19 band [1.08, 1.12]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 is an older state; installed Spell.dbc governs (G-9)."
     },
     {
       "spell": 300304,
@@ -4145,7 +4145,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "300304 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 24 (SPELLMOD_SPELL_BONUS_DAMAGE), EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20% ($s1 = 20), EffectSpellClassMask[1] 32 matching Wrath of the Black Empire 502172 (SpellFamilyFlags[1] 288, SP coef 1.0 in AscensionCultistData.h:30, CasterAuraSpell 680601; Spell.dbc). At +50000 SP precondition fixture, SP bonus 50000 dominates base ~780 so +20% SP bonus yields hit ratio 1.1969 inside the G-19 band [1.18, 1.22]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 matches +20% Wrath."
+      "observe_source": "300304 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 24 (SPELLMOD_BONUS_MULTIPLIER), EffectBasePoints[0] 19 + EffectDieSides[0] 1 = +20% ($s1 = 20), EffectSpellClassMask[1] 32 matching Wrath of the Black Empire 502172 (SpellFamilyFlags[1] 288, SP coef 1.0 in AscensionCultistData.h:30, scaled via SPELLMOD_BONUS_MULTIPLIER in AscensionCultistContracts.cpp:284-289, Cultist ADR 0004, CasterAuraSpell 680601; Spell.dbc). At +50000 SP precondition fixture, SP bonus 50000 dominates base ~780 so +20% SP bonus yields hit ratio 1.1969 inside the G-19 band [1.18, 1.22]. Reference search 2026-11-24: coa-history spell 300304: 0 events in 186 logs; coabuildhub spells_master_index.json entry 300304 matches +20% Wrath."
     },
     {
       "spell": 301255,
@@ -5098,7 +5098,7 @@
         "reach_yd": 0,
         "source": "Darkwither 502220 is single-target (EffectRadiusIndex 0) at dummy_distance 10 yd; Presence of C'Thun 803339 and triggered 803340 are caster-only; streams are ungrouped."
       },
-      "observe_source": "300272 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +10% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). Expected 30% with 300272 learned; AscensionCultist.cpp:105-116 Chance() does not call ApplySpellMod(SPELLMOD_CHANCE_OF_SUCCESS), so this entry verifies the live proc rate against 30%. Reference search 2026-11-24: coa-history spell 300272: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 300272 matches installed Spell.dbc."
+      "observe_source": "300272 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +10% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). AscensionCultist::Chance applies SPELLMOD_CHANCE_OF_SUCCESS before rolling (AscensionCultist.cpp:105-119, Cultist ADR 0003), giving 30% with 300272 learned over the unlearned control (0 procs). Reference search 2026-11-24: coa-history spell 300272: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 300272 matches installed Spell.dbc."
     },
     {
       "spell": 803283,
@@ -5156,7 +5156,7 @@
         "reach_yd": 0,
         "source": "Darkwither 502220 is single-target (EffectRadiusIndex 0) at dummy_distance 10 yd; Presence of C'Thun 803339 and triggered 803340 are caster-only; streams are ungrouped."
       },
-      "observe_source": "803283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +5% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). Expected 25% with 803283 learned; AscensionCultist.cpp:105-116 Chance() does not call ApplySpellMod(SPELLMOD_CHANCE_OF_SUCCESS), so this entry verifies the live proc rate against 25%. Reference search 2026-11-24: coa-history spell 803283: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 803283 matches installed Spell.dbc."
+      "observe_source": "803283 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 18 (SPELLMOD_CHANCE_OF_SUCCESS) +5% on Presences (Presence of C'Thun 803339 base ProcChance 20%, triggers 803340 via AscensionCultistEvents.cpp:104,249 -> Chance(player, 803339); Spell.dbc). AscensionCultist::Chance applies SPELLMOD_CHANCE_OF_SUCCESS before rolling (AscensionCultist.cpp:105-119, Cultist ADR 0003), giving 25% with 803283 learned over the unlearned control (0 procs). Reference search 2026-11-24: coa-history spell 803283: 0 events in 186 logs (positive control 803339: 21 casts in 8 logs); coabuildhub spells_master_index.json entry 803283 matches installed Spell.dbc."
     },
     {
       "spell": 524804,
@@ -6801,7 +6801,7 @@
       "critical": false,
       "trials": 10,
       "void_on_cast_failure": true,
-      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 no effective-heal restriction) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (expected ratio 2.0, +100% inside G-19 [95%, 105%]). Server defect note: AscensionCultistAbilities.cpp:228-233 gates granting 705107 on (damage || healing), where Spell.cpp:2868-2874,3069-3071 overwrites m_healing with effective gain (0 on full-health overheal, unlike Spell.h:634 GetScriptHealingIncludingOverheal()), so pure overheal fails to grant 705107 and alerts near +0%. Paired with heal_to_dmg (damaged target, supporting evidence only). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 owner ruling Q-cu-10 / O-12, Cultist ADR 0005) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (AscensionCultistAbilities.cpp:228-234 checks GetScriptHealingIncludingOverheal() to grant 705107, expected ratio 2.0, +100% inside G-19 [95%, 105%]). Paired with heal_to_dmg (damaged target). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 704880,
@@ -6863,7 +6863,7 @@
       "wait_ms": 1000,
       "expire_ms": 9000,
       "void_on_cast_failure": true,
-      "observe_source": "Supporting evidence arm only (damaged target, caster_health_pct 50 -> 5000 effective heal, gain > 0): paired with heal_to_dmg_overheal (full-health pure overheal), which tests the tooltip as worded and alerts on AscensionCultistAbilities.cpp:228-233 checking healing (Spell.cpp:2868-2874,3069-3071 effective gain) instead of Spell.h:634 GetScriptHealingIncludingOverheal(). When the heal is effective, AscensionCultistAbilities.cpp:228-233 grants 705107 (+100%) and AscensionCultistContracts.cpp:307-308 multiplies next Eldritch Shock damage 808043 by 2.0 (cumulative spell_damage_total = 3.0 * D within 0.02). Both phases hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present), 823764 (no resist) and 16255 -100 (no crit; precondition fixtures) at +20000 SP. Does not prove the claim as worded by itself. Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Damaged-target arm (caster_health_pct 50 -> 5000 effective heal, gain > 0) paired with heal_to_dmg_overheal (full-health pure overheal; owner ruling Q-cu-10 / O-12, Cultist ADR 0005). AscensionCultistAbilities.cpp:228-234 grants 705107 (+100%) via GetScriptHealingIncludingOverheal() and AscensionCultistContracts.cpp:313-314 multiplies next Eldritch Shock damage 808043 by 2.0 (cumulative spell_damage_total = 3.0 * D within 0.02). Both phases hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present), 823764 (no resist) and 16255 -100 (no crit; precondition fixtures) at +20000 SP. Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 92129,
