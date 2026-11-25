@@ -478,7 +478,8 @@
       {
         "claim": "increases your damage dealt by $573285s1%",
         "labels": [
-          "300307 effect_value 573285e0 #0"
+          "300307 behaviour_hit_ratio shadow_damage",
+          "300307 behaviour_hit_ratio melee_damage"
         ]
       },
       {
@@ -2519,9 +2520,9 @@
     "spell": 681106,
     "clause": "Each stack of Insanity increases the critical damage of your Netherstrike by $s1%.",
     "labels": [
-      "681106 behaviour_hit_ratio crit_20",
-      "681106 behaviour_hit_ratio crit_50",
-      "681106 behaviour_hit_ratio crit_0",
+      "681106 behaviour_metric_delta crit_20",
+      "681106 behaviour_metric_delta crit_50",
+      "681106 behaviour_metric_delta crit_0",
       "681106 behaviour_metric_delta mod_50"
     ],
     "kind": "claim"
@@ -3104,7 +3105,11 @@
   {
     "spell": 707429,
     "clause": "Your Mass Nightmare now triggers a 60 sec reduced cooldown when used at or above 80 Insanity.",
-    "labels": [],
+    "labels": [
+      "707429 behaviour_metric_delta at_80_ready",
+      "707429 behaviour_metric_delta at_80_still_cd",
+      "707429 behaviour_metric_delta at_79"
+    ],
     "kind": "claim"
   },
   {
@@ -3164,7 +3169,20 @@
     "spell": 707753,
     "clause": "While above 40 Insanity,",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind measures a two-rate proc-chance increase above a non-zero control baseline (AscensionCultist.cpp:109-110 raises Dark Revelation 300313/706245 proc chance by +10% from 6%->16% / 20%->30% when Insanity 500706 > 40): procs.py:354 rejects 707753 (EffectMiscValue[0]=23 SPELLMOD_EFFECT3, not 18 SPELLMOD_CHANCE_OF_SUCCESS); cooldown_reset_rate.py:213-221 accepts only a single talent (no prerequisite learn list) and hard-alerts on any control-arm reset; flat_chance_rate.py:27 EVENT_METRICS admits only spell_cast_count, owned_creature_summon_count, and owned_creature_spell_cast_count whereas 300313/706245 cast no spell (only SMSG_CLEAR_COOLDOWN and direct Insanity Resource()). Nearest kind: cooldown_reset_rate (needs base_learn + non-zero control baseline rate contrast) or flat_chance_rate (needs spell_cooldown_clear_count / aura_stacks event metric).",
+      "attempts": [
+        {
+          "agent": "cu-h1",
+          "report": ".agents/plans/cu-h1/report.md"
+        },
+        {
+          "agent": "cu-h1b",
+          "report": ".agents/plans/cu-h1b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707753,
@@ -3172,7 +3190,20 @@
     "labels": [
       "707753 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind measures a two-rate proc-chance increase above a non-zero control baseline (AscensionCultist.cpp:109-110 raises Dark Revelation 300313/706245 proc chance by +10% from 6%->16% / 20%->30% when Insanity 500706 > 40): procs.py:354 rejects 707753 (EffectMiscValue[0]=23 SPELLMOD_EFFECT3, not 18 SPELLMOD_CHANCE_OF_SUCCESS); cooldown_reset_rate.py:213-221 accepts only a single talent (no prerequisite learn list) and hard-alerts on any control-arm reset; flat_chance_rate.py:27 EVENT_METRICS admits only spell_cast_count, owned_creature_summon_count, and owned_creature_spell_cast_count whereas 300313/706245 cast no spell (only SMSG_CLEAR_COOLDOWN and direct Insanity Resource()). Nearest kind: cooldown_reset_rate (needs base_learn + non-zero control baseline rate contrast) or flat_chance_rate (needs spell_cooldown_clear_count / aura_stacks event metric).",
+      "attempts": [
+        {
+          "agent": "cu-h1",
+          "report": ".agents/plans/cu-h1/report.md"
+        },
+        {
+          "agent": "cu-h1b",
+          "report": ".agents/plans/cu-h1b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 707781,
@@ -3336,7 +3367,8 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "800432 behaviour_metric_delta period"
+          "800432 behaviour_metric_delta period",
+          "800432 behaviour_metric_delta period_setup"
         ]
       },
       {
@@ -3358,8 +3390,9 @@
     "spell": 800432,
     "clause": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
     "labels": [
-      "800432 behaviour_hit_ratio spell_amp",
-      "800432 behaviour_metric_delta amp_aura"
+      "800432 behaviour_metric_delta spell_amp",
+      "800432 behaviour_metric_delta amp_aura",
+      "800432 behaviour_metric_delta phys_control"
     ],
     "kind": "claim"
   },
@@ -3578,7 +3611,9 @@
       },
       {
         "claim": "dealing less damage with each enemy struck",
-        "labels": []
+        "labels": [
+          "803398 behaviour_metric_delta chain_falloff"
+        ]
       }
     ]
   },
@@ -3630,8 +3665,7 @@
       {
         "claim": "dealing $s2% Weapon Damage plus ${$m1+0} as Shadow damage",
         "labels": [
-          "572846 effect_value e1 #0",
-          "572846 effect_value e0 #1"
+          "572846 behaviour_metric_delta damage_ap_8x"
         ]
       },
       {

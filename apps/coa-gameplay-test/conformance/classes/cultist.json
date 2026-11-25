@@ -9429,7 +9429,25 @@
       "tolerance": 2,
       "wait_ms": 500,
       "expire_ms": 1000,
-      "observe_source": "301181 Rapid Incantations (AscensionCultistData.h:139 {301181, 572859, 60}): helper 572859 Effect[1] aura 138 SPELL_AURA_MOD_MELEE_HASTE BasePoints 4 + DieSides 1 = +5% ($572859s1 = 5; Spell.dbc). With Godblade 2H Axe 2531 (speed 3600 ms), +5% melee haste yields 3600 / 1.05 = 3428.57 ms. Both phases set 500706 to 61, wait 1000 ms for Refresh, read 500706 == 61 (after_setup_stacks), and verify 572859 present in treatment (after_auras_present). Reference search 2026-11-25: coa-history 301181: 0 events (passive), 572859: 2981 applies / 2994 removes in 35 logs; coabuildhub spells_master_index.json 301181 matches verbatim."
+      "observe_source": "301181 Rapid Incantations (AscensionCultistData.h:139 {301181, 572859, 60}): helper 572859 Effect[1] aura 138 SPELL_AURA_MOD_MELEE_HASTE BasePoints 4 + DieSides 1 = +5% ($572859s1 = 5; Spell.dbc). With Godblade 2H Axe 2531 (speed 3600 ms), +5% melee haste yields 3600 / 1.05 = 3428.57 ms. Both phases set 500706 to 61, wait 1000 ms for Refresh, read 500706 == 61 (after_setup_stacks), and verify 572859 absent (0) in control and present (1) in treatment (ally_arm + after_auras_present). Reference search 2026-11-25: coa-history 301181: 0 events (passive), 572859: 2981 applies / 2994 removes in 35 logs; coabuildhub spells_master_index.json 301181 matches verbatim.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 572859
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:139 {301181, 572859, 60}: helper 572859 reads 0 in control (301181 unlearned) and 1 in treatment (301181 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 301181,
@@ -9474,7 +9492,25 @@
       "tolerance": 0.0005,
       "wait_ms": 500,
       "expire_ms": 1000,
-      "observe_source": "301181 Rapid Incantations helper 572859 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 4 + DieSides 1 = +5% ($572859s1 = 5; Spell.dbc): cast_speed_multiplier moves from 1.0 to 1 / 1.05 = 0.952381 when 500706 == 61 (read in both phases) and 572859 is present in treatment. Reference search 2026-11-25: see melee_above_60."
+      "observe_source": "301181 Rapid Incantations helper 572859 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 4 + DieSides 1 = +5% ($572859s1 = 5; Spell.dbc): cast_speed_multiplier moves from 1.0 to 1 / 1.05 = 0.952381 when 500706 == 61 (read in both phases) and 572859 reads 0 in control and 1 in treatment (ally_arm + after_auras_present). Reference search 2026-11-25: see melee_above_60.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 572859
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:139 {301181, 572859, 60}: helper 572859 reads 0 in control (301181 unlearned) and 1 in treatment (301181 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 301181,
@@ -9567,7 +9603,25 @@
       "tolerance": 0.0001,
       "wait_ms": 500,
       "expire_ms": 1000,
-      "observe_source": "527268 Instilling Fear (AscensionCultistData.h:141 {527268, 573272, 60}): helper 573272 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 9 + DieSides 1 = +10% ($573272s1 = 10), EffectSpellClassMask[0] 262144 matching Netherstrike 578263 SpellFamilyFlags[0] 262144 (Spell.dbc). Both phases set and read 500706 == 61 after 1000 ms Refresh settle; treatment reads 573272 present. Reference search 2026-11-25: coa-history 527268: 0 events (passive), 573272: 417 applies / 423 removes in 11 logs, 578263: 82 casts; coabuildhub spells_master_index.json 527268 omits Eldritch Shock (older snapshot; installed Spell.dbc governs)."
+      "observe_source": "527268 Instilling Fear (AscensionCultistData.h:141 {527268, 573272, 60}): helper 573272 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER misc 7 (SPELLMOD_CRITICAL_CHANCE) BasePoints 9 + DieSides 1 = +10% ($573272s1 = 10), EffectSpellClassMask[0] 262144 matching Netherstrike 578263 SpellFamilyFlags[0] 262144 (Spell.dbc). Both phases set and read 500706 == 61 after 1000 ms Refresh settle; control reads 573272 absent (0) and treatment reads 573272 present (1) via ally_arm + after_auras_present. Reference search 2026-11-25: coa-history 527268: 0 events (passive), 573272: 417 applies / 423 removes in 11 logs, 578263: 82 casts; coabuildhub spells_master_index.json 527268 omits Eldritch Shock (older snapshot; installed Spell.dbc governs).",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 573272
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:141 {527268, 573272, 60}: helper 573272 reads 0 in control (527268 unlearned) and 1 in treatment (527268 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 527268,
@@ -9616,7 +9670,25 @@
       "tolerance": 0.0001,
       "wait_ms": 500,
       "expire_ms": 1000,
-      "observe_source": "527268 Instilling Fear helper 573272 EffectSpellClassMask[2] 1074266112 (0x40080000) matches Gaze of C'Thun damage 520332 SpellFamilyFlags[2] 1073741824 (0x40000000; Spell.dbc). Both phases read 500706 == 61; treatment reads 573272 present. Reference search 2026-11-25: coa-history 502141 Gaze: 681 casts; see netherstrike_above_60."
+      "observe_source": "527268 Instilling Fear helper 573272 EffectSpellClassMask[2] 1074266112 (0x40080000) matches Gaze of C'Thun damage 520332 SpellFamilyFlags[2] 1073741824 (0x40000000; Spell.dbc). Both phases read 500706 == 61; control reads 573272 absent (0) and treatment reads 573272 present (1) via ally_arm + after_auras_present. Reference search 2026-11-25: coa-history 502141 Gaze: 681 casts; see netherstrike_above_60.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 573272
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:141 {527268, 573272, 60}: helper 573272 reads 0 in control (527268 unlearned) and 1 in treatment (527268 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 527268,
@@ -9665,7 +9737,25 @@
       "tolerance": 0.0001,
       "wait_ms": 500,
       "expire_ms": 1000,
-      "observe_source": "527268 Instilling Fear helper 573272 EffectSpellClassMask[2] 1074266112 (0x40080000) matches Eldritch Shock damage 808043 SpellFamilyFlags[2] 524288 (0x80000; Spell.dbc). Both phases read 500706 == 61; treatment reads 573272 present. Reference search 2026-11-25: coa-history 808036 Eldritch Shock: 2 casts; see netherstrike_above_60."
+      "observe_source": "527268 Instilling Fear helper 573272 EffectSpellClassMask[2] 1074266112 (0x40080000) matches Eldritch Shock damage 808043 SpellFamilyFlags[2] 524288 (0x80000; Spell.dbc). Both phases read 500706 == 61; control reads 573272 absent (0) and treatment reads 573272 present (1) via ally_arm + after_auras_present. Reference search 2026-11-25: coa-history 808036 Eldritch Shock: 2 casts; see netherstrike_above_60.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 573272
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionCultistData.h:141 {527268, 573272, 60}: helper 573272 reads 0 in control (527268 unlearned) and 1 in treatment (527268 learned) at 61 Insanity"
+          }
+        ]
+      }
     },
     {
       "spell": 527268,
@@ -9760,7 +9850,25 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "300307 Embrace the Void (AscensionCultist.cpp:216-217): crossing before < 60 && after >= 60 inside Resource() casts 573285. Both phases set Insanity 500706 to 50 (read == 50 and 573285 == 0 before trigger), then cast Obliteration Beam 806897 (+10 Insanity -> 60). Control (300307 unlearned) reads 573285 == 0; treatment (300307 learned) reads 573285 == 1. Reference search 2026-11-25: coa-history 300307: 0 events (passive), 573285: 40 applies / 40 removes / 3 refreshes in 1 log; coabuildhub spells_master_index.json 300307 matches verbatim."
+      "observe_source": "300307 Embrace the Void (AscensionCultist.cpp:216-217): crossing before < 60 && after >= 60 inside Resource() casts 573285. Both phases set Insanity 500706 to 50 (after_setup_stacks reads 500706 == 50 and 573285 == 0 before trigger), cast Obliteration Beam 806897 (+10 Insanity -> 60), and re-read 500706 == 60 after the cast (ally_arm) in both phases. Control (300307 unlearned) reads 573285 == 0; treatment (300307 learned) reads 573285 == 1. Reference search 2026-11-25: coa-history 300307: 0 events (passive), 573285: 40 applies / 40 removes / 3 refreshes in 1 log; coabuildhub spells_master_index.json 300307 matches verbatim.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 60,
+            "expected": 60,
+            "tolerance": 0,
+            "source": "Obliteration Beam 806897 adds +10 Insanity (50 -> 60) in both phases (AscensionCultist.cpp:216-217)"
+          }
+        ]
+      }
     },
     {
       "spell": 300307,
@@ -9807,7 +9915,25 @@
       "wait_ms": 500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "Boundary control for 300307 Embrace the Void 'Reaching 60 Insanity': starting at 49 Insanity (read == 49, 573285 == 0), Obliteration Beam 806897 raises Insanity to 59 (< 60), so 573285 stays 0 even with 300307 learned. Reference search 2026-11-25: see reach_60."
+      "observe_source": "Boundary control for 300307 Embrace the Void 'Reaching 60 Insanity': starting at 49 Insanity (after_setup_stacks reads 500706 == 49 and 573285 == 0 before trigger in both phases), Obliteration Beam 806897 raises Insanity to 59 (re-read 500706 == 59 after trigger via ally_arm in both phases, < 60), so 573285 stays 0 even with 300307 learned. Reference search 2026-11-25: see reach_60.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 59,
+            "expected": 59,
+            "tolerance": 0,
+            "source": "Obliteration Beam 806897 adds +10 Insanity (49 -> 59) in both phases without reaching 60"
+          }
+        ]
+      }
     },
     {
       "spell": 300307,
@@ -9868,7 +9994,143 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "300307 Embrace the Void helper 573285 DurationIndex 1 = 10000 ms ($573285d; Spell.dbc). With 300307 learned, crossing 50 -> 60 Insanity via Obliteration Beam 806897 applies 573285, still present at [9200..9600] ms (> 9000 ms = 0.9*10000) and expired by [10400..10850] ms (< 11000 ms = 1.1*10000). Reference search 2026-11-25: see reach_60."
+      "observe_source": "300307 Embrace the Void helper 573285 DurationIndex 1 = 10000 ms ($573285d; Spell.dbc). Reads 500706 == 50 in the uncast before phase (ally_arm) and 500706 == 50, 573285 == 0 pre-trigger in after (after_setup_stacks); crossing 50 -> 60 Insanity via Obliteration Beam 806897 applies 573285 (500706 re-read == 60 via ally_arm), still present at [9200..9600] ms (> 9000 ms = 0.9*10000) and expired by [10400..10850] ms (< 11000 ms = 1.1*10000). Reference search 2026-11-25: see reach_60.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 50,
+            "expected": 60,
+            "tolerance": 0,
+            "source": "Insanity reads exact 50 in the uncast before phase and exact 60 after Obliteration Beam 806897 (+10 Insanity) in the after phase"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 300307,
+      "name": "Embrace the Void (+10% Shadow damage dealt after reaching 60 Insanity, supporting evidence)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+      "expected": 1.1,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        806897
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            50
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 806897,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300307
+        ],
+        "auras": [
+          [
+            500706,
+            50
+          ],
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 806897,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Supporting Shadow-school check for 300307 Embrace the Void helper 573285 (Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, bp 9 + die 1 = +10%; Spell.dbc): uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup whose 500706 (50 -> 60) and 573285 (0 -> 0 control, 0 -> 1 treatment) reads are proved by companion 300307 reach_60. Paired with alerting melee_damage (Physical excluded by EffectMiscValue[0] = 126). Reference search 2026-11-25: see reach_60."
+    },
+    {
+      "spell": 300307,
+      "name": "Embrace the Void (Physical melee damage dealt check after reaching 60 Insanity)",
+      "kind": "hit_ratio",
+      "variant": "melee_damage",
+      "label_suffix": "melee_damage",
+      "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+      "expected": 1.1,
+      "metric": "melee_damage_total",
+      "swing_hand": 0,
+      "observe_spell": 0,
+      "learn": [
+        806897
+      ],
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            500706,
+            50
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 806897,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          300307
+        ],
+        "auras": [
+          [
+            500706,
+            50
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 806897,
+            "target": "dummy",
+            "power": 2000
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Physical-school check for 300307 Embrace the Void 'increases your damage dealt by $573285s1%' (ADR 0287 ruling 'tout inclus': unqualified 'damage dealt' includes Physical). Uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup verified by companion 300307 reach_60 (500706 50 -> 60, 573285 0 -> 0 in control and 0 -> 1 in treatment). Server defect note: 573285 Effect[0] carries EffectMiscValue[0] = 126 (magic schools only, omitting Physical bit 1) with no pending SQL or AscensionCultistContracts.cpp override, so Physical white swings stay at ~+0% against expected +10% (alerting). Reference search 2026-11-25: see reach_60."
     },
     {
       "spell": 301181,
@@ -10096,7 +10358,7 @@
       "after_at_most": 3020,
       "wait_ms": 5500,
       "expire_ms": 500,
-      "observe_source": "800432 Psychic Suppression (BaseLevel 31, SpellLevel 31, MaxLevel 0, Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 500 ms, Duration 5000 ms = 10 ticks, BasePoints 29, DieSides 11, RPPL 5.48 -> 29 + int(29*5.48) + [1..11] = [188..198]; AscensionCultistData.h:103 sp 0.55 + ap 0.10; CasterAuraSpell 680601 >= 20 Insanity; Spell.dbc). At ref SP 0, AP 376 (+37.6): base [225..235], x1.12 Cultist tuning 887013 = [252..263], x1.15 own debuff 803746 applied on cast (AscensionCultistAuras.cpp:69) = [289..302]/tick -> 10 ticks [2890..3020]. Insanity 500706 == 20 and 680601 == 1 read before trigger; 823764 removes partial resists, 16255 (-100) removes crits. Reference search 2026-11-25: coa-history 800432: 89 periodic damage events / 9 applies in 2 logs; coabuildhub spells_master_index.json 800432 matches verbatim."
+      "observe_source": "800432 Psychic Suppression (BaseLevel 31, SpellLevel 31, MaxLevel 0, Effect[0] aura 3 SPELL_AURA_PERIODIC_DAMAGE, Amplitude 500 ms, Duration 5000 ms = 10 ticks, BasePoints 29, DieSides 11, RPPL 5.48 -> 29 + int(29*5.48) + [1..11] = [188..198]; AscensionCultistData.h:103 sp 0.55 + ap 0.10; CasterAuraSpell 680601 >= 20 Insanity; Spell.dbc). At ref SP 0, AP 376 (+37.6): base [225..235], x1.12 Cultist tuning 887013 = [252..263], x1.15 own debuff 803746 applied on cast (AscensionCultistAuras.cpp:69) = [289..302]/tick -> 10 ticks [2890..3020]. Insanity 500706 == 20 and 680601 == 1 read before trigger; 823764 removes partial resists, 16255 (-100) removes crits. Reference search 2026-11-25: coa-history 800432: 89 periodic damage events / 9 applies in 2 logs; coabuildhub spells_master_index.json 800432 matches verbatim. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 800432,
@@ -10168,7 +10430,7 @@
       "after_at_most": 144700,
       "wait_ms": 5500,
       "expire_ms": 500,
-      "observe_source": "SP scaling arm for 800432 Psychic Suppression (+20000 SP * 0.55 = +11000/tick before +12% 887013 and +15% 803746 -> [14457..14470]/tick, 10 ticks [144570..144700]). Insanity 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base."
+      "observe_source": "SP scaling arm for 800432 Psychic Suppression (+20000 SP * 0.55 = +11000/tick before +12% 887013 and +15% 803746 -> [14457..14470]/tick, 10 ticks [144570..144700]). Insanity 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 800432,
@@ -10237,7 +10499,7 @@
       "after_at_most": 28780,
       "wait_ms": 5500,
       "expire_ms": 500,
-      "observe_source": "AP scaling arm for 800432 Psychic Suppression (+20000 AP * 0.10 = +2000/tick before +12% 887013 and +15% 803746 -> [2865..2878]/tick, 10 ticks [28650..28780]). Insanity 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base."
+      "observe_source": "AP scaling arm for 800432 Psychic Suppression (+20000 AP * 0.10 = +2000/tick before +12% 887013 and +15% 803746 -> [2865..2878]/tick, 10 ticks [28650..28780]). Insanity 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 800432,
@@ -10269,6 +10531,78 @@
         }
       ],
       "observe_source": "800432 Psychic Suppression EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; Spell.dbc). Two real Obliteration Beam 806897 casts build 20 Insanity and earn 680601 natively before casting 800432; polls 800432 hits on dummy over [200..4900] ms and checks mean period == 500 ms within G-19 +-5% band. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 800432,
+      "name": "Psychic Suppression (period setup verification: 2x 806897 builds 20 Insanity + 680601, 10 ticks in 5000 ms)",
+      "kind": "metric_delta",
+      "variant": "period_setup",
+      "label_suffix": "period_setup",
+      "quote": "every $t1 sec",
+      "trigger_spell": 800432,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "setup_casts": [
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 20
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 0,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Control arm holds 0 Insanity; two real Obliteration Beam 806897 setup casts build exact 20 Insanity"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Control arm has 680601 absent (0); two real 806897 setup casts earn 680601 (1) natively via Refresh (first 806897 at 10 Insanity strips any harness-injected 680601)"
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800432,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "tolerance": 0,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "observe_source": "Companion Insanity and threshold-aura proof for 800432 period (hit_period lacks aura reads): reproduces the exact 2x Obliteration Beam 806897 setup (wait_ms 2000 each), reading 500706 == 0 and 680601 == 0 in control (before) and exact 500706 == 20 and 680601 == 1 right before 800432 (after_setup_stacks) and after (ally_arm), and confirming exact 10 periodic ticks over 5000 ms (500 ms amplitude, Spell.dbc). void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly. Reference search 2026-11-25: see damage_base."
     },
     {
       "spell": 800432,
@@ -10330,7 +10664,7 @@
           5480
         ]
       },
-      "observe_source": "800432 Psychic Suppression applies stun aura 802789 (SPELL_AURA_MOD_STUN 12, DurationIndex 28 = 5000 ms, $802789d; AscensionCultistAuras.cpp:66-68,155-157; Spell.dbc) on humanoid target (Kobold Vermin 6). Reads 500706 == 20 and 680601 == 1 before trigger; verifies 802789 present at [4600..4850] ms (> 4500 = 0.9*5000) and gone at [5250..5480] ms (< 5500 = 1.1*5000). Reference search 2026-11-25: see damage_base."
+      "observe_source": "800432 Psychic Suppression applies stun aura 802789 (SPELL_AURA_MOD_STUN 12, DurationIndex 28 = 5000 ms, $802789d; AscensionCultistAuras.cpp:66-68,155-157; Spell.dbc) on humanoid target (Kobold Vermin 6). Reads 500706 == 20 and 680601 == 1 before trigger; verifies 802789 present at [4600..4850] ms (> 4500 = 0.9*5000) and gone at [5250..5480] ms (< 5500 = 1.1*5000). Reference search 2026-11-25: see damage_base. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 800432,
@@ -10379,66 +10713,215 @@
       "expected": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Proves 800432 Psychic Suppression's stun (802789) actually stuns the target: humanoid dummy 6 channels Evocation 12051 (casting == 1 before cast) and is stunned out of the channel (casting == 0 after cast). Insanity 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base."
+      "observe_source": "Proves 800432 Psychic Suppression's stun (802789) actually stuns the target: humanoid dummy 6 channels Evocation 12051 (casting == 1 before cast) and is stunned out of the channel (casting == 0 after cast). Insanity 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 800432,
       "name": "Psychic Suppression (+15% spell damage taken from all sources while channeling)",
-      "kind": "hit_ratio",
+      "kind": "metric_delta",
       "variant": "spell_amp",
       "label_suffix": "spell_amp",
       "quote": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
-      "expected": 1.15,
-      "caster": "ally",
+      "trigger_spell": 800432,
+      "gate_spell": 800432,
       "target": "dummy",
-      "cast_spell": 806897,
-      "observe_spell": 805573,
-      "learn": [
-        806897,
-        800432
-      ],
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "setup_in_before": true,
       "cast_power": 2000,
-      "cast_wait_ms": 3000,
-      "cast_unit_auras": [
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
         [
-          823764,
-          1
+          500706,
+          20,
+          "caster",
+          "caster"
         ]
       ],
-      "control": {
-        "auras": [
-          [
-            500706,
-            20
-          ],
-          [
-            680601,
-            1
-          ]
-        ]
-      },
-      "treatment": {
-        "auras": [
-          [
-            500706,
-            20
-          ],
-          [
-            680601,
-            1
-          ]
-        ],
-        "casts": [
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 20
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_attacks": [
           {
-            "spell": 800432,
-            "target": "dummy",
-            "power": 2000
+            "spell": 66903,
+            "power": 0,
+            "source": "Hammer of the Righteous 66903 (Spell.dbc: SchoolMask 2 Holy, DmgClass 0, Effect[0] SCHOOL_DAMAGE bp 15999 + die 1 = 16000, instant, 0 mana, 0 CD; Holy cannot be partially resisted in WotLK and DmgClass 0 cannot crit) tests +15% spell damage taken from a grouped ally ('from all sources') while caster channels 800432"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 803746,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Debuff 803746 is absent on dummy in control (before) and present while channeling 800432 (after)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Caster holds exact 20 Insanity in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>= 20 Insanity) earned natively via Refresh reads 1 in both arms"
           }
         ]
       },
-      "critical": false,
-      "trials": 10,
-      "observe_source": "800432 Psychic Suppression applies 803746 (Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints 14 + DieSides 1 = +15%, MiscValue 127; AscensionCultistAuras.cpp:69,158; Spell.dbc) on dummy while caster channels 800432. Grouped ally casts Obliteration Beam 806897 (damage spell 805573, instant, 823764 removes partial resists) at dummy: control (caster idle) vs treatment (caster channeling 800432, ally hits 1600 ms into 5000 ms channel, then cast_wait_ms 3000 lets channel finish before next trial). Proves +15% spell damage from another player ('from all sources'). Reference search 2026-11-25: see damage_base."
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 66903,
+        "target": "dummy"
+      },
+      "before_expected": 15000,
+      "expected": 32250,
+      "expected_ratio": 2.15,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 5500,
+      "observe_source": "800432 Psychic Suppression applies 803746 (Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, BasePoints 14 + DieSides 1 = +15%; AscensionCultistAuras.cpp:69,158; Spell.dbc) on dummy while caster channels 800432. Both phases set 500706 to 20 (no manual 680601), run Greatness 60235 + 1000 ms wait for Refresh, and read exact 500706 == 20 and 680601 == 1 via after_setup_stacks and ally_arm; 803746 reads 0 in control and 1 in treatment. Grouped ally casts Hammer of the Righteous 66903 (SchoolMask 2 Holy, DmgClass 0, 0% resist/crit, exact 16000 base Holy damage): cumulative after / before expected ratio 2.15 +- 0.02, excluding 2.00 [0%] and 2.30 [+30%]). Paired with phys_control (alerting on Physical due to MiscValue 127). void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 800432,
+      "name": "Psychic Suppression (Physical negative control: 'more spell damage' must not amplify Physical)",
+      "kind": "metric_delta",
+      "variant": "phys_control",
+      "label_suffix": "phys_control",
+      "quote": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
+      "trigger_spell": 800432,
+      "gate_spell": 800432,
+      "target": "dummy",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 2000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 20
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_attacks": [
+          {
+            "spell": 92559,
+            "power": 0,
+            "source": "Void Zone 92559 (Spell.dbc: SchoolMask 1 Physical, DmgClass 0, Effect[0] SCHOOL_DAMAGE bp 999 + die 1 = 1000, instant, 0 mana, 0 CD) tests that 'more spell damage' excludes Physical damage"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 803746,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Debuff 803746 is absent on dummy in control (before) and present while channeling 800432 (after)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Caster holds exact 20 Insanity in both control and treatment arms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Threshold aura 680601 (>= 20 Insanity) earned natively via Refresh reads 1 in both arms"
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 92559,
+        "target": "dummy"
+      },
+      "before_expected": 900,
+      "expected": 1800,
+      "expected_ratio": 2.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 5500,
+      "observe_source": "Negative school control for 800432 Psychic Suppression 'takes $803746s1% more spell damage from all sources': tooltip restricts the +15% debuff to spell damage (magic schools 126), so Physical Void Zone 92559 (SchoolMask 1 Physical, DmgClass 0, exact 1000 raw Physical) from the grouped ally must stay at 0% increase (cumulative after / before ratio == 2.00 +- 0.02). Both arms read exact 500706 == 20 and 680601 == 1 (after_setup_stacks + ally_arm) and 803746 0 -> 1. Server defect note: 803746 Effect[0] carries EffectMiscValue[0] = 127 (SPELL_SCHOOL_MASK_ALL, including Physical bit 1) with no pending SQL or AscensionCultistContracts.cpp override, so Unit.cpp:10114,11724 amplifies Physical by +15% (ratio ~2.15, alerting). void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly. Reference search 2026-11-25: see damage_base."
     },
     {
       "spell": 800432,
@@ -10499,7 +10982,7 @@
           5480
         ]
       },
-      "observe_source": "800432 Psychic Suppression debuff 803746 lifecycle: present on dummy while channeling (t in [4600..4850] ms) and gone after channel ends (t in [5250..5480] ms), with 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base."
+      "observe_source": "800432 Psychic Suppression debuff 803746 lifecycle: present on dummy while channeling (t in [4600..4850] ms) and gone after channel ends (t in [5250..5480] ms), with 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 803398,
@@ -10707,7 +11190,7 @@
     },
     {
       "spell": 803398,
-      "name": "Eldritch Devastation (chains to 5 nearby enemies, 20 ticks total)",
+      "name": "Eldritch Devastation (chains to 5 nearby enemies, 20 ticks total; 6th & out-of-reach 0)",
       "kind": "metric_delta",
       "variant": "chain_targets",
       "label_suffix": "chain_targets",
@@ -10716,13 +11199,31 @@
       "target": "dummy",
       "cast_in_before": false,
       "cast_power": 2000,
+      "setup_casts": [
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
       "phase_auras": [
         [
           500706,
-          20,
+          0,
           "caster",
           "caster"
         ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 20
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
       ],
       "area_dummies": [
         4.0,
@@ -10733,6 +11234,191 @@
         25.0
       ],
       "area_sum": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 0,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Control arm holds 0 Insanity; two 806897 setup casts build exact 20 Insanity before 803398"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Control arm has 680601 absent (0); two 806897 setup casts earn 680601 (1) natively via Refresh"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Primary dummy stands at 3.0 yd from caster"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "area4"
+            },
+            "before_expected": 7.0,
+            "expected": 7.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "5th chain target area4 stands at 7.0 yd (4 yd from primary, inside 10 yd Spell.cpp:2230 jumpRadius)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "area5"
+            },
+            "before_expected": 8.0,
+            "expected": 8.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "6th nearby dummy area5 stands at 8.0 yd (inside jumpRadius but beyond EffectChainTarget 5 cap)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "area6"
+            },
+            "before_expected": 25.0,
+            "expected": 25.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Out-of-reach dummy area6 stands at 25.0 yd (> 10 yd jumpRadius from area4 at 7.0 yd)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803398,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Primary target takes exact 4 periodic ticks (4000 ms / 1000 ms)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803398,
+              "target": "area1"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Chain hop 1 (area1 at 4 yd) takes exact 4 ticks"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803398,
+              "target": "area2"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Chain hop 2 (area2 at 5 yd) takes exact 4 ticks"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803398,
+              "target": "area3"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Chain hop 3 (area3 at 6 yd) takes exact 4 ticks"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803398,
+              "target": "area4"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Chain hop 4 (area4 at 7 yd, 5th target) takes exact 4 ticks"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803398,
+              "target": "area5"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "6th nearby dummy (area5 at 8 yd) must take 0 hits (EffectChainTarget[0] = 5 cap)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803398,
+              "target": "area6"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Out-of-reach dummy (area6 at 25 yd, > 10 yd jumpRadius) must take 0 hits"
+          }
+        ]
+      },
       "metric": "spell_damage_count",
       "fields": {
         "spell": 803398,
@@ -10740,22 +11426,131 @@
       },
       "before_expected": 0,
       "expected": 20,
+      "tolerance": 0,
       "wait_ms": 4500,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "803398 Eldritch Devastation EffectChainTarget[0] = 5 (Spell.dbc): with primary dummy at 3 yd plus 5 nearby dummies (4..8 yd) and 1 far dummy (25 yd), 5 targets each take 4 ticks = 20 total hits (6th nearby and far dummy untouched). Insanity 500706 == 20 and 680601 == 1 read before trigger. Reference search 2026-11-25: see damage_base.",
-      "before_trigger_reads": [
+      "observe_source": "803398 Eldritch Devastation EffectChainTarget[0] = 5 (Spell.dbc), magic chain jumpRadius = 10 yd (Spell.cpp:2230). Control arm reads 500706 == 0 and 680601 == 0; treatment runs two real Obliteration Beam 806897 setup casts at dummy (+20 Insanity, Refresh earns 680601 natively) and reads exact 500706 == 20 and 680601 == 1 via after_setup_stacks and ally_arm. Position preconditions (distance_2d) verify dummy (3 yd), area4 (7 yd), area5 (8 yd), and area6 (25 yd, outside 10 yd jumpRadius); per-target counts assert exact 4 ticks each on dummy + area1..area4 (20 total) and exact 0 hits on area5 (beyond 5-target cap) and area6 (outside reach). Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 803398,
+      "name": "Eldritch Devastation (less damage with each enemy struck: 0.90x on first chain target)",
+      "kind": "metric_delta",
+      "variant": "chain_falloff",
+      "label_suffix": "chain_falloff",
+      "quote": "Channel upon an enemy, chaining to nearby enemies, dealing ${($d*1000/$t1)*($m1+0+$sps*0.44)} Shadow damage over $d, dealing less damage with each enemy struck.",
+      "trigger_spell": 803398,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "setup_casts": [
+        806897,
+        806897
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
         {
           "spell": 500706,
-          "expected": 1,
-          "actor": "caster"
+          "actor": "caster",
+          "stacks": 20
         },
         {
           "spell": 680601,
-          "expected": 1,
-          "actor": "caster"
+          "actor": "caster",
+          "stacks": 1
         }
-      ]
+      ],
+      "area_dummies": [
+        6.0,
+        7.0,
+        8.0,
+        9.0
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 0,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Control arm holds 0 Insanity; two 806897 setup casts build exact 20 Insanity"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680601
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Control arm has 680601 absent (0); two 806897 setup casts earn 680601 (1) natively via Refresh"
+          }
+        ]
+      },
+      "same_arm_ratio": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 803398,
+          "target": "dummy"
+        },
+        "ratio": 0.9,
+        "tolerance": 0.03,
+        "least": 30000,
+        "source": "803398 Effect[0] EffectChainTarget 5, EffectDamageMultiplier 0.90 (Spell.dbc)"
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803398,
+        "target": "area1"
+      },
+      "before_expected": 0,
+      "expected": 35883,
+      "wait_ms": 4800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "803398 Eldritch Devastation 'dealing less damage with each enemy struck': Effect[0] EffectDamageMultiplier[0] = 0.90 (Spell.dbc), so first chain target area1 (6 yd) must take 0.90 +- 0.03 of primary dummy (3 yd) damage at +20000 SP (non-crit, 823764 no resist). Control reads 500706 == 0, 680601 == 0; treatment runs 2x 806897 setup casts and reads exact 500706 == 20, 680601 == 1 via after_setup_stacks and ally_arm. Core server defect note: Spell.cpp:1934-1940,8655-8659 applies m_damageMultipliers only to direct m_damage, never periodic SPELL_EFFECT_APPLY_AURA damage, so area1/dummy measures ~1.000 against 0.90 +- 0.03 (alerting). Reference search 2026-11-25: see damage_base."
     },
     {
       "spell": 301008,
@@ -10810,7 +11605,7 @@
           5850
         ]
       },
-      "observe_source": "301008 Dark Channeler Effect[0] aura 107 misc 1 (SPELLMOD_DURATION) BasePoints 999 + DieSides 1 = +1000 ms ($/1000;s1 = 1 sec), EffectSpellClassMask[1] 8388608 matching Psychic Suppression 800432/802789 SpellFamilyFlags[1] 8388608 (5000 ms -> 6000 ms; Spell.dbc). Both phases read 500706 == 20 and 680601 == 1; at [5550..5850] ms (> 5400 = 0.9*6000), 800432 is 0 before learning 301008 and 1 after. Reference search 2026-11-25: coa-history 301008: 0 events (passive), 800432: 9 applies; coabuildhub spells_master_index.json has no 301008 entry (installed Spell.dbc governs)."
+      "observe_source": "301008 Dark Channeler Effect[0] aura 107 misc 1 (SPELLMOD_DURATION) BasePoints 999 + DieSides 1 = +1000 ms ($/1000;s1 = 1 sec), EffectSpellClassMask[1] 8388608 matching Psychic Suppression 800432/802789 SpellFamilyFlags[1] 8388608 (5000 ms -> 6000 ms; Spell.dbc). Both phases read 500706 == 20 and 680601 == 1; at [5550..5850] ms (> 5400 = 0.9*6000), 800432 is 0 before learning 301008 and 1 after. Reference search 2026-11-25: coa-history 301008: 0 events (passive), 800432: 9 applies; coabuildhub spells_master_index.json has no 301008 entry (installed Spell.dbc governs). void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 301008,
@@ -10873,7 +11668,7 @@
           6580
         ]
       },
-      "observe_source": "Upper-bound duration bracket for 301008 Dark Channeler on 800432 Psychic Suppression (6000 ms): present at [5550..5850] ms (> 5400) and gone at [6300..6580] ms (< 6600 = 1.1*6000). Reference search 2026-11-25: see ps_contrast."
+      "observe_source": "Upper-bound duration bracket for 301008 Dark Channeler on 800432 Psychic Suppression (6000 ms): present at [5550..5850] ms (> 5400) and gone at [6300..6580] ms (< 6600 = 1.1*6000). Reference search 2026-11-25: see ps_contrast. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly."
     },
     {
       "spell": 301008,
@@ -11055,7 +11850,13 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 5500,
-      "observe_source": "300298 Misery (AscensionCultistAbilities.cpp:130-134): casting Gaze of C'Thun 502141 calls Reduce(player, 800432, abs(Amount(300297, 1))) = 4000 ms (300297 Effect[1] BasePoints -4001 + DieSides 1 = -4000; 800432 RecoveryTime 90000 ms -> 86000 ms; Spell.dbc). Both phases set 500706 to 20, settle 5500 ms after 60235, cast 800432 (5000 ms channel) + 5500 ms wait, read 500706 == 20 and 680601 == 1, cast 502141, and re-attempt 800432 at 5500 + 80800 = 86300 ms (< 86400 ms = 90000 - 0.9*4000): before (unlearned) fails on CD (count 1); after (learned) succeeds (count 3, gain 2). Reference search 2026-11-25: coa-history 300298: 0 events (passive), 502141: 681 casts, 800432: 9 applies; coabuildhub spells_master_index.json 300298 lists older -1 s state (installed Spell.dbc governs)."
+      "observe_source": "300298 Misery (AscensionCultistAbilities.cpp:130-134): casting Gaze of C'Thun 502141 calls Reduce(player, 800432, abs(Amount(300297, 1))) = 4000 ms (300297 Effect[1] BasePoints -4001 + DieSides 1 = -4000; 800432 RecoveryTime 90000 ms -> 86000 ms; Spell.dbc). Both phases set 500706 to 20, settle 5500 ms after 60235, cast 800432 (5000 ms channel) + 5500 ms wait, read 500706 == 20 and 680601 == 1, cast 502141, and re-attempt 800432 at 5500 + 80800 = 86300 ms (< 86400 ms = 90000 - 0.9*4000): before (unlearned) fails on CD (count 1); after (learned) succeeds (count 3, gain 2). Reference search 2026-11-25: coa-history 300298: 0 events (passive), 502141: 681 casts, 800432: 9 applies; coabuildhub spells_master_index.json 300298 lists older -1 s state (installed Spell.dbc governs). void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly.",
+      "game_time": {
+        "after": [
+          81100,
+          81600
+        ]
+      }
     },
     {
       "spell": 300298,
@@ -11119,7 +11920,13 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 5500,
-      "observe_source": "Lower-bound bracket for 300298 Misery on 800432 Psychic Suppression: re-attempt at 5500 + 80200 = 85700 ms (> 85600 ms = 90000 - 1.1*4000) is still refused on CD (count 1 before, 2 after). Paired with ps_through (86300 ms), excludes +-10% off the 4 s cut on both sides. Reference search 2026-11-25: see ps_through."
+      "observe_source": "Lower-bound bracket for 300298 Misery on 800432 Psychic Suppression: re-attempt at 5500 + 80200 = 85700 ms (> 85600 ms = 90000 - 1.1*4000) is still refused on CD (count 1 before, 2 after). Paired with ps_through (86300 ms), excludes +-10% off the 4 s cut on both sides. Reference search 2026-11-25: see ps_through. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly.",
+      "game_time": {
+        "after": [
+          80500,
+          81000
+        ]
+      }
     },
     {
       "spell": 300298,
@@ -11158,7 +11965,13 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 7000,
-      "observe_source": "300298 Misery (AscensionCultistAbilities.cpp:130-132): casting Gaze of C'Thun 502141 calls Reduce(player, 573028, abs(Amount(300297))) = 1000 ms (300297 Effect[0] BasePoints -1001 + DieSides 1 = -1000; 573028 RecoveryTime 6000 ms -> 5000 ms; Spell.dbc). Re-attempting 573028 at 1600 + 3450 = 5050 ms (< 5100 ms = 6000 - 0.9*1000) fails before learning 300298 (count 1) and succeeds after (count 3, gain 2). Reference search 2026-11-25: see ps_through."
+      "observe_source": "300298 Misery (AscensionCultistAbilities.cpp:130-132): casting Gaze of C'Thun 502141 calls Reduce(player, 573028, abs(Amount(300297))) = 1000 ms (300297 Effect[0] BasePoints -1001 + DieSides 1 = -1000; 573028 RecoveryTime 6000 ms -> 5000 ms; Spell.dbc). Re-attempting 573028 at 1600 + 3450 = 5050 ms (< 5100 ms = 6000 - 0.9*1000) fails before learning 300298 (count 1) and succeeds after (count 3, gain 2). Reference search 2026-11-25: see ps_through.",
+      "game_time": {
+        "after": [
+          3800,
+          4150
+        ]
+      }
     },
     {
       "spell": 300298,
@@ -11197,7 +12010,13 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 7000,
-      "observe_source": "Lower-bound bracket for 300298 Misery on 573028 Grasp of Zek'voz: re-attempt at 1600 + 3320 = 4920 ms (> 4900 ms = 6000 - 1.1*1000) is still refused on CD (count 1 before, 2 after). Paired with grasp_through (5050 ms), excludes +-10% off the 1 s cut on both sides. Reference search 2026-11-25: see ps_through."
+      "observe_source": "Lower-bound bracket for 300298 Misery on 573028 Grasp of Zek'voz: re-attempt at 1600 + 3320 = 4920 ms (> 4900 ms = 6000 - 1.1*1000) is still refused on CD (count 1 before, 2 after). Paired with grasp_through (5050 ms), excludes +-10% off the 1 s cut on both sides. Reference search 2026-11-25: see ps_through.",
+      "game_time": {
+        "after": [
+          3680,
+          4020
+        ]
+      }
     },
     {
       "spell": 582307,
@@ -11370,194 +12189,269 @@
     {
       "spell": 681106,
       "name": "Who Needs Sanity? (20 Insanity: Netherstrike +20% crit bonus -> 1.10x)",
-      "kind": "hit_ratio",
+      "kind": "metric_delta",
       "variant": "crit_20",
       "label_suffix": "crit_20",
       "quote": "Each stack of Insanity increases the critical damage of your Netherstrike by $s1%.",
-      "observe_spell": 578263,
-      "learn": [
-        578263
-      ],
-      "target_health_pct": 25,
+      "trigger_spell": 578263,
+      "gate_spell": 681106,
+      "target": "dummy",
       "force_crit": "melee",
-      "critical": true,
-      "expected": 1.1,
-      "trials": 10,
-      "fixture": {
-        "attack_power": 20000
-      },
+      "player_attack_power": 20000,
       "cast_power": 2000,
-      "control": {
-        "auras": [
-          [
-            500706,
-            20
-          ],
-          [
-            823764,
-            1
-          ]
+      "phase_auras": [
+        [
+          500706,
+          20,
+          "caster",
+          "caster"
         ],
-        "casts": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 20
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
           {
-            "spell": 60235,
-            "target": "caster"
-          }
-        ],
-        "casts_wait_ms": 1000
-      },
-      "treatment": {
-        "learn": [
-          681106
-        ],
-        "auras": [
-          [
-            500706,
-            20
-          ],
-          [
-            823764,
-            1
-          ]
-        ],
-        "casts": [
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578263,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Exactly 1 forced melee crit of Netherstrike 578263 lands in control (before) and 1 in treatment (after)"
+          },
           {
-            "spell": 60235,
-            "target": "caster"
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 40,
+            "expected": 40,
+            "tolerance": 0,
+            "source": "Netherstrike 578263 adds +20 Insanity (20 -> 40) in both phases"
           }
-        ],
-        "casts_wait_ms": 1000
+        ]
       },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578263,
+        "target": "dummy"
+      },
+      "before_expected": 14000,
+      "expected": 29400,
+      "expected_ratio": 2.1,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "expected_source": "681106 Effect[0] BasePoints 0 + DieSides 1 = +1% per Insanity stack ($s1 = 1; Spell.dbc). AscensionCultist.cpp:283 sets Insanity 500706 Effect[2] (SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_CRIT_DAMAGE_BONUS 15, EffectSpellClassMask[6] 262144 matching Netherstrike 578263 SpellFamilyFlags[0] 262144) to stacks * 1 during Refresh (500 ms tick). Per owner ruling Q-r1b-1 (2026-11-12) and Unit::SpellCriticalDamageBonus (Unit.cpp:10673-10712), op 15 scales melee DmgClass 2 crit bonus (+100%): at 20 Insanity, crit multiplier rises from 2.00x to 2.20x -> ratio 2.20 / 2.00 = 1.10 (+10%, G-19 band +8%..+12%). Both arms set 500706 x20 + 823764, cast Greatness 60235 and wait 1000 ms for Refresh before each forced melee crit of 578263 at +20000 AP on a 25% HP dummy (TargetAuraState 13). Reference search 2026-11-25: coa-history 681106: 0 events (passive; 578263 Netherstrike present in logs); coabuildhub spells_master_index.json 681106 matches verbatim."
+      "observe_source": "681106 Effect[0] BasePoints 0 + DieSides 1 = +1% per Insanity stack ($s1 = 1; Spell.dbc). AscensionCultist.cpp:283 sets Insanity 500706 Effect[2] (SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_CRIT_DAMAGE_BONUS 15, EffectSpellClassMask[6] 262144 matching Netherstrike 578263) to stacks * 1 during Refresh (500 ms tick; no separate threshold aura). Per owner ruling Q-r1b-1 (2026-11-12) and Unit::SpellCriticalDamageBonus (Unit.cpp:10673-10712), op 15 scales melee DmgClass 2 crit bonus (+100%): at 20 Insanity, crit multiplier is 2.20x vs 2.00x (single-hit ratio 1.10x -> cumulative after/before ratio 2.10 +- 0.02). At +20000 AP (Godblade 2531 weapon spread +-0.34% -> ratio spread +-0.007 << 0.02), both phases set 500706 to 20, wait 1000 ms for Refresh, read exact 500706 == 20 right before 578263 (after_setup_stacks), cast forced-crit 578263 at 25% HP dummy, and verify 1 hit/phase + 500706 == 40 (ally_arm). Reference search 2026-11-25: coa-history 681106: 0 events (passive; 578263 Netherstrike present in logs); coabuildhub spells_master_index.json 681106 matches verbatim.",
+      "phase_target_health_pct": [
+        30,
+        25
+      ]
     },
     {
       "spell": 681106,
       "name": "Who Needs Sanity? (50 Insanity: Netherstrike +50% crit bonus -> 1.25x)",
-      "kind": "hit_ratio",
+      "kind": "metric_delta",
       "variant": "crit_50",
       "label_suffix": "crit_50",
       "quote": "Each stack of Insanity increases the critical damage of your Netherstrike by $s1%.",
-      "observe_spell": 578263,
-      "learn": [
-        578263
-      ],
-      "target_health_pct": 25,
+      "trigger_spell": 578263,
+      "gate_spell": 681106,
+      "target": "dummy",
       "force_crit": "melee",
-      "critical": true,
-      "expected": 1.25,
-      "trials": 10,
-      "fixture": {
-        "attack_power": 20000
-      },
+      "player_attack_power": 20000,
       "cast_power": 2000,
-      "control": {
-        "auras": [
-          [
-            500706,
-            50
-          ],
-          [
-            823764,
-            1
-          ]
+      "phase_auras": [
+        [
+          500706,
+          50,
+          "caster",
+          "caster"
         ],
-        "casts": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 50
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
           {
-            "spell": 60235,
-            "target": "caster"
-          }
-        ],
-        "casts_wait_ms": 1000
-      },
-      "treatment": {
-        "learn": [
-          681106
-        ],
-        "auras": [
-          [
-            500706,
-            50
-          ],
-          [
-            823764,
-            1
-          ]
-        ],
-        "casts": [
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578263,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Exactly 1 forced melee crit of Netherstrike 578263 lands in control (before) and 1 in treatment (after)"
+          },
           {
-            "spell": 60235,
-            "target": "caster"
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 70,
+            "expected": 70,
+            "tolerance": 0,
+            "source": "Netherstrike 578263 adds +20 Insanity (50 -> 70) in both phases"
           }
-        ],
-        "casts_wait_ms": 1000
+        ]
       },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578263,
+        "target": "dummy"
+      },
+      "before_expected": 14000,
+      "expected": 31500,
+      "expected_ratio": 2.25,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "expected_source": "681106 second Insanity point proving linear +1%/stack scaling (AscensionCultist.cpp:283, Unit.cpp:10673-10712): at 50 Insanity, melee DmgClass 2 crit multiplier rises from 2.00x to 2.50x -> ratio 2.50 / 2.00 = 1.25 (+25%, G-19 band +23%..+27%). Reference search 2026-11-25: see crit_20."
+      "observe_source": "681106 Effect[0] BasePoints 0 + DieSides 1 = +1% per Insanity stack ($s1 = 1; Spell.dbc). AscensionCultist.cpp:283 sets Insanity 500706 Effect[2] (SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_CRIT_DAMAGE_BONUS 15, EffectSpellClassMask[6] 262144 matching Netherstrike 578263) to stacks * 1 during Refresh (500 ms tick; no separate threshold aura). Per owner ruling Q-r1b-1 (2026-11-12) and Unit::SpellCriticalDamageBonus (Unit.cpp:10673-10712), op 15 scales melee DmgClass 2 crit bonus (+100%): at 50 Insanity, crit multiplier is 2.50x vs 2.00x (single-hit ratio 1.25x -> cumulative after/before ratio 2.25 +- 0.02). At +20000 AP (Godblade 2531 weapon spread +-0.34% -> ratio spread +-0.007 << 0.02), both phases set 500706 to 50, wait 1000 ms for Refresh, read exact 500706 == 50 right before 578263 (after_setup_stacks), cast forced-crit 578263 at 25% HP dummy, and verify 1 hit/phase + 500706 == 70 (ally_arm). Reference search 2026-11-25: coa-history 681106: 0 events (passive; 578263 Netherstrike present in logs); coabuildhub spells_master_index.json 681106 matches verbatim.",
+      "phase_target_health_pct": [
+        30,
+        25
+      ]
     },
     {
       "spell": 681106,
-      "name": "Who Needs Sanity? (0 Insanity control: +0% crit bonus -> 1.00x)",
-      "kind": "hit_ratio",
+      "name": "Who Needs Sanity? (0 Insanity: Netherstrike +0% crit bonus -> 1.00x control)",
+      "kind": "metric_delta",
       "variant": "crit_0",
       "label_suffix": "crit_0",
       "quote": "Each stack of Insanity increases the critical damage of your Netherstrike by $s1%.",
-      "observe_spell": 578263,
-      "learn": [
-        578263
-      ],
-      "target_health_pct": 25,
+      "trigger_spell": 578263,
+      "gate_spell": 681106,
+      "target": "dummy",
       "force_crit": "melee",
-      "critical": true,
-      "expected": 1.0,
-      "trials": 10,
-      "fixture": {
-        "attack_power": 20000
-      },
+      "player_attack_power": 20000,
       "cast_power": 2000,
-      "control": {
-        "auras": [
-          [
-            500706,
-            0
-          ],
-          [
-            823764,
-            1
-          ]
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
         ],
-        "casts": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 0
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
           {
-            "spell": 60235,
-            "target": "caster"
-          }
-        ],
-        "casts_wait_ms": 1000
-      },
-      "treatment": {
-        "learn": [
-          681106
-        ],
-        "auras": [
-          [
-            500706,
-            0
-          ],
-          [
-            823764,
-            1
-          ]
-        ],
-        "casts": [
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578263,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Exactly 1 forced melee crit of Netherstrike 578263 lands in control (before) and 1 in treatment (after)"
+          },
           {
-            "spell": 60235,
-            "target": "caster"
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Netherstrike 578263 adds +20 Insanity (0 -> 20) in both phases"
           }
-        ],
-        "casts_wait_ms": 1000
+        ]
       },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578263,
+        "target": "dummy"
+      },
+      "before_expected": 14000,
+      "expected": 28000,
+      "expected_ratio": 2.0,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "expected_source": "681106 zero-Insanity control: clearing 500706 to 0 stacks before each trial gives +0% crit damage bonus (ratio 1.00, G-19 band 0.98..1.02). Reference search 2026-11-25: see crit_20."
+      "observe_source": "681106 Effect[0] BasePoints 0 + DieSides 1 = +1% per Insanity stack ($s1 = 1; Spell.dbc). AscensionCultist.cpp:283 sets Insanity 500706 Effect[2] (SPELL_AURA_ADD_PCT_MODIFIER, SPELLMOD_CRIT_DAMAGE_BONUS 15, EffectSpellClassMask[6] 262144 matching Netherstrike 578263) to stacks * 1 during Refresh (500 ms tick; no separate threshold aura). Per owner ruling Q-r1b-1 (2026-11-12) and Unit::SpellCriticalDamageBonus (Unit.cpp:10673-10712), op 15 scales melee DmgClass 2 crit bonus (+100%): at 0 Insanity, crit multiplier is 2.00x vs 2.00x (single-hit ratio 1.00x -> cumulative after/before ratio 2.00 +- 0.02). At +20000 AP (Godblade 2531 weapon spread +-0.34% -> ratio spread +-0.007 << 0.02), both phases set 500706 to 0, wait 1000 ms for Refresh, read exact 500706 == 0 right before 578263 (after_setup_stacks), cast forced-crit 578263 at 25% HP dummy, and verify 1 hit/phase + 500706 == 20 (ally_arm). Reference search 2026-11-25: coa-history 681106: 0 events (passive; 578263 Netherstrike present in logs); coabuildhub spells_master_index.json 681106 matches verbatim.",
+      "phase_target_health_pct": [
+        30,
+        25
+      ]
     },
     {
       "spell": 681106,
@@ -12090,29 +12984,11 @@
           "caster"
         ],
         [
-          680603,
-          1,
-          "caster",
-          "caster"
-        ],
-        [
           823764,
           1,
           "caster",
           "caster"
         ]
-      ],
-      "before_trigger_reads": [
-        {
-          "spell": 500706,
-          "expected": 1,
-          "actor": "caster"
-        },
-        {
-          "spell": 680603,
-          "expected": 1,
-          "actor": "caster"
-        }
       ],
       "area_dummies": {
         "cone": {
@@ -12122,6 +12998,38 @@
           "source": "Spell::SelectImplicitConeTargets, Spell.cpp:1292-1293: TARGET_UNIT_CONE_ENEMY_54 uses 54 degrees (no spell_cone row for 804152/572846); Position::HasInArc tests +/-27 deg from facing; EffectRadiusIndex 13 = 10 yd"
         }
       },
+      "ally_arm": {
+        "allies": 0,
+        "control_wait": true,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 60,
+            "expected": 20,
+            "tolerance": 0,
+            "source": "Control arm holds exact 60 Insanity after 1000 ms control_wait; casting 572846 drains 40 Insanity leaving exact 20 in after"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680603
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Control arm earns 680603 (1) natively via Refresh during 1000 ms control_wait (no manual 680603 set); after 572846 drains Insanity to 20, Refresh strips 680603 to 0"
+          }
+        ]
+      },
       "metric": "spell_damage_count",
       "fields": {
         "spell": 572846,
@@ -12130,10 +13038,10 @@
       "before_expected": 0,
       "expected": 1,
       "tolerance": 0,
-      "wait_ms": 500,
+      "wait_ms": 1000,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "572846 Effect[0..1] TARGET_UNIT_CONE_ENEMY_54 (54 deg full cone, +/-27 deg from facing, Spell.cpp:1292-1293), EffectRadiusIndex 13 = 10 yd (Spell.dbc). Three dummies stand inside 10 yd at 24.3 deg (dummy, struck), 29.7 deg (area1, outside cone, unhit), and 135 deg (area2, behind caster, unhit), with positions and caster orientation read and verified. 500706 x60 and 680603 x1 set and read before trigger. Reference search 2026-11-25: see damage_ref_4x."
+      "observe_source": "572846 Effect[0..1] TARGET_UNIT_CONE_ENEMY_54 (54 deg full cone, +/-27 deg from facing, Spell.cpp:1292-1293), EffectRadiusIndex 13 = 10 yd (Spell.dbc). Three dummies stand inside 10 yd at 24.3 deg (dummy, struck == 1), 29.7 deg (area1, outside cone, must read 0), and 135 deg (area2, behind caster, must read 0), with all positions and caster orientation read and verified by area_dummies cone. No manual 680603: 1000 ms control_wait runs Refresh in control (exact 500706 == 60, 680603 == 1 read via ally_arm); casting 572846 drains 40 Insanity and strips 680603 via Refresh (exact 500706 == 20, 680603 == 0 read in after). Reference search 2026-11-25: see damage_ap_8x."
     },
     {
       "spell": 572846,
@@ -12186,7 +13094,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "AscensionCultistAbilities.cpp:88-89 calls Resource(player, Insanity, -40) when casting Entropic Slam (804152 / 572846). Starting at 80 Insanity (500706 x80 and 680603 x1 set and read before trigger), casting 572846 leaves exact 40 Insanity (draining 40, not 60 or all, tolerance 0). Reference search 2026-11-25: see damage_ref_4x."
+      "observe_source": "AscensionCultistAbilities.cpp:88-89 calls Resource(player, Insanity, -40) when casting Entropic Slam (804152 / 572846). Starting at 80 Insanity (500706 x80 and 680603 x1 set and read before trigger), casting 572846 leaves exact 40 Insanity (draining 40, not 60 or all, tolerance 0). Reference search 2026-11-25: see damage_ap_8x."
     },
     {
       "spell": 572846,
@@ -12239,7 +13147,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "At exact 60 Insanity threshold (500706 x60 and 680603 x1 set and read before trigger), casting 572846 drains exact 40 Insanity leaving 20 (tolerance 0). Reference search 2026-11-25: see damage_ref_4x."
+      "observe_source": "At exact 60 Insanity threshold (500706 x60 and 680603 x1 set and read before trigger), casting 572846 drains exact 40 Insanity leaving 20 (tolerance 0). Reference search 2026-11-25: see damage_ap_8x."
     },
     {
       "spell": 572846,
@@ -12285,7 +13193,455 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 1600,
-      "observe_source": "AscensionCultistAbilities.cpp:53-55 refuses Entropic Slam 572846 with SPELL_FAILED_NO_POWER (85) when Insanity < 60 (500706 x59 and 680603 x0 set and read before trigger). Reference search 2026-11-25: see damage_ref_4x."
+      "observe_source": "AscensionCultistAbilities.cpp:53-55 refuses Entropic Slam 572846 with SPELL_FAILED_NO_POWER (85) when Insanity < 60 (500706 x59 and 680603 x0 set and read before trigger). Reference search 2026-11-25: see damage_ap_8x."
+    },
+    {
+      "spell": 707429,
+      "name": "Overwhelming Void (Mass Nightmare ready at 121000 ms when cast at 80 Insanity)",
+      "kind": "metric_delta",
+      "variant": "at_80_ready",
+      "label_suffix": "at_80_ready",
+      "quote": "Your Mass Nightmare now triggers a 60 sec reduced cooldown when used at or above 80 Insanity.",
+      "trigger_spell": 805114,
+      "gate_spell": 707429,
+      "target": "caster",
+      "cast_power": 2000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 805114,
+          "target": "caster",
+          "delay_ms": 121000,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 805114
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "expected_gain": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "observe_source": "707429 Overwhelming Void (Spell.dbc: Effect[0] aura 107 misc 23 SPELLMOD_EFFECT3 bp -60001 + die 1 = -60000 ms on 680604 '80 Insanity' Effect[2] SPELLMOD_COOLDOWN matching Mass Nightmare 805114 RecoveryTime 180000 ms -> expected 120000 ms CD). Both phases set 500706 to 80, wait 1000 ms for Refresh, and read exact 500706 == 80, 680604 == 1, 680601 == 1 (after_setup_stacks). Re-attempt at 121000 ms fails without 707429 (count 1) and succeeds with 707429 (count 3, gain 2). Supporting evidence paired with alerting at_80_still_cd. Reference search 2026-11-25: coa-history 707429: 0 events (passive), 805114: 10 casts in 6 logs; coabuildhub spells_master_index.json 707429 matches verbatim."
+    },
+    {
+      "spell": 707429,
+      "name": "Overwhelming Void (Mass Nightmare still on CD at 119000 ms when cast at 80 Insanity)",
+      "kind": "metric_delta",
+      "variant": "at_80_still_cd",
+      "label_suffix": "at_80_still_cd",
+      "quote": "Your Mass Nightmare now triggers a 60 sec reduced cooldown when used at or above 80 Insanity.",
+      "trigger_spell": 805114,
+      "gate_spell": 707429,
+      "target": "caster",
+      "cast_power": 2000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 80
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 1
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 805114,
+          "target": "caster",
+          "delay_ms": 119000,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 805114
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "observe_source": "Lower-bound CD bracket for 707429 Overwhelming Void (expected 120000 ms CD = 180000 - 60000 ms; Spell.dbc): at 80 Insanity (exact 500706 == 80, 680604 == 1, 680601 == 1 read in both phases via after_setup_stacks), Mass Nightmare 805114 re-attempted at 119000 ms must still be on CD (count 1 -> 2, gain 1). Server defect note: both native DBC (707429 -> 680604 e2 -60000 ms) AND AscensionCultistAbilities.cpp:201-202 (Reduce 60000 ms) apply, cutting 805114 CD twice to 60 s so 119000 ms succeeds (gain 2 vs 1, alerting). Reference search 2026-11-25: see at_80_ready."
+    },
+    {
+      "spell": 707429,
+      "name": "Overwhelming Void (no CD reduction at 79 Insanity threshold)",
+      "kind": "metric_delta",
+      "variant": "at_79",
+      "label_suffix": "at_79",
+      "quote": "Your Mass Nightmare now triggers a 60 sec reduced cooldown when used at or above 80 Insanity.",
+      "trigger_spell": 805114,
+      "gate_spell": 707429,
+      "target": "caster",
+      "cast_power": 2000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          500706,
+          79,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 79
+        },
+        {
+          "spell": 680604,
+          "actor": "caster",
+          "stacks": 0
+        },
+        {
+          "spell": 680601,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 805114,
+          "target": "caster",
+          "delay_ms": 121000,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 805114
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1000,
+      "observe_source": "Boundary control for 707429 Overwhelming Void 'at or above 80 Insanity': at 79 Insanity (exact 500706 == 79, 680604 == 0, 680601 == 1 read in both phases via after_setup_stacks), Mass Nightmare 805114 remains on its 180 s CD at 121000 ms even with 707429 learned (count 1 -> 2, gain 1). Reference search 2026-11-25: see at_80_ready."
+    },
+    {
+      "spell": 572846,
+      "name": "Entropic Slam (8x +20000 AP casts: 130% normalized weapon damage plus 98 Shadow damage)",
+      "kind": "metric_delta",
+      "variant": "damage_ap_8x",
+      "label_suffix": "damage_ap_8x",
+      "quote": "Crush enemies in front of you, dealing $s2% Weapon Damage plus ${$m1+0} as Shadow damage",
+      "trigger_spell": 572846,
+      "target": "dummy",
+      "cast_in_before": false,
+      "learn": [
+        502122
+      ],
+      "cast_power": 2297,
+      "player_attack_power": 20000,
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          500706,
+          90,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 500706,
+          "actor": "caster",
+          "stacks": 90
+        },
+        {
+          "spell": 680603,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572846,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572846,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572846,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572846,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572846,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572846,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 502122,
+          "target": "dummy",
+          "delay_ms": 5500,
+          "in_before": false,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572846,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 0,
+            "expected": 30,
+            "tolerance": 0,
+            "source": "Control arm holds 0 Insanity; treatment starts at 90 Insanity (read via after_setup_stacks) and finishes at 30 after 8x 572846 (-320) and 13x 502122 (+260)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680603
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Control arm has 680603 absent (0); after_setup_stacks reads 680603 == 1 natively via Refresh at 90 Insanity before cast 1; after the 8th 572846 leaves 30 Insanity, Refresh strips 680603 back to 0"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572846,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 8,
+            "tolerance": 0,
+            "source": "Exactly 8 Entropic Slam 572846 hits land in treatment"
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572846,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 58093,
+      "after_at_least": 57953,
+      "after_at_most": 58233,
+      "wait_ms": 1000,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "572846 Entropic Slam (rank of 804152, SkillLineAbility Cultist) Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG +98 (${$m1+0} = 98), Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE 130% ($s2 = 130), Shadow school 32, DmgClass 2 (Spell.dbc). Godblade 2H Axe 2531 (90.86..127.3, normalized 3.3 s), +20000 AP (total AP 20376 -> W = 4893.7743..4930.2143), Cultist tuning 887013 (+12%), non-crit (16255 -100), no resist (823764). Tooltip per-hit mean (1.30 * W + 98) * 1.12 = 7261.6 (range [7235.1..7288.2], std 15.32); 8-hit sum mean = 58093 (std 43.33), band [57953..58233] (+-140 = +-3.23 sigma, < 0.12% false-alert when fixed; excludes 0 flat 57215, 2x flat 58971, 100% weapon 44687). Control reads 500706 == 0, 680603 == 0; treatment sets 500706=90 via after_auras, waits 1000 ms for Refresh, reads exact 500706 == 90 and 680603 == 1 (after_setup_stacks), lands 8 hits of 572846 (verified by ally_arm count == 8). Server defect note: Effect[0] (121) precedes Effect[1] (31) and AscensionCultistContracts.cpp never sets AscensionFlatAfterWeaponPercent on 804152, so SpellEffects.cpp:4732-4748 multiplies +98 by 130% (+32.93/hit -> 8-hit mean 58357, +264 = +6.09 sigma above tooltip mean, alerting deterministically). Reference search 2026-11-25: coa-history 572846: 5366 hits in 12 logs; coabuildhub spells_master_index.json 572846 matches verbatim."
     }
   ],
   "player_observations": [],
