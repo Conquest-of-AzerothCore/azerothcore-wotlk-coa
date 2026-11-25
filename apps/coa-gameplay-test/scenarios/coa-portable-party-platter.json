@@ -6,7 +6,8 @@
     "CoA item 9707200 is realm bound, so storing it adds it to the account's Vanity collection; spell 9978100 summons platter 11000400 with the desserts aura 9978101.",
     "The platter's gossip lists Slice of Cake, Blubbery Muffin, Rocks on the Rocks, Sugarfree Firewater Sorbet, Snow in a Cone and Party Peripherals; any player can pick one.",
     "Two players take treats from the same platter; the platter stays for its full lifetime and then despawns.",
-    "The client learns the platter's Spell, Item, VanityCollection and spell visual rows from the 5 s fallback login stream; every player gets the treat spells."
+    "The client learns the platter's Spell, Item, VanityCollection and spell visual rows from the 5 s fallback login stream; every player gets the treat spells.",
+    "Opening the platter sends the treat choice window as client Lua over the hot-patch channel (opcode 0x8F0), so the client needs no addon."
   ],
   "timeout_ms": 240000,
   "vanity_ownership": { "unlock_all": false },
@@ -30,7 +31,9 @@
     {"action": "assert", "label": "It carries the desserts", "actor": "host", "metric": "nearby_creature_count", "entry": 11000400, "spell": 9978101, "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "It lasts 3 minutes", "actor": "host", "metric": "owned_creature_remaining_ms", "entry": 11000400, "min": 170000, "max": 180000},
     {"action": "assert", "label": "The platter goes on its 2 hour cooldown", "actor": "host", "metric": "cooldown_ms", "spell": 9978100, "min": 7190000, "max": 7200000},
+    {"action": "client_packet", "label": "The host's client announces its hot-patch channel", "actor": "host", "opcode": 2289, "fields": [{"u32": 1}, {"u8": 0}]},
     {"action": "gossip_hello", "label": "The host looks at the platter", "actor": "host", "entry": 11000400},
+    {"action": "assert", "label": "The server sends the choice window with the gossip, no client addon needed", "actor": "host", "metric": "server_packet_contains", "opcode": 2288, "text": "CoAPartyPlatterFrame", "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "Six treats are offered", "actor": "host", "metric": "gossip_options", "equals": 6, "within_ms": 2000},
     {"action": "assert", "label": "Option 1", "actor": "host", "metric": "gossip_option_text", "index": 0, "text": "Slice of Cake", "equals": 1},
     {"action": "assert", "label": "Option 2", "actor": "host", "metric": "gossip_option_text", "index": 1, "text": "Blubbery Muffin", "equals": 1},
