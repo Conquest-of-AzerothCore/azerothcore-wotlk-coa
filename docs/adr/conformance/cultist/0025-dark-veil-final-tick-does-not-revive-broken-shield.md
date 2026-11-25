@@ -40,7 +40,7 @@ Before measurement (`cu-tb2/prove-520345-v2`, runs `20261125-074205` and `202611
   effect->GetTotalTicks())`) inside `aura_ascension_cultist_lifecycle::Tick`
   (`src/server/coa/AscensionCultistAuras.cpp`), cast `520346` only if both `allyShield` (`EFFECT_0`) and `selfShield`
   (`EFFECT_1`) are still active with `GetAmount() > 0`. Chosen: preserves all 5 ticks and 5-stack capping when the
-  shield holds (`520345 stacks`, `period_early/late`, `teleport_holds`) and under `520682` Endless Devotion
+  shield holds (`520345 stacks`, `period_early/late`, `teleport_holds`) and under `520682` Tales of Woe
   (`2500 ms / 500 ms = 5` ticks), while preventing tick #5 from reviving a broken shield before `Remove()` checks
   whether the shield held.
 - Suppress tick #5 unconditionally. Rejected: caps Dark Veil at 4 stacks on a single unbroken channel, breaking
@@ -57,7 +57,7 @@ with `GetAmount() > 0`. No shared engine, DBC, SQL, or client text changes.
 - When Dark Veil's shields hold through the channel, tick #5 raises `520346` to 5 stacks and expiry teleports the
   Cultist to the ally. When either shield is broken before expiry, tick #5 does not revive `520346` and the Cultist
   does not teleport.
-- Other spells reached: `520682` Endless Devotion (`-50%` period/duration of `520345`); no other spell is reached.
+- Other spells reached: `520682` Tales of Woe (`-50%` period/duration of `520345`); no other spell is reached.
 - Regressions (`prove-D`, runs `20261125-091043` and `20261125-091121`, build `d6d2e5b8395a`, `18/18` ok, `0` flips):
   - `520345 behaviour_metric_delta teleport_holds`: `ok` / `ok` (`15.0` / `15.0` yd, `distance_2d 15 -> 0`, `520346`
     at `5` stacks).

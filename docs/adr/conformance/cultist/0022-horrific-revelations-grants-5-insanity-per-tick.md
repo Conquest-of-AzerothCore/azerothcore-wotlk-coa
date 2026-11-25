@@ -39,11 +39,13 @@ Live evidence note (`ev1.md:181-203`): a single-player archived combat-log hint 
 
 - Clear `Effects[0].TargetB` on `704476` in `ApplyContracts` (`src/server/coa/AscensionCultistContracts.cpp`). Chosen:
   `Effects[1]` (`-15%` damage taken) and `Effects[2]` (`+15%` damage done) remain on both ally and caster, while
-  `Effects[0]` ticks once on the tethered target (and still ticks once on self if self-cast), granting `5` Insanity
-  and casting `704473` on the target only.
+  `Effects[0]` is placed only on the tethered target, granting `5` Insanity per tick and casting `704473` on the target
+  only, and stopping cleanly if the target dies or has `704476` dispelled.
 - Guard `GetTarget() != player` inside `aura_ascension_cultist_lifecycle::Tick` (`AscensionCultistAuras.cpp`).
-  Rejected: if a Cultist casts `704476` on themselves (`TARGET_UNIT_TARGET_ALLY` permits self-cast), guarding
-  `GetTarget() != player` would suppress both `704473` and Insanity completely.
+  Rejected: although `704476` carries `AttributesEx = SPELL_ATTR1_EXCLUDE_CASTER` (`SpellInfo.cpp:2000` rejects manual
+  self-cast with `SPELL_FAILED_BAD_TARGETS`), keeping `Effects[0]` on the caster leaves a redundant periodic aura
+  running on the caster even after the tethered ally dies or is dispelled; clearing `Effects[0].TargetB` eliminates
+  the duplicate periodic aura at the contract layer.
 - Keep `+10` Insanity per tick and edit the tooltip. Rejected by owner ruling `Q-cu-18`.
 
 ## Decision
