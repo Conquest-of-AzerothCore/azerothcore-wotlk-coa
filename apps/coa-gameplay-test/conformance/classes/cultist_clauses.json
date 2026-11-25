@@ -393,7 +393,8 @@
           "300300 spell_duration 560943 #2"
         ]
       }
-    ]
+    ],
+    "reason": "Server fix (owner ruling O-12 Q-cu-1, Cultist ADR 0010): AscensionCultist::ApplyContracts sets 560943 Effect[0].MiscValue = SPELL_SCHOOL_MASK_ALL (127). Proved in gameplay runs 20261125-011318 and 20261125-011505 (build 5ab2e4cf9275, scratch/cultist-525049-mind-rot-hit.json): spell_hit_bonus_taken reads 0 without 560943 and +3 across Shadow 502182, Fire 2136, and Nature 5176 when 300300 applies 560943. Claim 0 stays at data evidence in cultist.json until a tool task registers spell_hit_bonus_taken in coverage.METRIC_EVIDENCE (test_coverage.py:975)."
   },
   {
     "spell": 300300,
@@ -1487,7 +1488,8 @@
           "525049 spell_duration 560943 #1"
         ]
       }
-    ]
+    ],
+    "reason": "Server fix (owner ruling O-12 Q-cu-1, Cultist ADR 0010): AscensionCultist::ApplyContracts sets 560943 Effect[0].MiscValue = SPELL_SCHOOL_MASK_ALL (127), fixing the 0% alert measured in 20261125-002625 / 20261125-002657. Proved in gameplay runs 20261125-011318 and 20261125-011505 (build 5ab2e4cf9275, scratch/cultist-525049-mind-rot-hit.json): spell_hit_bonus_taken reads 0 before learning 525049, +3 across all 7 spell school masks (Shadow 502182, Fire 2136, Nature 5176, Holy 585, Frost 116, Arcane 5143, Physical 500720) with 560943 applied via 525049 + 560109, 0 on unafflicted caster, and 0 after removal. Claim 0 stays at data evidence in cultist.json until a tool task registers spell_hit_bonus_taken in coverage.METRIC_EVIDENCE (test_coverage.py:975)."
   },
   {
     "spell": 525049,
