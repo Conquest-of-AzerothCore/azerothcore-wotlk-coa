@@ -1950,7 +1950,8 @@ void Player::AdjustQuestReqItemCount(Quest const* quest, QuestStatusData& questS
 
 uint16 Player::FindQuestSlot(uint32 quest_id) const
 {
-    return m_questLogSlots.Find(quest_id, quest_id ? MAX_QUEST_LOG_SIZE : GetQuestLogCapacity());
+    return m_questLogSlots.Find(quest_id, quest_id ? MAX_QUEST_LOG_SIZE
+        : m_questLogExtended ? uint16(QuestLogExtendedSize()) : GetQuestLogCapacity());
 }
 
 uint16 Player::GetQuestLogCapacity() const
@@ -2122,14 +2123,12 @@ bool Player::CanClientSwapQuestSlots(uint16 slot1, uint16 slot2) const
     if (slot1 == slot2 || slot1 >= clientSlots || slot2 >= clientSlots)
         return false;
 
-    // A quest may not move into an empty slot past Quests.LogSize (the emptied slot would let the log grow
-    // past it), and a timed quest may not leave the native log.
     auto const canMove = [this](uint16 from, uint16 to)
     {
         uint32 const questId = m_questLogSlots[from].QuestId;
         if (!questId)
             return true;
-        if (!m_questLogSlots[to].QuestId && to >= GetQuestLogCapacity())
+        if (!m_questLogSlots[to].QuestId && to >= QuestLogExtendedSize())
             return false;
         return to < NATIVE_QUEST_LOG_SIZE || !IsQuestPinnedToNativeLog(questId);
     };

@@ -1477,6 +1477,52 @@ void ObserveUnitValues(Actor& actor, WorldPacket const& packet)
     }
 }
 
+double QuestPoiCount(Actor const& actor, uint32 questId)
+{
+    auto const found = actor.extensionPayloads.find(SMSG_QUEST_POI_QUERY_RESPONSE);
+    if (found == actor.extensionPayloads.end() || found->second.empty())
+        return -1.0;
+
+    std::string const& payload = found->second.back();
+    std::size_t offset = 0;
+    auto const read = [&payload, &offset](uint32& value)
+    {
+        if (payload.size() - offset < sizeof(uint32))
+            return false;
+        value = 0;
+        for (std::size_t byte = 0; byte < sizeof(uint32); ++byte)
+            value |= uint32(uint8(payload[offset + byte])) << (byte * 8);
+        offset += sizeof(uint32);
+        return true;
+    };
+
+    constexpr uint32 PoiHeaderFields = 7;
+    uint32 quests = 0;
+    if (!read(quests))
+        return -1.0;
+    for (uint32 quest = 0; quest < quests; ++quest)
+    {
+        uint32 id = 0, pois = 0;
+        if (!read(id) || !read(pois))
+            return -1.0;
+        if (id == questId)
+            return double(pois);
+        for (uint32 poi = 0; poi < pois; ++poi)
+        {
+            uint32 field = 0, points = 0;
+            for (uint32 header = 0; header < PoiHeaderFields; ++header)
+                if (!read(field))
+                    return -1.0;
+            if (!read(points))
+                return -1.0;
+            for (uint32 coordinate = 0; coordinate < points * 2; ++coordinate)
+                if (!read(field))
+                    return -1.0;
+        }
+    }
+    return -1.0;
+}
+
 void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
 {
     if (packet.size() >= sizeof(uint32))
@@ -7027,6 +7073,8 @@ private:
             }
             return -1.0;
         }
+        if (metric == "quest_poi_count")
+            return QuestPoiCount(_actors.at(step.get<std::string>("actor")), step.get<uint32>("quest"));
         if (metric == "quest_log_has_room")
             return double(player->SatisfyQuestLog(false));
         if (metric == "quest_objective_count")

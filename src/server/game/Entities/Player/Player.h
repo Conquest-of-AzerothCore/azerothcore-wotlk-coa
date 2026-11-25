@@ -2913,7 +2913,7 @@ protected:
     bool m_questLogExtended = false;
     uint8 m_questLogExtendedClientSlots = MAX_QUEST_LOG_SIZE;
     uint64 m_questLogExtendedDirty = 0;
-    uint16 m_questLogExtendedCapacity = 0;   // Quests.LogSize at the last snapshot; a reload that changes it resends one
+    uint16 m_questLogExtendedCapacity = 0;
     void MirrorQuestSlot(uint16 slot);
     [[nodiscard]] uint8 QuestLogExtendedSize() const;
     uint16 MoveQuestToNativeLog(uint16 slot);

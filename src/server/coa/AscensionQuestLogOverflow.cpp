@@ -395,7 +395,6 @@ private:
         uint16 const slot = questId ? player->FindQuestSlot(questId) : MAX_QUEST_LOG_SIZE;
         bool const overflow = slot >= NATIVE_QUEST_LOG_SIZE && slot < MAX_QUEST_LOG_SIZE;
 
-        // A 0x8F6 client shows slots 25-63 itself, so it gets no Extra Quests window text.
         bool const window = !player->IsQuestLogExtended();
         if (action == "PROMOTE" && overflow && !player->PromoteQuestToNativeLog(questId) && window)
             SendAddon(player, "ERROR Your quest log has no quest that can make room.");

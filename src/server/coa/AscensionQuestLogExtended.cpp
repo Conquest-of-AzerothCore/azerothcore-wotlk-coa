@@ -74,6 +74,8 @@ namespace
         void OnPlayerLogin(Player* player) override
         {
             player->SetQuestLogExtended(false);
+            if (WorldSession* session = player->GetSession())
+                ForgetPendingHello(session->GetAccountId());
         }
 
         void OnPlayerLogout(Player* player) override

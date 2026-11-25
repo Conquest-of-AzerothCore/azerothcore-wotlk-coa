@@ -3,7 +3,7 @@
   "name": "Quest log: a client that announces 0x8F6 abandons slot 40 and queries POIs for 30 quests",
   "contract": [
     "A client that sent HELLO (0x8F6) addresses quest log slots up to 63: CMSG_QUESTLOG_REMOVE_QUEST (404) for slot 40 abandons the 41st quest (475).",
-    "CMSG_QUEST_POI_QUERY (483) may name more than 25 quests for such a client: a query for 30 quests is answered with SMSG_QUEST_POI_QUERY_RESPONSE (484)."
+    "CMSG_QUEST_POI_QUERY (483) may name more than 25 quests for such a client: a query for 30 quests is answered with SMSG_QUEST_POI_QUERY_RESPONSE (484), which carries the POIs of quests in extended slots, such as 318 (slot 25, one POI), 319 (slot 26, eleven POIs) and 421 (slot 29, four POIs)."
   ],
   "timeout_ms": 120000,
   "quest_log_size": 64,
@@ -478,6 +478,30 @@
       "opcode": 484,
       "equals": 1,
       "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The response carries quest 318's POI (slot 25)",
+      "actor": "hero",
+      "metric": "quest_poi_count",
+      "quest": 318,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The response carries quest 319's eleven POIs (slot 26)",
+      "actor": "hero",
+      "metric": "quest_poi_count",
+      "quest": 319,
+      "equals": 11
+    },
+    {
+      "action": "assert",
+      "label": "The response carries quest 421's four POIs (slot 29)",
+      "actor": "hero",
+      "metric": "quest_poi_count",
+      "quest": 421,
+      "equals": 4
     }
   ]
 }
