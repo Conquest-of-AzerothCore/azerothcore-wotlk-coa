@@ -283,7 +283,7 @@ def outgoing_avoidance_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
                            explanation=f'{arm} delivered {d["swings"]} swings, below min_swings {min_swings}')
         deltas[arm] = d
     ctrl, treat = deltas[CONTROL], deltas[TREATMENT]
-    detail = {'control': ctrl, 'treatment': treat, 'min_swings': min_swings}
+    detail = {'metric': METRIC, 'control': ctrl, 'treatment': treat, 'min_swings': min_swings}
     ctrl_missing = [name for name in ('misses', 'dodges', 'parries') if ctrl[name] < 1]
     if ctrl_missing:
         return replace(base, status='alert', measured=float(ctrl[ctrl_missing[0]]), expected=1.0, detail=detail,

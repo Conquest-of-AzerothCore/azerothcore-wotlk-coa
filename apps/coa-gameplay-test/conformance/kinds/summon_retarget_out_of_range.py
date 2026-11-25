@@ -292,6 +292,7 @@ def summon_retarget_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
     ctrl_sec = values[ctrl_end['secondary_aura']]
     treat_sec = values[treat_end['secondary_aura']]
     detail = {
+        'metric': METRIC,
         'control_primary_dist_yd': values[ctrl_end['primary_dist']],
         'control_secondary_aura': ctrl_sec,
         'treatment_mid_primary_dist_yd': values[treat_mid['primary_dist']],
