@@ -3035,18 +3035,15 @@
       },
       {
         "claim": "and they now generates a large amount of threat.",
-        "labels": []
+        "labels": [
+          "680600 behaviour_metric_delta hammer_threat",
+          "680600 behaviour_metric_delta hammer_threat_control",
+          "680600 behaviour_metric_delta slam_threat",
+          "680600 behaviour_metric_delta slam_threat_control"
+        ]
       }
     ],
-    "tool_gap": {
-      "reason": "Two blockers on \"and they now generates a large amount of threat.\": (1) Owner question: Eldritch Strength 680600 Effect[1] adds +15% SPELLMOD_THREAT (bp=14+1) to Hammer of Twilight 806830 and Entropic Slam 572846; the wording is not the Templar \"High Threat\" x2 phrase (ADR 0296) and +15% is far below x2, so owner confirmation is needed on whether +15% satisfies \"generates a large amount of threat\"; (2) Tool gap: standalone kind threat_above_control (kinds/threat_above_control.py) does not support gate_spell (passive learn contrast) or Insanity phase_auras (500706 + 680602/680603), so a passive threat modifier on Insanity-gated spells cannot be run under threat_above_control without extending threat_above_control.",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "reason": "Proved after Cultist ADR 0030 (owner ruling O-15 Q-cu-34, 2026-11-25: threat x2, keeping existing Bulwark Tab 88 talent gate CharacterAdvancement 29273): Effect[1] SPELLMOD_THREAT BasePoints set to 99 (+100%). Counted pair 20261125-092328 / 20261125-092359 (build 3744367126f6, 0 flips): hammer_threat 2.00844 / 2.00849 vs control 1.01057 / 1.01058; slam_threat 2.01105 / 2.01103 vs control 1.01384 / 1.01379."
   },
   {
     "spell": 680607,

@@ -45947,6 +45947,326 @@
       "expire_ms": 7000,
       "void_on_cast_failure": true,
       "observe_source": "Regression for Dark Matter 806382 AoE heal count with 3 inside + 1 outside (Cultist ADR 0013): Spell.dbc 807219 is TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ALLY (30.0 yd). On the 1000 ms tick of 807124 (read at 1500 ms), ally (10 yd), ally2 (20 yd), and ally3 (28.5 yd) each receive exactly 1 heal (0 before learning 806382, 1 after), while outer ally4 (31.5 yd) receives 0."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (Hammer of Twilight threat multiplied by 2)",
+      "kind": "metric_delta",
+      "variant": "hammer_threat",
+      "label_suffix": "hammer_threat",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 680600,
+      "trigger_spell": 806830,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806830,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Hammer of Twilight 806830 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-15 Q-cu-34 (Cultist ADR 0030): Eldritch Strength 680600 Effect[1] SPELLMOD_THREAT BasePoints set to 99 (+DieSides 1 = +100% -> 2.0x threat) in AscensionCultist::ApplyContracts for Hammer of Twilight (805116 chain) and Entropic Slam (804152 chain), keeping its existing Bulwark Tab 88 talent gate (CharacterAdvancement 29273). At +20000 AP (Dreadnought set 2534 + 2129, non-crit 16255=-100, no resist 823764, 500706=40 + 680602=1), a ~7090 damage hit plus 60 unscaled initial threat (SpellLevel 60) yields threat_per_damage = (2*D + 60)/D ~ 2.0085 (expected 2.01 +- 0.02). Paired with hammer_threat_control (without 680600: ~1.01)."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (control: Hammer of Twilight threat without talent is 1x)",
+      "kind": "metric_delta",
+      "variant": "hammer_threat_control",
+      "label_suffix": "hammer_threat_control",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 806830,
+      "trigger_spell": 806830,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          40,
+          "caster",
+          "caster"
+        ],
+        [
+          680602,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806830,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Hammer of Twilight 806830 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Unlearned control arm for 680600 hammer_threat (Cultist ADR 0030): identical Hammer of Twilight 806830 cast at +20000 AP without Eldritch Strength 680600 learned (gate_spell 806830). A ~5675 hit plus 60 flat initial threat yields threat_per_damage = (D + 60)/D ~ 1.0106 (expected 1.01 +- 0.02), proving 2.0x threat comes from 680600."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (Entropic Slam threat multiplied by 2)",
+      "kind": "metric_delta",
+      "variant": "slam_threat",
+      "label_suffix": "slam_threat",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 680600,
+      "trigger_spell": 572846,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680603,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572846,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Entropic Slam 572846 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Owner ruling O-15 Q-cu-34 (Cultist ADR 0030): Eldritch Strength 680600 Effect[1] SPELLMOD_THREAT BasePoints set to 99 (+DieSides 1 = +100% -> 2.0x threat) in AscensionCultist::ApplyContracts for Entropic Slam (804152 chain). At +20000 AP (Dreadnought set 2534 + 2129, non-crit 16255=-100, no resist 823764, 500706=60 + 680603=1), a ~4705 damage hit plus 52 unscaled initial threat (SpellLevel 52) yields threat_per_damage = (2*D + 52)/D ~ 2.0111 (expected 2.01 +- 0.02). Paired with slam_threat_control (without 680600: ~1.01)."
+    },
+    {
+      "spell": 680600,
+      "name": "Eldritch Strength (control: Entropic Slam threat without talent is 1x)",
+      "kind": "metric_delta",
+      "variant": "slam_threat_control",
+      "label_suffix": "slam_threat_control",
+      "quote": "and they now generates a large amount of threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 572846,
+      "trigger_spell": 572846,
+      "target": "dummy",
+      "dummy_distance": 4,
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680603,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.01,
+      "tolerance": 0.02,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 572846,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Entropic Slam 572846 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "Unlearned control arm for 680600 slam_threat (Cultist ADR 0030): identical Entropic Slam 572846 cast at +20000 AP without Eldritch Strength 680600 learned (gate_spell 572846). A ~3765 hit plus 52 flat initial threat yields threat_per_damage = (D + 52)/D ~ 1.0138 (expected 1.01 +- 0.02), proving 2.0x threat comes from 680600."
     }
   ],
   "player_observations": [],

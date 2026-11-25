@@ -266,6 +266,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].RealPointsPerLevel = 0.0f;
     if (id == 567525)
         info->DurationEntry = sSpellDurationStore.LookupEntry(18);
+    if (id == 680600)
+        info->Effects[1].BasePoints = 99;
     info->_InitializeExplicitTargetMask();
 }
 }
