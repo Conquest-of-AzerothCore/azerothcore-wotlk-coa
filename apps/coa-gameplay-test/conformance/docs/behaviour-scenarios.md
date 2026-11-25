@@ -2303,6 +2303,9 @@ every module imports, names its kind and has a test file); its page is `docs/kin
   ends (ADR 0543, ADR 0546, ADR 0570)
 - [`pick_effect`](kinds/pick_effect.md): each aura of a random pick, read for its stated change in the trials of a
   real cast that left it and for no change in the others (ADR 1163, provisional)
+- [`portal_single_cast`](kinds/portal_single_cast.md): per-summon exact single direct cast from an allowed set and
+  post-cast despawn strictly before summon lifetime, with direct/channeled despawn branching and optional rolled feed
+  (ADR 1296, provisional)
 - [`radius_edge`](kinds/radius_edge.md): an area radius bracketed by dummies 0.5 yd inside and beyond its edge (ADR
   0592)
 - [`shot_ramp`](kinds/shot_ramp.md): each shot of a chained channel against its first, by the stacks the earlier

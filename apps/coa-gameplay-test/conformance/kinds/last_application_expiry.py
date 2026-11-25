@@ -41,6 +41,7 @@ class LastApplicationSpec:
     forced_roll: int | None = None
     feed_every_ms: int | None = None
     feed_stop_aura: int | None = None
+    feed_stop_target: str | None = None
     force_crit: str | None = None
     quote_spell: int | None = None
     trigger_target: str = TARGET
@@ -84,9 +85,10 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
         if spec.repeat is not None or spec.forced_roll is not None or spec.no_refresh:
             raise ValueError(f'{spec.spell} last_application_expiry feeds the trigger instead of repeat, forced_roll '
                              f'and no_refresh')
-        if spec.feed_stop_aura is None and not spec.caster:
-            raise ValueError(f'{spec.spell} last_application_expiry feed stops on an aura of the caster: name '
-                             f'stop_aura when the judged aura is on the dummy')
+        stop_actor = spec.feed_stop_target or CASTER
+        if spec.feed_stop_aura is None and stop_actor != AURA_HOLDERS[spec.caster]:
+            raise ValueError(f'{spec.spell} last_application_expiry feed stops on an aura of the {stop_actor}: name '
+                             f'stop_aura when the judged aura is on the {AURA_HOLDERS[spec.caster]}')
         if spec.feed_every_ms < GCD_WAIT_MS:
             raise ValueError(f'{spec.spell} last_application_expiry feed casts at least {GCD_WAIT_MS} ms apart')
     if spec.repeat is not None and spec.repeat[0] * spec.repeat[1] >= spec.expected_ms:
@@ -99,15 +101,24 @@ def last_application_spec(entry: dict) -> LastApplicationSpec:
     return spec
 
 
-def feed_of(entry: dict) -> tuple[int | None, int | None]:
+def feed_of(entry: dict) -> tuple[int | None, int | None, str | None]:
     raw = entry.get('feed')
     if raw is None:
-        return None, None
-    if not isinstance(raw, dict) or not {'every_ms'} <= set(raw) <= {'every_ms', 'stop_aura'} or not all(
-            isinstance(value, int) and not isinstance(value, bool) and value > 0 for value in raw.values()):
-        raise ValueError(f'last_application_expiry feed is {{"every_ms": ms, "stop_aura": spell}} (stop_aura '
-                         f'optional), not {raw!r}')
-    return raw['every_ms'], raw.get('stop_aura')
+        return None, None, None
+    if not isinstance(raw, dict) or not {'every_ms'} <= set(raw) <= {'every_ms', 'stop_aura', 'stop_target'}:
+        raise ValueError(f'last_application_expiry feed is {{"every_ms": ms, "stop_aura": spell, '
+                         f'"stop_target": "caster"|"dummy"}} (stop_aura and stop_target optional), not {raw!r}')
+    every_ms = raw['every_ms']
+    stop_aura = raw.get('stop_aura')
+    stop_target = raw.get('stop_target')
+    if not isinstance(every_ms, int) or isinstance(every_ms, bool) or every_ms <= 0:
+        raise ValueError(f'last_application_expiry feed every_ms must be a positive int, not {every_ms!r}')
+    if stop_aura is not None and (not isinstance(stop_aura, int) or isinstance(stop_aura, bool) or stop_aura <= 0):
+        raise ValueError(f'last_application_expiry feed stop_aura must be a positive int, not {stop_aura!r}')
+    if stop_target is not None and stop_target not in (CASTER, TARGET):
+        raise ValueError(f'last_application_expiry feed stop_target must be {CASTER!r} or {TARGET!r}, '
+                         f'not {stop_target!r}')
+    return every_ms, stop_aura, stop_target
 
 
 def feed_casts(records: Records, spec: LastApplicationSpec) -> int:
@@ -178,11 +189,15 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
             stop = last_application_label(spec, f'{name} stop')
             remaining = last_application_label(spec, f'{name} remaining')
             feed_reads[name] = {'stop': stop, 'remaining': remaining}
-            steps += [{'action': 'cast_until_aura', 'label': last_application_label(spec, f'{name} feed'),
-                       'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET, 'aura': stop_aura,
-                       'every_ms': spec.feed_every_ms, 'max_casts': max_casts, 'cast_power': power,
-                       'power': facts.power_type, 'reset_cooldown': True},
-                      measurement(stop, CASTER, 'aura', spell=stop_aura),
+            stop_actor = spec.feed_stop_target or CASTER
+            loop = {'action': 'cast_until_aura', 'label': last_application_label(spec, f'{name} feed'),
+                    'actor': CASTER, 'spell': spec.trigger_spell, 'target': TARGET, 'aura': stop_aura,
+                    'every_ms': spec.feed_every_ms, 'max_casts': max_casts, 'cast_power': power,
+                    'power': facts.power_type, 'reset_cooldown': True}
+            if spec.feed_stop_target is not None:
+                loop['stop_target'] = spec.feed_stop_target
+            steps += [loop,
+                      measurement(stop, stop_actor, 'aura', spell=stop_aura),
                       measurement(remaining, holder, 'aura_duration_ms', spell=spec.aura)]
         else:
             steps.append(cast)
@@ -203,11 +218,24 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
         reads[name] = rows
         return steps
 
-    cleared = [{'action': 'cancel_aura', 'actor': CASTER, 'spell': aura}
-               for aura in dict.fromkeys((stop_aura, spec.aura)) if feeding and (aura == stop_aura or spec.caster)]
+    pre_learn_clear = ([{'action': 'set_aura', 'actor': CASTER, 'spell': spec.trigger_spell, 'stacks': 0,
+                         'target': TARGET, 'caster': CASTER}]
+                       if spec.feed_stop_target == TARGET and feeding and spec.trigger_target == TARGET else [])
+    if spec.feed_stop_target == TARGET and feeding:
+        cleared = [{'action': 'set_aura', 'actor': CASTER, 'spell': stop_aura, 'stacks': 0,
+                    'target': TARGET, 'caster': CASTER}]
+        if spec.caster:
+            cleared.append({'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.aura})
+        elif spec.aura != stop_aura:
+            cleared.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.aura, 'stacks': 0,
+                            'target': TARGET, 'caster': CASTER})
+    else:
+        cleared = [{'action': 'cancel_aura', 'actor': CASTER, 'spell': aura}
+                   for aura in dict.fromkeys((stop_aura, spec.aura)) if feeding and (aura == stop_aura or spec.caster)]
     steps = (base_steps(class_file)
              + ([{'action': 'learn', 'actor': CASTER, 'spell': spec.trigger_spell}] if feeding else [])
              + arm(ARMS[0], spec.control_window_ms)
+             + pre_learn_clear
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell}
                 for spell in dict.fromkeys((spec.gate_spell, spec.trigger_spell))]
              + cleared
@@ -235,23 +263,24 @@ def last_application_scenario(class_file: dict, spec: LastApplicationSpec) -> tu
     if spec.caster:
         scenario['contract'] += ' The aura is read on the caster, not the dummy.'
     if feeding:
+        stop_holder = spec.feed_stop_target or CASTER
         scenario['contract'] = scenario['contract'].replace(
             f'cast at the dummy before {spec.gate_spell} is learned (control: refused, no {spec.aura}) and after it',
             f'known in both arms; {spec.gate_spell} is learned after the control arm (control: no {spec.aura})')
         scenario['contract'] += (
             f' The cast_until_aura step casts it every {spec.feed_every_ms} ms (power and cooldown reset before each '
-            f'cast), at most {max_casts} casts per arm, until {stop_aura} is on the caster: one roll per cast at the '
-            f'ProcChance of {spec.gate_spell} leaves at most {FEED_RESIDUAL:.2%} of a run without the grant after '
-            f'{max_casts} casts. Before the measured arm {stop_aura} is cancelled on the caster, the aura and its '
-            f'application count are read, and nothing is cast but the loop, which stops at the first grant, so no '
-            f'earlier grant is on. A loop that reaches its cap leaves the arm unmeasured. The grant is at most '
-            f'{FEED_STAMP_MS} ms before the first poll after the loop, the remaining duration is read right after '
-            f'the stop, and the expected duration is the DBC one. An encounter timeline opened before the measured '
-            f'feed (after a game time read) stamps every apply of {spec.aura} on the holder in the game time base: '
-            f'the aura\'s age at the first read after the loop is at most that read minus the start read and the '
-            f'first apply stamp; above {FEED_STAMP_MS} ms, without a stamp, or with any count of stamped applies '
-            f'but one (a refresh or a second apply leaves the last application unstamped), the arm is unmeasured. '
-            f'The timeline is process global, so the scenario runs exclusive in a batch.')
+            f'cast), at most {max_casts} casts per arm, until {stop_aura} is on the {stop_holder}: one roll per cast '
+            f'at the ProcChance of {spec.gate_spell} leaves at most {FEED_RESIDUAL:.2%} of a run without the grant '
+            f'after {max_casts} casts. Before the measured arm {stop_aura} is cancelled on the {stop_holder}, the '
+            f'aura and its application count are read, and nothing is cast but the loop, which stops at the first '
+            f'grant, so no earlier grant is on. A loop that reaches its cap leaves the arm unmeasured. The grant is '
+            f'at most {FEED_STAMP_MS} ms before the first poll after the loop, the remaining duration is read right '
+            f'after the stop, and the expected duration is the DBC one. An encounter timeline opened before the '
+            f'measured feed (after a game time read) stamps every apply of {spec.aura} on the holder in the game '
+            f'time base: the aura\'s age at the first read after the loop is at most that read minus the start read '
+            f'and the first apply stamp; above {FEED_STAMP_MS} ms, without a stamp, or with any count of stamped '
+            f'applies but one (a refresh or a second apply leaves the last application unstamped), the arm is '
+            f'unmeasured. The timeline is process global, so the scenario runs exclusive in a batch.')
     if spec.same_stamp_applies:
         scenario['contract'] += (
             f' Two or more stamped applies are accepted only when the run\'s recorded timeline holds exactly that '

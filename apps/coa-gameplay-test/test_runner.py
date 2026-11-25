@@ -244,12 +244,45 @@ class RunnerTests(unittest.TestCase):
                 'aura': 807299, 'every_ms': 4300, 'max_casts': 10, 'cast_power': 2272, 'reset_cooldown': True}
         self.assert_step_validates(step)
         self.assert_step_validates({**step, 'power': 0})
+        self.assert_step_validates({**step, 'stop_target': 'target'})
+        self.assert_step_validates({**step, 'stop_target': 'caster'})
         for change in ({'max_casts': 0}, {'max_casts': 201}, {'every_ms': 0}, {'every_ms': 9001}, {'aura': 0},
-                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100}):
+                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100},
+                       {'stop_target': 'ghost'}, {'stop_target': 1}):
             self.assert_step_rejected({**step, **change})
         self.assert_step_rejected({key: value for key, value in step.items() if key != 'cast_power'} | {'power': 0})
         for field in ('spell', 'aura', 'every_ms', 'max_casts'):
             self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def test_cast_until_owned_creature_action_fields(self):
+        step = {'action': 'cast_until_owned_creature', 'actor': 'caster', 'spell': 500110, 'target': 'target',
+                'entry': 533030, 'every_ms': 1700, 'max_casts': 10, 'cast_power': 2000, 'reset_cooldown': True}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'power': 0})
+        for change in ({'max_casts': 0}, {'max_casts': 201}, {'every_ms': 0}, {'every_ms': 9001}, {'entry': 0},
+                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'cast_power'} | {'power': 0})
+        for field in ('spell', 'entry', 'every_ms', 'max_casts'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def test_owned_creature_total_cast_count_metric_fields(self):
+        step = {'action': 'snapshot', 'actor': 'caster', 'metric': 'owned_creature_total_cast_count',
+                'entry': 533030, 'save_as': 'total'}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'triggered': False})
+        self.assert_step_validates({**step, 'cumulative': True})
+        self.assert_step_validates({**step, 'spell': 500110, 'triggered': False, 'cumulative': True})
+        for change in ({'actor': 'target'}, {'entry': 0}, {'spell': 0}, {'triggered': 0}, {'triggered': 'false'},
+                       {'cumulative': 1}, {'cumulative': 'true'}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster',
+                                   'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
+                                   'triggered': False, 'save_as': 'bad'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster',
+                                   'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
+                                   'cumulative': True, 'save_as': 'bad'})
 
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}

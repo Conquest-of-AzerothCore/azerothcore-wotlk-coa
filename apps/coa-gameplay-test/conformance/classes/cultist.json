@@ -44170,6 +44170,177 @@
         "wait_ms": 1000
       },
       "observe_source": "Dreadful 680579 row 246 ('Increases your critical strike rating based on your parry and dodge rating.'): dodge-rating partner to crit_parry_arms (D-38, ADR 1295). Passive stat_arms tests 3 measured dodge rating values (0, +24 via 13670, +48 via 13672) before and after real learn of 680579 plus an unrelated-stat control (+100 Haste Rating via 10033), judging strict monotonicity and unrelated-stat invariance without asserting any coefficient."
+    },
+    {
+      "spell": 706911,
+      "name": "Depths of Madness (each void portal casts once from the three spells and disappears)",
+      "kind": "portal_single_cast",
+      "variant": "portal_single_cast",
+      "label_suffix": "portal_single_cast",
+      "quote": "before disappearing",
+      "gate_spell": 706911,
+      "trigger_spell": 500110,
+      "learn": [
+        500110,
+        800416,
+        805572
+      ],
+      "entry": 533030,
+      "allowed_spells": [
+        500110,
+        800416,
+        805572
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "cast_power": 2000,
+      "cast_read_ms": 4000,
+      "direct_despawn_ms": 5000,
+      "direct_despawn_check_ms": 6200,
+      "lifetime_ms": 12000,
+      "portals": 3,
+      "parts": 4,
+      "feed": {
+        "every_ms": 1700
+      },
+      "observe_source": "Depths of Madness 706911 (15% ProcChance, AscensionCultistEvents.cpp:98,230-232) summons Void Portal 533030 (12000 ms lifetime); AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all three AttributesEx & 0x44 == 0, non-channeled) and schedules DespawnOrUnsummon(5000ms). Feed cast_until_owned_creature (every_ms 1700, 63 casts/portal cap, pair cap-hit risk 0.086% <= 0.1%) isolates 3 portals/part x 4 parts = 12 portals/run (24/pair); each is read alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime) with post-despawn cumulative direct-cast delta == 1 across its full lifetime. Control arm runs unlearned feed and reads 0 spawns (ADR 1296)."
+    },
+    {
+      "spell": 301068,
+      "name": "Sunderer of Realities (each void portal casts once from the three spells and disappears)",
+      "kind": "portal_single_cast",
+      "variant": "portal_single_cast",
+      "label_suffix": "portal_single_cast",
+      "quote": "before disappearing.",
+      "quote_spell": 301988,
+      "gate_spell": 301068,
+      "trigger_spell": 504904,
+      "learn": [
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "setup_casts": [
+        504904
+      ],
+      "setup_wait_ms": 3200,
+      "cancel_before_trial": [
+        301067
+      ],
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "entry": 533030,
+      "allowed_spells": [
+        500110,
+        800416,
+        805572
+      ],
+      "cast_power": 2000,
+      "cast_read_ms": 4000,
+      "direct_despawn_ms": 5000,
+      "direct_despawn_check_ms": 6200,
+      "lifetime_ms": 12000,
+      "portals": 6,
+      "parts": 2,
+      "observe_source": "Sunderer of Realities 301068 (@s:301988:0@; AscensionCultistAbilities.cpp:149-154) deterministically summons Void Portal 533030 (12000 ms lifetime) on the 2nd Wrath of the Black Empire 504904 within 301067; AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all non-channeled, AttributesEx & 0x44 == 0) and calls DespawnOrUnsummon(5000ms). 6 portals/part x 2 parts = 12 portals/run (24/pair); each trial cancels 301067, fixtures Insanity 60 + 680601 + 823764, casts setup 504904 then trigger 504904, verifies 1 portal alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime) with post-despawn cumulative direct-cast delta == 1 across its full lifetime. Control arm before learning 301068 reads 0 spawns (ADR 1296)."
+    },
+    {
+      "spell": 301200,
+      "name": "Apocalyptic Skies (each void portal casts once from the three spells and disappears)",
+      "kind": "portal_single_cast",
+      "variant": "portal_single_cast",
+      "label_suffix": "portal_single_cast",
+      "quote": "before disappearing.",
+      "gate_spell": 301200,
+      "trigger_spell": 504904,
+      "learn": [
+        504904,
+        500110,
+        800416,
+        805572
+      ],
+      "phase_auras": [
+        [
+          500706,
+          60,
+          "caster",
+          "caster"
+        ],
+        [
+          680601,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "entry": 533030,
+      "allowed_spells": [
+        500110,
+        800416,
+        805572
+      ],
+      "cast_power": 2000,
+      "cast_read_ms": 4000,
+      "direct_despawn_ms": 5000,
+      "direct_despawn_check_ms": 6200,
+      "lifetime_ms": 12000,
+      "portals": 6,
+      "parts": 2,
+      "observe_source": "Apocalyptic Skies 301200 (AscensionCultistAbilities.cpp:149-152) deterministically summons Void Portal 533030 (12000 ms lifetime) on Wrath of the Black Empire 504904; AscensionCultistSummons.cpp:290-297 casts one of {500110, 800416, 805572} at 100 ms Pulse (all non-channeled, AttributesEx & 0x44 == 0) and calls DespawnOrUnsummon(5000ms). 6 portals/part x 2 parts = 12 portals/run (24/pair); each trial fixtures Insanity 60 + 680601 + 823764, casts 504904, verifies 1 portal alive at +4000 ms with owned_creature_total_cast_count(triggered=false) == 1 and allowed-set sum == 1, then absent at +6200 ms (5800 ms before 12000 ms lifetime) with post-despawn cumulative direct-cast delta == 1 across its full lifetime. Control arm before learning 301200 reads 0 spawns (ADR 1296)."
+    },
+    {
+      "spell": 300300,
+      "name": "Mind Rot (debuff 560943 lasts 10 sec on target)",
+      "kind": "last_application_expiry",
+      "variant": "mind_rot_duration",
+      "label_suffix": "mind_rot_duration",
+      "quote": "for $560943d.",
+      "quote_spell": 560714,
+      "gate_spell": 300300,
+      "trigger_spell": 806039,
+      "aura": 560943,
+      "expected_ms": 10000,
+      "control_window_ms": 500,
+      "window_ms": 20000,
+      "poll_ms": 50,
+      "caster": false,
+      "trigger_power": 2000,
+      "feed": {
+        "every_ms": 3500,
+        "stop_target": "dummy"
+      },
+      "observe_source": "Mind Rot 300300 (@s:560714:0@): 'for $560943d.' (560943 DurationIndex -> 10000 ms, Spell.dbc; AscensionCultistEvents.cpp:82,165 procs 560943 on target at 25% raw Chance() on periodic or channeled damage). Trigger Black Prayer 806039 (instant, 0 CD, 9000 ms DoT ticking every 3000 ms) is fed via cast_until_aura with stop_target: 'dummy' (every_ms 3500, 27-cast cap -> residual cap risk <= 0.05%/run; ADR 1297) until 560943 lands on dummy; window_ms 20000 covers up to 6000 ms remaining DoT ticks plus the 10000 ms debuff duration from its last application. Control arm before learning 300300 reads 0 applications of 560943."
     }
   ],
   "player_observations": [],

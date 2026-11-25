@@ -744,6 +744,9 @@ public:
     {
         _counts.clear();
         _casts.clear();
+        _directCasts.clear();
+        _ownedEntryCasts.clear();
+        _ownedEntryDirectCasts.clear();
         _enabled = true;
     }
 
@@ -759,10 +762,29 @@ public:
         return itr == _counts.end() ? 0 : itr->second;
     }
 
-    static void RecordCast(Unit const* unit, uint32 spell)
+    static void RecordCast(Unit const* unit, uint32 spell, bool triggered = false)
     {
         if (_enabled)
-            ++_casts[{ OwnerOf(unit), spell }];
+        {
+            Owner const owner = OwnerOf(unit);
+            ++_casts[{ owner, spell }];
+            if (!triggered)
+                ++_directCasts[{ owner, spell }];
+            if (Creature const* creature = unit->ToCreature())
+            {
+                ObjectGuid creatureOwner = creature->GetOwnerGUID();
+                if (creatureOwner.IsEmpty() && creature->IsSummon())
+                    creatureOwner = creature->ToTempSummon()->GetSummonerGUID();
+                if (creatureOwner.IsEmpty())
+                    creatureOwner = creature->GetCreatorGUID();
+                if (!creatureOwner.IsEmpty())
+                {
+                    ++_ownedEntryCasts[{ creatureOwner, creature->GetEntry(), spell }];
+                    if (!triggered)
+                        ++_ownedEntryDirectCasts[{ creatureOwner, creature->GetEntry(), spell }];
+                }
+            }
+        }
     }
 
     static uint32 CastCount(Unit const* unit, uint32 spell)
@@ -771,22 +793,69 @@ public:
         return itr == _casts.end() ? 0 : itr->second;
     }
 
+    static uint32 TotalCastCount(Unit const* unit, uint32 spell, bool includeTriggered)
+    {
+        auto const& map = includeTriggered ? _casts : _directCasts;
+        Owner const owner = OwnerOf(unit);
+        if (spell)
+        {
+            auto itr = map.find({ owner, spell });
+            return itr == map.end() ? 0 : itr->second;
+        }
+        uint32 total = 0;
+        for (auto const& [key, count] : map)
+            if (key.first == owner)
+                total += count;
+        return total;
+    }
+
+    static uint32 OwnedEntryCastCount(ObjectGuid owner, uint32 entry, uint32 spell, bool includeTriggered)
+    {
+        auto const& map = includeTriggered ? _ownedEntryCasts : _ownedEntryDirectCasts;
+        if (spell)
+        {
+            auto itr = map.find({ owner, entry, spell });
+            return itr == map.end() ? 0 : itr->second;
+        }
+        uint32 total = 0;
+        for (auto const& [key, count] : map)
+            if (std::get<0>(key) == owner && std::get<1>(key) == entry)
+                total += count;
+        return total;
+    }
+
     static void Forget(std::set<Owner> const& owners)
     {
         auto const owned = [&owners](auto const& entry) { return owners.contains(entry.first.first); };
         std::erase_if(_counts, owned);
         std::erase_if(_casts, owned);
+        std::erase_if(_directCasts, owned);
+        std::set<ObjectGuid> ownerGuids;
+        for (Owner const& owner : owners)
+            ownerGuids.insert(std::get<ObjectGuid>(owner));
+        auto const ownedEntry = [&ownerGuids](auto const& entry)
+        {
+            return ownerGuids.contains(std::get<0>(entry.first));
+        };
+        std::erase_if(_ownedEntryCasts, ownedEntry);
+        std::erase_if(_ownedEntryDirectCasts, ownedEntry);
     }
 
 private:
     static bool _enabled;
     static std::map<std::pair<Owner, uint32>, uint32> _counts;
     static std::map<std::pair<Owner, uint32>, uint32> _casts;
+    static std::map<std::pair<Owner, uint32>, uint32> _directCasts;
+    static std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> _ownedEntryCasts;
+    static std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> _ownedEntryDirectCasts;
 };
 
 bool ProcCounter::_enabled = false;
 std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_counts;
 std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_casts;
+std::map<std::pair<ProcCounter::Owner, uint32>, uint32> ProcCounter::_directCasts;
+std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> ProcCounter::_ownedEntryCasts;
+std::map<std::tuple<ObjectGuid, uint32, uint32>, uint32> ProcCounter::_ownedEntryDirectCasts;
 
 class AuraApplyCounter
 {
@@ -6131,6 +6200,18 @@ private:
             Require(creature != nullptr, "Cast observation needs a present owned creature");
             return ProcCounter::CastCount(creature, spell);
         }
+        if (metric == "owned_creature_total_cast_count")
+        {
+            Require(!spell || sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature cast spell");
+            uint32 const entry = step.get<uint32>("entry");
+            bool const includeTriggered = step.get<bool>("triggered", true);
+            if (step.get<bool>("cumulative", false))
+                return ProcCounter::OwnedEntryCastCount(player->GetGUID(), entry, spell, includeTriggered);
+            Creature* creature = GetOwnedCreature(player, entry);
+            if (!creature)
+                return -1.0;
+            return ProcCounter::TotalCastCount(creature, spell, includeTriggered);
+        }
         if (metric == "owned_creature_aura_max_duration_ms")
         {
             Require(sSpellMgr->GetSpellInfo(spell) != nullptr, "Unknown owned creature aura spell");
@@ -7568,6 +7649,11 @@ private:
             if (!CastUntilAura(step, record))
                 return;
         }
+        else if (action == "cast_until_owned_creature")
+        {
+            if (!CastUntilOwnedCreature(step, record))
+                return;
+        }
         else if (action == "forget_vanity" && !VanityRowStored(step))
             return;
         else
@@ -7587,7 +7673,9 @@ private:
         uint32 const maxCasts = step.get<uint32>("max_casts");
         uint64 const everyMs = step.get<uint32>("every_ms");
         uint64 const elapsed = GameElapsed(_stepTime);
-        bool const present = player->HasAura(aura);
+        Unit* stopUnit = step.get_optional<std::string>("stop_target")
+            ? GetUnit(step.get<std::string>("stop_target")) : player;
+        bool const present = stopUnit->HasAura(aura);
         if (!present && (_untilAuraAttempts < maxCasts || elapsed < _untilAuraAttempts * everyMs))
         {
             if (_untilAuraAttempts < maxCasts && elapsed >= _untilAuraAttempts * everyMs)
@@ -7623,6 +7711,55 @@ private:
         }
         record.put("attempts", _untilAuraAttempts);
         record.put("stopped", present ? "aura" : "cap");
+        return true;
+    }
+
+    bool CastUntilOwnedCreature(Tree const& step, Tree& record)
+    {
+        std::string const actor = step.get<std::string>("actor");
+        Player* player = GetPlayer(actor);
+        uint32 const entry = step.get<uint32>("entry");
+        Require(sObjectMgr->GetCreatureTemplate(entry) != nullptr,
+            "Unknown cast_until_owned_creature entry: " + std::to_string(entry));
+        uint32 const maxCasts = step.get<uint32>("max_casts");
+        uint64 const everyMs = step.get<uint32>("every_ms");
+        uint64 const elapsed = GameElapsed(_stepTime);
+        bool const present = GetOwnedCreature(player, entry) != nullptr;
+        if (!present && (_untilAuraAttempts < maxCasts || elapsed < _untilAuraAttempts * everyMs))
+        {
+            if (_untilAuraAttempts < maxCasts && elapsed >= _untilAuraAttempts * everyMs)
+            {
+                Tree ignored;
+                if (auto power = step.get_optional<uint32>("cast_power"))
+                {
+                    Tree fixture;
+                    fixture.put("action", "set_power");
+                    fixture.put("actor", actor);
+                    fixture.put("power", step.get<uint32>("power", POWER_MANA));
+                    fixture.put("value", *power);
+                    Act(fixture, ignored);
+                }
+                if (step.get<bool>("reset_cooldown", false))
+                {
+                    Tree fixture;
+                    fixture.put("action", "reset_cooldown");
+                    fixture.put("actor", actor);
+                    fixture.put("spell", step.get<uint32>("spell"));
+                    Act(fixture, ignored);
+                }
+                Tree cast;
+                cast.put("action", "cast");
+                cast.put("actor", actor);
+                cast.put("spell", step.get<uint32>("spell"));
+                if (auto target = step.get_optional<std::string>("target"))
+                    cast.put("target", *target);
+                Act(cast, ignored);
+                ++_untilAuraAttempts;
+            }
+            return false;
+        }
+        record.put("attempts", _untilAuraAttempts);
+        record.put("stopped", present ? "creature" : "cap");
         return true;
     }
 
@@ -10345,7 +10482,7 @@ public:
             return;
         if (info)
         {
-            ProcCounter::RecordCast(caster, info->Id);
+            ProcCounter::RecordCast(caster, info->Id, spell->IsTriggered());
             TimelineRecorder::Record(caster, { 0, CoAGameplay::TimelineEventKind::Cast, caster->GetGUID(),
                 spell->m_targets.GetUnitTargetGUID(), CreatureEntry(caster), info->Id, 0 });
         }
