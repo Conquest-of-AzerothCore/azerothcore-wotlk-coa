@@ -8812,7 +8812,8 @@ private:
             player->GetSession()->HandleDestroyItemOpcode(request);
         }
         else if (action == "economy_log_cleanup")
-            CoAEconomyLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY, true);
+            CoAEconomyLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY,
+                !step.get<bool>("background", false));
         else if (action == "start_challenge")
         {
             WorldPacket packet(CMSG_COA_START_CHALLENGE, 8);

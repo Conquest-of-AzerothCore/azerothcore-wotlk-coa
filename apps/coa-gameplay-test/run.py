@@ -373,7 +373,7 @@ ACTIONS = {
     'binder_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'destroy_item': ({'actor', 'item'}, {'actor', 'item'}),
     'forget_vanity': ({'actor', 'item'}, {'actor', 'item'}),
-    'economy_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead'}),
+    'economy_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead', 'background'}),
     'system_mail': ({'actor', 'item', 'kind'}, {'actor', 'item', 'kind'}),
     'start_challenge': ({'actor', 'challenge', 'level'}, {'actor', 'challenge', 'level'}),
     'stop_challenge': ({'actor', 'challenge'}, {'actor', 'challenge'}),
@@ -792,6 +792,7 @@ def validate(scenario, clock=REAL_CLOCK):
                     and isinstance(step['text'], str), f'{where}: addon_message needs a prefix without tabs and text')
         if action == 'economy_log_cleanup':
             number(step['days_ahead'], f'{where}.days_ahead', 0, 3650, True)
+            require(type(step.get('background', False)) is bool, f'{where}: background must be boolean')
         if action == 'system_mail':
             require(step['kind'] in SYSTEM_MAIL_KINDS,
                     f'{where}: system_mail kind must be one of {sorted(SYSTEM_MAIL_KINDS)}')

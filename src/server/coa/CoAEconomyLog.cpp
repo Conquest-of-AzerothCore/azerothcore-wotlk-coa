@@ -11,10 +11,12 @@
 #include "GameTime.h"
 #include "Item.h"
 #include "ItemTemplate.h"
+#include "Log.h"
 #include "Mail.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "QueryCallback.h"
 #include "ScriptMgr.h"
 #include "StringConvert.h"
 #include "Tokenize.h"
@@ -22,8 +24,11 @@
 
 #include <array>
 #include <atomic>
+#include <chrono>
 #include <cmath>
+#include <future>
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 #include <utility>
 #include <vector>
@@ -69,7 +74,11 @@ namespace
         CoAEconomyRow row;
     };
 
-    constexpr uint32 CleanupBatch = 10000;
+    constexpr uint32 CleanupBatch = 2000;
+    std::optional<uint32> s_cleanupCutoff;
+    std::optional<bool> s_cleanupRowsLeft;
+    std::optional<QueryCallback> s_cleanupProbe;
+    std::optional<TransactionFuture> s_cleanupDelete;
     std::mutex s_queueLock;
     std::unordered_map<ObjectGuid::LowType, std::vector<PendingRow>> s_queue;
 
@@ -118,6 +127,47 @@ namespace
             row.otherAccount = AccountOf(mail->sender);
         }
         return row;
+    }
+
+    void ContinueCleanup()
+    {
+        if (s_cleanupProbe)
+        {
+            if (!s_cleanupProbe->InvokeIfReady())
+                return;
+            s_cleanupProbe.reset();
+        }
+        if (s_cleanupDelete)
+        {
+            if (s_cleanupDelete->wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+                return;
+            if (!s_cleanupDelete->get())
+                LOG_ERROR("coa", "CoA economy log: a cleanup batch of up to {} coa_economy_log rows failed", CleanupBatch);
+            s_cleanupDelete.reset();
+        }
+        if (!s_cleanupCutoff)
+            return;
+        if (s_cleanupRowsLeft == false)
+        {
+            s_cleanupCutoff.reset();
+            s_cleanupRowsLeft.reset();
+            return;
+        }
+        uint32 const cutoff = *s_cleanupCutoff;
+        if (s_cleanupRowsLeft == true)
+        {
+            s_cleanupRowsLeft.reset();
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            trans->Append("DELETE FROM coa_economy_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
+            s_cleanupDelete.emplace(std::move(CharacterDatabase.AsyncCommitTransaction(trans).m_future));
+            return;
+        }
+        s_cleanupProbe.emplace(CharacterDatabase.AsyncQuery(
+            Acore::StringFormat("SELECT 1 FROM coa_economy_log WHERE time < {} LIMIT 1", cutoff))
+            .WithCallback([cutoff](QueryResult result)
+            {
+                s_cleanupRowsLeft = s_cleanupCutoff == cutoff ? std::optional<bool>(bool(result)) : std::nullopt;
+            }));
     }
 }
 
@@ -321,15 +371,19 @@ void CoAEconomyLog::Cleanup(uint32 now, bool wait)
     if (!keep || now <= keep)
         return;
     uint32 const cutoff = uint32(now - keep);
+    if (!wait)
+    {
+        if (!s_cleanupCutoff || *s_cleanupCutoff < cutoff)
+        {
+            s_cleanupCutoff = cutoff;
+            s_cleanupRowsLeft.reset();
+        }
+        return;
+    }
     QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_economy_log WHERE time < {}", cutoff);
     uint64 const old = result ? result->Fetch()[0].Get<uint64>() : 0;
     for (uint64 deleted = 0; deleted < old; deleted += CleanupBatch)
-    {
-        if (wait)
-            CharacterDatabase.DirectExecute("DELETE FROM coa_economy_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
-        else
-            CharacterDatabase.Execute("DELETE FROM coa_economy_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
-    }
+        CharacterDatabase.DirectExecute("DELETE FROM coa_economy_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
 }
 
 namespace
@@ -666,10 +720,12 @@ namespace
         void OnUpdate(uint32 diff) override
         {
             _sinceCleanup += diff;
-            if (_sinceCleanup < DAY * IN_MILLISECONDS)
-                return;
-            _sinceCleanup = 0;
-            CoAEconomyLog::Cleanup(Now(), false);
+            if (_sinceCleanup >= DAY * IN_MILLISECONDS)
+            {
+                _sinceCleanup = 0;
+                CoAEconomyLog::Cleanup(Now(), false);
+            }
+            ContinueCleanup();
         }
 
     private:
