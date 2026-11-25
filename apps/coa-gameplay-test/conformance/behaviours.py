@@ -14,9 +14,9 @@ from hits import (ARMOR_LABEL, DAMAGE_TAKEN, DRAIN_MS, HEAL_KINDS, MAIN_HAND, MA
                   SCHOOL_DAMAGE, magic_schools, model_record, reference_script_hit_model, resistance_label, timed)
 from kinds import kind_module, kind_names
 from metric_delta_options import shield_after_learn
-from metric_delta_options import (checked_options, forbids_expected, option_after_trigger_steps, option_fixtures,
-                                  option_model, option_phase_steps, option_setup_cast_steps,
-                                  option_setup_cast_target, parsed_options)
+from metric_delta_options import (checked_options, forbids_expected, option_after_trigger_steps,
+                                  option_attack_phase_steps, option_fixtures, option_model, option_phase_steps,
+                                  option_setup_cast_steps, option_setup_cast_target, parsed_options)
 from procs import cast_interval, swing_interval
 from profile import (CASTER, DBC_DIR, DISPEL_TYPE_NAMES, base_steps, measurement, off_hand_steps, off_hand_weapon,
                      one_hand_main, player_fixture)
@@ -2119,15 +2119,20 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
             setup_steps = [gate_learn_step] + [step for setup_spell in spec.setup_casts
                                                for step in attack_setup_cast_steps(records, setup_spell,
                                                                                    spec.setup_wait_ms)]
+        def attack_phase(after: bool) -> list[dict]:
+            prefix = ([phase_aura_step(aura) for aura in spec.phase_auras]
+                      + option_attack_phase_steps(spec, after))
+            if prefix:
+                prefix += [{'action': 'wait', 'label': 'let the phase auras settle', 'ms': spec.wait_ms}]
+            return prefix + swings
+
         if spec.phase_auras:
-            swings = ([phase_aura_step(aura) for aura in spec.phase_auras]
-                      + [{'action': 'wait', 'label': 'let the phase auras settle', 'ms': spec.wait_ms}] + swings)
             contract += (f' Each phase sets the auras {[list(aura) for aura in spec.phase_auras]} (spell, stacks, on, '
                          f'by) and waits {spec.wait_ms} ms before it starts attacking.')
-        steps = (base_steps(class_file) + setup_steps + swings
+        steps = (base_steps(class_file) + setup_steps + attack_phase(False)
                  + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] + gate_steps
                  + [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}]
-                 + swings + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
+                 + attack_phase(True) + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
     else:
         contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
