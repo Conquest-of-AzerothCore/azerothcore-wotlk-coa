@@ -34845,15 +34845,19 @@
         "wait_ms": 300,
         "after_trigger_ms": 500
       },
-      "metric": "health",
-      "fields": {},
-      "before_expected": 8900,
-      "expected": 9175,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1100,
+      "expected": 1925,
       "tolerance": 1,
-      "wait_ms": 1500,
+      "wait_ms": 0,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "255275 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 127 (all schools), BasePoints -26 + DieSides 1 = -25% ($255276s1 = 25; Spell.dbc). Striker casts Light of the Naaru 41394 (1100 fixed Holy damage) at caster from 10000/10000 health: before cast (control) 10000 - 1100 = 8900; while channeling 255275 (500 ms into 6000 ms channel) 10000 - int(1100 * 0.75) = 9175 (tol 1; excludes 0% = 8900 and doubled -50% = 9450). Reference search 2026-11-25: coa-history spell 255275/255276: 0 events in 186 logs; coabuildhub has no entry; installed Spell.dbc governs."
+      "observe_source": "255275 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 127 (all schools), BasePoints -26 + DieSides 1 = -25% ($255276s1 = 25; Spell.dbc). Striker casts Light of the Naaru 41394 (1100 fixed Holy damage) at caster once in uncast control (1100) and once 500 ms into 255275 channel (int(1100 * 0.75) = 825; cumulative spell_damage_total 1100 -> 1925, tol 1; excludes 0% = 2200 and doubled -50% = 1650). Reading spell_damage_total directly at wait_ms 0 avoids Apocalyptic Skies 301988 Void Portal self-heals entering a health read. Reference search 2026-11-25: coa-history spell 255275/255276: 0 events in 186 logs; coabuildhub has no entry; installed Spell.dbc governs."
     },
     {
       "spell": 255275,
@@ -35059,6 +35063,254 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "255275 tooltip states 'At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.' Reads aura 560109 (Corrupt Mind) on humanoid dummy 6 at 5 yd before cast (0) and 6500 ms after cast start (500 ms past 6000 ms channel end; expected 1). Neither 255275 nor 255276 nor AscensionCultist*.cpp casts 560109 on channel end. Reference search 2026-11-25: coa-history 255275: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (applies full-duration Corrupt Mind to each of 3 inside enemies without DR collapse, none outside)",
+      "kind": "metric_delta",
+      "variant": "corrupt_mind_end_group_duration",
+      "label_suffix": "corrupt_mind_end_group_duration",
+      "quote": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
+      "trigger_spell": 255275,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "target_entry": 36301,
+      "dummy_distance": 3.0,
+      "area_dummies": [
+        4.5,
+        6.0,
+        14.0
+      ],
+      "area_sum": true,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 13600,
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13450,
+          13850
+        ],
+        "expired": [
+          14650,
+          15100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 560109
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Hour of Twilight expiry applies Corrupt Mind 560109 exactly once per inside enemy without chaining (Cultist ADR 0023)."
+          }
+        ]
+      },
+      "observe_source": "Regression for Cultist ADR 0023 (Hour of Twilight 255275 end-of-channel Corrupt Mind 560109 must not chain): four CREATURE_FLAG_EXTRA_ALL_DIMINISH enemies (entry 36301, CombatReach 1.5 yd, exact 8s/4s/2s/0s Fear DR per Unit.cpp:13240,13276 and AscensionCultistAbilities.cpp:115-122) stand at dummy=3.0 yd, area1=4.5 yd, area2=6.0 yd (all 3 inside Radius(255276) 8.0 yd) and area3=14.0 yd (outside 11.0 yd Nearby / 12.16 yd 255276 edge, yet 8.0 yd < 10.0 yd Corrupt Mind jumpRadius from area2). Channel ends at 6000 ms, missiles land ~6217-6260 ms; at 13600 ms (~7340 ms post-apply, > 7200 = 0.9*8000 and well past DR2 4000 ms / DR3 2000 ms), area_sum of aura 560109 reads 3 (proving all 3 inside enemies hold full 8 s duration without DR collapse), and 0 at 14800 ms (~8580 ms post-apply, < 8800 = 1.1*8000), while ally_arm proves dummy received aura_apply_count 0 -> 1. Paired with corrupt_mind_end_group_applies and corrupt_mind_end_outside_none."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (applies Corrupt Mind exactly 3 total times across 3 inside + 1 outside enemies)",
+      "kind": "metric_delta",
+      "variant": "corrupt_mind_end_group_applies",
+      "label_suffix": "corrupt_mind_end_group_applies",
+      "quote": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "target_entry": 36301,
+      "dummy_distance": 3.0,
+      "area_dummies": [
+        4.5,
+        6.0,
+        14.0
+      ],
+      "area_sum": true,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 560109
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 6800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Regression for Cultist ADR 0023: same 4-enemy layout (36301 at 3.0, 4.5, 6.0 yd inside and 14.0 yd outside within 10 yd chain jump range of area2). area_sum of aura_apply_count 560109 reads 0 before cast and exactly 3 after channel expiry (6800 ms); chaining would produce 9 applications."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (outside enemy within chain range receives no Corrupt Mind while inside dummy receives 1)",
+      "kind": "metric_delta",
+      "variant": "corrupt_mind_end_outside_none",
+      "label_suffix": "corrupt_mind_end_outside_none",
+      "quote": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "area3",
+      "target_entry": 36301,
+      "dummy_distance": 3.0,
+      "area_dummies": [
+        4.5,
+        6.0,
+        14.0
+      ],
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 560109
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 560109
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "In-scenario positive control: inside enemy dummy at 3 yd receives exactly 1 Corrupt Mind 560109 application while outside enemy area3 at 14 yd receives 0 (Cultist ADR 0023)."
+          }
+        ]
+      },
+      "observe_source": "Regression for Cultist ADR 0023: same 4-enemy layout (36301 at 3.0, 4.5, 6.0 yd inside and 14.0 yd outside, 8.0 yd from area2 < 10.0 yd Corrupt Mind jumpRadius). Measures area3 directly: aura_apply_count 560109 stays 0 -> 0 while ally_arm proves inside dummy at 3.0 yd receives 0 -> 1 in the same channel."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (early channel cancel does not apply Corrupt Mind)",
+      "kind": "metric_delta",
+      "variant": "corrupt_mind_early_cancel",
+      "label_suffix": "corrupt_mind_early_cancel",
+      "quote": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
+      "trigger_spell": 255275,
+      "gate_timing": "start",
+      "trigger_only_after": false,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "target_entry": 36301,
+      "dummy_distance": 5,
+      "learn": [
+        60235
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 60235,
+          "target": "caster",
+          "delay_ms": 1500,
+          "in_before": false
+        }
+      ],
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 6800,
+      "expire_ms": 9500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 560109
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Full 6 s channel in before applies 560109 once; early cancel at 1500 ms in after adds 0 applications (AURA_REMOVE_BY_CANCEL, AscensionCultistContracts.cpp:396)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 60235
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms interrupting cast 60235 actually fired at 1500 ms in treatment only."
+          }
+        ]
+      },
+      "observe_source": "Negative early-cancel control for Cultist ADR 0023 ('At the end of the duration'): before phase completes the full 6 s channel of 255275 on 36301 at 5 yd (560109 aura == 1, apply count == 1), then waits 9500 ms so the 8 s fear expires; after phase interrupts 255275 at 1500 ms by casting 60235 (spell_go_count 0 -> 1), verifying AURA_REMOVE_BY_CANCEL does not apply 560109 (aura == 0, apply count stays 1)."
     },
     {
       "spell": 301984,

@@ -184,7 +184,11 @@
     "spell": 255275,
     "clause": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
     "labels": [
-      "255275 behaviour_metric_delta corrupt_mind_end"
+      "255275 behaviour_metric_delta corrupt_mind_end",
+      "255275 behaviour_metric_delta corrupt_mind_end_group_duration",
+      "255275 behaviour_metric_delta corrupt_mind_end_group_applies",
+      "255275 behaviour_metric_delta corrupt_mind_end_outside_none",
+      "255275 behaviour_metric_delta corrupt_mind_early_cancel"
     ],
     "kind": "claim"
   },

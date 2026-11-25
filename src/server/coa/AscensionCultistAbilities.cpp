@@ -60,7 +60,18 @@ public:
     void OnSpellBeforeEffects(Spell* spell, Unit* caster, SpellInfo const* info) override
     {
         Player* player = Owner(caster);
-        if (!player || caster != player || info->SpellFamilyName != 31 || spell->IsTriggered())
+        if (!player || caster != player || info->SpellFamilyName != 31)
+            return;
+        if (info->Id == 560109 && State(player).hourOfTwilightCorruptMind)
+        {
+            ObjectGuid targetGuid = spell->m_targets.GetUnitTargetGUID();
+            spell->GetUniqueTargetInfo()->remove_if([targetGuid](TargetInfo const& entry)
+            {
+                return entry.targetGUID != targetGuid;
+            });
+            return;
+        }
+        if (spell->IsTriggered())
             return;
         spell->SetScriptValue(Insanity, Count(player, Insanity));
         if (Named(info, 500110) || info->Id == 680576)

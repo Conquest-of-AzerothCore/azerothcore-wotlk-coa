@@ -2,6 +2,7 @@
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
 #include "DBCStores.h"
+#include "Opcodes.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -9,6 +10,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "WorldPacket.h"
 #include <algorithm>
 #include <tuple>
 #include <vector>
@@ -383,9 +385,25 @@ public:
                 if (Aura* candidate = pair.first)
                     if (int32 chance = candidate->CalcDispelChance(enemy, true); chance > 0 && roll_chance_i(chance))
                         toDispel.emplace_back(candidate->GetId(), candidate->GetCasterGUID(), pair.second);
+            std::vector<uint32> dispelled;
             for (auto const& [spellId, casterGuid, charges] : toDispel)
                 if (enemy->GetAura(spellId, casterGuid))
+                {
                     enemy->RemoveAurasDueToSpellByDispel(spellId, 255275, casterGuid, player, charges);
+                    dispelled.push_back(spellId);
+                }
+            if (!dispelled.empty())
+            {
+                WorldPacket data(SMSG_SPELLDISPELLOG, 8 + 8 + 4 + 1 + 4 + dispelled.size() * 5);
+                data << enemy->GetPackGUID();
+                data << player->GetPackGUID();
+                data << uint32(255275);
+                data << uint8(0);
+                data << uint32(dispelled.size());
+                for (uint32 spellId : dispelled)
+                    data << uint32(spellId) << uint8(0);
+                player->SendMessageToSet(&data, true);
+            }
         }
     }
     void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode mode) override
@@ -395,9 +413,14 @@ public:
                 Cast(player, player, 560947);
         if (mode == AURA_REMOVE_BY_EXPIRE && application && application->GetBase()->GetId() == 255275)
             if (Player* player = Owner(unit); player && player == unit && player->IsAlive())
+            {
+                bool previous = State(player).hourOfTwilightCorruptMind;
+                State(player).hourOfTwilightCorruptMind = true;
                 for (Unit* enemy : Nearby(player, Radius(255276)))
                     if (player->IsValidAttackTarget(enemy))
                         Cast(player, enemy, 560109);
+                State(player).hourOfTwilightCorruptMind = previous;
+            }
     }
 };
 }
