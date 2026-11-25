@@ -4408,7 +4408,7 @@
           15950
         ]
       },
-      "observe_source": "Duration proof for Unrelenting Void 706908 (DurationIndex 1 = 10000 ms, $706908d, SpellDuration.dbc). One Psychic Suppression 800432 channel (5000 ms, last tick at 5000 ms) refreshes 706908 at 5000 ms so it expires at 15000 ms. Reads 0 before cast, 1 at 14300 ms (9100..9650 ms after final tick, > 0.9 * 10000) and 0 at 15700 ms (10500..10950 ms after final tick, < 1.1 * 10000). Paired with duration_contrast. Reference search 2026-11-24: coa-history 706908: 702 applies / 702 removes in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+      "observe_source": "Duration proof for Unrelenting Void 706908 (DurationIndex 1 = 10000 ms, $706908d, SpellDuration.dbc). One Psychic Suppression 800432 channel (5000 ms, last tick at 5000 ms) refreshes 706908 at 5000 ms so it expires at 15000 ms. Reads 0 before cast, 1 at 14300 ms (9100..9650 ms after final tick, > 0.9 * 10000) and 0 at 15700 ms (10500..10950 ms after final tick, < 1.1 * 10000). Paired with duration_contrast. Reference search 2026-11-24: coa-history 706908: 702 applies / 702 removes in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim. void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 704527,
@@ -4462,7 +4462,7 @@
           14650
         ]
       },
-      "observe_source": "Learned contrast for Unrelenting Void 706908 duration (DurationIndex 1 = 10000 ms): Psychic Suppression 800432 channel before (unlearned control: 0) and after learning 704527 (1 at 14300 ms). Paired with duration. Reference search 2026-11-24: coa-history 706908: 702 applies / 702 removes in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim."
+      "observe_source": "Learned contrast for Unrelenting Void 706908 duration (DurationIndex 1 = 10000 ms): Psychic Suppression 800432 channel before (unlearned control: 0) and after learning 704527 (1 at 14300 ms). Paired with duration. Reference search 2026-11-24: coa-history 706908: 702 applies / 702 removes in 5 logs; coabuildhub spells_master_index.json 704527 matches verbatim. void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 300308,
@@ -4557,7 +4557,7 @@
       "expected": 40,
       "wait_ms": 5500,
       "expire_ms": 500,
-      "observe_source": "Channeled arm for Abyssal Destruction 300308 Insanity generation (+2 per tick): Psychic Suppression 800432 starts at 20 Insanity (precondition fixture + 680601 CasterAuraSpell, 823764 no resist) and delivers 10 channeled ticks (5000 ms / 500 ms): Insanity 500706 reads 20 before learn (control) and 20 + 10*2 = 40 after learn (excludes 0 gain = 20 and double gain = 60). Paired with insanity_periodic. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; server Spell.dbc governs (G-9)."
+      "observe_source": "Channeled arm for Abyssal Destruction 300308 Insanity generation (+2 per tick): Psychic Suppression 800432 starts at 20 Insanity (precondition fixture + 680601 CasterAuraSpell, 823764 no resist) and delivers 10 channeled ticks (5000 ms / 500 ms): Insanity 500706 reads 20 before learn (control) and 20 + 10*2 = 40 after learn (excludes 0 gain = 20 and double gain = 60). Paired with insanity_periodic. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; server Spell.dbc governs (G-9). void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 300308,
@@ -4617,7 +4617,7 @@
       "expected": 2,
       "wait_ms": 1000,
       "expire_ms": 2000,
-      "observe_source": "Lower-bound cooldown-cut bracket for Abyssal Destruction 300308 (300605 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN BasePoints -1001 + DieSides 1 = -1000 ms on 805572 chain; Obliteration Beam 806897 CategoryRecoveryTime 20000 ms). Setup casts 806897 at t=0, setup_wait_ms 1600 clears GCD, then Psychic Suppression 800432 delivers 10 channeled ticks (-10000 ms total cut -> 806897 ready at t=10000 ms = 8400 ms after 800432). Attempting 806897 at delay_ms 7500 (t=9100 ms, 900 ms before 10000 ms) is refused in both phases (spell_cast_count 1 before, 2 after), excluding a cut >= 1100 ms/tick (10% over) or full cooldown reset. Paired with cd_cut_late. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches ('-1 sec')."
+      "observe_source": "Lower-bound cooldown-cut bracket for Abyssal Destruction 300308 (300605 Effect[1] SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN BasePoints -1001 + DieSides 1 = -1000 ms on 805572 chain; Obliteration Beam 806897 CategoryRecoveryTime 20000 ms). Setup casts 806897 at t=0, setup_wait_ms 1600 clears GCD, then Psychic Suppression 800432 delivers 10 channeled ticks (-10000 ms total cut -> 806897 ready at t=10000 ms = 8400 ms after 800432). Attempting 806897 at delay_ms 7500 (t=9100 ms, 900 ms before 10000 ms) is refused in both phases (spell_cast_count 1 before, 2 after), excluding a cut >= 1100 ms/tick (10% over) or full cooldown reset. Paired with cd_cut_late. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches ('-1 sec'). void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 300308,
@@ -4677,7 +4677,7 @@
       "expected": 3,
       "wait_ms": 1000,
       "expire_ms": 2000,
-      "observe_source": "Upper-bound cooldown-cut bracket for Abyssal Destruction 300308 (-1000 ms/tick x 10 ticks = -10000 ms off Obliteration Beam 806897 20000 ms cooldown -> ready at t=10000 ms). Attempting 806897 at delay_ms 9200 after 800432 (t=10800 ms, 800 ms past reduced end, well short of 20000 ms base CD) is refused in unlearned control (1) and succeeds in treatment (1 + 2 = 3), excluding no cut and <= 900 ms/tick (10% under). Paired with cd_cut_early. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches ('-1 sec')."
+      "observe_source": "Upper-bound cooldown-cut bracket for Abyssal Destruction 300308 (-1000 ms/tick x 10 ticks = -10000 ms off Obliteration Beam 806897 20000 ms cooldown -> ready at t=10000 ms). Attempting 806897 at delay_ms 9200 after 800432 (t=10800 ms, 800 ms past reduced end, well short of 20000 ms base CD) is refused in unlearned control (1) and succeeds in treatment (1 + 2 = 3), excluding no cut and <= 900 ms/tick (10% under). Paired with cd_cut_early. Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses in 4 logs; coabuildhub spells_master_index.json 300308 matches ('-1 sec'). void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 300308,
@@ -4879,7 +4879,7 @@
       "tolerance": 15,
       "wait_ms": 500,
       "expire_ms": 2000,
-      "observe_source": "10-stack damage arm for Abyssal Destruction 300605 (+5% x 10 = +50% on 805573): one Psychic Suppression 800432 channel (10 ticks -> 10 stacks 300605, Insanity 20+20+10=50 < 60, setup_wait_ms 5500 lets temporary 803746 expire, expire_ms 2000 clears GCD) boosts Obliteration Beam 806897 (+20000 SP, 823764 no resist, 16255 -100 no crit) from 15358 to 23037 (cumulative 38395 +- 15; excludes 0%, 9 stacks 37627, 11 stacks 39163, double 46074). Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses; coabuildhub spells_master_index.json 300308 matches."
+      "observe_source": "10-stack damage arm for Abyssal Destruction 300605 (+5% x 10 = +50% on 805573): one Psychic Suppression 800432 channel (10 ticks -> 10 stacks 300605, Insanity 20+20+10=50 < 60, setup_wait_ms 5500 lets temporary 803746 expire, expire_ms 2000 clears GCD) boosts Obliteration Beam 806897 (+20000 SP, 823764 no resist, 16255 -100 no crit) from 15358 to 23037 (cumulative 38395 +- 15; excludes 0%, 9 stacks 37627, 11 stacks 39163, double 46074). Reference search 2026-11-24: coa-history 300605: 317 applies / 1219 doses; coabuildhub spells_master_index.json 300308 matches. void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 300308,
@@ -5045,7 +5045,7 @@
           21250
         ]
       },
-      "observe_source": "Duration proof for Abyssal Destruction 300605 (DurationIndex 8 = 15000 ms, $d, SpellDuration.dbc). One Psychic Suppression 800432 channel (5000 ms, last tick at 5000 ms) refreshes 300605 at 5000 ms so it expires at 20000 ms. Reads 0 before cast, 1 at 19200 ms (14000..14550 ms after final tick, > 0.9 * 15000 = 13500) and 0 at 20800 ms (15600..16250 ms after final tick, < 1.1 * 15000 = 16500). Paired with duration_contrast. Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches ('for 15 sec')."
+      "observe_source": "Duration proof for Abyssal Destruction 300605 (DurationIndex 8 = 15000 ms, $d, SpellDuration.dbc). One Psychic Suppression 800432 channel (5000 ms, last tick at 5000 ms) refreshes 300605 at 5000 ms so it expires at 20000 ms. Reads 0 before cast, 1 at 19200 ms (14000..14550 ms after final tick, > 0.9 * 15000 = 13500) and 0 at 20800 ms (15600..16250 ms after final tick, < 1.1 * 15000 = 16500). Paired with duration_contrast. Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches ('for 15 sec'). void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 300308,
@@ -5098,7 +5098,7 @@
           19550
         ]
       },
-      "observe_source": "Learned contrast for Abyssal Destruction 300605 duration (15000 ms): Psychic Suppression 800432 channel before (unlearned control: 0) and after learning 300308 (1 at 19200 ms). Paired with duration. Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches."
+      "observe_source": "Learned contrast for Abyssal Destruction 300605 duration (15000 ms): Psychic Suppression 800432 channel before (unlearned control: 0) and after learning 300308 (1 at 19200 ms). Paired with duration. Reference search 2026-11-24: coa-history 300605: 317 applies / 316 removes; coabuildhub spells_master_index.json 300308 matches. void_on_cast_failure is omitted because Psychic Suppression 800432's internal sub-aura casts emit benign DONT_REPORT (27); positive treatment readings ensure a refused channel cannot pass."
     },
     {
       "spell": 525049,
@@ -5425,14 +5425,9 @@
       "trigger_spell": 600327,
       "gate_spell": 600327,
       "gate_cast": true,
-      "setup_casts": [
-        48162,
-        633
-      ],
-      "setup_wait_ms": 1600,
       "disable_regeneration": true,
       "target": "dummy",
-      "attack_swings": 1,
+      "attack_swings": 4,
       "phase_auras": [
         [
           64481,
@@ -5447,9 +5442,9 @@
         "target": "ally"
       },
       "before_expected": 0,
-      "expected": 2,
-      "after_at_least": 1,
-      "after_at_most": 3,
+      "expected": 6,
+      "after_at_least": 5,
+      "after_at_most": 7,
       "wait_ms": 500,
       "expire_ms": 500,
       "ally_arm": {
@@ -5467,11 +5462,84 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "AscensionCultistEvents.cpp:277-280 Allies(player, player, 40, 1): full-health caster (100% after Lay on Hands 633) must NOT receive 302897 heals when grouped ally has lower health pct (Prayer of Fortitude 48162 +115 Stamina without heal, regeneration off, 64481 prevents crits so 1-2 swings never top off the +1150 HP deficit)"
+            "source": "AscensionCultistEvents.cpp:277-280 Allies(player, player, 40, 1): full-health caster (100% after Lay on Hands 633) must NOT receive 302897 heals when grouped ally has +2040 max HP deficit (Prayer of Fortitude 48162 +115 Sta, Gift of the Wild 48470 +37 Sta, Spirit of Zandalar 24425 +25 Sta, Greater Blessing of Kings 25898 +10% stats without healing, disable_regeneration: true, 64481 -100% crit keeping ally well below 100% across all 5-7 swings)"
           }
         ]
       },
-      "observe_source": "Lowest-health-ally reach proof for Saronite Blessing 301262/600327 (AscensionCultistEvents.cpp:277-280): Allies(player, player, 40, 1) picks the lowest-health-pct grouped ally within 40 yd and copies 100% of auto-attack damage into 302897 heal. Setup casts Prayer of Fortitude 48162 (raid-wide +115 Stamina -> +1150 max HP without healing current HP, dropping both caster and ally below 100%) then Lay on Hands 633 on caster (restoring caster to 100% while ally stays below 100% with disable_regeneration: true); phase aura 64481 (-100% crit, precondition fixture) ensures non-crit auto-attacks (~250-350 dmg) never top off ally's +1150 HP deficit over 1 swing interval (3300 ms / 2640 ms hasted = 1-2 swings). Before phase runs 1 swing interval without 600327 (0 heals to ally and caster); gate_cast casts real 600327 (crit->600327 trigger proved separately by 301262 trigger_count + noncrit_control); after phase runs 1 swing interval with 600327 (1..3 302897 heals to ally, 0 to full-health caster confirmed by ally_arm). Paired with 301262 trigger_magnitude_ratio (100% of melee damage dealt). Reference search 2026-11-24: coa-history 302897: 1006 SPELL_HEAL events in 3 logs; coabuildhub spells_master_index.json 301262 matches verbatim."
+      "observe_source": "Lowest-health-ally reach proof (forward arm: ally lowest) for Saronite Blessing 301262/600327 (AscensionCultistEvents.cpp:277-280): Allies(player, player, 40, 1) picks the lowest-health-pct grouped ally within 40 yd (AscensionCultist.cpp:245-249) and copies 100% of auto-attack damage into 302897 heal. Setup casts raid/area Stamina buffs Prayer of Fortitude 48162 (+115 Sta), Gift of the Wild 48470 (+37 Sta), Spirit of Zandalar 24425 (+25 Sta), and Greater Blessing of Kings 25898 (+10% stats) without healing (~+2040 max HP deficit, dropping ally near ~55% HP), then Lay on Hands 633 restores caster to 100% HP while ally stays below 100% (disable_regeneration: true); phase aura 64481 (-100% crit, precondition fixture) keeps non-crit Heretic staff 2535 swings (~215 dmg each) from ever topping off ally across 4 swing intervals (14400 ms -> 5-6 swings = ~1100-1300 total heal vs ~2040 deficit, leaving ally >15 percentage points below caster's 100% throughout so GUID tie-break cannot decide). Before phase runs 4 swing intervals without 600327 (0 heals to ally and caster); gate_cast casts real 600327 (15000 ms, 10 charges, +25% melee haste -> 2640 ms swing time); after phase delivers 5-7 heals of 302897 to ally and 0 to full-health caster (ally_arm). Paired with symmetric reverse arm caster_lowest (caster lowest via 72590+46302, ally 100%): together >=10 independent picks per run (>=20 per pair) exclude fixed/GUID-order selection deterministically and random selection with probability <= (1/2)^10 = 9.77e-4 per run (<= 9.5e-7 per pair). Paired with 301262 trigger_magnitude_ratio (100% of melee damage dealt). Reference search 2026-11-24: coa-history 302897: 1006 SPELL_HEAL events in 3 logs; coabuildhub spells_master_index.json 301262 matches verbatim.",
+      "setup_casts": [
+        48162,
+        48470,
+        24425,
+        25898,
+        633
+      ],
+      "setup_wait_ms": 1600
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (melee auto attacks heal lowest health caster, not full-health ally)",
+      "kind": "metric_delta",
+      "variant": "caster_lowest",
+      "label_suffix": "caster_lowest",
+      "quote": "Melee critical strikes now apply Saronite Blessing to you.@s:600327:0@",
+      "trigger_spell": 600327,
+      "gate_spell": 600327,
+      "gate_cast": true,
+      "disable_regeneration": true,
+      "target": "dummy",
+      "attack_swings": 4,
+      "phase_auras": [
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          72590,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          46302,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 302897,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "after_at_least": 5,
+      "after_at_most": 7,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 302897,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "AscensionCultistEvents.cpp:277-280 Allies(player, player, 40, 1): full-health grouped ally (100%) must NOT receive 302897 heals when caster has +244 Stamina (+2440 max HP deficit from Fortitude 72590 +165 Stamina and K'iru's Song of Victory 46302 +79 Stamina without healing, disable_regeneration: true, keeping caster near 50-75% HP across all 5-7 non-crit swings with 64481 -100% crit)"
+          }
+        ]
+      },
+      "observe_source": "Lowest-health-ally reach proof (symmetric reverse arm: caster lowest) for Saronite Blessing 301262/600327 (AscensionCultistEvents.cpp:277-280): Allies(player, player, 40, 1) includes the caster and sorts by health percentage (AscensionCultist.cpp:245-249). Phase auras Fortitude 72590 (+165 Stamina -> +1650 max HP without healing) and K'iru's Song of Victory 46302 (+79 Stamina -> +790 max HP without healing, 0 AP) applied to caster with disable_regeneration: true drop caster to ~50% HP (+2440 HP deficit) while grouped ally stays at 100% HP; phase aura 64481 (-100% crit, precondition fixture) holds non-crit swings (~195 dmg each) so 5-6 swings keep caster >25 percentage points below ally throughout (GUID tie-break can never fire). Before phase runs 4 swing intervals without 600327 (0 heals to caster and ally); gate_cast casts real 600327; after phase runs 4 swing intervals delivering 5-7 heals of 302897 to caster and 0 to full-health ally (ally_arm). Paired with ally_lowest (forward arm): together >=10 independent picks per run (>=20 per pair) exclude fixed/GUID-order selection deterministically and random selection with probability <= (1/2)^10 = 9.77e-4 per run (<= 9.5e-7 per pair). Reference search 2026-11-24: coa-history 302897: 1006 SPELL_HEAL events in 3 logs; coabuildhub spells_master_index.json 301262 matches verbatim."
     },
     {
       "spell": 301262,
@@ -5554,6 +5622,37 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "Learned contrast for Saronite Blessing 600327 duration (15000 ms): forced-crit Blade of the Empire 502122 before (unlearned control: 0) and after learning 301262 (1 at 14200 ms). Paired with duration. Reference search 2026-11-24: coa-history 600327: 172 applies / 172 removes; coabuildhub spells_master_index.json 301262 matches."
+    },
+    {
+      "spell": 301262,
+      "name": "Saronite Blessing (600327 starts with 10 charges)",
+      "kind": "metric_delta",
+      "variant": "initial_charges",
+      "label_suffix": "initial_charges",
+      "quote": "Melee critical strikes now apply Saronite Blessing to you.@s:600327:0@",
+      "trigger_spell": 502122,
+      "gate_spell": 301262,
+      "target": "dummy",
+      "cast_power": 2000,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          600327,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_charges",
+      "fields": {
+        "spell": 600327
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Initial charge-count proof for Saronite Blessing 600327 ('$n attacks', $n = ProcCharges 10 in Spell.dbc, AscensionCultistContracts.cpp:220 info->ProcCharges = 10, rev_20260909_12_cultist_completion.sql:52 spell_proc Charges = 10). Forced-crit Blade of the Empire 502122 applies 600327 after learning 301262; reads aura_charges of 600327 right after apply (wait 500 ms): 0 before learn (control) and 10 after learn (exact band +-1e-5, distinguishing 9, 10, and 11). Note: aura_charges is READBACK (data evidence class in coverage.py:454); proving actual removal on the 10th auto-attack before the 15000 ms duration is split as its own claim ('or $n attacks') and recorded as a tool gap. Reference search 2026-11-24: coa-history 600327: 172 applies / 172 removes in 3 logs; coabuildhub spells_master_index.json 301262 matches ('or 10 attacks')."
     },
     {
       "spell": 805110,
@@ -5842,7 +5941,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%')."
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert \u2014 no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
     }
   ],
   "player_observations": [],

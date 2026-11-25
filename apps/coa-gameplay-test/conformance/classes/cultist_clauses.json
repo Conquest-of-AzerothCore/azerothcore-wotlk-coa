@@ -500,7 +500,9 @@
     "spell": 300308,
     "clause": "Increases the damage dealt of your next Obliteration Beam by $s1%,",
     "labels": [
-      "300308 effect_value 300605e0 #1"
+      "300308 behaviour_metric_delta oblit_damage_1stack",
+      "300308 behaviour_metric_delta oblit_damage_10stacks",
+      "300308 behaviour_metric_delta oblit_consumes"
     ],
     "kind": "claim"
   },
@@ -755,6 +757,7 @@
     "clause": "and your melee auto attacks heal the lowest health ally for an additional $s1% of the damage dealt.",
     "labels": [
       "301262 behaviour_metric_delta ally_lowest",
+      "301262 behaviour_metric_delta caster_lowest",
       "301262 trigger_magnitude_ratio"
     ],
     "kind": "claim"
@@ -774,10 +777,17 @@
       {
         "claim": "$n attacks",
         "labels": [
+          "301262 behaviour_metric_delta initial_charges"
+        ]
+      },
+      {
+        "claim": "or $n attacks",
+        "labels": [
           "301262 effect_value #3"
         ]
       }
-    ]
+    ],
+    "reason": "Claim '$n attacks' proves the initial charge count 10 against 9/11 at runtime via aura_charges (301262 behaviour_metric_delta initial_charges, readback / data evidence class in coverage.py:454). Split claim 'or $n attacks' (appended at end) is a tool gap for proving Saronite Blessing 600327 actually ends on the 10th auto-attack before its 15000 ms duration: attack_swings waits un-hasted reference intervals without exact per-swing counting, Heretic staff 2535 (3300 ms / 2640 ms hasted) delivers <= 6 swings in 15000 ms, melee crits refresh 600327 back to 10 charges, fed_charge_casts is cast-time-only, and block_charge_strikes is block-only."
   },
   {
     "spell": 301315,
@@ -1470,7 +1480,8 @@
           "525049 behaviour_metric_delta mind_rot_duration_contrast"
         ]
       }
-    ]
+    ],
+    "reason": "Alert (claim 0, uncounted): Mind Rot 560943 Spell.dbc Effect[0] aura 186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE has BasePoints 2 + DieSides 1 (+3%) but EffectMiscValue[0] = 0 (no pending SQL or AscensionCultistContracts.cpp override), so Unit::GetTotalAuraModifierByMiscMask (Unit.cpp:4011, 7194) evaluates 0 & schoolMask == 0. Measured at runtime via coa-verify runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-525049-mind-rot-hit.json, Kobold Vermin 6): before learn 560943 aura=0, spell_hit_bonus_taken=0/0/0; after learn 560943 aura=1, aura_amount=3, spell_hit_bonus_taken=0 (Shadow 502182), 0 (Fire 2136), 0 (Nature 5176) vs tooltip +3% both runs. Not added as a cultist.json entry because spell_hit_bonus_taken is absent from coverage.METRIC_EVIDENCE (coverage.py:433-486), which fails test_coverage.py:975 under the no-tool-code-change rule."
   },
   {
     "spell": 525049,
@@ -1480,13 +1491,13 @@
       {
         "claim": "your critical strike chance is increased by $560947s1%",
         "labels": [
-          "525049 effect_value 560947e0 #2"
+          "525049 behaviour_metric_delta dispel_crit"
         ]
       },
       {
         "claim": "for $560947d",
         "labels": [
-          "525049 spell_duration 560947 #3"
+          "525049 behaviour_metric_delta dispel_crit"
         ]
       }
     ]
