@@ -7872,7 +7872,7 @@
       "critical": false,
       "trials": 10,
       "void_on_cast_failure": true,
-      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc \u2014 owner ruling Q-cu-10 / O-12, Cultist ADR 0005) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (AscensionCultistAbilities.cpp:228-234 checks GetScriptHealingIncludingOverheal() to grant 705107, expected ratio 2.0, +100% inside G-19 [95%, 105%]). Paired with heal_to_dmg (damaged target). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
+      "observe_source": "Tests Doomsayer 704880 as worded ('Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.', Spell.dbc — owner ruling Q-cu-10 / O-12, Cultist ADR 0005) when the healing Eldritch Shock 808036 -> 808050 targets the full-health caster (pure overheal). Both arms hold Insanity 500706=40 (keeps CasterAuraSpell 680601 present) and 823764 (no partial resist; precondition fixtures) at +20000 SP, cast 808036 at the full-health caster before each observed 808036 -> 808043 damage cast at dummy (non-crit): control has no 704880, treatment learns 704880 (AscensionCultistAbilities.cpp:228-234 checks GetScriptHealingIncludingOverheal() to grant 705107, expected ratio 2.0, +100% inside G-19 [95%, 105%]). Paired with heal_to_dmg (damaged target). Reference search 2026-11-24: coa-history spell 705107: 10 aura applied/removed in 5 logs; installed Spell.dbc governs (G-1, G-9)."
     },
     {
       "spell": 704880,
@@ -12913,7 +12913,7 @@
       "wait_ms": 1000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert \u2014 no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
+      "observe_source": "Black Prayer 806039 apply hook (AscensionCultistAuras.cpp:80-81) casts Withered 520418 (Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -21 + DieSides 1 = -20%, $520418s1; DurationIndex 32 = 6000 ms; Spell.dbc). Unit::ApplyAttackTimePercentMod (Unit.cpp:15027-15031) multiplies attack time by 1.20 for -20%: dummy main-hand attack_time_ms rises from 2000 ms (uncast control) to 2400 ms at 1000 ms after 806039 cast (ratio 1.200 +- 0.005; excludes 1.00 no slow and 1.44 double slow). Reference search 2026-11-24: coa-history 520418: 1364 applies in 22 logs; coabuildhub spells_master_index.json 805110 matches ('reduces attack speed by 20%'). OBSERVATION (I3, non-alert — no tooltip states a duration for the slow): Spell.dbc 806039 Effect[1] is 178 (SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION, bp 7999+1 = 8000 ms, trigger 520418), while AscensionCultistContracts.cpp:251-252 dummies Effect[1] and AscensionCultistAuras.cpp:80-81 casts 520418 directly (DurationIndex 32 = 6000 ms; 806039 DurationIndex 105 = 9000 ms). Measured in runs 20261125-002625 and 20261125-002657 (build aa4bb0bc3311, scratch/cultist-805110-withered-duration-obs.json): at +109 ms 520418 aura=1 aura_duration_ms=5891/5894 ms (806039 aura=1 aura_duration_ms=8879/8882 ms); at +5527 ms 520418 aura=1 (806039 aura=1); at +6539 ms 520418 aura=0 (806039 aura=1) both runs. git log -L 251,252:src/server/coa/AscensionCultistContracts.cpp shows commit e36bc50aad ('feat(CoA): Restore mechanics for five additional classes', 2026-09-10) introduced the file in bulk and does not explain why Effect[1] was dummied."
     },
     {
       "spell": 502122,
@@ -29898,6 +29898,43 @@
         500110,
         500110,
         500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
         500110
       ],
       "setup_target": "dummy",
@@ -29938,7 +29975,10 @@
       "after_at_least": 1,
       "wait_ms": 13000,
       "expire_ms": 500,
-      "observe_source": "Complements 706911 portal_rate (15% spawn rate): 48 casts of Gaze of C'Thun 500110 with spell pen 823764 (precondition fixture; P(0 portals) = 0.85^48 = 0.041% per run, 0.082% <= 0.1% per pair) produce 0 portal damage hits before learning 706911 and >= 1 owned_creature_damage_count(533030) after learning 706911 (AscensionCultistSummons.cpp:290-297), with owned_creature_count(533030) == 0 at wait_ms 13000 confirming portals disappear after casting. void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) on unused ally effect 520335. Uniform 1-of-3 spell pick distribution is tracked separately in tool-queue.md. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim."
+      "observe_source": "Complements 706911 portal_rate (15% ProcChance, Spell.dbc): 85 effective casts of Gaze of C'Thun 500110 (84 setup_casts + 1 trigger_spell) with spell pen 823764 (precondition fixture) and refill_power_after_setup_casts {'power': 0} restoring mana to cast_power after every setup cast (500110 costs 15% of base mana, Spell.dbc ManaCostPercentage = 15; without refill, 76/96 casts failed SPELL_FAILED_NO_POWER leaving only 10 effective casts and P(0) = 0.85^10 = 19.69% per run). At p = 0.15 from Spell.dbc ProcChance, 85 casts give P(0 portals) = 0.85^85 = 1.001e-6 (0.00010%) per run and 1 - (1 - 0.85^85)^2 = 2.003e-6 (0.00020%) per pair (vs 0.85^48 = 0.041% / 0.082% per pair and 0.85^60 = 0.0058% / 0.0116% per pair). Produces 0 portal damage hits before learning 706911 and >= 1 owned_creature_damage_count(533030) after learning 706911 (AscensionCultistSummons.cpp:290-297), with owned_creature_count(533030) == 0 at wait_ms 13000 confirming portals disappear after casting. void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) on unused ally effect 520335. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim.",
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     },
     {
       "spell": 706911,
@@ -35411,7 +35451,7 @@
           }
         ]
       },
-      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (second outcome of 'Damage dealt may end this effect.' \u2014 proving not every damaging hit ends it): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and verify aura 560109 PRESENT == 1 via after_setup_stacks right before trigger. Control deals no damage (1); treatment lands one unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage, confirmed 0 -> 1 via ally_arm, below the stock 1048 cap at SpellAuraEffects.cpp:548-562,7245-7253) and 560109 remains active (1). Paired with damage_breaks (large hit ends 560109: 1 -> 0). No break chance is asserted. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
+      "observe_source": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (second outcome of 'Damage dealt may end this effect.' — proving not every damaging hit ends it): both phases cast Corrupt Mind 560109 on Kobold Vermin 6 in setup_casts (setup_in_before: true) and verify aura 560109 PRESENT == 1 via after_setup_stacks right before trigger. Control deals no damage (1); treatment lands one unbuffed non-critical Horrorbolt 502182 (~587-657 Shadow damage, confirmed 0 -> 1 via ally_arm, below the stock 1048 cap at SpellAuraEffects.cpp:548-562,7245-7253) and 560109 remains active (1). Paired with damage_breaks (large hit ends 560109: 1 -> 0). No break chance is asserted. Reference search 2026-11-25: coa-history spell 560109 has 19 cast starts, 24 applies, 24 removals, and 13 SPELL_AURA_BROKEN_SPELL events across 4-8 logs (confirming damage breaks Corrupt Mind live); coabuildhub spells_master_index.json 560109 matches installed Spell.dbc verbatim; no pending_db_world spell_dbc or streamed description override."
     },
     {
       "spell": 255275,
@@ -36790,46 +36830,54 @@
       "label_suffix": "tentacle_crit_damage",
       "quote": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
       "expected": 1.1,
-      "observe_spell": 804999,
+      "observe_spell": 802046,
       "cast_spell": 500110,
-      "caster_entry": 50272,
-      "warmup": [
-        801153
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044,
+        704879
       ],
-      "control": {},
+      "warmup": [
+        802044
+      ],
+      "warmup_power": 2000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ]
+      },
       "treatment": {
         "learn": [
           802728
+        ],
+        "auras": [
+          [
+            500706,
+            0
+          ]
         ]
       },
       "critical": true,
-      "trials": 6,
+      "trials": 10,
       "cast_power": 2000,
-      "cast_wait_ms": 2000,
-      "owned_auras": [
-        [
-          823764,
-          1,
-          50272
-        ]
-      ],
-      "expected_source": "802728 Effect[1] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190, EffectApplyAreaAura) aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS MiscValue 127 (all schools), BasePoints 9 + DieSides 1 = +10% ($s1 = 10; Unit.cpp:10690-10703 multiplies total critical damage by 1.10; Spell.dbc). Tentacle of C'Thun (warmup 801153 -> entry 50272, 30 s duration) casts Shadow bolt 804999 (1.5 s cadence via Mental Assault 801151; AscensionCultistData.h:113 + Contracts.cpp:287 adds 0.08 * caster SP) while caster engages dummy with 500110. fixture spell_power 50000 adds +4000 flat damage per hit so base roll variance is <0.3%; 6 trials * 2000 ms = 12 s < 30 s lifetime. Precondition target_auras on dummy: Vulnerable 213 (aura 197 +10000% crit taken) forces every 804999 to crit in both arms; cast_unit_auras 823764 on caster (read through the owner by GetEffectiveResistChance, matching Necromancer minion precedent) and owned_auras 823764 on 50272 remove partial resists. Expected critical damage ratio 1.10 (excludes 1.0 and 1.20). Reference search 2026-11-25: coa-history 802728: 0 events; coabuildhub 802728 matches verbatim.",
-      "warmup_power": 2000,
+      "cast_wait_ms": 200,
       "target_auras": [
         [
           213,
           1
         ]
       ],
-      "fixture": {
-        "spell_power": 50000
-      },
       "cast_unit_auras": [
         [
           823764,
           1
         ]
-      ]
+      ],
+      "expected_source": "802728 Effect[1] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190, EffectApplyAreaAura) aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS MiscValue 127 (all schools including Physical), BasePoints 9 + DieSides 1 = +10% ($s1 = 10; Unit.cpp:10675-10715 multiplies total melee-class spell critical damage by 1.10; Spell.dbc). Uses synchronously commanded Tentacle of Y'shaarj (warmup 802044 -> entry 50096, slam 802046 Physical DmgClass 2 BasePoints 0 DieSides 1 + 1.0 * Stamina, zero roll variance; fires strictly once per Gaze of C'Thun 500110 via Command -> DoAction(1) with zero autonomous periodic ticks after its initial 100 ms summon slam, eliminating the 1-tick total/count read tearing observed against autonomous 50272's 1500 ms channel). Warmup 802044 waits 1600 ms before the baseline read so any initial summon slam completes before marks[0] and 802728's area aura (UPDATE_TARGET_MAP_INTERVAL 500 ms) applies to 50096 before trial 1. Precondition Eternal Grasp R2 704879 (learned in both arms; duration +50% only, 30000 ms -> 45000 ms, no damage or crit effect) keeps 50096 alive through the 20-trial pilot (20 * 1800 ms + 1600 ms + 2000 ms = 39600 ms < 45000 ms). Precondition target_auras Vulnerable 213 (aura 197 +10000% crit taken) forces every 802046 slam to crit in both arms; cast_unit_auras 823764 prevents 500110 full resist; Insanity 500706 is cleared to 0 each trial. Expected critical damage ratio 1.10 (excludes 1.0 and 1.20). Reference search 2026-11-25: coa-history 802728: 0 events; coabuildhub 802728 matches verbatim."
     },
     {
       "spell": 807128,
