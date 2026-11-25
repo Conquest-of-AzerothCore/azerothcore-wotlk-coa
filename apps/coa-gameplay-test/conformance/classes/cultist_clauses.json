@@ -4025,42 +4025,18 @@
   {
     "spell": 707753,
     "clause": "While above 40 Insanity,",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind measures a two-rate proc-chance increase above a non-zero control baseline (AscensionCultist.cpp:109-110 raises Dark Revelation 300313/706245 proc chance by +10% from 6%->16% / 20%->30% when Insanity 500706 > 40): procs.py:354 rejects 707753 (EffectMiscValue[0]=23 SPELLMOD_EFFECT3, not 18 SPELLMOD_CHANCE_OF_SUCCESS); cooldown_reset_rate.py:213-221 accepts only a single talent (no prerequisite learn list) and hard-alerts on any control-arm reset; flat_chance_rate.py:27 EVENT_METRICS admits only spell_cast_count, owned_creature_summon_count, and owned_creature_spell_cast_count whereas 300313/706245 cast no spell (only SMSG_CLEAR_COOLDOWN and direct Insanity Resource()). Nearest kind: cooldown_reset_rate (needs base_learn + non-zero control baseline rate contrast) or flat_chance_rate (needs spell_cooldown_clear_count / aura_stacks event metric).",
-      "attempts": [
-        {
-          "agent": "cu-h1",
-          "report": ".agents/plans/cu-h1/report.md"
-        },
-        {
-          "agent": "cu-h1b",
-          "report": ".agents/plans/cu-h1b/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "707753 behaviour_metric_delta threshold_40"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 707753,
     "clause": "your chance to trigger Dark Revelation is now increased by $s1%.",
     "labels": [
-      "707753 effect_value e0 #0"
+      "707753 behaviour_metric_delta above_40_learned"
     ],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind measures a two-rate proc-chance increase above a non-zero control baseline (AscensionCultist.cpp:109-110 raises Dark Revelation 300313/706245 proc chance by +10% from 6%->16% / 20%->30% when Insanity 500706 > 40): procs.py:354 rejects 707753 (EffectMiscValue[0]=23 SPELLMOD_EFFECT3, not 18 SPELLMOD_CHANCE_OF_SUCCESS); cooldown_reset_rate.py:213-221 accepts only a single talent (no prerequisite learn list) and hard-alerts on any control-arm reset; flat_chance_rate.py:27 EVENT_METRICS admits only spell_cast_count, owned_creature_summon_count, and owned_creature_spell_cast_count whereas 300313/706245 cast no spell (only SMSG_CLEAR_COOLDOWN and direct Insanity Resource()). Nearest kind: cooldown_reset_rate (needs base_learn + non-zero control baseline rate contrast) or flat_chance_rate (needs spell_cooldown_clear_count / aura_stacks event metric).",
-      "attempts": [
-        {
-          "agent": "cu-h1",
-          "report": ".agents/plans/cu-h1/report.md"
-        },
-        {
-          "agent": "cu-h1b",
-          "report": ".agents/plans/cu-h1b/report.md"
-        }
-      ]
-    }
+    "kind": "claim"
   },
   {
     "spell": 707781,
