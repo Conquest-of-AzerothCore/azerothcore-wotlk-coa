@@ -26,10 +26,10 @@ ENTRY = {'spell': 707504, 'name': 'Spirit Hunting (extra Spirit per Malefic Arro
 ECHO = {'spell': 705843, 'name': 'Loa Spirits (Reclamation recast)', 'kind': 'stack_chance_rate',
         'label_suffix': 'spirit_chance', 'quote': ECHO_QUOTE, 'stack_aura': SPIRIT, 'trigger_spell': RECLAMATION,
         'trial_spell': SPIRIT, 'event_spell': RECLAMATION, 'event_offset': 1, 'chance_pct': 5,
-        'arms': [{'stacks': 1, 'trials': 420}, {'stacks': 2, 'trials': 795}], 'control_trials': 10,
-        'unlearned_trials': 8, 'cast_wait_ms': 2500, 'cast_power': 1000, 'parts': 13, 'dummy_distance': 15}
+        'arms': [{'stacks': 1, 'trials': 385}, {'stacks': 2, 'trials': 729}], 'control_trials': 10,
+        'unlearned_trials': 8, 'cast_wait_ms': 2900, 'cast_power': 1000, 'parts': 14, 'dummy_distance': 15}
 FAIR = {'unlearned': (10, 0), 'control': (10, 0), 'stacks 5': (588, 441), 'stacks 4': (1175, 705)}
-ECHO_FAIR = {'unlearned': (8, 0), 'control': (10, 0), 'stacks 1': (420, 21), 'stacks 2': (795, 80)}
+ECHO_FAIR = {'unlearned': (8, 0), 'control': (10, 0), 'stacks 1': (385, 19), 'stacks 2': (729, 73)}
 ECHO_SPREAD = {'stacks 1': 2, 'stacks 2': 3}
 OLD_MINIMUM = {'parts': 6, 'arms': [{'stacks': 5, 'trials': 590}, {'stacks': 4, 'trials': 1180}]}
 STREAMS = {'streams': 8, 'arms': [{'stacks': 5, 'trials': 74}, {'stacks': 4, 'trials': 147}], 'control_trials': 2,
@@ -124,10 +124,10 @@ class StackChanceRateTests(unittest.TestCase):
 
     def test_the_event_offset_discounts_the_trigger_own_cast(self):
         self.assertEqual(self.pooled(ECHO_FAIR, ECHO, 1, ECHO_SPREAD).status, 'ok')
-        self.assertEqual(self.pooled({**ECHO_FAIR, 'stacks 2': (795, -20)}, ECHO, 1, ECHO_SPREAD).status, 'alert')
+        self.assertEqual(self.pooled({**ECHO_FAIR, 'stacks 2': (729, -20)}, ECHO, 1, ECHO_SPREAD).status, 'alert')
 
     def test_a_roll_on_the_stacks_after_reclamation_grants_its_spirit_alerts_at_one_stack(self):
-        self.assertEqual(self.pooled({**ECHO_FAIR, 'stacks 1': (420, 45)}, ECHO, 1, ECHO_SPREAD).status, 'alert')
+        self.assertEqual(self.pooled({**ECHO_FAIR, 'stacks 1': (385, 41)}, ECHO, 1, ECHO_SPREAD).status, 'alert')
 
     def test_the_flip_proof_size_holds_for_five_sixty_and_seventy_five_percent(self):
         self.assertAlmostEqual(Z_FLIP, 3.719, places=3)
@@ -147,16 +147,16 @@ class StackChanceRateTests(unittest.TestCase):
     def test_ten_parts_or_more_take_the_t_quantile_and_overdispersed_parts_are_measured(self):
         _, [expectation] = self.built(ECHO)
         arms = {arm['name']: arm['minimum'] for arm in expectation.model['arms']}
-        self.assertEqual((arms['stacks 1'], arms['stacks 2']), (5449, 10324))
-        self.assertEqual([arm['trials'] * ECHO['parts'] for arm in ECHO['arms']], [5460, 10335])
+        self.assertEqual((arms['stacks 1'], arms['stacks 2']), (5381, 10195))
+        self.assertEqual([arm['trials'] * ECHO['parts'] for arm in ECHO['arms']], [5390, 10206])
         steady = self.pooled(ECHO_FAIR, ECHO, 1, ECHO_SPREAD)
         self.assertEqual(steady.status, 'ok')
         self.assertIn('between-part', steady.explanation)
-        self.assertIn('12 df', steady.explanation)
+        self.assertIn('13 df', steady.explanation)
         spread = self.pooled(ECHO_FAIR, ECHO, 1, {**ECHO_SPREAD, 'stacks 1': 15})
         self.assertEqual(spread.status, 'measured')
         with self.assertRaises(ValueError):
-            self.built(ECHO, arms=[{'stacks': 1, 'trials': 419}, {'stacks': 2, 'trials': 795}])
+            self.built(ECHO, arms=[{'stacks': 1, 'trials': 384}, {'stacks': 2, 'trials': 729}])
 
     def test_parts_are_pooled_and_one_part_alone_is_too_small(self):
         _, [expectation] = self.built()
