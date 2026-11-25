@@ -1,4 +1,4 @@
-#include "Event.h"
+#include "BattleEvent.h"
 #include "LuaNumber.h"
 
 namespace CoAPetBattles::Engine
