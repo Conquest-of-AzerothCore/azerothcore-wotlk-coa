@@ -43,17 +43,24 @@ invoked at the top of `cultist_spells::OnSpellBeforeEffects`. It exits immediate
 that flag and must still be deflected.) For each hostile target in `*spell->GetUniqueTargetInfo()` whose
 `missCondition == SPELL_MISS_NONE` and who is a living Cultist (`Owner(victim) == victim`) facing the attacker (or carrying
 `HasIgnoreHitDirectionAura()`) and not stunned, it sums `SPELL_AURA_DEFLECT_SPELLS` amounts from spell `525065` and sets
-`target.missCondition = SPELL_MISS_DEFLECT` on a successful roll. No shared engine, SQL, DBC, or other-class files are
-changed.
+`target.missCondition = SPELL_MISS_DEFLECT` on a successful roll.
+
+In `src/server/coa/AscensionCultistEvents.cpp` (`aura_ascension_cultist_event::Check`, `case 525065:`), gate the
+`525066` Silence proc on `info->DmgClass == SPELL_DAMAGE_CLASS_MAGIC` so deflecting a melee ability does not silence the
+attacker, matching `525065 Description[enUS]` (*"Casters whose magic is deflected are silenced for $525066d."*). No shared
+engine, SQL, DBC, or other-class files are changed.
 
 ## Consequences
 
-- Hostile melee abilities targeting a Cultist under Twisted Seal `525065` from the front are deflected; non-Cultists,
+- Hostile melee abilities targeting a Cultist under Twisted Seal `525065` from the front are deflected and do not apply
+  Silence `525066` to the attacker; deflected magic spells still silence the caster for 3 s (`525066`). Non-Cultists,
   Cultists without `525065`, positive spells, and `SPELL_ATTR3_ALWAYS_HIT` spells are unaffected.
-- Regressions (counted pair `prove-525065` `20261125-090856` / `20261125-090925`, build `3732deaa8812`, 0 flips; also
-  confirmed in `prove-2` `20261125-090640` / `20261125-090726`):
+- Regressions (counted pair `cu-rfix42-prove` `20261125-094043` / `20261125-094117`, build `0a0822d00f1f`, 0 flips):
   - `525065 behaviour_metric_delta deflect_melee_ability`: `10` hits before (control) -> `10` cumulative after (gain `0`
     of 10 strikes in both runs, `ok/ok`).
   - `525065 behaviour_metric_delta deflect_magic`: `20` before -> `20` after (gain `0` of 20 strikes in both runs, `ok/ok`).
-  - `525065 behaviour_metric_delta silence_on_deflect`: `0 -> 1` and `0` after expiry in both runs (`ok/ok`).
+  - `525065 behaviour_metric_delta silence_on_deflect` (with `+100%` hit fixture `43689` on `dummy`): `0 -> 1` (at
+    `+3268 ms`) -> `0` (at `+3757 ms`) in both runs (`ok/ok`).
+  - `525065 behaviour_metric_delta no_silence_on_melee_deflect` (with `+100%` hit fixture `43689` on `dummy`, Night
+    Slaughter `23583`): `0` before -> `0` after in both runs (`ok/ok`).
   - Sibling checks `duration`, `no_cast`, `no_attack`, `no_attack_applied`: all `ok/ok`.

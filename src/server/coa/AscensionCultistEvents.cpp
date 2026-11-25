@@ -65,7 +65,9 @@ class aura_ascension_cultist_event : public AuraScript
                 case 800463: return (avoided || (damage && damage->GetAbsorb())) && Chance(player, id);
                 case 802043: return avoided;
                 case 560715: return dealt && player->GetHealthPct() < 35 && Chance(player, id, 120000);
-                case 525065: return info && (event.GetHitMask() & (PROC_HIT_DEFLECT | PROC_HIT_REFLECT));
+                case 525065:
+                    return info && info->DmgClass == SPELL_DAMAGE_CLASS_MAGIC &&
+                        (event.GetHitMask() & (PROC_HIT_DEFLECT | PROC_HIT_REFLECT));
                 default: return false;
             }
         }
