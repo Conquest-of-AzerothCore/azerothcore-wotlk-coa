@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Southmoon Amulet sits in the open courtyard instead of inside the Tanaris ruin wall (#13429)",
+  "contract": "#13429 reported Southmoon Amulet (gameobject entry 515843, guid 6942219, drops Southmoon Amulet 515843) in Tanaris mostly buried in a wall. The realm-map pass placed it at (-9271.600, -3086.300) and rev_20261006_65 dropped z to 12.9566, enclosing it inside a solid stone wall of Tanarisruins04.wmo (wall roof z 25.10, south face 0.50 yd away). rev_20261125_13429 moves it to its first-pass realm-dump XY (-9266.215, -3084.820) on stock terrain z 14.421 in the open courtyard. Expected: the amulet stands at that spot, rests flush on terrain, is not under water, has clear headroom, and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -9266.2,
+    "y": -3084.8,
+    "z": 14.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 515843,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the amulet stands in the open courtyard at (-9266.215, -3084.820, 14.421) instead of inside the ruin wall",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -9266.215,
+      "y": -3084.82,
+      "z": 14.421,
+      "max": 0.3,
+      "guid": 6942219,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the amulet rests flush on terrain",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.1,
+      "max": 0.1,
+      "guid": 6942219,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the amulet is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6942219,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the amulet is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6942219,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "no model surface lies above the amulet",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6942219,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 515843
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the amulet is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
