@@ -731,18 +731,16 @@
       },
       {
         "claim": "and unleash Apocalyptic Skies upon the enemy.",
-        "labels": []
+        "labels": [
+          "301068 behaviour_metric_delta portal_spawn",
+          "301068 behaviour_metric_delta portal_cast_gaze",
+          "301068 behaviour_metric_delta portal_cast_horrorbolt",
+          "301068 behaviour_metric_delta portal_cast_beam",
+          "301068 behaviour_metric_delta portal_only_three",
+          "301068 behaviour_metric_delta portal_single_cast"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "301068 Row 66[1] (\"and unleash Apocalyptic Skies upon the enemy.\") references the sub-spell Apocalyptic Skies @s:301988:0@ (Row 67), whose sub-claim Row 67[2] (\"before disappearing.\") remains an unproven tool gap (summon_cast_once). Per review I4, Row 66[1] is left uncounted rather than double-counting Row 67[0] portal_spawn alone.",
-      "attempts": [
-        {
-          "agent": "cu-t2b",
-          "report": ".agents/plans/cu-t2b/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 301068,
@@ -761,23 +759,17 @@
           "301068 behaviour_metric_delta portal_cast_gaze",
           "301068 behaviour_metric_delta portal_cast_horrorbolt",
           "301068 behaviour_metric_delta portal_cast_beam",
-          "301068 behaviour_metric_delta portal_only_three"
+          "301068 behaviour_metric_delta portal_only_three",
+          "301068 behaviour_metric_delta portal_single_cast"
         ]
       },
       {
         "claim": "before disappearing.",
-        "labels": []
+        "labels": [
+          "301068 behaviour_metric_delta portal_single_cast"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "Matches merged Depths of Madness 706911 tool_gap for \"before disappearing.\" (Row 67[2]): while portal_only_three proves 100% of portal 533030 damage comes from {520332, 800416, 805573} and 0 heals, no existing conformance kind proves per-portal exact-one-cast and post-cast despawn (\"before disappearing.\": 533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, AscensionCultistSummons.cpp:290-297).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 301180,
@@ -876,23 +868,17 @@
           "301200 behaviour_metric_delta portal_cast_gaze",
           "301200 behaviour_metric_delta portal_cast_horrorbolt",
           "301200 behaviour_metric_delta portal_cast_beam",
-          "301200 behaviour_metric_delta portal_only_three"
+          "301200 behaviour_metric_delta portal_only_three",
+          "301200 behaviour_metric_delta portal_single_cast"
         ]
       },
       {
         "claim": "before disappearing.",
-        "labels": []
+        "labels": [
+          "301200 behaviour_metric_delta portal_single_cast"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "Matches merged Depths of Madness 706911 tool_gap for \"before disappearing.\" (Row 75[2]): while portal_only_three proves 100% of portal 533030 damage comes from {520332, 800416, 805573} and 0 heals, no existing conformance kind proves per-portal exact-one-cast and post-cast despawn (\"before disappearing.\": 533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, AscensionCultistSummons.cpp:290-297).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 301209,
@@ -3906,27 +3892,17 @@
           "706911 behaviour_metric_delta portal_cast_gaze",
           "706911 behaviour_metric_delta portal_cast_horrorbolt",
           "706911 behaviour_metric_delta portal_cast_beam",
-          "706911 behaviour_metric_delta portal_casts"
+          "706911 behaviour_metric_delta portal_casts",
+          "706911 behaviour_metric_delta portal_single_cast"
         ]
       },
       {
         "claim": "before disappearing",
-        "labels": []
+        "labels": [
+          "706911 behaviour_metric_delta portal_single_cast"
+        ]
       }
-    ],
-    "tool_gap": {
-      "reason": "No existing conformance kind reads two of the properties the tooltip states for Depths of Madness 706911's void portal 533030: (1) exactly one cast per portal and no spell other than Gaze of C'thun, Horrorbolt or Obliteration Beam: the harness cast counter ProcCounter::CastCount is keyed by the creature guid and spell (CoAGameplayTest.cpp:768-783) and owned_creature_spell_cast_count needs a present owned creature (6127-6132), so it reads one portal; the cumulative reads (spell_damage_count with caster_entry, owned_creature_damage_count) count damage events, not casts (Obliteration Beam is a channel, 805572 DurationIndex 285, with several 805573 ticks per cast), and metric_delta compares a reading with an expectation or with one second read (fields_sum is two terms, ratio_to_metric one base), so the portal count (owned_creature_summon_count) cannot be set against the sum of the three spells' casts; flat_chance_rate takes a chance below 100% and judges a band around it, which for one spell would assert its unstated share; (2) 'before disappearing': AscensionCultistSummons.cpp:290-297 despawns the portal 5 s (10 s if channeled) after its cast, inside its 12000 ms summon duration (AscensionCultistEvents.cpp:230-232); proving the despawn follows the cast needs a read of one portal a known time after its cast, but the portal exists only after a 15% roll that Chance() (AscensionCultist.cpp:105-115) takes from roll_chance_f without the chance-of-success modifier forced_roll sets, and a metric_delta reading taken after a fixed series of Gaze casts sees only portals of the last ~7 casts (12 s / 1.7 s), none with probability 0.85^7 = 32%, so a 'gone before 12 s' read cannot be sized to 0.1%. The 706911 portal_casts read (portal damage, none present at 13 s) is the evidence kept under 'casts either ...' only as 'the portals deal damage'; it does not prove 'before disappearing'.",
-      "attempts": [
-        {
-          "agent": "cu-h3c",
-          "report": ".agents/plans/cu-h3c/report.md"
-        },
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    ]
   },
   {
     "spell": 706915,
