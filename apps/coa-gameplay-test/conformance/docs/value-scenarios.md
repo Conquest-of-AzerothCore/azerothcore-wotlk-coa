@@ -48,7 +48,9 @@ The cast, when a cooldown or an aura is measured, targets the fixture creature `
 effect has an enemy target (implicit targets 2, 6, 15, 16, 24), a fixture ally player `ally` when an active effect
 is a resurrection (`SPELL_EFFECT_RESURRECT` 18 or `SPELL_EFFECT_RESURRECT_NEW` 113, `targets_resurrect`) — the ally
 is killed with a `die` step right before the cast, since `TARGET_FLAG_CORPSE_ALLY` needs a dead friendly unit, not
-a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — and the caster otherwise; an aura
+a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — or when the rank is listed in
+`value_ally_casts` (ADR 1232, grouping `caster` and `ally` when an active effect uses `TARGET_UNIT_TARGET_RAID` 57,
+and reading ally/raid-targeted aura metrics on `ally`), and the caster otherwise; an aura
 whose target is the caster is read on the caster. A cost in a power other than mana is set to its cost before the
 cast. A cost paid from health (PowerType -2, read as 4294967294) writes no `set_power`: a `SETUP:` assertion checks
 that the caster's health is above the cost instead, since the server refuses the cast at health equal to or below it

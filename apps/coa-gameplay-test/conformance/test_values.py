@@ -1067,6 +1067,30 @@ class ValueAllyCastTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.build(self.ALLY_ONLY, [{'spell': self.ALLY_ONLY}, {'spell': self.ALLY_ONLY}])
 
+    def test_ally_cast_reads_ally_and_raid_auras_on_ally_and_groups_for_raid_targets(self):
+        for spell_id, expect_group, metrics in (
+                (500751, True, ('aura', 'aura_duration_ms', 'aura_amount')),
+                (520345, False, ('aura', 'aura_amplitude_ms', 'aura_duration_ms')),
+                (704476, False, ('aura', 'aura_duration_ms', 'aura_amount'))):
+            with self.subTest(spell=spell_id):
+                class_file = {**self.class_file, 'value_ally_casts': [{'spell': spell_id}]}
+                scenario, _, _ = value_scenario(
+                    class_file, ClassSpell(spell_id, 'Test', (spell_id,), spell_id, 0, False), spell_id)
+                run.validate(scenario)
+                steps = scenario['steps']
+                cast, = self.casts(scenario)
+                self.assertEqual((cast['spell'], cast['target']), (spell_id, ALLY))
+                self.assertEqual(any(step.get('action') == 'group' for step in steps), expect_group)
+                aura_steps = [step for step in steps if step.get('metric') in metrics and step.get('spell') == spell_id]
+                self.assertTrue(aura_steps)
+                self.assertTrue(all(step['actor'] == ALLY for step in aura_steps))
+                plain, _, _ = value_scenario(
+                    {k: v for k, v in self.class_file.items() if k != 'value_ally_casts'},
+                    ClassSpell(spell_id, 'Test', (spell_id,), spell_id, 0, False), spell_id)
+                plain_auras = [step for step in plain['steps']
+                               if step.get('metric') in metrics and step.get('spell') == spell_id]
+                self.assertTrue(all(step['actor'] == CASTER for step in plain_auras))
+
 
 class FirstAuraEffectTest(unittest.TestCase):
     FACTS = RankFacts(passive=False, effects=(50, 28, 27), aura_names=(0, 0, 8), target_a=(47, 47, 31),
