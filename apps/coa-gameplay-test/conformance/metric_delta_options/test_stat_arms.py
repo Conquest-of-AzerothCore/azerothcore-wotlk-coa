@@ -109,7 +109,8 @@ class StatArmsTests(unittest.TestCase):
         }
         if drop:
             found.pop(drop(rec))
-        fake = FakeRun(found, cast_failures=cast_failures or {})
+        fake = FakeRun(found)
+        fake.cast_failures = cast_failures or {}
         return judge_behaviour(base_verdict(exp), fake, exp)
 
     def judge_active(self, out=(850.0, 1183.0, 1516.0, 850.0),
@@ -127,7 +128,8 @@ class StatArmsTests(unittest.TestCase):
         }
         if drop:
             found.pop(drop(rec))
-        fake = FakeRun(found, cast_failures=cast_failures or {})
+        fake = FakeRun(found)
+        fake.cast_failures = cast_failures or {}
         return judge_behaviour(base_verdict(exp), fake, exp)
 
     def test_seeded_ok_in_both_modes(self):

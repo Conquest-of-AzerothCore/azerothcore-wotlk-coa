@@ -2261,8 +2261,12 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
 
 def metric_delta_spec(entry: dict) -> MetricDeltaSpec:
     if forbids_expected(entry):
-        if 'expected' in entry or 'before_expected' in entry:
-            raise ValueError(f'{entry["spell"]} metric_delta direction option forbids expected and before_expected')
+        forbidden = ('expected', 'before_expected', 'expected_gain', 'expected_ratio',
+                     'after_at_least', 'after_at_most', 'after_expiry_expected')
+        present = [key for key in forbidden if entry.get(key) is not None or key in ('expected', 'before_expected')
+                   and key in entry]
+        if present:
+            raise ValueError(f'{entry["spell"]} metric_delta direction option forbids {present}')
         expected, before_expected = None, None
     else:
         expected, before_expected = entry['expected'], entry['before_expected']
