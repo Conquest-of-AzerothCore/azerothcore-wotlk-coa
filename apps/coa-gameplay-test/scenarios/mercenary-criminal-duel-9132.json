@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "name": "Mercenary for Hire!: striking a same-faction duel opponent gives no Criminal (#9132)",
+  "contract": [
+    "Issue #9132. Criminal: Blood On Your Hands 9930873 punishes a Mercenary who attacks an unwilling member of",
+    "their own faction. A duel is consensual: a High-Risk Human Mercenary duels a same-faction Human in Goldshire",
+    "(Duel 7266, CMSG_DUEL_ACCEPTED), strikes first and lands several hits, and gets no Criminal. Dodge and parry",
+    "are zeroed on the opponent so the hits land."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "mercenary",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 600,
+      "expertise_rating": 600
+    },
+    {
+      "id": "friend",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 84421
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary-to-be is in High-Risk",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 1004019,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the ruleset spell's global cooldown pass",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "actor": "mercenary",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: and takes up Mercenary for Hire!",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "actor": "mercenary",
+      "map": 0,
+      "x": -9451.3,
+      "y": 62.8,
+      "z": 55.9,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "friend",
+      "map": 0,
+      "x": -9449.3,
+      "y": 62.8,
+      "z": 55.9,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "label": "Let both arrive in Goldshire",
+      "ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "mercenary",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_health",
+      "actor": "friend",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "friend",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
+      "action": "learn",
+      "actor": "mercenary",
+      "spell": 7266
+    },
+    {
+      "action": "cast",
+      "label": "The Mercenary challenges a same-faction Human to a duel",
+      "actor": "mercenary",
+      "spell": 7266,
+      "target": "friend"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Human is asked to duel",
+      "actor": "friend",
+      "metric": "server_packets",
+      "opcode": 359,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "client_packet",
+      "label": "The Human accepts (CMSG_DUEL_ACCEPTED)",
+      "actor": "friend",
+      "opcode": 364,
+      "consumed": false,
+      "fields": [
+        {
+          "duel_arbiter": "friend"
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the duel counts down",
+      "actor": "friend",
+      "metric": "server_packets",
+      "opcode": 695,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the duel countdown finish",
+      "ms": 4000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mercenary",
+      "metric": "melee_attack_count",
+      "save_as": "duel_swings"
+    },
+    {
+      "action": "attack",
+      "label": "The Mercenary strikes first in the duel",
+      "actor": "mercenary",
+      "target": "friend"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary's swings go out",
+      "actor": "mercenary",
+      "metric": "melee_attack_count",
+      "relative_to": "duel_swings",
+      "min": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mercenary"
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong Criminal application time to land",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a duel gives no Criminal",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 0
+    }
+  ]
+}

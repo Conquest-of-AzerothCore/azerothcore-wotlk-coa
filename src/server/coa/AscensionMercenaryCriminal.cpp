@@ -38,7 +38,8 @@ Player* MercenaryStriking(Unit* attacker, Unit* victim, Player*& innocent)
     Player* mercenary = attacker ? attacker->GetCharmerOrOwnerPlayerOrPlayerItself() : nullptr;
     innocent = victim ? victim->ToPlayer() : nullptr;
     if (!mercenary || !innocent || mercenary == innocent || !AscensionMercenary::Active(mercenary) ||
-        AscensionMercenary::Active(innocent) || mercenary->GetTeamId() != innocent->GetTeamId())
+        AscensionMercenary::Active(innocent) || mercenary->GetTeamId() != innocent->GetTeamId() ||
+        (mercenary->duel && mercenary->duel->Opponent == innocent))
         return nullptr;
     return mercenary;
 }
