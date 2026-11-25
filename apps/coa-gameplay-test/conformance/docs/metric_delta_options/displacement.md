@@ -7,7 +7,8 @@ the reading when the phase casts none) and `position_x` and `position_y` right b
 points, so the plain judge (`expected`, `expected_gain`, `expected_ratio`, `after_at_least`, `tolerance`) judges the
 displacement of each phase. The model names the evidence metric `displacement_2d`, a state the module declares with
 the entry's own `position_x` reads (merged through `metric_delta_options.option_rows`, so the class files' metrics stay
-classed), promised by `dash\w*|direction|distance|leap\w*|range|yds?`. A missing position read leaves
+classed), promised by `charge\w*|dash\w*|direction|distance|leap\w*|range|teleport\w*|yds?` (ADR 1302). A missing
+position read leaves
 the judged reading missing. Absent, the scenario is unchanged.
 
 `{"bearing": degrees, "bearing_tolerance": degrees}` (ADR 0740; tolerance default 15, in (0, 90)) also judges the
@@ -16,3 +17,7 @@ long and point within the tolerance of `bearing` (counterclockwise from the faci
 
 Witch Hunter: Vault 500085 `strafe_left` (90), `vault_backward` (180) and `vault_speed` (ratio 1.5 at +50% run
 speed); Night Walker 789256 `vault_range` (Vault 15 yd without it, 18 with it, the D-9 start point).
+
+Cultist (ADR 1302, provisional): Dreadfall 806175 `charge_displacement` (charges forward toward dummy at 15 yd) and
+Dark Veil 520345 `teleport_holds` / `teleport_broken_control` (teleports to grouped ally at channel expiry only when the
+shield holds).
