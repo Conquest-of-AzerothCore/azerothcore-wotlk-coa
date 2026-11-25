@@ -129,7 +129,6 @@ namespace CoAPetBattles::Follow
             if (!_world.Online(character))
             {
                 Remove(entry);
-                _followers.erase(found);
                 continue;
             }
             if (!_world.Owns(character, entry.species))

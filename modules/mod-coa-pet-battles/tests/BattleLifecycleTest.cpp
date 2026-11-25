@@ -47,6 +47,7 @@ namespace
         std::vector<uint32_t> displays;
         std::vector<uint64_t> shownTo;
         std::vector<uint64_t> stale;
+        std::vector<uint64_t> cueCharacters;
 
         void Send(uint64_t, std::string_view module, std::string_view action, std::string const& payload) override
         {
@@ -72,8 +73,9 @@ namespace
         Store::Journal* JournalOf(uint64_t) override { return online ? journal.get() : nullptr; }
         void Flush(Store::Journal& target) override { target.TakeWrites(); }
         void SyncCompanions(uint64_t) override { }
-        void Show(uint64_t handle, uint64_t, Cue const&) override
+        void Show(uint64_t handle, uint64_t, Cue const& cue) override
         {
+            cueCharacters.push_back(cue.character);
             shownTo.push_back(handle);
             if (!live.count(handle))
                 stale.push_back(handle);
@@ -228,4 +230,16 @@ TEST(CoAPetBattlesLifecycle, CuesForADespawnedStandInAreDropped)
     arena.RunFor(10000);
     EXPECT_TRUE(arena.world.live.empty());
     EXPECT_TRUE(arena.world.stale.empty());
+}
+
+TEST(CoAPetBattlesLifecycle, EveryCueNamesItsCharacter)
+{
+    Arena arena;
+    arena.Start();
+    arena.RunFor(3000);
+    arena.battles.Message(7, "pbt", "cmd", "A1");
+    arena.RunFor(6000);
+    ASSERT_FALSE(arena.world.cueCharacters.empty());
+    for (uint64_t character : arena.world.cueCharacters)
+        EXPECT_EQ(character, 7u);
 }

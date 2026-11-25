@@ -112,6 +112,7 @@ namespace CoAPetBattles::Battle
             cue.value = value;
             cue.ranged = ranged;
             cue.heal = heal;
+            cue.character = _character;
             if (kind == CueKind::Health)
                 _health[Index(side)] = value;
             uint64_t const other = kind == CueKind::Cast ? _handles[Index(target)] : 0;
@@ -144,6 +145,7 @@ namespace CoAPetBattles::Battle
             cue.kind = CueKind::Uncrate;
             cue.side = Side::E;
             cue.value = CrateObject;
+            cue.character = _character;
             _world.Show(_handles[Index(Side::E)], 0, cue);
         }
 

@@ -33,6 +33,7 @@ namespace CoAPetBattles::Battle
         uint32_t value = 0;
         bool ranged = false;
         bool heal = false;
+        uint64_t character = 0;
     };
 
     class World

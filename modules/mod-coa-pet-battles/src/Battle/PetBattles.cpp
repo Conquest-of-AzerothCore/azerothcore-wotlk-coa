@@ -189,6 +189,7 @@ namespace CoAPetBattles::Battle
                 summon->SetDisplayId(display);
             summon->SetMaxHealth(StandInHealth);
             summon->SetHealth(StandInHealth);
+            summon->SetRegeneratingHealth(false);
             _summons[++_lastHandle] = { character, side, summon->GetGUID(), summon->GetMapId(),
                 summon->GetInstanceId() };
             return Spawned { _lastHandle, summon->GetDisplayId() };
@@ -241,7 +242,7 @@ namespace CoAPetBattles::Battle
             auto const record = _summons.find(handle);
             if (cue.kind == CueKind::Uncrate)
             {
-                RemoveCrate(record == _summons.end() ? 0 : record->second.character);
+                RemoveCrate(cue.character);
                 return;
             }
             Creature* creature = StandIn(handle);
@@ -479,14 +480,13 @@ namespace CoAPetBattles::Battle
     public:
         bool Online(uint64_t character) const override
         {
-            Player* player = Find(character);
-            return player && player->IsInWorld();
+            return Find(character) != nullptr;
         }
 
         bool Wanted(uint64_t character) const override
         {
             Player* player = Find(character);
-            if (!player || !player->IsAlive() || player->IsMounted())
+            if (!player || !player->IsInWorld() || !player->IsAlive() || player->IsMounted())
                 return false;
             uint32_t const phase = player->GetPhaseMask();
             return phase == NormalPhase || phase >= AllPhases;
