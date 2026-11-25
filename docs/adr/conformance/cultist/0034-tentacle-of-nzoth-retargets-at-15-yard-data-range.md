@@ -107,22 +107,26 @@ No shared engine, DBC, SQL, or client text changes.
   `Thoughtseize` (`806596`)'s runtime `SpellRange` (`15.0 yd` + combat reach = `17.025 yd` centre-to-centre against
   Harvest Golem `36`) measured from the tentacle.
 - **Observations (not decisions):**
-  - **(a) Previous target keeps Thoughtseize after retargeting — dual-target affliction (open for owner ruling):**
-    `ApplyThoughtseize` (`AscensionCultistSummons.cpp:192-208`) calls `player->AddAura(Thoughtseize, target)` without
-    removing `806596` from previously afflicted targets when they leave range or when `Target()` picks a replacement.
+  - **(a) Previous target keeps Thoughtseize after retargeting — dual-target affliction (resolved by owner ruling O-22,
+    see ADR 0036):**
+    `ApplyThoughtseize` (`AscensionCultistSummons.cpp:192-208`) called `player->AddAura(Thoughtseize, target)` without
+    removing `806596` from previously afflicted targets when they left range or when `Target()` picked a replacement.
     In the committed `retarget_out_of_range` pair (`20261125-132735` and `20261125-132804`), at `t = 6800 ms` (after
-    the `6000 ms` retarget pulse), `dummy` at `19.62–22.25 yd` (near) and `50.73–52.70 yd` (far) still holds
-    `primary_aura = 1` simultaneously while `area1` carries `secondary_aura = 1`. On natural `8000 ms` expiry, ADR
-    0016's `ClearThoughtseize(ExpiryGrace())` (`:178-186, 406`) clears `area1`'s freshly applied aura (`~6000 ms >
-    200 ms`) while sparing `dummy`'s `<= 200 ms` aura so `dummy` still takes its 4th Shadow tick out of range. This
-    contrasts with `Spell.cpp:3506-3510`, where a real channel removes the aura immediately on range exit. **Status:
-    open for an owner ruling** (whether to strip `806596` from an out-of-range target when dropped/retargeted, and
-    whether range should be checked more often than every `6000 ms`). No regression assertion is added on this
-    behaviour yet.
-  - **(b) No other target in range:** When the primary target leaves range and no other combat target is within range
-    (`Target()` returns `nullptr`), `501464` stays alive until its natural `8000 ms` despawn (`UpdateAI` `:324,
-    356-360` checks only owner liveness, `100 yd`, and phase) and the previous target keeps its already-applied
-    `806596` aura until expiry. The tooltip is silent on no-other-target behaviour.
+    the `6000 ms` retarget pulse), `dummy` at `19.62–22.25 yd` (near) and `50.73–52.70 yd` (far) still held
+    `primary_aura = 1` simultaneously while `area1` carried `secondary_aura = 1`. On natural `8000 ms` expiry, ADR
+    0016's `ClearThoughtseize(ExpiryGrace())` (`:178-186, 406`) cleared `area1`'s freshly applied aura (`~6000 ms >
+    200 ms`) while sparing `dummy`'s `<= 200 ms` aura so `dummy` still took its 4th Shadow tick out of range. This
+    contrasted with `Spell.cpp:3506-3510`, where a real channel removes the aura immediately on range exit.
+    **Superseded by owner ruling O-22 (2026-11-25) and Cultist ADR
+    `0036-tentacle-of-nzoth-clears-thoughtseize-out-of-range.md`**, which removes `806596` from an out-of-range target
+    on the first `UpdateAI` tick and retargets immediately.
+  - **(b) No other target in range (partially superseded by owner ruling O-22, see ADR 0036):**
+    When the primary target left range and no other combat target was within range (`Target()` returns `nullptr`),
+    `501464` stayed alive until its natural `8000 ms` despawn (`UpdateAI` checks only owner liveness, `100 yd`, and
+    phase) and the previous target kept its already-applied `806596` aura until expiry. Under owner ruling O-22 and
+    Cultist ADR `0036-tentacle-of-nzoth-clears-thoughtseize-out-of-range.md`, the out-of-range target now loses
+    `806596` immediately even with no other target in range, while `501464` still stays alive until natural despawn
+    (tooltip silent).
   - **(c) Presence of N'Zoth / Eldritch Tentacle (`500464`) unchanged:** Creature `500464` (`803037` `RangeIndex 1 =
     Self`, `500707` `RangeIndex 6 = 100 yd`) calls the same `ApplyThoughtseize` (`806596`, `15 yd`) through
     `Target(player)` (`AscensionCultistSummons.cpp:196-197, 375-376`) and still uses the hardcoded `40` / `30 yd`
