@@ -66,7 +66,8 @@ def swing_charge_spec(entry: dict) -> SwingChargeSpec:
                                        or cast_power_raw < 0):
         raise ValueError(f'{spell} {KIND} cast_power must be a non-negative integer')
     trigger_wait_ms = entry.get('trigger_wait_ms', DEFAULT_TRIGGER_WAIT_MS)
-    if isinstance(trigger_wait_ms, bool) or not isinstance(trigger_wait_ms, int) or trigger_wait_ms < MIN_TRIGGER_WAIT_MS:
+    if (isinstance(trigger_wait_ms, bool) or not isinstance(trigger_wait_ms, int)
+            or trigger_wait_ms < MIN_TRIGGER_WAIT_MS):
         raise ValueError(f'{spell} {KIND} trigger_wait_ms must be >= {MIN_TRIGGER_WAIT_MS}')
     final_timeout_ms = entry.get('final_timeout_ms', DEFAULT_FINAL_TIMEOUT_MS)
     if (isinstance(final_timeout_ms, bool) or not isinstance(final_timeout_ms, int)

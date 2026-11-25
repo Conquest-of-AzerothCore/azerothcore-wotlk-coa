@@ -81,7 +81,8 @@ def summon_random_direction_spec(entry: dict) -> SummonRandomDirectionSpec:
     if isinstance(max_resultant, bool) or not isinstance(max_resultant, (int, float)) or not 0 < max_resultant < 1:
         raise ValueError(f'{spell} {KIND} max_resultant must lie strictly in (0, 1)')
     min_sectors = entry.get('min_sectors', DEFAULT_MIN_SECTORS)
-    if isinstance(min_sectors, bool) or not isinstance(min_sectors, int) or not DEFAULT_MIN_SECTORS <= min_sectors <= SECTORS:
+    if (isinstance(min_sectors, bool) or not isinstance(min_sectors, int)
+            or not DEFAULT_MIN_SECTORS <= min_sectors <= SECTORS):
         raise ValueError(f'{spell} {KIND} min_sectors must be in {DEFAULT_MIN_SECTORS}..{SECTORS}')
     cast_power = entry.get('cast_power')
     if cast_power is not None and (isinstance(cast_power, bool) or not isinstance(cast_power, int) or cast_power < 0):
@@ -259,9 +260,9 @@ def summon_random_direction_verdict(base: Verdict, runs: list[Run], model: dict)
                                    f'but occupied only {occupied}/{SECTORS} sectors (< {min_sectors}, fixed fan or '
                                    f'discrete directions)')
     return replace(base, status='ok', measured=resultant, expected=0.0, low=0.0, high=max_resultant, detail=detail,
-                   explanation=f'control 0; {total} copies ran {min_dist:.2f}..{max_dist:.2f} yd (>= {min_run_yd:g} yd), '
-                               f'R={resultant:.4f} <= {max_resultant:g}, {occupied}/{SECTORS} sectors '
-                               f'(>= {min_sectors})')
+                   explanation=f'control 0; {total} copies ran {min_dist:.2f}..{max_dist:.2f} yd '
+                               f'(>= {min_run_yd:g} yd), R={resultant:.4f} <= {max_resultant:g}, '
+                               f'{occupied}/{SECTORS} sectors (>= {min_sectors})')
 
 
 def summon_random_direction_single_verdict(base: Verdict, run: Run, model: dict) -> Verdict:
