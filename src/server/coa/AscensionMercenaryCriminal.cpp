@@ -15,6 +15,7 @@
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
+#include "WorldPacket.h"
 #include "WorldSession.h"
 #include <array>
 #include <unordered_set>
@@ -129,11 +130,13 @@ bool IsCriminal(Player const* player)
     return player && player->HasAura(SPELL_CRIMINAL);
 }
 
-bool TravelsCasterAway(SpellInfo const* info)
+bool TravelsCasterAway(Spell const* spell)
 {
-    for (SpellEffectInfo const& effect : info->Effects)
-        if (effect.Effect == SPELL_EFFECT_TELEPORT_UNITS && effect.TargetA.GetTarget() == TARGET_UNIT_CASTER &&
-            (effect.TargetB.GetTarget() == TARGET_DEST_DB || effect.TargetB.GetTarget() == TARGET_DEST_HOME))
+    Unit const* caster = spell->GetCaster();
+    for (SpellEffectInfo const& effect : spell->GetSpellInfo()->Effects)
+        if (effect.Effect == SPELL_EFFECT_TELEPORT_UNITS &&
+            (effect.TargetB.GetTarget() == TARGET_DEST_DB || effect.TargetB.GetTarget() == TARGET_DEST_HOME) &&
+            (effect.TargetA.GetTarget() == TARGET_UNIT_CASTER || spell->m_targets.GetUnitTarget() == caster))
             return true;
     return false;
 }
@@ -141,12 +144,6 @@ bool TravelsCasterAway(SpellInfo const* info)
 void RefuseRetreat(Player* player)
 {
     ChatHandler(player->GetSession()).SendNotification(NoRetreatMessage);
-}
-
-bool SummonedByPlayer(Player const* player, Unit const* summoner)
-{
-    Player const* other = summoner ? summoner->ToPlayer() : nullptr;
-    return other && other != player && other->GetSession()->GetSecurity() == SEC_PLAYER;
 }
 
 bool GroupHasCriminal(Player* player)
@@ -246,7 +243,7 @@ public:
     void OnSpellCheckCast(Spell* spell, bool strict, SpellCastResult& result) override
     {
         Player* player = spell->GetCaster()->ToPlayer();
-        if (result != SPELL_CAST_OK || !IsCriminal(player) || !TravelsCasterAway(spell->GetSpellInfo()))
+        if (result != SPELL_CAST_OK || !IsCriminal(player) || !TravelsCasterAway(spell))
             return;
 
         result = SPELL_FAILED_DONT_REPORT;
@@ -259,19 +256,29 @@ class ascension_mercenary_criminal_no_retreat : public PlayerScript
 {
 public:
     ascension_mercenary_criminal_no_retreat()
-        : PlayerScript("ascension_mercenary_criminal_no_retreat",
-                       {PLAYERHOOK_ON_BEFORE_TELEPORT, PLAYERHOOK_CAN_LFG_TELEPORT}) { }
+        : PlayerScript("ascension_mercenary_criminal_no_retreat", {PLAYERHOOK_CAN_LFG_TELEPORT}) { }
 
-    bool OnPlayerBeforeTeleport(Player* player, uint32, float, float, float, float, uint32, Unit* target) override
+    bool OnPlayerCanLfgTeleport(Player* player) override { return !IsCriminal(player); }
+};
+
+class ascension_mercenary_criminal_no_summons : public ServerScript
+{
+public:
+    ascension_mercenary_criminal_no_summons()
+        : ServerScript("ascension_mercenary_criminal_no_summons", {SERVERHOOK_CAN_PACKET_RECEIVE}) { }
+
+    bool CanPacketReceive(WorldSession* session, WorldPacket const& packet) override
     {
-        if (!IsCriminal(player) || !SummonedByPlayer(player, target))
+        if (packet.GetOpcode() != CMSG_SUMMON_RESPONSE || packet.size() < sizeof(uint64) + sizeof(uint8) || !session)
+            return true;
+
+        Player* player = session->GetPlayer();
+        if (!packet.read<uint8>(sizeof(uint64)) || !IsCriminal(player))
             return true;
 
         RefuseRetreat(player);
         return false;
     }
-
-    bool OnPlayerCanLfgTeleport(Player* player) override { return !IsCriminal(player); }
 };
 
 class ascension_mercenary_criminal_outcast : public PlayerScript
@@ -321,5 +328,6 @@ void AddSC_AscensionMercenaryCriminal()
     new ascension_mercenary_criminal_outlaw();
     new ascension_mercenary_criminal_no_retreat_spells();
     new ascension_mercenary_criminal_no_retreat();
+    new ascension_mercenary_criminal_no_summons();
     new ascension_mercenary_criminal_outcast();
 }

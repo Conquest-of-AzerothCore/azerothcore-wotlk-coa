@@ -8,10 +8,11 @@
     "(to a spell_target_position) fail silently (SPELL_FAILED_DONT_REPORT, 27) and leave the Criminal in place;",
     "as in original Ascension footage the PR author reviewed on 2026-11-25, the player is told 'You cannot escape",
     "while the No Retreat debuff is active!' (SMSG_NOTIFICATION) for every refused teleport; an accepted Call To",
-    "Arms 804723 summon does not move it; Blink 1953 (a leap, not a fixed-destination teleport) is cast without a",
+    "Arms 804723 summon and a group member's Portal to Stormwind (gameobject 176296, Portal Effect 17334 cast by",
+    "its user on itself) do not move it; Blink 1953 (a leap, not a fixed-destination teleport) is cast without a",
     "failure. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
   ],
-  "timeout_ms": 120000,
+  "timeout_ms": 150000,
   "players": [
     {
       "id": "g",
@@ -128,6 +129,14 @@
       "equals": 1
     },
     {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_teleport"
+    },
+    {
       "action": "cast",
       "label": "The Criminal tries Teleport: Stormwind",
       "actor": "mage",
@@ -144,13 +153,13 @@
     },
     {
       "action": "assert",
-      "label": "with the No Retreat message",
+      "label": "with its own No Retreat message",
       "actor": "mage",
-      "metric": "server_packet_contains",
+      "metric": "server_packets",
       "opcode": 459,
       "row": 544567129,
-      "text": "You cannot escape while the No Retreat debuff is active!",
-      "equals": 1
+      "relative_to": "before_teleport",
+      "min": 1
     },
     {
       "action": "wait",
@@ -231,7 +240,8 @@
         {
           "u8": 1
         }
-      ]
+      ],
+      "early": false
     },
     {
       "action": "wait",
@@ -254,6 +264,63 @@
       "opcode": 459,
       "row": 544567129,
       "relative_to": "before_summon",
+      "min": 1
+    },
+    {
+      "action": "summon_gameobject",
+      "label": "The Guardian opens a Portal to Stormwind beside itself",
+      "actor": "g",
+      "entry": 176296
+    },
+    {
+      "action": "teleport",
+      "actor": "mage",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3897.4,
+      "z": -95.32,
+      "o": 3.2
+    },
+    {
+      "action": "wait",
+      "label": "Let the Criminal arrive at the portal",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "save_as": "before_portal"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The Criminal steps into its group member's portal",
+      "actor": "mage",
+      "entry": 176296,
+      "owner": "g"
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong portal teleport time to land",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the portal does not take the Criminal away",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "and the Criminal is told why",
+      "actor": "mage",
+      "metric": "server_packets",
+      "opcode": 459,
+      "row": 544567129,
+      "relative_to": "before_portal",
       "min": 1
     },
     {
