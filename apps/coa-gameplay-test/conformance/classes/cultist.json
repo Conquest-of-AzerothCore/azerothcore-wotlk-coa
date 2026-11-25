@@ -26024,6 +26024,3196 @@
         }
       ],
       "observe_source": "Dreadnought weapon set (2534 Rondel dagger satisfies 806830; 2129 shield equipped via for_entry). $h = 10 (561336 Spell.dbc ProcChance 10; AscensionCultistEvents.cpp:90,200 checks dealt && Shadow && Chance(player, 561336) via roll_chance_f and calls Reduce(player, 524876, INT32_MAX) -> RemoveSpellCooldown(572141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (SchoolMask 32 Shadow, 0 mana, instant, 1500 ms GCD). Control: 50 casts x 7 parts = 350 hits unlearned (0 resets). Treatment: 7 pooled parts x 1800 casts = 12600 damaging Shadow hits (>= 10905 needed for residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 10%). Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+    },
+    {
+      "spell": 300287,
+      "name": "Forbidden Resilience (-15% damage taken while Herald of the Depths is active)",
+      "kind": "taken_hit",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "judge": "damage_ratio",
+      "health_loss": true,
+      "expected": 0.85,
+      "quote": "While Herald of the Depths is active, you now take $s2% less damage",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "caster_health_from_pct": 99,
+      "learn": [
+        92131,
+        520326
+      ],
+      "trials": 8,
+      "settle_ms": 100,
+      "arms": [
+        {
+          "name": "control",
+          "unlearn": [
+            300287
+          ],
+          "opening_casts": [
+            [
+              520326,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 1
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            300287
+          ],
+          "opening_casts": [
+            [
+              520326,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Forbidden Resilience 300287 Effect[1] BasePoints -16 + DieSides 1 = -15 ($s2 = 15; Spell.dbc). AscensionCultistContracts.cpp:345-346 applies AddPct(damage, -15) inside UnitScript::OnDamage while Herald of the Depths 520326 and 300287 are active; health_loss reads post-OnDamage HP loss from Void Zone 92559 (1000 Physical, no miss/crit). Herald 520326 is cast for real and verified present (aura == 1) in both arms; control unlearns 300287, treatment learns 300287 (expected 0.85). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300287,
+      "name": "Forbidden Resilience (Herald of the Depths gate: absent without form, -15% with form)",
+      "kind": "taken_hit",
+      "variant": "herald_gate",
+      "label_suffix": "herald_gate",
+      "judge": "damage_ratio",
+      "health_loss": true,
+      "expected": 0.85,
+      "quote": "While Herald of the Depths is active, you now take $s2% less damage",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "caster_health_from_pct": 99,
+      "learn": [
+        92131,
+        520326,
+        300287
+      ],
+      "trials": 8,
+      "settle_ms": 100,
+      "arms": [
+        {
+          "name": "control",
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "opening_casts": [
+            [
+              520326,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 520326,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Form-gate partner for Forbidden Resilience 300287: 300287 learned in both arms; control reads Herald 520326 absent (0) and takes unreduced damage, treatment casts Herald 520326 and reads it present (1) and takes 0.85x damage. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300290,
+      "name": "Dark Rites (movement speed floored at 100% under slow while Herald active)",
+      "kind": "metric_delta",
+      "variant": "min_speed",
+      "label_suffix": "min_speed",
+      "quote": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
+      "trigger_spell": 520326,
+      "gate_spell": 300290,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "phase_auras": [
+        [
+          1715,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        },
+        {
+          "aura": 1715,
+          "source": "Hamstring 1715 (-50% speed) precondition fixture"
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 1.0,
+      "wait_ms": 1000,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Rites 300290 Effect[1] BasePoints 99 + DieSides 1 = 100 ($s2 = 100; Spell.dbc); patched to SPELL_AURA_MOD_MINIMUM_SPEED 100 in AscensionCultistContracts.cpp:112-113, gated on Herald 520326 in AscensionCultistAuras.cpp:99,137 and AscensionCultist.cpp:293. Precondition fixture: Hamstring 1715 (-50% run speed, 15s) set on caster in both phases. Before learning 300290 (with Herald 520326 cast): run_speed_rate = 0.5; after learning 300290 (with Herald 520326 cast and verified present alongside 1715): run_speed_rate = 1.0. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300290,
+      "name": "Dark Rites (Herald gate: slowed to 50% without Herald, floored at 100% with Herald)",
+      "kind": "metric_delta",
+      "variant": "herald_gate",
+      "label_suffix": "herald_gate",
+      "quote": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
+      "trigger_spell": 520326,
+      "gate_spell": 300290,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "phase_auras": [
+        [
+          1715,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        },
+        {
+          "aura": 1715,
+          "source": "Hamstring 1715 (-50% speed) precondition fixture"
+        }
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 1.0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-gate partner for Dark Rites 300290: 300290 learned at start; before phase has Hamstring 1715 without Herald 520326 -> run_speed_rate 0.5; after phase casts Herald 520326 (verified present with 1715) -> run_speed_rate 1.0. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (Herald grants 301259 for 10 sec)",
+      "kind": "metric_delta",
+      "variant": "window_duration",
+      "label_suffix": "window_duration",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 520326,
+      "gate_spell": 300291,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 301259,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10400,
+          10900
+        ]
+      },
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        }
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Void Barrier 300291 grants helper aura 301259 (DurationIndex 1 = 10000 ms; Spell.dbc) on casting Herald of the Depths 520326 (AscensionCultistAuras.cpp:91-92). Control (before learning 300291) casts 520326 and reads 301259 == 0; treatment learns 300291, waits for prior 520326 to expire, casts 520326 (verified present) and brackets 301259 expiry in game time: present at [9100..9600] ms and absent at [10400..10900] ms, strictly excluding 10% off (9000 / 11000 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (next Void Shield absorb doubled +100%)",
+      "kind": "metric_delta",
+      "variant": "absorb_doubled",
+      "label_suffix": "absorb_doubled",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 300291,
+      "learn": [
+        92131,
+        520326
+      ],
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "after_setup_reads": [
+        {
+          "spell": 520326,
+          "expected": 1
+        },
+        {
+          "spell": 301259,
+          "expected": 1
+        }
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        25000,
+        25000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 10,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 9606,
+      "after_at_least": 9552,
+      "after_at_most": 9660,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Void Barrier 300291 / 301259 Effect[0] BasePoints 99 + DieSides 1 = +100% ($301259s1 = 100; Spell.dbc; AscensionCultistAuras.cpp:129-130 amount *= 2). Level-60 Void Shield 578115 (BaseLevel 60, SpellLevel 60, MaxLevel 66, bp=775, die=55, coeff 2.0 SP) at player_spell_power 2000 has unboosted absorb [4776..4830]; doubled (+100%) is [9552..9660], broken by 10x Light of the Naaru 41394 (11000 Holy > 9660). Setup casts Herald 520326 and verifies both 520326 and 301259 present before 578115 cast. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (control: Void Shield absorb without 300291 after Herald)",
+      "kind": "metric_delta",
+      "variant": "absorb_control",
+      "label_suffix": "absorb_control",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 60235,
+      "learn": [
+        92131,
+        520326
+      ],
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "after_setup_reads": [
+        {
+          "spell": 520326,
+          "expected": 1
+        },
+        {
+          "spell": 301259,
+          "expected": 0
+        }
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        25000,
+        25000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 6,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4803,
+      "after_at_least": 4776,
+      "after_at_most": 4830,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Void Barrier 300291: casts Herald 520326 without 300291 (verifies 520326 == 1 and 301259 == 0), then casts Void Shield 578115 at SP 2000 -> unboosted absorb [4776..4830]. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (301259 consumed by the next Void Shield cast)",
+      "kind": "metric_delta",
+      "variant": "consumed_next",
+      "label_suffix": "consumed_next",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 300291,
+      "learn": [
+        92131,
+        520326
+      ],
+      "setup_casts": [
+        520326
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 500,
+      "after_setup_reads": [
+        {
+          "spell": 520326,
+          "expected": 1
+        },
+        {
+          "spell": 301259,
+          "expected": 1
+        }
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 301259,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Proves 'your next Void Shield' consumption for Void Barrier 300291: setup casts Herald 520326 and verifies 301259 == 1 before 578115; casting Void Shield 578115 consumes 301259 (AscensionCultistAbilities.cpp:19,27,34-40) so 301259 reads 0 afterward. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 301258,
+      "name": "Forbidden Strength (+10% Blade of the Empire crit while Herald active)",
+      "kind": "metric_delta",
+      "variant": "with_herald",
+      "label_suffix": "with_herald",
+      "quote": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
+      "trigger_spell": 520326,
+      "gate_spell": 301258,
+      "learn": [
+        92131,
+        502122
+      ],
+      "target": "caster",
+      "select_dummy": true,
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Forbidden Strength 301258 Effect[0] BasePoints 9 + DieSides 1 = 10 ($s1 = 10; Spell.dbc); AscensionCultistAbilities.cpp:104-105 adds Amount(301258) to OnSpellCritChance of Blade of the Empire (500720 chain, rank 502122) while Herald 520326 is active. Reads spell_done_crit_chance_scripted of 502122 against dummy with Herald 520326 cast for real in both phases, before and after learning 301258: expected gain +10.0 points (tol 0.05). Partnered with without_herald (gain 0). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 301258,
+      "name": "Forbidden Strength (no crit bonus without Herald of the Depths)",
+      "kind": "metric_delta",
+      "variant": "without_herald",
+      "label_suffix": "without_herald",
+      "quote": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
+      "trigger_spell": 500711,
+      "gate_spell": 301258,
+      "learn": [
+        92131,
+        502122
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "select_dummy": true,
+      "before_trigger_reads": [
+        {
+          "spell": 520326,
+          "expected": 0,
+          "actor": "caster"
+        }
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 502122,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Negative form-gate partner for Forbidden Strength 301258: Herald 520326 verified absent (0) before learning 301258 and after; spell_done_crit_chance_scripted of Blade of the Empire 502122 gains 0.0 points (tol 0.05). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 680557,
+      "name": "Strength of the Black Empire (Dreadnought transforms caster into void monstrosity)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+      "trigger_spell": 567552,
+      "gate_spell": 680557,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_power": 2000,
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        },
+        {
+          "aura": 680556,
+          "source": "Strength of the Black Empire helper 680556 applied by Refresh"
+        }
+      ],
+      "metric": "display_id",
+      "fields": {},
+      "before_expected": 49,
+      "expected": 280073,
+      "wait_ms": 1000,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Strength of the Black Empire 680557 enables helper 680556 in AscensionCultist.cpp:287 while any ranked Dreadnought aura (567524 chain, rank 6 567552) is active. 680556 Effect[0] SPELL_AURA_TRANSFORM creature 250043 (AscensionCultistContracts.cpp:79-80) uses CreatureDisplayID 280073 (pending SQL rev_20261101_00_cultist_dreadnought_display.sql). Before learning 680557 (with 567552 cast): display_id = 49 (Human male); after learning 680557 (with 567552 cast and wait_ms 1000 for Refresh): 680556 present and display_id = 280073. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 680557,
+      "name": "Strength of the Black Empire (-10% damage taken during Dreadnought)",
+      "kind": "metric_delta",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "quote": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+      "trigger_spell": 567552,
+      "gate_spell": 680557,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 1000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        },
+        {
+          "aura": 680556,
+          "source": "Strength of the Black Empire helper 680556 applied by Refresh"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 990,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Strength of the Black Empire 680557 helper 680556 Effect[2] SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN BasePoints -11 + DieSides 1 = -10% ($680556s3 = 10; Spell.dbc). Dreadnought 567552 carries an all-school absorb (>2600) that absorbs 100% of one Light of the Naaru 41394 strike (1100 Holy) after SpellDamageBonusTaken applies -10%: floor(1100 * 0.90) = 990 absorbed (control without 680557 absorbs 1100). delay_ms 1000 lets Refresh apply 680556 before the strike. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 680557,
+      "name": "Strength of the Black Empire (control: unreduced 1100 strike during Dreadnought without 680557)",
+      "kind": "metric_delta",
+      "variant": "damage_taken_control",
+      "label_suffix": "damage_taken_control",
+      "quote": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+      "trigger_spell": 567552,
+      "gate_spell": 60235,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 1000,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Strength of the Black Empire 680557: Dreadnought 567552 active without 680557 -> Light of the Naaru 41394 deals full 1100 Holy absorbed in full by 567552. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 801968,
+      "name": "Blessing of Y'Shaarj (+10% maximum health)",
+      "kind": "metric_delta",
+      "variant": "max_health",
+      "label_suffix": "max_health",
+      "quote": "Increases your maximum health by $s2%",
+      "trigger_spell": 60235,
+      "gate_spell": 801968,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1000,
+      "expected": 1100,
+      "expected_ratio": 1.1,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Blessing of Y'Shaarj 801968 Effect[1] SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT BasePoints 9 + DieSides 1 = +10% ($s2 = 10; Spell.dbc). Reads live max_health before and after learning 801968 (expected ratio 1.10, tol 0.002). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 801968,
+      "name": "Blessing of Y'Shaarj (+20% damage dealt while transformed into void monstrosity)",
+      "kind": "hit_ratio",
+      "variant": "monstrosity_damage",
+      "label_suffix": "monstrosity_damage",
+      "quote": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        680750,
+        567552,
+        680557
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            567552,
+            0
+          ],
+          [
+            680556,
+            0
+          ],
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 567552,
+            "target": "caster",
+            "power": 2000
+          }
+        ],
+        "casts_wait_ms": 600
+      },
+      "treatment": {
+        "learn": [
+          801968
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            567552,
+            0
+          ],
+          [
+            680556,
+            0
+          ],
+          [
+            500706,
+            80
+          ],
+          [
+            680604,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 567552,
+            "target": "caster",
+            "power": 2000
+          }
+        ],
+        "casts_wait_ms": 600
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Blessing of Y'Shaarj 801968 Effect[0] SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT2 +20 ($s1 = 20; Spell.dbc) targeting SpellFamilyFlags[2] 0x80000000 = 680556 Strength of the Black Empire Effect[1] (SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, base 0% -> +20%). Both arms cast Dreadnought 567552 with 680557 learned (clearing prior 567552/680556 first so Refresh applies a fresh 680556 after 801968 is learned in treatment) and wait 1500+600 ms before casting Horrorbolt 502182 at dummy. Expected ratio 1.20. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 801968,
+      "name": "Blessing of Y'Shaarj (no damage bonus when not transformed)",
+      "kind": "hit_ratio",
+      "variant": "without_monstrosity",
+      "label_suffix": "without_monstrosity",
+      "quote": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
+      "expected": 1.0,
+      "observe_spell": 502182,
+      "learn": [
+        502182,
+        680750,
+        680557
+      ],
+      "cast_power": 2000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          801968
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative form-gate partner for Blessing of Y'Shaarj 801968: without Dreadnought / 680556 active, learning 801968 leaves Horrorbolt 502182 damage unchanged (expected ratio 1.00). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (Void Shield base absorb +100% at SP 0)",
+      "kind": "metric_delta",
+      "variant": "void_shield_base_sp0",
+      "label_suffix": "void_shield_base_sp0",
+      "quote": "Increases the base amount that Void Shield absorbs by $s1%",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 0,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1606,
+      "after_at_least": 1552,
+      "after_at_most": 1660,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Embodiment of Y'shaarj 681088 Effect[0] BasePoints 99 + DieSides 1 = +100% ($s1 = 100; Spell.dbc); AscensionCultistContracts.cpp:284-285 doubles Void Shield base value before adding 2.0*SP. Level-60 Void Shield 578115 (BaseLevel 60, MaxLevel 66, bp=775, die=55) at SP 0 rolls [776..830]; doubled base is [1552..1660], broken by 2x Light of the Naaru 41394 (2200 Holy). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (control: Void Shield base absorb without 681088 at SP 0)",
+      "kind": "metric_delta",
+      "variant": "void_shield_base_control",
+      "label_suffix": "void_shield_base_control",
+      "quote": "Increases the base amount that Void Shield absorbs by $s1%",
+      "trigger_spell": 578115,
+      "gate_spell": 60235,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 0,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 803,
+      "after_at_least": 776,
+      "after_at_most": 830,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Embodiment of Y'shaarj 681088 Void Shield base absorb: without 681088 at SP 0, Void Shield 578115 absorbs [776..830]. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (Void Shield base-only +100% at SP 2000: SP term not doubled)",
+      "kind": "metric_delta",
+      "variant": "void_shield_base_sp2000",
+      "label_suffix": "void_shield_base_sp2000",
+      "quote": "Increases the base amount that Void Shield absorbs by $s1%",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 6,
+        "wait_ms": 200
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5606,
+      "after_at_least": 5552,
+      "after_at_most": 5660,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Separates base-amount doubling from total-absorb doubling for Embodiment of Y'shaarj 681088: at SP 2000, Void Shield 578115 absorbs [1552..1660] + 4000 = [5552..5660] (not [9552..9660]). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (Dreadnought ignores 25% of damage taken)",
+      "kind": "metric_delta",
+      "variant": "dreadnought_ignore_25",
+      "label_suffix": "dreadnought_ignore_25",
+      "quote": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
+      "trigger_spell": 567552,
+      "gate_spell": 681088,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 825,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Embodiment of Y'shaarj 681088 causes Dreadnought (567524 chain, rank 6 567552) Effect[0] SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN (all schools) to apply -25% (AscensionCultistContracts.cpp:85-86, AscensionCultistAuras.cpp:127-128). One Light of the Naaru 41394 (1100 Holy) reduced by 25% is floor(1100 * 0.75) = 825, absorbed in full by 567552 (>2600 absorb). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (control: Dreadnought takes full 1100 without 681088)",
+      "kind": "metric_delta",
+      "variant": "dreadnought_ignore_control",
+      "label_suffix": "dreadnought_ignore_control",
+      "quote": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
+      "trigger_spell": 567552,
+      "gate_spell": 60235,
+      "learn": [
+        680750
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 567552,
+          "source": "Dreadnought 567552 cast by trigger_spell"
+        }
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1100,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Embodiment of Y'shaarj 681088 Dreadnought -25% damage taken: without 681088, Light of the Naaru 41394 absorbs full 1100 Holy on Dreadnought 567552. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (absorbing 1100 grants +220 AP = 20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap",
+      "label_suffix": "absorb_ap",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 681067,
+          "source": "Embodiment of Y'shaarj AP buff 681067 granted on absorb"
+        }
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 596,
+      "expected_gain": 220,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Embodiment of Y'shaarj 681088 Effect[1] BasePoints 19 + DieSides 1 = 20% ($s2 = 20; Spell.dbc); AscensionCultistAuras.cpp:283-284 and AscensionCultist.cpp:171-181 grant 681067 SPELL_AURA_MOD_ATTACK_POWER for CalculatePct(absorbed, 20). One 41394 (1100 Holy) absorbed in full by Void Shield 578115 (SP 2000, capacity >5500) grants +220 AP (expected_gain 220, tol 1). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (absorbing 2200 grants +440 AP = 20%, scaling arm)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap_two_strikes",
+      "label_suffix": "absorb_ap_two_strikes",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "after_auras_present": [
+        {
+          "aura": 681067,
+          "source": "Embodiment of Y'shaarj AP buff 681067 granted on absorb"
+        }
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 816,
+      "expected_gain": 440,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Proves linear 20% scaling of Embodiment of Y'shaarj 681088 AP grant: two 41394 strikes (2200 absorbed in full) grant +440 AP (expected_gain 440, tol 1). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (control: absorbing 1100 grants 0 AP without 681088)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap_control",
+      "label_suffix": "absorb_ap_control",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 60235,
+      "target": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 376,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Embodiment of Y'shaarj 681088 AP grant: without 681088, absorbing 1100 Holy leaves attack_power unchanged (expected_gain 0). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681088,
+      "name": "Embodiment of Y'shaarj (AP buff 681067 lasts 8 sec)",
+      "kind": "metric_delta",
+      "variant": "absorb_ap_duration",
+      "label_suffix": "absorb_ap_duration",
+      "quote": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+      "trigger_spell": 578115,
+      "gate_spell": 681088,
+      "target": "caster",
+      "cast_power": 2000,
+      "caster_health": [
+        20000,
+        20000
+      ],
+      "player_spell_power": 2000,
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 200,
+        "count": 1,
+        "wait_ms": 200
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 681067,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7200,
+      "expiry_wait_ms": 1400,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7500,
+          8100
+        ],
+        "expired": [
+          8900,
+          9500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Proves Embodiment of Y'shaarj AP buff 681067 duration (DurationIndex 31 = 8000 ms; Spell.dbc): 41394 lands at delay_ms 200 (+200 ms strike wait = ~400 ms after trigger cast); 681067 is present at wait_ms 7200 (~7400 ms after apply, >7200 ms -10% bound) and absent 1400 ms later (~8800 ms after apply, <8800 ms +10% bound). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives; 301259: 91 applies/removes, 680556: 1 apply/remove). Installed Spell.dbc governs (G-9).",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 300291,
+      "name": "Void Barrier (control: Herald does not grant 301259 without 300291)",
+      "kind": "metric_delta",
+      "variant": "window_control",
+      "label_suffix": "window_control",
+      "quote": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+      "trigger_spell": 520326,
+      "gate_spell": 60235,
+      "learn": [
+        92131
+      ],
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 301259,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "after_auras_present": [
+        {
+          "aura": 520326,
+          "source": "Herald of the Depths 520326 cast by trigger_spell"
+        }
+      ],
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for Void Barrier 300291 window_duration: casting Herald of the Depths 520326 without 300291 does not apply 301259 (reads 0 -> 0 with 520326 verified present)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (summons creature 50096 for 30 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Summon a Tentacle of Y'shaarj near you for $d.",
+      "trigger_spell": 802044,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 28000,
+      "expiry_wait_ms": 4000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          27800,
+          28600
+        ],
+        "expired": [
+          31800,
+          32600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of Y'shaarj 802044 Effect[0] SPELL_EFFECT_SUMMON creature 50096, DurationIndex 9 = 30000 ms (Spell.dbc). Brackets owned_creature_count(50096) in game time: 0 before cast, 1 at [27800..28600] ms (>27000 ms -10%), 0 at [31800..32600] ms (<33000 ms +10%). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (slams on summon when in combat)",
+      "kind": "metric_delta",
+      "variant": "slam_on_summon",
+      "label_suffix": "slam_on_summon",
+      "quote": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+      "trigger_spell": 802044,
+      "target": "caster",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        502182
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of Y'shaarj 50096 slams with 802046 on first pulse after summon (AscensionCultistSummons.cpp:314-318). Horrorbolt 502182 engages dummy in both phases (before 802044: 0 hits from 50096); casting 802044 produces 1 slam without casting Gaze of C'Thun. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (slams whenever Gaze of C'Thun is used)",
+      "kind": "metric_delta",
+      "variant": "slam_on_gaze",
+      "label_suffix": "slam_on_gaze",
+      "quote": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        502182,
+        802044
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "observe_source": "Tentacle of Y'shaarj 50096 slams with 802046 when commanded by Gaze of C'Thun 500110 (AscensionCultistAbilities.cpp:135-137, AscensionCultistSummons.cpp:203-204). Setup casts [502182, 802044] run in both phases: before phase produces 1 summon slam (before_expected = 1); after phase adds 1 summon slam plus 1 Gaze-commanded slam (expected = 3, tolerance 0; without Gaze command after would read 2). void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from its unused opposite-faction triggered effect 520335 when targeting an enemy. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (slam scales with Stamina)",
+      "kind": "hit_ratio",
+      "variant": "stamina_scaling",
+      "label_suffix": "stamina_scaling",
+      "quote": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+      "expected": 2.095238,
+      "observe_spell": 802046,
+      "cast_spell": 500110,
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044
+      ],
+      "cast_power": 2000,
+      "cast_wait_ms": 1000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            0
+          ],
+          [
+            48161,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "observe_source": "Tentacle of Y'shaarj slam 802046 (BasePoints 0 + DieSides 1 = 1, Physical SchoolMask 1, AscensionCultistContracts.cpp:77, AscensionCultistData.h:104 coeff 1.0*Stamina). Control has reference Stamina 104 (raw 105); treatment adds Power Word: Fortitude 48161 (+115 Stamina -> 219, raw 220). Ratio 220/105 = 2.095238 (armor cancels). void_on_cast_failure omitted because Gaze of C'Thun 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from unused ally effect 520335. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (10 yd frontal cone)",
+      "kind": "fixed_count",
+      "variant": "cone",
+      "label_suffix": "cone",
+      "quote": "to all enemies in a $802046a yd frontal cone.",
+      "expected": 2,
+      "radius": 10,
+      "cluster_yd": 0.5,
+      "primary_distance_reads": true,
+      "uncapped": true,
+      "behind_yd": 5,
+      "radius_reason": "Tentacle of Y'shaarj slam 802046 Effect[0] TARGET_UNIT_CONE_ENEMY_24 (24 deg total / +-12 deg half-angle, Spell.cpp:1290), EffectRadiusIndex 13 = 10 yd (SpellRadius 13 RadiusMin 10), MaxAffectedTargets 0; tentacle 50096 spawns within 2 yd of caster (SpellRadius 7 = 2 yd) and faces primary dummy at 3 yd, so clustering the 2 extras within 0.5 yd of primary (at 3.17 and 3.33 yd) keeps the worst-case bearing delta <= 6.8 deg < 12 deg from every point in the 2 yd spawn disk, while far dummy at 15+ yd is outside 10 yd and behind dummy 5 yd behind caster is outside the frontal cone.",
+      "cast_spell": 500110,
+      "target_rank": 802046,
+      "caster_entry": 50096,
+      "setup_casts": [
+        [
+          802044,
+          "caster"
+        ]
+      ],
+      "repeats": 3,
+      "settle_ms": 1500,
+      "observe_source": "Proves 10 yd frontal cone of Tentacle of Y'shaarj slam 802046 (TARGET_UNIT_CONE_ENEMY_24, 10 yd radius, Spell.dbc) on primary + 2 extras inside cone vs far dummy and behind dummy unhit. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (max 1 active on recast)",
+      "kind": "metric_delta",
+      "variant": "max_one",
+      "label_suffix": "max_one",
+      "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+      "trigger_spell": 802044,
+      "target": "caster",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        802044
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of Y'shaarj 802044 uses SummonProperties 63 (shared Old God Tentacle slot, AscensionCultistSummons.cpp:39,44): casting 802044 with one 50096 already active replaces it, keeping owned_creature_count(50096) at 1 -> 1. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802044,
+      "name": "Tentacle of Y'shaarj (replaces existing Tentacle of N'Zoth)",
+      "kind": "metric_delta",
+      "variant": "replaces_nzoth",
+      "label_suffix": "replaces_nzoth",
+      "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+      "trigger_spell": 802044,
+      "target": "caster",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        572103
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 501464
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Proves shared Old God Tentacle cap across types: Tentacle of N'Zoth 572103 (entry 501464, 8s duration, SummonProperties 63) is present (1) before 802044 and replaced (0) after 802044 (at ~2.6s << 8s). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560321,
+      "name": "Eldritch Obelisk (lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Create an Eldritch Obelisk beneath you for $560322d,",
+      "trigger_spell": 560321,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 560322,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 18500,
+      "expiry_wait_ms": 3000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18300,
+          19000
+        ],
+        "expired": [
+          21300,
+          22000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Obelisk 560321 triggers 560322 (DurationIndex 18 = 20000 ms; Spell.dbc). Brackets persistent area aura 560322 on caster in game time: 0 before, 1 at [18300..19000] ms (>18000 ms -10%), 0 at [21300..22000] ms (<22000 ms +10%). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560321,
+      "name": "Eldritch Obelisk (+100% Tentacle damage)",
+      "kind": "hit_ratio",
+      "variant": "tentacle_damage",
+      "label_suffix": "tentacle_damage",
+      "quote": "increasing the damage of your Tentacles by $560322s1%",
+      "expected": 2.0,
+      "observe_spell": 802046,
+      "cast_spell": 500110,
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044,
+        560321
+      ],
+      "cast_power": 2000,
+      "cast_wait_ms": 1000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 560321,
+            "target": "caster",
+            "power": 2000
+          },
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ],
+        "casts_wait_ms": 500
+      },
+      "critical": false,
+      "trials": 10,
+      "observe_source": "Eldritch Obelisk 560322 Effect[0] SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS (190), SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (79) BasePoints 99 + DieSides 1 = +100% ($560322s1 = 100; Spell.dbc). Treatment casts Eldritch Obelisk 560321 before summoning Tentacle of Y'shaarj 802044 so every 802046 slam (summon and Gaze-commanded) lands while 560322 is active: expected ratio 2.00. void_on_cast_failure omitted because Gaze of C'Thun 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from unused ally effect 520335. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560321,
+      "name": "Eldritch Obelisk (+40% ally movement speed within 15 yd, not at 20 yd)",
+      "kind": "metric_delta",
+      "variant": "ally_speed",
+      "label_suffix": "ally_speed",
+      "quote": "and the movement speed of allies by $560322s3% while near it.",
+      "trigger_spell": 560321,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "ally_offsets": {
+        "ally": 10,
+        "ally2": 20
+      },
+      "ally_arm": {
+        "allies": 2,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 10,
+            "expected": 10,
+            "tolerance": 0.5,
+            "precondition": true,
+            "source": "ally placed 10 yd from caster on flat ground (< 15 yd radius of 560322 Effect[2])"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 20,
+            "expected": 20,
+            "tolerance": 0.5,
+            "precondition": true,
+            "source": "ally2 placed 20 yd from caster on flat ground (> 15 yd radius of 560322 Effect[2])"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "run_speed_rate",
+            "fields": {},
+            "before_expected": 1.0,
+            "expected": 1.0,
+            "tolerance": 0.001,
+            "source": "ally2 at 20 yd (beyond 15 yd radius) receives no speed boost (1.0 -> 1.0)"
+          }
+        ]
+      },
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.4,
+      "tolerance": 0.001,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Obelisk 560322 Effect[2] SPELL_EFFECT_PERSISTENT_AREA_AURA (27), SPELL_AURA_MOD_INCREASE_SPEED (31) BasePoints 39 + DieSides 1 = +40% ($560322s3 = 40), EffectRadiusIndex 18 = 15 yd (Spell.dbc; SpellAuras.cpp:3047). Grouped ally at 10 yd (<15 yd) gains 1.0 -> 1.4 run_speed_rate; grouped ally2 at 20 yd (>15 yd) stays 1.0 -> 1.0. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 802048,
+      "name": "Corruptor's Gaze (+20% Tentacle damage)",
+      "kind": "hit_ratio",
+      "variant": "tentacle_damage",
+      "label_suffix": "tentacle_damage",
+      "quote": "Increases the damage of your Tentacles by $s1%.",
+      "expected": 1.2,
+      "observe_spell": 802046,
+      "cast_spell": 500110,
+      "caster_entry": 50096,
+      "learn": [
+        500110,
+        802044
+      ],
+      "cast_power": 2000,
+      "cast_wait_ms": 1000,
+      "control": {
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          802048
+        ],
+        "auras": [
+          [
+            500706,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 802044,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "observe_source": "Corruptor's Gaze 802048 Effect[0] BasePoints 19 + DieSides 1 = +20% ($s1 = 20; Spell.dbc); AscensionCultistContracts.cpp:293-296 multiplies Tentacle damage value by 1 + 20/100. Compares Tentacle of Y'shaarj 50096 slam 802046 damage without vs with 802048: expected ratio 1.20. void_on_cast_failure omitted because Gaze of C'Thun 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) from unused ally effect 520335. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 706187,
+      "name": "Twisted Sanity (heals Black Blood ally for 30% of Tentacle damage)",
+      "kind": "metric_delta",
+      "variant": "black_blood_heal",
+      "label_suffix": "black_blood_heal",
+      "quote": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
+      "trigger_spell": 802044,
+      "gate_spell": 706187,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        502241
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 2000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Malevolence 502241 applies Black Blood 804153 to injured grouped ally in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 500773,
+              "target": "ally"
+            },
+            "source": "Twisted Sanity 706187 heals Black Blood ally via Copy 500773 (AscensionCultistSummons.cpp:354-357)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_total",
+            "count_metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "source": "Tentacle of Y'shaarj 50096 slam damage on dummy"
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 2,
+            "expected": 0.3,
+            "tolerance": 0.015,
+            "floor_count": 1,
+            "source": "Twisted Sanity 706187 $s1 = 30% of Tentacle damage (CalculatePct floors per hit)"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Twisted Sanity 706187 Effect[0] BasePoints 29 + DieSides 1 = 30% ($s1 = 30; Spell.dbc); AscensionCultistSummons.cpp:354-357 heals grouped allies carrying Black Blood 804153 for CalculatePct(damage, 30) via 500773. Control (before 706187): 0 heals; treatment (after 706187): 1 heal at exact 0.30 ratio to Tentacle 50096 damage. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 706187,
+      "name": "Twisted Sanity (control: no heal for ally without Black Blood)",
+      "kind": "metric_delta",
+      "variant": "without_black_blood",
+      "label_suffix": "without_black_blood",
+      "quote": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
+      "trigger_spell": 802044,
+      "gate_spell": 706187,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        502182
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804153,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Horrorbolt 502182 engages dummy without applying Black Blood 804153 to ally"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Tentacle 50096 dealt damage in both phases"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 500773,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative Black Blood gate for Twisted Sanity 706187: with 706187 learned and Tentacle 50096 dealing damage, ally without Black Blood 804153 receives 0 heals from 500773. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 704878,
+      "name": "Eternal Grasp rank 1 (Tentacle of Y'shaarj 30 sec -> 37.5 sec)",
+      "kind": "metric_delta",
+      "variant": "tentacle_duration",
+      "label_suffix": "tentacle_duration",
+      "quote": "Increases the duration of your Tentacles by $s1%.",
+      "trigger_spell": 802044,
+      "gate_spell": 704878,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 35000,
+      "expiry_wait_ms": 5000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          34800,
+          35600
+        ],
+        "expired": [
+          39800,
+          40600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Grasp 704878 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DURATION +25% ($s1 = 25; Spell.dbc) matching Tentacle of Y'shaarj 802044 (SpellFamilyFlags[2]=536870912, base 30000 ms -> expected 37500 ms). Brackets owned_creature_count(50096) at 35s (present) and 40s (absent), excluding +-10% (33750 / 41250 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 704879,
+      "name": "Eternal Grasp rank 2 (Tentacle of Y'shaarj 30 sec -> 45 sec)",
+      "kind": "metric_delta",
+      "variant": "tentacle_duration",
+      "label_suffix": "tentacle_duration",
+      "quote": "Increases the duration of your Tentacles by $s1%.",
+      "trigger_spell": 802044,
+      "gate_spell": 704879,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 42000,
+      "expiry_wait_ms": 6000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          41800,
+          42600
+        ],
+        "expired": [
+          47800,
+          48600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Grasp 704879 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER SPELLMOD_DURATION +50% ($s1 = 50; Spell.dbc) matching Tentacle of Y'shaarj 802044 (SpellFamilyFlags[2]=536870912, base 30000 ms -> expected 45000 ms). Brackets owned_creature_count(50096) at 42s (present) and 48s (absent), excluding +-10% (40500 / 49500 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events for passives/802044/560321). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (ability crit summons Manifestation of Y'shaarj for 10 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+      "trigger_spell": 502122,
+      "gate_spell": 681425,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "force_crit": "melee",
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9100,
+          9600
+        ],
+        "expired": [
+          10500,
+          10950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Eldritch Entities 681425 (AscensionCultistEvents.cpp:96,219-221): on player non-periodic ability critical strike, summons Manifestation of Y'shaarj 397771 for 680573 duration (DurationIndex 1 = 10000 ms, $680573d; Spell.dbc). Blade of the Empire 502122 with force_crit melee (precondition fixture) brackets owned_creature_count(397771) in game time: 0 before cast, 1 at [9100..9600] ms (>9000 ms -10%), 0 at [10500..10950] ms (<11000 ms +10%). Reference search 2026-11-25: coa-history 680573 has 277 summons; coabuildhub spells_master_index.json matches; installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (control: ability crit does not summon without 681425)",
+      "kind": "metric_delta",
+      "variant": "no_talent",
+      "label_suffix": "no_talent",
+      "quote": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+      "trigger_spell": 502122,
+      "gate_spell": 681425,
+      "target": "dummy",
+      "force_crit": "melee",
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Learned contrast for Eldritch Entities 681425: forced-crit Blade of the Empire 502122 summons 0 Manifestations 397771 before learning 681425 and 1 after learning 681425. Reference search 2026-11-25: coa-history 680573 has 277 summons; installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (control: non-critical ability hit does not summon)",
+      "kind": "metric_delta",
+      "variant": "non_crit",
+      "label_suffix": "non_crit",
+      "quote": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+      "trigger_spell": 502182,
+      "gate_spell": 681425,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "uncritical_casts": {
+        "casts": 2,
+        "min_uncritical": 2
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 3000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Non-crit gate for Eldritch Entities 681425: Horrorbolt 502182 with spell pen 823764 and -100 spell crit 16255 (precondition fixtures, verified non-critical by uncritical_casts 2/2) summons 0 Manifestations 397771 both before and after learning 681425. Reference search 2026-11-25: coa-history 680573 has 277 summons; installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 681425,
+      "name": "Eldritch Entities (Manifestation attacks enemy and heals caster for 5% base health per hit)",
+      "kind": "metric_delta",
+      "variant": "attack_and_heal",
+      "label_suffix": "attack_and_heal",
+      "quote": "which will attack enemies and heal you for $681275s1% of your base health.",
+      "trigger_spell": 502122,
+      "gate_spell": 681425,
+      "target": "dummy",
+      "force_crit": "melee",
+      "cast_power": 2000,
+      "caster_health": [
+        500,
+        2278
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 70,
+      "after_at_least": 70,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_count",
+        "fields": {
+          "entry": 397771
+        },
+        "ratio": 70.0,
+        "tolerance": 1.0,
+        "least": 1,
+        "source": "681275 $s1 = 5% of base health (Spell.dbc); AscensionCultistSummons.cpp:352-353 heals caster via 680769 for player->GetCreateHealth() / 20 (level-60 Cultist basehp 1418 / 20 = 70 HP) per Manifestation 397771 melee hit"
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681275 Effect[0] BasePoints 4 + DieSides 1 = 5% ($681275s1 = 5; Spell.dbc). AscensionCultistSummons.cpp:309-313,352-353: Manifestation 397771 melee-attacks the enemy and heals caster via 680769 (CultistCopies, CANT_CRIT, IGNORE_CASTER_MODIFIERS) for GetCreateHealth() / 20 = 1418 / 20 = 70 HP per hit. Control (before 681425): 0 heals; treatment: owned_creature_damage_count(397771) >= 1 and spell_heal_total(680769) / owned_creature_damage_count(397771) == 70.0 within 1.0. Reference search 2026-11-25: coa-history 681275 has 848 heals (mean 129 across levels); coabuildhub older snapshot had 2%, installed Spell.dbc 5% governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (damage below 35% health summons 3 Manifestations for 10 sec)",
+      "kind": "metric_delta",
+      "variant": "summon_duration",
+      "label_suffix": "summon_duration",
+      "quote": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        34000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 92559,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 9100,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9150,
+          9650
+        ],
+        "expired": [
+          10700,
+          11090
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Calling 560715 (AscensionCultistEvents.cpp:66,205-208): taking damage while health < 35% summons 3 Manifestations of Y'shaarj 397771 for 10000 ms. Striker casts Void Zone 92559 (1000 Physical) at +100 ms on caster at 34000/100000 HP (<35%): owned_creature_count(397771) reads 0 before, 3 at [9150..9650] ms (~9200 ms after strike, >9000 ms -10%), and 0 at [10700..11090] ms (~10800 ms after strike, <11000 ms +10%). Reference search 2026-11-25: coa-history 680573 has 277 summons; coabuildhub older snapshot had 2%, installed Spell.dbc 5% governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (control: damage below 35% does not summon without 560715)",
+      "kind": "metric_delta",
+      "variant": "no_talent",
+      "label_suffix": "no_talent",
+      "quote": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "target": "caster",
+      "strike": {
+        "spell": 92559,
+        "health": 34000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Learned contrast for Dark Calling 560715: taking Void Zone 92559 at 34000/100000 HP (<35%) summons 0 Manifestations 397771 before learning 560715 and 3 after learning 560715. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (control: taking damage at 36% >= 35% health does not summon)",
+      "kind": "metric_delta",
+      "variant": "threshold_above_35",
+      "label_suffix": "threshold_above_35",
+      "quote": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "target": "caster",
+      "strike": {
+        "spell": 92559,
+        "health": 37000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Threshold contrast for Dark Calling 560715 (<35% health): starting at 37000/100000 HP, Void Zone 92559 (~977 damage) leaves caster at ~36% >= 35%, so owned_creature_count(397771) stays 0 both before and after learning 560715. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (Manifestations attack enemy and heal caster for 5% base health per hit)",
+      "kind": "metric_delta",
+      "variant": "attack_and_heal",
+      "label_suffix": "attack_and_heal",
+      "quote": "which will attack enemies and heal you for 5% of your base health.",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "target": "caster",
+      "strike": {
+        "spell": 92559,
+        "health": 34000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680769,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 70,
+      "after_at_least": 70,
+      "wait_ms": 4000,
+      "expire_ms": 500,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_count",
+        "fields": {
+          "entry": 397771
+        },
+        "ratio": 70.0,
+        "tolerance": 1.0,
+        "least": 1,
+        "source": "Dark Calling 560715 heals caster via 680769 for player->GetCreateHealth() / 20 (5% of level-60 Cultist basehp 1418 = 70 HP) per Manifestation 397771 hit (AscensionCultistSummons.cpp:352-353)"
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Calling 560715 Manifestations 397771 attack striker and heal caster via 680769 for GetCreateHealth() / 20 = 70 HP per hit (AscensionCultistSummons.cpp:309-313,352-353). Control (before 560715): 0 heals; treatment: owned_creature_damage_count(397771) >= 1 and spell_heal_total(680769) / owned_creature_damage_count(397771) == 70.0 within 1.0. Reference search 2026-11-25: coabuildhub older snapshot had 2%, installed Spell.dbc 5% governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (2 min ICD blocks re-trigger through 112 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_blocked",
+      "label_suffix": "icd_blocked",
+      "quote": "Can ony occur once every 2 minutes.",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 92559,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 1000,
+      "expiry_wait_ms": 111000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1000,
+          1600
+        ],
+        "expired": [
+          111500,
+          113500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Lower bracket of Dark Calling 560715 2-minute ICD (AscensionCultistEvents.cpp:66: Chance(player, 560715, 120000)). Void Zone 92559 at 20000/100000 HP (<35%) triggers 560715, verified 3 active Manifestations at +1.2s (game_time [1000..1600]); Manifestations engage the REACT_DEFENSIVE striker, which continues melee-hitting caster (<35% HP) after the 10s wave despawns, yet owned_creature_count(397771) remains 0 at +112.2s (game_time [111500..113500], strictly above 108000 ms = -10% of 120000 ms). Paired with icd_reopened (reads 3 at +124.2s) to bracket 120s inside +-10%. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 560715,
+      "name": "Dark Calling (2 min ICD reopens by 124 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_reopened",
+      "label_suffix": "icd_reopened",
+      "quote": "Can ony occur once every 2 minutes.",
+      "trigger_spell": 60235,
+      "gate_spell": 560715,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        20000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 92559,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 397771
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 124000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          123800,
+          125500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket of Dark Calling 560715 2-minute ICD (AscensionCultistEvents.cpp:66: Chance(player, 560715, 120000)). Void Zone 92559 at 20000/100000 HP triggers the initial wave (despawns at 10s, stays 0 through 112s per icd_blocked); once the 120s ICD expires, ongoing hits from the engaged REACT_DEFENSIVE striker re-trigger 560715 so owned_creature_count(397771) reads 3 at +124.2s (game_time [123800..125500], strictly below 132000 ms = +10% of 120000 ms). Paired with icd_blocked (0 at +112.2s) to bracket 120s inside +-10%. Reference search 2026-11-25: installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (Tentacle damage reduces Eldritch Obelisk cooldown by 2 sec)",
+      "kind": "metric_delta",
+      "variant": "obelisk_cd",
+      "label_suffix": "obelisk_cd",
+      "quote": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+      "trigger_spell": 802044,
+      "gate_spell": 520405,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        502182,
+        560321
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Tentacle of Y'shaarj 50096 deals 1 slam hit in each phase"
+          }
+        ]
+      },
+      "metric": "cooldown_ms",
+      "fields": {
+        "spell": 560321
+      },
+      "before_expected": 175900,
+      "expected": 173900,
+      "expected_gain": -2000,
+      "tolerance": 300,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Twilight Domination 520405 + 520872 Effect[0] BasePoints -2001 + DieSides 1 = -2000 ms ($/1000;520872s1 = 2 sec; Spell.dbc). Both phases engage dummy with Horrorbolt 502182, cast Eldritch Obelisk 560321 (180000 ms RecoveryTime, reset before cast), wait 3000 ms, then cast Tentacle of Y'shaarj 802044 (verified 1 slam hit per phase via ally_arm owned_creature_damage_count 50096) and read cooldown_ms of 560321 1000 ms later: expected gain -2000 ms within 300 ms after learning 520405. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (+25% Eldritch Obelisk effectiveness: ally speed +40% -> +50%)",
+      "kind": "effectiveness_delta",
+      "variant": "obelisk_effectiveness",
+      "label_suffix": "obelisk_effectiveness",
+      "quote": "In addition, increases the effectiveness of Eldritch Obelisk by $s1%.",
+      "trigger_spell": 560321,
+      "gate_spell": 520405,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.4,
+      "expected": 1.5,
+      "tolerance": 0.001,
+      "wait_ms": 1500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "Twilight Domination 520405 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 24 + DieSides 1 = +25% ($s1 = 25), SpellClassMask[1] 65536 matching Eldritch Obelisk 560322 SpellFamilyFlags[1] 65536 (Spell.dbc). Grouped ally inside 15 yd of Eldritch Obelisk reads run_speed_rate 1.40 (+40%) before learning 520405 and 1.50 (+50% = 40% * 1.25) after learning 520405 (21000 ms expire_ms clears the 20000 ms Obelisk between phases). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 302015,
+      "kind": "flat_chance_rate",
+      "variant": "blast_rate",
+      "label_suffix": "blast_rate",
+      "name": "Eldritch Command (30% chance on Gaze of C'Thun cast for Tentacle to blast with 573311)",
+      "quote": "Casting Gaze of C'thun now has a $h% chance to cause your Tentacles to blast the enemy with eldritch energy,",
+      "chance_pct": 30,
+      "learn": [
+        802044
+      ],
+      "trigger_spell": 500110,
+      "trigger_target": "dummy",
+      "cast_power": 2000,
+      "setup": {
+        "spell": 802044,
+        "target": "caster",
+        "power": 2000,
+        "every": 12
+      },
+      "layout": [
+        {
+          "do": "setup",
+          "wait_ms": 1700
+        },
+        {
+          "do": "start"
+        },
+        {
+          "do": "trigger",
+          "wait_ms": 1700
+        },
+        {
+          "do": "end"
+        }
+      ],
+      "trial": {
+        "metric": "spell_cast_count",
+        "spell": 500110
+      },
+      "event": {
+        "metric": "owned_creature_spell_cast_count",
+        "entry": 50096,
+        "spell": 573311
+      },
+      "cycles": 235,
+      "unlearned_cycles": 4,
+      "trials_per_cycle": 1,
+      "parts": 32,
+      "streams": 3,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Gaze of C'Thun 500110 is single-target (no AoE, no chain) cast at each stream's own dummy; Tentacle of Y'shaarj 50096 spawns within 2 yd of its owner (within_yd 2.5) and selects targets within 40 yd (AscensionCultistSummons.cpp:176; combat_reach_yd 4); 3 streams are spaced 50 yd apart (hypot(50, 3) - 2.5 = 47.59 yd > 46 yd), and ward hits on other dummies are checked before every setup recast and at the end.",
+        "wards": [
+          {
+            "entries": [
+              50096
+            ],
+            "within_yd": 2.5,
+            "reach_yd": 40,
+            "combat_reach_yd": 4,
+            "spells": [
+              802046,
+              573311
+            ]
+          }
+        ]
+      },
+      "observe_source": "Eldritch Command 302015 ProcChance 30 ($h = 30; Spell.dbc); AscensionCultistAbilities.cpp:138-139 rolls Chance(player, 302015) on each Gaze of C'Thun 500110 cast and calls Command(player, target, true) -> Tentacle 50096 casts 573311 (AscensionCultistSummons.cpp:205-206). Setup refreshes 802044 (30s duration) every 12 cycles (20.4s < 30s) before each cycle's start read so owned creature 50096 is present for every owned_creature_spell_cast_count read. Control (unlearned, 384 trials): 0 casts of 573311. Treatment: 235 cycles x 3 streams x 32 parts = 22560 trials (>= 21950 flip-proof requirement for 30% +-2 pts, residual <= 0.1% per pair). Reference search 2026-11-25: coa-history 573311 has 258 hits + 3 misses; coabuildhub matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 302015,
+      "name": "Eldritch Command (Tentacle blast 573311 Shadow damage)",
+      "kind": "script_hit",
+      "label_suffix": "blast_damage",
+      "quote": "dealing ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} Shadow damage.",
+      "hit_spell": 573311,
+      "caster_entry": 50096,
+      "unresisted": true,
+      "learn": [
+        802044,
+        500110
+      ],
+      "cast_power": 2000,
+      "casts": [
+        [
+          802044,
+          "caster"
+        ],
+        [
+          500110,
+          "dummy"
+        ],
+        [
+          500110,
+          "dummy"
+        ],
+        [
+          500110,
+          "dummy"
+        ]
+      ],
+      "trials": 16,
+      "minimum_hits": 3,
+      "settle_ms": 1000,
+      "observe_source": "Eldritch Command 573311 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Shadow, BasePoints 11 + DieSides 1 = 12, RealPointsPerLevel 1.5, BaseLevel 14, SpellLevel 14, MaxLevel 0; AscensionCultistData.h:93 {573311, 0, 0.225f, 0.10f, 0, 0, 0}. Tooltip formula ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} resolves to 118.6 at level 60 reference stats (12 + 46*1.5 + 0 + 37.6). 16 trials x 3 Gaze casts = 48 attempts at 30% proc rate (expected 14.4 blasts; P(<3 hits) < 1e-5); control without 302015 produces 0 hits of 573311. Reference search 2026-11-25: coa-history 573311 has 258 hits (mean 527); coabuildhub matches installed Spell.dbc verbatim. Per-hit probe 2026-11-25 (cu-h3c, two runs of the same trial layout with a read after every Gaze): non-crit hits of 573311 by the Tentacle took four values, 132 (resisted false) and 119, 106, 93 (resisted true), i.e. 132 reduced by the 10/20/30% partial resist tiers of the level-60 dummy's Shadow resistance, with owner attack power 376 and spell power 0 at every hit; the 118 mode of the earlier runs was a 10%-resisted hit, not the unresisted amount. caster_auras 823764 (target magic resistance -9999, as the other script_hit entries of the project that read minion hits with unresisted true) removes the partial resist so every non-crit hit is the unresisted amount.",
+      "caster_auras": [
+        [
+          823764,
+          1
+        ]
+      ]
+    },
+    {
+      "spell": 706911,
+      "kind": "flat_chance_rate",
+      "variant": "portal_rate",
+      "label_suffix": "portal_rate",
+      "name": "Depths of Madness (15% chance on Gaze of C'Thun damage to spawn Void Portal 533030)",
+      "quote": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+      "chance_pct": 15,
+      "trigger_spell": 500110,
+      "trigger_target": "dummy",
+      "cast_power": 2000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "caster aura 823764 (target magic resistance -9999) prevents full Shadow resist on Gaze of C'Thun 520332 so every cast lands a damage trial"
+        }
+      ],
+      "cast_wait_ms": 1700,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 520332,
+        "target": "dummy"
+      },
+      "event": {
+        "metric": "owned_creature_summon_count",
+        "entry": 533030
+      },
+      "cycles": 445,
+      "unlearned_cycles": 4,
+      "trials_per_cycle": 1,
+      "parts": 16,
+      "streams": 2,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Gaze of C'Thun 500110/520332 is single-target cast at each stream's own dummy; Void Portal 533030 spawns within 3 yd of dummy (within 6.5 yd of caster) and casts within 40 yd (AscensionCultistSummons.cpp:176; combat_reach_yd 4); 2 streams are spaced 100 yd apart (hypot(100, 3) - 6.5 = 93.54 yd >> 46 yd), and portal placement is asserted each cycle.",
+        "wards": [
+          {
+            "entries": [
+              533030
+            ],
+            "within_yd": 6.5,
+            "reach_yd": 40,
+            "combat_reach_yd": 4
+          }
+        ]
+      },
+      "observe_source": "Depths of Madness 706911 ProcChance 15 ($h = 15; Spell.dbc); AscensionCultistEvents.cpp:98,230-232 rolls Chance(player, 706911) on Gaze of C'Thun 520332 damage and summons Void Portal 533030 for 12000 ms. Control (unlearned, 128 trials): 0 summons of 533030. Treatment: 445 cycles x 2 streams x 16 parts = 14240 trials (>= 14163 flip-proof requirement for 15% +-2 pts, residual <= 0.1% per pair). Uniform 1-of-3 spell pick distribution of 533030 is tracked separately in tool-queue.md. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim; coa-history checked (0 events for 706911)."
+    },
+    {
+      "spell": 706911,
+      "name": "Depths of Madness (spawned Void Portal casts damaging spell and disappears)",
+      "kind": "metric_delta",
+      "variant": "portal_casts",
+      "label_suffix": "portal_casts",
+      "quote": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+      "trigger_spell": 500110,
+      "gate_spell": 706911,
+      "learn": [
+        800416,
+        805572
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 533030
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Every spawned Void Portal 533030 disappears within 12000 ms after casting (checked at wait_ms 13000)"
+          }
+        ]
+      },
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 533030
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 13000,
+      "expire_ms": 500,
+      "observe_source": "Complements 706911 portal_rate (15% spawn rate): 48 casts of Gaze of C'Thun 500110 with spell pen 823764 (precondition fixture; P(0 portals) = 0.85^48 = 0.041% per run, 0.082% <= 0.1% per pair) produce 0 portal damage hits before learning 706911 and >= 1 owned_creature_damage_count(533030) after learning 706911 (AscensionCultistSummons.cpp:290-297), with owned_creature_count(533030) == 0 at wait_ms 13000 confirming portals disappear after casting. void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) on unused ally effect 520335. Uniform 1-of-3 spell pick distribution is tracked separately in tool-queue.md. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 706911,
+      "name": "Depths of Madness (the void portal casts Gaze of C'thun)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_gaze",
+      "label_suffix": "portal_cast_gaze",
+      "quote": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+      "trigger_spell": 500110,
+      "gate_spell": 706911,
+      "learn": [
+        800416,
+        805572
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 520332,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 13000,
+      "expire_ms": 500,
+      "observe_source": "Tooltip: the void portal casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam. AscensionCultistSummons.cpp:290-297 picks roots[urand(0, 2)] from {500110, 800416, 805572} and the portal casts it at the dummy; Gaze of C'thun reaches the dummy through 500110 -> 520334 -> 520332, so its damage events by the portal (caster_entry 533030, spell 520332) are the read; they are cumulative over every portal of the phase (harness spell_damage_count with caster_entry, CoAGameplayTest.cpp:5359-5397). The tooltip states no share for the three spells and none is asserted: the claim is that Gaze of C'thun occurs at least once. Sizing: 180 Gaze casts per phase, each rolls the 15% portal and, for a spell with a 1/3 share, the spell is cast with probability 0.15/3 = 0.05 per cast, so a missed spell has probability 0.95^180 = 9.78e-05 per run; over 3 spells x 2 runs of a pair the bound is 6 x 0.95^180 = 5.87e-04 <= 0.1% per pair. Control: the same 180 casts before 706911 is learned produce 0 damage events of 520332 by 533030. Precondition fixture as portal_casts: caster aura 823764 (target magic resistance -9999) so every Gaze lands. The exact-one-cast-per-portal and no-other-spell properties are not read here (see the ledger tool_gap). Reference search 2026-11-25: Spell.dbc 500110 effects trigger 520334/520335, 800416 school damage, 805572 channel triggering 805573 (school damage). Gaze of C'Thun 500110 costs 15% of the mana pool (Spell.dbc ManaCostPercentage 15), so refill_power_after_setup_casts sets the mana back to cast_power after every setup cast; without it the pool of the first prove covered about 7 casts and the later casts were refused (portals dealt 0-2 hits in 180 casts).",
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
+    },
+    {
+      "spell": 706911,
+      "name": "Depths of Madness (the void portal casts Horrorbolt)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_horrorbolt",
+      "label_suffix": "portal_cast_horrorbolt",
+      "quote": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+      "trigger_spell": 500110,
+      "gate_spell": 706911,
+      "learn": [
+        800416,
+        805572
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 800416,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 13000,
+      "expire_ms": 500,
+      "observe_source": "Tooltip: the void portal casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam. AscensionCultistSummons.cpp:290-297 picks roots[urand(0, 2)] from {500110, 800416, 805572} and the portal casts it at the dummy; Horrorbolt reaches the dummy through 800416, so its damage events by the portal (caster_entry 533030, spell 800416) are the read; they are cumulative over every portal of the phase (harness spell_damage_count with caster_entry, CoAGameplayTest.cpp:5359-5397). The tooltip states no share for the three spells and none is asserted: the claim is that Horrorbolt occurs at least once. Sizing: 180 Gaze casts per phase, each rolls the 15% portal and, for a spell with a 1/3 share, the spell is cast with probability 0.15/3 = 0.05 per cast, so a missed spell has probability 0.95^180 = 9.78e-05 per run; over 3 spells x 2 runs of a pair the bound is 6 x 0.95^180 = 5.87e-04 <= 0.1% per pair. Control: the same 180 casts before 706911 is learned produce 0 damage events of 800416 by 533030. Precondition fixture as portal_casts: caster aura 823764 (target magic resistance -9999) so every Gaze lands. The exact-one-cast-per-portal and no-other-spell properties are not read here (see the ledger tool_gap). Reference search 2026-11-25: Spell.dbc 500110 effects trigger 520334/520335, 800416 school damage, 805572 channel triggering 805573 (school damage). Gaze of C'Thun 500110 costs 15% of the mana pool (Spell.dbc ManaCostPercentage 15), so refill_power_after_setup_casts sets the mana back to cast_power after every setup cast; without it the pool of the first prove covered about 7 casts and the later casts were refused (portals dealt 0-2 hits in 180 casts).",
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
+    },
+    {
+      "spell": 706911,
+      "name": "Depths of Madness (the void portal casts Obliteration Beam)",
+      "kind": "metric_delta",
+      "variant": "portal_cast_beam",
+      "label_suffix": "portal_cast_beam",
+      "quote": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+      "trigger_spell": 500110,
+      "gate_spell": 706911,
+      "learn": [
+        800416,
+        805572
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805573,
+        "caster_entry": 533030,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 13000,
+      "expire_ms": 500,
+      "observe_source": "Tooltip: the void portal casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam. AscensionCultistSummons.cpp:290-297 picks roots[urand(0, 2)] from {500110, 800416, 805572} and the portal casts it at the dummy; Obliteration Beam reaches the dummy through 805572 channel -> 805573, so its damage events by the portal (caster_entry 533030, spell 805573) are the read; they are cumulative over every portal of the phase (harness spell_damage_count with caster_entry, CoAGameplayTest.cpp:5359-5397). The tooltip states no share for the three spells and none is asserted: the claim is that Obliteration Beam occurs at least once. Sizing: 180 Gaze casts per phase, each rolls the 15% portal and, for a spell with a 1/3 share, the spell is cast with probability 0.15/3 = 0.05 per cast, so a missed spell has probability 0.95^180 = 9.78e-05 per run; over 3 spells x 2 runs of a pair the bound is 6 x 0.95^180 = 5.87e-04 <= 0.1% per pair. Control: the same 180 casts before 706911 is learned produce 0 damage events of 805573 by 533030. Precondition fixture as portal_casts: caster aura 823764 (target magic resistance -9999) so every Gaze lands. The exact-one-cast-per-portal and no-other-spell properties are not read here (see the ledger tool_gap). Reference search 2026-11-25: Spell.dbc 500110 effects trigger 520334/520335, 800416 school damage, 805572 channel triggering 805573 (school damage). Gaze of C'Thun 500110 costs 15% of the mana pool (Spell.dbc ManaCostPercentage 15), so refill_power_after_setup_casts sets the mana back to cast_power after every setup cast; without it the pool of the first prove covered about 7 casts and the later casts were refused (portals dealt 0-2 hits in 180 casts).",
+      "refill_power_after_setup_casts": {
+        "power": 0
+      }
     }
   ],
   "player_observations": [],

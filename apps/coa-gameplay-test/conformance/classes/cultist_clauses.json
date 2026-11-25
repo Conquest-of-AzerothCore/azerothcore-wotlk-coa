@@ -291,7 +291,8 @@
     "spell": 300287,
     "clause": "While Herald of the Depths is active, you now take $s2% less damage",
     "labels": [
-      "300287 effect_value e1 #0"
+      "300287 behaviour_hit_ratio damage_taken",
+      "300287 behaviour_hit_ratio herald_gate"
     ],
     "kind": "claim"
   },
@@ -307,7 +308,8 @@
     "spell": 300290,
     "clause": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
     "labels": [
-      "300290 effect_value e1 #0"
+      "300290 behaviour_metric_delta min_speed",
+      "300290 behaviour_metric_delta herald_gate"
     ],
     "kind": "claim"
   },
@@ -319,13 +321,16 @@
       {
         "claim": "within $301259d",
         "labels": [
-          "300291 spell_duration 301259 #0"
+          "300291 behaviour_metric_delta window_duration",
+          "300291 behaviour_metric_delta window_control"
         ]
       },
       {
         "claim": "increases the absorption of your next Void Shield ... by $301259s1%",
         "labels": [
-          "300291 effect_value 301259e0 #1"
+          "300291 behaviour_metric_delta absorb_doubled",
+          "300291 behaviour_metric_delta absorb_control",
+          "300291 behaviour_metric_delta consumed_next"
         ]
       }
     ]
@@ -783,7 +788,8 @@
     "spell": 301258,
     "clause": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
     "labels": [
-      "301258 effect_value e0 #0"
+      "301258 behaviour_metric_delta with_herald",
+      "301258 behaviour_metric_delta without_herald"
     ],
     "kind": "claim"
   },
@@ -919,7 +925,7 @@
     "spell": 302015,
     "clause": "Casting Gaze of C'thun now has a $h% chance to cause your Tentacles to blast the enemy with eldritch energy,",
     "labels": [
-      "302015 effect_value #0"
+      "302015 behaviour_metric_delta blast_rate"
     ],
     "kind": "claim"
   },
@@ -927,7 +933,7 @@
     "spell": 302015,
     "clause": "dealing ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} Shadow damage.",
     "labels": [
-      "302015 effect_value 573311e0 #1"
+      "302015 script_hit 573311 blast_damage"
     ],
     "kind": "claim"
   },
@@ -1418,7 +1424,7 @@
     "spell": 520405,
     "clause": "In addition, increases the effectiveness of Eldritch Obelisk by $s1%.",
     "labels": [
-      "520405 effect_value e0 #1"
+      "520405 behaviour_metric_delta obelisk_effectiveness"
     ],
     "kind": "claim"
   },
@@ -1926,7 +1932,7 @@
     "spell": 560321,
     "clause": "Create an Eldritch Obelisk beneath you for $560322d,",
     "labels": [
-      "560321 spell_duration 560322 #0"
+      "560321 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -1942,7 +1948,7 @@
     "spell": 560321,
     "clause": "and the movement speed of allies by $560322s3% while near it.",
     "labels": [
-      "560321 effect_value 560322e2 #2"
+      "560321 behaviour_metric_delta ally_speed"
     ],
     "kind": "claim"
   },
@@ -1996,19 +2002,28 @@
   {
     "spell": 560715,
     "clause": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
-    "labels": [],
+    "labels": [
+      "560715 behaviour_metric_delta summon_duration",
+      "560715 behaviour_metric_delta no_talent",
+      "560715 behaviour_metric_delta threshold_above_35"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560715,
     "clause": "which will attack enemies and heal you for 5% of your base health.",
-    "labels": [],
+    "labels": [
+      "560715 behaviour_metric_delta attack_and_heal"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560715,
     "clause": "Can ony occur once every 2 minutes.",
-    "labels": [],
+    "labels": [
+      "560715 behaviour_metric_delta icd_blocked",
+      "560715 behaviour_metric_delta icd_reopened"
+    ],
     "kind": "claim"
   },
   {
@@ -2029,7 +2044,16 @@
     "labels": [
       "561035 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind proves the +25% duration that Teachings of Mythrax 561035 adds to Presence of N'Zoth 803037 and Presence of Y'Shaarj 803035. Attempted with last_application_expiry `feed` (the kind built for a grant that only a rolled proc earns; the Cultist Chance() rolls the raw ProcChance with roll_chance_f, AscensionCultist.cpp:105-115, so forced_roll cannot raise it): the kind learns one `gate_spell` after its control arm and sizes the feed loop from that spell's ProcChance (kinds/last_application_expiry.py:112-117), but the gate of this claim would be 561035 (ProcChance 100, Effect[0] aura 108 ADD_PCT_MODIFIER BP 24) and generation refuses it: '561035 last_application_expiry feed needs a gate spell 561035 with a proc chance between 0 and 100%' (prove run 2026-11-25, entry aura 500707 on the caster, expected 25000 ms). With the rolled Presence 803037 (ProcChance 20) as the gate the talent 561035 would be unlearned in both arms, so the duration read would be the base one; the kind has no option to learn or cast a second spell (561035) beside the gate, and the Presence must also be an active aura on the caster (AscensionCultistEvents.cpp:103-105 needs player->HasAura(803037)). The proc has no ICD (Chance() is called without a cooldown for 803037/803035), so the roll is repeatable; only the two-spell set-up is missing. The Y'Shaarj half (curse 805180 on the target, ModifiedDuration(807632)) has the same limit.",
+      "attempts": [
+        {
+          "agent": "cu-h3c",
+          "report": ".agents/plans/cu-h3c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 561335,
@@ -2417,7 +2441,9 @@
     "spell": 680557,
     "clause": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
     "labels": [
-      "680557 effect_value 680556e2 #0"
+      "680557 behaviour_metric_delta transform",
+      "680557 behaviour_metric_delta damage_taken",
+      "680557 behaviour_metric_delta damage_taken_control"
     ],
     "kind": "claim"
   },
@@ -2676,14 +2702,19 @@
     "spell": 681088,
     "clause": "Increases the base amount that Void Shield absorbs by $s1%",
     "labels": [
-      "681088 effect_value e0 #0"
+      "681088 behaviour_metric_delta void_shield_base_sp0",
+      "681088 behaviour_metric_delta void_shield_base_control",
+      "681088 behaviour_metric_delta void_shield_base_sp2000"
     ],
     "kind": "claim"
   },
   {
     "spell": 681088,
     "clause": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
-    "labels": [],
+    "labels": [
+      "681088 behaviour_metric_delta dreadnought_ignore_25",
+      "681088 behaviour_metric_delta dreadnought_ignore_control"
+    ],
     "kind": "claim"
   },
   {
@@ -2694,13 +2725,15 @@
       {
         "claim": "Absorbing damage grants you $s2% of the absorbed value as attack power",
         "labels": [
-          "681088 effect_value e1 #1"
+          "681088 behaviour_metric_delta absorb_ap",
+          "681088 behaviour_metric_delta absorb_ap_two_strikes",
+          "681088 behaviour_metric_delta absorb_ap_control"
         ]
       },
       {
         "claim": "for $681067d",
         "labels": [
-          "681088 spell_duration 681067 #2"
+          "681088 behaviour_metric_delta absorb_ap_duration"
         ]
       }
     ]
@@ -2813,7 +2846,9 @@
     "spell": 681425,
     "clause": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
     "labels": [
-      "681425 spell_duration 680573 #0"
+      "681425 behaviour_metric_delta duration",
+      "681425 behaviour_metric_delta no_talent",
+      "681425 behaviour_metric_delta non_crit"
     ],
     "kind": "claim"
   },
@@ -2821,7 +2856,7 @@
     "spell": 681425,
     "clause": "which will attack enemies and heal you for $681275s1% of your base health.",
     "labels": [
-      "681425 effect_value 681275e0 #1"
+      "681425 behaviour_metric_delta attack_and_heal"
     ],
     "kind": "claim"
   },
@@ -3203,7 +3238,8 @@
     "spell": 706187,
     "clause": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
     "labels": [
-      "706187 effect_value e0 #0"
+      "706187 behaviour_metric_delta black_blood_heal",
+      "706187 behaviour_metric_delta without_black_blood"
     ],
     "kind": "claim"
   },
@@ -3287,10 +3323,37 @@
   {
     "spell": 706911,
     "clause": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
-    "labels": [
-      "706911 effect_value #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal",
+        "labels": [
+          "706911 behaviour_metric_delta portal_rate"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "706911 behaviour_metric_delta portal_cast_gaze",
+          "706911 behaviour_metric_delta portal_cast_horrorbolt",
+          "706911 behaviour_metric_delta portal_cast_beam",
+          "706911 behaviour_metric_delta portal_casts"
+        ]
+      },
+      {
+        "claim": "before disappearing",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance kind reads two of the properties the tooltip states for Depths of Madness 706911's void portal 533030: (1) exactly one cast per portal and no spell other than Gaze of C'thun, Horrorbolt or Obliteration Beam: the harness cast counter ProcCounter::CastCount is keyed by the creature guid and spell (CoAGameplayTest.cpp:768-783) and owned_creature_spell_cast_count needs a present owned creature (6127-6132), so it reads one portal; the cumulative reads (spell_damage_count with caster_entry, owned_creature_damage_count) count damage events, not casts (Obliteration Beam is a channel, 805572 DurationIndex 285, with several 805573 ticks per cast), and metric_delta compares a reading with an expectation or with one second read (fields_sum is two terms, ratio_to_metric one base), so the portal count (owned_creature_summon_count) cannot be set against the sum of the three spells' casts; flat_chance_rate takes a chance below 100% and judges a band around it, which for one spell would assert its unstated share; (2) 'before disappearing': AscensionCultistSummons.cpp:290-297 despawns the portal 5 s (10 s if channeled) after its cast, inside its 12000 ms summon duration (AscensionCultistEvents.cpp:230-232); proving the despawn follows the cast needs a read of one portal a known time after its cast, but the portal exists only after a 15% roll that Chance() (AscensionCultist.cpp:105-115) takes from roll_chance_f without the chance-of-success modifier forced_roll sets, and a metric_delta reading taken after a fixed series of Gaze casts sees only portals of the last ~7 casts (12 s / 1.7 s), none with probability 0.85^7 = 32%, so a 'gone before 12 s' read cannot be sized to 0.1%. The 706911 portal_casts read (portal damage, none present at 13 s) is the evidence kept under 'casts either ...' only as 'the portals deal damage'; it does not prove 'before disappearing'.",
+      "attempts": [
+        {
+          "agent": "cu-h3c",
+          "report": ".agents/plans/cu-h3c/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706915,
@@ -3766,7 +3829,7 @@
     "spell": 801968,
     "clause": "Increases your maximum health by $s2%",
     "labels": [
-      "801968 effect_value e1 #0"
+      "801968 behaviour_metric_delta max_health"
     ],
     "kind": "claim"
   },
@@ -3774,7 +3837,8 @@
     "spell": 801968,
     "clause": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
     "labels": [
-      "801968 effect_value e0 #1"
+      "801968 behaviour_hit_ratio monstrosity_damage",
+      "801968 behaviour_hit_ratio without_monstrosity"
     ],
     "kind": "claim"
   },
@@ -3809,7 +3873,7 @@
     "spell": 802044,
     "clause": "Summon a Tentacle of Y'shaarj near you for $d.",
     "labels": [
-      "802044 aura_duration_ms #0"
+      "802044 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -3817,7 +3881,10 @@
     "spell": 802044,
     "clause": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
     "labels": [
-      "802044 effect_value #1"
+      "802044 behaviour_metric_delta slam_on_summon",
+      "802044 behaviour_metric_delta slam_on_gaze",
+      "802044 behaviour_hit_ratio stamina_scaling",
+      "802044 cone behaviour_fixed_count"
     ],
     "kind": "claim"
   },
@@ -3825,7 +3892,8 @@
     "spell": 802044,
     "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
     "labels": [
-      "802044 effect_value #2"
+      "802044 behaviour_metric_delta max_one",
+      "802044 behaviour_metric_delta replaces_nzoth"
     ],
     "kind": "claim"
   },
@@ -3842,7 +3910,7 @@
     "spell": 802048,
     "clause": "Increases the damage of your Tentacles by $s1%.",
     "labels": [
-      "802048 effect_value e0 #0"
+      "802048 behaviour_hit_ratio tentacle_damage"
     ],
     "kind": "claim"
   },
