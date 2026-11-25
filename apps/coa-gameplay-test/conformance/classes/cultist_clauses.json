@@ -2521,7 +2521,8 @@
     "labels": [
       "572103 behaviour_metric_delta retarget_out_of_range"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Proved after server fix (owner ruling O-20, 2026-11-25, Cultist ADR 0034): npc_ascension_cultist_summon reads Thoughtseize (806596, RangeIndex 11 = 15.0 yd) via GetMaxRange(false, me) for both target retention and replacement search on entry 501464; counted pair 20261125-124949 / 20261125-125018 (build a17a35612e2e, 0 flips, clear LOS, dummy alive) kept dummy in control (9.88 / 6.73 yd, area1 806596 = 0) and retargeted area1 in both near (22.13 / 25.76 yd, area1 = 1) and far (50.03 / 52.50 yd, area1 = 1) arms."
   },
   {
     "spell": 572103,
