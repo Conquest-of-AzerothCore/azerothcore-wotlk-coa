@@ -123,7 +123,7 @@ PLAIN_TOKEN = re.compile(r'\$(?:/\d+;)?(?P<spell>\d*)(?P<letter>[sSmM])(?P<digit
 TRUNCATED_READ = 1.0
 BONUS_DATA = 'bonus_data'
 COST_DIVISOR = re.compile(r'ManaCost divisor (\d+)')
-BASE_MANA_COST_DIVISOR = re.compile(r'ManaCost \d+ \+ \d+% of base_mana \d+ divisor (\d+)')
+BASE_MANA_COST_DIVISOR = re.compile(r'ManaCost \d+ \+ \d+% of base_(?:mana|health) \d+ divisor (\d+)')
 EXPLORATORY = ('gameplay', 'exploratory')
 ALERT_COLUMNS = ('scenario', 'spell_id', 'rank_id', 'label', 'check', 'status', 'measured', 'expected', 'low', 'high',
                  'deviation', 'explanation', 'server_commit', 'build', 'runs')

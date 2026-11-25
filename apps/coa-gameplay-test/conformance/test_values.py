@@ -1190,9 +1190,12 @@ class BaseManaPowerCostTest(unittest.TestCase):
         cls.voidborne = ClassSpell(VOIDBORNE, 'Voidborne', (VOIDBORNE,), VOIDBORNE, 0, False)
 
     def test_base_mana_power_cost_judges_mana_percent_spells_only_when_opted_in(self):
-        from values import BASE_MANA_POWER_COST_KEY
-        without = {key: value for key, value in self.cultist.items() if key != BASE_MANA_POWER_COST_KEY}
+        from values import BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY
+        without = {key: value for key, value in self.cultist.items()
+                   if key not in (BASE_MANA_POWER_COST_KEY, BASE_HEALTH_KEY)}
         with_opt = {**without, BASE_MANA_POWER_COST_KEY: True}
+        with_health = {**with_opt, BASE_HEALTH_KEY: {'value': 1418}}
+        without_opt_with_health = {**without, BASE_HEALTH_KEY: {'value': 1418}}
         _, exp_plain, _ = value_scenario(without, self.dreadfall, DREADFALL)
         _, exp_opt, _ = value_scenario(with_opt, self.dreadfall, DREADFALL)
         pc_plain = next(item for item in exp_plain if item.check == 'power_cost')
@@ -1200,12 +1203,19 @@ class BaseManaPowerCostTest(unittest.TestCase):
         self.assertTrue(pc_plain.rule.startswith(UNREADABLE))
         self.assertEqual(pc_opt.displayed, '181')
         self.assertEqual(pc_opt.rule, 'ManaCost 0 + 12% of base_mana 1512 divisor 1')
-        _, exp_health, _ = value_scenario(with_opt, self.voidborne, VOIDBORNE)
+        _, exp_health_no_key, _ = value_scenario(with_opt, self.voidborne, VOIDBORNE)
+        pc_health_no_key = next(item for item in exp_health_no_key if item.check == 'power_cost')
+        self.assertTrue(pc_health_no_key.rule.startswith(UNREADABLE))
+        _, exp_health_no_opt, _ = value_scenario(without_opt_with_health, self.voidborne, VOIDBORNE)
+        pc_health_no_opt = next(item for item in exp_health_no_opt if item.check == 'power_cost')
+        self.assertTrue(pc_health_no_opt.rule.startswith(UNREADABLE))
+        _, exp_health, _ = value_scenario(with_health, self.voidborne, VOIDBORNE)
         pc_health = next(item for item in exp_health if item.check == 'power_cost')
-        self.assertTrue(pc_health.rule.startswith(UNREADABLE))
+        self.assertEqual(pc_health.displayed, '141')
+        self.assertEqual(pc_health.rule, 'ManaCost 0 + 10% of base_health 1418 divisor 1')
 
     def test_invalid_base_mana_power_cost_config_is_refused(self):
-        from values import BASE_MANA_POWER_COST_KEY, base_mana_for_power_cost
+        from values import BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_health_for_power_cost, base_mana_for_power_cost
         for bad in (
                 {BASE_MANA_POWER_COST_KEY: 1},
                 {BASE_MANA_POWER_COST_KEY: True},
@@ -1214,6 +1224,10 @@ class BaseManaPowerCostTest(unittest.TestCase):
                 {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': True}}):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 base_mana_for_power_cost(bad)
+        valid_mana = {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 1512}}
+        for bad_health in (1418, {}, {'value': 0}, {'value': -5}, {'value': True}):
+            with self.subTest(bad_health=bad_health), self.assertRaises(ValueError):
+                base_health_for_power_cost({**valid_mana, BASE_HEALTH_KEY: bad_health})
 
 
 class CastAuraStacksTest(unittest.TestCase):

@@ -575,7 +575,8 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 
 - Deterministic values (`effect_value`, `aura_amount`, `power_cost`, `spell_duration`):
   `|measured - expected| <= max(1, 0.5 % of expected)`. A `power_cost` (plain `ManaCost` or opt-in
-  `base_mana_power_cost` `ManaCostPercentage` for mana spells, ADR 1318) is divided by the display divisor of its
+  `base_mana_power_cost` `ManaCostPercentage` for mana spells and `POWER_HEALTH` spells with `base_health`, ADR 1318)
+  is divided by the display divisor of its
   rule. A `$/N;` token expects N times the value it shows, except a `$/1000;sN sec` token of kind `duration_ms`,
   which the reader already gives in ms. A token of another spell reads its points, sign and rolls from that
   spell's effect (`model`).

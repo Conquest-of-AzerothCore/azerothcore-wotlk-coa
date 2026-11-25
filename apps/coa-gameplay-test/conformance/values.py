@@ -28,6 +28,7 @@ ALLY = 'ally'
 ALLY_CASTS_KEY = 'value_ally_casts'
 HONOUR_MIN_RANGE_KEY = 'honour_min_range'
 BASE_MANA_POWER_COST_KEY = 'base_mana_power_cost'
+BASE_HEALTH_KEY = 'base_health'
 ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
@@ -544,8 +545,17 @@ def base_mana_for_power_cost(class_file: dict | None) -> int | None:
     return base['value']
 
 
+def base_health_for_power_cost(class_file: dict | None) -> int | None:
+    if base_mana_for_power_cost(class_file) is None or BASE_HEALTH_KEY not in class_file:
+        return None
+    base = class_file[BASE_HEALTH_KEY]
+    if not isinstance(base, dict) or type(base.get('value')) is not int or base['value'] <= 0:
+        raise ValueError(f'{BASE_HEALTH_KEY} requires a positive integer value')
+    return base['value']
+
+
 def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts,
-                           base_mana: int | None = None) -> Expectation:
+                           base_mana: int | None = None, base_health: int | None = None) -> Expectation:
     divisor = POWER_DISPLAY_DIVISOR.get(facts.power_type, 1)
     if facts.mana_cost_per_level:
         displayed = f'{facts.mana_cost} + {facts.mana_cost_per_level} per level'
@@ -555,6 +565,11 @@ def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankF
             expected = facts.mana_cost + (base_mana * facts.mana_cost_percentage) // 100
             displayed = str(expected // divisor)
             rule = (f'ManaCost {facts.mana_cost} + {facts.mana_cost_percentage}% of base_mana {base_mana} '
+                    f'divisor {divisor}')
+        elif base_health is not None and facts.power_type == HEALTH_POWER:
+            expected = facts.mana_cost + (base_health * facts.mana_cost_percentage) // 100
+            displayed = str(expected // divisor)
+            rule = (f'ManaCost {facts.mana_cost} + {facts.mana_cost_percentage}% of base_health {base_health} '
                     f'divisor {divisor}')
         else:
             displayed = f'{facts.mana_cost} + {facts.mana_cost_percentage}% of base power'
@@ -864,7 +879,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         label = f'{rank_id} power_cost'
         measured.append(measurement(label, CASTER, 'spell_power_cost', spell=rank_id))
         expectations.append(power_cost_expectation(label, spell.spell_id, rank_id, facts,
-                                                   base_mana_for_power_cost(class_file)))
+                                                   base_mana_for_power_cost(class_file),
+                                                   base_health_for_power_cost(class_file)))
         if facts.recast_ms > 0:
             label = f'{rank_id} cooldown_ms'
             after_cast.append(measurement(label, CASTER, 'cooldown_ms', spell=rank_id))
