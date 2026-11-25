@@ -2509,8 +2509,7 @@
           "572103 behaviour_metric_delta duration_contrast"
         ]
       }
-    ],
-    "reason": "Alert (claim 0, uncounted): Tentacle of N'Zoth 572103 summons 501464 for 8000 ms (AscensionCultistAbilities.cpp:460) with a 100 ms initial Pulse delay (AscensionCultistSummons.cpp:156), so Thoughtseize 806596 (Duration 8000 ms, Amplitude 2000 ms) applies at ~+100 ms and schedules its 4th tick at ~+8100 ms; at +8000 ms 501464 despawns and OnCreatureRemoveWorld -> ClearThoughtseize() (AscensionCultistSummons.cpp:334-339) removes 806596 before tick 4, delivering only 3 ticks instead of 4 (25% total damage loss). Counted pair 20261125-060244 / 20261125-060311 (build eb39f0e31481, 0 flips): damage_base 405/402 (3 ticks, ~134-135/tick matches [131..135] per tick) vs 4-tick tooltip expectation 520..546; damage_sp (+1000 SP) 2916/2925 (3 ticks, ~972-975/tick matches [971..975] per tick) vs 4-tick tooltip expectation 3875..3910; silence ok (dummy Evocation 12051 casting 1->0, 806596 aura 0->1). Live Ascension logs (coa-history: 3 SPELL_SUMMON of 572103, 12 SPELL_PERIODIC_DAMAGE of 806596) confirm 4.0 ticks/summon. Claims 1 (tick_period 2006 ms in [1976.5..2035.5] vs 2000+-100) and 2 (duration 7509..8418 ms + duration_contrast) are behaviour proven."
+    ]
   },
   {
     "spell": 572103,
