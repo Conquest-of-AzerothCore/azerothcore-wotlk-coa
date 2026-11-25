@@ -237,7 +237,7 @@
     {
       "action": "snapshot",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "save_as": "orc_swings"
     },
     {
@@ -250,7 +250,7 @@
       "action": "assert",
       "label": "SETUP: the Mercenary's swings at the Orc go out",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "relative_to": "orc_swings",
       "min": 1,
       "within_ms": 6000
@@ -317,7 +317,7 @@
     {
       "action": "snapshot",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "save_as": "rehit_swings"
     },
     {
@@ -328,9 +328,9 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the further swings go out",
+      "label": "SETUP: the further hits land",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "relative_to": "rehit_swings",
       "min": 1,
       "within_ms": 6000
@@ -383,7 +383,7 @@
     {
       "action": "snapshot",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "save_as": "second_swings"
     },
     {
@@ -394,9 +394,9 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: those swings go out",
+      "label": "SETUP: those hits land",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "relative_to": "second_swings",
       "min": 1,
       "within_ms": 6000

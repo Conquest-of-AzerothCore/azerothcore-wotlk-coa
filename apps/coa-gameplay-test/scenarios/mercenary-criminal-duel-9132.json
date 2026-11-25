@@ -160,7 +160,7 @@
     {
       "action": "snapshot",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "save_as": "duel_swings"
     },
     {
@@ -171,9 +171,9 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the Mercenary's swings go out",
+      "label": "SETUP: the Mercenary's hits land",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "relative_to": "duel_swings",
       "min": 2,
       "within_ms": 8000

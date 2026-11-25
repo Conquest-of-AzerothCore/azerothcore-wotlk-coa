@@ -10,8 +10,9 @@
     "while the No Retreat debuff is active!' (SMSG_NOTIFICATION) for every refused teleport; an accepted Call To",
     "Arms 804723 summon and a group member's Portal to Stormwind (gameobject 176296, Portal Effect 17334 cast by",
     "its user on itself) and CoA's Homebound Portal (item 97758, gameobject 80775, spell 93187: a dummy effect",
-    "that teleports to the owner's hearth) do not move it; Blink 1953 (a leap, not a fixed-destination teleport)",
-    "is cast without a failure. Once Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
+    "that teleports to the owner's hearth) do not move it (the same summon, accepted again once Criminal is",
+    "lifted, does); Blink 1953 (a leap, not a fixed-destination teleport) is cast without a failure. Once",
+    "Criminal is removed, Teleport: Stormwind lands at its target x -9003.46."
   ],
   "timeout_ms": 180000,
   "players": [
@@ -266,6 +267,45 @@
       "row": 544567129,
       "relative_to": "before_summon",
       "min": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "CONTROL: Criminal is lifted for a moment",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "CONTROL: the same pending summon is accepted again",
+      "actor": "mage",
+      "opcode": 684,
+      "consumed": false,
+      "early": false,
+      "fields": [
+        {
+          "actor_guid": "g"
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a law-abiding player is moved to the summoner, so the summon was offered",
+      "actor": "mage",
+      "metric": "distance",
+      "target": "g",
+      "max": 5,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "The Mage is a Criminal again",
+      "actor": "mage",
+      "spell": 9930873,
+      "stacks": 1
     },
     {
       "action": "summon_gameobject",
