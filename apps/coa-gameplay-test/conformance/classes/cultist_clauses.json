@@ -1148,14 +1148,14 @@
       {
         "claim": "absorbing ${$m1+$SP*2} damage",
         "labels": [
-          "578115 effect_value e0 #0",
-          "578115 aura_amount e0 #0"
+          "578115 behaviour_metric_delta absorb_base",
+          "578115 behaviour_metric_delta absorb_sp"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "578115 aura_duration_ms #1"
+          "578115 behaviour_metric_delta duration"
         ]
       }
     ]
@@ -1163,14 +1163,16 @@
   {
     "spell": 578115,
     "clause": "Cannot be affected by Void Shield.",
-    "labels": [],
+    "labels": [
+      "578115 behaviour_metric_delta wracked_mind_gate"
+    ],
     "kind": "claim"
   },
   {
     "spell": 578115,
     "clause": "Lasts for $d.",
     "labels": [
-      "578115 spell_duration 805801 #2"
+      "578115 behaviour_metric_delta wracked_mind_duration"
     ],
     "kind": "claim"
   },
@@ -2599,12 +2601,18 @@
       {
         "claim": "for every ${($m1*$m2)*2} armor value you have",
         "labels": [
-          "680569 effect_value e0 #0"
-        ]
+          "680569 behaviour_metric_delta ap_base",
+          "680569 behaviour_metric_delta ap_armor"
+        ],
+        "reason": "Counted against ruled client text '2 for every 100 armor' per owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24: correct client text at class end, leave server 1 AP per 50 armor unchanged; proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
       },
       {
         "claim": "Increases your attack power by 2",
-        "labels": []
+        "labels": [
+          "680569 behaviour_metric_delta ap_base",
+          "680569 behaviour_metric_delta ap_armor"
+        ],
+        "reason": "Counted against ruled client text '2 for every 100 armor' per owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24: correct client text at class end, leave server 1 AP per 50 armor unchanged; proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
       }
     ]
   },
@@ -3035,24 +3043,49 @@
     "spell": 704476,
     "clause": "Tether yourself to an ally for $d,",
     "labels": [
-      "704476 aura_duration_ms #0"
+      "704476 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 704476,
     "clause": "increasing all damage they deal and reducing all damage they take by $s3%.",
-    "labels": [
-      "704476 effect_value e2 #1",
-      "704476 aura_amount e2 #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing all damage they deal",
+        "labels": [
+          "704476 behaviour_metric_delta ally_damage_dealt"
+        ]
+      },
+      {
+        "claim": "and reducing all damage they take by $s3%.",
+        "labels": [
+          "704476 behaviour_metric_delta ally_damage_taken"
+        ]
+      }
+    ]
   },
   {
     "spell": 704476,
     "clause": "$?s524877[\n\nEvery $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Every $t1 sec while active, you trigger a Horrific Revelation on the target",
+        "labels": [
+          "704476 behaviour_metric_delta without_524877",
+          "704476 behaviour_metric_delta with_524877_period_early",
+          "704476 behaviour_metric_delta with_524877_period_late"
+        ]
+      },
+      {
+        "claim": "and generate 5 Insanity.",
+        "labels": [
+          "704476 behaviour_metric_delta with_524877_insanity"
+        ]
+      }
+    ]
   },
   {
     "spell": 704527,

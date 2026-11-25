@@ -28788,6 +28788,671 @@
       "expire_ms": 6000,
       "void_on_cast_failure": true,
       "observe_source": "True branch of conditional $?s301317[8][$706913u]: with Call of C'Thun 301317 learned, Darkwither's tooltip states hardcoded literal '8' times (expected 8). Precondition 300306 extends Darkwither to 24 s (10 ticks with 301317, same pattern as 301317 withered_stacks). Server defect/tooltip mismatch note: 301317 Effect[0] SPELLMOD_MAX_AURA_STACKS adds +3 to base 4 -> 7 stacks, contradicting Darkwither's hardcoded literal 8 (alerts honestly). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+    },
+    {
+      "spell": 704476,
+      "name": "Hand of Yogg-Saron (duration 15 sec on ally)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Tether yourself to an ally for $d,",
+      "trigger_spell": 704476,
+      "target": "ally",
+      "measure_actor": "ally",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 704476,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          13900,
+          14600
+        ],
+        "expired": [
+          15500,
+          16200
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "704476 DurationIndex 8 = 15000 ms ($d = 15 sec; Spell.dbc). Aura 704476 on ally reads 0 before cast, 1 at 14200 ms (window [13900, 14600] > 13500 ms = 0.9 * 15000), and 0 at 15800 ms (window [15500, 16200] < 16500 ms = 1.1 * 15000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+    },
+    {
+      "spell": 704476,
+      "name": "Hand of Yogg-Saron (increases ally damage dealt by 15%)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_dealt",
+      "label_suffix": "ally_damage_dealt",
+      "quote": "increasing all damage they deal and reducing all damage they take by $s3%.",
+      "trigger_spell": 704476,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "select_dummy": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_attacks": [
+          {
+            "spell": 66903,
+            "power": 0,
+            "source": "Hammer of the Righteous 66903 (Holy 16000 exact, DmgClass 0, 0 resist/crit; 800432 precedent)"
+          }
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 704476,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Hand of Yogg-Saron 704476 is absent on ally in control and active in treatment."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 66903,
+        "target": "dummy"
+      },
+      "before_expected": 16000,
+      "expected": 34400,
+      "expected_ratio": 2.15,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "704476 Effect[2] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 (all schools), BasePoints 14 + DieSides 1 = +15% ($s3 = 15; Spell.dbc). Grouped ally casts deterministic Hammer of the Righteous 66903 (16000 Holy exact) at dummy before (control: 16000) and after real cast of 704476 on ally (+18400 -> cumulative 34400, ratio 2.15 +- 0.02; excludes 2.00 [0%] and 2.30 [+30%]). Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+    },
+    {
+      "spell": 704476,
+      "name": "Hand of Yogg-Saron (reduces ally damage taken by 15%)",
+      "kind": "metric_delta",
+      "variant": "ally_damage_taken",
+      "label_suffix": "ally_damage_taken",
+      "quote": "increasing all damage they deal and reducing all damage they take by $s3%.",
+      "trigger_spell": 704476,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 704476,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Hand of Yogg-Saron 704476 is absent on ally in control and active in treatment."
+          }
+        ]
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 8900,
+      "expected": 9065,
+      "tolerance": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "704476 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 127 (all schools), BasePoints -16 + DieSides 1 = -15% ($s3 = 15; Spell.dbc). Striker casts Light of the Naaru 41394 (1100 Holy exact) at 10000-HP ally (regen disabled): control leaves 8900 HP; with 704476 active, 1100 * 0.85 = 935 taken -> 9065 HP (+165 spared, tol 2 excludes 0% 8900 and -30% 9230). Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+    },
+    {
+      "spell": 704476,
+      "name": "Hand of Yogg-Saron (without 524877: no Horrific Revelation or Insanity)",
+      "kind": "metric_delta",
+      "variant": "without_524877",
+      "label_suffix": "without_524877",
+      "quote": "$?s524877[ Every $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@][]",
+      "trigger_spell": 704476,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 524877
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Horrific Revelations 524877 is absent (false branch of $?s524877)."
+          },
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 704476,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Hand of Yogg-Saron 704476 applied to ally."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms 0 Insanity is generated without 524877."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 704473,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "False branch of conditional $?s524877[...][] in 704476: without Horrific Revelations 524877 learned (verified 0 via ally_arm), AscensionCultistAuras.cpp:220 skips triggering 704473 and Insanity. After 3500 ms with 704476 active on ally, ally has 0 stacks of 704473 and caster has 0 Insanity. Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+    },
+    {
+      "spell": 704476,
+      "name": "Hand of Yogg-Saron (with 524877: triggers Horrific Revelation every 1 sec, early bracket)",
+      "kind": "metric_delta",
+      "variant": "with_524877_period_early",
+      "label_suffix": "with_524877_period_early",
+      "quote": "$?s524877[ Every $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@][]",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 704473,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 3200,
+      "expire_ms": 35000,
+      "game_time": {
+        "after": [
+          3100,
+          3290
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "True branch of conditional $?s524877[...][] in 704476: 524877 Effect[0] SPELLMOD_DOT -14000 ms cuts 704476 period from 15000 ms to 1000 ms ($t1 = 1); AscensionCultistAuras.cpp:220-224 triggers 704473 on ally each tick. At [3100, 3290] ms, 0 stacks before learning 524877 and 3 stacks after (excluding +10% slow 1100 ms; paired with with_524877_period_late). Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+    },
+    {
+      "spell": 704476,
+      "name": "Hand of Yogg-Saron (with 524877: triggers Horrific Revelation every 1 sec, late bracket)",
+      "kind": "metric_delta",
+      "variant": "with_524877_period_late",
+      "label_suffix": "with_524877_period_late",
+      "quote": "$?s524877[ Every $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@][]",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "ally",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 704473,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 4600,
+      "expire_ms": 35000,
+      "game_time": {
+        "after": [
+          4550,
+          4800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "True branch of conditional $?s524877[...][] in 704476: late period bracket at [4550, 4800] ms reads 0 stacks of 704473 before learning 524877 and 4 stacks after (excluding -10% fast 900 ms which reaches 5 stacks at 4500 ms). Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+    },
+    {
+      "spell": 704476,
+      "name": "Hand of Yogg-Saron (with 524877: generates 5 Insanity per sec)",
+      "kind": "metric_delta",
+      "variant": "with_524877_insanity",
+      "label_suffix": "with_524877_insanity",
+      "quote": "$?s524877[ Every $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@][]",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 704473,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms 1 tick of 704476 triggered 1 stack of Horrific Revelation 704473 on ally."
+          }
+        ]
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 500706
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 35000,
+      "void_on_cast_failure": true,
+      "observe_source": "True branch of conditional $?s524877[...][] in 704476: on tick 1 (1000 ms), AscensionCultistAuras.cpp:220-224 calls Resource(player, Insanity, 5). Because 704476 Effect[0] has TargetA 21 (ally) and TargetB 1 (caster) in Spell.dbc, the periodic aura ticks on both units and grants 10 Insanity instead of 5 (alerts honestly, matching 524877 trigger_and_insanity). Reference search 2026-11-25: coa-history 704476 Hand of Yogg-Saron: 248 SPELL_AURA_APPLIED in 14 logs; 704473 Horrific Revelation: 480 SPELL_HEAL in 3 logs; coabuildhub 704476 matches verbatim."
+    },
+    {
+      "spell": 680569,
+      "name": "Malignant Armor (1 AP per 50 armor at base Dreadnought armor 182; Q-cu-4)",
+      "kind": "metric_delta",
+      "variant": "ap_base",
+      "label_suffix": "ap_base",
+      "quote": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have.",
+      "trigger_spell": 60235,
+      "gate_spell": 680569,
+      "target": "caster",
+      "measure_actor": "caster",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "armor",
+            "before_expected": 182,
+            "expected": 182,
+            "tolerance": 0,
+            "source": "Dreadnought reference armor 182 = 2*63 Agi (126) + 8 starter cloth + 48 shield 2129 in both phases."
+          }
+        ]
+      },
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 379,
+      "expected_gain": 3,
+      "tolerance": 0.1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "680569 Effect[0] aura 285 SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR BasePoints 49 + DieSides 1 = 50 (StatSystem.cpp:660-663: attPowerMod += int32(GetArmor() / 50) = 1 AP per 50 armor = 2 AP per 100 armor; Spell.dbc). At Dreadnought reference armor 182 (read via ally_arm), int(182 / 50) = +3 AP (376 -> 379, tol 0.1). Paired with ap_armor at 5182 armor (+103 AP) to prove the exact slope. Owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
+    },
+    {
+      "spell": 680569,
+      "name": "Malignant Armor (1 AP per 50 armor at +5000 armor = 5182; slope proof, Q-cu-4)",
+      "kind": "metric_delta",
+      "variant": "ap_armor",
+      "label_suffix": "ap_armor",
+      "quote": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have.",
+      "trigger_spell": 60235,
+      "gate_spell": 680569,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          673,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          673,
+          0,
+          5000
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "armor",
+            "before_expected": 5182,
+            "expected": 5182,
+            "tolerance": 0,
+            "source": "Confirms Lesser Armor 673 amount 5000 sets total armor to 182 + 5000 = 5182 in both phases."
+          }
+        ]
+      },
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 479,
+      "expected_gain": 103,
+      "tolerance": 0.1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Second armor point for 680569 (StatSystem.cpp:663 attPowerMod += int32(GetArmor() / 50)): Lesser Armor 673 (Effect[0] aura 22 armor) at amount 5000 raises armor to 5182 (read via ally_arm) -> int(5182 / 50) = +103 AP (376 -> 479, tol 0.1). With ap_base (182 -> +3 AP), proves exact slope +100 AP / +5000 armor = 1 AP per 50 armor = 2 AP per 100 armor. Owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
+    },
+    {
+      "spell": 578115,
+      "name": "Void Shield (absorbs 776..830 damage on ally at SP 0 and applies Wracked Mind)",
+      "kind": "metric_delta",
+      "variant": "absorb_base",
+      "label_suffix": "absorb_base",
+      "quote": "Shields an ally, absorbing ${$m1+$SP*2} damage for $d and applying Wracked Mind.",
+      "trigger_spell": 578115,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805801,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms casting Void Shield 578115 on ally applies Wracked Mind 805801 (0 before, 1 after)."
+          }
+        ]
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 803,
+      "tolerance": 28,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "578115 Effect[0] aura 69 SPELL_AURA_SCHOOL_ABSORB BasePoints 775 + DieSides 55 at BaseLevel 60 -> 776..830 (midpoint 803 +- 28) at SP 0; Effect[2] triggers Wracked Mind 805801 on ally (verified via ally_arm 0 -> 1; Spell.dbc). Striker hits ally 2x with Light of the Naaru 41394 (2200 > 830): control absorbs 0; after real cast of 578115 absorbs [776, 830]. Paired with absorb_sp (+2000 SP). Reference search 2026-11-25: coa-history 578115 Void Shield: 59538 events in 23 logs; 805801 Wracked Mind: 23383 events in 14 logs; coabuildhub 578115 matches verbatim."
+    },
+    {
+      "spell": 578115,
+      "name": "Void Shield (absorbs +4000 damage on ally at +2000 SP)",
+      "kind": "metric_delta",
+      "variant": "absorb_sp",
+      "label_suffix": "absorb_sp",
+      "quote": "Shields an ally, absorbing ${$m1+$SP*2} damage for $d and applying Wracked Mind.",
+      "trigger_spell": 578115,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "player_spell_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 6,
+        "wait_ms": 200,
+        "after_trigger_ms": 500
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_strikes": true,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805801,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms casting Void Shield 578115 on ally applies Wracked Mind 805801."
+          }
+        ]
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 4803,
+      "tolerance": 28,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "578115 SP scaling arm (${$m1+$SP*2}, AscensionCultistData.h:96 coeff 2.0): at player_spell_power 2000 (caster SP fixture), shield absorbs 776..830 + 4000 = 4776..4830 (4803 +- 28). Striker hits ally 6x with 41394 (6600 > 4830): control absorbs 0, treatment absorbs [4776, 4830]. Reference search 2026-11-25: coa-history 578115 Void Shield: 59538 events in 23 logs; 805801 Wracked Mind: 23383 events in 14 logs; coabuildhub 578115 matches verbatim."
+    },
+    {
+      "spell": 578115,
+      "name": "Void Shield (duration 30 sec on ally)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Shields an ally, absorbing ${$m1+$SP*2} damage for $d and applying Wracked Mind.",
+      "trigger_spell": 578115,
+      "target": "ally",
+      "measure_actor": "ally",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 578115,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 28500,
+      "expiry_wait_ms": 3000,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          28000,
+          29200
+        ],
+        "expired": [
+          31000,
+          32200
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "578115 DurationIndex 9 = 30000 ms ($d = 30 sec; Spell.dbc). Aura 578115 on ally reads 0 before cast, 1 at 28500 ms (window [28000, 29200] > 27000 ms = 0.9 * 30000), and 0 at 31500 ms (window [31000, 32200] < 33000 ms = 1.1 * 30000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history 578115 Void Shield: 59538 events in 23 logs; 805801 Wracked Mind: 23383 events in 14 logs; coabuildhub 578115 matches verbatim."
+    },
+    {
+      "spell": 578115,
+      "name": "Void Shield (Wracked Mind 805801 blocks recast with SPELL_FAILED_TARGET_AURASTATE 111)",
+      "kind": "metric_delta",
+      "variant": "wracked_mind_gate",
+      "label_suffix": "wracked_mind_gate",
+      "quote": "and applying Wracked Mind. @s:805801:0@",
+      "trigger_spell": 578115,
+      "target": "ally",
+      "measure_actor": "caster",
+      "setup_casts": [
+        578115
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 805801,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms ally holds Wracked Mind 805801 after trigger in before (control cast succeeded) and after setup cast in after (blocking trigger)."
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 0,
+      "expected": 111,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 16500,
+      "observe_source": "578115 ExcludeTargetAuraSpell = 805801 (Wracked Mind: 'Cannot be affected by Void Shield.'; SpellInfo.cpp:2180-2181 returns SPELL_FAILED_TARGET_AURASTATE = 111). Before phase casts 578115 on clean ally (succeeds: cast_failure 0, applies 805801); expire_ms 16500 lets 15000 ms 805801 expire; after phase setup cast of 578115 succeeds and re-applies 805801 (proving expiry lifted the gate), then immediate trigger cast of 578115 is refused with 111. Reference search 2026-11-25: coa-history 578115 Void Shield: 59538 events in 23 logs; 805801 Wracked Mind: 23383 events in 14 logs; coabuildhub 578115 matches verbatim."
+    },
+    {
+      "spell": 578115,
+      "name": "Void Shield (Wracked Mind 805801 lasts 15 sec on ally)",
+      "kind": "metric_delta",
+      "variant": "wracked_mind_duration",
+      "label_suffix": "wracked_mind_duration",
+      "quote": "and applying Wracked Mind. @s:805801:0@",
+      "trigger_spell": 578115,
+      "target": "ally",
+      "measure_actor": "ally",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 805801,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14000,
+      "expiry_wait_ms": 2000,
+      "after_expiry_expected": 0,
+      "game_time": {
+        "after": [
+          13700,
+          14400
+        ],
+        "expired": [
+          15700,
+          16300
+        ]
+      },
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Wracked Mind 805801 (embedded via @s:805801:0@ in 578115) DurationIndex 8 = 15000 ms ($d = 15 sec; Spell.dbc). Aura 805801 on ally reads 0 before cast, 1 at 14000 ms (window [13700, 14400] > 13500 ms = 0.9 * 15000), and 0 at 16000 ms (window [15700, 16300] < 16500 ms = 1.1 * 15000). Reference search 2026-11-25: coa-history 578115 Void Shield: 59538 events in 23 logs; 805801 Wracked Mind: 23383 events in 14 logs; coabuildhub 578115 matches verbatim."
     }
   ],
   "player_observations": [],
