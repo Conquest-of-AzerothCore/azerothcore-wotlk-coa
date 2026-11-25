@@ -1530,7 +1530,8 @@ public:
     [[nodiscard]] uint32 GetQuestSlotTime(uint16 slot)    const { return m_questLogSlots[slot].Time; }
     [[nodiscard]] bool HasOverflowQuests() const { return m_questLogSlots.HasOverflow(); }
     [[nodiscard]] bool IsQuestLogExtended() const { return m_questLogExtended; }
-    [[nodiscard]] uint16 GetClientQuestLogSlots() const { return m_questLogExtended ? MAX_QUEST_LOG_SIZE : NATIVE_QUEST_LOG_SIZE; }
+    [[nodiscard]] uint16 GetClientQuestLogSlots() const;
+    [[nodiscard]] bool CanClientSwapQuestSlots(uint16 slot1, uint16 slot2) const;
     void SetQuestLogExtended(bool extended, uint8 clientMaxSlots = MAX_QUEST_LOG_SIZE);
     void MarkQuestSlotExtendedDirty(uint16 slot);
     void FlushQuestLogExtended();

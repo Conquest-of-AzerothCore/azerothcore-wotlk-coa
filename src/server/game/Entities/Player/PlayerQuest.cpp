@@ -1996,6 +1996,13 @@ uint8 Player::QuestLogExtendedSize() const
         std::clamp<uint16>(m_questLogExtendedClientSlots, NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE)));
 }
 
+uint16 Player::GetClientQuestLogSlots() const
+{
+    return m_questLogExtended
+        ? std::clamp<uint16>(m_questLogExtendedClientSlots, NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE)
+        : NATIVE_QUEST_LOG_SIZE;
+}
+
 void Player::SetQuestLogExtended(bool extended, uint8 clientMaxSlots)
 {
     m_questLogExtended = extended;
@@ -2107,6 +2114,26 @@ namespace
         Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
         return quest && quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED);
     }
+}
+
+bool Player::CanClientSwapQuestSlots(uint16 slot1, uint16 slot2) const
+{
+    uint16 const clientSlots = GetClientQuestLogSlots();
+    if (slot1 == slot2 || slot1 >= clientSlots || slot2 >= clientSlots)
+        return false;
+
+    // A quest may not move into an empty slot past Quests.LogSize (the emptied slot would let the log grow
+    // past it), and a timed quest may not leave the native log.
+    auto const canMove = [this](uint16 from, uint16 to)
+    {
+        uint32 const questId = m_questLogSlots[from].QuestId;
+        if (!questId)
+            return true;
+        if (!m_questLogSlots[to].QuestId && to >= GetQuestLogCapacity())
+            return false;
+        return to < NATIVE_QUEST_LOG_SIZE || !IsQuestPinnedToNativeLog(questId);
+    };
+    return canMove(slot1, slot2) && canMove(slot2, slot1);
 }
 
 uint16 Player::MoveQuestToNativeLog(uint16 slot)

@@ -393,8 +393,7 @@ void WorldSession::HandleQuestgiverCancel(WorldPacket& /*recvData*/)
 
 void WorldSession::HandleQuestLogSwapQuest(WorldPackets::Quest::QuestLogSwapQuest& packet)
 {
-    uint16 const clientSlots = GetPlayer()->GetClientQuestLogSlots();
-    if (packet.Slot1 == packet.Slot2 || packet.Slot1 >= clientSlots || packet.Slot2 >= clientSlots)
+    if (!GetPlayer()->CanClientSwapQuestSlots(packet.Slot1, packet.Slot2))
         return;
 
     LOG_DEBUG("network", "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = {}, slot 2 = {}", packet.Slot1, packet.Slot2);
