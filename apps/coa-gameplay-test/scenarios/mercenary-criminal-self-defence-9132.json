@@ -1,13 +1,15 @@
 {
   "schema": 1,
-  "name": "Mercenary for Hire!: a Mercenary who defends itself against a same-faction attacker gets no Criminal",
+  "name": "Mercenary for Hire!: who struck first decides Criminal, also when the other side fights back (#9132)",
   "contract": [
     "Issue #9132. The PR author's ruling (2026-11-25): no Criminal: Blood On Your Hands 9930873 is applied when a",
     "non-Mercenary player attacks a Mercenary and the Mercenary defends itself, even when it kills the attacker.",
-    "A War Mode Human attacks a High-Risk Human Mercenary in Elwynn Forest, the Mercenary fights back and kills it.",
-    "Dodge and parry are zeroed so the Human's first swing lands: an avoided swing records no attacker."
+    "A War Mode Human attacks a High-Risk Human Mercenary in Elwynn Forest, the Mercenary fights back and kills",
+    "it. Dodge and parry are zeroed so the Human's first swing lands: an avoided swing records no attacker. The",
+    "rule follows who struck first: when the Mercenary strikes a second Human first and that Human fights back,",
+    "the Mercenary's next hit still tops Criminal up to 3 minutes."
   ],
-  "timeout_ms": 120000,
+  "timeout_ms": 180000,
   "players": [
     {
       "id": "mercenary",
@@ -19,6 +21,14 @@
     },
     {
       "id": "innocent",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 600,
+      "expertise_rating": 600
+    },
+    {
+      "id": "bystander",
       "race": 1,
       "class": 1,
       "level": 60,
@@ -56,6 +66,20 @@
       "action": "assert",
       "label": "SETUP: the innocent is in War Mode",
       "actor": "innocent",
+      "metric": "aura",
+      "spell": 1004119,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "bystander",
+      "spell": 84420
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: a second Human is in War Mode",
+      "actor": "bystander",
       "metric": "aura",
       "spell": 1004119,
       "equals": 1,
@@ -113,6 +137,15 @@
       "o": 3.14159
     },
     {
+      "action": "teleport",
+      "actor": "bystander",
+      "map": 0,
+      "x": -9615.06,
+      "y": -286.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
       "action": "wait",
       "label": "Let both arrive in Elwynn Forest",
       "ms": 3000
@@ -130,6 +163,18 @@
       "value": 1000000
     },
     {
+      "action": "set_health",
+      "actor": "bystander",
+      "maximum": 1000000,
+      "value": 1000000
+    },
+    {
+      "action": "set_combat_avoidance",
+      "actor": "bystander",
+      "dodge": 0,
+      "parry": 0
+    },
+    {
       "action": "set_combat_avoidance",
       "actor": "mercenary",
       "dodge": 0,
@@ -144,7 +189,7 @@
     {
       "action": "snapshot",
       "actor": "innocent",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "save_as": "first_swings"
     },
     {
@@ -155,9 +200,9 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the Human's swings go out",
+      "label": "SETUP: the Human's hits land",
       "actor": "innocent",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "relative_to": "first_swings",
       "min": 1,
       "within_ms": 6000
@@ -165,7 +210,7 @@
     {
       "action": "snapshot",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "save_as": "defence_swings"
     },
     {
@@ -176,9 +221,9 @@
     },
     {
       "action": "assert",
-      "label": "SETUP: the Mercenary's swings go out",
+      "label": "SETUP: the Mercenary's hits land",
       "actor": "mercenary",
-      "metric": "melee_attack_count",
+      "metric": "melee_damage_count",
       "relative_to": "defence_swings",
       "min": 1,
       "within_ms": 6000
@@ -220,6 +265,104 @@
       "metric": "aura",
       "spell": 9930873,
       "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "mercenary",
+      "metric": "melee_damage_count",
+      "save_as": "aggressor_hits"
+    },
+    {
+      "action": "attack",
+      "label": "The Mercenary strikes the second Human first",
+      "actor": "mercenary",
+      "target": "bystander"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mercenary's hits land",
+      "actor": "mercenary",
+      "metric": "melee_damage_count",
+      "relative_to": "aggressor_hits",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mercenary"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the aggressor is a Criminal",
+      "actor": "mercenary",
+      "metric": "aura",
+      "spell": 9930873,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "bystander",
+      "metric": "melee_damage_count",
+      "save_as": "fight_back"
+    },
+    {
+      "action": "attack",
+      "label": "The second Human fights back",
+      "actor": "bystander",
+      "target": "mercenary"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Human's hits land",
+      "actor": "bystander",
+      "metric": "melee_damage_count",
+      "relative_to": "fight_back",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "bystander"
+    },
+    {
+      "action": "wait",
+      "label": "Let 30 seconds of Criminal time pass",
+      "ms": 30000
+    },
+    {
+      "action": "snapshot",
+      "actor": "mercenary",
+      "metric": "melee_damage_count",
+      "save_as": "again_hits"
+    },
+    {
+      "action": "attack",
+      "label": "The aggressor strikes again",
+      "actor": "mercenary",
+      "target": "bystander"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: those hits land",
+      "actor": "mercenary",
+      "metric": "melee_damage_count",
+      "relative_to": "again_hits",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "mercenary"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the victim fighting back does not stop the aggressor's top-up",
+      "actor": "mercenary",
+      "metric": "aura_duration_ms",
+      "spell": 9930873,
+      "min": 170000,
+      "max": 180000
     }
   ]
 }

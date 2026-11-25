@@ -67,10 +67,16 @@ void StrikeInnocent(Unit* attacker, Unit* victim)
 {
     Player* innocent = nullptr;
     Player* mercenary = MercenaryStriking(attacker, victim, innocent);
-    if (!mercenary || AscensionMercenary::StruckFirst(innocent, mercenary))
+    if (!mercenary)
         return;
 
-    mercenary->CustomData.GetDefault<Aggression>(AggressionKey)->Victims.insert(innocent->GetGUID());
+    Aggression* state = mercenary->CustomData.Get<Aggression>(AggressionKey);
+    bool const aggressor = state && state->Victims.contains(innocent->GetGUID());
+    if (!aggressor && AscensionMercenary::StruckFirst(innocent, mercenary))
+        return;
+
+    if (!aggressor)
+        mercenary->CustomData.GetDefault<Aggression>(AggressionKey)->Victims.insert(innocent->GetGUID());
     MarkCriminal(mercenary, CRIMINAL_HIT_DURATION);
 }
 
