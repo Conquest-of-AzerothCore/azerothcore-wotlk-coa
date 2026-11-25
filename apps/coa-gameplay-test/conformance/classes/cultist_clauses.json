@@ -2265,7 +2265,7 @@
     "spell": 560321,
     "clause": "increasing the damage of your Tentacles by $560322s1%",
     "labels": [
-      "560321 effect_value 560322e0 #1"
+      "560321 behaviour_hit_ratio tentacle_damage"
     ],
     "kind": "claim"
   },

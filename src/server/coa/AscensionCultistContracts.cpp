@@ -138,7 +138,7 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_TARGET_ALLY);
         info->Effects[0].TargetB = SpellImplicitTargetInfo();
     }
-    if (id == 802048)
+    if (id == 802048 || id == 560322)
         dummy(0);
     if (id == 574147)
     {
@@ -321,6 +321,14 @@ public:
             factor *= 1 + Amount(705107) / 100.0f;
         if (!healing && caster != player && State(player).summons.count(caster->GetGUID()) && player->HasAura(802048))
             (void)target;
+        bool tentacle = caster != player && State(player).summons.count(caster->GetGUID()) &&
+            (caster->GetEntry() == CthunTentacle || caster->GetEntry() == 501464 ||
+             caster->GetEntry() == 500465 || caster->GetEntry() == 50096 || caster->GetEntry() == 500464);
+        if (!healing && (tentacle || info->Id == Thoughtseize))
+            if (Aura* obelisk = player->GetOwnedAura(560322, player->GetGUID()))
+                if (AuraEffect* bonus = obelisk->GetEffect(EFFECT_0);
+                    bonus && (info->Id == Thoughtseize || player->IsWithinDistInMap(caster, Radius(560322, 0))))
+                    factor *= 1 + bonus->GetAmount() / 100.0f;
         return factor;
     }
     void ModifySpellDamageTaken(Unit* target, Unit* caster, int32& damage, SpellInfo const* info) override
