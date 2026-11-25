@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Terenthis gossip text 3334 spells Cenarion Circle and Night Elves correctly (#13176)",
+  "contract": [
+    "Terenthis (creature 3693, gossip_menu 6456) displays npc_text 3334.",
+    "npc_text 3334 previously spelled 'Cenarian Circle' and 'Night elves'.",
+    "CMSG_NPC_TEXT_QUERY (opcode 383) for textID 3334 returns SMSG_NPC_TEXT_UPDATE (opcode 384)",
+    "containing 'Cenarion Circle' and 'Night Elves' and neither misspelled form."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 4,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "client_packet",
+      "label": "Query npc_text 3334 (Terenthis gossip)",
+      "actor": "hero",
+      "opcode": 383,
+      "fields": [
+        {
+          "u32": 3334
+        },
+        {
+          "u64": 0
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: server replies with SMSG_NPC_TEXT_UPDATE for row 3334",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 384,
+      "row": 3334,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Gossip text 3334 contains Cenarion Circle",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 384,
+      "row": 3334,
+      "text": "Cenarion Circle",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gossip text 3334 no longer contains Cenarian Circle",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 384,
+      "row": 3334,
+      "text": "Cenarian Circle",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Gossip text 3334 contains Night Elves",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 384,
+      "row": 3334,
+      "text": "Night Elves",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Gossip text 3334 no longer contains Night elves",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 384,
+      "row": 3334,
+      "text": "Night elves",
+      "equals": 0
+    }
+  ]
+}
