@@ -2197,7 +2197,9 @@
       },
       {
         "claim": "that run in a random direction",
-        "labels": []
+        "labels": [
+          "560301 behaviour_metric_delta copies_random_run"
+        ]
       },
       {
         "claim": "and may briefly trick enemies into ignoring you.",
@@ -2207,16 +2209,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control in cu-t2 batch-b2 20261125-055332 / 20261125-055401) covers \"and may briefly trick enemies into ignoring you.\" with no server change. Copy movement direction (\"that run in a random direction\") remains a tool gap.",
-    "tool_gap": {
-      "reason": "No existing conformance metric/kind reads an owned creature's movement path or heading to prove that Hallucination 560301's 3 copies (entry 840025, AscensionCultistSummons.cpp:278-283 Wander(me) -> MovePoint at a random angle) run in a random direction (owned_creature_distance_2d only measures scalar distance from the caster and has no STATE_PROMISES entry).",
-      "attempts": [
-        {
-          "agent": "cu-t2",
-          "report": ".agents/plans/cu-t2/report.md"
-        }
-      ]
-    }
+    "reason": "Owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control in cu-t2 batch-b2 20261125-055332 / 20261125-055401) covers \"and may briefly trick enemies into ignoring you.\" with no server change."
   },
   {
     "spell": 560301,

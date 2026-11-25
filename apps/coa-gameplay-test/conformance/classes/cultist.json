@@ -47995,6 +47995,26 @@
         }
       ],
       "observe_source": "Shadowy Symbiosis 680574 above-60 arm at 61 Insanity (500706=61, 680603=1, 573315=1 verified in both arms; AscensionCultist.cpp:291 doubles 680574 Effect[1] to 40% when stacks > 60, Cultist ADR 0010). critical_block_rate (ADR 1310) collects >= 22,014 pooled partial blocks across 8 parts, proving 0 critical blocks in unlearned control, 40% +- 2 pts (doubled from 20%; exact binomial pair residual <= 0.1%) after learning 680574, and exact 2.0x blocked amount. Reference search 2026-11-25: coa-history 680574 0 events; coabuildhub matches verbatim."
+    },
+    {
+      "spell": 560301,
+      "name": "Hallucination (3 copies run in random directions)",
+      "kind": "summon_random_direction",
+      "variant": "copies_random_run",
+      "label_suffix": "copies_random_run",
+      "quote": "that run in a random direction",
+      "trigger_spell": 560301,
+      "entry": 840025,
+      "copies": 3,
+      "casts": 8,
+      "parts": 1,
+      "duration_spell": 706932,
+      "start_wait_ms": 50,
+      "run_ms": 1500,
+      "despawn_wait_ms": 2000,
+      "min_run_yd": 5.0,
+      "cast_power": 2000,
+      "observe_source": "Hallucination 560301 row 179[2] ('that run in a random direction', DurationIndex 27 = 3000 ms on 706932; AscensionCultistAbilities.cpp:495-497 spawns 3 copies of entry 840025; AscensionCultistSummons.cpp:29-33,58-59 Wander calls MovePoint(1, GetNearPosition(20, frand(0, 2*pi)), FORCED_MOVEMENT_RUN)). summon_random_direction (ADR 1311, D-38) checks uncast control (0 copies), then across 8 independent casts (24 total copies) reads GUID-sorted (x, y) at +50 ms and +1550 ms (< 3000 ms) with 2000 ms despawn gap: every copy must displace >= 5.0 yd (excluding stationary 0 yd and walk ~3.75 yd against run ~10.5 yd), mean resultant length R <= 0.65 (catching single-direction / narrow-cone), and occupied 45-deg sectors >= 5/8 (catching deterministic 1/2/3/4-way fans; uniform false-fail bound <= 8.8e-5 per 2-run pair <= 0.1%). Reference search 2026-11-25: coa-history 560301: 36 casts in 11 logs; coabuildhub matches verbatim."
     }
   ],
   "player_observations": [],
