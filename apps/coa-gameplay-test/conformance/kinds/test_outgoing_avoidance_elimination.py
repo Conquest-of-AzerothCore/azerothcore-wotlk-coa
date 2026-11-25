@@ -68,6 +68,8 @@ class OutgoingAvoidanceEliminationTests(unittest.TestCase):
         self.assertEqual(exp.model['metric'], METRIC)
         self.assertTrue(valid['creatures'][0]['face_caster'])
         self.assertTrue(valid['creatures'][0]['stationary'])
+        for rating in ('melee_hit_rating', 'expertise_rating', 'spell_hit_rating', 'ranged_hit_rating'):
+            self.assertNotIn(rating, valid['players'][0])
         for metric in OUTCOME_METRICS:
             self.assertNotIn(metric, METRIC_EVIDENCE)
             self.assertEqual(metric_evidence()[metric], EVENT)

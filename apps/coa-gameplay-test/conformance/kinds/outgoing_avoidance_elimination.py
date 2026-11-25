@@ -201,7 +201,8 @@ def outgoing_avoidance_scenario(class_file: dict, spec: OutgoingAvoidanceSpec) -
                      f'min_swings {spec.min_swings}/arm/run ({PAIR_RUNS * spec.min_swings}/pair): control pair '
                      f'false-fail <= {ctrl_ff:.6f} and treatment pair false-pass <= {treat_fp:.6g} '
                      f'(both <= residual {spec.residual:g}).'),
-        'players': [player_fixture(class_file)],
+        'players': [{k: v for k, v in player_fixture(class_file).items()
+                     if k not in ('melee_hit_rating', 'expertise_rating', 'spell_hit_rating', 'ranged_hit_rating')}],
         'creatures': [{**creature_fixture(class_file, spec.dummy_distance),
                        'entry': spec.dummy_entry, 'health': spec.dummy_health,
                        'stationary': True, 'face_caster': True}],
