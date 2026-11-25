@@ -583,6 +583,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `reset_cooldown` | Player `actor`, `spell`: reset that native spell cooldown between independent cases. |
 | `restore_charges` | Player `actor`, `spell`: restore the native charge pool between independent cases. Separate from ordinary cooldowns. |
 | `cast_until_aura` | Player `actor`, `spell`, `aura`, `every_ms`, `max_casts`; optional `target`, `cast_power` (with optional `power`, default 0) and `reset_cooldown`: every `every_ms` of game time while the actor lacks `aura`, run the fixtures and submit the same cast as `cast`; stop at the first poll that reads the aura or once the last of `max_casts` casts had its `every_ms`. The step never sets the aura; its record carries `attempts` and `stopped` (`aura` or `cap`), and a judged read of the aura must follow it (ADR 1195). |
+| `cast_until_owned_creature` | Player `actor`, `spell`, `entry`, `every_ms`, `max_casts`; optional `target`, `cast_power` (with optional `power`, default 0) and `reset_cooldown`: every `every_ms` of game time while no living owned creature of `entry` is present, run the fixtures and submit the same cast as `cast`; stop at the first poll that reads a living owned creature of `entry` or once the last of `max_casts` casts had its `every_ms`. The step never spawns the creature; its record carries `attempts` and `stopped` (`creature` or `cap`), and a judged read of `owned_creature_count` must follow it (ADR 1296). |
 | `wait` | `ms`: let the world continue updating for that much game time. |
 | `snapshot` | `actor`, `metric`, `save_as`: remember a numeric observation. |
 | `assert` | `actor`, `metric`, `equals` and/or `min`/`max`: check an observation. |
@@ -1174,6 +1175,10 @@ lists them in the step record as `auras`: `spell`, `caster` (GUID), `caster_entr
 each (a read only, ADR 0652).
 `owned_creature_spell_cast_count` counts the casts of `spell` by that owned creature in its map instance (the
 harness cast counter), and `game_time_ms` reads the server's game time in milliseconds (reads only, ADR 0485).
+`owned_creature_total_cast_count` counts the casts of a living owned creature of `entry` in its map instance across all
+spells (or of one optional `spell`), with optional boolean `triggered` (default `true`; `false` counts only
+non-triggered casts so triggered sub-effects do not inflate a single cast); returns `-1` when no living owned creature
+of `entry` is present (read only, ADR 1296).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
 (`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
 `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,

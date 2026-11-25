@@ -222,7 +222,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'server_packet_float', 'server_packet_contains',
     'known_entry_rank',
     'pet_autocast_enabled', 'pet_react_state', 'pet_free_talent_points', 'pet_player_react_state', 'combo_points', 'game_mode_mask', 'owned_creature_spell_proc_count',
-    'owned_creature_spell_cast_count',
+    'owned_creature_spell_cast_count', 'owned_creature_total_cast_count',
     'player_class', 'cached_class', 'at_login_flag', 'wildcard_starter_spells_known', 'action_bar_unknown_spells',
     'wildcard_spells_known', 'wildcard_cards_pending', 'wildcard_cards_collected', 'wildcard_roll_cards_set',
     'wildcard_roll_cards_used', 'wildcard_bonus_pack_progress',
@@ -285,7 +285,7 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster',
                  'chat_type', 'chat_text', 'chat_target', 'chat_channel', 'chat_subject', 'chat_emote', 'chat_name',
                  'chat_target_name', *CHAT_LOG_FLAGS,
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
-                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry'} \
+                  'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered'} \
     | TIMELINE_FIELDS | EVENT_TIME_FIELDS
 ACTIONS = {
     'stop_attack': ({'actor'}, {'actor'}),
@@ -332,6 +332,9 @@ ACTIONS = {
     'cast_until_aura': ({'actor', 'spell', 'aura', 'every_ms', 'max_casts'},
                         {'actor', 'spell', 'target', 'aura', 'every_ms', 'max_casts', 'cast_power', 'power',
                          'reset_cooldown'}),
+    'cast_until_owned_creature': ({'actor', 'spell', 'entry', 'every_ms', 'max_casts'},
+                                  {'actor', 'spell', 'target', 'entry', 'every_ms', 'max_casts', 'cast_power', 'power',
+                                   'reset_cooldown'}),
     'creature_attack': ({'actor'}, {'actor', 'target', 'stop'}),
     'cast_no_target': ({'actor', 'spell'}, {'actor', 'spell'}),
     'attack': ({'actor', 'target'}, {'actor', 'target', 'pet'}),
@@ -1006,6 +1009,19 @@ def validate(scenario, clock=REAL_CLOCK):
                 require('cast_power' in step, f'{where}: power selects the type of cast_power')
             if 'reset_cooldown' in step:
                 require(type(step['reset_cooldown']) is bool, f'{where}: reset_cooldown must be boolean')
+        if action == 'cast_until_owned_creature':
+            number(step['spell'], f'{where}.spell', 1, 2**32 - 1, True)
+            number(step['entry'], f'{where}.entry', 1, 2**31 - 1, True)
+            number(step['max_casts'], f'{where}.max_casts', 1, 200, True)
+            number(step['every_ms'], f'{where}.every_ms', 1, scenario.get('timeout_ms', 90000) // step['max_casts'],
+                   True)
+            if 'cast_power' in step:
+                number(step['cast_power'], f'{where}.cast_power', 0, 2**31 - 1, True)
+            if 'power' in step:
+                number(step['power'], f'{where}.power', 0, 6, True)
+                require('cast_power' in step, f'{where}: power selects the type of cast_power')
+            if 'reset_cooldown' in step:
+                require(type(step['reset_cooldown']) is bool, f'{where}: reset_cooldown must be boolean')
         if action in {'set_skill', 'gather_skill'}:
             number(step['skill'], f'{where}.skill', 1, 65535, True)
         if action == 'set_skill':
@@ -1194,11 +1210,17 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(step['actor'] in player_ids, f'{where}: equipment metric needs a player')
                 number(step.get('slot'), f'{where}.slot', 0, 18, True)
             if metric in {'known_entry_rank', 'owned_creature_spell_proc_count', 'owned_creature_summon_count',
-                          'owned_creature_spell_cast_count'}:
+                          'owned_creature_spell_cast_count', 'owned_creature_total_cast_count'}:
                 require(step['actor'] in player_ids, f'{where}: metric needs a player')
                 number(step.get('entry'), f'{where}.entry', 1, 2**31 - 1, True)
             if metric in {'pet_autocast_enabled', 'owned_creature_spell_proc_count', 'owned_creature_spell_cast_count'}:
                 number(step.get('spell'), f'{where}.spell', 1, 2**31 - 1, True)
+            if metric == 'owned_creature_total_cast_count' and 'spell' in step:
+                number(step['spell'], f'{where}.spell', 1, 2**31 - 1, True)
+            if 'triggered' in step:
+                require(metric == 'owned_creature_total_cast_count',
+                        f'{where}: triggered applies to owned_creature_total_cast_count')
+                require(type(step['triggered']) is bool, f'{where}: triggered must be boolean')
             if metric in {'spell_damage_done', 'spell_damage_taken'} and 'base' in step:
                 number(step['base'], f'{where}.base', 0, 2**32 - 1, True)
             if 'stacks' in step:
