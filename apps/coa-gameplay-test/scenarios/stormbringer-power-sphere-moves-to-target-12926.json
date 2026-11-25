@@ -1,0 +1,734 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: the Power Sphere moves to the target and explodes on it (#12926)",
+  "contract": [
+    "#12926: Spheres of Power 706434 reads 'Your direct damage dealt now has a 25% chance to summon a Power",
+    "Sphere that will move towards your target.' The Power Sphere 503201 is passive and never attacks, but its AI",
+    "moved it with MoveChase, and ChaseMovementGenerator pauses whenever the mover's victim is not the chase",
+    "target, so the sphere stayed where it was summoned, at the Stormbringer, and only exploded when the enemy",
+    "stood on it. It now follows its target with MoveFollow. Its explosion, Power Sphere 706433, was cast by the",
+    "Stormbringer with a 15 yard range, so from 20 yards it failed even once the sphere arrived; the sphere now",
+    "casts it itself on the Stormbringer's behalf (original caster), with the Stormbringer's faction. A level 80",
+    "Stormbringer stands 20 yards from a Harvest Golem, outside the sphere's 5 yard blast, and casts Shock 804020",
+    "40 times. Each landed Shock has a 25% chance (706434 ProcChance) to summon a sphere while none is up, so the",
+    "chance that no sphere ever appears is 0.75^40, about 1 in 100,000. At least one Power Sphere 706433",
+    "explosion must hit the enemy; a sphere that stays at the caster never reaches it. The enemy fixture is",
+    "stationary and its distance is asserted again at the end, so the explosion cannot come from the enemy",
+    "walking up to a sphere that stayed with the caster."
+  ],
+  "timeout_ms": 240000,
+  "players": [
+    {
+      "id": "sb",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "sb",
+      "entry": 36,
+      "level": 80,
+      "health": 10000000,
+      "distance": 20,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "sb",
+      "spell": 804020
+    },
+    {
+      "action": "learn",
+      "actor": "sb",
+      "spell": 706434
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy stands 20 yards away, well outside the Power Sphere's 5 yard blast",
+      "actor": "sb",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 15,
+      "max": 30
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "set_power",
+      "actor": "sb",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "sb",
+      "spell": 804020,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1700
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Shocks landed on the enemy",
+      "actor": "sb",
+      "metric": "spell_damage_count",
+      "spell": 804020,
+      "target": "dummy",
+      "min": 30
+    },
+    {
+      "action": "assert",
+      "label": "#12926: a Power Sphere travelled the 20 yards to the enemy and exploded on it",
+      "actor": "sb",
+      "metric": "spell_damage_count",
+      "spell": 706433,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the enemy never came within the sphere's reach of the caster",
+      "actor": "sb",
+      "metric": "distance",
+      "target": "dummy",
+      "min": 15,
+      "max": 30
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Refunded Bazaar Tokens come back Realm Bound",
+  "contract": [
+    "Realm Bound Bazaar Tokens (975001) cannot be laundered through a refund. With the 200 Daily Login Reward tokens",
+    "in the account reserve, buying Unlock Talent Loadout (1179288, refundable, ItemExtendedCost 2988 = 175 tokens)",
+    "from Tiraxis' Convenience Items spends the reserve first (200 -> 25). Refunding it returns the 175 tokens into",
+    "the reserve (back to 200), so none of the 200 can be mailed to another account. Without that, the refund would",
+    "hand back 175 free tokens."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -9465, "y": 64, "z": 56, "o": 0},
+  "players": [
+    {"id": "hero", "name": "Coarefhero", "race": 1, "class": 1, "level": 10},
+    {"id": "other", "name": "Coarefoth", "race": 1, "class": 1, "level": 1}
+  ],
+  "creatures": [
+    {"id": "tiraxis", "owner": "hero", "entry": 900007, "distance": 2, "faction": 35}
+  ],
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "summon_gameobject", "actor": "hero", "entry": 142119},
+    {"action": "money", "actor": "hero", "copper": 10000},
+
+    {"action": "assert", "label": "The Daily Login Reward arrives by mail", "actor": "hero", "metric": "mail_has_item",
+     "item": 975001, "equals": 1, "within_ms": 15000},
+    {"action": "client_packet", "label": "Take the reward tokens from the mailbox", "actor": "hero", "opcode": 582,
+     "consumed": false,
+     "fields": [{"gameobject_guid": 142119}, {"mail_id": 975001}, {"mail_item_guid": 975001}]},
+    {"action": "assert", "label": "200 reward tokens in the bags", "actor": "hero", "metric": "item_count",
+     "item": 975001, "equals": 200, "within_ms": 2000},
+
+    {"action": "gossip_hello", "actor": "hero", "target": "tiraxis"},
+    {"action": "gossip_select", "actor": "hero", "option": 2, "label": "Convenience Items"},
+    {"action": "assert", "label": "Unlock Talent Loadout costs 175 tokens", "actor": "hero",
+     "metric": "vendor_extended_cost", "item": 1179288, "equals": 2988, "within_ms": 2000},
+    {"action": "client_packet", "label": "Buy Unlock Talent Loadout", "actor": "hero", "opcode": 418,
+     "consumed": false,
+     "fields": [{"actor_guid": "tiraxis"}, {"u32": 1179288}, {"vendor_slot": 1179288}, {"u32": 1}, {"u8": 0}]},
+    {"action": "assert", "label": "The purchase is made", "actor": "hero", "metric": "item_count", "item": 1179288,
+     "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "25 tokens are left", "actor": "hero", "metric": "item_count", "item": 975001,
+     "equals": 25},
+
+    {"action": "client_packet", "label": "Refund Unlock Talent Loadout", "actor": "hero", "opcode": 1204,
+     "consumed": false, "fields": [{"item_guid": 1179288}]},
+    {"action": "assert", "label": "The item is gone", "actor": "hero", "metric": "item_count", "item": 1179288,
+     "equals": 0, "within_ms": 2000},
+    {"action": "assert", "label": "The 175 tokens are back", "actor": "hero", "metric": "item_count", "item": 975001,
+     "equals": 200},
+
+    {"action": "client_packet", "label": "Split 175 tokens into the last backpack slot", "actor": "hero",
+     "opcode": 270, "consumed": false,
+     "fields": [{"item_bag": 975001}, {"item_slot": 975001}, {"u8": 255}, {"u8": 38}, {"u32": 175}]},
+    {"action": "client_packet", "label": "Mail one token stack to another account", "actor": "hero",
+     "opcode": 568, "consumed": false,
+     "fields": [{"gameobject_guid": 142119}, {"string": "Coarefoth"}, {"string": "Tokens"}, {"string": "Refunded"},
+                {"u32": 41}, {"u32": 0}, {"u8": 1}, {"u8": 0}, {"item_guid": 975001}, {"u32": 0}, {"u32": 0},
+                {"u64": 0}, {"u8": 0}]},
+    {"action": "assert", "label": "DISCRIMINATING: refunded tokens are Realm Bound again", "actor": "hero",
+     "metric": "server_packet_u32", "opcode": 569, "index": 2, "equals": 1},
+    {"action": "assert", "label": "All 200 tokens stay on the account", "actor": "hero", "metric": "item_count",
+     "item": 975001, "equals": 200}
+  ]
+}

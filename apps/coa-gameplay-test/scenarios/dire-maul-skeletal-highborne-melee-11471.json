@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "Dire Maul West: Skeletal Highborne hits like Rotting Highborne (#11471)",
+  "contract": "#11471: Skeletal Highborne (11476) hit about five times as hard as Rotting Highborne (11477) on Normal (DamageModifier 5 against 1: 499 against 100 minimum weapon damage) and about 40% harder on Mythic (6.5 against 4.73). Ascension's Exiles data gives both the same Normal damage (80-244 and 81-249) and the Mythic+ logs show them hitting alike (299/318, 60/63, 126/129 median in the same runs). Skeletal Highborne now uses Rotting Highborne's modifiers on Normal and Mythic; Heroic already matched (2.27/2.25).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "normal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "mythic",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "normal",
+      "value": 0
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "normal",
+      "map": 429,
+      "x": -73.3,
+      "y": 400.0,
+      "z": 28.1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dire Maul on Normal",
+      "actor": "normal",
+      "metric": "map_difficulty",
+      "equals": 0
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 11476,
+      "as": "skeletal0",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "normal",
+      "entry": 11477,
+      "as": "rotting0",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Rotting Highborne's weapon damage on Normal",
+      "actor": "rotting0",
+      "metric": "weapon_damage_min",
+      "min": 95,
+      "max": 105
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Skeletal Highborne hits like Rotting Highborne on Normal",
+      "actor": "skeletal0",
+      "metric": "weapon_damage_min",
+      "min": 95,
+      "max": 105
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 429,
+      "x": -73.3,
+      "y": 400.0,
+      "z": 28.1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dire Maul on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 11476,
+      "as": "skeletal1",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 11477,
+      "as": "rotting1",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Rotting Highborne's weapon damage on Heroic",
+      "actor": "rotting1",
+      "metric": "weapon_damage_min",
+      "min": 225,
+      "max": 245
+    },
+    {
+      "action": "assert",
+      "label": "Skeletal Highborne hits like Rotting Highborne on Heroic",
+      "actor": "skeletal1",
+      "metric": "weapon_damage_min",
+      "min": 225,
+      "max": 245
+    },
+    {
+      "action": "ascension_dungeon_difficulty_packet",
+      "actor": "mythic",
+      "value": 2
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "mythic",
+      "map": 429,
+      "x": -73.3,
+      "y": 400.0,
+      "z": 28.1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dire Maul on Mythic",
+      "actor": "mythic",
+      "metric": "map_difficulty",
+      "equals": 2
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 11476,
+      "as": "skeletal2",
+      "distance": 20
+    },
+    {
+      "action": "summon",
+      "actor": "mythic",
+      "entry": 11477,
+      "as": "rotting2",
+      "distance": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Rotting Highborne's weapon damage on Mythic",
+      "actor": "rotting2",
+      "metric": "weapon_damage_min",
+      "min": 485,
+      "max": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Skeletal Highborne hits like Rotting Highborne on Mythic",
+      "actor": "skeletal2",
+      "metric": "weapon_damage_min",
+      "min": 485,
+      "max": 500
+    }
+  ]
+}

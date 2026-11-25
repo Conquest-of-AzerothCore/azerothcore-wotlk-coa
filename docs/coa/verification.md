@@ -56,6 +56,17 @@ Keep secrets out of this file: credentials stay in the worldserver config or the
 | `gameplay_db_workers` | `16` (1-32); character database workers, used only with the simulated clock |
 | `gameplay_copy_workers` | `min(8, cpu)` (1-32); MySQL connections per schema copy and (up to 8) world checksum |
 
+The gameplay runners pin `Modules.ConfigDirectory` to `server_modules_dir`, including when it differs from
+the compiled config path. To keep an installed server's configs untouched, set `server_modules_dir` to an empty
+private directory and `modules_config_dir` to the existing configs to copy. Use a rebuilt worldserver with this
+override support; older binaries still read their compiled module directory. The runners remove inherited
+environment and module-file overrides of this setting.
+
+When `PlayerbotsDatabaseInfo` is configured in the source or its module configs, the runner also copies and
+redirects that database. The Playerbots loader refuses non-`coa_test_*` database names during gameplay
+verification before opening its pool. The test runner disables the bot command server so it cannot claim the
+installed server's command port.
+
 `cmake_args` is used only to configure a build directory that has no `CMakeCache.txt` or whose last configure
 did not generate build files. Its default adds `-G` with the generator already in the cache, else `-G Ninja`
 when ninja exists:

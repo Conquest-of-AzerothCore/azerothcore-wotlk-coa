@@ -13,7 +13,10 @@
  *    holds for the fight; someone who zones in halfway does not change it.
  *
  * Who counts: every player in the instance who is not a game master. That
- * includes bots, which are players to the core.
+ * includes bots, which are players to the core; for health only, a bot counts
+ * as CoaRaidDifficulty.BotMemberWeight of a player (experimental, 0.3 by
+ * default, 1.0 = every bot is a full player). Loot and item counts keep the
+ * plain count.
  *
  * The count is clamped to 10..25. The 25 is in the label. The 10 is an
  * assumption read off the same label - the logs only hold raids of 13 to 18,
@@ -35,12 +38,15 @@
 #include "Field.h"
 #include "Log.h"
 #include "Map.h"
+#include "Config.h"
 #include "Player.h"
 #include "QueryResult.h"
 #include "ScriptMgr.h"
 #include "World.h"
+#include "WorldSession.h"
 
 #include <algorithm>
+#include <atomic>
 #include <limits>
 #include <unordered_map>
 
@@ -48,6 +54,7 @@ namespace
 {
     constexpr uint32 FLEX_MIN_PLAYERS = 10;
     constexpr uint32 FLEX_MAX_PLAYERS = 25;
+    std::atomic<float> botMemberWeight{0.3f};
 }
 
 namespace coa_flex
@@ -61,6 +68,18 @@ namespace coa_flex
                 ++count;
         });
         return std::clamp(count, FLEX_MIN_PLAYERS, FLEX_MAX_PLAYERS);
+    }
+
+    uint32 CountHealthPlayers(Map* map)
+    {
+        float const botWeight = botMemberWeight.load();
+        float count = 0.0f;
+        map->DoForAllPlayers([&count, botWeight](Player* player)
+        {
+            if (!player->IsGameMaster())
+                count += player->GetSession() && player->GetSession()->IsBot() ? botWeight : 1.0f;
+        });
+        return std::clamp(uint32(count + 0.5f), FLEX_MIN_PLAYERS, FLEX_MAX_PLAYERS);
     }
 }
 
@@ -150,7 +169,7 @@ namespace
             return;
 
         int32 const configured = it->second.perPlayer[mode];
-        uint32 const players = configured < 0 ? FLEX_MAX_PLAYERS : coa_flex::CountPlayers(creature->GetMap());
+        uint32 const players = configured < 0 ? FLEX_MAX_PLAYERS : coa_flex::CountHealthPlayers(creature->GetMap());
         uint64 const measured = uint64(configured < 0 ? uint32(-configured) : uint32(configured)) * players;
         uint64 const wanted = std::max<uint64>(1, uint64(double(measured) * HealthRate(creature->GetCreatureTemplate()->rank)));
         uint32 const health = uint32(std::min<uint64>(wanted, std::numeric_limits<uint32>::max()));
@@ -196,6 +215,8 @@ namespace
 
         void OnAfterConfigLoad(bool /*reload*/) override
         {
+            botMemberWeight = std::clamp(
+                sConfigMgr->GetOption<float>("CoaRaidDifficulty.BotMemberWeight", 0.3f), 0.0f, 1.0f);
             LoadFlex();
         }
     };

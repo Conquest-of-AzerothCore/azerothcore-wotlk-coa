@@ -1,6 +1,8 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
+#include "CoAProfessionRescale.h"
 #include "AscensionNativeItemScaling.h"
+#include "CoAZoneScaling.h"
 #include "AscensionCompatOpcodes.h"
 #include "AscensionItemAddonFile.h"
 #include "AscensionItemLadder.h"
@@ -199,6 +201,8 @@ std::unordered_map<ItemTemplate const*, uint32> scaledRebornArmor;
 
 uint8 StoredLevel(Item const* item)
 {
+    if (ZoneScaling::OwnsItem(item->GetEntry()))
+        return 0;
     std::shared_lock lock(levelsMutex);
     auto const level = instanceLevels.find(item->GetGUID().GetCounter());
     return level == instanceLevels.end() ? 0 : level->second;
@@ -216,15 +220,18 @@ bool IsBot(Player const* player)
 
 bool IsScalingItem(ItemTemplate const* proto)
 {
-    return proto && ItemLadder::ScalableItem(*proto) && ItemScaling::LiftableEntry(proto->ItemId) &&
+    return proto && !ZoneScaling::OwnsItem(proto->ItemId) && ItemLadder::ScalableItem(*proto) &&
+        ItemScaling::LiftableEntry(proto->ItemId) &&
         LadderStore::Instance().Has(proto->ItemId);
 }
 
 uint32 ClientLevel(Item const* item)
 {
+    ItemTemplate const* proto = item->GetTemplate();
+    if (ZoneScaling::OwnsItem(proto->ItemId))
+        return proto->ItemLevel;
     if (uint8 const level = StoredLevel(item))
         return level;
-    ItemTemplate const* proto = item->GetTemplate();
     return PreviewOn() && IsScalingItem(proto) ? proto->ItemLevel : 0;
 }
 
@@ -255,7 +262,8 @@ ItemTemplate const* InstanceTemplate(Item const* item)
 
 uint32 WornArmor(Player const* player, ItemTemplate const* proto, uint32 armor)
 {
-    if (!armor || !rebornArmor.load(std::memory_order_relaxed) || !ItemLadder::WearsRebornArmor(player->getClass()))
+    if (ProfessionRescale::OwnsItem(proto->ItemId) || !armor ||
+        !rebornArmor.load(std::memory_order_relaxed) || !ItemLadder::WearsRebornArmor(player->getClass()))
         return armor;
 
     {
@@ -279,14 +287,14 @@ template <typename Visitor>
 void ForEachCarriedItem(Player const* player, Visitor&& visit)
 {
     for (uint8 slot = EQUIPMENT_SLOT_START; slot < PLAYER_SLOT_END; ++slot)
-        if (Item const* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+        if (Item* item = player->GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
             visit(item);
 
     auto visitBag = [&](uint8 slot)
     {
         if (Bag const* bag = player->GetBagByPos(slot))
             for (uint32 index = 0; index < bag->GetBagSize(); ++index)
-                if (Item const* item = bag->GetItemByPos(uint8(index)))
+                if (Item* item = bag->GetItemByPos(uint8(index)))
                     visit(item);
     };
     for (uint8 slot = INVENTORY_SLOT_BAG_START; slot < INVENTORY_SLOT_BAG_END; ++slot)
@@ -302,6 +310,7 @@ void SendAllLevels(Player* player)
 
 void ItemArrived(Player* player, Item* item)
 {
+    ZoneScaling::NormalizeProperty(item);
     if (enabled.load(std::memory_order_relaxed))
         SendLevel(player, item);
 }
@@ -424,12 +433,17 @@ void MailListed(Player* player)
 
     for (Mail const* mail : player->GetMails())
         for (MailItemInfo const& info : mail->items)
-            if (Item const* item = player->GetMItem(info.item_guid))
+            if (Item* item = player->GetMItem(info.item_guid))
+            {
+                ProfessionRescale::NormalizeProperty(item);
                 SendLevel(player, item);
+            }
 }
 
 uint32 AuctionLevel(uint32 itemGuidLow, ItemTemplate const* proto)
 {
+    if (!proto || ZoneScaling::OwnsItem(proto->ItemId))
+        return 0;
     {
         std::shared_lock lock(levelsMutex);
         if (auto const level = instanceLevels.find(itemGuidLow); level != instanceLevels.end())
@@ -466,9 +480,12 @@ void SendStatReply(WorldSession* session, uint32 itemId, uint32 level, ItemTempl
     bool const reborn = rebornArmor.load(std::memory_order_relaxed);
     if (stock)
     {
+        bool const fixed = ZoneScaling::OwnsItem(itemId);
         ItemLadder::Row const stockRow =
-            ItemLadder::StockRow(*proto, reborn ? AuthoredRebornArmor(*proto) : proto->Armor);
+            ItemLadder::StockRow(*proto, reborn && !fixed ? AuthoredRebornArmor(*proto) : proto->Armor);
         WorldPacket reply = ItemLadder::BuildItemStatResponse(itemId, level, stockRow, proto);
+        if (fixed)
+            reply.put<uint32>(3 * sizeof(uint32), proto->ItemLevel);
         session->SendPacket(&reply);
         return;
     }
@@ -486,13 +503,21 @@ void SendStatReply(WorldSession* session, uint32 itemId, uint32 level, ItemTempl
 
 bool HandleItemStatQuery(WorldSession* session, WorldPacket const& packet)
 {
-    if (!session || packet.size() < 2 * sizeof(uint32) || !enabled.load(std::memory_order_relaxed))
+    if (!session || packet.size() < 2 * sizeof(uint32))
         return true;
 
     uint32 const itemId = packet.read<uint32>(0);
     uint32 const level = packet.read<uint32>(sizeof(uint32));
     ItemTemplate const* proto = sObjectMgr->GetItemTemplate(itemId);
     if (!level || !proto)
+        return true;
+
+    if (ZoneScaling::OwnsItem(itemId))
+    {
+        SendStatReply(session, itemId, level, proto, true);
+        return true;
+    }
+    if (!enabled.load(std::memory_order_relaxed))
         return true;
 
     if (PreviewOn() && level == proto->ItemLevel)
@@ -614,11 +639,19 @@ class Acquisition : public PlayerScript
 public:
     Acquisition() : PlayerScript("NativeItemScalingAcquisition", { PLAYERHOOK_ON_LOGIN, PLAYERHOOK_ON_LOOT_ITEM,
         PLAYERHOOK_ON_GROUP_ROLL_REWARD_ITEM, PLAYERHOOK_ON_QUEST_REWARD_ITEM, PLAYERHOOK_ON_STORE_NEW_ITEM,
-        PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_MAP_CHANGED }) { }
+        PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_MAP_CHANGED,
+        PLAYERHOOK_CHECK_ITEM_IN_SLOT_AT_LOAD_INVENTORY }) { }
 
     void OnPlayerLogin(Player* player) override
     {
+        ForEachCarriedItem(player, [](Item* item) { ZoneScaling::NormalizeProperty(item); });
         SendClientState(player);
+    }
+
+    bool OnPlayerCheckItemInSlotAtLoadInventory(Player*, Item* item, uint8, uint8&, uint16&) override
+    {
+        ZoneScaling::NormalizeProperty(item);
+        return true;
     }
 
     void OnPlayerMapChanged(Player* player) override
@@ -639,6 +672,7 @@ public:
 
     void OnPlayerStoreNewItem(Player* player, Item* item, uint32) override
     {
+        ZoneScaling::NormalizeProperty(item);
         if (PreviewOn() && player && item && !IsBot(player))
             SendLevel(player, item);
     }
@@ -673,7 +707,7 @@ bool Active()
 
 bool Handles(uint32 itemId)
 {
-    return enabled.load(std::memory_order_relaxed) && LadderStore::Instance().Has(itemId);
+    return !ZoneScaling::OwnsItem(itemId) && enabled.load(std::memory_order_relaxed) && LadderStore::Instance().Has(itemId);
 }
 
 uint8 InstanceLevel(Item const* item)

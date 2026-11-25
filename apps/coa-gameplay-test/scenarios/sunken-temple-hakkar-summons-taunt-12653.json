@@ -1,0 +1,243 @@
+{
+  "schema": 1,
+  "name": "Sunken Temple: a tank can taunt the Hakkar event summons off the starter (#12653)",
+  "contract": [
+    "#12653: once the Avatar of Hakkar event started, the creatures it summons stayed on the player who lit the",
+    "altar for the whole event and a tank could not taunt them off. #11443 made them attack that player instead",
+    "of the closest one, but it also fixated them, which ignores threat. The PR author ruled that they should",
+    "only aggro the starter on spawn and then follow normal threat. Using the Hakkar Worship Altar 2310500",
+    "summons the Shade of Hakkar 8440, whose SmartAI summons Hakkari Bloodkeepers 8438. A Warrior tank in",
+    "Defensive Stance 71 stands beside the starter. A Bloodkeeper first aims its Shadow Bolt 12471 at the starter",
+    "(the #11443 behaviour, asserted). Bloodkeepers cast from beyond Taunt's 30 yards, so the tank then steps up",
+    "to the first Bloodkeeper's summon point (-434.5, 288.3) and taunts the nearest one with Taunt 355, and a",
+    "Bloodkeeper must cast Shadow Bolt at the tank. A fixated Bloodkeeper never would. Health fixtures keep both",
+    "players alive; both join world phase 1, where the altar and the event's creatures are."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "starter",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "tank",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters finish logging in",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "label": "tank joins starter's group",
+      "actor": "starter",
+      "target": "tank"
+    },
+    {
+      "action": "teleport",
+      "label": "starter goes to the altar",
+      "actor": "starter",
+      "map": 109,
+      "x": -470.0,
+      "y": 272.7,
+      "z": -90.4,
+      "o": 3.14
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: starter is inside the dungeon",
+      "actor": "starter",
+      "metric": "map_id",
+      "equals": 109,
+      "within_ms": 10000
+    },
+    {
+      "action": "teleport",
+      "label": "tank stands beside the starter at the altar",
+      "actor": "tank",
+      "map": 109,
+      "x": -468.0,
+      "y": 270.7,
+      "z": -90.4,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: tank is inside the dungeon",
+      "actor": "tank",
+      "metric": "map_id",
+      "equals": 109,
+      "within_ms": 10000
+    },
+    {
+      "action": "set_phase",
+      "label": "starter joins world phase 1, where the altar is spawned",
+      "actor": "starter",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "tank joins world phase 1",
+      "actor": "tank",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "set_health",
+      "actor": "starter",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "set_health",
+      "actor": "tank",
+      "value": 100000000,
+      "maximum": 100000000
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 71
+    },
+    {
+      "action": "learn",
+      "actor": "tank",
+      "spell": 355
+    },
+    {
+      "action": "cast",
+      "label": "tank enters Defensive Stance",
+      "actor": "tank",
+      "spell": 71,
+      "target": "tank"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: tank is in Defensive Stance",
+      "actor": "tank",
+      "metric": "aura",
+      "spell": 71,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "starter uses the Hakkar Worship Altar",
+      "actor": "starter",
+      "entry": 2310500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Shade of Hakkar appears",
+      "actor": "starter",
+      "metric": "nearby_creature_count",
+      "entry": 8440,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "encounter_start",
+      "actor": "starter",
+      "boss_entry": 8440,
+      "radius": 100
+    },
+    {
+      "action": "assert",
+      "label": "A Nightmare Suppressor engages the starter",
+      "actor": "starter",
+      "metric": "timeline_count",
+      "event": "enter_combat",
+      "source_entry": 8497,
+      "target_actors": [
+        "starter"
+      ],
+      "min": 1,
+      "within_ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "A Hakkari Bloodkeeper aims its Shadow Bolt at the starter",
+      "actor": "starter",
+      "metric": "timeline_count",
+      "event": "cast",
+      "source_entry": 8438,
+      "target_actors": [
+        "starter"
+      ],
+      "min": 1,
+      "within_ms": 25000,
+      "spell": 12471
+    },
+    {
+      "action": "teleport",
+      "label": "tank steps up to the Bloodkeeper's summon point, inside Taunt range",
+      "actor": "tank",
+      "map": 109,
+      "x": -445.0,
+      "y": 284.0,
+      "z": -90.4,
+      "o": 0.3
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "select_nearby",
+      "label": "tank targets the nearest Hakkari Bloodkeeper",
+      "actor": "tank",
+      "entry": 8438,
+      "radius": 25
+    },
+    {
+      "action": "cast_no_target",
+      "label": "tank taunts it",
+      "actor": "tank",
+      "spell": 355
+    },
+    {
+      "action": "assert",
+      "label": "Taunt lands",
+      "actor": "tank",
+      "metric": "cast_failure",
+      "spell": 355,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "#12653: a taunted Bloodkeeper turns its Shadow Bolt on the tank",
+      "actor": "tank",
+      "metric": "timeline_count",
+      "event": "cast",
+      "source_entry": 8438,
+      "target_actors": [
+        "tank"
+      ],
+      "spell": 12471,
+      "min": 1,
+      "within_ms": 20000
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  }
+}

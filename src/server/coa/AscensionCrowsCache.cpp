@@ -3,6 +3,7 @@
 #include "AscensionBloodforged.h"
 #include "AscensionBazaarTokenCap.h"
 #include "AscensionCrowsCachePolicy.h"
+#include "AscensionMercenary.h"
 #include "Chat.h"
 #include "Config.h"
 #include "Containers.h"
@@ -22,7 +23,9 @@
 #include "Random.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellInfo.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 #include "World.h"
@@ -60,8 +63,16 @@ struct Reward
     uint32 count = 1;
 };
 
+struct WallPoint
+{
+    uint32 map = 0;
+    Position position;
+};
+
 std::recursive_mutex mutex;
+std::mutex wallMutex;
 std::map<uint32, Event> events;
+std::vector<WallPoint> wall;
 std::vector<Reward> materials;
 bool enabled = false;
 bool randomLocation = true;
@@ -71,6 +82,7 @@ uint32 warning = 1800;
 std::array<uint32, 2> silverMarks = {SilverMarksMin, SilverMarksMax};
 std::array<uint32, 2> goldenMarks = {GoldenMarks, GoldenMarks};
 uint32 bazaarTokens = DefaultBazaarTokens;
+float wallRange = DefaultWallRange;
 uint64 nextStart = 0;
 Position location(-7831.0f, -3465.0f, 56.87f, 0.0f);
 Position silithus(-7203.1616f, 372.38562f, 25.355282f, 4.4326873f);
@@ -271,9 +283,109 @@ void UpdateCarrier(Player* player)
         player->RemoveAurasDueToSpell(Spite);
 }
 
+bool AppliesAura(SpellInfo const* info, AuraType first, AuraType second)
+{
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        if (effect.ApplyAuraName == first || effect.ApplyAuraName == second)
+            return true;
+    return false;
+}
+
+bool AppliesHiding(SpellInfo const* info)
+{
+    return AppliesAura(info, SPELL_AURA_MOD_STEALTH, SPELL_AURA_MOD_INVISIBILITY);
+}
+
+bool AppliesImmunity(SpellInfo const* info)
+{
+    return AppliesAura(info, SPELL_AURA_SCHOOL_IMMUNITY, SPELL_AURA_DAMAGE_IMMUNITY);
+}
+
+bool Hides(SpellInfo const* info)
+{
+    if (AppliesHiding(info))
+        return true;
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        if (effect.TriggerSpell)
+            if (SpellInfo const* triggered = sSpellMgr->GetSpellInfo(effect.TriggerSpell))
+                if (AppliesHiding(triggered))
+                    return true;
+    return false;
+}
+
+bool MovesCaster(SpellInfo const* info)
+{
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        switch (effect.Effect)
+        {
+            case SPELL_EFFECT_TELEPORT_UNITS:
+            case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
+            case SPELL_EFFECT_LEAP:
+            case SPELL_EFFECT_LEAP_BACK:
+            case SPELL_EFFECT_CHARGE:
+            case SPELL_EFFECT_CHARGE_DEST:
+            case SPELL_EFFECT_JUMP:
+            case SPELL_EFFECT_JUMP_DEST:
+                return true;
+            default:
+                break;
+        }
+    return false;
+}
+
 bool Eligible(Player const* player)
 {
     return Eligible(player->GetLevel(), player->HasAura(HighRisk), player->HasAura(Mercenary), player->IsAlive());
+}
+
+void RefreshWall()
+{
+    std::vector<WallPoint> points;
+    for (auto const& [id, event] : events)
+        if (WallPhase(event.phase))
+            points.push_back({event.map, event.position});
+    std::lock_guard lock(wallMutex);
+    wall.swap(points);
+}
+
+bool NearCache(WorldObject const* object)
+{
+    return std::any_of(wall.begin(), wall.end(), [object](WallPoint const& point)
+    {
+        return point.map == object->GetMapId() && object->GetExactDist(&point.position) <= wallRange;
+    });
+}
+
+bool Walled(Unit const* first, Unit const* second)
+{
+    if (!enabled || wallRange <= 0.0f || !first || !second)
+        return false;
+    Player const* firstPlayer = first->GetCharmerOrOwnerPlayerOrPlayerItself();
+    Player const* secondPlayer = second->GetCharmerOrOwnerPlayerOrPlayerItself();
+    if (!firstPlayer || !secondPlayer || firstPlayer == secondPlayer)
+        return false;
+    bool const firstMercenary = AscensionMercenary::Active(firstPlayer);
+    bool const secondMercenary = AscensionMercenary::Active(secondPlayer);
+    if (firstMercenary == secondMercenary)
+        return false;
+    std::lock_guard lock(wallMutex);
+    return Walled(firstMercenary, secondMercenary, NearCache(first) || NearCache(second));
+}
+
+void TrackCarrier(Player const* player)
+{
+    for (auto& [id, event] : events)
+        if (event.phase == Phase::Carried && event.carrier == player->GetGUID().GetCounter()
+            && event.map == player->GetMapId())
+            event.position.Relocate(player);
+}
+
+bool Jumps(SpellInfo const* info)
+{
+    for (SpellEffectInfo const& effect : info->GetEffects())
+        if (effect.Effect == SPELL_EFFECT_JUMP || effect.Effect == SPELL_EFFECT_JUMP_DEST)
+            return true;
+    return false;
 }
 
 Event* Find(GameObject const* object)
@@ -377,15 +489,34 @@ bool Claim(Player* player, GameObject* object, bool completedCast)
     event->item = cache->GetGUID().GetCounter();
     Save(*event, player);
     RemoveObjects(player->GetMap(), *event);
+    player->RemoveAurasByType(SPELL_AURA_MOD_STEALTH);
+    player->RemoveAurasByType(SPELL_AURA_MOD_INVISIBILITY);
     UpdateCarrier(player);
+    RefreshWall();
     ChatHandler(player->GetSession()).PSendSysMessage("Crow's Cache claimed. Carry it to {} to open it.",
         DeliveryTown(*event));
     return true;
 }
 
-void Drop(Player* player)
+char const* DropMessage(DropReason reason)
+{
+    switch (reason)
+    {
+        case DropReason::Immunity:
+            return "You dropped Crow's Cache: immunity effects cannot be used while carrying it.";
+        case DropReason::LeftMode:
+            return "You dropped Crow's Cache: carrying it requires High-Risk and Mercenary mode.";
+        case DropReason::LeftMap:
+            return "You dropped Crow's Cache: it cannot leave the open world it appeared in.";
+        default:
+            return nullptr;
+    }
+}
+
+void Drop(Player* player, DropReason reason)
 {
     std::lock_guard lock(mutex);
+    bool dropped = false;
     for (auto& [id, event] : events)
     {
         if (event.phase != Phase::Carried || event.carrier != player->GetGUID().GetCounter())
@@ -397,12 +528,35 @@ void Drop(Player* player)
         event.phase = Phase::Dropped;
         event.carrier = 0;
         event.item = 0;
-        event.map = player->GetMapId();
-        event.position.Relocate(player);
+        if (reason != DropReason::LeftMap)
+        {
+            event.map = player->GetMapId();
+            event.position.Relocate(player);
+        }
         Save(event, player);
-        Spawn(player->GetMap(), event);
+        if (reason != DropReason::LeftMap)
+            Spawn(player->GetMap(), event);
+        dropped = true;
     }
     UpdateCarrier(player);
+    RefreshWall();
+    if (char const* message = dropped ? DropMessage(reason) : nullptr)
+        ChatHandler(player->GetSession()).SendSysMessage(message);
+}
+
+template <typename Action>
+void OnceSettled(Player* player, Action action)
+{
+    ObjectGuid const guid = player->GetGUID();
+    player->m_Events.AddEventAtOffset([guid, action]()
+    {
+        Player* carrier = ObjectAccessor::FindPlayer(guid);
+        if (!carrier || !carrier->IsInWorld())
+            return;
+        std::lock_guard lock(mutex);
+        if (Carries(carrier))
+            action(carrier);
+    }, 0ms);
 }
 
 bool Open(Player* player, Item* cache)
@@ -600,6 +754,7 @@ void UpdateEvents()
             Announce(event, now);
         ++it;
     }
+    RefreshWall();
 }
 
 bool ReadMarkRange(std::string const& key, std::array<uint32, 2>& range)
@@ -647,6 +802,7 @@ public:
         if (!enabled)
             return;
         bazaarTokens = sConfigMgr->GetOption<uint32>("CrowsCache.BazaarTokens", DefaultBazaarTokens);
+        wallRange = std::clamp(sConfigMgr->GetOption<float>("CrowsCache.WallRange", DefaultWallRange), 0.0f, 500.0f);
         if (!ReadMarkRange("CrowsCache.SilverMarksOfWar", silverMarks)
             || !ReadMarkRange("CrowsCache.GoldenMarksOfWar", goldenMarks))
         {
@@ -716,7 +872,11 @@ public:
             Spawn(map, event);
         for (auto const& reference : map->GetPlayers())
             if (Player* player = reference.GetSource())
+            {
                 UpdateCarrier(player);
+                TrackCarrier(player);
+            }
+        RefreshWall();
     }
 };
 
@@ -725,8 +885,20 @@ class Players final : public PlayerScript
 public:
     Players() : PlayerScript("crows_cache_players", {PLAYERHOOK_ON_PLAYER_JUST_DIED, PLAYERHOOK_ON_LOGIN,
         PLAYERHOOK_ON_UPDATE_AREA, PLAYERHOOK_CAN_INIT_TRADE, PLAYERHOOK_CAN_SEND_MAIL,
-        PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT}) { }
-    void OnPlayerJustDied(Player* player) override { Drop(player); }
+        PLAYERHOOK_CAN_PLAYER_USE_PRIVATE_CHAT, PLAYERHOOK_ON_BEFORE_LOGOUT, PLAYERHOOK_ON_MAP_CHANGED}) { }
+    void OnPlayerJustDied(Player* player) override { Drop(player, DropReason::Death); }
+    void OnPlayerBeforeLogout(Player* player) override { Drop(player, DropReason::Logout); }
+    void OnPlayerMapChanged(Player* player) override
+    {
+        std::lock_guard lock(mutex);
+        bool const left = std::any_of(events.begin(), events.end(), [player](auto const& row)
+        {
+            return row.second.phase == Phase::Carried && row.second.carrier == player->GetGUID().GetCounter()
+                && LeftCacheMap(row.second.map, player->GetMapId(), player->GetMap()->Instanceable());
+        });
+        if (left)
+            Drop(player, DropReason::LeftMap);
+    }
     void OnPlayerLogin(Player* player) override
     {
         std::lock_guard lock(mutex);
@@ -826,21 +998,79 @@ public:
                     result = SPELL_FAILED_BAD_TARGETS;
             }
         }
-        if (!player->HasAura(Spite))
+        SpellInfo const* info = spell->GetSpellInfo();
+        if (info->IsPassive())
             return;
-        for (SpellEffectInfo const& effect : spell->GetSpellInfo()->GetEffects())
-            if (effect.Effect == SPELL_EFFECT_TELEPORT_UNITS || effect.Effect == SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
-                || effect.ApplyAuraName == SPELL_AURA_MOD_STEALTH || effect.ApplyAuraName == SPELL_AURA_MOD_INVISIBILITY)
-                result = SPELL_FAILED_NOT_HERE;
+        bool const hides = Hides(info);
+        bool const moves = MovesCaster(info);
+        if (!hides && !moves)
+            return;
+        std::lock_guard lock(mutex);
+        if (!Carries(player))
+            return;
+        Unit const* original = spell->GetOriginalCaster();
+        bool const pulled = (original && original != player) || (spell->IsTriggered() && Jumps(info));
+        if (hides || RefuseMovement(true, moves, pulled))
+            result = SPELL_FAILED_NOT_HERE;
     }
 };
 
-class Damage final : public UnitScript
+class Combat final : public UnitScript
 {
 public:
-    Damage() : UnitScript("crows_cache_damage", true, {UNITHOOK_ON_DAMAGE}) { }
-    void OnDamage(Unit*, Unit* victim, uint32& damage) override
+    Combat() : UnitScript("crows_cache_damage", true, {UNITHOOK_ON_DAMAGE, UNITHOOK_CAN_UNIT_ATTACK,
+        UNITHOOK_CAN_UNIT_ASSIST, UNITHOOK_MODIFY_HEAL_RECEIVED, UNITHOOK_MODIFY_PERIODIC_DAMAGE_AURAS_TICK,
+        UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE}) { }
+    void OnAuraApply(Unit* unit, Aura* aura) override
     {
+        Player* player = unit->ToPlayer();
+        if (!player)
+            return;
+        SpellInfo const* info = aura->GetSpellInfo();
+        bool const hiding = AppliesHiding(info);
+        bool const immunity = AppliesImmunity(info);
+        if (!hiding && !immunity)
+            return;
+        std::lock_guard lock(mutex);
+        bool const carrying = Carries(player);
+        if (hiding && carrying)
+            OnceSettled(player, [id = info->Id](Player* carrier) { carrier->RemoveAurasDueToSpell(id); });
+        if (ImmunityDrops(carrying, immunity, aura->GetCasterGUID() == player->GetGUID()))
+            OnceSettled(player, [](Player* carrier) { Drop(carrier, DropReason::Immunity); });
+    }
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        uint32 const id = application->GetBase()->GetId();
+        Player* player = unit->ToPlayer();
+        if (player && (id == Mercenary || id == HighRisk))
+            OnceSettled(player, [](Player* carrier)
+            {
+                if (ModeDrops(true, carrier->HasAura(HighRisk), carrier->HasAura(Mercenary)))
+                    Drop(carrier, DropReason::LeftMode);
+            });
+    }
+    bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const*) override
+    {
+        return !Walled(attacker, target);
+    }
+    bool CanUnitAssist(Unit const* assister, Unit const* target, SpellInfo const*) override
+    {
+        return !Walled(assister, target);
+    }
+    void ModifyHealReceived(Unit* target, Unit* healer, uint32& heal, SpellInfo const*) override
+    {
+        if (Walled(healer, target))
+            heal = 0;
+    }
+    void ModifyPeriodicDamageAurasTick(Unit* target, Unit* attacker, uint32& damage, SpellInfo const*) override
+    {
+        if (Walled(attacker, target))
+            damage = 0;
+    }
+    void OnDamage(Unit* attacker, Unit* victim, uint32& damage) override
+    {
+        if (Walled(attacker, victim))
+            damage = 0;
         if (!InterruptOpening(false, damage))
             return;
         Spell* spell = victim->GetCurrentSpell(CURRENT_GENERIC_SPELL);
@@ -878,6 +1108,17 @@ public:
             if (item && item->GetEntry() == CacheItem)
             {
                 Open(player, item);
+                return false;
+            }
+        }
+        if (packet.GetOpcode() == CMSG_SUMMON_RESPONSE || packet.GetOpcode() == CMSG_ACTIVATETAXI
+            || packet.GetOpcode() == CMSG_ACTIVATETAXIEXPRESS)
+        {
+            std::lock_guard lock(mutex);
+            if (Carries(player))
+            {
+                ChatHandler(session).SendSysMessage(
+                    "You cannot be summoned or take a flight while carrying Crow's Cache.");
                 return false;
             }
         }
@@ -1038,7 +1279,7 @@ void AddSC_AscensionCrowsCache()
     new CrowsCache::Chest();
     RegisterSpellScript(CrowsCache::Opening);
     new CrowsCache::Casts();
-    new CrowsCache::Damage();
+    new CrowsCache::Combat();
     new CrowsCache::Cache();
     new CrowsCache::Packets();
     new CrowsCache::Commands();

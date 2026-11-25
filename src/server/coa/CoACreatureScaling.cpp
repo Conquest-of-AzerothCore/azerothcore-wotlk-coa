@@ -2,6 +2,9 @@
 
 #include "CoACreatureScaling.h"
 #include "CoACreatureScalingPolicy.h"
+#include "CoAZoneScaling.h"
+#include "CoADungeonRescale.h"
+#include "CoAProfessionRescale.h"
 #include "CoADungeonNormal.h"
 #include "AllCreatureScript.h"
 #include "AscensionRaidReleasePolicy.h"
@@ -87,7 +90,7 @@ namespace
         Creature const* creature = attacker->ToCreature();
         if (!IsEligible(creature) || creature->IsFriendlyTo(target))
             return nullptr;
-        context = ContextOf(creature);
+        context = DungeonRescale::Owns(creature) ? CreatureScaling::Context::Dungeon : ContextOf(creature);
         return context == CreatureScaling::Context::None ? nullptr : creature;
     }
 
@@ -103,7 +106,8 @@ namespace
 
     float DamageMultiplier(Unit const* target, Unit const* attacker)
     {
-        return DamageValue(target, attacker, &CreatureScaling::Settings::damage);
+        return DamageValue(target, attacker, &CreatureScaling::Settings::damage) *
+            ZoneScaling::MeleeMultiplier(attacker) * DungeonRescale::MeleeMultiplier(attacker);
     }
 
     float Level60NaxxramasSpellMultiplier(Unit const* attacker, SpellInfo const* spellInfo)
@@ -129,7 +133,8 @@ namespace
         bool const weaponSpell = spellInfo && (spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MELEE ||
             spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED);
         return encounterMultiplier * CreatureScaling::SpellMultiplier(*Active(), context, creature->GetMapId(),
-            creature->GetLevel(), weaponSpell);
+            creature->GetLevel(), weaponSpell) * ZoneScaling::SpellMultiplier(attacker) *
+            DungeonRescale::SpellMultiplier(attacker, spellInfo, false);
     }
 
     template <typename T>
@@ -221,6 +226,9 @@ public:
     void OnStartup() override
     {
         OnAfterConfigLoad(false);
+        ProfessionRescale::Load();
+        ZoneScaling::Load();
+        DungeonRescale::Load();
         FlexHealthEntries.clear();
         if (QueryResult result = WorldDatabase.Query("SELECT entry FROM coa_boss_flex"))
         {
@@ -246,8 +254,35 @@ class CoACreatureScalingHealth final : public AllCreatureScript
 public:
     CoACreatureScalingHealth() : AllCreatureScript("CoACreatureScalingHealth") { }
 
+    void OnBeforeCreatureSelectLevel(CreatureTemplate const*, Creature* creature, uint8& level) override
+    {
+        ZoneScaling::SelectLevel(creature, level);
+        DungeonRescale::SelectLevel(creature, level);
+    }
+
+    void OnCreatureAddWorld(Creature* creature) override
+    {
+        if (ZoneScaling::Health(creature))
+            return;
+        uint8 level = creature->GetLevel();
+        ZoneScaling::SelectLevel(creature, level);
+        DungeonRescale::SelectLevel(creature, level);
+        if (ZoneScaling::Health(creature))
+            creature->SelectLevel();
+    }
+
     void OnCreatureSelectLevel(CreatureTemplate const*, Creature* creature) override
     {
+        if (std::optional<uint32> const health = DungeonRescale::Health(creature) ?
+            DungeonRescale::Health(creature) : ZoneScaling::Health(creature))
+        {
+            creature->SetCreateHealth(*health);
+            creature->SetStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(*health));
+            creature->SetMaxHealth(*health);
+            creature->SetHealth(*health);
+            creature->ResetPlayerDamageReq();
+            return;
+        }
         if (!Enabled || !IsEligible(creature) || HasFlexHealth(creature))
             return;
         Map const* map = creature->FindMap();

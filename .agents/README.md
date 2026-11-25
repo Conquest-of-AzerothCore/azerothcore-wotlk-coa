@@ -4,6 +4,10 @@ Source of truth for this repo's agent rules, skill and docs:
 
 - `rules/` — rules that apply to every task, linked from `AGENTS.md`
 - `skills/coa-development/` — the repository's development skill; `SKILL.md` routes to `references/`
+- `skills/coa-raid-rescaling/` — level-60 raid conversion workflow, worked examples and comparison data
+- `skills/coa-zone-rescaling/` — outdoor level-60 zone conversion workflow and Hellfire input definition
+- `skills/coa-dungeon-rescale/` — level-60 dungeon conversions by zone, difficulty budgets and quest rewards
+- `skills/coa-profession-rescale/` — expansion-scoped profession level gates and crafted-equipment bands
 - `docs/` — task-scoped agent docs; taxonomy and placement policy in `docs/README.md`
 - `plans/` — per-task plans, specs and investigation notes, gitignored
 

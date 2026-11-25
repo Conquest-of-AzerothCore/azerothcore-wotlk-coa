@@ -1,0 +1,269 @@
+{
+  "schema": 1,
+  "name": "Zul'Gurub: a cursed player's pet and guardians see the Shade of Jin'do",
+  "contract": [
+    "Tester (ZG feedback, 2026-11-20): pet and guardian specs cannot help kill the Shades of Jin'do (14986).",
+    "A pet or guardian detects with its owner's detection (WorldObject::CanDetect), so while its owner carries",
+    "the Delusions vision (2118511) it sees the shade, and it loses sight once the vision ends. In one grouped",
+    "instance the Warlock's Imp (416) and the Mage's Mirror Images (31216) each see the shade only while their",
+    "own owner is cursed; the uncursed Mage's images stay blind while the Warlock is cursed."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "warlock",
+      "race": 1,
+      "class": 9,
+      "level": 60
+    },
+    {
+      "id": "mage",
+      "race": 1,
+      "class": 8,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "group",
+      "label": "The Warlock and the Mage share one Zul'Gurub instance",
+      "actor": "warlock",
+      "target": "mage"
+    },
+    {
+      "action": "teleport",
+      "actor": "warlock",
+      "map": 309,
+      "x": -11515.8,
+      "y": -1275.48,
+      "z": 79.6621,
+      "o": 3.15905,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Warlock is in Zul'Gurub",
+      "actor": "warlock",
+      "metric": "map_id",
+      "equals": 309,
+      "within_ms": 15000
+    },
+    {
+      "action": "teleport",
+      "actor": "mage",
+      "map": 309,
+      "x": -11515.8,
+      "y": -1275.48,
+      "z": 79.6621,
+      "o": 3.15905,
+      "ignore_access": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mage is in Zul'Gurub",
+      "actor": "mage",
+      "metric": "map_id",
+      "equals": 309,
+      "within_ms": 15000
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "set_health",
+      "actor": "warlock",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "set_health",
+      "actor": "mage",
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "learn",
+      "label": "Summon Imp",
+      "actor": "warlock",
+      "spell": 688
+    },
+    {
+      "action": "cast",
+      "label": "The Warlock summons the Imp",
+      "actor": "warlock",
+      "spell": 688
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Imp is summoned",
+      "actor": "warlock",
+      "metric": "pet_entry",
+      "equals": 416,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_health",
+      "actor": "warlock",
+      "pet": true,
+      "value": 10000000,
+      "maximum": 10000000
+    },
+    {
+      "action": "learn",
+      "label": "Mirror Image",
+      "actor": "mage",
+      "spell": 55342
+    },
+    {
+      "action": "cast",
+      "label": "The Mage casts Mirror Image",
+      "actor": "mage",
+      "spell": 55342
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Mirror Images are summoned",
+      "actor": "mage",
+      "metric": "owned_creature_count",
+      "entry": 31216,
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "summon",
+      "label": "The Warlock summons a Shade of Jin'do",
+      "actor": "warlock",
+      "entry": 14986,
+      "as": "shade",
+      "distance": 5
+    },
+    {
+      "action": "wait",
+      "label": "Let the shade take its invisibility",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the shade carries its invisibility",
+      "actor": "shade",
+      "metric": "aura",
+      "spell": 24307,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the uncursed Warlock does not see the shade",
+      "actor": "warlock",
+      "metric": "can_detect",
+      "target": "shade",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the uncursed Warlock's Imp does not see the shade",
+      "actor": "warlock",
+      "metric": "can_detect",
+      "pet": true,
+      "target": "shade",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the uncursed Mage's Mirror Image does not see the shade",
+      "actor": "mage",
+      "metric": "can_detect",
+      "owned_entry": 31216,
+      "target": "shade",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Curse the Warlock with the Delusions vision",
+      "actor": "warlock",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "the cursed Warlock's Imp sees the shade",
+      "actor": "warlock",
+      "metric": "can_detect",
+      "pet": true,
+      "target": "shade",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the uncursed Mage's Mirror Image still does not see it",
+      "actor": "mage",
+      "metric": "can_detect",
+      "owned_entry": 31216,
+      "target": "shade",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Curse the Mage with the Delusions vision",
+      "actor": "mage",
+      "spell": 2118511,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the Mage carries the vision",
+      "actor": "mage",
+      "metric": "aura",
+      "spell": 2118511,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cursed Mage sees the shade",
+      "actor": "mage",
+      "metric": "can_detect",
+      "target": "shade",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "the cursed Mage's Mirror Image sees the shade",
+      "actor": "mage",
+      "metric": "can_detect",
+      "owned_entry": 31216,
+      "target": "shade",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "set_aura",
+      "label": "End the Warlock's vision",
+      "actor": "warlock",
+      "spell": 2118511,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "the Imp loses sight of the shade once the vision ends",
+      "actor": "warlock",
+      "metric": "can_detect",
+      "pet": true,
+      "target": "shade",
+      "equals": 0,
+      "within_ms": 1000
+    }
+  ]
+}

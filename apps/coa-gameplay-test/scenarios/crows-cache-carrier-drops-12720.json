@@ -1,0 +1,639 @@
+{
+  "schema": 1,
+  "name": "Crow's Cache: the carrier drops the cache on its own immunity, on leaving its modes, the map or the game",
+  "contract": "Issue #12720. A Crow's Cache carrier must stay attackable by Mercenaries, so the cache drops where the carrier stands when the carrier makes itself immune, loses Mercenary for Hire! (9930874) or High-Risk (1004019), leaves the open-world map the cache appeared on, or logs out; an immunity cast on the carrier by another player does not drop it. An Undead High-Risk Mercenary mage claims the Thousand Needles cache next to an Undead High-Risk Mercenary priest who observes. The priest's Death Grip (49576) from 25 yards still pulls the carrier, who keeps the cache: movement forced by another player is not refused. The priest's Cyclone (33786, a school immunity on its target) lands on the carrier and the cache stays. Then, with the carrier picking the dropped cache (994312) up again between cases: a teleport to Elwynn Forest, made first while the cache has only ever been at the chest and then carried 40 yards, drops it where the carrier last stood on Kalimdor, which the carrier proves by picking it up there, out of reach of the chest's spot; the carrier's own Ice Block (45438, a school immunity) drops it; removing Mercenary for Hire! drops it; removing High-Risk drops it; a relog drops it. Each drop is proved by the carrier's item count reaching zero and the observer seeing exactly one more dropped cache than before, 40 yards from the cache point so that caches left there by earlier cases are out of reach, and the first three also by the system message that names the reason. The observer has capped spell hit so Cyclone cannot miss; nothing else is probabilistic. Spell ids were read from the CoA Spell.dbc. Requires CrowsCache.Enable=1 and Bloodforged.Enable=1 with released Heroic Bloodforged rewards and automatic cycles deferred.",
+  "timeout_ms": 180000,
+  "players": [
+    {
+      "id": "carrier",
+      "race": 5,
+      "class": 8,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "observer",
+      "race": 5,
+      "class": 5,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "location": {
+    "map": 1,
+    "x": -5805.16,
+    "y": -3899.4,
+    "z": -95.32,
+    "o": 3.2
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login scripts settle",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "actor": "carrier",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "carrier",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "carrier",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "carrier takes up Mercenary for Hire!",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "set_phase",
+      "actor": "observer",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "observer",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 9931032,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004119,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "observer",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "observer",
+      "enabled": true
+    },
+    {
+      "action": "cast",
+      "actor": "observer",
+      "spell": 9930874
+    },
+    {
+      "action": "assert",
+      "label": "observer takes up Mercenary for Hire!",
+      "actor": "observer",
+      "metric": "aura",
+      "spell": 9930874,
+      "equals": 1,
+      "within_ms": 15000
+    },
+    {
+      "action": "learn",
+      "actor": "carrier",
+      "spell": 45438
+    },
+    {
+      "action": "learn",
+      "actor": "observer",
+      "spell": 33786
+    },
+    {
+      "action": "teleport",
+      "actor": "observer",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3903.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "carrier",
+      "map": 1,
+      "x": -5805.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Arrive at the cache point",
+      "ms": 3000
+    },
+    {
+      "action": "console",
+      "command": "crows needles 3"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "The cache appears",
+      "actor": "carrier",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "carrier",
+      "entry": 994311
+    },
+    {
+      "action": "wait",
+      "label": "Let the ten-second claim finish",
+      "ms": 10500
+    },
+    {
+      "action": "assert",
+      "label": "The carrier holds the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "teleport",
+      "actor": "carrier",
+      "map": 1,
+      "x": -5765.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "observer",
+      "map": 1,
+      "x": -5765.16,
+      "y": -3903.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Carry the cache 40 yards away from where earlier cases left theirs",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "A teleport on the same map keeps the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "observer",
+      "spell": 49576
+    },
+    {
+      "action": "teleport",
+      "actor": "observer",
+      "map": 1,
+      "x": -5765.16,
+      "y": -3924.4,
+      "z": -95.32
+    },
+    {
+      "action": "assert",
+      "label": "The other Mercenary stands 25 yards away",
+      "actor": "observer",
+      "metric": "distance",
+      "target": "carrier",
+      "min": 20,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "observer",
+      "spell": 49576,
+      "target": "carrier"
+    },
+    {
+      "action": "assert",
+      "label": "Death Grip (49576) still pulls the carrier to its caster",
+      "actor": "observer",
+      "metric": "distance",
+      "target": "carrier",
+      "max": 10,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "and the pulled carrier keeps the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "carrier",
+      "map": 1,
+      "x": -5765.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "teleport",
+      "actor": "observer",
+      "map": 1,
+      "x": -5765.16,
+      "y": -3903.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Both return to level ground",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "save_as": "on_ground_1"
+    },
+    {
+      "action": "cast",
+      "actor": "observer",
+      "spell": 33786,
+      "target": "carrier"
+    },
+    {
+      "action": "assert",
+      "label": "Another Mercenary's Cyclone puts its immunity on the carrier",
+      "actor": "carrier",
+      "metric": "aura",
+      "spell": 33786,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Give a wrong drop time to happen",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "An immunity cast by someone else does not drop the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 33786,
+      "stacks": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "save_as": "on_ground_before_exit"
+    },
+    {
+      "action": "teleport",
+      "actor": "carrier",
+      "map": 0,
+      "x": -9617.06,
+      "y": -288.949,
+      "z": 57.3053
+    },
+    {
+      "action": "assert",
+      "label": "Leaving Kalimdor drops the cache where the carrier last stood",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and one more dropped cache lies on the ground for the other Mercenary",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "relative_to": "on_ground_before_exit",
+      "min": 1,
+      "max": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The carrier is told why",
+      "actor": "carrier",
+      "metric": "system_message_contains",
+      "text": "it cannot leave the open world it appeared in",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "teleport",
+      "actor": "carrier",
+      "map": 1,
+      "x": -5765.16,
+      "y": -3899.4,
+      "z": -95.32
+    },
+    {
+      "action": "wait",
+      "label": "Return to the dropped cache",
+      "ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "actor": "carrier",
+      "value": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "carrier",
+      "entry": 994312
+    },
+    {
+      "action": "assert",
+      "label": "The carrier picks the dropped cache up again",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the picked-up cache leave the ground",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "save_as": "on_ground_5"
+    },
+    {
+      "action": "cast",
+      "actor": "carrier",
+      "spell": 45438
+    },
+    {
+      "action": "assert",
+      "label": "The carrier's own Ice Block drops the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and one more dropped cache lies on the ground for the other Mercenary",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "relative_to": "on_ground_1",
+      "min": 1,
+      "max": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The carrier is told why",
+      "actor": "carrier",
+      "metric": "system_message_contains",
+      "text": "immunity effects cannot be used while carrying it",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 45438,
+      "stacks": 0
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "carrier",
+      "entry": 994312
+    },
+    {
+      "action": "assert",
+      "label": "The carrier picks the dropped cache up again",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the picked-up cache leave the ground",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "save_as": "on_ground_2"
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 9930874,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Losing Mercenary for Hire! drops the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and one more dropped cache lies on the ground for the other Mercenary",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "relative_to": "on_ground_2",
+      "min": 1,
+      "max": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "The carrier is told why",
+      "actor": "carrier",
+      "metric": "system_message_contains",
+      "text": "carrying it requires High-Risk and Mercenary mode",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 9930874,
+      "stacks": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "carrier",
+      "entry": 994312
+    },
+    {
+      "action": "assert",
+      "label": "The carrier picks the dropped cache up again",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the picked-up cache leave the ground",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "save_as": "on_ground_3"
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1004019,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Losing High-Risk drops the cache",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and one more dropped cache lies on the ground for the other Mercenary",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "relative_to": "on_ground_3",
+      "min": 1,
+      "max": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "carrier",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "carrier",
+      "entry": 994312
+    },
+    {
+      "action": "assert",
+      "label": "The carrier picks the dropped cache up again",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Let the picked-up cache leave the ground",
+      "ms": 1000
+    },
+    {
+      "action": "snapshot",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "save_as": "on_ground_4"
+    },
+    {
+      "action": "relog",
+      "actor": "carrier"
+    },
+    {
+      "action": "assert",
+      "label": "Logging out drops the cache instead of taking it offline",
+      "actor": "carrier",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and one more dropped cache lies on the ground for the other Mercenary",
+      "actor": "observer",
+      "metric": "nearby_gameobject_count",
+      "entry": 994312,
+      "relative_to": "on_ground_4",
+      "min": 1,
+      "max": 1,
+      "within_ms": 5000
+    }
+  ]
+}

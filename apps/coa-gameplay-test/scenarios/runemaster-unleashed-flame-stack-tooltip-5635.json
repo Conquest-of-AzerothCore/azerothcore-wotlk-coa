@@ -1,7 +1,7 @@
 {
   "schema": 1,
-  "name": "Normal Flame Glyph casts reach the authored cap and stream its stacking tooltip (#5635)",
-  "contract": "Elemental Burst 802202 is purchased normally from the Book of Ascension after selecting Glyphic. Glyphic identity 92152 is acquired through specialization 62; Flame Glyph 705625 through normal advancement entry 34664. Two normally trained Elemental Burst casts generate Frost and Flame glyphs, then the normally granted Glyphic Ruin consumes them and unleashes payload 520097. Its authored StackAmount is three and its periodic effect lasts ten seconds. Four ordinary generation-and-release cycles must reach stacks 1, 2, 3 and 3, with periodic aura amounts 1x, 2x, 3x and 3x the first application. An otherwise identical untalented Glyphic caster must never generate Flame or apply its periodic effect. The client text stream must disclose the existing periodic cap in both Flame Glyph 520091, which talent 705625 embeds, and Unleashed Flame 520097. The text change does not decide whether the authored stacking policy should change, separate direct and periodic combat-log identities, or prove graphical client rendering.",
+  "name": "Normal Flame Glyph casts reach the authored cap and the client text states its stacking (#5635)",
+  "contract": "Elemental Burst 802202 is purchased normally from the Book of Ascension after selecting Glyphic. Glyphic identity 92152 is acquired through specialization 62; Flame Glyph 705625 through normal advancement entry 34664. Two normally trained Elemental Burst casts generate Frost and Flame glyphs, then the normally granted Glyphic Ruin consumes them and unleashes payload 520097. Its authored StackAmount is three and its periodic effect lasts ten seconds. Four ordinary generation-and-release cycles must reach stacks 1, 2, 3 and 3, with periodic aura amounts 1x, 2x, 3x and 3x the first application. An otherwise identical untalented Glyphic caster must never generate Flame or apply its periodic effect. The client's spell text must disclose the existing periodic cap in both Flame Glyph 520091, which talent 705625 embeds, and Unleashed Flame 520097. The text change does not decide whether the authored stacking policy should change, separate direct and periodic combat-log identities, or prove graphical client rendering.",
   "timeout_ms": 120000,
   "location": {
     "map": 0,
@@ -741,34 +741,28 @@
     },
     {
       "action": "assert",
-      "label": "The native spell-text stream is available",
+      "label": "CONTROL: the client's Runeshroud row 500639 is read",
       "actor": "runemaster",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 500639,
+      "metric": "client_spell_row_contains",
+      "spell": 500639,
       "text": "Requires Runeshroud",
-      "equals": 1,
-      "within_ms": 5000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "runemaster",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 520091,
+      "metric": "client_spell_row_contains",
+      "spell": 520091,
       "text": "The periodic damage stacks up to $520097u times.",
-      "equals": 1,
-      "within_ms": 2000
+      "equals": 1
     },
     {
       "action": "assert",
       "actor": "runemaster",
-      "metric": "server_packet_contains",
-      "opcode": 2346,
-      "row": 520097,
+      "metric": "client_spell_row_contains",
+      "spell": 520097,
       "text": "The periodic damage stacks up to $u times.",
-      "equals": 1,
-      "within_ms": 2000
+      "equals": 1
     }
   ]
 }

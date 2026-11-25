@@ -40,6 +40,7 @@
 #include "Opcodes.h"
 #include "Pet.h"
 #include "Player.h"
+#include "PrismaticSetting.h"
 #include "ScriptMgr.h"
 #include "SharedDefines.h"
 #include "SpellAuraDefines.h"
@@ -7100,7 +7101,8 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
         }
         // immune movement impairment and loss of control
         //         PVP trinket                   Ascension PVP trinket            EMFH                   TOC PVP trinket               Bullheaded                  Bestial Wrath             // Beath Within         // Medalion of Immunity
-        if (m_spellInfo->Id == 42292 || m_spellInfo->Id == 1142292 || m_spellInfo->Id == 59752 || m_spellInfo->Id == 65547 || m_spellInfo->Id == 53490 || m_spellInfo->Id == 19574 || m_spellInfo->Id == 34471 || m_spellInfo->Id == 46227)
+        if (m_spellInfo->Id == 42292 || m_spellInfo->Id == 1142292 || m_spellInfo->Id == 59752 || m_spellInfo->Id == 65547 || m_spellInfo->Id == 53490 || m_spellInfo->Id == 19574 || m_spellInfo->Id == 34471 || m_spellInfo->Id == 46227 ||
+            sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 19574)
             mechanic_immune = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
     }
 
@@ -7108,7 +7110,7 @@ SpellCastResult Spell::CheckCasterAuras(bool preventionOnly) const
 
     // Glyph of Pain Suppression
     // there is no other way to handle it
-    if (m_spellInfo->Id == 33206 && !m_caster->HasAuraOrTwin(63248))
+    if (sSpellMgr->GetSpellTwinSource(m_spellInfo->Id) == 33206 && !m_caster->HasAuraOrTwin(63248))
         usableInStun = false;
 
     // Check whether the cast should be prevented by any state you might have.
@@ -7447,6 +7449,10 @@ SpellCastResult Spell::CheckItems(uint32* param1, uint32* param2)
         return SPELL_CAST_OK;
     }
 
+    if (m_spellInfo->Id == PrismaticSetting::CraftSpell &&
+        player->GetBaseSkillValue(SKILL_JEWELCRAFTING) < PrismaticSetting::CraftSkill)
+        return SPELL_FAILED_MIN_SKILL;
+
     if (!m_CastItem)
     {
         if (m_castItemGUID)
@@ -7711,6 +7717,39 @@ SpellCastResult Spell::CheckItems(uint32* param1, uint32* param2)
                     Item* targetItem = m_targets.GetItemTarget();
                     if (!targetItem)
                         return SPELL_FAILED_ITEM_NOT_FOUND;
+
+                    if (m_spellInfo->Id == PrismaticSetting::Spell)
+                    {
+                        if (targetItem->GetOwner() != m_caster)
+                            return SPELL_FAILED_NOT_TRADEABLE;
+                        if (!PrismaticSetting::IsEligible(*targetItem->GetTemplate()))
+                            return SPELL_FAILED_BAD_TARGETS;
+                    }
+                    else if (m_spellInfo->Effects[i].Effect == SPELL_EFFECT_ENCHANT_ITEM &&
+                        PrismaticSetting::IsApplied(*targetItem))
+                    {
+                        Player* owner = targetItem->GetOwner();
+                        if (!owner || owner != m_caster)
+                            return SPELL_FAILED_NOT_TRADEABLE;
+                        uint8 const socket = PrismaticSetting::AddedSocket(*targetItem->GetTemplate());
+                        if (socket == MAX_ITEM_PROTO_SOCKETS)
+                            return SPELL_FAILED_BAD_TARGETS;
+                        uint32 const gem = targetItem->GetEnchantmentId(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + socket));
+                        if (gem)
+                        {
+                            auto const* enchant = sSpellItemEnchantmentStore.LookupEntry(gem);
+                            if (!enchant || !enchant->GemID)
+                                return SPELL_FAILED_BAD_TARGETS;
+                            ItemPosCountVec destination;
+                            InventoryResult const result =
+                                owner->CanStoreNewItem(NULL_BAG, NULL_SLOT, destination, enchant->GemID, 1);
+                            if (result != EQUIP_ERR_OK)
+                            {
+                                owner->SendEquipError(result, nullptr, nullptr, enchant->GemID);
+                                return SPELL_FAILED_DONT_REPORT;
+                            }
+                        }
+                    }
 
                     // Apply item level restriction
                     if (!m_spellInfo->HasAttribute(SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF))

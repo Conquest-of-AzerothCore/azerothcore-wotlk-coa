@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "Arena ready crystal: the countdown drops to 15 seconds once every player of both teams clicked it",
+  "contract": "Each arena start room holds an Arena Ready Crystal (gameobject 9900053) during preparation. One player clicking it does not change the 60 second preparation. Once every player of both full teams clicked it, the countdown drops to 15 seconds, so the gates open well before the default minute, and the crystals are removed.",
+  "timeout_ms": 480000,
+  "players": [
+    {
+      "id": "first",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "second",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player joins the rated 1v1 solo queue",
+      "actor": "first",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the join reach the world update",
+      "ms": 500
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player joins",
+      "actor": "second",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue match the two players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player enters the arena",
+      "actor": "first",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "first"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player enters the arena",
+      "actor": "second",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "second"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first player is in the arena",
+      "actor": "first",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second player is in the arena",
+      "actor": "second",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "A ready crystal stands in the first player's start room",
+      "actor": "first",
+      "metric": "nearby_gameobject_count",
+      "entry": 9900053,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "A ready crystal stands in the second player's start room",
+      "actor": "second",
+      "metric": "nearby_gameobject_count",
+      "entry": 9900053,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The first player clicks the crystal",
+      "actor": "first",
+      "entry": 9900053
+    },
+    {
+      "action": "wait",
+      "label": "Give a shortened countdown time to run out",
+      "ms": 20000
+    },
+    {
+      "action": "assert",
+      "label": "One ready player keeps the arena in preparation",
+      "actor": "first",
+      "metric": "battleground_status",
+      "equals": 2
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "The second player clicks the crystal",
+      "actor": "second",
+      "entry": 9900053
+    },
+    {
+      "action": "wait",
+      "label": "Let most of the shortened countdown run",
+      "ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "The gates stay closed during the 15 second countdown",
+      "actor": "first",
+      "metric": "battleground_status",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: with every player ready the gates open after 15 seconds, not at the end of the minute",
+      "actor": "first",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "The crystals are gone",
+      "actor": "second",
+      "metric": "nearby_gameobject_count",
+      "entry": 9900053,
+      "equals": 0
+    }
+  ]
+}

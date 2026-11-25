@@ -168,6 +168,15 @@ namespace
         return found == rows.end() ? nullptr : &found->second;
     }
 
+    /// The row Mute clears the notable bit on and Unmute puts back: the book's own, else the client table's, but only
+    /// when the server's copy is that very table, because the client applies a row by its id.
+    SpellbookNotifyData::Row const *MutableRow(uint32 spellId)
+    {
+        if (SpellbookNotifyData::Row const *row = FindRow(spellId))
+            return row;
+        return Table().Complete ? FindTableRow(spellId) : nullptr;
+    }
+
     /// The row Quiet sends and Unquiet puts back: the client table's own, else the book's, else a spare row of our
     /// own with every attribute zero, which the client reads exactly as "no row" once it is put back.
     /// A row the client already learns quietly, unplaced and without the toast needs no push at all.
@@ -231,13 +240,28 @@ namespace SpellbookNotify
         if (!player || !player->GetSession() || !Enabled())
             return;
 
-        SpellbookNotifyData::Row const *row = FindRow(spellId);
+        SpellbookNotifyData::Row const *row = MutableRow(spellId);
         if (!row || !(row->Field4 & NOTABLE_BIT))
             return;
 
         SpellbookNotifyData::Row muted = *row;
         muted.Field4 &= ~NOTABLE_BIT;
         SendRow(player, muted);
+
+        if (AddsRow(*row))
+            SendRow(player, SpellbookNotifyData::RefreshRow);
+    }
+
+    void Unmute(Player *player, uint32 spellId)
+    {
+        if (!player || !player->GetSession() || !Enabled())
+            return;
+
+        SpellbookNotifyData::Row const *row = MutableRow(spellId);
+        if (!row || !(row->Field4 & NOTABLE_BIT))
+            return;
+
+        SendRow(player, *row);
 
         if (AddsRow(*row))
             SendRow(player, SpellbookNotifyData::RefreshRow);

@@ -1,0 +1,342 @@
+entry	name	RequiredLevel	ItemLevel	class	subclass	InventoryType	ItemSet	source_loot_ids
+39240	Noth's Curse	80	200	4	2	1	0	15932,15954
+39260	Helm of the Corrupted Mind	80	200	4	4	1	0	15932,16011
+39294	Arc-Scorched Helmet	80	200	4	3	1	0	15928,15932
+39295	Cowl of Sheet Lightning	80	200	4	1	1	0	15928,15932
+39395	Thane's Tainted Greathelm	80	200	4	4	1	0	15932
+39399	Helm of the Vast Legions	80	200	4	2	1	0	15989
+39403	Helm of the Unsubmissive	80	200	4	4	1	0	15989
+39405	Helmet of the Inner Sanctum	80	200	4	3	1	0	15989
+39409	Cowl of Winged Fear	80	200	4	1	1	0	15989
+39146	Collar of Dissolution	80	200	4	0	2	0	15932,15956
+39232	Pendant of Lost Vocations	80	200	4	0	2	0	15932,15952
+39246	Amulet of Autopsy	80	200	4	0	2	0	15932,15936
+39282	Bone-Linked Amulet	80	200	4	0	2	0	15931,15932
+39392	Veiled Amulet of Life	80	200	4	0	2	0	15932,16060
+39198	Frostblight Pauldrons	80	200	4	4	3	0	15932,15953
+39230	Spaulders of the Monstrosity	80	200	4	2	3	0	15932,15952
+39237	Spaulders of Resumed Battle	80	200	4	2	3	0	15932,15954
+39249	Shoulderplates of Bloodshed	80	200	4	4	3	0	15932,15936
+39267	Abomination Shoulderblades	80	200	4	4	3	0	15932,16028
+39274	Retcher's Shoulderpads	80	200	4	3	3	0	15932,16028
+39284	Miasma Mantle	80	200	4	1	3	0	15931,15932
+39310	Mantle of the Extensive Mind	80	200	4	1	3	0	15932,16061
+39397	Pauldrons of Havoc	80	200	4	3	3	0	15932
+39188	Chivalric Chestguard	80	200	4	4	5	0	15932,15956
+39239	Chestplate of the Risen Soldier	80	200	4	4	5	0	15932,15954
+39248	Tunic of the Lost Pack	80	200	4	3	5	0	15932,15936
+39259	Fungi-Stained Coverings	80	200	4	2	5	0	15932,16011
+39386	Tunic of Dislocation	80	200	4	2	5	0	15932,16060
+39391	Heinous Mail Chestguard	80	200	4	3	5	0	15932,16060
+39398	Massive Skeletal Ribcage	80	200	4	4	5	0	15989
+39190	Agonal Sash	80	200	4	1	6	0	15932,15956
+39216	Sash of Mortal Desire	80	200	4	1	6	0	15932,15953
+39251	Necrogenic Belt	80	200	4	3	6	0	15932,15936
+39261	Tainted Girdle of Mending	80	200	4	4	6	0	15932,16028
+39279	Blistered Belt of Decay	80	200	4	2	6	0	15931,15932
+39298	Waistguard of the Tutor	80	200	4	4	6	0	15932,16061
+39308	Girdle of Lenience	80	200	4	2	6	0	15932,16061
+39345	Girdle of the Ascended Phantom	80	200	4	4	6	0	15932,16060
+39379	Spectral Rider's Girdle	80	200	4	3	6	0	15932,16060
+39191	Splint-Bound Leggings	80	200	4	2	7	0	15932,15956
+39217	Avenging Combat Leggings	80	200	4	3	7	0	15932,15953
+39224	Leggings of Discord	80	200	4	2	7	0	15932,15952
+39258	Legplates of Inescapable Death	80	200	4	4	7	0	15932,16011
+39280	Leggings of Innumerable Barbs	80	200	4	4	7	0	15931,15932
+39293	Blackened Legplates of Feugen	80	200	4	4	7	0	15928,15932
+39309	Leggings of the Instructor	80	200	4	1	7	0	15932,16061
+39408	Leggings of Sapphiron	80	200	4	1	7	0	15989
+39139	Ravaging Sabatons	80	200	4	4	8	0	15932,15956
+39189	Boots of Persistence	80	200	4	3	8	0	15932,15956
+39196	Boots of the Worshiper	80	200	4	2	8	0	15932,15953
+39215	Boots of the Follower	80	200	4	2	8	0	15932,15953
+39234	Plague-Impervious Boots	80	200	4	4	8	0	15932,15954
+39236	Trespasser's Boots	80	200	4	3	8	0	15932,15954
+39254	Saltarello Shoes	80	200	4	1	8	0	15932,15936
+39273	Sullen Cloth Boots	80	200	4	1	8	0	15932,16028
+39369	Sabatons of Deathlike Gloom	80	200	4	4	8	0	15932,16060
+39195	Bracers of Lost Sentiments	80	200	4	4	9	0	15932,15953
+39235	Bone-Framed Bracers	80	200	4	4	9	0	15932,15954
+39247	Cuffs of Dark Shadows	80	200	4	2	9	0	15932,15936
+39252	Preceptor's Bindings	80	200	4	1	9	0	15932,15936
+39278	Bands of Anxiety	80	200	4	3	9	0	15931,15932
+39283	Putrescent Bands	80	200	4	2	9	0	15931,15932
+39307	Iron Rings of Endurance	80	200	4	3	9	0	15932,16061
+39390	Resurgent Phantom Bindings	80	200	4	1	9	0	15932,16060
+39192	Gloves of Dark Gestures	80	200	4	1	10	0	15932,15956
+39194	Rusted-Link Spiked Gauntlets	80	200	4	3	10	0	15932,15953
+39197	Gauntlets of the Master	80	200	4	4	10	0	15932,15953
+39228	Web Cocoon Grips	80	200	4	4	10	0	15932,15952
+39243	Handgrips of the Foredoomed	80	200	4	3	10	0	15932,15954
+39262	Gauntlets of Combined Strength	80	200	4	4	10	0	15932,16028
+39275	Contagion Gloves	80	200	4	2	10	0	15932,16028
+39285	Handgrips of Turmoil	80	200	4	1	10	0	15931,15932
+39299	Rapid Attack Gloves	80	200	4	2	10	0	15932,16061
+39306	Plated Gloves of Relief	80	200	4	4	10	0	15932,16061
+39141	Deflection Band	80	200	4	0	11	0	15932,15956
+39193	Band of Neglected Pleas	80	200	4	0	11	0	15932,15956
+39231	Timeworn Silken Band	80	200	4	0	11	0	15932,15952
+39244	Ring of the Fated	80	200	4	0	11	0	15932,15954
+39250	Ring of Holy Cleansing	80	200	4	0	11	0	15932,15936
+39277	Sealing Ring of Grobbulus	80	200	4	0	11	0	15931,15932
+39389	Signet of the Malevolent	80	200	4	0	11	0	15932,16060
+39401	Circle of Death	80	200	4	0	11	0	15989
+39407	Circle of Life	80	200	4	0	11	0	15989
+39229	Embrace of the Spider	80	200	4	0	12	0	15932,15952
+39257	Loatheb's Shadow	80	200	4	0	12	0	15932,16011
+39292	Repelling Charge	80	200	4	0	12	0	15928,15932
+39388	Spirit-World Glass	80	200	4	0	12	0	15932,16060
+39140	Knife of Incision	80	200	2	15	13	0	15932,15956
+39226	Maexxna's Femur	80	200	2	4	13	0	15932,15952
+39270	Hatestrike	80	200	2	7	13	0	15932,16028
+39291	Torment of the Banished	80	200	2	7	13	0	15928,15932
+39344	Slayer of the Lifeless	80	200	2	7	13	0	15932,16060
+39233	Aegis of Damnation	80	200	4	6	14	0	15932,15952
+39276	The Skull of Ruin	80	200	4	6	14	0	15931,15932
+39296	Accursed Bow of the Elite	80	200	2	2	15	0	15932,16061
+39225	Cloak of Armed Strife	80	200	4	1	16	0	15932,15952
+39241	Dark Shroud of the Scourge	80	200	4	1	16	0	15932,15954
+39272	Drape of Surgery	80	200	4	1	16	0	15932,16028
+39297	Cloak of Darkening	80	200	4	1	16	0	15932,16061
+39404	Cloak of Mastery	80	200	4	1	16	0	15989
+39415	Shroud of the Citadel	80	200	4	1	16	0	15989
+39221	Wraith Spear	80	200	2	6	17	0	15932,15952
+39245	Demise	80	200	2	5	17	0	15932,15936
+39255	Staff of the Plague Beast	80	200	2	10	17	0	15932,15936
+39256	Sulfur Stave	80	200	2	10	17	0	15932,16011
+39393	Claymore of Ancient Power	80	200	2	8	17	0	15932
+39394	Charmed Cierge	80	200	2	10	17	0	15932
+39242	Robes of Hoarse Breaths	80	200	4	1	20	0	15932,15954
+39396	Gown of Blaumeux	80	200	4	1	20	0	15932
+39200	Grieving Spellblade	80	200	2	7	21	0	15932,15953
+39271	Blade of Dormant Memories	80	200	2	15	21	0	15932,16028
+39281	Infection Repulser	80	200	2	4	21	0	15931,15932
+39199	Watchful Eye	80	200	4	0	23	0	15932,15953
+39311	Scepter of Murmuring Spirits	80	200	4	0	23	0	15932,16061
+39723	Fire-Scorched Greathelm	80	213	4	4	1	0	29268,29417
+39732	Faerlina's Madness	80	213	4	1	1	0	29268,29417
+39760	Helm of Diminished Pride	80	213	4	4	1	0	29278,29417
+39768	Cowl of the Perished	80	213	4	2	1	0	29278,29417
+40235	Helm of Pilgrimage	80	213	4	3	1	0	29417,29701
+40247	Cowl of Innocent Delight	80	213	4	1	1	0	29417,29718
+40287	Cowl of Vanity	80	213	4	1	1	0	29373,29417
+40296	Cover of Silence	80	213	4	2	1	0	29417,29448
+40298	Faceguard of the Succumbed	80	213	4	4	1	0	29417,29448
+40304	Headpiece of Fungal Bloom	80	213	4	2	1	0	29417,29448
+40328	Helm of Vital Protection	80	213	4	4	1	0	29417,29955
+40329	Hood of the Exodus	80	213	4	2	1	0	29417,29955
+40339	Gothik's Cowl	80	213	4	1	1	0	29417,29955
+40340	Helm of Unleashed Energy	80	213	4	3	1	0	29417,29955
+40344	Helm of the Grave	80	213	4	3	1	0	29417
+40366	Platehelm of the Great Wyrm	80	213	4	4	1	0	29991
+39421	Gem of Imprisoned Vassals	80	213	4	0	2	0	15990
+40064	Thunderstorm Amulet	80	213	4	0	2	0	29249,29268,29324,29615,29940
+40065	Fool's Trial	80	213	4	0	2	0	29249,29268,29324,29615,29940
+40069	Heritage	80	213	4	0	2	0	29249,29268,29324,29615,29940
+40071	Chains of Adoration	80	213	4	0	2	0	29249,29268,29324,29615,29940
+40369	Icy Blast Amulet	80	213	4	0	2	0	29991
+40374	Cosmic Lights	80	213	4	0	2	0	29991
+40378	Ceaseless Pity	80	213	4	0	2	0	29991
+39704	Pauldrons of Unnatural Death	80	213	4	4	3	0	29249,29417
+39719	Mantle of the Locusts	80	213	4	1	3	0	29249,29417
+39725	Epaulets of the Grieving Servant	80	213	4	4	3	0	29268,29417
+40063	Mantle of Shattered Kinship	80	213	4	2	3	0	29278,29417
+40185	Shoulderguards of Opportunity	80	213	4	4	3	0	29417,29615
+40286	Mantle of the Corrupted	80	213	4	1	3	0	29417
+40288	Spaulders of Incoherence	80	213	4	3	3	0	29373,29417
+40289	Sympathetic Amice	80	213	4	1	3	0	29373,29417
+40299	Pauldrons of the Abandoned	80	213	4	3	3	0	29417,29448
+40305	Spaulders of Egotism	80	213	4	2	3	0	29417,29940
+40315	Shoulderpads of Secret Arts	80	213	4	3	3	0	29417,29940
+40334	Burdened Shoulderplates	80	213	4	4	3	0	29417,29955
+40351	Mantle of the Fatigued Sage	80	213	4	1	3	0	29373,29417
+40377	Noble Birthright Pauldrons	80	213	4	4	3	0	29991
+39724	Cult's Chestguard	80	213	4	3	5	0	29268,29417
+39756	Tunic of Prejudice	80	213	4	2	5	0	29268,29417
+39767	Undiminished Battleplate	80	213	4	4	5	0	29278,29417
+40061	Quivering Tunic	80	213	4	3	5	0	29278,29417
+40193	Tunic of Masked Suffering	80	213	4	3	5	0	29417,29615
+40203	Breastplate of Tormented Rage	80	213	4	4	5	0	29417,29701
+40210	Chestguard of Bitter Charms	80	213	4	4	5	0	29417,29701
+40249	Vest of Vitality	80	213	4	2	5	0	29417,29718
+40277	Tunic of Indulgence	80	213	4	2	5	0	29373,29417
+40279	Chestguard of the Exhausted	80	213	4	4	5	0	29373,29417
+40283	Fallout Impervious Tunic	80	213	4	3	5	0	29373,29417
+40319	Chestpiece of Suspicion	80	213	4	2	5	0	29417,29940
+40365	Breastplate of Frozen Pain	80	213	4	4	5	0	29991
+39721	Sash of the Parlor	80	213	4	1	6	0	29249,29417
+39735	Belt of False Dignity	80	213	4	1	6	0	29268,29417
+39759	Ablative Chitin Girdle	80	213	4	4	6	0	29278,29417
+39762	Torn Web Wrapping	80	213	4	3	6	0	29278,29417
+40200	Belt of Potent Chanting	80	213	4	2	6	0	29417,29615
+40205	Stalk-Skin Belt	80	213	4	2	6	0	29417,29701
+40241	Girdle of Unity	80	213	4	4	6	0	29417,29718
+40259	Waistguard of Divine Grace	80	213	4	4	6	0	29324,29417
+40260	Belt of the Tortured	80	213	4	2	6	0	29324,29417
+40263	Fleshless Girdle	80	213	4	4	6	0	29324,29417
+40271	Sash of Solitude	80	213	4	1	6	0	29324,29417
+40272	Girdle of the Gambit	80	213	4	3	6	0	29324,29417
+40275	Depraved Linked Belt	80	213	4	3	6	0	29373,29417
+40278	Girdle of Chivalry	80	213	4	4	6	0	29373,29417
+40301	Cincture of Polarity	80	213	4	1	6	0	29417,29448
+40317	Girdle of Razuvious	80	213	4	4	6	0	29417,29940
+40327	Girdle of Recuperation	80	213	4	3	6	0	29417,29940
+40341	Shackled Cinch	80	213	4	2	6	0	29417,29955
+39720	Leggings of Atrophy	80	213	4	1	7	0	29249,29417
+39761	Infectious Skitterer Leggings	80	213	4	2	7	0	29278,29417
+40060	Distorted Limbs	80	213	4	1	7	0	29278,29417
+40196	Legguards of the Undisturbed	80	213	4	3	7	0	29417,29615
+40201	Leggings of Colossal Strides	80	213	4	3	7	0	29417,29701
+40204	Legguards of the Apostle	80	213	4	4	7	0	29417,29701
+40240	Greaves of Turbulence	80	213	4	4	7	0	29417,29718
+40285	Desecrated Past	80	213	4	2	7	0	29373,29417
+40294	Riveted Abomination Leggings	80	213	4	4	7	0	29417,29448
+40318	Legplates of Double Strikes	80	213	4	4	7	0	29417,29940
+40331	Leggings of Failed Escape	80	213	4	3	7	0	29417,29955
+40333	Leggings of Fleeting Moments	80	213	4	2	7	0	29417,29955
+40352	Leggings of Voracious Shadows	80	213	4	3	7	0	29417
+40363	Bone-Inlaid Legguards	80	213	4	4	7	0	29991
+40376	Legwraps of the Defeated Dragon	80	213	4	1	7	0	29991
+40379	Legguards of the Boneyard	80	213	4	2	7	0	29991
+39701	Dawnwalkers	80	213	4	2	8	0	29249,29417
+39706	Sabatons of Sudden Reprisal	80	213	4	4	8	0	29249,29417
+39717	Inexorable Sabatons	80	213	4	4	8	0	29249,29417
+39734	Atonement Greaves	80	213	4	3	8	0	29268,29417
+40184	Crippled Treads	80	213	4	3	8	0	29417,29615
+40187	Poignant Sabatons	80	213	4	4	8	0	29417,29615
+40206	Iron-Spring Jumpers	80	213	4	4	8	0	29417,29701
+40236	Serene Echoes	80	213	4	1	8	0	29417,29701
+40237	Eruption-Scarred Boots	80	213	4	3	8	0	29417,29701
+40243	Footwraps of Vile Deceit	80	213	4	2	8	0	29417,29718
+40246	Boots of Impetuous Ideals	80	213	4	1	8	0	29417,29718
+40269	Boots of Persuasion	80	213	4	1	8	0	29324,29417
+40270	Boots of Septic Wounds	80	213	4	2	8	0	29324,29417
+40297	Sabatons of Endurance	80	213	4	4	8	0	29417,29448
+40320	Faithful Steel Sabatons	80	213	4	4	8	0	29417,29940
+40326	Boots of Forlorn Wishes	80	213	4	1	8	0	29417,29940
+40367	Boots of the Great Construct	80	213	4	3	8	0	29991
+39702	Arachnoid Gold Band	80	213	4	3	9	0	29249,29417
+39722	Swarm Bindings	80	213	4	2	9	0	29249,29417
+39729	Bracers of the Tyrant	80	213	4	4	9	0	29268,29417
+39731	Punctilious Bindings	80	213	4	1	9	0	29268,29417
+39764	Bindings of the Hapless Prey	80	213	4	4	9	0	29278,29417
+39765	Sinner's Bindings	80	213	4	2	9	0	29278,29417
+40186	Thrusting Bands	80	213	4	2	9	0	29417,29615
+40198	Bands of Impurity	80	213	4	1	9	0	29417,29615
+40209	Bindings of the Decrepit	80	213	4	3	9	0	29417,29701
+40274	Bracers of Liberation	80	213	4	4	9	0	29373,29417
+40282	Slime Stream Bands	80	213	4	3	9	0	29373,29417
+40306	Bracers of the Unholy Knight	80	213	4	4	9	0	29417,29940
+40323	Esteemed Bindings	80	213	4	2	9	0	29417,29940
+40324	Bands of Mutual Respect	80	213	4	3	9	0	29417,29940
+40325	Bindings of the Expansive Mind	80	213	4	1	9	0	29417,29940
+40330	Bracers of Unrelenting Attack	80	213	4	4	9	0	29417,29955
+40332	Abetment Bracers	80	213	4	4	9	0	29417,29955
+40338	Bindings of Yearning	80	213	4	1	9	0	29417,29955
+39703	Rescinding Grips	80	213	4	4	10	0	29249,29417
+39718	Corpse Scarab Handguards	80	213	4	3	10	0	29249,29417
+39726	Callous-Hearted Gauntlets	80	213	4	4	10	0	29268,29417
+39727	Dislocating Handguards	80	213	4	2	10	0	29268,29417
+39733	Gloves of Token Respect	80	213	4	1	10	0	29268,29417
+40188	Gauntlets of the Disobedient	80	213	4	4	10	0	29417,29615
+40197	Gloves of the Fallen Wizard	80	213	4	1	10	0	29417,29615
+40238	Gloves of the Dancing Bear	80	213	4	2	10	0	29417,29701
+40242	Grotesque Handgrips	80	213	4	3	10	0	29417,29718
+40261	Crude Discolored Battlegrips	80	213	4	4	10	0	29324,29417
+40262	Gloves of Calculated Risk	80	213	4	3	10	0	29324,29417
+40302	Benefactor's Gauntlets	80	213	4	3	10	0	29417,29448
+40303	Wraps of the Persecuted	80	213	4	1	10	0	29417,29448
+40316	Gauntlets of Guiding Touch	80	213	4	4	10	0	29417,29940
+40347	Zeliek's Gauntlets	80	213	4	4	10	0	29417
+40349	Gloves of Peaceful Death	80	213	4	2	10	0	29417
+40362	Gloves of Fast Reactions	80	213	4	2	10	0	29991
+40380	Gloves of Grandeur	80	213	4	1	10	0	29991
+40074	Strong-Handed Ring	80	213	4	0	11	0	29249,29268,29324,29615,29940
+40075	Ruthlessness	80	213	4	0	11	0	29249,29268,29324,29615,29940
+40080	Lost Jewel	80	213	4	0	11	0	29249,29268,29324,29615,29940
+40107	Sand-Worn Band	80	213	4	0	11	0	29249,29268,29324,29615,29940
+40108	Seized Beauty	80	213	4	0	11	0	29249,29268,29324,29615,29940
+40370	Gatekeeper	80	213	4	0	11	0	29991
+40375	Ring of Decaying Beauty	80	213	4	0	11	0	29991
+40255	Dying Curse	80	213	4	0	12	0	29278,29373,29701,29955
+40256	Grim Toll	80	213	4	0	12	0	29278,29373,29701,29955
+40257	Defender's Code	80	213	4	0	12	0	29278,29373,29701,29955
+40258	Forethought Talisman	80	213	4	0	12	0	29278,29373,29701,29955
+40371	Bandit's Insignia	80	213	4	0	12	0	29991
+40372	Rune of Repulsion	80	213	4	0	12	0	29991
+40373	Extract of Necromantic Power	80	213	4	0	12	0	29991
+40382	Soul of the Dead	80	213	4	0	12	0	29991
+39420	Anarchy	80	213	2	15	13	0	15990
+39714	Webbed Death	80	213	2	15	13	0	29249,29417
+39730	Widow's Fury	80	213	2	7	13	0	29268,29417
+40189	Angry Dread	80	213	2	4	13	0	29417,29615
+40264	Split Greathammer	80	213	2	4	13	0	29324,29417
+40281	Twilight Mist	80	213	2	15	13	0	29373,29417
+40345	Broken Promise	80	213	2	7	13	0	29417
+40368	Murder	80	213	2	15	13	0	29991
+39716	Shield of Assimilation	80	213	4	6	14	0	29249,29417
+40266	Hero's Surrender	80	213	4	6	14	0	29324,29417
+40265	Arrowsong	80	213	2	2	15	0	29324,29417
+39425	Cloak of the Dying	80	213	4	1	16	0	15990
+40250	Aged Winter Cloak	80	213	4	1	16	0	29278,29373,29701,29955
+40251	Shroud of Luminosity	80	213	4	1	16	0	29278,29373,29701,29955
+40252	Cloak of the Shadowed Sun	80	213	4	1	16	0	29278,29373,29701,29955
+40253	Shawl of the Old Maid	80	213	4	1	16	0	29278,29373,29701,29955
+40254	Cloak of Averted Crisis	80	213	4	1	16	0	29278,29373,29701,29955
+39417	Death's Bite	80	213	2	1	17	0	15990
+39422	Staff of the Plaguehound	80	213	2	10	17	0	15990
+39758	The Jawbone	80	213	2	5	17	0	29278,29417
+40208	Cryptfiend's Bite	80	213	2	6	17	0	29417,29701
+40233	The Undeath Carrier	80	213	2	10	17	0	29417,29701
+40280	Origin of Nightmares	80	213	2	10	17	0	29373,29417
+40300	Spire of Sunset	80	213	2	10	17	0	29417,29448
+40343	Armageddon	80	213	2	8	17	0	29417
+40348	Damnation	80	213	2	10	17	0	29417
+40062	Digested Silken Robes	80	213	4	1	20	0	29278,29417
+40234	Heigan's Putrid Vestments	80	213	4	1	20	0	29417,29701
+40381	Sympathy	80	213	4	1	20	0	29991
+40602	Robes of Mutation	80	213	4	1	20	0	29417,29615
+39416	Kel'Thuzad's Reach	80	213	2	13	21	0	15990
+39423	Hammer of the Astral Plane	80	213	2	4	21	0	15990
+39424	The Soulblade	80	213	2	15	21	0	15990
+39763	Wraith Strike	80	213	2	13	21	0	29278,29417
+40244	The Impossible Dream	80	213	2	4	21	0	29417,29718
+40336	Life and Death	80	213	2	7	21	0	29417,29955
+40239	The Hand of Nerub	80	213	2	13	22	0	29417,29718
+39766	Matriarch's Spawn	80	213	4	0	23	0	29278,29417
+40192	Accursed Spine	80	213	4	0	23	0	29417,29615
+40273	Surplus Limb	80	213	4	0	23	0	29324,29417
+40350	Urn of Lost Memories	80	213	4	0	23	0	29417
+40190	Spinning Fate	80	213	2	16	25	0	29417,29615
+39419	Nerubian Conquerer	80	213	2	3	26	0	15990
+39426	Wand of the Archlich	80	213	2	19	26	0	15990
+39712	Gemmed Wand of the Nerubians	80	213	2	19	26	0	29249,29417
+40245	Fading Glow	80	213	2	19	26	0	29417,29718
+40284	Plague Igniter	80	213	2	19	26	0	29373,29417
+40335	Touch of Horror	80	213	2	19	26	0	29417,29955
+40346	Final Voyage	80	213	2	18	26	0	29417
+39728	Totem of Misery	80	213	4	9	28	0	29268,29417
+39757	Idol of Worship	80	213	4	8	28	0	29268,29417
+40191	Libram of Radiance	80	213	4	7	28	0	29417,29615
+40207	Sigil of Awareness	80	213	4	10	28	0	29417,29701
+40267	Totem of Hex	80	213	4	9	28	0	29324,29417
+40268	Libram of Tolerance	80	213	4	7	28	0	29324,29417
+40321	Idol of the Shooting Star	80	213	4	8	28	0	29417,29940
+40322	Totem of Dueling	80	213	4	9	28	0	29417,29940
+40337	Libram of Resurgence	80	213	4	7	28	0	29417,29955
+40342	Idol of Awakening	80	213	4	8	28	0	29417,29955
+40387	Boundless Ambition	80	226	4	0	2	0	30061
+40398	Leggings of Mortal Arrogance	80	226	4	1	7	0	30061
+40399	Signet of Manifested Pain	80	226	4	0	11	0	30061
+40386	Sinister Revenge	80	226	2	15	13	0	30061
+40402	Last Laugh	80	226	2	0	13	0	30061
+40400	Wall of Terror	80	226	4	6	14	0	30061
+40401	Voice of Reason	80	226	4	6	14	0	30061
+40403	Drape of the Deadly Foe	80	226	4	1	16	0	30061
+40405	Cape of the Unworthy Wizard	80	226	4	1	16	0	30061
+40384	Betrayer of Humanity	80	226	2	1	17	0	30061
+40388	Journey's End	80	226	2	10	17	0	30061
+40383	Calamity's Grasp	80	226	2	13	21	0	30061
+40395	Torch of Holy Fire	80	226	2	4	21	0	30061
+40396	The Turning Tide	80	226	2	7	21	0	30061
+40385	Envoy of Mortality	80	226	2	3	26	0	30061

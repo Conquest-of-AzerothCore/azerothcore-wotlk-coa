@@ -1,0 +1,32 @@
+diff --git a/mod-dungeon-clear.cmake b/mod-dungeon-clear.cmake
+index b701c94..be07095 100644
+--- a/mod-dungeon-clear.cmake
++++ b/mod-dungeon-clear.cmake
+@@ -212,14 +212,24 @@ if (BUILD_TESTING)
+ 
+         # Link the necessary targets
+         target_link_libraries(dungeon_clear_tests
+-            game
+             gtest_main
+             gmock_main
+             game-interface
+-            modules
+-            scripts
+         )
+ 
++        set(DC_TEST_SERVER_LIBRARIES game modules scripts)
++        foreach(DC_TEST_OPTIONAL_LIBRARY coa modules-playerbots modules-ale)
++            if(TARGET ${DC_TEST_OPTIONAL_LIBRARY})
++                list(APPEND DC_TEST_SERVER_LIBRARIES ${DC_TEST_OPTIONAL_LIBRARY})
++            endif()
++        endforeach()
++        if(CMAKE_CXX_LINK_GROUP_USING_RESCAN_SUPPORTED OR CMAKE_LINK_GROUP_USING_RESCAN_SUPPORTED)
++            list(JOIN DC_TEST_SERVER_LIBRARIES "," DC_TEST_LINK_GROUP)
++            target_link_libraries(dungeon_clear_tests "$<LINK_GROUP:RESCAN,${DC_TEST_LINK_GROUP}>")
++        else()
++            target_link_libraries(dungeon_clear_tests ${DC_TEST_SERVER_LIBRARIES})
++        endif()
++
+         # Include directories
+         target_include_directories(dungeon_clear_tests PRIVATE
+             "${MOD_PATH}/src"

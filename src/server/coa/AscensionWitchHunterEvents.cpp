@@ -58,9 +58,9 @@ bool Extra(SpellInfo const* info)
     }
 }
 
-bool DawnFromFlamesOfSin(uint32 aura, SpellInfo const* info)
+bool DawnFromFireExtra(uint32 aura, SpellInfo const* info)
 {
-    return aura == 705484 && info && info->Id == 802850;
+    return aura == 705484 && info && (info->Id == 802850 || info->Id == 807262);
 }
 
 bool HasOwnedTormentor(Unit* target, ObjectGuid caster)
@@ -124,7 +124,7 @@ class aura_ascension_witch_hunter_event : public AuraScript
         bool critical = event.GetHitMask() & PROC_HIT_CRITICAL;
         bool avoid = event.GetHitMask() & (PROC_HIT_DODGE | PROC_HIT_PARRY);
         SpellInfo const* info = event.GetSpellInfo();
-        if (outgoing && Extra(info) && !DawnFromFlamesOfSin(id, info))
+        if (outgoing && Extra(info) && !DawnFromFireExtra(id, info))
             return false;
         bool autoMelee = event.GetTypeMask() & PROC_FLAG_DONE_MELEE_AUTO_ATTACK;
         bool autoRanged = event.GetTypeMask() & PROC_FLAG_DONE_RANGED_AUTO_ATTACK;

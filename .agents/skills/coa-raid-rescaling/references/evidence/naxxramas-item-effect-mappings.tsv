@@ -1,0 +1,93 @@
+Base item	Item	Difficulty	Original spell	Original base amount	New benefit	New base amount	Effect text
+39229	Embrace of the Spider	Normal	2158300	505	haste rating	154	Direct damage or healing: 10% chance for 154 haste rating for 10 sec. 45 sec internal cooldown.
+39257	Loatheb's Shadow	Normal	2158302	670	attack power	250	Use: Gain 250 attack power for 20 sec.
+39292	Repelling Charge	Normal	2158303	3025	current and maximum health	1150	Use: Gain 1150 current and maximum health for 15 sec.
+39388	Spirit-World Glass	Normal	2158304	335	Spirit	120	Use: Gain 120 Spirit for 20 sec.
+40255	Dying Curse	Normal	2158305	765	spell power	235	Damage or healing spells: 15% chance for 235 spell power for 10 sec. 45 sec internal cooldown.
+40256	Grim Toll	Normal	2158307	612	armor penetration rating	145	Melee or ranged special attacks: 15% chance for 145 armor penetration rating for 10 sec. 45 sec internal cooldown.
+40257	Defender's Code	Normal	2158309	455	dodge rating	135	Use: Gain 135 dodge rating for 20 sec.
+40258	Forethought Talisman	Normal	2158310	893	base healing per tick	300	Direct healing: 20% chance for 300 base healing per tick every 3 sec for 12 sec, plus 2.5% spell power per tick. 45 sec internal cooldown.
+40371	Bandit's Insignia	Normal	2158312	1975	base Arcane damage	680	Melee or ranged special attacks: 15% chance for 680–776 base Arcane damage, plus 7.5% AP and 2.5% spell power. 45 sec internal cooldown.
+40372	Rune of Repulsion	Normal	2158314	375	parry rating	116	Use: Gain 116 parry rating for 20 sec.
+40373	Extract of Necromantic Power	Normal	2158315	1149	base Shadow damage	385	Periodic damage: 10% chance for 385–439 base Shadow damage, plus 2.5% AP and 7.5% spell power. 15 sec internal cooldown.
+40382	Soul of the Dead	Normal	2158317	900	mana restored	330	Spell critical strikes: 25% chance for 330 mana restored. 45 sec internal cooldown.
+39226	Maexxna's Femur	Normal	46748		armor penetration rating	15	+15 armor penetration rating.
+39728	Totem of Misery	Normal	2158319		mana per 5 sec	8	+8 mana per 5 sec.
+39757	Idol of Worship	Normal	2158320		attack power	32	+32 attack power.
+40191	Libram of Radiance	Normal	2158321		attack power	31	+31 attack power.
+40207	Sigil of Awareness	Normal	2158322		attack power	28	+28 attack power.
+40267	Totem of Hex	Normal	2158323		spell power	27	+27 spell power.
+40268	Libram of Tolerance	Normal	2158324		spell power	26	+26 spell power.
+40321	Idol of the Shooting Star	Normal	2158325		spell power	27	+27 spell power.
+40322	Totem of Dueling	Normal	2158326		haste rating	18	+18 haste rating.
+40337	Libram of Resurgence	Normal	2158328		spell power	24	+24 spell power.
+40342	Idol of Awakening	Normal	2158329		mana per 5 sec	8	+8 mana per 5 sec.
+39229	Embrace of the Spider	Heroic	2158300	505	haste rating	165	Direct damage or healing: 10% chance for 165 haste rating for 10 sec. 45 sec internal cooldown.
+39257	Loatheb's Shadow	Heroic	2158302	670	attack power	268	Use: Gain 268 attack power for 20 sec.
+39292	Repelling Charge	Heroic	2158303	3025	current and maximum health	1230	Use: Gain 1230 current and maximum health for 15 sec.
+39388	Spirit-World Glass	Heroic	2158304	335	Spirit	128	Use: Gain 128 Spirit for 20 sec.
+40255	Dying Curse	Heroic	2158305	765	spell power	251	Damage or healing spells: 15% chance for 251 spell power for 10 sec. 45 sec internal cooldown.
+40256	Grim Toll	Heroic	2158307	612	armor penetration rating	155	Melee or ranged special attacks: 15% chance for 155 armor penetration rating for 10 sec. 45 sec internal cooldown.
+40257	Defender's Code	Heroic	2158309	455	dodge rating	144	Use: Gain 144 dodge rating for 20 sec.
+40258	Forethought Talisman	Heroic	2158310	893	base healing per tick	321	Direct healing: 20% chance for 321 base healing per tick every 3 sec for 12 sec, plus 2.5% spell power per tick. 45 sec internal cooldown.
+40371	Bandit's Insignia	Heroic	2158312	1975	base Arcane damage	728	Melee or ranged special attacks: 15% chance for 728–831 base Arcane damage, plus 7.5% AP and 2.5% spell power. 45 sec internal cooldown.
+40372	Rune of Repulsion	Heroic	2158314	375	parry rating	124	Use: Gain 124 parry rating for 20 sec.
+40373	Extract of Necromantic Power	Heroic	2158315	1149	base Shadow damage	412	Periodic damage: 10% chance for 412–470 base Shadow damage, plus 2.5% AP and 7.5% spell power. 15 sec internal cooldown.
+40382	Soul of the Dead	Heroic	2158317	900	mana restored	353	Spell critical strikes: 25% chance for 353 mana restored. 45 sec internal cooldown.
+39226	Maexxna's Femur	Heroic	46748		armor penetration rating	16	+16 armor penetration rating.
+39728	Totem of Misery	Heroic	2158319		mana per 5 sec	9	+9 mana per 5 sec.
+39757	Idol of Worship	Heroic	2158320		attack power	34	+34 attack power.
+40191	Libram of Radiance	Heroic	2158321		attack power	33	+33 attack power.
+40207	Sigil of Awareness	Heroic	2158322		attack power	30	+30 attack power.
+40267	Totem of Hex	Heroic	2158323		spell power	29	+29 spell power.
+40268	Libram of Tolerance	Heroic	2158324		spell power	28	+28 spell power.
+40321	Idol of the Shooting Star	Heroic	2158325		spell power	29	+29 spell power.
+40322	Totem of Dueling	Heroic	2158326		haste rating	19	+19 haste rating.
+40337	Libram of Resurgence	Heroic	2158328		spell power	26	+26 spell power.
+40342	Idol of Awakening	Heroic	2158329		mana per 5 sec	9	+9 mana per 5 sec.
+39229	Embrace of the Spider	Mythic	2158300	505	haste rating	176	Direct damage or healing: 10% chance for 176 haste rating for 10 sec. 45 sec internal cooldown.
+39257	Loatheb's Shadow	Mythic	2158302	670	attack power	285	Use: Gain 285 attack power for 20 sec.
+39292	Repelling Charge	Mythic	2158303	3025	current and maximum health	1311	Use: Gain 1311 current and maximum health for 15 sec.
+39388	Spirit-World Glass	Mythic	2158304	335	Spirit	137	Use: Gain 137 Spirit for 20 sec.
+40255	Dying Curse	Mythic	2158305	765	spell power	268	Damage or healing spells: 15% chance for 268 spell power for 10 sec. 45 sec internal cooldown.
+40256	Grim Toll	Mythic	2158307	612	armor penetration rating	165	Melee or ranged special attacks: 15% chance for 165 armor penetration rating for 10 sec. 45 sec internal cooldown.
+40257	Defender's Code	Mythic	2158309	455	dodge rating	154	Use: Gain 154 dodge rating for 20 sec.
+40258	Forethought Talisman	Mythic	2158310	893	base healing per tick	342	Direct healing: 20% chance for 342 base healing per tick every 3 sec for 12 sec, plus 2.5% spell power per tick. 45 sec internal cooldown.
+40371	Bandit's Insignia	Mythic	2158312	1975	base Arcane damage	775	Melee or ranged special attacks: 15% chance for 775–885 base Arcane damage, plus 7.5% AP and 2.5% spell power. 45 sec internal cooldown.
+40372	Rune of Repulsion	Mythic	2158314	375	parry rating	132	Use: Gain 132 parry rating for 20 sec.
+40373	Extract of Necromantic Power	Mythic	2158315	1149	base Shadow damage	439	Periodic damage: 10% chance for 439–501 base Shadow damage, plus 2.5% AP and 7.5% spell power. 15 sec internal cooldown.
+40382	Soul of the Dead	Mythic	2158317	900	mana restored	376	Spell critical strikes: 25% chance for 376 mana restored. 45 sec internal cooldown.
+39226	Maexxna's Femur	Mythic	46748		armor penetration rating	17	+17 armor penetration rating.
+39728	Totem of Misery	Mythic	2158319		mana per 5 sec	9	+9 mana per 5 sec.
+39757	Idol of Worship	Mythic	2158320		attack power	36	+36 attack power.
+40191	Libram of Radiance	Mythic	2158321		attack power	35	+35 attack power.
+40207	Sigil of Awareness	Mythic	2158322		attack power	32	+32 attack power.
+40267	Totem of Hex	Mythic	2158323		spell power	31	+31 spell power.
+40268	Libram of Tolerance	Mythic	2158324		spell power	30	+30 spell power.
+40321	Idol of the Shooting Star	Mythic	2158325		spell power	31	+31 spell power.
+40322	Totem of Dueling	Mythic	2158326		haste rating	21	+21 haste rating.
+40337	Libram of Resurgence	Mythic	2158328		spell power	27	+27 spell power.
+40342	Idol of Awakening	Mythic	2158329		mana per 5 sec	9	+9 mana per 5 sec.
+39229	Embrace of the Spider	Ascended	2158300	505	haste rating	185	Direct damage or healing: 10% chance for 185 haste rating for 10 sec. 45 sec internal cooldown.
+39257	Loatheb's Shadow	Ascended	2158302	670	attack power	300	Use: Gain 300 attack power for 20 sec.
+39292	Repelling Charge	Ascended	2158303	3025	current and maximum health	1380	Use: Gain 1380 current and maximum health for 15 sec.
+39388	Spirit-World Glass	Ascended	2158304	335	Spirit	144	Use: Gain 144 Spirit for 20 sec.
+40255	Dying Curse	Ascended	2158305	765	spell power	282	Damage or healing spells: 15% chance for 282 spell power for 10 sec. 45 sec internal cooldown.
+40256	Grim Toll	Ascended	2158307	612	armor penetration rating	174	Melee or ranged special attacks: 15% chance for 174 armor penetration rating for 10 sec. 45 sec internal cooldown.
+40257	Defender's Code	Ascended	2158309	455	dodge rating	162	Use: Gain 162 dodge rating for 20 sec.
+40258	Forethought Talisman	Ascended	2158310	893	base healing per tick	360	Direct healing: 20% chance for 360 base healing per tick every 3 sec for 12 sec, plus 2.5% spell power per tick. 45 sec internal cooldown.
+40371	Bandit's Insignia	Ascended	2158312	1975	base Arcane damage	816	Melee or ranged special attacks: 15% chance for 816–932 base Arcane damage, plus 7.5% AP and 2.5% spell power. 45 sec internal cooldown.
+40372	Rune of Repulsion	Ascended	2158314	375	parry rating	139	Use: Gain 139 parry rating for 20 sec.
+40373	Extract of Necromantic Power	Ascended	2158315	1149	base Shadow damage	462	Periodic damage: 10% chance for 462–527 base Shadow damage, plus 2.5% AP and 7.5% spell power. 15 sec internal cooldown.
+40382	Soul of the Dead	Ascended	2158317	900	mana restored	396	Spell critical strikes: 25% chance for 396 mana restored. 45 sec internal cooldown.
+39226	Maexxna's Femur	Ascended	46748		armor penetration rating	18	+18 armor penetration rating.
+39728	Totem of Misery	Ascended	2158319		mana per 5 sec	10	+10 mana per 5 sec.
+39757	Idol of Worship	Ascended	2158320		attack power	38	+38 attack power.
+40191	Libram of Radiance	Ascended	2158321		attack power	37	+37 attack power.
+40207	Sigil of Awareness	Ascended	2158322		attack power	34	+34 attack power.
+40267	Totem of Hex	Ascended	2158323		spell power	32	+32 spell power.
+40268	Libram of Tolerance	Ascended	2158324		spell power	31	+31 spell power.
+40321	Idol of the Shooting Star	Ascended	2158325		spell power	32	+32 spell power.
+40322	Totem of Dueling	Ascended	2158326		haste rating	22	+22 haste rating.
+40337	Libram of Resurgence	Ascended	2158328		spell power	29	+29 spell power.
+40342	Idol of Awakening	Ascended	2158329		mana per 5 sec	10	+10 mana per 5 sec.

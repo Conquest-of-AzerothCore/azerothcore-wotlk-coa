@@ -284,7 +284,7 @@ namespace
             // fight at every raid size. Heroic and above keep the old rule until
             // they are tuned on their own.
             bool const shareOfSkeram = me->GetMap()->IsRegularDifficulty();
-            uint64 const perPlayer = shareOfSkeram ? me->GetMaxHealth() / coa_flex::CountPlayers(me->GetMap()) : 0;
+            uint64 const perPlayer = shareOfSkeram ? me->GetMaxHealth() / coa_flex::CountHealthPlayers(me->GetMap()) : 0;
 
             for (uint8 f = 0; f < PHOBIAS; ++f)
             {

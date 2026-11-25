@@ -288,10 +288,15 @@ public:
         }
         if (Named(info, 524876) && damage && player->HasAura(704889))
         {
-            uint32 existing = 0;
+            int64 remaining = 0;
             if (AuraEffect* shield = player->GetAuraEffect(850002, EFFECT_0))
-                existing = std::max(0, shield->GetAmount());
-            Copy(player, player, 850002, existing + CalculatePct(damage, Amount(704889)));
+                remaining = std::max(0, shield->GetAmount());
+            if (uint32 added = CalculatePct(damage, Amount(704889)))
+            {
+                Copy(player, player, 850002, added);
+                if (AuraEffect* shield = player->GetAuraEffect(850002, EFFECT_0); shield && remaining)
+                    shield->ChangeAmount(int32(std::min<int64>(INT32_MAX, shield->GetAmount() + remaining)));
+            }
         }
         if (id == 560109 && player->HasAura(525049))
             for (Unit* enemy : Nearby(target, Radius(560943)))

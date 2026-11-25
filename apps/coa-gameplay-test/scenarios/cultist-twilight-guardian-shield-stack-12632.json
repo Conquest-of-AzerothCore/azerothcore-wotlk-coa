@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "name": "Cultist: Twilight Guardian adds a new shield to the remaining absorb without rescaling it (#12632)",
+  "contract": "Twilight Guardian 704889 (aura 354, value 100, trigger 850002) reads: 'Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d. Additional shields add to the remaining absorb amount and refresh its duration.' 850002 is SPELL_AURA_SCHOOL_ABSORB, SpellFamilyName 31, 8 s. AuraEffect::CalculateAmount multiplies every family-31 absorb a Cultist casts by GetTotalAuraMultiplier(SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT); In And Out of Insanity 582308 adds 20% with no class mask, so it scales 850002. The old hook re-cast 850002 with base points remaining + new, and the refresh ran the whole sum through that multiplier again, so each Shieldtoss hit grew the shield by 20% of everything left (#12632 reports billions). The fixture shield holds exactly 100000 remaining absorb; one Twilight Shieldtoss rank 804208 (level 18-24, EffectBasePoints 125 + DieSides 11, needs an equipped shield) against a passive dummy then adds 1.2 x its damage. Even a critical hit with this level-20 caster's spell power stays far below 1000 damage, so the additive result is bounded to (100000, 102000]; the old rescaled result is at least 120000. The refreshed duration must be back near 8 s after 2.5 s of the fixture's own duration ran out. spell_hit_rating 10000 removes the hit roll.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "cultist", "race": 1, "class": 25, "level": 20, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "cultist", "entry": 36, "faction": 7, "health": 1000000, "distance": 8, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "cultist", "spell": 9116 },
+    { "action": "add_item", "actor": "cultist", "item": 2362 },
+    { "action": "equip", "actor": "cultist", "item": 2362, "slot": 16 },
+    { "action": "learn", "actor": "cultist", "spell": 804208 },
+    { "action": "learn", "actor": "cultist", "spell": 704889 },
+    { "action": "learn", "actor": "cultist", "spell": 582308 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 704889, "equals": 1 },
+    { "action": "assert", "actor": "cultist", "metric": "aura", "spell": 582308, "equals": 1 },
+    { "action": "set_aura", "actor": "cultist", "spell": 850002, "stacks": 1, "effect": 0, "amount": 100000 },
+    {
+      "action": "assert", "label": "SETUP: the fixture shield holds exactly 100000 absorb",
+      "actor": "cultist", "metric": "aura_amount", "spell": 850002, "effect": 0, "equals": 100000
+    },
+    { "action": "wait", "label": "Let part of the fixture shield's 8 s run out", "ms": 2500 },
+    { "action": "cast", "label": "Twilight Shieldtoss hits the dummy", "actor": "cultist", "spell": 804208, "target": "dummy" },
+    {
+      "action": "assert", "label": "The new shield adds to the remaining 100000 instead of rescaling it by 20% (#12632)",
+      "actor": "cultist", "metric": "aura_amount", "spell": 850002, "effect": 0, "min": 100001, "max": 102000,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "The added shield refreshes the duration",
+      "actor": "cultist", "metric": "aura_duration_ms", "spell": 850002, "min": 6500, "max": 8000
+    }
+  ]
+}

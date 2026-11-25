@@ -140,12 +140,28 @@ int main()
         Expect(entry->secure == 0, "Ascension addons that need no protected calls are known but not secure");
     }
 
-    Expect(entries.size() == session.clientAddons.size() - 1 + 33, "every Ascension addon is listed exactly once");
+    for (char const* name : { "DescensionUI", "Descension_CharacterAdvancement", "Descension_Collections",
+                              "Descension_CompactRaidFrames", "Descension_HelpUI", "Descension_WildCard" })
+    {
+        Entry const* entry = Find(entries, name);
+        Expect(entry != nullptr, "Descension spellings are listed even when the client did not report them");
+        Expect(entry->secure == 1, "Descension spellings of secure Ascension addons are secure");
+    }
+    for (char const* name : { "DescensionResources", "Descension_TalentUI", "Descension_VanityCollection" })
+    {
+        Entry const* entry = Find(entries, name);
+        Expect(entry != nullptr, "Descension spellings are listed even when the client did not report them");
+        Expect(entry->secure == 0, "Descension spellings of non-secure Ascension addons are not secure");
+    }
+
+    Expect(entries.size() == session.clientAddons.size() - 1 + 33 * 2,
+           "every Ascension addon is listed exactly once in each spelling");
 
     Expect(std::count_if(entries.begin(), entries.end(),
                          [](Entry const& e) { return e.name == "Ascension_HelpUI"; }) == 1,
            "an addon the client already reported is not listed twice");
 
-    std::cout << "PASS: SMSG 0x94E echoes " << entries.size() << " addons, Blizzard and 14 Ascension addons secure\n";
+    std::cout << "PASS: SMSG 0x94E echoes " << entries.size()
+              << " addons, Blizzard and 14 Ascension addons secure in both spellings\n";
     return 0;
 }

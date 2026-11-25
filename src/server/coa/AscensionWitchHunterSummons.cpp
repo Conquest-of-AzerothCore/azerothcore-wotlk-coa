@@ -65,6 +65,13 @@ bool InSmoke(Unit const* attacker, Unit const* target)
     return false;
 }
 
+bool HoundMayHunt(Creature const* hound, Unit const* target)
+{
+    Unit const* owner = hound->GetCharmerOrOwner();
+    return owner && target && hound->IsValidAttackTarget(target) &&
+           (!target->HasStealthAura() || owner->CanSeeOrDetect(target));
+}
+
 void SummonHounds(Player* player, uint32 count, uint32 duration, uint32 spellId, Unit* target)
 {
     if (!player || !player->IsInWorld() || !player->IsAlive())
@@ -80,7 +87,7 @@ void SummonHounds(Player* player, uint32 count, uint32 duration, uint32 spellId,
         if (!pet)
             continue;
         pet->SetTempSummonType(TEMPSUMMON_TIMED_DESPAWN);
-        if (target && player->IsValidAttackTarget(target))
+        if (target && HoundMayHunt(pet, target))
             pet->AI()->AttackStart(target);
     }
 }
@@ -120,7 +127,7 @@ class HoundActions
     {
         Player* owner = Owner(_me->GetOwner());
         Unit* target = ObjectAccessor::GetUnit(*_me, victim);
-        if (!owner || !target || !owner->IsValidAttackTarget(target) || !_me->IsWithinDistInMap(target, 40.0f) ||
+        if (!owner || !target || !HoundMayHunt(_me, target) || !_me->IsWithinDistInMap(target, 40.0f) ||
             !_me->IsWithinLOSInMap(target) || _me->HasUnitState(UNIT_STATE_ROOT | UNIT_STATE_STUNNED))
         {
             _events.RescheduleEvent(EVENT_AUTO_LEAP, 1s);
@@ -194,7 +201,7 @@ class HoundActions
                         if (Unit* selected = owner->GetSelectedUnit())
                             if (selected->IsInCombatWith(owner))
                                 target = selected;
-                    if (target && owner->IsValidAttackTarget(target))
+                    if (target && HoundMayHunt(_me, target))
                         _me->AI()->AttackStart(target);
                     else if (_me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
                         _me->GetMotionMaster()->MoveFollow(owner, 2.0f, PET_FOLLOW_ANGLE);
@@ -204,7 +211,7 @@ class HoundActions
             else if (event == EVENT_CHECK_LANDING)
             {
                 Unit* target = ObjectAccessor::GetUnit(*_me, victim);
-                if (!target || !owner->IsValidAttackTarget(target))
+                if (!target || !HoundMayHunt(_me, target))
                     continue;
                 if (!_me->IsWithinMeleeRange(target))
                 {
@@ -270,6 +277,7 @@ struct npc_ascension_witch_hunter_pet : PetAI
         if (action == ACTION_CALLED_LEAP)
             actions.Leap(true);
     }
+    bool CanAIAttack(Unit const* target) const override { return HoundMayHunt(me, target); }
     void UpdateAI(uint32 diff) override
     {
         actions.Update(diff);
@@ -309,9 +317,16 @@ struct npc_ascension_witch_hunter_hound : ScriptedAI
         if (action == ACTION_CALLED_LEAP)
             actions.Leap(true);
     }
+    bool CanAIAttack(Unit const* target) const override { return HoundMayHunt(me, target); }
     void UpdateAI(uint32 diff) override
     {
         actions.Update(diff);
+        if (Unit* victim = me->GetVictim(); victim && !HoundMayHunt(me, victim))
+        {
+            me->AttackStop();
+            if (Unit* owner = me->GetOwner())
+                me->GetMotionMaster()->MoveFollow(owner, 2.0f, PET_FOLLOW_ANGLE);
+        }
         if (me->GetVictim())
             DoMeleeAttackIfReady();
     }

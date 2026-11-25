@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Abyssal Conditioning stacks raise Energy regeneration to +20% (#12995)",
+  "contract": [
+    "Abyssal Conditioning 807431 (Felsworn) tooltips: casting Felfury spenders now increases your Energy",
+    "regeneration by $521234s1% (5%) for $521234d (10 sec), stacking up to $521234u (4) times. #12995 reports",
+    "that it does not reach 20%. 521234 is native SPELL_AURA_MOD_POWER_REGEN_PERCENT for Energy with",
+    "EffectBasePoints 4 and DieSides 1, applied by the Felsworn cast hook for each non-triggered spender.",
+    "Expected: four Sargeron Smite casts (501314, 2 Felfury each) stack it four times at +5% each, and over a 5",
+    "second window the talented Felsworn regenerates about 20% more Energy than an untalented control."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "control", "race": 1, "class": 14, "level": 80},
+    {"id": "abyssal", "race": 1, "class": 14, "level": 80, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "abyssal", "entry": 36, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "abyssal", "spell": 807431},
+    {"action": "learn", "actor": "abyssal", "spell": 501314},
+    {"action": "set_power", "actor": "abyssal", "power": 3, "value": 100},
+    {
+      "action": "set_aura", "label": "SETUP: two Felfury for spender 1", "actor": "abyssal", "spell": 800058,
+      "stacks": 2
+    },
+    {"action": "reset_cooldown", "actor": "abyssal", "spell": 501314},
+    {"action": "cast", "label": "Sargeron Smite 1", "actor": "abyssal", "spell": 501314, "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: Sargeron Smite 1 is accepted", "actor": "abyssal", "metric": "cast_failure",
+      "spell": 501314, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#12995: spender 1 leaves 1 stack", "actor": "abyssal", "metric": "aura_stacks",
+      "spell": 521234, "equals": 1, "within_ms": 1500
+    },
+    {"action": "wait", "label": "Let the global cooldown finish", "ms": 1600},
+    {"action": "set_power", "actor": "abyssal", "power": 3, "value": 100},
+    {
+      "action": "set_aura", "label": "SETUP: two Felfury for spender 2", "actor": "abyssal", "spell": 800058,
+      "stacks": 2
+    },
+    {"action": "reset_cooldown", "actor": "abyssal", "spell": 501314},
+    {"action": "cast", "label": "Sargeron Smite 2", "actor": "abyssal", "spell": 501314, "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: Sargeron Smite 2 is accepted", "actor": "abyssal", "metric": "cast_failure",
+      "spell": 501314, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#12995: spender 2 leaves 2 stacks", "actor": "abyssal", "metric": "aura_stacks",
+      "spell": 521234, "equals": 2, "within_ms": 1500
+    },
+    {"action": "wait", "label": "Let the global cooldown finish", "ms": 1600},
+    {"action": "set_power", "actor": "abyssal", "power": 3, "value": 100},
+    {
+      "action": "set_aura", "label": "SETUP: two Felfury for spender 3", "actor": "abyssal", "spell": 800058,
+      "stacks": 2
+    },
+    {"action": "reset_cooldown", "actor": "abyssal", "spell": 501314},
+    {"action": "cast", "label": "Sargeron Smite 3", "actor": "abyssal", "spell": 501314, "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: Sargeron Smite 3 is accepted", "actor": "abyssal", "metric": "cast_failure",
+      "spell": 501314, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#12995: spender 3 leaves 3 stacks", "actor": "abyssal", "metric": "aura_stacks",
+      "spell": 521234, "equals": 3, "within_ms": 1500
+    },
+    {"action": "wait", "label": "Let the global cooldown finish", "ms": 1600},
+    {"action": "set_power", "actor": "abyssal", "power": 3, "value": 100},
+    {
+      "action": "set_aura", "label": "SETUP: two Felfury for spender 4", "actor": "abyssal", "spell": 800058,
+      "stacks": 2
+    },
+    {"action": "reset_cooldown", "actor": "abyssal", "spell": 501314},
+    {"action": "cast", "label": "Sargeron Smite 4", "actor": "abyssal", "spell": 501314, "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: Sargeron Smite 4 is accepted", "actor": "abyssal", "metric": "cast_failure",
+      "spell": 501314, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#12995: spender 4 leaves 4 stacks", "actor": "abyssal", "metric": "aura_stacks",
+      "spell": 521234, "equals": 4, "within_ms": 1500
+    },
+    {
+      "action": "assert", "label": "#12995: each stack is worth +5% Energy regeneration", "actor": "abyssal",
+      "metric": "aura_amount", "spell": 521234, "effect": 0, "min": 5
+    },
+    {"action": "set_power", "actor": "control", "power": 3, "value": 0},
+    {"action": "set_power", "actor": "abyssal", "power": 3, "value": 0},
+    {"action": "wait", "label": "Let Energy regenerate while the stacks last", "ms": 5000},
+    {"action": "snapshot", "actor": "control", "metric": "power", "power": 3, "save_as": "control_energy"},
+    {
+      "action": "assert", "label": "#12995: four stacks regenerate about 20% more Energy", "actor": "abyssal",
+      "metric": "power", "power": 3, "ratio_to": "control_energy", "min": 1.12, "max": 1.3
+    }
+  ]
+}

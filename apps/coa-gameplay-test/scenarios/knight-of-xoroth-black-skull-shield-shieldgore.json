@@ -1,7 +1,19 @@
 {
   "schema": 1,
-  "name": "Black Skull Shield cuts Shieldgore's Rage cost and raises its damage (#1109)",
-  "contract": "Black Skull Shield 804354 reads 'Reduces the Rage cost of Shieldgore by -5 and increases its damage by 25%' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z). Shieldgore's actual cast spell is 804353 (grep-confirmed; the 301302 talent node only swaps Infernal Strike for it). Effect 0 is aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 0 (SPELLMOD_DAMAGE), BasePoints 25, classmask (0,256,0) matching Shieldgore's own family flags; Unit::SpellDamageBonusDone applies SPELLMOD_DAMAGE to the resolved damage bonus regardless of which effect index carries the SPELL_EFFECT_SCHOOL_DAMAGE effect (Shieldgore's own damage effect is at effect index 1). Effect 1 reuses the SPELLMOD_COST flat-modifier pattern from Combusting Blade (#942/704999), BasePoints -5, DieSides 0, classmask (0,256,0). At level 60 the owned Sever rank is 501505 (AscensionSpellProgressionData.h).",
+  "name": "Black Skull Shield cuts Shieldgore's Rage cost and raises its damage (#1109, #12946)",
+  "contract": [
+    "#12946 and #1109: Black Skull Shield 804354 reads 'Reduces the Rage cost of Shieldgore by $/10;s2 and",
+    "increases its damage by $s1%'. The installed Spell.dbc effect 1 is aura 107 (SPELL_AURA_ADD_FLAT_MODIFIER),",
+    "MiscValue 14 (SPELLMOD_COST), BasePoints -51 with DieSides 1, so -50, with classmask (0,256,0) matching",
+    "Shieldgore's family flags. Rage is stored in tenths, so -50 is the tooltip's 5 Rage ($/10;s2). The contract",
+    "in AscensionXorothContracts.cpp had set -5 (0.5 Rage), which players saw as a 1 Rage drop (#12946: 25 to",
+    "24). Shieldgore's cast spell is 804353 (the 301302 talent node only swaps Infernal Strike for it) and",
+    "spell_power_cost reads the raw tenths, so the cost must drop by exactly 50; the old -5 fails that assertion.",
+    "Effect 0 is aura 108 (SPELL_AURA_ADD_PCT_MODIFIER), MiscValue 0 (SPELLMOD_DAMAGE), 25%, same classmask;",
+    "Unit::SpellDamageBonusDone applies SPELLMOD_DAMAGE regardless of which effect index carries the damage",
+    "effect (Shieldgore's is effect 1). At level 60 the owned Sever rank is 501505",
+    "(AscensionSpellProgressionData.h)."
+  ],
   "timeout_ms": 90000,
   "players": [
     {
@@ -44,8 +56,9 @@
       "actor": "knight", "metric": "aura", "spell": 804354, "equals": 1
     },
     {
-      "action": "assert", "label": "CONTRACT: Shieldgore's Rage cost drops by 5",
-      "actor": "knight", "metric": "spell_power_cost", "spell": 804353, "relative_to": "cost_before", "equals": -5
+      "action": "assert", "label": "CONTRACT: Shieldgore's Rage cost drops by 5 Rage (50 tenths)",
+      "actor": "knight", "metric": "spell_power_cost", "spell": 804353, "relative_to": "cost_before",
+      "equals": -50
     },
     {
       "action": "assert", "label": "CONTRACT: Shieldgore's damage bonus rises by 25%",

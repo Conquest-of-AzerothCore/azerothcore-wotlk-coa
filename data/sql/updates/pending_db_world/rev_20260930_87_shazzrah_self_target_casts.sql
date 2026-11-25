@@ -15,7 +15,7 @@
 --    Arcane Instability (2105605/06). Retargeted to 3 (area), matching that row.
 DELETE FROM `coa_boss_schedule` WHERE `entry` = 12264 AND `idx` IN (2, 5);
 INSERT INTO `coa_boss_schedule`
-    (`entry`, `idx`, `spell_d0`, `spell_d1`, `spell_d2`, `spell_d3`, `effect`, `first_ms`, `period_ms`, `hp_pct`, `target`, `comment`)
+    (`entry`, `idx`, `spell_d0`, `spell_d1`, `spell_d2`, `spell_d3`, `effect_d0`, `effect_d1`, `effect_d2`, `effect_d3`, `first_ms`, `period_ms`, `hp_pct`, `target`, `comment`)
 VALUES
-(12264, 2, 2105607, 2105607, 2105607, 2105607, 2105608, 14100, 30200, 0, 0, 'Dampen Magic'),
-(12264, 5, 2105609, 2105609, 2105609, 2105609, 2105610, 23600, 34800, 0, 3, 'Mass Counterspell');
+(12264, 2, 2105607, 2105607, 2105607, 2105607,2105608, 2105608, 2105608, 2105608, 14100, 30200, 0, 0, 'Dampen Magic'),
+(12264, 5, 2105609, 2105609, 2105609, 2105609,2105610, 2105610, 2105610, 2105610, 23600, 34800, 0, 3, 'Mass Counterspell');

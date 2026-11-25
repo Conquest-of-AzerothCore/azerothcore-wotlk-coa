@@ -1,0 +1,70 @@
+{
+  "schema": 1,
+  "name": "Conjuration Mastery refunds 10 Static from Updraft (#12981)",
+  "contract": [
+    "Conjuration Mastery 300595 tooltips: your $?s707615[Updraft][Conjure Storm] now refunds 10 Static. With",
+    "Tempest Calling 707615 (Wind) Conjure Storm becomes Updraft (802354 and its trainer ranks 570161 to 570166),",
+    "which depletes 20 Static. The Stormbringer on-cast hook casts the refund 804084 (+10 Static,",
+    "EffectMiscValue[1] 10) only for Conjure Storm, matched by SpellFamilyFlags[2] 16, which Updraft does not",
+    "carry, so #12981 reports that Updraft never refunds. Expected: without the talent Updraft spends 20 of 80",
+    "Static (60 left); with Conjuration Mastery it leaves 70. Combat holds Static steady, since it decays out of",
+    "combat, and the Static is read within 1.5 seconds of each cast."
+  ],
+  "timeout_ms": 60000,
+  "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
+  "players": [
+    {"id": "storm", "race": 1, "class": 16, "level": 80}
+  ],
+  "creatures": [
+    {"id": "dummy", "owner": "storm", "entry": 36, "health": 1000000, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "storm", "spell": 707615},
+    {"action": "learn", "actor": "storm", "spell": 570166},
+    {
+      "action": "assert", "label": "SETUP: Updraft rank 6 is known", "actor": "storm", "metric": "knows_spell",
+      "spell": 570166, "equals": 1
+    },
+    {"action": "attack", "actor": "storm", "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: combat holds Static steady", "actor": "storm", "metric": "combat",
+      "equals": 1, "within_ms": 2000
+    },
+    {"action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 80},
+    {
+      "action": "assert", "label": "SETUP: 80 Static", "actor": "storm", "metric": "aura_stacks", "spell": 803102,
+      "equals": 80
+    },
+    {"action": "cast", "actor": "storm", "spell": 570166, "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: Updraft is accepted", "actor": "storm", "metric": "cast_failure",
+      "spell": 570166, "equals": 0
+    },
+    {
+      "action": "assert", "label": "BASELINE: without Conjuration Mastery Updraft spends 20 (80 - 20)",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 60, "within_ms": 1500
+    },
+    {"action": "wait", "label": "Global cooldown", "ms": 1600},
+    {"action": "learn", "actor": "storm", "spell": 300595},
+    {
+      "action": "assert", "label": "SETUP: the Conjuration Mastery passive is active", "actor": "storm",
+      "metric": "aura", "spell": 300595, "equals": 1
+    },
+    {"action": "set_aura", "actor": "storm", "spell": 803102, "stacks": 80},
+    {
+      "action": "assert", "label": "SETUP: Static restored to 80", "actor": "storm", "metric": "aura_stacks",
+      "spell": 803102, "equals": 80
+    },
+    {"action": "restore_charges", "actor": "storm", "spell": 570166},
+    {"action": "cast", "actor": "storm", "spell": 570166, "target": "dummy"},
+    {
+      "action": "assert", "label": "SETUP: the second Updraft is accepted", "actor": "storm", "metric": "cast_failure",
+      "spell": 570166, "equals": 0
+    },
+    {
+      "action": "assert", "label": "#12981: Conjuration Mastery refunds 10 of Updraft's 20 (80 - 20 + 10)",
+      "actor": "storm", "metric": "aura_stacks", "spell": 803102, "equals": 70, "within_ms": 1500
+    }
+  ]
+}
