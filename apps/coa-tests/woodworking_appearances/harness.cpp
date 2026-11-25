@@ -259,6 +259,7 @@ public:
     std::vector<uint32> _allVanityItemIds;
     std::vector<std::array<uint32, 17>> _woodworkingAppearancePatches;
     std::vector<std::array<uint32, 17>> _serverPetAppearancePatches;
+    std::vector<std::array<uint32, 17>> _illusionAppearancePatches;
     std::vector<std::array<uint32, 3>> _woodworkingItemAppearancePatches;
     std::unordered_map<uint32, IncarnationCategory> _incarnationCategories;
     std::map<uint32, CosmeticPetCategory> _petCategories;
