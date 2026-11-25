@@ -36,7 +36,11 @@ The ADR 1210 void rule itself is correct and must not be weakened: a torn read a
 Extend `proc_avoided.py` and `procs.py` ([doc](../../apps/coa-gameplay-test/conformance/docs/proc-rates.md)):
 
 - Add `'pause_before_reads'` (optional boolean, default `False`) to `proc_avoided.TRIGGER_FIELDS`, rejecting
-  non-boolean values.
+  non-boolean values and rejecting `pause_before_reads: true` combined with `event_metric: "aura_stacks"`
+  (`counts_stacks`, whose stack drain reads run before the pause and would tear against post-pause trial reads).
+- Require instant/synchronous proc events when `pause_before_reads` is enabled (pausing runs after `drain`, so any
+  swing during the striker pause rollout has no post-pause drain for missile or delayed procs; safe for Cultist
+  `800463` whose proc `502133` is an instant `Speed = 0` self-buff counted by `spell_cast_count`).
 - Add `PAUSE_AURA = 56`, `pauses_before_reads(entry)`, and `pause_steps(entry, on)` emitting
   `{'action': 'set_aura', 'actor': CASTER, 'target': striker, 'caster': striker, 'spell': 56, 'stacks': 1|0}`
   for each striker in `striker_ids(entry)`.
@@ -55,5 +59,5 @@ Extend `proc_avoided.py` and `procs.py` ([doc](../../apps/coa-gameplay-test/conf
   every striker is stunned for 3000 ms (well above the <= 200 ms read sequence), making `attacks_taken == dodged +
   parried + missed` deterministic.
 - Cultist `800463` Void Reaver enables `"pause_before_reads": true`.
-- Unit tests in `test_proc_avoided.py` verify pause/unpause step placement, byte-identical default output, and
-  boolean validation.
+- Unit tests in `test_proc_avoided.py` verify pause/unpause step placement, byte-identical default output,
+  boolean validation, and generate-time rejection with `event_metric: "aura_stacks"` (`counts_stacks`).

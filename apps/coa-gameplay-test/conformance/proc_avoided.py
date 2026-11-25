@@ -46,6 +46,10 @@ def checked_trigger(entry: dict) -> dict:
         raise ValueError(f'Proc {aura} avoided trigger count_misses is a boolean')
     if type(trigger.get('pause_before_reads', False)) is not bool:
         raise ValueError(f'Proc {aura} avoided trigger pause_before_reads is a boolean')
+    from proc_stacks import AURA_STACKS
+    if pauses_before_reads(entry) and entry.get('event_metric') == AURA_STACKS:
+        raise ValueError(f'Proc {aura} avoided trigger pause_before_reads cannot be combined with '
+                         f'event_metric {AURA_STACKS} (stack drain reads run before the pause)')
     exclusion = trigger.get('miss_exclusion')
     if exclusion is not None and (not counts_misses(entry) or not isinstance(exclusion, dict)
                                   or set(exclusion) != {'min_share'} or isinstance(exclusion['min_share'], bool)

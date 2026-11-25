@@ -482,3 +482,13 @@ class AvoidedProcPauseBeforeReadsTest(unittest.TestCase):
             with self.subTest(bad=bad), self.assertRaises(ValueError):
                 proc_plan(self.class_file,
                           {**self.entry, 'trigger': {**self.entry['trigger'], 'pause_before_reads': bad}})
+
+    def test_pause_before_reads_with_aura_stacks_is_refused(self):
+        stack = AvoidedProcStackEventsTest.STACK
+        entry = {**self.paused(), 'event_metric': 'aura_stacks', 'stack_aura': stack, 'stack_set': 0,
+                 'stack_per_cast': 0, 'stack_cap': 6, 'events_per_proc': 1, 'baseline': True,
+                 'attempt_auras': [{'spell': stack, 'stacks': 0, 'source': 'seeded'}]}
+        with self.assertRaisesRegex(ValueError, 'pause_before_reads.*aura_stacks'):
+            proc_plan(self.class_file, entry)
+        with self.assertRaisesRegex(ValueError, 'pause_before_reads.*aura_stacks'):
+            proc_scenario(self.class_file, entry)
