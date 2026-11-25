@@ -1091,7 +1091,8 @@
     "labels": [
       "302015 script_hit 573311 blast_damage"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Proved under ADR 0011 R4 (Q-cu-31, no server change): Cultist class tuning aura 887013 (+12% PvE damage done) listed in cultist.json known_auras folds into the expected value (floor(118 * 1.12) = 132 vs tooltip 118.6). Counted pair 20261125-100023 / 20261125-100220 (build 3744367126f6, 0 flips): 302015 script_hit 573311 blast_damage 132.0 / 132.0 (15 / 11 usable hits, control 0 hits) and blast_rate 0.2992 / 0.3018 both ok/ok."
   },
   {
     "spell": 302072,

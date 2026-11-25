@@ -72,7 +72,9 @@
     }
   ],
   "off_hand_weapons": [],
-  "known_auras": [],
+  "known_auras": [
+    887013
+  ],
   "probe_auras": [],
   "extra_spells": [
     {
