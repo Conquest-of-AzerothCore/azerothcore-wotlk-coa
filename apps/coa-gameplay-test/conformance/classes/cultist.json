@@ -26024,6 +26024,702 @@
         }
       ],
       "observe_source": "Dreadnought weapon set (2534 Rondel dagger satisfies 806830; 2129 shield equipped via for_entry). $h = 10 (561336 Spell.dbc ProcChance 10; AscensionCultistEvents.cpp:90,200 checks dealt && Shadow && Chance(player, 561336) via roll_chance_f and calls Reduce(player, 524876, INT32_MAX) -> RemoveSpellCooldown(572141, true) sending SMSG_CLEAR_COOLDOWN 0x1DE). Trigger: Hammer of Twilight 806830 (SchoolMask 32 Shadow, 0 mana, instant, 1500 ms GCD). Control: 50 casts x 7 parts = 350 hits unlearned (0 resets). Treatment: 7 pooled parts x 1800 casts = 12600 damaging Shadow hits (>= 10905 needed for residual_target 0.001 per pair, min_detectable 4 pts, G-20 +-2 pt band around 10%). Reference search 2026-11-25: coa-history 561336/561365 0 events (passive/proc; 572141 Twilight Shieldtoss 4 casts); coabuildhub spells_master_index.json has no entry for rank 2 561336; installed server Spell.dbc (30% shield armor, 10% Shadow damage reset) governs."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (channels for 6 sec)",
+      "kind": "metric_delta",
+      "variant": "channel_duration",
+      "label_suffix": "channel_duration",
+      "quote": "Channel for $d,",
+      "trigger_spell": 255275,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "casting",
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms caster is actively channeling Hour of Twilight 255275 at 5600 ms (0 before cast)."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 255275,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5600,
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5500,
+          5800
+        ],
+        "expired": [
+          6200,
+          6550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "255275 Hour of Twilight DurationIndex 32 = 6000 ms ($d), channeled (AttributesEx 0x200000cc; Spell.dbc). Reads aura 255275 on caster absent before cast (0), present (1) and actively channeling (ally_arm casting 0 -> 1) at 5600 ms (game_time [5500, 5800] > 5400 ms = 0.9 * 6000), and gone (0) at 6400 ms (game_time [6200, 6550] < 6600 ms = 1.1 * 6000), excluding 10% off on both sides. Reference search 2026-11-25: coa-history spell 255275: 0 events in 186 logs; coabuildhub spells_master_index.json has no entry for 255275; installed Spell.dbc governs."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (reduces caster damage taken by 25% while channeling)",
+      "kind": "metric_delta",
+      "variant": "damage_taken",
+      "label_suffix": "damage_taken",
+      "quote": "reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 8900,
+      "expected": 9175,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "255275 Effect[0] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 127 (all schools), BasePoints -26 + DieSides 1 = -25% ($255276s1 = 25; Spell.dbc). Striker casts Light of the Naaru 41394 (1100 fixed Holy damage) at caster from 10000/10000 health: before cast (control) 10000 - 1100 = 8900; while channeling 255275 (500 ms into 6000 ms channel) 10000 - int(1100 * 0.75) = 9175 (tol 1; excludes 0% = 8900 and doubled -50% = 9450). Reference search 2026-11-25: coa-history spell 255275/255276: 0 events in 186 logs; coabuildhub has no entry; installed Spell.dbc governs."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (reduces nearby enemy melee haste by 25% while channeling)",
+      "kind": "metric_delta",
+      "variant": "enemy_melee_haste",
+      "label_suffix": "enemy_melee_haste",
+      "quote": "reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 2000,
+      "expected": 2500,
+      "expected_ratio": 1.25,
+      "tolerance": 0.005,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "255275 Effect[1] aura 23 periodic trigger 255276 every 2000 ms (radius 8 yd, RadiusIndex 14; Spell.dbc). 255276 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints -26 + DieSides 1 = -25% ($255276s1 = 25). In AzerothCore Unit::ApplyAttackTimePercentMod, negative haste -25% scales attack time by (100 - (-25))/100 = 1.25x (2000 -> 2500 ms, tol 0.005; excludes 1.0 and 1.50). Fixture 823764 removes Shadow resist so 255276 lands reliably. Reference search 2026-11-25: coa-history 255275/255276: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (reduces nearby enemy movement speed by 25% while channeling)",
+      "kind": "metric_delta",
+      "variant": "enemy_slow",
+      "label_suffix": "enemy_slow",
+      "quote": "reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.14286,
+      "expected": 0.85714,
+      "expected_ratio": 0.75,
+      "tolerance": 0.002,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "255275 Effect[1] periodic trigger 255276 (radius 8 yd): Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -26 + DieSides 1 = -25% ($255276s1 = 25; Spell.dbc). Dummy at 5 yd run_speed_rate drops to 0.75x (1.14286 -> 0.85714, tol 0.002; excludes 1.0 and 0.5). Fixture 823764 removes Shadow resist. Reference search 2026-11-25: coa-history 255275/255276: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (nearby enemy spell haste check vs 25% tooltip)",
+      "kind": "metric_delta",
+      "variant": "enemy_spell_haste",
+      "label_suffix": "enemy_spell_haste",
+      "quote": "reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+      "enemy_player_race": 2,
+      "trigger_spell": 255275,
+      "target": "caster",
+      "measure_actor": "enemy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.25,
+      "tolerance": 0.01,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "255275 tooltip states reducing 'their haste and movement speed by $255276s1%' ($255276s1 = 25% -> Unit::ApplyCastTimePercentMod negative -25% scales UNIT_MOD_CAST_SPEED to 1.25x). DBC 255276 Effect[2] aura 216 SPELL_AURA_HASTE_SPELLS has BasePoints -51 + DieSides 1 = -50% (measured 1.50x vs 1.25x tooltip). Measured on enemy player (race 2) inside 8 yd radius with 823764 spellpen. Reference search 2026-11-25: coa-history 255275/255276: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (beneficial magic dispel check on nearby enemy)",
+      "kind": "metric_delta",
+      "variant": "dispel_magic",
+      "label_suffix": "dispel_magic",
+      "quote": "instantly removing all beneficial magic effects from them",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          1459,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 1459
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "255275 tooltip states 'instantly removing all beneficial magic effects from them'. Enemy dummy at 5 yd (inside 8 yd radius) carries Arcane Intellect 1459 (Dispel 1 Magic, positive buff); reads aura 1459 before (1) and 2500 ms into Hour of Twilight channel (expected 0). Neither 255275 nor 255276 nor AscensionCultist*.cpp has a dispel effect. Reference search 2026-11-25: coa-history 255275: 0 events; installed Spell.dbc governs.",
+      "dummy_distance": 5
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (nearby enemies struck with Apocalyptic Skies while channeling)",
+      "kind": "metric_delta",
+      "variant": "apocalyptic_skies",
+      "label_suffix": "apocalyptic_skies",
+      "quote": "While channeling, nearby enemies will also be struck with Apocalyptic Skies.",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 533030
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "after_at_least": 1,
+      "after_at_most": 25,
+      "wait_ms": 7000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "255275 Effect[2] aura 23 periodic trigger 301988 Apocalyptic Skies every 1500 ms during 6000 ms channel (Spell.dbc); 301988 Effect[0] summons Void Portal 533030 (AscensionCultistAbilities.cpp:453-463), which casts Gaze of C'thun / Horrorbolt / Obliteration Beam at nearby enemies in combat (AscensionCultistSummons.cpp:290-297). Reads owned_creature_damage_count of entry 533030 before cast (0) and at 7000 ms (after_at_least 1, proving nearby enemy dummy at 5 yd was actually struck by Apocalyptic Skies). Reference search 2026-11-25: coa-history 255275: 0 events; installed Spell.dbc governs.",
+      "select_dummy": true
+    },
+    {
+      "spell": 255275,
+      "name": "Hour of Twilight (applies Corrupt Mind at end of channel)",
+      "kind": "metric_delta",
+      "variant": "corrupt_mind_end",
+      "label_suffix": "corrupt_mind_end",
+      "quote": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
+      "trigger_spell": 255275,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "target_entry": 6,
+      "dummy_distance": 5,
+      "cast_in_before": false,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 560109,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "255275 tooltip states 'At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.' Reads aura 560109 (Corrupt Mind) on humanoid dummy 6 at 5 yd before cast (0) and 6500 ms after cast start (500 ms past 6000 ms channel end; expected 1). Neither 255275 nor 255276 nor AscensionCultist*.cpp casts 560109 on channel end. Reference search 2026-11-25: coa-history 255275: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 301984,
+      "name": "Yogg-Saron's Embrace (attack power +10%)",
+      "kind": "metric_delta",
+      "variant": "attack_power",
+      "label_suffix": "attack_power",
+      "quote": "Increases your attack power and your maximum mana by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 301984,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 376,
+      "expected": 413.6,
+      "expected_ratio": 1.1,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301984 Effect[0] aura 166 SPELL_AURA_MOD_ATTACK_POWER_PCT BasePoints 9 + DieSides 1 = +10% ($s1 = 10; Spell.dbc). Reads caster attack_power before (control: 376) and after real learn of 301984: 376 * 1.10 = 413.6 (int32 413, ratio 1.0984; expected_ratio 1.10 +- 0.005 excludes 0% and 20%). Trigger 60235 (+300 Spirit) does not affect AP. Reference search 2026-11-25: coa-history 301984: 0 events (passive); coabuildhub spells_master_index.json entry 301984 matches verbatim ('10%')."
+    },
+    {
+      "spell": 301984,
+      "name": "Yogg-Saron's Embrace (maximum mana +10%)",
+      "kind": "metric_delta",
+      "variant": "max_mana",
+      "label_suffix": "max_mana",
+      "quote": "Increases your attack power and your maximum mana by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 301984,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 0
+      },
+      "before_expected": 2297,
+      "expected": 2526.7,
+      "expected_ratio": 1.1,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301984 Effect[1] aura 132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT MiscValue 0 (POWER_MANA), BasePoints 9 + DieSides 1 = +10% ($s1 = 10; Spell.dbc). Reads caster max_power (power 0) before (control: 2297) and after real learn of 301984: int(2297 * 1.10) = 2526 (ratio 1.0997; expected_ratio 1.10 +- 0.005 excludes 0% and 20%). Trigger 60235 (+300 Spirit) does not affect max mana. Reference search 2026-11-25: coa-history 301984: 0 events (passive); coabuildhub entry 301984 matches verbatim."
+    },
+    {
+      "spell": 302072,
+      "name": "Persistent Prayers R1 (Void Shield held at 36.0 sec)",
+      "kind": "metric_delta",
+      "variant": "void_shield_held",
+      "label_suffix": "void_shield_held",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 302072,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 36000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          35800,
+          36300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 24 + DieSides 1 = +25% ($s1 = 25), mask [0, 536870912, 262144] matching Void Shield 578115 (DurationIndex 9 = 30000 ms; Spell.dbc): 30000 * 1.25 = 37500 ms. Reads aura 578115 at 36000 ms (> 33750 ms = 0.9 * 37500): control (30000 ms) already expired (0); treatment held (1). Paired with void_shield_gone. Reference search 2026-11-25: coa-history 302072: 0 events (passive; 578115: 59538 events); coabuildhub entry 302072 matches verbatim ('25%')."
+    },
+    {
+      "spell": 302072,
+      "name": "Persistent Prayers R1 (Void Shield gone at 39.0 sec)",
+      "kind": "metric_delta",
+      "variant": "void_shield_gone",
+      "label_suffix": "void_shield_gone",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 302072,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 39000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          38800,
+          39300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION +25% on Void Shield 578115 (37500 ms; Spell.dbc). Reads aura 578115 at 39000 ms (< 41250 ms = 1.1 * 37500): gone (0) in both phases, excluding a duration 10% long. Paired with void_shield_held. Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
+    },
+    {
+      "spell": 302072,
+      "name": "Persistent Prayers R1 (Forbidden Ritual held at 14.7 sec)",
+      "kind": "metric_delta",
+      "variant": "forbidden_ritual_held",
+      "label_suffix": "forbidden_ritual_held",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 302072,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 14700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14600,
+          14950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION +25% matching Forbidden Ritual 502273 (CastTime 3000 ms, DurationIndex 1 = 10000 ms; Spell.dbc): 10000 * 1.25 = 12500 ms (expires 15500 ms after cast start). At 14700 ms (11700 ms after cast finish > 11250 ms = 0.9 * 12500): control (10000 ms) is expired (0), treatment is held (1). Paired with forbidden_ritual_gone. Reference search 2026-11-25: coa-history 302072: 0 events (502273: 354 casts); coabuildhub entry 302072 matches verbatim."
+    },
+    {
+      "spell": 302072,
+      "name": "Persistent Prayers R1 (Forbidden Ritual gone at 16.2 sec)",
+      "kind": "metric_delta",
+      "variant": "forbidden_ritual_gone",
+      "label_suffix": "forbidden_ritual_gone",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 302072,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 16200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          16100,
+          16450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302072 Effect[0] aura 108 SPELLMOD_DURATION +25% on Forbidden Ritual 502273 (3000 ms cast + 12500 ms = 15500 ms; Spell.dbc). At 16200 ms (13200 ms after cast finish < 13750 ms = 1.1 * 12500): gone (0) in both phases. Paired with forbidden_ritual_held. Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
+    },
+    {
+      "spell": 302072,
+      "name": "Persistent Prayers R1 (Void Shield absorb +25%)",
+      "kind": "metric_delta",
+      "variant": "void_shield_absorb",
+      "label_suffix": "void_shield_absorb",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 302072,
+      "target": "caster",
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 803,
+      "expected": 1003.5,
+      "tolerance": 28,
+      "after_at_least": 970,
+      "after_at_most": 1037,
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "phase_since": true,
+      "void_on_cast_failure": true,
+      "observe_source": "302072 Effect[1] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +25%, mask [0, 536870912, 262144] matching Void Shield 578115 (776..830 at SP 0; Spell.dbc). Struck 2x by Light of the Naaru 41394 (2200 > max shield) with phase_since: control [776..830] (803 +- 28); treatment after real learn of 302072 [970..1037] (1003.5; excludes 0% and +50%). expire_ms 16000 clears 15s Wracked Mind 805801. Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
+    },
+    {
+      "spell": 302072,
+      "name": "Persistent Prayers R1 (Forbidden Ritual absorb +25%)",
+      "kind": "metric_delta",
+      "variant": "forbidden_ritual_absorb",
+      "label_suffix": "forbidden_ritual_absorb",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 302072,
+      "target": "caster",
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 300,
+        "after_trigger_ms": 3500
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1032,
+      "expected": 1289.5,
+      "tolerance": 47,
+      "after_at_least": 1232,
+      "after_at_most": 1347,
+      "wait_ms": 1500,
+      "expire_ms": 1000,
+      "phase_since": true,
+      "void_on_cast_failure": true,
+      "observe_source": "302072 Effect[1] aura 317 +25% matching Forbidden Ritual 502273 (base absorb 986..1078 at lvl 60, SP 0; Spell.dbc). Struck 3x by 41394 (3300 > max shield) at after_trigger_ms 3500 (past 3000 ms cast) with phase_since: control [986..1078] (1032 +- 47); treatment [1232..1347] (1289.5; excludes 0% and +50%). Reference search 2026-11-25: coa-history 302072: 0 events; coabuildhub entry 302072 matches verbatim."
+    },
+    {
+      "spell": 302919,
+      "name": "Persistent Prayers R2 (Void Shield held at 43.5 sec)",
+      "kind": "metric_delta",
+      "variant": "void_shield_held",
+      "label_suffix": "void_shield_held",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 302919,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 43500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          43300,
+          43800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 49 + DieSides 1 = +50% ($s1 = 50), mask [0, 536870912, 262144] matching Void Shield 578115 (30000 ms; Spell.dbc): 30000 * 1.50 = 45000 ms. Reads aura 578115 at 43500 ms (> 40500 ms = 0.9 * 45000): control (30000 ms) already expired (0); treatment held (1). Paired with void_shield_gone. Reference search 2026-11-25: coa-history 302919: 0 events (passive); coabuildhub has no rank-2 entry; installed Spell.dbc governs."
+    },
+    {
+      "spell": 302919,
+      "name": "Persistent Prayers R2 (Void Shield gone at 46.5 sec)",
+      "kind": "metric_delta",
+      "variant": "void_shield_gone",
+      "label_suffix": "void_shield_gone",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 302919,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 578115
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 46500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          46300,
+          46800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% on Void Shield 578115 (45000 ms; Spell.dbc). Reads aura 578115 at 46500 ms (< 49500 ms = 1.1 * 45000): gone (0) in both phases. Paired with void_shield_held. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 302919,
+      "name": "Persistent Prayers R2 (Forbidden Ritual held at 17.2 sec)",
+      "kind": "metric_delta",
+      "variant": "forbidden_ritual_held",
+      "label_suffix": "forbidden_ritual_held",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 302919,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 17200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          17100,
+          17450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% matching Forbidden Ritual 502273 (CastTime 3000 ms, Duration 10000 ms; Spell.dbc): 10000 * 1.50 = 15000 ms (expires 18000 ms after cast start). At 17200 ms (14200 ms after cast finish > 13500 ms = 0.9 * 15000): control is expired (0), treatment is held (1). Paired with forbidden_ritual_gone. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 302919,
+      "name": "Persistent Prayers R2 (Forbidden Ritual gone at 18.7 sec)",
+      "kind": "metric_delta",
+      "variant": "forbidden_ritual_gone",
+      "label_suffix": "forbidden_ritual_gone",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 302919,
+      "target": "caster",
+      "cast_power": 2000,
+      "metric": "aura",
+      "fields": {
+        "spell": 502273
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 18700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18600,
+          18950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302919 Effect[0] aura 108 SPELLMOD_DURATION +50% on Forbidden Ritual 502273 (3000 ms cast + 15000 ms = 18000 ms; Spell.dbc). At 18700 ms (15700 ms after cast finish < 16500 ms = 1.1 * 15000): gone (0) in both phases. Paired with forbidden_ritual_held. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 302919,
+      "name": "Persistent Prayers R2 (Void Shield absorb +50%)",
+      "kind": "metric_delta",
+      "variant": "void_shield_absorb",
+      "label_suffix": "void_shield_absorb",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 578115,
+      "gate_spell": 302919,
+      "target": "caster",
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 803,
+      "expected": 1204.5,
+      "tolerance": 28,
+      "after_at_least": 1164,
+      "after_at_most": 1245,
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "phase_since": true,
+      "void_on_cast_failure": true,
+      "observe_source": "302919 Effect[1] aura 317 +50% matching Void Shield 578115 (776..830 at SP 0; Spell.dbc). Struck 2x by 41394 (2200 > max shield) with phase_since: control [776..830] (803 +- 28); treatment [1164..1245] (1204.5; excludes 0% and +100%). expire_ms 16000 clears 15s Wracked Mind 805801. Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 302919,
+      "name": "Persistent Prayers R2 (Forbidden Ritual absorb +50%)",
+      "kind": "metric_delta",
+      "variant": "forbidden_ritual_absorb",
+      "label_suffix": "forbidden_ritual_absorb",
+      "quote": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 302919,
+      "target": "caster",
+      "cast_power": 2000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 300,
+        "after_trigger_ms": 3500
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1032,
+      "expected": 1548,
+      "tolerance": 47,
+      "after_at_least": 1479,
+      "after_at_most": 1617,
+      "wait_ms": 1500,
+      "expire_ms": 1000,
+      "phase_since": true,
+      "void_on_cast_failure": true,
+      "observe_source": "302919 Effect[1] aura 317 +50% matching Forbidden Ritual 502273 (986..1078 at lvl 60, SP 0; Spell.dbc). Struck 3x by 41394 (3300 > max shield) at after_trigger_ms 3500 with phase_since: control [986..1078] (1032 +- 47); treatment [1479..1617] (1548; excludes 0% and +100%). Reference search 2026-11-25: coa-history 302919: 0 events; installed Spell.dbc governs."
     }
   ],
   "player_observations": [],

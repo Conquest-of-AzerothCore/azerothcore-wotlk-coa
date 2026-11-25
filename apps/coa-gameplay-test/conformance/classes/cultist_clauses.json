@@ -104,28 +104,56 @@
     "spell": 255275,
     "clause": "Channel for $d,",
     "labels": [
-      "255275 aura_duration_ms #0"
+      "255275 behaviour_metric_delta channel_duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 255275,
     "clause": "heralding the end of the world on all nearby enemies, instantly removing all beneficial magic effects from them and reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing your damage taken",
+        "labels": [
+          "255275 behaviour_metric_delta damage_taken"
+        ]
+      },
+      {
+        "claim": "and their haste",
+        "labels": [
+          "255275 behaviour_metric_delta enemy_melee_haste",
+          "255275 behaviour_metric_delta enemy_spell_haste"
+        ]
+      },
+      {
+        "claim": "and movement speed by $255276s1% while channeling.",
+        "labels": [
+          "255275 behaviour_metric_delta enemy_slow"
+        ]
+      },
+      {
+        "claim": "instantly removing all beneficial magic effects from them",
+        "labels": [
+          "255275 behaviour_metric_delta dispel_magic"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 255275,
+    "clause": "While channeling, nearby enemies will also be struck with Apocalyptic Skies.",
     "labels": [
-      "255275 effect_value 255276e0 #1"
+      "255275 behaviour_metric_delta apocalyptic_skies"
     ],
     "kind": "claim"
   },
   {
     "spell": 255275,
-    "clause": "While channeling, nearby enemies will also be struck with Apocalyptic Skies.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 255275,
     "clause": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
-    "labels": [],
+    "labels": [
+      "255275 behaviour_metric_delta corrupt_mind_end"
+    ],
     "kind": "claim"
   },
   {
@@ -910,10 +938,21 @@
   {
     "spell": 301984,
     "clause": "Increases your attack power and your maximum mana by $s1%.",
-    "labels": [
-      "301984 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your attack power",
+        "labels": [
+          "301984 behaviour_metric_delta attack_power"
+        ]
+      },
+      {
+        "claim": "and your maximum mana by $s1%.",
+        "labels": [
+          "301984 behaviour_metric_delta max_mana"
+        ]
+      }
+    ]
   },
   {
     "spell": 302015,
@@ -934,18 +973,48 @@
   {
     "spell": 302072,
     "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
-    "labels": [
-      "302072 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration",
+        "labels": [
+          "302072 behaviour_metric_delta void_shield_held",
+          "302072 behaviour_metric_delta void_shield_gone",
+          "302072 behaviour_metric_delta forbidden_ritual_held",
+          "302072 behaviour_metric_delta forbidden_ritual_gone"
+        ]
+      },
+      {
+        "claim": "and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+        "labels": [
+          "302072 behaviour_metric_delta void_shield_absorb",
+          "302072 behaviour_metric_delta forbidden_ritual_absorb"
+        ]
+      }
+    ]
   },
   {
     "spell": 302919,
     "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
-    "labels": [
-      "302919 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration",
+        "labels": [
+          "302919 behaviour_metric_delta void_shield_held",
+          "302919 behaviour_metric_delta void_shield_gone",
+          "302919 behaviour_metric_delta forbidden_ritual_held",
+          "302919 behaviour_metric_delta forbidden_ritual_gone"
+        ]
+      },
+      {
+        "claim": "and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+        "labels": [
+          "302919 behaviour_metric_delta void_shield_absorb",
+          "302919 behaviour_metric_delta forbidden_ritual_absorb"
+        ]
+      }
+    ]
   },
   {
     "spell": 500704,
@@ -1535,7 +1604,7 @@
         "labels": []
       }
     ],
-    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) — no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
+    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) \u2014 no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
   },
   {
     "spell": 524877,
