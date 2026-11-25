@@ -25,12 +25,12 @@ The owner ruled (Cultist `Q-cu-34`, `O-15`, 2026-11-25): `threat_x2` — multipl
 
 ## Decision
 
-In `AscensionCultist::ApplyContracts` (`src/server/coa/AscensionCultistContracts.cpp:268-269`), set `info->Effects[1].BasePoints = 99;` when `id == 680600`. Add learned/control `threat_per_damage` regression entries (`hammer_threat`, `hammer_threat_control`, `slam_threat`, `slam_threat_control`) in `apps/coa-gameplay-test/conformance/classes/cultist.json` and update `cultist_clauses.json` Row 249. No shared engine, SQL, DBC, or other-class changes.
+In `AscensionCultist::ApplyContracts` (`src/server/coa/AscensionCultistContracts.cpp:269-270`), set `info->Effects[1].BasePoints = 99;` when `id == 680600`. Add learned/control `threat_per_damage` regression entries (`hammer_threat`, `hammer_threat_control`, `slam_threat`, `slam_threat_control`) in `apps/coa-gameplay-test/conformance/classes/cultist.json` and update `cultist_clauses.json` Row 249. No shared engine, SQL, DBC, or other-class changes.
 
 ## Consequences
 
 - Eldritch Strength `680600` multiplies threat of Hammer of Twilight (`805116..806830`) and Entropic Slam (`804152..572846`) by `2.0x` (`+100%`), keeping its `+25%` damage bonus and existing Bulwark Tab 88 acquisition gate intact.
-- No other spell or class is reached. Note: `apps/coa-gameplay-test/scenarios/tank-threat-audit-cultist.json` (outside the class conformance edit scope and already failing on unrelated missing `500717`) still asserts the old `+15%` (`114500..115500`) value and should be updated in a separate follow-up.
+- No other spell or class is reached. Existing catalog scenarios `apps/coa-gameplay-test/scenarios/cultist-eldritch-strength.json` (`1999..2001` on `base: 1000`) and `apps/coa-gameplay-test/scenarios/tank-threat-audit-cultist.json` (`199500..200500` on `base: 100000`) are updated to match the `x2` threat ruling and both pass.
 - Counted pair (`20261125-092328` / `20261125-092359`, build `3744367126f6`, 18/18 ok, 0 flips):
   - `680600 behaviour_metric_delta hammer_threat`: `2.00844` / `2.00849` vs `hammer_threat_control`: `1.01057` / `1.01058` (expected `2.01` vs `1.01` +- `0.02`, accounting for 60 flat `SpellLevel` initial threat).
   - `680600 behaviour_metric_delta slam_threat`: `2.01105` / `2.01103` vs `slam_threat_control`: `1.01384` / `1.01379` (expected `2.01` vs `1.01` +- `0.02`, accounting for 52 flat `SpellLevel` initial threat).

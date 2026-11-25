@@ -1256,7 +1256,7 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Confirms Mind Rot 560943 (10000 ms duration, last possible proc <= 15000 ms) finished expiring naturally by 25900 ms"
+            "source": "Confirms Mind Rot 560943 (10000 ms duration, last possible proc <= 15000 ms) finished expiring naturally by ~25600 ms (> 25000 ms)"
           }
         ]
       },

@@ -26,7 +26,7 @@ The owner ruled (Cultist `Q-cu-19`, `O-15`, 2026-11-25): `tooltip` — align the
 
 ## Decision
 
-In `AscensionCultist::ApplyContracts` (`src/server/coa/AscensionCultistContracts.cpp:262-263`), set `info->Effects[0].RealPointsPerLevel = 0.0f;` when `id == 704473`. No shared engine, SQL, DBC, or other-class changes.
+In `AscensionCultist::ApplyContracts` (`src/server/coa/AscensionCultistContracts.cpp:265-266`), set `info->Effects[0].RealPointsPerLevel = 0.0f;` when `id == 704473`. No shared engine, SQL, DBC, or other-class changes.
 
 ## Consequences
 

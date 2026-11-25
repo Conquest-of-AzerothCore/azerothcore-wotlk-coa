@@ -26,7 +26,7 @@ The owner ruled (Cultist `Q-cu-13`, `O-15`, 2026-11-25): `fix` — flat Shadow d
 
 ## Decision
 
-In `AscensionCultist::ApplyContracts` (`src/server/coa/AscensionCultistContracts.cpp:85-86`), set `info->AscensionFlatAfterWeaponPercent = true` when `Any(info, {806222, 804152})`. No shared engine, SQL, DBC, or other-class changes.
+In `AscensionCultist::ApplyContracts` (`src/server/coa/AscensionCultistContracts.cpp:88-89`), set `info->AscensionFlatAfterWeaponPercent = true` when `Any(info, {806222, 804152})`. No shared engine, SQL, DBC, or other-class changes.
 
 ## Consequences
 
