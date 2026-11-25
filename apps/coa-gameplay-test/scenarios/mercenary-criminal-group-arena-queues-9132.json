@@ -6,7 +6,8 @@
     "Finder queues. A group with a Criminal member starts no Dungeon Finder role check and its Warsong Gulch",
     "group join gets SMSG_GROUP_JOINED_BATTLEGROUND with ERR_GROUP_JOIN_BATTLEGROUND_FAIL (0); a lone Criminal's",
     "1v1 arena join gets the same, while a law-abiding Human's identical arena join is queued",
-    "(SMSG_BATTLEFIELD_STATUS)."
+    "(SMSG_BATTLEFIELD_STATUS). A law-abiding leader who queues alone is still queued: only group joins check",
+    "every member."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -125,6 +126,46 @@
       "opcode": 744,
       "row": 0,
       "relative_to": "group_bg",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "leader",
+      "metric": "server_packets",
+      "opcode": 724,
+      "row": 0,
+      "save_as": "solo_bg"
+    },
+    {
+      "action": "client_packet",
+      "label": "The law-abiding leader queues alone for Warsong Gulch",
+      "actor": "leader",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a solo join is judged on the player alone, so it is queued",
+      "actor": "leader",
+      "metric": "server_packets",
+      "opcode": 724,
+      "row": 0,
+      "relative_to": "solo_bg",
       "min": 1,
       "within_ms": 2000
     },

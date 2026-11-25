@@ -340,16 +340,16 @@ public:
         return !IsCriminal(player) && !IsCriminal(target);
     }
 
-    bool OnPlayerCanJoinInBattlegroundQueue(Player* player, ObjectGuid, BattlegroundTypeId, uint8,
+    bool OnPlayerCanJoinInBattlegroundQueue(Player* player, ObjectGuid, BattlegroundTypeId, uint8 joinAsGroup,
                                             GroupJoinBattlegroundResult& err) override
     {
-        return Admit(player, err);
+        return Admit(player, joinAsGroup, err);
     }
 
-    bool OnPlayerCanJoinInArenaQueue(Player* player, ObjectGuid, uint8, BattlegroundTypeId, uint8, uint8,
+    bool OnPlayerCanJoinInArenaQueue(Player* player, ObjectGuid, uint8, BattlegroundTypeId, uint8 asGroup, uint8,
                                      GroupJoinBattlegroundResult& err) override
     {
-        return Admit(player, err);
+        return Admit(player, asGroup, err);
     }
 
     bool OnPlayerCanJoinLfg(Player* player, uint8, std::set<uint32>&, std::string const&) override
@@ -358,9 +358,9 @@ public:
     }
 
 private:
-    static bool Admit(Player* player, GroupJoinBattlegroundResult& err)
+    static bool Admit(Player* player, uint8 asGroup, GroupJoinBattlegroundResult& err)
     {
-        if (!GroupHasCriminal(player))
+        if (asGroup ? !GroupHasCriminal(player) : !IsCriminal(player))
             return true;
         err = ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
         return false;
