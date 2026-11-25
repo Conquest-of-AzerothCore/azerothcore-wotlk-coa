@@ -139,6 +139,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'owned_creature_spell_hit_chance', 'owned_creature_attackable', 'owned_creature_sent_faction', 'owned_creature_victim',
     'owned_creature_distance_2d', 'owned_creature_combat_reach', 'owned_creature_position_x',
     'owned_creature_position_y', 'owned_creature_position_z',
+    'owned_creature_copy_x', 'owned_creature_copy_y',
     'charm_entry', 'charm_distance', 'charm_aura_stacks', 'controls_self', 'charmed', 'viewpoint_entry', 'seer_entry', 'private_instance',
     'dynamic_object', 'dynamic_object_count', 'dynamic_object_duration_ms', 'dynamic_object_height',
     'dynamic_object_radius', 'dynamic_object_size', 'gossip_options', 'gossip_option_text',
@@ -1648,8 +1649,12 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_power', 'owned_creature_threat_multiplier',
                           'owned_creature_spell_crit_chance', 'owned_creature_react_state',
                           'owned_creature_school_spell_crit_chance', 'owned_creature_combat_reach',
-                          'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z'}:
+                          'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z',
+                          'owned_creature_copy_x', 'owned_creature_copy_y'}:
                 require('entry' in step, f'{where}: metric needs creature entry')
+            if metric in {'owned_creature_copy_x', 'owned_creature_copy_y'}:
+                require('index' in step, f'{where}: owned_creature_copy metric needs index')
+                number(step['index'], f'{where}.index', 0, 31, True)
             if metric == 'owned_creature_school_spell_crit_chance':
                 require('spell' in step, f'{where}: metric needs a magic probe spell')
             if metric in {'owned_creature_crit_chance', 'owned_creature_threat', 'melee_crit_chance_against'}:
@@ -1793,6 +1798,7 @@ def validate(scenario, clock=REAL_CLOCK):
                           'owned_creature_spell_crit_chance', 'owned_creature_react_state',
                           'owned_creature_school_spell_crit_chance', 'owned_creature_combat_reach',
                           'owned_creature_position_x', 'owned_creature_position_y', 'owned_creature_position_z',
+                          'owned_creature_copy_x', 'owned_creature_copy_y',
                           'pet_entry', 'pet_aura_stacks', 'pet_is_banker', 'pet_display', 'pet_flags', 'pet_mirror_image', 'pet_name_is', 'pet_native_display', 'pet_scale',
                           'pet_knows_spell', 'pet_distance', 'pet_bearing', 'pet_casting', 'pet_loading',
                           'owned_creature_count', 'owned_creature_spacing', 'charm_entry', 'charm_distance',

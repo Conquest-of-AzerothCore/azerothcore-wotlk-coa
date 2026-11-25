@@ -311,6 +311,17 @@ class RunnerTests(unittest.TestCase):
         self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_attacks_taken',
                                    'block_kind': 'normal', 'save_as': 'bad'})
 
+    def test_owned_creature_copy_coordinate_metric_fields(self):
+        for metric in ('owned_creature_copy_x', 'owned_creature_copy_y'):
+            step = {'action': 'snapshot', 'actor': 'caster', 'metric': metric, 'entry': 840025,
+                    'index': 0, 'save_as': 'coord'}
+            self.assert_step_validates(step)
+            self.assert_step_validates({**step, 'index': 2})
+            for change in ({'actor': 'target'}, {'entry': 0}, {'index': -1}, {'index': 32}, {'index': True}):
+                self.assert_step_rejected({**step, **change})
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'index'})
+
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
         self.assert_step_validates(step)

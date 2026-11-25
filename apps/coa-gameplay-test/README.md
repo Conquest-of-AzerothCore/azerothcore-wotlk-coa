@@ -1182,6 +1182,9 @@ non-triggered casts so triggered sub-effects do not inflate a single cast) and o
 `false`; `true` reads the cumulative count across all summons of `entry` owned by `actor`, remaining readable after
 despawn); returns `-1` when `cumulative` is `false` and no living owned creature of `entry` is present (read only,
 ADR 1296).
+`owned_creature_copy_x` and `owned_creature_copy_y` read the X and Y world coordinates of the `index`-th (`0..31`)
+living owned creature of `entry` sorted ascending by GUID (returning `NaN` when fewer than `index + 1` living copies
+exist; read only, ADR 1311).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
 (`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
 `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,

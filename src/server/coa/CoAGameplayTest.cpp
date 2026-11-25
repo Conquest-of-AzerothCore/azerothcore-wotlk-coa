@@ -3229,6 +3229,21 @@ private:
         return nullptr;
     }
 
+    std::vector<Creature*> GetOwnedCreaturesSorted(Player* player, uint32 entry)
+    {
+        std::list<Creature*> listed;
+        player->GetCreatureListWithEntryInGrid(listed, entry, 100.0f);
+        std::vector<Creature*> creatures;
+        for (Creature* creature : listed)
+            if (IsLivingSummonOf(player, creature))
+                creatures.push_back(creature);
+        std::sort(creatures.begin(), creatures.end(), [](Creature const* left, Creature const* right)
+        {
+            return left->GetGUID().GetRawValue() < right->GetGUID().GetRawValue();
+        });
+        return creatures;
+    }
+
     static AscensionWildcard::Slot WildcardSlot(Player const* player, uint32 slot)
     {
         std::vector<AscensionWildcard::Slot> const slots = AscensionWildcard::Slots(player);
@@ -6358,6 +6373,17 @@ private:
                 return double(creature->GetCombatReach());
             return double(metric == "owned_creature_position_x" ? creature->GetPositionX() :
                 metric == "owned_creature_position_y" ? creature->GetPositionY() : creature->GetPositionZ());
+        }
+        if (metric == "owned_creature_copy_x" || metric == "owned_creature_copy_y")
+        {
+            uint32 const entry = step.get<uint32>("entry");
+            uint32 const index = step.get<uint32>("index");
+            Require(sObjectMgr->GetCreatureTemplate(entry) != nullptr, "Unknown creature entry in metric");
+            std::vector<Creature*> const creatures = GetOwnedCreaturesSorted(player, entry);
+            if (index >= creatures.size())
+                return std::numeric_limits<double>::quiet_NaN();
+            return double(metric == "owned_creature_copy_x"
+                ? creatures[index]->GetPositionX() : creatures[index]->GetPositionY());
         }
         if (metric == "owned_creature_weapon_damage_min")
         {
