@@ -374,6 +374,9 @@ template's lowest level (`creature_classlevelstats` at `minlevel` times the temp
 time. A template with a level range otherwise rolls its level at spawn, and its armor with it. Melee damage, mana
 and the other level-derived stats still follow the rolled level; health comes from the `health` field. The
 conformance generator sets it on every creature fixture ([ADR 0658](../../docs/adr/0658-pin-generated-fixture-armor-to-the-template-minimum.md)).
+Optional `face_caster: true` orients the spawned fixture creature toward its `owner` player (`SetOrientation`,
+`SetFacingToObject` and home orientation) so front-arc mechanics such as parry are reachable; omitted or `false`
+leaves the default spawn orientation unchanged.
 
 Start from [scenarios/frostbolt.json](scenarios/frostbolt.json). Schema version 1 accepts up to eight players,
 twelve creatures and 10,000 sequential steps (twelve since ADR 0221; eight before). Schema version 2 raises the
@@ -774,6 +777,8 @@ accepts `effect` (default 0). These queries submit no attack.
 `melee_attack_count` counts the actor's native melee combat packets, including extra attacks and misses.
 `melee_damage_count` counts only those dealing positive damage. Both accept `hand` (0 main hand, 1 off hand).
 `melee_damage_total` sums the positive melee damage in those packets and accepts the same hand filter.
+`melee_misses_dealt`, `melee_dodges_dealt` and `melee_parries_dealt` count the actor's outgoing melee swings that
+missed (excluding `VICTIMSTATE_EVADES`), were dodged, or were parried, accepting optional `hand` (0 or 1).
 Both damage metrics also accept the booleans `critical`, `glancing` and `blocked`, which keep only the hits whose
 packet carries (true) or lacks (false) the critical, glancing or block flag; `critical: false, glancing: false,
 blocked: false` selects plain hits.

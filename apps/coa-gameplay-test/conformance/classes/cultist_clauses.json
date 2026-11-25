@@ -2518,17 +2518,10 @@
   {
     "spell": 572103,
     "clause": "If your target runs out of range, the tentacle will seek a new target.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind moves the primary target beyond 40 yd (AscensionCultistSummons.cpp:176) while a second engaged enemy (area1 within 30 yd, :175,:185) remains in range to receive Thoughtseize 806596 on the next 6000 ms pulse: summon_chase caps move_yd at 20 yd, spawns one dummy, and measures owned_creature_distance_2d; metric_delta relocation options (relocate_during_wait, step_out) move the caster, never a creature. Nearest kind: metric_delta with area_dummies plus a creature move/relocate step and secondary-target combat engage.",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "572103 behaviour_metric_delta retarget_out_of_range"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 572103,
@@ -4894,21 +4887,10 @@
   {
     "spell": 805607,
     "clause": "In addition, you are now unable to miss your attacks and you cannot be parried or dodged.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing conformance kind can prove outgoing melee miss, parry, and dodge elimination against a judged control arm in which each outcome occurs: (1) CoAGameplayTest.cpp:3522-3524,3550-3555 spawns dummy at x+distance with orientation 0 (facing +X away from caster), REACT_PASSIVE and UNIT_FLAG_DISABLE_MOVE, so Unit.cpp:3411-3415 disables parry (0% parry in both arms), and no existing kind faces a melee target toward the caster or reads facing (nearby_creature_orientation / nearby_creature_facing_offset); (2) CoAGameplayTest.cpp:1793-1803,5316-5356 records only melee_attack_count and melee_damage_count on attacks dealt by the caster (no separate outgoing miss, dodge, or parry counters; meleeVictimStatesTakenFrom/meleeMissesTakenFrom at :1814-1822 record incoming attacks taken by a player only); (3) same_arm_ratio.py:76-99 overwrites verdict.status and drops the control arm completely (a 0%-avoidance control passes), while plain metric_delta cannot judge a non-zero control avoidance count alongside an exact-zero treatment avoidance count sized for <=0.1% residual false-pass probability per pair (at 5% base miss/dodge/parry each, N >= 68 swings/arm/run = 136 per pair gives 0.95^136 = 0.093% <= 0.1%). Nearest kind: metric_delta with attack_swings and same_arm_ratio (needs a target-facing setup + facing read, outgoing per-outcome miss/dodge/parry counters, and a judged non-zero control arm).",
-      "attempts": [
-        {
-          "agent": "cu-g3b",
-          "report": ".agents/plans/cu-g3b/report.md"
-        },
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "805607 behaviour_metric_delta outgoing_avoidance"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 806175,

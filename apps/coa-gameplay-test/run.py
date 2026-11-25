@@ -231,6 +231,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'healing_power', 'swim_speed_rate', 'skill_bonus',
     'combat_rating_bonus',
     'creature_cast_result',
+    'melee_misses_dealt', 'melee_dodges_dealt', 'melee_parries_dealt',
 }
 MELEE_OUTCOME_METRICS = {'melee_damage_count', 'melee_damage_total'}
 MAX_VICTIM_STATE = 8
@@ -242,6 +243,7 @@ PLAYER_STAT_METRICS = {
     'global_cooldown_ms',
     'melee_damage_count',
     'melee_damage_total',
+    'melee_misses_dealt', 'melee_dodges_dealt', 'melee_parries_dealt',
     'pet_power', 'pet_max_power', 'spell_energize_count', 'spell_energize_total',
     'melee_crit_chance', 'melee_crit_chance_refreshed', 'dodge_chance', 'parry_chance', 'expertise',
     'combat_rating', 'combat_rating_bonus',
@@ -707,7 +709,7 @@ def validate(scenario, clock=REAL_CLOCK):
     for creature in creatures:
         keys(creature, {'id', 'owner', 'entry'},
              {'id', 'owner', 'entry', 'distance', 'dx', 'dy', 'faction', 'level', 'health', 'reaction',
-              'spell_hit_bonus', 'melee_hit_bonus', 'stationary', 'min_level_armor'},
+              'spell_hit_bonus', 'melee_hit_bonus', 'stationary', 'min_level_armor', 'face_caster'},
              'creature')
         identity = creature['id']
         require(isinstance(identity, str) and ACTOR_ID.fullmatch(identity), 'Invalid creature id')
@@ -729,6 +731,7 @@ def validate(scenario, clock=REAL_CLOCK):
         number(creature.get('reaction', 0), 'reaction', 0, 2, True)
         require(type(creature.get('stationary', False)) is bool, 'stationary must be boolean')
         require(type(creature.get('min_level_armor', False)) is bool, 'min_level_armor must be boolean')
+        require(type(creature.get('face_caster', False)) is bool, 'face_caster must be boolean')
         number(creature.get('spell_hit_bonus', 0), 'creature spell hit bonus', 0, 100)
         number(creature.get('melee_hit_bonus', 0), 'creature melee hit bonus', 0, 100)
     if 'location' in scenario:
@@ -1573,7 +1576,8 @@ def validate(scenario, clock=REAL_CLOCK):
             if metric == 'spell_family_flags':
                 number(step.get('index', 0), f'{where}.index', 0, 2, True)
             if 'hand' in step:
-                maximum = 1 if metric in {'melee_attack_count', 'melee_damage_count', 'melee_damage_total'} else 2
+                maximum = 1 if metric in {'melee_attack_count', 'melee_damage_count', 'melee_damage_total',
+                                          'melee_misses_dealt', 'melee_dodges_dealt', 'melee_parries_dealt'} else 2
                 number(step['hand'], f'{where}.hand', 0, maximum, True)
             if 'school' in step and metric == 'spell_crit_chance':
                 number(step['school'], f'{where}.school', 0, 6, True)
