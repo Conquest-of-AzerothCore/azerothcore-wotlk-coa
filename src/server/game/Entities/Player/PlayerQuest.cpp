@@ -29,6 +29,7 @@
 #include "MapMgr.h"
 #include "Player.h"
 #include "PoolMgr.h"
+#include "QuestLogExtended.h"
 #include "QuestPackets.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
@@ -1961,7 +1962,10 @@ uint16 Player::GetQuestLogCapacity() const
 void Player::MirrorQuestSlot(uint16 slot)
 {
     if (slot >= NATIVE_QUEST_LOG_SIZE)
+    {
+        MarkQuestSlotExtendedDirty(slot);
         return;
+    }
 
     QuestLogSlot const& entry = m_questLogSlots[slot];
     uint16 const field = PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET;
@@ -1972,6 +1976,73 @@ void Player::MirrorQuestSlot(uint16 slot)
 
     if (!entry.QuestId && m_questLogSlots.HasOverflow())
         m_questLogPromotionPending = true;
+}
+
+namespace
+{
+    std::pair<uint32, uint32> ExtendedQuestLevelAndXP(Player* player, uint32 questId)
+    {
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        if (!quest)
+            return { 0, 0 };
+
+        return { uint32(player->GetQuestLevel(quest)), AscensionQuestLog::RewardXPForDisplay(player, quest) };
+    }
+}
+
+uint8 Player::QuestLogExtendedSize() const
+{
+    return uint8(std::min<uint16>(GetQuestLogCapacity(),
+        std::clamp<uint16>(m_questLogExtendedClientSlots, NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE)));
+}
+
+void Player::SetQuestLogExtended(bool extended, uint8 clientMaxSlots)
+{
+    m_questLogExtended = extended;
+    m_questLogExtendedClientSlots = clientMaxSlots;
+    m_questLogExtendedDirty = 0;
+}
+
+void Player::MarkQuestSlotExtendedDirty(uint16 slot)
+{
+    if (m_questLogExtended && slot >= NATIVE_QUEST_LOG_SIZE && slot < MAX_QUEST_LOG_SIZE)
+        m_questLogExtendedDirty |= uint64(1) << slot;
+}
+
+void Player::FlushQuestLogExtended()
+{
+    if (!m_questLogExtended || !m_questLogExtendedDirty)
+        return;
+
+    std::vector<QuestLogExtended::Entry> entries;
+    for (uint16 slot = NATIVE_QUEST_LOG_SIZE; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        if (!(m_questLogExtendedDirty & (uint64(1) << slot)))
+            continue;
+
+        QuestLogSlot const& source = m_questLogSlots[slot];
+        auto const [level, rewardXP] = source.QuestId
+            ? ExtendedQuestLevelAndXP(this, source.QuestId) : std::pair<uint32, uint32>{ 0, 0 };
+        QuestLogExtended::Entry entry{ uint8(slot), source.QuestId, source.State, {}, source.Time, level, rewardXP };
+        for (uint8 i = 0; i < 4; ++i)
+            entry.Counters[i] = uint16(source.Counters >> (i * 16));
+        entries.push_back(entry);
+    }
+
+    m_questLogExtendedDirty = 0;
+    WorldPacket data = QuestLogExtended::BuildState(entries, QuestLogExtendedSize(), false);
+    SendDirectMessage(&data);
+}
+
+void Player::SendQuestLogExtendedSnapshot()
+{
+    if (!m_questLogExtended)
+        return;
+
+    m_questLogExtendedDirty = 0;
+    WorldPacket data = QuestLogExtended::BuildState(QuestLogExtended::Snapshot(m_questLogSlots,
+        [this](uint32 questId) { return ExtendedQuestLevelAndXP(this, questId); }), QuestLogExtendedSize(), true);
+    SendDirectMessage(&data);
 }
 
 void Player::SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer)

@@ -143,6 +143,8 @@ void Player::Update(uint32 p_time)
     if (m_questLogPromotionPending && IsInWorld())
         PromoteOverflowQuests();
 
+    FlushQuestLogExtended();
+
     if (!m_timedquests.empty())
     {
         QuestSet::iterator iter = m_timedquests.begin();

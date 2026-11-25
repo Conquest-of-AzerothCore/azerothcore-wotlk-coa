@@ -1529,6 +1529,11 @@ public:
     [[nodiscard]] uint16 GetQuestSlotCounter(uint16 slot, uint8 counter) const { return (uint16)(m_questLogSlots[slot].Counters >> (counter * 16)); }
     [[nodiscard]] uint32 GetQuestSlotTime(uint16 slot)    const { return m_questLogSlots[slot].Time; }
     [[nodiscard]] bool HasOverflowQuests() const { return m_questLogSlots.HasOverflow(); }
+    [[nodiscard]] bool IsQuestLogExtended() const { return m_questLogExtended; }
+    void SetQuestLogExtended(bool extended, uint8 clientMaxSlots = MAX_QUEST_LOG_SIZE);
+    void MarkQuestSlotExtendedDirty(uint16 slot);
+    void FlushQuestLogExtended();
+    void SendQuestLogExtendedSnapshot();
     void SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer = 0);
     void SetQuestSlotCounter(uint16 slot, uint8 counter, uint16 count);
     void SetQuestSlotState(uint16 slot, uint32 state);
@@ -2903,7 +2908,11 @@ protected:
     SeasonalEventQuestMap m_seasonalquests;
     QuestLogSlots m_questLogSlots;
     bool m_questLogPromotionPending = false;
+    bool m_questLogExtended = false;
+    uint8 m_questLogExtendedClientSlots = MAX_QUEST_LOG_SIZE;
+    uint64 m_questLogExtendedDirty = 0;
     void MirrorQuestSlot(uint16 slot);
+    [[nodiscard]] uint8 QuestLogExtendedSize() const;
     uint16 MoveQuestToNativeLog(uint16 slot);
     void PinTimedQuestsToNativeLog();
 
