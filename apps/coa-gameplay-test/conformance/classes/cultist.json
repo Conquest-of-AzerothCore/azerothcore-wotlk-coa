@@ -29475,6 +29475,374 @@
       "expected": 1,
       "tolerance": 0,
       "observe_source": "XP-target control for Split Mind 572064 kill_removes: identical setup with 572064 learned, killing Rabbit 721 (creature_template type 8 = CREATURE_TYPE_CRITTER, faction 31; Player::isHonorOrXPTarget returns false at Player.cpp:13733); Wracked Mind 805801 is NOT removed (1 -> 1). Reference search 2026-11-25: see kill_removes."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (Thoughtseize 806596 Shadow periodic damage at base SP)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Target an enemy and summon a Tentacle of N'Zoth on the ground near them that will silence them and deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage every $806596t2 sec for $806596d.",
+      "trigger_spell": 572103,
+      "cast_in_before": false,
+      "target": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806596,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Thoughtseize 806596 ticks every 2000 ms for 8000 ms (4 periodic ticks)"
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806596,
+        "target": "dummy",
+        "periodic": true
+      },
+      "before_expected": 0,
+      "expected": 533,
+      "after_at_least": 520,
+      "after_at_most": 546,
+      "wait_ms": 8500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of N'Zoth 572103 summons 501464 for 8000 ms (AscensionCultistAbilities.cpp:453-463, AscensionCultistSummons.cpp:156,300-308), applying Thoughtseize 806596 to target (caster = player). 806596 Effect[1] SPELL_AURA_PERIODIC_DAMAGE (Shadow, BasePoints 60, DieSides 5, RPPL 2.0, BaseLevel=SpellLevel=32, MaxLevel 0, Amplitude 2000 ms, Duration 8000 ms = 4 ticks; AscensionCultistData.h:116 sp 0.75). At level 60 SP 0: 60 + 2*(60-32) + [1..5] = [117..121] (mean 119), x1.12 Cultist tuning 887013 = [131..135] per tick, 4 ticks = [524..542] (mean 533, band [520..546] excludes 0, 3 ticks ~400, and double ~1066). Precondition fixtures: 823764 (no resist) and 16255 -100 (no crit). Paired with damage_sp. Reference search 2026-11-25: coa-history 572103: 3 summons in 1 log, 806596: 12 periodic ticks in 1 log (mean 254 with live gear); coabuildhub spells_master_index.json 572103 matches verbatim."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (Thoughtseize 806596 Shadow periodic damage at +1000 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Target an enemy and summon a Tentacle of N'Zoth on the ground near them that will silence them and deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage every $806596t2 sec for $806596d.",
+      "trigger_spell": 572103,
+      "cast_in_before": false,
+      "target": "dummy",
+      "cast_power": 2000,
+      "player_spell_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806596,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Thoughtseize 806596 ticks every 2000 ms for 8000 ms (4 periodic ticks)"
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806596,
+        "target": "dummy",
+        "periodic": true
+      },
+      "before_expected": 0,
+      "expected": 3893,
+      "after_at_least": 3875,
+      "after_at_most": 3910,
+      "wait_ms": 8500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell-power scaling arm for Thoughtseize 806596 (+1000 Shadow SP via player_spell_power, coefficient 0.75 -> +750/tick): ([117..121] + 750) * 1.12 Cultist tuning 887013 = [971..975] per tick, 4 ticks = [3884..3902] (mean 3893, band [3875..3910]). Precondition fixtures: 823764 (no resist) and 16255 -100 (no crit). Paired with damage_base. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (silences target, stopping dummy channel)",
+      "kind": "metric_delta",
+      "variant": "silence",
+      "label_suffix": "silence",
+      "quote": "Target an enemy and summon a Tentacle of N'Zoth on the ground near them that will silence them and deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage every $806596t2 sec for $806596d.",
+      "trigger_spell": 572103,
+      "cast_in_before": false,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "target_casts_before": [
+        12051
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806596
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Thoughtseize 806596 (SPELL_AURA_MOD_SILENCE) is applied to dummy in treatment and absent in control"
+          }
+        ]
+      },
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 8500,
+      "void_on_cast_failure": true,
+      "observe_source": "Thoughtseize 806596 Effect[0] SPELL_AURA_MOD_SILENCE (aura 27, Spell.dbc) applied by Tentacle of N'Zoth 501464 at first pulse (~100 ms, AscensionCultistSummons.cpp:156,300-308). Dummy channels Evocation 12051 (8 s) before each phase: without 572103 (control), dummy keeps channeling (casting == 1, 806596 == 0); after 572103, Thoughtseize silences and interrupts the channel (casting == 0, 806596 == 1). Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (Thoughtseize 806596 ticks every 2 sec)",
+      "kind": "hit_period",
+      "label_suffix": "tick_period",
+      "quote": "every $806596t2 sec",
+      "trigger_spell": 572103,
+      "hit_spell": 806596,
+      "expected_ms": 2000,
+      "window": [
+        1500,
+        7500
+      ],
+      "poll_ms": 50,
+      "fixtures": [
+        [
+          823764,
+          "caster"
+        ]
+      ],
+      "observe_source": "Thoughtseize 806596 Effect[1] EffectAmplitude 2000 ms ($806596t2 = 2 sec, Spell.dbc). Polls spell_damage_count of 806596 on dummy with game_time_ms every 50 ms over [1500..7500] ms after casting 572103 (precondition fixture 823764 prevents full resist); judges (last - first) / (hits - 1) against 2000 ms within the G-19 +-100 ms band. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (Thoughtseize 806596 lasts 8 sec within +-10%)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $806596d",
+      "trigger_spell": 572103,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 7500,
+      "expiry_wait_ms": 900,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7350,
+          7750
+        ],
+        "expired": [
+          8250,
+          8650
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration proof for Thoughtseize 806596 (DurationIndex 31 = 8000 ms, $806596d, SpellDuration.dbc) applied ~100 ms after casting 572103 (AscensionCultistSummons.cpp:156,300-308) and cleared on 501464 despawn at 8000 ms (OnCreatureRemoveWorld -> ClearThoughtseize, :334-339). Reads 0 before cast, held (1) at [7350..7750] ms (~7250..7650 ms after apply, > 7200 ms = 0.9 * 8000) and gone (0) at [8250..8650] ms (< 8800 ms = 1.1 * 8000). Paired with duration_contrast. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (Thoughtseize 806596 cast contrast at 7.5 sec)",
+      "kind": "metric_delta",
+      "variant": "duration_contrast",
+      "label_suffix": "duration_contrast",
+      "quote": "for $806596d",
+      "trigger_spell": 572103,
+      "cast_in_before": false,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 7500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7350,
+          7750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Cast contrast for Thoughtseize 806596 duration (8000 ms): uncast control reads 0 on dummy, casting 572103 reads 1 at [7350..7750] ms. Paired with duration. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (max 1 active on recast)",
+      "kind": "metric_delta",
+      "variant": "max_one",
+      "label_suffix": "max_one",
+      "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+      "trigger_spell": 572103,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        572103
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "trigger_reset_after_setup": true,
+      "cast_power": 2000,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 501464
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 8500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of N'Zoth 572103 uses SummonProperties 63 (shared Old God Tentacle slot, AscensionCultistSummons.cpp:39,44): recasting 572103 while one 501464 is active replaces it, keeping owned_creature_count(501464) at 1 -> 1 (trigger_reset_after_setup clears the 90 s cooldown between setup and recast; expire_ms 8500 lets the control tentacle expire cleanly). Paired with replaces_yshaarj. Reference search 2026-11-25: see damage_base."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (replaces existing Tentacle of Y'shaarj)",
+      "kind": "metric_delta",
+      "variant": "replaces_yshaarj",
+      "label_suffix": "replaces_yshaarj",
+      "quote": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+      "trigger_spell": 572103,
+      "target": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        802044
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 501464
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tentacle of N'Zoth 501464 is absent before trigger and present (1) after replacing Tentacle of Y'shaarj 50096"
+          }
+        ]
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50096
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Proves shared Old God Tentacle cap across types: Tentacle of Y'shaarj 802044 (entry 50096, 30 s duration, SummonProperties 63) is present (1) before 572103 and replaced (0) after 572103 while 501464 rises 0 -> 1 (~2.6 s << 30 s). Paired with max_one. Reference search 2026-11-25: see damage_base."
     }
   ],
   "player_observations": [],

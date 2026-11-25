@@ -220,7 +220,16 @@
     "labels": [
       "300278 effect_value #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind measures a 40% avoided-melee-swing proc that restores a spell charge via direct RestoreBlade -> RestoreSpellCharge (AscensionCultistEvents.cpp:62,155-156; AscensionCultist.cpp:105-116,138-141, raw roll_chance_f ignoring forced_roll): procs.counts_charges (procs.py:468-473) explicitly rejects trigger.action != 'cast' and proc_spell != trigger.spell; avoided_proc_instances / avoided_swing_reads / parried_restore do not read spell_charges; flat_chance_rate has no avoided-swing trigger or spell_charges event metric. Nearest kind: procs (proc_avoided + counts_charges) or new kind avoided_charge_restore.",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 300280,
@@ -302,7 +311,16 @@
     "labels": [
       "300287 effect_value e0 #1"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind runs a pooled hostile offensive-dispel survival trial loop against a re-applied positive Magic buff on the caster while Herald of the Depths 520326 is active (AscensionCultistContracts.cpp:110-111, AscensionCultist.cpp:294 grants +25% SPELL_AURA_MOD_DISPEL_RESIST gated on Herald): dispel_removal/dispel_count test debuff removal by the caster, and debuff_resist_rate tests incoming debuff application resist. Nearest kind: new kind offensive_dispel_resist_rate (shared with 804633 and 525060, with a Herald-off control arm).",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 300290,
@@ -409,7 +427,16 @@
           "300300 spell_duration 560943 #2"
         ]
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "Two gaps on row 42: (1) claim 0 ('Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%'): harness metric spell_hit_bonus_taken (CoAGameplayTest.cpp:4132-4138, run.py:175) already reads the engine modifier on the target (confirmed alert 0% vs +3% on 560943 due to EffectMiscValue[0]=0 in cu-g6b runs 20261125-002625 / -002657), but coverage.METRIC_EVIDENCE (coverage.py:433-486) omits spell_hit_bonus_taken (1-line tool extension); (2) claim 1 ('for $560943d'): 300300 applies 560943 at 25% raw Chance() on periodic/channeled damage, and last_application_expiry feed (cast_until_aura, CoAGameplayTest.cpp:7590, last_application_expiry.py:87,185) stops only on an aura on the caster, never on the dummy, while repeat cannot guarantee a proc within 10000 ms at <=0.1% residual failure.",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 300300,
@@ -1673,6 +1700,10 @@
         {
           "agent": "cu-g8c",
           "report": ".agents/plans/cu-g8c/report.md"
+        },
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
         }
       ]
     }
@@ -1815,7 +1846,16 @@
       "560002 effect_value #1"
     ],
     "kind": "claim",
-    "reason": "Tool gap (uncounted): level-60 resistance +19 across all 6 magic schools (floor(5 + 0.5 * (60 - 31)), Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel = SpellLevel = 31, MaxLevel 0, SkillLineAbility 23039) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level arm (e.g. level 50 expecting floor(5 + 0.5 * (50 - 31)) = +14). No existing conformance kind/option sets a single caster level for a passive metric_delta resistance check: phase_caster_level requires two distinct levels per phase for cast buffs while Player::GiveLevel (Player.cpp:2623-2728 / StatSystem.cpp:344-369) does not recalculate already-applied passive aura amounts; hit_ratio.level only measures hits; shifted_control.caster_level only measures dummy spell_resist_chance. Because the amount and 'scaling with level' share one combined claim row, the claim stays uncounted until metric_delta supports a single caster_level option."
+    "reason": "Tool gap (uncounted): level-60 resistance +19 across all 6 magic schools (floor(5 + 0.5 * (60 - 31)), Effect[1] aura 83 SPELL_AURA_MOD_BASE_RESISTANCE, BasePoints 4 + DieSides 1 = 5, RealPointsPerLevel 0.5, BaseLevel = SpellLevel = 31, MaxLevel 0, SkillLineAbility 23039) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level arm (e.g. level 50 expecting floor(5 + 0.5 * (50 - 31)) = +14). No existing conformance kind/option sets a single caster level for a passive metric_delta resistance check: phase_caster_level requires two distinct levels per phase for cast buffs while Player::GiveLevel (Player.cpp:2623-2728 / StatSystem.cpp:344-369) does not recalculate already-applied passive aura amounts; hit_ratio.level only measures hits; shifted_control.caster_level only measures dummy spell_resist_chance. Because the amount and 'scaling with level' share one combined claim row, the claim stays uncounted until metric_delta supports a single caster_level option.",
+    "tool_gap": {
+      "reason": "Level-60 resistance (+19 across all 6 magic schools) is proved by res_holy..res_arcane in cultist.json, but proving 'scaling with level' requires a second lower-level passive arm (e.g. level 50 -> +14). No existing metric_delta option sets a single caster_level for a passive resistance check: phase_caster_level (phase_caster_level.py:8,17) requires two distinct levels with cast_in_before:true, and Player::GiveLevel does not recalculate already-applied passive auras. Nearest kind: metric_delta with a single-level caster_level option.",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 560080,
@@ -2132,46 +2172,78 @@
       {
         "claim": "deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage",
         "labels": [
-          "572103 effect_value 806596e1 #0"
+          "572103 behaviour_metric_delta damage_base",
+          "572103 behaviour_metric_delta damage_sp",
+          "572103 behaviour_metric_delta silence"
         ]
       },
       {
         "claim": "every $806596t2 sec",
         "labels": [
-          "572103 aura_amplitude_ms #1"
+          "572103 behaviour_metric_delta tick_period"
         ]
       },
       {
         "claim": "for $806596d",
         "labels": [
-          "572103 spell_duration 806596 #2"
+          "572103 behaviour_metric_delta duration",
+          "572103 behaviour_metric_delta duration_contrast"
         ]
       }
-    ]
+    ],
+    "reason": "Alert (claim 0, uncounted): Tentacle of N'Zoth 572103 summons 501464 for 8000 ms (AscensionCultistAbilities.cpp:460) with a 100 ms initial Pulse delay (AscensionCultistSummons.cpp:156), so Thoughtseize 806596 (Duration 8000 ms, Amplitude 2000 ms) applies at ~+100 ms and schedules its 4th tick at ~+8100 ms; at +8000 ms 501464 despawns and OnCreatureRemoveWorld -> ClearThoughtseize() (AscensionCultistSummons.cpp:334-339) removes 806596 before tick 4, delivering only 3 ticks instead of 4 (25% total damage loss). Counted pair 20261125-060244 / 20261125-060311 (build eb39f0e31481, 0 flips): damage_base 405/402 (3 ticks, ~134-135/tick matches [131..135] per tick) vs 4-tick tooltip expectation 520..546; damage_sp (+1000 SP) 2916/2925 (3 ticks, ~972-975/tick matches [971..975] per tick) vs 4-tick tooltip expectation 3875..3910; silence ok (dummy Evocation 12051 casting 1->0, 806596 aura 0->1). Live Ascension logs (coa-history: 3 SPELL_SUMMON of 572103, 12 SPELL_PERIODIC_DAMAGE of 806596) confirm 4.0 ticks/summon. Claims 1 (tick_period 2006 ms in [1976.5..2035.5] vs 2000+-100) and 2 (duration 7509..8418 ms + duration_contrast) are behaviour proven."
   },
   {
     "spell": 572103,
     "clause": "If your target runs out of range, the tentacle will seek a new target.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind moves the primary target beyond 40 yd (AscensionCultistSummons.cpp:176) while a second engaged enemy (area1 within 30 yd, :175,:185) remains in range to receive Thoughtseize 806596 on the next 6000 ms pulse: summon_chase caps move_yd at 20 yd, spawns one dummy, and measures owned_creature_distance_2d; metric_delta relocation options (relocate_during_wait, step_out) move the caster, never a creature. Nearest kind: metric_delta with area_dummies plus a creature move/relocate step and secondary-target combat engage.",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 572103,
     "clause": "The tentacle gains health based on your Stamina.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Tooltip states no coefficient ('gains health based on your Stamina'; direction-only claim, AscensionCultistSummons.cpp:128 sets player->GetMaxHealth() / 3). No existing kind judges a direction-only Stamina increase on owned_creature_max_health without inventing a server-code expected value (attack_power_arms supports only attack_power; power_term_direction supports only damage or absorb on cast_spell; monotone requires phase_power), and coverage.STATE_PROMISES['owned_creature_max_health'] (coverage.py:496) requires 'maximum health' rather than 'gains health'. Nearest kind: metric_delta with generalized stat_arms (Stamina + owned_creature_max_health) and STATE_PROMISES widened to '(?:maximum )?health'.",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 572103,
     "clause": "If the tentacle dies, the silence effect will end.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing harness action or conformance kind kills an owned TempSummon (501464, GetOwnedCreature) mid-duration to verify JustDied -> ClearThoughtseize() (AscensionCultistSummons.cpp:159-169) ends 806596 on the target while an unkilled control keeps 806596 active at the same timestamp: harness action 'die' with pet:true only kills player->GetPet() (CoAGameplayTest.cpp:8247-8254), and attack_nearby kill:true requires IsValidAttackTarget (hostile to caster). Nearest kind: metric_delta with a kill_owned_after_ms option and harness 'die' supporting owned_entry.",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 572103,
     "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
     "labels": [
-      "572103 effect_value #3"
+      "572103 behaviour_metric_delta max_one",
+      "572103 behaviour_metric_delta replaces_yshaarj"
     ],
     "kind": "claim"
   },
@@ -2912,7 +2984,16 @@
         "claim": "to enemies in front of you",
         "labels": []
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "Claim 3 ('to enemies in front of you'): Eldritch Force 680576 is a narrow 24-degree, 8 yd cone (TARGET_UNIT_CONE_ENEMY_24, Spell.cpp:1289-1291, RadiusIndex 14 = 8 yd) reached only after 5 crit setup_casts transforming Gaze of C'Thun (681794). area_dummies.cone (area_dummies.py:54,59,134) enforces offset >= 2 yd (at 10.8 deg inside bearing, 2/sin(10.8 deg) = 10.67 yd > radius - 1 = 7 yd) and refuses setup_casts; fixed_count cannot place a just-outside-cone dummy at ~13.2 deg with verified position/bearing reads. Nearest kind: metric_delta with generalized position-aware multi-target area_dummies (shared with 804056).",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 704434,
@@ -3357,6 +3438,10 @@
         {
           "agent": "cu-h3c",
           "report": ".agents/plans/cu-h3c/report.md"
+        },
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
         }
       ]
     }
@@ -4053,6 +4138,10 @@
         {
           "agent": "cu-g8d",
           "report": ".agents/plans/cu-g8d/report.md"
+        },
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
         }
       ]
     }
@@ -4118,7 +4207,16 @@
       "804633 effect_value e0 #0"
     ],
     "kind": "claim",
-    "reason": "Tool gap (uncounted, not a server defect): shipped Spell.dbc carries EffectBasePoints[0] = -21 (-20), but data/sql/updates/pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql overrides spell_dbc ID 804633 to EffectBasePoints_1 = 19, EffectDieSides_1 = 1 (+20% SPELL_AURA_MOD_DISPEL_RESIST, verified live in coa_test_00353e74d42a_world.spell_dbc), retracting cu-g1 Alert 3. Stays uncounted because no existing conformance kind measures offensive dispel resist rate on a caster's positive buff (taken_hit resist_rate and debuff_resist_rate test incoming debuff application resist, not dispel survival of a buff)."
+    "reason": "Tool gap (uncounted, not a server defect): shipped Spell.dbc carries EffectBasePoints[0] = -21 (-20), but data/sql/updates/pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql overrides spell_dbc ID 804633 to EffectBasePoints_1 = 19, EffectDieSides_1 = 1 (+20% SPELL_AURA_MOD_DISPEL_RESIST, verified live in coa_test_00353e74d42a_world.spell_dbc), retracting cu-g1 Alert 3. Stays uncounted because no existing conformance kind measures offensive dispel resist rate on a caster's positive buff (taken_hit resist_rate and debuff_resist_rate test incoming debuff application resist, not dispel survival of a buff).",
+    "tool_gap": {
+      "reason": "No existing conformance kind runs a pooled hostile offensive-dispel survival trial loop against a re-applied positive Magic buff on the caster (SpellAuras.cpp:1152-1178 Aura::CalcDispelChance consuming SPELL_AURA_MOD_DISPEL_RESIST +20% via pending_db_world/rev_20260922_03_cultist_void_enchanted_armor.sql): dispel_removal/dispel_count test the caster dispelling debuffs, and debuff_resist_rate / taken_hit resist_rate test incoming debuff application resist, not dispel survival of a positive buff. Nearest kind: debuff_resist_rate / new kind offensive_dispel_resist_rate (shared with 300287 and 525060).",
+      "attempts": [
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 804670,
@@ -4402,6 +4500,10 @@
         {
           "agent": "cu-g3b",
           "report": ".agents/plans/cu-g3b/report.md"
+        },
+        {
+          "agent": "cu-t3",
+          "report": ".agents/plans/cu-t3/report.md"
         }
       ]
     }
