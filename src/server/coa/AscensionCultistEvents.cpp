@@ -1,6 +1,7 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionCultist.h"
 #include "AscensionCultistData.h"
+#include "DBCStores.h"
 #include "Map.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
@@ -189,7 +190,20 @@ class aura_ascension_cultist_event : public AuraScript
             case 524887: case 525078:
                 for (Unit* ally : Allies(player, player, 40, 1))
                 {
-                    float flat = Amount(500748, 0, player) + .4f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW) +
+                    int32 base = Amount(500748, 0, player);
+                    if (SpellInfo const* heal = sSpellMgr->GetSpellInfo(500748))
+                        if (SpellEntry const* entry = sSpellStore.LookupEntry(500748))
+                            if (float perLevel = entry->EffectRealPointsPerLevel[0]; perLevel != 0.0f)
+                            {
+                                int32 level = int32(player->GetLevel());
+                                if (heal->MaxLevel > 0 && level > int32(heal->MaxLevel))
+                                    level = int32(heal->MaxLevel);
+                                else if (level < int32(heal->BaseLevel))
+                                    level = int32(heal->BaseLevel);
+                                level -= int32(std::max(heal->BaseLevel, heal->SpellLevel));
+                                base += int32(level * perLevel);
+                            }
+                    float flat = base + .4f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW) +
                                  .1f * player->GetTotalAttackPowerValue(BASE_ATTACK);
                     flat *= .5f;
                     Copy(player, ally, 500748, CalculatePct(damage, Amount(id)) + uint32(std::max(0.0f, flat)));

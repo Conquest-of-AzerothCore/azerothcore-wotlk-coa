@@ -67,7 +67,7 @@ public:
                 if (Aura* marks = ally->GetAura(301982, player->GetGUID()))
                 {
                     uint32 stacks = marks->GetStackAmount();
-                    float amount = Amount(301983, 0, player) +
+                    float amount = Amount(301983, 0) +
                         .35f * player->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW);
                     Copy(player, ally, 301983, uint32(std::max(0.0f, amount)));
                     if (Aura* remaining = ally->GetAura(301982, player->GetGUID());

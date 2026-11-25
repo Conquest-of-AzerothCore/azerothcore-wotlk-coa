@@ -45947,6 +45947,65 @@
       "expire_ms": 7000,
       "void_on_cast_failure": true,
       "observe_source": "Regression for Dark Matter 806382 AoE heal count with 3 inside + 1 outside (Cultist ADR 0023): Spell.dbc 807219 is TARGET_SRC_CASTER + TARGET_UNIT_SRC_AREA_ALLY (30.0 yd). On the 1000 ms tick of 807124 (read at 1500 ms), ally (10 yd), ally2 (20 yd), and ally3 (28.5 yd) each receive exactly 1 heal (0 before learning 806382, 1 after), while outer ally4 (31.5 yd) receives 0."
+    },
+    {
+      "spell": 300286,
+      "name": "Void-Touched (Gaze of CThun heal at 1 stack, 0 SP, without Q-cu-12 stack check)",
+      "kind": "metric_delta",
+      "variant": "gaze_heal_base",
+      "label_suffix": "gaze_heal_base",
+      "quote": "Direct healing done now applies Void-Touched.",
+      "trigger_spell": 500110,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ],
+        "ally_casts": [
+          808036
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 301983,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 364,
+      "after_at_least": 364,
+      "after_at_most": 365,
+      "wait_ms": 1000,
+      "expire_ms": 11000,
+      "observe_source": "Owner ruling Q-cu-11 (2026-11-25): single per-level heal on 301983 (100 + floor(43*4.75) = 304; 1 stack 301982 +20% -> 364.8 [364..365]), unlearned control 0. Separates Q-cu-11 heal proof from held Q-cu-12 (301982 stack retention checked in gaze_consume_base).",
+      "gate_spell": 300286,
+      "learn": [
+        808036
+      ]
     }
   ],
   "player_observations": [],

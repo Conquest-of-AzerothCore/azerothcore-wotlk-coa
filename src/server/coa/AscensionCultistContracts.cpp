@@ -63,6 +63,8 @@ void ApplyContracts(SpellInfo* info)
         info->AttributesEx2 &= ~SPELL_ATTR2_CANT_CRIT;
         info->AscensionInheritsResolvedAmount = id == 520450 || id == 520497;
     }
+    if (id == 500748)
+        info->Effects[0].RealPointsPerLevel = 0.0f;
     if (id == 807083)
         info->Effects[1].Effect = 0;
     if (id == 301983 || id == 806175)
