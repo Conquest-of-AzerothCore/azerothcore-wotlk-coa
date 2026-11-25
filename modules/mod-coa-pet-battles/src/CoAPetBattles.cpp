@@ -73,6 +73,7 @@ namespace
         void OnPlayerLogin(Player* player) override
         {
             sPetJournals->Login(player);
+            sPetBattles->Login(player);
         }
 
         void OnPlayerLogout(Player* player) override

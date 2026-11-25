@@ -9,7 +9,10 @@
 #include "MapMgr.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
+#include "DatabaseEnv.h"
+#include "GameObject.h"
 #include "PetBattleDataStore.h"
+#include "Present/Packets.h"
 #include "Player.h"
 #include "Protocol/AddonChannel.h"
 #include "Store/PetJournalStore.h"
@@ -29,6 +32,22 @@ namespace CoAPetBattles::Battle
         constexpr float MaxRange = 40.0f;
         constexpr uint32_t PeacefulFaction = 35;
         constexpr uint32_t StandInHealth = 1000;
+        constexpr float LungeGap = 1.1f;
+        constexpr float JumpSpeedXY = 9.0f;
+        constexpr float JumpSpeedZ = 2.5f;
+        constexpr uint32_t PrimeGuardSeconds = 5;
+        constexpr int32_t FoodCategory = 11;
+        constexpr uint32_t CrateObject = 193761;
+        constexpr float CrateScale = 3.6f;
+        constexpr uint32_t NormalPhase = 1;
+        constexpr uint32_t AllPhases = 0x7FFFFFFF;
+        constexpr float FollowBehind = 2.0f;
+        constexpr float FollowAside = 1.0f;
+        constexpr float FollowLeave = 22.0f;
+        constexpr float FollowRefollow = 4.0f;
+        constexpr float FollowDistance = 1.8f;
+        constexpr float FollowAngle = 2.6f;
+        constexpr float FollowMinRate = 1.4f;
         constexpr uint64_t WatchdogMs = 5000;
 
         struct StandInOf
@@ -170,7 +189,8 @@ namespace CoAPetBattles::Battle
                 summon->SetDisplayId(display);
             summon->SetMaxHealth(StandInHealth);
             summon->SetHealth(StandInHealth);
-            _summons[++_lastHandle] = { character, summon->GetGUID(), summon->GetMapId(), summon->GetInstanceId() };
+            _summons[++_lastHandle] = { character, side, summon->GetGUID(), summon->GetMapId(),
+                summon->GetInstanceId() };
             return Spawned { _lastHandle, summon->GetDisplayId() };
         }
 
@@ -216,18 +236,153 @@ namespace CoAPetBattles::Battle
             sPetJournals->SyncCompanions(Find(character));
         }
 
-        void Show(uint64_t, uint64_t, Cue const&) override { }
+        void Show(uint64_t handle, uint64_t other, Cue const& cue) override
+        {
+            auto const record = _summons.find(handle);
+            if (cue.kind == CueKind::Uncrate)
+            {
+                RemoveCrate(record == _summons.end() ? 0 : record->second.character);
+                return;
+            }
+            Creature* creature = StandIn(handle);
+            if (!creature || record == _summons.end())
+                return;
+            auto const place = _places.find(record->second.character);
+            switch (cue.kind)
+            {
+                case CueKind::Cast:
+                {
+                    Creature* target = other ? StandIn(other) : nullptr;
+                    Present::SendVisualCast(creature, target ? target : creature, cue.value);
+                    break;
+                }
+                case CueKind::Effect:
+                    Present::SendVisualCast(creature, creature, cue.value);
+                    break;
+                case CueKind::Aura:
+                case CueKind::Unaura:
+                    Present::SendVisualAura(creature, cue.value, cue.kind == CueKind::Aura);
+                    break;
+                case CueKind::Emote:
+                    creature->HandleEmoteCommand(cue.value);
+                    break;
+                case CueKind::Face:
+                    if (place != _places.end())
+                        creature->SetFacingTo(place->second.pets[Index(record->second.side)][3]);
+                    break;
+                case CueKind::Lunge:
+                    if (Creature* target = Opponent(record->second))
+                    {
+                        float const dx = target->GetPositionX() - creature->GetPositionX();
+                        float const dy = target->GetPositionY() - creature->GetPositionY();
+                        float const distance = std::sqrt(dx * dx + dy * dy);
+                        if (distance >= 0.1f)
+                        {
+                            float const k = std::max(0.0f, distance - LungeGap) / distance;
+                            creature->GetMotionMaster()->MovePoint(0, creature->GetPositionX() + dx * k,
+                                creature->GetPositionY() + dy * k, target->GetPositionZ());
+                        }
+                    }
+                    break;
+                case CueKind::Back:
+                case CueKind::Jump:
+                    if (place != _places.end())
+                    {
+                        auto const& home = place->second.pets[Index(record->second.side)];
+                        if (cue.kind == CueKind::Jump)
+                            creature->GetMotionMaster()->MoveJump(home[0], home[1], home[2], JumpSpeedXY, JumpSpeedZ);
+                        else
+                            creature->GetMotionMaster()->MovePoint(0, home[0], home[1], home[2]);
+                    }
+                    break;
+                case CueKind::Health:
+                    creature->SetMaxHealth(StandInHealth);
+                    creature->SetHealth(std::max<uint32_t>(1, std::min<uint32_t>(cue.value, StandInHealth)));
+                    break;
+                case CueKind::Crate:
+                    PlaceCrate(record->second.character, creature);
+                    break;
+                case CueKind::Uncrate:
+                    break;
+            }
+        }
 
-        void Prime(uint64_t, uint32_t, uint32_t, uint32_t) override { }
-        std::optional<uint32_t> PrimeAll(uint64_t) override { return std::nullopt; }
-        std::optional<uint8_t> FoodLevel(uint32_t) override { return std::nullopt; }
-        bool HasItem(uint64_t, uint32_t) override { return false; }
-        void TakeItem(uint64_t, uint32_t) override { }
-        void Summon(uint64_t, uint32_t) override { }
-        void Dismiss(uint64_t) override { }
-        uint32_t Follower(uint64_t) override { return 0; }
-        void Suppress(uint64_t, bool) override { }
-        uint32_t SweepStandIns(uint64_t, float) override { return 0; }
+        void Prime(uint64_t character, uint32_t entry, uint32_t species, uint32_t display) override
+        {
+            if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(species))
+                Present::SendCreatureRecord(Find(character), *creature, entry, display);
+        }
+
+        std::optional<uint32_t> PrimeAll(uint64_t character) override
+        {
+            Player* player = Find(character);
+            if (!player)
+                return std::nullopt;
+            uint32_t const now = UnixNow();
+            auto const last = _primed.find(character);
+            if (last != _primed.end() && now - last->second < PrimeGuardSeconds)
+                return std::nullopt;
+            _primed[character] = now;
+            Store::Journal* journal = sPetJournals->For(player);
+            uint32_t count = 0;
+            for (auto const& [species, row] : sPetBattleData->Data().species)
+                if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(species))
+                {
+                    ++count;
+                    Store::OwnedPet const* owned = journal ? journal->Pet(species) : nullptr;
+                    Present::SendCreatureRecord(player, *creature, species, owned ? owned->display : 0);
+                }
+            return count;
+        }
+
+        std::optional<uint8_t> FoodLevel(uint32_t item) override
+        {
+            ItemTemplate const* food = sObjectMgr->GetItemTemplate(item);
+            if (!food || food->Class != ITEM_CLASS_CONSUMABLE || food->SubClass != ITEM_SUBCLASS_FOOD ||
+                food->Spells[0].SpellCategory != FoodCategory)
+                return std::nullopt;
+            return static_cast<uint8_t>(std::max<uint32_t>(1, std::min<uint32_t>(food->RequiredLevel, 255)));
+        }
+
+        bool HasItem(uint64_t character, uint32_t item) override
+        {
+            Player* player = Find(character);
+            return player && player->HasItemCount(item, 1);
+        }
+
+        void TakeItem(uint64_t character, uint32_t item) override
+        {
+            if (Player* player = Find(character))
+                player->DestroyItemCount(item, 1, true);
+        }
+
+        void Summon(uint64_t character, uint32_t species) override
+        {
+            sPetBattles->Followers().Summon(character, species);
+        }
+        void Dismiss(uint64_t character) override { sPetBattles->Followers().Dismiss(character); }
+        uint32_t Follower(uint64_t character) override { return sPetBattles->Followers().Follower(character); }
+        void Suppress(uint64_t character, bool on) override { sPetBattles->Followers().Suppress(character, on); }
+
+        uint32_t SweepStandIns(uint64_t character, float yards) override
+        {
+            Player* player = Find(character);
+            if (!player)
+                return 0;
+            std::list<Creature*> standIns;
+            StandInOf check { player };
+            Acore::CreatureListSearcher<StandInOf> searcher(player, standIns, check);
+            Cell::VisitObjects(player, searcher, yards);
+            uint32_t removed = 0;
+            for (Creature* creature : standIns)
+            {
+                if (Tracked(creature->GetGUID()) || sPetBattles->IsFollower(creature->GetGUID()))
+                    continue;
+                creature->DespawnOrUnsummon();
+                ++removed;
+            }
+            return removed;
+        }
 
         size_t StandIns(uint64_t character) const
         {
@@ -244,12 +399,15 @@ namespace CoAPetBattles::Battle
         void Forget(uint64_t character)
         {
             _places.erase(character);
+            _primed.erase(character);
+            RemoveCrate(character);
         }
 
     private:
         struct StandInRecord
         {
             uint64_t character = 0;
+            Side side = Side::P;
             ObjectGuid guid;
             uint32_t map = 0;
             uint32_t instance = 0;
@@ -264,8 +422,194 @@ namespace CoAPetBattles::Battle
             return map ? map->GetCreature(found->second.guid) : nullptr;
         }
 
+        Creature* Opponent(StandInRecord const& record) const
+        {
+            for (auto const& [handle, other] : _summons)
+                if (other.character == record.character && other.side != record.side)
+                    return StandIn(handle);
+            return nullptr;
+        }
+
+        bool Tracked(ObjectGuid guid) const
+        {
+            for (auto const& [handle, record] : _summons)
+                if (record.guid == guid)
+                    return true;
+            return false;
+        }
+
+        void PlaceCrate(uint64_t character, Creature* over)
+        {
+            RemoveCrate(character);
+            GameObject* crate = over->GetMap()->SummonGameObject(CrateObject, over->GetPositionX(),
+                over->GetPositionY(), over->GetPositionZ(), over->GetOrientation(), 0, 0, 0, 0, 0);
+            if (!crate)
+                return;
+            crate->SetObjectScale(CrateScale);
+            _crates[character] = { crate->GetGUID(), crate->GetMapId(), crate->GetInstanceId() };
+        }
+
+        void RemoveCrate(uint64_t character)
+        {
+            auto const found = _crates.find(character);
+            if (found == _crates.end())
+                return;
+            if (Map* map = sMapMgr->FindMap(found->second.map, found->second.instance))
+                if (GameObject* crate = map->GetGameObject(found->second.guid))
+                    crate->DespawnOrUnsummon();
+            _crates.erase(found);
+        }
+
+        struct CrateRecord
+        {
+            ObjectGuid guid;
+            uint32_t map = 0;
+            uint32_t instance = 0;
+        };
+
         std::map<uint64_t, Place> _places;
         std::map<uint64_t, StandInRecord> _summons;
+        std::map<uint64_t, CrateRecord> _crates;
+        std::map<uint64_t, uint32_t> _primed;
+        uint64_t _lastHandle = 0;
+    };
+
+    class ServerFollowerWorld : public Follow::FollowerWorld
+    {
+    public:
+        bool Online(uint64_t character) const override
+        {
+            Player* player = Find(character);
+            return player && player->IsInWorld();
+        }
+
+        bool Wanted(uint64_t character) const override
+        {
+            Player* player = Find(character);
+            if (!player || !player->IsAlive() || player->IsMounted())
+                return false;
+            uint32_t const phase = player->GetPhaseMask();
+            return phase == NormalPhase || phase >= AllPhases;
+        }
+
+        bool Owns(uint64_t character, uint32_t species) const override
+        {
+            Store::Journal* journal = sPetJournals->For(Find(character));
+            return journal && journal->Owns(species);
+        }
+
+        std::optional<uint64_t> SpawnFollower(uint64_t character, uint32_t species) override
+        {
+            Player* player = Find(character);
+            Store::Journal* journal = sPetJournals->For(player);
+            Store::OwnedPet const* pet = journal ? journal->Pet(species) : nullptr;
+            if (!player || !pet)
+                return std::nullopt;
+            float const o = player->GetOrientation();
+            float const x = player->GetPositionX() - std::cos(o) * FollowBehind + std::cos(o + 1.57f) * FollowAside;
+            float const y = player->GetPositionY() - std::sin(o) * FollowBehind + std::sin(o + 1.57f) * FollowAside;
+            uint32_t const standIn = StandInEntry(sPetBattleData->Data(), species);
+            TempSummon* summon = player->SummonCreature(standIn ? standIn : species, x, y, player->GetPositionZ(), o,
+                TEMPSUMMON_MANUAL_DESPAWN);
+            if (!summon)
+                return std::nullopt;
+            summon->SetReactState(REACT_PASSIVE);
+            summon->SetFaction(PeacefulFaction);
+            uint32_t display = pet->display;
+            if (display)
+                summon->SetDisplayId(display);
+            else if ((display = summon->GetDisplayId()) && journal->SetDisplayOnce(species, display))
+            {
+                sPetJournals->Flush(*journal);
+                if (CreatureTemplate const* creature = sObjectMgr->GetCreatureTemplate(species))
+                    Present::SendCreatureRecord(player, *creature, species, display);
+            }
+            if (Battles* battles = sPetBattles->Registry())
+                summon->SetObjectScale(static_cast<float>(battles->GetScale().ScaleOf(species, display)));
+            summon->SetPhaseMask(NormalPhase, true);
+            _followers[++_lastHandle] = { summon->GetGUID(), summon->GetMapId(), summon->GetInstanceId() };
+            return _lastHandle;
+        }
+
+        void DespawnFollower(uint64_t handle) override
+        {
+            if (Creature* creature = Resolve(handle))
+                creature->DespawnOrUnsummon();
+            _followers.erase(handle);
+        }
+
+        bool Near(uint64_t character, uint64_t handle) const override
+        {
+            Player* player = Find(character);
+            Creature* creature = Resolve(handle);
+            return player && creature && creature->GetMapId() == player->GetMapId() &&
+                player->GetDistance(creature) <= FollowLeave;
+        }
+
+        void Pace(uint64_t character, uint64_t handle) override
+        {
+            Player* player = Find(character);
+            Creature* creature = Resolve(handle);
+            if (!player || !creature)
+                return;
+            creature->SetSpeed(MOVE_RUN, std::max(FollowMinRate, player->GetSpeed(MOVE_RUN) / 7.0f * 1.3f), true);
+            if (creature->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE ||
+                player->GetDistance(creature) > FollowRefollow)
+                creature->GetMotionMaster()->MoveFollow(player, FollowDistance, FollowAngle, MOTION_SLOT_ACTIVE, false,
+                    false);
+        }
+
+        void SendFollow(uint64_t character, uint32_t species) override
+        {
+            if (Player* player = Find(character))
+                sAddonChannel->Send(player, "pbj", "follow", std::to_string(species));
+        }
+
+        void Save(uint64_t character, uint32_t species) override
+        {
+            if (species)
+                CharacterDatabase.Execute("REPLACE INTO `coa_pet_follower` (`guid`, `species`) VALUES ({}, {})",
+                    character, species);
+            else
+                CharacterDatabase.Execute("DELETE FROM `coa_pet_follower` WHERE `guid` = {}", character);
+        }
+
+        std::optional<uint32_t> Saved(uint64_t character) override
+        {
+            QueryResult result = CharacterDatabase.Query("SELECT `species` FROM `coa_pet_follower` WHERE `guid` = {}",
+                character);
+            if (!result)
+                return std::nullopt;
+            return (*result)[0].Get<uint32>();
+        }
+
+        bool Holds(ObjectGuid guid) const
+        {
+            for (auto const& [handle, record] : _followers)
+                if (record.guid == guid)
+                    return true;
+            return false;
+        }
+
+    private:
+        struct Record
+        {
+            ObjectGuid guid;
+            uint32_t map = 0;
+            uint32_t instance = 0;
+        };
+
+        Creature* Resolve(uint64_t handle) const
+        {
+            auto const found = _followers.find(handle);
+            if (found == _followers.end())
+                return nullptr;
+            Map* map = sMapMgr->FindMap(found->second.map, found->second.instance);
+            Creature* creature = map ? map->GetCreature(found->second.guid) : nullptr;
+            return creature && creature->IsInWorld() ? creature : nullptr;
+        }
+
+        std::map<uint64_t, Record> _followers;
         uint64_t _lastHandle = 0;
     };
 
@@ -275,7 +619,9 @@ namespace CoAPetBattles::Battle
         return &battles;
     }
 
-    PetBattles::PetBattles() : _world(std::make_unique<ServerWorld>()), _rng(std::random_device {}())
+    PetBattles::PetBattles() : _world(std::make_unique<ServerWorld>()),
+        _followerWorld(std::make_unique<ServerFollowerWorld>()),
+        _followers(std::make_unique<Follow::Registry>(*_followerWorld, _scheduler)), _rng(std::random_device {}())
     {
         _scheduler.Every(WatchdogMs, [this]
         {
@@ -339,10 +685,32 @@ namespace CoAPetBattles::Battle
         return battles && battles->Start(Character(player), std::move(enemies));
     }
 
+    Follow::Registry& PetBattles::Followers()
+    {
+        return *_followers;
+    }
+
+    Battles* PetBattles::Registry()
+    {
+        return Current();
+    }
+
+    bool PetBattles::IsFollower(ObjectGuid guid) const
+    {
+        return _followerWorld->Holds(guid);
+    }
+
+    void PetBattles::Login(Player* player)
+    {
+        if (player && player->GetSession() && !player->GetSession()->IsBot())
+            _followers->Login(Character(player));
+    }
+
     void PetBattles::Logout(Player* player)
     {
         if (!player)
             return;
+        _followers->Logout(Character(player));
         if (_battles && ::World::IsStopped())
             _battles->Abandon(Character(player));
         else if (_battles)

@@ -117,6 +117,26 @@ numbers are `CoAPetBattles.Wild.*` settings with upstream's values as defaults.
 - **GM commands**: `.petbattle wild` lists the wild pets near you; `.petbattle challenge` challenges the nearest one
   within reach, the same path as the menu.
 
+## The client side (phase 5)
+
+- **Addons**: `client/AddOns/` holds upstream's `AcoreLib`, `wotlk_petbattle` and `wotlk_pets` unchanged (see
+  `client/README.md`); they are handed to players separately.
+- **Presentation**: battles show upstream's look through visual-only packets — the stand-ins face each other, lunge in
+  for melee, play the ability's spell (cast, projectile, impact, sound) from `coa_pet_presentation`, flinch, die, hop,
+  glow, and a crate drops over a captured pet. No spell is cast server-side, no aura is applied and factions never
+  change, so no CoA script, proc or combat log runs during a battle. Upstream casts real spells; that method stays a
+  possible later look.
+- **Feeding** (`pbj|feed|<species>,<item>`): a food item (consumable, food subclass, food spell category 11) whose
+  required level is at least the pet's heals it `FedPercent` every `FedStepSeconds` for `FedSeconds`, while its health
+  is unchanged; kept in memory as upstream does.
+- **Followers** (`pbj|summon|<species>`, `pbj|dismiss`): one owned pet follows the character as its stand-in, saved in
+  `coa_pet_follower` (characters database) and restored at login; hidden while dead, mounted, outside the normal phase
+  or in a pet battle, and dismissed when the pet leaves the journal.
+- **Previews** (`pbj|prime`): the creature-cache record of every species, with the skin the player owns, at most once
+  per 5 seconds; battles and new skins send their own records.
+- **Clean** (`pbt|clean`): ends a stuck battle without penalty and removes the player's orphaned stand-ins within 200
+  yards.
+
 ## Trying it: `.petbattle sim`
 
 GMs can run a whole battle between two pet species and read it in chat:
