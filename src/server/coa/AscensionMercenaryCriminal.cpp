@@ -1,13 +1,17 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 
 #include "AscensionMercenary.h"
+#include "DBCStores.h"
 #include "DataMap.h"
 #include "ObjectAccessor.h"
 #include "Player.h"
+#include "ReputationMgr.h"
 #include "ScriptMgr.h"
 #include "SpellAuras.h"
 #include "SpellInfo.h"
+#include <array>
 #include <unordered_set>
+#include <vector>
 
 namespace
 {
@@ -87,6 +91,30 @@ void ForgetAggressionOnceOutOfCombat(Player* player)
     }, 0ms);
 }
 
+std::vector<uint32> CapitalFactionsOf(Team team)
+{
+    std::vector<uint32> factions;
+    for (uint32 id = 0; id < sFactionStore.GetNumRows(); ++id)
+        if (FactionEntry const* faction = sFactionStore.LookupEntry(id))
+            if (faction->team == uint32(team) && faction->CanHaveReputation())
+                factions.push_back(faction->ID);
+    return factions;
+}
+
+std::vector<uint32> const& CapitalFactions(TeamId team)
+{
+    static std::array<std::vector<uint32>, 2> const factions = {CapitalFactionsOf(ALLIANCE), CapitalFactionsOf(HORDE)};
+    return factions[team == TEAM_ALLIANCE ? 0 : 1];
+}
+
+void SetOutlawed(Player* player, bool outlawed)
+{
+    for (uint32 faction : CapitalFactions(player->GetTeamId()))
+        player->GetReputationMgr().ApplyForceReaction(faction, REP_HOSTILE, outlawed);
+    if (player->IsInWorld())
+        player->GetReputationMgr().SendForceReactions();
+}
+
 class ascension_mercenary_criminal_acts : public UnitScript
 {
 public:
@@ -112,9 +140,29 @@ public:
             ForgetAggressionOnceOutOfCombat(player);
     }
 };
+
+class ascension_mercenary_criminal_outlaw : public UnitScript
+{
+public:
+    ascension_mercenary_criminal_outlaw()
+        : UnitScript("ascension_mercenary_criminal_outlaw", true, {UNITHOOK_ON_AURA_APPLY, UNITHOOK_ON_AURA_REMOVE}) { }
+
+    void OnAuraApply(Unit* unit, Aura* aura) override
+    {
+        if (Player* player = unit->ToPlayer(); player && aura->GetId() == SPELL_CRIMINAL)
+            SetOutlawed(player, true);
+    }
+
+    void OnAuraRemove(Unit* unit, AuraApplication* application, AuraRemoveMode) override
+    {
+        if (Player* player = unit->ToPlayer(); player && application->GetBase()->GetId() == SPELL_CRIMINAL)
+            SetOutlawed(player, false);
+    }
+};
 }
 
 void AddSC_AscensionMercenaryCriminal()
 {
     new ascension_mercenary_criminal_acts();
+    new ascension_mercenary_criminal_outlaw();
 }
