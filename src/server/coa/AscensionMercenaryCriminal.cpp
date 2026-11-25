@@ -228,6 +228,7 @@ public:
             SetOutlawed(player, false);
     }
 };
+
 class ascension_mercenary_criminal_no_retreat_spells : public AllSpellScript
 {
 public:
@@ -256,6 +257,7 @@ public:
 
     bool OnPlayerCanLfgTeleport(Player* player) override { return !IsCriminal(player); }
 };
+
 class ascension_mercenary_criminal_outcast : public PlayerScript
 {
 public:
