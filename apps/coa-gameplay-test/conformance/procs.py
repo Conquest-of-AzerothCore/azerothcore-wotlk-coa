@@ -863,15 +863,18 @@ def attempt_steps(class_file: dict, entry: dict, plan: ProcPlan, labels: dict[st
                 {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS},
                 measurement(labels['trials'], CASTER, 'melee_damage_count', **hand_fields(entry)),
                 measurement(labels['attempts'], CASTER, 'melee_attack_count', **hand_fields(entry))]
-    from proc_avoided import attempt_steps as avoided_attempts, counts_misses, guard_steps, is_avoided, trial_steps
+    from proc_avoided import (attempt_steps as avoided_attempts, counts_misses, guard_steps, is_avoided,
+                              pause_steps, trial_steps)
     if is_avoided(entry):
         drain = {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}
+        unpause = pause_steps(entry, False)
         if counts_stacks(entry):
             from proc_stacks import avoided_attempt_steps
-            swings = avoided_attempt_steps(entry, plan.per_part, plan.attempt_ms) + stack_drain_steps(entry, drain)
+            swings = unpause + avoided_attempt_steps(entry, plan.per_part, plan.attempt_ms) + stack_drain_steps(entry, drain)
         else:
-            swings = avoided_attempts(entry, plan.per_part, plan.attempt_ms) + [drain]
-        return swings + guard_steps(entry) + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry))
+            swings = unpause + avoided_attempts(entry, plan.per_part, plan.attempt_ms) + [drain]
+        return (swings + pause_steps(entry, True) + guard_steps(entry)
+                + trial_steps(labels['trials'], labels['attempts'], counts_misses(entry)))
     if entry['trigger']['action'] == TAKEN_HIT:
         drain = {'action': 'wait', 'label': 'drain', 'ms': DRAIN_MS}
         return (taken_hit_attempts(entry, plan, plan.per_part)
