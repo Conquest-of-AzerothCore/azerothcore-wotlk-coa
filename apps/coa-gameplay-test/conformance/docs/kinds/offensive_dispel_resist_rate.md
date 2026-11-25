@@ -33,10 +33,12 @@ Magic dispel) at `target` (`"caster"` by default, or `"ally"` for a grouped ally
   and after) while `spell` stays learned, expecting the control rate. Produces two labels: `<suffix>` (`control` +
   `treatment`) and `<suffix>_gate_off` (`control` + `gate_off`).
 - `gate_auras` (optional, requires `gate_cast`; ADR 1314, provisional): list of `[spell, stacks]` pairs emitted as
-  `set_aura` on `caster` immediately before `required_aura_steps` and the `gate_cast` in `control` and `treatment` (not
-  in `gate_off`). Holds a backing resource aura (such as Insanity `500706`) with margin above a derived marker
-  threshold so periodic refresh ticks cannot strip the `CasterAuraSpell` marker between `set_aura` and `cast`. Omitting
-  `gate_auras` leaves the generated scenario byte-identical.
+  `set_aura` on `caster` in every arm — immediately before `required_aura_steps` and `gate_cast` in `control` and
+  `treatment`, and immediately after removing `gate_cast` (`stacks: 0`, before `gate_settle_ms`) in `gate_off`. Holds a
+  backing resource aura (such as Insanity `500706`) with margin above a derived marker threshold so periodic refresh
+  ticks cannot strip the `CasterAuraSpell` marker between `set_aura` and `cast`, while keeping `gate_off` equal in
+  backing state even when removing `gate_cast` drains the resource so `treatment` and `gate_off` differ strictly by
+  `gate_cast`. Omitting `gate_auras` leaves the generated scenario byte-identical.
 
 ## Sizing, judgement and refusals
 

@@ -290,14 +290,16 @@ def arm_steps(records: Records, spec: OffensiveDispelResistSpec, arm: str, count
     prefix = check_label(spec)
     steps = clear_steps(spec)
     if spec.gate_cast is not None:
+        gate_auras = [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
+                      for aura, stacks in spec.gate_auras]
         if arm == GATE_OFF:
             steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': spec.gate_cast, 'stacks': 0})
+            steps += gate_auras
             if spec.gate_settle_ms:
                 steps.append({'action': 'wait', 'label': f'{KIND} gate off settle', 'ms': spec.gate_settle_ms})
         else:
             steps.append({'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.gate_cast})
-            steps += [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': stacks}
-                      for aura, stacks in spec.gate_auras]
+            steps += gate_auras
             steps += required_aura_steps(facts_of(records, spec.gate_cast))
             steps.append({'action': 'cast', 'actor': CASTER, 'spell': spec.gate_cast, 'target': CASTER})
             if spec.gate_settle_ms:
