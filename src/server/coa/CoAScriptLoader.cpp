@@ -33,6 +33,7 @@ void AddSC_AscensionCrowsCache();
 void AddSC_AscensionAetherialReliquary();
 void AddSC_CoAProbeRelay();
 void AddSC_CoAChatLog();
+void AddSC_CoAPortablePartyPlatter();
 void AddSC_AscensionItemScaling();
 void AddSC_AscensionNativeItemScaling();
 void AddSC_AscensionQuestScaling();
@@ -889,6 +890,7 @@ void AddCoAScripts()
     AddSC_AscensionAetherialReliquary();
     AddSC_CoAProbeRelay();
     AddSC_CoAChatLog();
+    AddSC_CoAPortablePartyPlatter();
     AddSC_AscensionItemScaling();
     AddSC_AscensionNativeItemScaling();
     AddSC_AscensionQuestScaling();
