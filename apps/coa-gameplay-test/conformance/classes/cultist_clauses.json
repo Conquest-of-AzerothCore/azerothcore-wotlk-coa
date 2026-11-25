@@ -164,14 +164,18 @@
   {
     "spell": 300270,
     "clause": "While above 60 Insanity,",
-    "labels": [],
+    "labels": [
+      "300270 behaviour_hit_ratio above_60",
+      "300270 behaviour_hit_ratio at_60"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300270,
     "clause": "you gain $681256s1% reduced damage taken.",
     "labels": [
-      "300270 effect_value 681256e0 #0"
+      "300270 behaviour_hit_ratio above_60",
+      "300270 behaviour_hit_ratio at_60"
     ],
     "kind": "claim"
   },
@@ -355,7 +359,8 @@
     "spell": 300298,
     "clause": "Casting Gaze of C'Thun now reduces the cooldown of Psychic Suppression by $/1000;300297s2 sec",
     "labels": [
-      "300298 effect_value 300297e1 #0"
+      "300298 behaviour_metric_delta ps_through",
+      "300298 behaviour_metric_delta ps_still_cd"
     ],
     "kind": "claim"
   },
@@ -363,7 +368,8 @@
     "spell": 300298,
     "clause": "and Grasp of Zek'voz by $/1000;300297s1 sec.",
     "labels": [
-      "300298 effect_value 300297e0 #1"
+      "300298 behaviour_metric_delta grasp_through",
+      "300298 behaviour_metric_delta grasp_still_cd"
     ],
     "kind": "claim"
   },
@@ -478,12 +484,15 @@
       {
         "claim": "for $573285d",
         "labels": [
-          "300307 spell_duration 573285 #1"
+          "300307 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "Reaching 60 Insanity",
-        "labels": []
+        "labels": [
+          "300307 behaviour_metric_delta reach_60",
+          "300307 behaviour_metric_delta below_60"
+        ]
       }
     ]
   },
@@ -575,7 +584,8 @@
     "spell": 301008,
     "clause": "Increases the duration of Psychic Suppression by $/1000;s1 sec",
     "labels": [
-      "301008 effect_value e0 #0"
+      "301008 behaviour_metric_delta ps_contrast",
+      "301008 behaviour_metric_delta ps_duration"
     ],
     "kind": "claim"
   },
@@ -583,7 +593,8 @@
     "spell": 301008,
     "clause": "and Eldritch Devastation by $/1000;s2 sec.",
     "labels": [
-      "301008 effect_value e1 #1"
+      "301008 behaviour_metric_delta ed_contrast",
+      "301008 behaviour_metric_delta ed_duration"
     ],
     "kind": "claim"
   },
@@ -636,14 +647,19 @@
   {
     "spell": 301181,
     "clause": "While above 60 Insanity,",
-    "labels": [],
+    "labels": [
+      "301181 behaviour_metric_delta aura_above_60",
+      "301181 behaviour_metric_delta aura_at_60"
+    ],
     "kind": "claim"
   },
   {
     "spell": 301181,
     "clause": "you gain $572859s1% increased haste.",
     "labels": [
-      "301181 effect_value 572859e0 #0"
+      "301181 behaviour_metric_delta melee_above_60",
+      "301181 behaviour_metric_delta spell_above_60",
+      "301181 behaviour_metric_delta at_60"
     ],
     "kind": "claim"
   },
@@ -1570,14 +1586,20 @@
   {
     "spell": 527268,
     "clause": "While above 60 Insanity,",
-    "labels": [],
+    "labels": [
+      "527268 behaviour_metric_delta aura_above_60",
+      "527268 behaviour_metric_delta aura_at_60"
+    ],
     "kind": "claim"
   },
   {
     "spell": 527268,
     "clause": "your Netherstrike, Gaze of C'Thun, and Eldritch Shock now gain $573272s1% increased critical strike chance.",
     "labels": [
-      "527268 effect_value 573272e0 #0"
+      "527268 behaviour_metric_delta netherstrike_above_60",
+      "527268 behaviour_metric_delta gaze_above_60",
+      "527268 behaviour_metric_delta shock_above_60",
+      "527268 behaviour_metric_delta at_60"
     ],
     "kind": "claim"
   },
@@ -3300,20 +3322,28 @@
       {
         "claim": "dealing ${$m1+0+$sps*.55+$AP*.1} Shadow damage",
         "labels": [
-          "800432 effect_value e0 #0",
-          "800432 aura_amount e0 #0"
+          "800432 behaviour_metric_delta damage_base",
+          "800432 behaviour_metric_delta damage_sp",
+          "800432 behaviour_metric_delta damage_ap"
         ]
       },
       {
         "claim": "every $t1 sec",
         "labels": [
-          "800432 aura_amplitude_ms #1"
+          "800432 behaviour_metric_delta period"
         ]
       },
       {
         "claim": "for $802789d",
         "labels": [
-          "800432 spell_duration 802789 #2"
+          "800432 behaviour_metric_delta stun_duration"
+        ]
+      },
+      {
+        "claim": "Stun an enemy",
+        "labels": [
+          "800432 behaviour_metric_delta stun_interrupt",
+          "800432 behaviour_metric_delta stun_duration"
         ]
       }
     ]
@@ -3322,7 +3352,8 @@
     "spell": 800432,
     "clause": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
     "labels": [
-      "800432 effect_value 803746e0 #3"
+      "800432 behaviour_hit_ratio spell_amp",
+      "800432 behaviour_metric_delta amp_aura"
     ],
     "kind": "claim"
   },
@@ -3523,14 +3554,25 @@
       {
         "claim": "dealing ${($d*1000/$t1)*($m1+0+$sps*0.44)} Shadow damage",
         "labels": [
-          "803398 effect_value #0"
+          "803398 behaviour_metric_delta damage_base",
+          "803398 behaviour_metric_delta damage_sp"
         ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "803398 aura_duration_ms #1"
+          "803398 behaviour_metric_delta duration"
         ]
+      },
+      {
+        "claim": "chaining to nearby enemies",
+        "labels": [
+          "803398 behaviour_metric_delta chain_targets"
+        ]
+      },
+      {
+        "claim": "dealing less damage with each enemy struck",
+        "labels": []
       }
     ]
   },
