@@ -1,0 +1,5 @@
+## Interface: 30300
+## Title: AcoreLib
+## Notes: Shared addon <-> server messaging for our AzerothCore addons
+## Version: 0.1
+AcoreLib.lua
