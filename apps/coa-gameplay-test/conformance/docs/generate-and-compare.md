@@ -663,12 +663,15 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 - Time (`cooldown_ms`, `aura_duration_ms`, ruling R8): `expected - W <= measured <= expected`. W bounds the game
   time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
   its `elapsed_ms` plus the run's `max_step_ms`; the `cast time` wait of a cast-time spell counts only its 500 ms
-  margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes. `CoAGameplayTest::Tick`
-  runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is the game time from its
-  start to its completion, and `max_step_ms` is the largest update diff of the run (`docs/coa/verification.md`, fidelity
-  limits: at most 25 ms in a wait, 10 ms while polling). Measured on 2026-11-05 (stamp `20261105-181206`): cooldowns 6,
-  12 and 18 ms below the record two, four and six steps after the cast, durations 12 and 15 ms below; W was 50 to 150
-  ms.
+  margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes; plus a map-update carry-in
+  term `max(0, 10 - max_step_ms)` when at least one step follows the cast (`MapMgr::i_timer[3]` accumulates world
+  ticks up to `CONFIG_INTERVAL_MAPUPDATE = 10 ms` before calling `map->Update`, so a carry-in from ticks prior to
+  the cast can flush a 10 ms map update during the first post-cast tick when `max_step_ms < 10`, ADR 1317).
+  `CoAGameplayTest::Tick` runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is
+  the game time from its start to its completion, and `max_step_ms` is the largest update diff of the run
+  (`docs/coa/verification.md`, fidelity limits: at most 25 ms in a wait, 10 ms while polling). Measured on
+  2026-11-05 (stamp `20261105-181206`): cooldowns 6, 12 and 18 ms below the record two, four and six steps after the
+  cast, durations 12 and 15 ms below; W was 50 to 150 ms.
 - Hit means (`hit_mean`, `melee_mean`): `measured_hit_model` recomputes the model from the run's stats, known auras
   and target; the measured mean of the non-critical, non-blocked hits must lie in `mean ± 2.576 x sigma / sqrt(n)`,
   n the usable hits. `tooltip_mean` is shown in the explanation only. The parts of a hit (same label) give one

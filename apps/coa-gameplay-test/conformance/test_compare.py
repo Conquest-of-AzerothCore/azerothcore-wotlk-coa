@@ -105,6 +105,7 @@ class Workspace:
         self.runs = {}
         self.cast_failures = {}
         self.builds = {}
+        self.max_step_ms = '25'
 
     def close(self):
         shutil.rmtree(self.root, ignore_errors=True)
@@ -145,7 +146,7 @@ class Workspace:
             every = [{'index': str(index), **step} for index, step in enumerate(base + steps)]
             commit, binary = self.builds.get(key, (WORKSPACE_COMMIT, WORKSPACE_BUILD))
             result = {'schema': '1', 'run_id': f'run-{key}', 'scenario': key, 'status': 'passed',
-                      'message': 'All assertions passed', 'max_step_ms': '25', 'steps': every,
+                      'message': 'All assertions passed', 'max_step_ms': self.max_step_ms, 'steps': every,
                       'server_version': f'AzerothCore rev. {commit} 2026-11-10 11:09:47 +0100 (test branch)'}
             if key in self.cast_failures:
                 result['cast_failures'] = self.cast_failures[key]
@@ -990,6 +991,32 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([expectation(label, 'aura_duration_ms', '$d', 'read duration_ms')], ['$d'], steps,
                                   constant_reader(Displayed('$d', 20000.0, None, 'duration_ms')))
         self.assertEqual((verdicts[label].status, verdicts[label].low), ('ok', 19925.0))
+
+    def test_aura_duration_includes_map_update_carry_in_when_max_step_is_below_10_ms(self):
+        label = '1001 aura_duration_ms #1'
+
+        def judge(expected_ms, actual_ms, max_step='1'):
+            self.fresh()
+            self.workspace.max_step_ms = max_step
+            steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'), assert_step('1001 aura_present', '1'),
+                     assert_step(label, str(actual_ms))]
+            verdicts = self.value_run(
+                [expectation(label, 'aura_duration_ms', '$d', 'read duration_ms')],
+                ['$d'], steps, constant_reader(Displayed('$d', float(expected_ms), None, 'duration_ms')))
+            return verdicts[label]
+
+        ok = judge(15000, 14990, '1')
+        self.assertEqual((ok.status, ok.low, ok.high), ('ok', 14988.0, 15000.0))
+        self.assertIn('map-update carry-in', ok.explanation)
+        self.assertEqual(judge(15000, 14988, '1').status, 'ok')
+        self.assertEqual(judge(15000, 14987, '1').status, 'alert')
+        self.assertEqual(judge(15000, 15001, '1').status, 'alert')
+        self.assertEqual(judge(15000, 14850, '1').status, 'alert')
+        self.assertEqual(judge(15000, 12000, '1').status, 'alert')
+        self.assertEqual(judge(1500, 1485, '1').status, 'alert')
+        at_ten = judge(15000, 14990, '10')
+        self.assertEqual((at_ten.status, at_ten.low), ('ok', 14970.0))
+        self.assertNotIn('map-update carry-in', at_ten.explanation)
 
     def test_foreign_aura_grant_duration_on_the_ally_matches_the_duration_token(self):
         label = '1001 aura_duration_ms 2002 #0'

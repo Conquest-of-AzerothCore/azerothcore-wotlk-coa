@@ -94,6 +94,7 @@ ABSOLUTE_TOLERANCE = 1.0
 RELATIVE_TOLERANCE = 0.005
 TOLERATED_RELATIVE = 0.05
 FLOAT_EPSILON = 1e-9
+MAP_UPDATE_INTERVAL_MS = 10.0
 MINIMUM_BETWEEN_PARTS = 10
 ARMOR_PROBE_DAMAGE = 1000.0
 MAGNITUDE_RATIO_TOLERANCE = 0.05
@@ -568,14 +569,20 @@ def judge_gap_closer_distance(base: Verdict, measured: float, expected: float, r
                    explanation=f'{rule}; measured <= NOMINAL_MELEE_RANGE + {GAP_CLOSER_MARGIN_YD:g} yd margin')
 
 
+def map_update_carry_in_ms(max_step_ms: float) -> float:
+    return max(0.0, MAP_UPDATE_INTERVAL_MS - max_step_ms)
+
+
 def elapsed_bound(run: Run, label: str) -> float | None:
     position = next((index for index, step in enumerate(run.steps) if step.get('label') == label), None)
     if position is None or run.max_step_ms is None:
         return None
     cast = max((index for index in range(position) if run.steps[index].get('action') == 'cast'), default=position)
-    return sum(CAST_MARGIN_MS + run.max_step_ms if step.get('label') == CAST_WAIT_LABEL
-               else number(step.get('elapsed_ms', 0), 'elapsed_ms') + run.max_step_ms
-               for step in run.steps[cast + 1:position + 1])
+    step_window = sum(CAST_MARGIN_MS + run.max_step_ms if step.get('label') == CAST_WAIT_LABEL
+                      else number(step.get('elapsed_ms', 0), 'elapsed_ms') + run.max_step_ms
+                      for step in run.steps[cast + 1:position + 1])
+    carry_in = map_update_carry_in_ms(run.max_step_ms) if position > cast else 0.0
+    return step_window + carry_in
 
 
 def judge_time(base: Verdict, run: Run, measured: float, expected: float, why: str) -> Verdict:
@@ -585,9 +592,11 @@ def judge_time(base: Verdict, run: Run, measured: float, expected: float, why: s
                        explanation=f'{why}; no step timing in {run.key} bounds the time elapsed since the cast')
     low = expected - window
     status = 'ok' if low - FLOAT_EPSILON <= measured <= expected + FLOAT_EPSILON else 'alert'
+    carry_in = map_update_carry_in_ms(run.max_step_ms)
+    carry_note = f' plus {carry_in:g} ms map-update carry-in' if carry_in > 0 else ''
     return replace(base, status=status, measured=measured, expected=expected, low=low, high=expected,
                    explanation=f'{why}; expected - W <= measured <= expected, W = {window:g} ms elapsed since the '
-                               f'cast step (step elapsed_ms plus max_step_ms {run.max_step_ms:g} per step)')
+                               f'cast step (step elapsed_ms plus max_step_ms {run.max_step_ms:g} per step{carry_note})')
 
 
 def token_divisor(text: str) -> int:
