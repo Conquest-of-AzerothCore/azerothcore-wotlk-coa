@@ -73,9 +73,6 @@ class aura_ascension_cultist_event : public AuraScript
         }
         if (!owned || Derived(info))
             return false;
-        uint32 entry = event.GetActor()->GetEntry();
-        bool tentacle = event.GetActor() != player && State(player).summons.count(event.GetActor()->GetGUID()) &&
-            (entry == 50272 || entry == 501464 || entry == 500465 || entry == 50096 || entry == 500464);
         bool ability = info && !periodic;
         switch (id)
         {
@@ -88,7 +85,7 @@ class aura_ascension_cultist_event : public AuraScript
             case 520388: return (dealt || healed) && !periodic && event.GetActor() == player &&
                 Chance(player, id, 3000);
             case 500719: case 500767: return dealt && Named(info, 805573);
-            case 520405: return dealt && tentacle;
+            case 520405: return dealt && info && info->Id == Thoughtseize;
             case 524887: case 525078: return dealt && Named(info, 500720);
             case 560091: case 561336: return dealt && info && (info->SchoolMask & SPELL_SCHOOL_MASK_SHADOW) && Chance(player, id);
             case 560320: return dealt && melee && Chance(player, id);
@@ -188,7 +185,7 @@ class aura_ascension_cultist_event : public AuraScript
                         Copy(player, ally, 520497, CalculatePct(healing, Amount(id)));
                 break;
             case 500719: case 500767: Cast(player, target, 804369); break;
-            case 520405: Reduce(player, 560322, std::abs(Amount(520872))); break;
+            case 520405: Reduce(player, 560321, std::abs(Amount(520872))); break;
             case 524887: case 525078:
                 for (Unit* ally : Allies(player, player, 40, 1))
                 {

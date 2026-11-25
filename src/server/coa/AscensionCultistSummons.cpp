@@ -10,8 +10,10 @@
 #include "ScriptedCreature.h"
 #include "ScriptedGossip.h"
 #include "Spell.h"
+#include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
+#include "Totem.h"
 #include <algorithm>
 #include <cmath>
 namespace AscensionCultist
@@ -40,6 +42,11 @@ void Summon(Player* player, uint32 entry, Position const& position, uint32 durat
     if (!Tentacle(entry) && entry != 533030 && entry != 397771 && entry != HallucinationEntry &&
         entry != 50298 && entry != 50263)
         return;
+    if (oldGod)
+        if (Creature* existing = ObjectAccessor::GetCreature(*player, State(player).tentacle);
+            existing && existing->GetEntry() == 501464)
+            if (CreatureAI* ai = existing->AI())
+                ai->DoAction(4);
     TempSummon* summon = player->GetMap()->SummonCreature(entry, position,
         entry == 50263 ? nullptr : sSummonPropertiesStore.LookupEntry(oldGod ? 63 : 61), duration,
         entry == 50263 ? nullptr : player, spellId);
@@ -63,6 +70,9 @@ void Summon(Player* player, uint32 entry, Position const& position, uint32 durat
     }
     else if (target)
         summon->AI()->SetGUID(target->GetGUID());
+    if (entry == 501464)
+        if (CreatureAI* ai = summon->AI())
+            ai->DoAction(3);
 }
 void Command(Player* player, Unit* target, bool blast)
 {
@@ -115,6 +125,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
     ObjectGuid owner, command;
     std::set<ObjectGuid> participants, afflicted;
     EventMap timers;
+    uint32 lastDiff = 0;
     bool portalCast = false;
     void IsSummonedBy(WorldObject* summoner) override
     {
@@ -156,12 +167,51 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         timers.ScheduleEvent(Pulse, 100ms);
     }
     void SetGUID(ObjectGuid const& guid, int32 = 0) override { command = guid; }
-    void ClearThoughtseize()
+    uint32 ExpiryGrace() const
+    {
+        SpellInfo const* info = sSpellMgr->GetSpellInfo(Thoughtseize);
+        uint32 amplitude = info ? info->Effects[EFFECT_1].Amplitude : 0;
+        if (!amplitude)
+            return 0;
+        return std::min<uint32>(std::max<uint32>(lastDiff * 2, amplitude / 10), amplitude / 2);
+    }
+    void ClearThoughtseize(int32 graceMs = 0)
     {
         for (ObjectGuid guid : afflicted)
             if (Unit* target = ObjectAccessor::GetUnit(*me, guid))
-                target->RemoveAurasDueToSpell(Thoughtseize, owner);
+                if (Aura* aura = target->GetAura(Thoughtseize, owner))
+                    if (graceMs <= 0 || aura->GetDuration() > graceMs)
+                        aura->Remove();
         afflicted.clear();
+    }
+    void ApplyThoughtseize(Player* player)
+    {
+        if (!player)
+            return;
+        if (Unit* target = Target(player))
+        {
+            Face(target);
+            if (!target->HasAura(Thoughtseize, owner))
+            {
+                OverrideSpellVisual(target, Thoughtseize, PresenceTentacleVisual);
+                player->AddAura(Thoughtseize, target);
+                afflicted.insert(target->GetGUID());
+            }
+        }
+    }
+    bool Expired() const
+    {
+        if (!me->IsAlive())
+            return false;
+        Player* player = ObjectAccessor::GetPlayer(*me, owner);
+        if (!player || !player->IsAlive() || !me->IsWithinDistInMap(player, 100) || !me->InSamePhase(player))
+            return false;
+        uint32 threshold = ExpiryGrace();
+        if (Totem* totem = me->ToTotem())
+            return totem->GetTotemDuration() <= threshold;
+        if (TempSummon* summon = me->ToTempSummon())
+            return summon->GetTimer() <= threshold;
+        return false;
     }
     void JustDied(Unit*) override
     {
@@ -194,9 +244,20 @@ struct npc_ascension_cultist_summon : public ScriptedAI
     }
     void DoAction(int32 action) override
     {
+        if (action == 4)
+        {
+            ClearThoughtseize();
+            return;
+        }
         Player* player = ObjectAccessor::GetPlayer(*me, owner);
         if (!player || !Tentacle(me->GetEntry()))
             return;
+        if (action == 3 && me->GetEntry() == 501464)
+        {
+            ApplyThoughtseize(player);
+            timers.RescheduleEvent(Pulse, 6000ms);
+            return;
+        }
         if (Unit* target = Target(player))
         {
             Face(target);
@@ -255,9 +316,11 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         Player* player = ObjectAccessor::GetPlayer(*me, owner);
         if (!player || !player->IsAlive() || !me->IsWithinDistInMap(player, 100) || !me->InSamePhase(player))
         {
+            ClearThoughtseize();
             me->DespawnOrUnsummon();
             return;
         }
+        lastDiff = diff;
         if (me->GetFaction() != player->GetFaction())
             me->SetFaction(player->GetFaction());
         uint8 pvp = player->GetByteValue(UNIT_FIELD_BYTES_2, 1);
@@ -298,14 +361,7 @@ struct npc_ascension_cultist_summon : public ScriptedAI
         else if (entry == CthunTentacle && !me->HasUnitState(UNIT_STATE_CASTING))
             me->CastSpell(target, MentalAssault, false);
         else if (entry == 501464 || entry == 500464)
-        {
-            if (!target->HasAura(Thoughtseize, owner))
-            {
-                OverrideSpellVisual(target, Thoughtseize, PresenceTentacleVisual);
-                player->AddAura(Thoughtseize, target);
-                afflicted.insert(target->GetGUID());
-            }
-        }
+            ApplyThoughtseize(player);
         else if (entry == 397771)
         {
             AttackStart(target);
@@ -335,7 +391,7 @@ public:
     {
         if (creature->GetEntry() == 501464 || creature->GetEntry() == 500464)
             if (auto* ai = dynamic_cast<npc_ascension_cultist_summon*>(creature->AI()))
-                ai->ClearThoughtseize();
+                ai->ClearThoughtseize(ai->Expired() ? int32(ai->ExpiryGrace()) : 0);
     }
 };
 class cultist_summon_damage : public UnitScript
@@ -355,6 +411,8 @@ public:
             for (Unit* ally : Allies(player, creature, 40))
                 if (ally->HasAura(BlackBlood, player->GetGUID()))
                     Copy(player, ally, 500773, CalculatePct(std::min(damage, victim->GetHealth()), Amount(706187)));
+        if (Tentacle(creature->GetEntry()) && player->HasAura(520405))
+            Reduce(player, 560321, std::abs(Amount(520872)));
         State(player).event = false;
     }
 };

@@ -29229,7 +29229,7 @@
     },
     {
       "spell": 520405,
-      "name": "Twilight Domination (Tentacle damage reduces Eldritch Obelisk cooldown by 2 sec)",
+      "name": "Twilight Domination (1 Tentacle slam cuts Eldritch Obelisk 180s CD by 2s: succeeds at 178.3s)",
       "kind": "metric_delta",
       "variant": "obelisk_cd",
       "label_suffix": "obelisk_cd",
@@ -29248,6 +29248,87 @@
       ],
       "setup_wait_ms": 3000,
       "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 560321,
+          "target": "caster",
+          "delay_ms": 175300,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Tentacle of Y'shaarj 50096 deals 1 slam hit in each phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 560321
+            },
+            "before_expected": 1,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Eldritch Obelisk 560321 casts once in control (2nd refused) and twice in treatment (cumulative 3)"
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 560321
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "observe_source": "Behaviour cast-gate upper bracket for Twilight Domination 520405 + 520872 Effect[0] BasePoints -2001 + DieSides 1 = -2000 ms ($/1000;520872s1 = 2 sec; Spell.dbc) on Eldritch Obelisk 560321 (RecoveryTime 180000 ms; Cultist ADR 0015). Both phases engage dummy with Horrorbolt 502182, cast 560321, wait 3000 ms, summon Tentacle of Y'shaarj 802044 (1 slam hit verified via ally_arm owned_creature_damage_count 50096), and attempt a 2nd 560321 at 178300 ms (3000 + 175300 ms): refused with SPELL_FAILED_NOT_READY (67) without 520405 and succeeds (0, spell_cast_count 1 -> 3) after real learn of 520405. Paired with obelisk_cd_held (177700 ms). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (1 Tentacle slam cuts Eldritch Obelisk 180s CD by 2s: still refused at 177.7s)",
+      "kind": "metric_delta",
+      "variant": "obelisk_cd_held",
+      "label_suffix": "obelisk_cd_held",
+      "quote": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+      "trigger_spell": 802044,
+      "gate_spell": 520405,
+      "target": "caster",
+      "select_dummy": true,
+      "setup_casts": [
+        502182,
+        560321
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 560321,
+          "target": "caster",
+          "delay_ms": 174700,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -29266,18 +29347,231 @@
           }
         ]
       },
-      "metric": "cooldown_ms",
+      "metric": "cast_failure",
       "fields": {
         "spell": 560321
       },
-      "before_expected": 175900,
-      "expected": 173900,
-      "expected_gain": -2000,
-      "tolerance": 300,
-      "wait_ms": 1000,
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 200,
       "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "Twilight Domination 520405 + 520872 Effect[0] BasePoints -2001 + DieSides 1 = -2000 ms ($/1000;520872s1 = 2 sec; Spell.dbc). Both phases engage dummy with Horrorbolt 502182, cast Eldritch Obelisk 560321 (180000 ms RecoveryTime, reset before cast), wait 3000 ms, then cast Tentacle of Y'shaarj 802044 (verified 1 slam hit per phase via ally_arm owned_creature_damage_count 50096) and read cooldown_ms of 560321 1000 ms later: expected gain -2000 ms within 300 ms after learning 520405. Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events). Installed Spell.dbc governs (G-9)."
+      "observe_source": "Behaviour cast-gate lower bracket for Twilight Domination 520405 (1 slam -> -2000 ms cut to 178000 ms; Cultist ADR 0015): attempting a 2nd Eldritch Obelisk 560321 at 177700 ms (3000 + 174700 ms) is still refused with SPELL_FAILED_NOT_READY (67) in both control and treatment, ruling out an over-cut >= 2300 ms (including double-proc). Paired with obelisk_cd (178300 ms)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (2 Tentacle slams across UpdateTargetMap cut Obelisk CD by 4s: succeeds at 176.3s)",
+      "kind": "metric_delta",
+      "variant": "obelisk_cd_gaze",
+      "label_suffix": "obelisk_cd_gaze",
+      "quote": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+      "trigger_spell": 500110,
+      "gate_spell": 520405,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        502182,
+        560321,
+        802044
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 560321,
+          "target": "caster",
+          "delay_ms": 170300,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Tentacle of Y'shaarj 50096 deals 1 summon slam plus 1 Gaze-commanded slam after 3000 ms in each phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 560321
+            },
+            "before_expected": 1,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Eldritch Obelisk 560321 casts once in control (2nd refused) and twice in treatment (cumulative 3)"
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 560321
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "observe_source": "Behaviour cast-gate upper bracket for Twilight Domination 520405 (Cultist ADR 0015): summons Tentacle of Y'shaarj 802044 (summon slam at +100 ms), waits 3000 ms (> 500 ms UpdateTargetMap interval of 520405 Effect[1]), then commands a 2nd slam via Gaze of C'Thun 500110 (2 slams/phase verified via ally_arm). Attempting a 2nd Eldritch Obelisk 560321 at 176300 ms (3000 + 3000 + 170300 ms) is refused (67) without 520405 and succeeds (0, spell_cast_count 1 -> 3) after learning 520405, proving both slams reduce CD by 2 s each (-4000 ms total). Paired with obelisk_cd_gaze_held (175500 ms)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (2 Tentacle slams across UpdateTargetMap cut Obelisk CD by 4s: still refused at 175.5s, no double-proc)",
+      "kind": "metric_delta",
+      "variant": "obelisk_cd_gaze_held",
+      "label_suffix": "obelisk_cd_gaze_held",
+      "quote": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+      "trigger_spell": 500110,
+      "gate_spell": 520405,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        502182,
+        560321,
+        802044
+      ],
+      "setup_cast_targets": [
+        "dummy",
+        "caster",
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "after_trigger_casts": [
+        {
+          "spell": 560321,
+          "target": "caster",
+          "delay_ms": 169500,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_damage_count",
+            "fields": {
+              "entry": 50096
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Tentacle of Y'shaarj 50096 deals 1 summon slam plus 1 Gaze-commanded slam after 3000 ms in each phase"
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 560321
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "observe_source": "Behaviour cast-gate lower bracket for Twilight Domination 520405 across UpdateTargetMap (Cultist ADR 0015): after 2 slams (-4000 ms -> 176000 ms CD), attempting a 2nd Eldritch Obelisk 560321 at 175500 ms (3000 + 3000 + 169500 ms) is still refused (67) in both phases; a double-proc on the 2nd slam (-6000 ms -> 174000 ms CD) would succeed here and alert. Paired with obelisk_cd_gaze (176300 ms)."
+    },
+    {
+      "spell": 520405,
+      "name": "Twilight Domination (4 Thoughtseize 806596 ticks from Tentacle of N'Zoth cut Obelisk CD by 8s: succeeds at 172.5s)",
+      "kind": "metric_delta",
+      "variant": "obelisk_cd_thoughtseize",
+      "label_suffix": "obelisk_cd_thoughtseize",
+      "quote": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+      "trigger_spell": 572103,
+      "gate_spell": 520405,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        560321
+      ],
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 3000,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 560321,
+          "target": "caster",
+          "delay_ms": 169500,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806596,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 4,
+            "expected": 8,
+            "tolerance": 0,
+            "source": "Tentacle of N'Zoth 572103 delivers 4 periodic Thoughtseize 806596 ticks per phase"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 560321
+            },
+            "before_expected": 1,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Eldritch Obelisk 560321 casts once in control (2nd refused) and twice in treatment (cumulative 3)"
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 560321
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "observe_source": "Runtime proof of the player-attributed Thoughtseize 806596 path of Twilight Domination 520405 (AscensionCultistEvents.cpp:85,185; Cultist ADR 0015): casts Eldritch Obelisk 560321 (180000 ms CD), waits 3000 ms, casts Tentacle of N'Zoth 572103 (4 periodic 806596 ticks verified via ally_arm, cutting 4 x 2000 = 8000 ms to 172000 ms), then re-attempts 560321 at 172500 ms (3000 + 169500 ms): refused (67) without 520405 and succeeds (0, spell_cast_count 1 -> 3) after learning 520405. Precondition fixture 823764 prevents full resist."
     },
     {
       "spell": 520405,
@@ -30564,7 +30858,7 @@
       "wait_ms": 8500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Tentacle of N'Zoth 572103 summons 501464 for 8000 ms (AscensionCultistAbilities.cpp:453-463, AscensionCultistSummons.cpp:156,300-308), applying Thoughtseize 806596 to target (caster = player). 806596 Effect[1] SPELL_AURA_PERIODIC_DAMAGE (Shadow, BasePoints 60, DieSides 5, RPPL 2.0, BaseLevel=SpellLevel=32, MaxLevel 0, Amplitude 2000 ms, Duration 8000 ms = 4 ticks; AscensionCultistData.h:116 sp 0.75). At level 60 SP 0: 60 + 2*(60-32) + [1..5] = [117..121] (mean 119), x1.12 Cultist tuning 887013 = [131..135] per tick, 4 ticks = [524..542] (mean 533, band [520..546] excludes 0, 3 ticks ~400, and double ~1066). Precondition fixtures: 823764 (no resist) and 16255 -100 (no crit). Paired with damage_sp. Reference search 2026-11-25: coa-history 572103: 3 summons in 1 log, 806596: 12 periodic ticks in 1 log (mean 254 with live gear); coabuildhub spells_master_index.json 572103 matches verbatim."
+      "observe_source": "Tentacle of N'Zoth 572103 summons 501464 for 8000 ms (AscensionCultistAbilities.cpp:450-462, AscensionCultistSummons.cpp:71-74,178-192,248-253), applying Thoughtseize 806596 at t = 0 ms to target (caster = player). 806596 Effect[1] SPELL_AURA_PERIODIC_DAMAGE (Shadow, BasePoints 60, DieSides 5, RPPL 2.0, BaseLevel=SpellLevel=32, MaxLevel 0, Amplitude 2000 ms, Duration 8000 ms = 4 ticks; AscensionCultistData.h:116 sp 0.75). At level 60 SP 0: 60 + 2*(60-32) + [1..5] = [117..121] (mean 119), x1.12 Cultist tuning 887013 = [131..135] per tick, 4 ticks = [524..542] (mean 533, band [520..546] excludes 0, 3 ticks ~400, and double ~1066). Precondition fixtures: 823764 (no resist) and 16255 -100 (no crit). Paired with damage_sp. Reference search 2026-11-25: coa-history 572103: 3 summons in 1 log, 806596: 12 periodic ticks in 1 log (mean 254 with live gear); coabuildhub spells_master_index.json 572103 matches verbatim."
     },
     {
       "spell": 572103,
@@ -30636,6 +30930,96 @@
     },
     {
       "spell": 572103,
+      "name": "Tentacle of N'Zoth (extended Presence tentacle with Eternal Grasp R2 delivers 5 ticks and clears Thoughtseize on despawn)",
+      "kind": "metric_delta",
+      "variant": "presence_eternal_grasp_expiry",
+      "label_suffix": "presence_eternal_grasp_expiry",
+      "quote": "Target an enemy and summon a Tentacle of N'Zoth on the ground near them that will silence them and deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage every $806596t2 sec for $806596d.",
+      "trigger_spell": 502122,
+      "gate_spell": 704879,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        803037
+      ],
+      "setup_casts": [
+        803037
+      ],
+      "setup_cast_targets": [
+        "caster"
+      ],
+      "setup_wait_ms": 1600,
+      "forced_roll": 803037,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 500464
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Presence of N'Zoth 803037 -> 500707 (8000 ms) extended +50% by Eternal Grasp R2 704879 to 12000 ms is still alive at 11500 ms"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806596,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 5,
+            "tolerance": 0,
+            "source": "500464 applies 806596 (8000 ms, amplitude 2000 ms) at +100 ms (4 ticks at 2.1, 4.1, 6.1, 8.1 s) and re-applies on the 2000 ms presence pulse at 8.1 s (5th tick at 10.1 s); floor((12000 - 100) / 2000) = 5 ticks"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 11500,
+      "expiry_wait_ms": 1200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          11300,
+          11800
+        ],
+        "expired": [
+          12400,
+          13000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Regression for Cultist ADR 0016 (Important #1): Presence of N'Zoth 803037 (forced_roll 803037 via SPELLMOD_CHANCE_OF_SUCCESS on instant Blade of the Empire 502122; 803037 ignores Thoughtseize ticks so only 1 creature 500464 spawns) with Eternal Grasp R2 704879 (+50% SPELLMOD_DURATION on 500707 DurationIndex 31 = 8000 ms -> 12000 ms). Creature 500464 pulses every 2000 ms from +100 ms, delivering 4 ticks of the first Thoughtseize 806596 (2.1, 4.1, 6.1, 8.1 s), re-applying a fresh 8000 ms 806596 at 8.1 s (5th tick at 10.1 s; expected tick count floor((12000 - 100) / 2000) = 5), and despawning at 12000 ms when the re-applied 806596 still has ~4100 ms remaining (> ExpiryGrace() = 200 ms, 10% of 806596's 2000 ms amplitude). Uncast control reads 0; at 11500 ms ([11300..11800] ms) 500464 is alive (1), 806596 is active (1), and 5 ticks have landed; at 12700 ms ([12400..13000] ms, 700 ms after despawn) 806596 is gone (0), whereas skipping ClearThoughtseize on natural expiry left 806596 active until 16100 ms. Precondition fixture 823764 prevents full resist."
+    },
+    {
+      "spell": 572103,
       "name": "Tentacle of N'Zoth (silences target, stopping dummy channel)",
       "kind": "metric_delta",
       "variant": "silence",
@@ -30683,7 +31067,7 @@
       "wait_ms": 1000,
       "expire_ms": 8500,
       "void_on_cast_failure": true,
-      "observe_source": "Thoughtseize 806596 Effect[0] SPELL_AURA_MOD_SILENCE (aura 27, Spell.dbc) applied by Tentacle of N'Zoth 501464 at first pulse (~100 ms, AscensionCultistSummons.cpp:156,300-308). Dummy channels Evocation 12051 (8 s) before each phase: without 572103 (control), dummy keeps channeling (casting == 1, 806596 == 0); after 572103, Thoughtseize silences and interrupts the channel (casting == 0, 806596 == 1). Reference search 2026-11-25: see damage_base."
+      "observe_source": "Thoughtseize 806596 Effect[0] SPELL_AURA_MOD_SILENCE (aura 27, Spell.dbc) applied immediately on summon (t = 0 ms) by Tentacle of N'Zoth 501464 via DoAction(3) (AscensionCultistSummons.cpp:71-74,178-192,248-253). Dummy channels Evocation 12051 (8 s) before each phase: without 572103 (control), dummy keeps channeling (casting == 1, 806596 == 0); after 572103, Thoughtseize silences and interrupts the channel (casting == 0, 806596 == 1). Reference search 2026-11-25: see damage_base."
     },
     {
       "spell": 572103,
@@ -30750,7 +31134,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Duration proof for Thoughtseize 806596 (DurationIndex 31 = 8000 ms, $806596d, SpellDuration.dbc) applied ~100 ms after casting 572103 (AscensionCultistSummons.cpp:156,300-308) and cleared on 501464 despawn at 8000 ms (OnCreatureRemoveWorld -> ClearThoughtseize, :334-339). Reads 0 before cast, held (1) at [7350..7750] ms (~7250..7650 ms after apply, > 7200 ms = 0.9 * 8000) and gone (0) at [8250..8650] ms (< 8800 ms = 1.1 * 8000). Paired with duration_contrast. Reference search 2026-11-25: see damage_base."
+      "observe_source": "Duration proof for Thoughtseize 806596 (DurationIndex 31 = 8000 ms, $806596d, SpellDuration.dbc) applied at t = 0 ms on 572103 summon (AscensionCultistSummons.cpp:71-74,178-192,248-253) and expiring after its 4th tick at 8000 ms (OnCreatureRemoveWorld passes ExpiryGrace() on natural expiry, sparing only the same-tick final tick). Reads 0 before cast, held (1) at [7350..7750] ms (> 7200 ms = 0.9 * 8000) and gone (0) at [8250..8650] ms (< 8800 ms = 1.1 * 8000). Paired with duration_contrast. Reference search 2026-11-25: see damage_base."
     },
     {
       "spell": 572103,

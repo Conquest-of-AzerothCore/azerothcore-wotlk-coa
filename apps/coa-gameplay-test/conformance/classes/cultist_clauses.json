@@ -1676,7 +1676,11 @@
     "spell": 520405,
     "clause": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
     "labels": [
-      "520405 effect_value 520872e0 #0"
+      "520405 behaviour_metric_delta obelisk_cd",
+      "520405 behaviour_metric_delta obelisk_cd_held",
+      "520405 behaviour_metric_delta obelisk_cd_gaze",
+      "520405 behaviour_metric_delta obelisk_cd_gaze_held",
+      "520405 behaviour_metric_delta obelisk_cd_thoughtseize"
     ],
     "kind": "claim"
   },
@@ -2280,7 +2284,7 @@
     "spell": 560321,
     "clause": "increasing the damage of your Tentacles by $560322s1%",
     "labels": [
-      "560321 effect_value 560322e0 #1"
+      "560321 behaviour_hit_ratio tentacle_damage"
     ],
     "kind": "claim"
   },
@@ -2523,11 +2527,11 @@
         "claim": "for $806596d",
         "labels": [
           "572103 behaviour_metric_delta duration",
-          "572103 behaviour_metric_delta duration_contrast"
+          "572103 behaviour_metric_delta duration_contrast",
+          "572103 behaviour_metric_delta presence_eternal_grasp_expiry"
         ]
       }
-    ],
-    "reason": "Alert (claim 0, uncounted): Tentacle of N'Zoth 572103 summons 501464 for 8000 ms (AscensionCultistAbilities.cpp:460) with a 100 ms initial Pulse delay (AscensionCultistSummons.cpp:156), so Thoughtseize 806596 (Duration 8000 ms, Amplitude 2000 ms) applies at ~+100 ms and schedules its 4th tick at ~+8100 ms; at +8000 ms 501464 despawns and OnCreatureRemoveWorld -> ClearThoughtseize() (AscensionCultistSummons.cpp:334-339) removes 806596 before tick 4, delivering only 3 ticks instead of 4 (25% total damage loss). Counted pair 20261125-060244 / 20261125-060311 (build eb39f0e31481, 0 flips): damage_base 405/402 (3 ticks, ~134-135/tick matches [131..135] per tick) vs 4-tick tooltip expectation 520..546; damage_sp (+1000 SP) 2916/2925 (3 ticks, ~972-975/tick matches [971..975] per tick) vs 4-tick tooltip expectation 3875..3910; silence ok (dummy Evocation 12051 casting 1->0, 806596 aura 0->1). Live Ascension logs (coa-history: 3 SPELL_SUMMON of 572103, 12 SPELL_PERIODIC_DAMAGE of 806596) confirm 4.0 ticks/summon. Claims 1 (tick_period 2006 ms in [1976.5..2035.5] vs 2000+-100) and 2 (duration 7509..8418 ms + duration_contrast) are behaviour proven."
+    ]
   },
   {
     "spell": 572103,
@@ -3484,7 +3488,7 @@
     "spell": 704878,
     "clause": "Increases the duration of your Tentacles by $s1%.",
     "labels": [
-      "704878 effect_value e0 #0"
+      "704878 behaviour_metric_delta tentacle_duration"
     ],
     "kind": "claim"
   },
@@ -3492,7 +3496,7 @@
     "spell": 704879,
     "clause": "Increases the duration of your Tentacles by $s1%.",
     "labels": [
-      "704879 effect_value e0 #0"
+      "704879 behaviour_metric_delta tentacle_duration"
     ],
     "kind": "claim"
   },
