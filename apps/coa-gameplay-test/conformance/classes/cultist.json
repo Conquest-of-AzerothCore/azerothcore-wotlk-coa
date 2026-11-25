@@ -814,7 +814,7 @@
       "variant": "periodic",
       "label_suffix": "periodic",
       "name": "Mind Rot (periodic damage procs 560943 at 25%)",
-      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.",
       "chance_pct": 25,
       "trigger_spell": 502220,
       "trigger_target": "dummy",
@@ -861,7 +861,7 @@
       "variant": "channeled",
       "label_suffix": "channeled",
       "name": "Mind Rot (channeled damage procs 560943 at 25%)",
-      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.",
       "chance_pct": 25,
       "trigger_spell": 800432,
       "trigger_target": "dummy",
@@ -913,7 +913,7 @@
       "kind": "metric_delta",
       "variant": "dispel_crit",
       "label_suffix": "dispel_crit",
-      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.@s:560714:0@",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.@s:560714:0@",
       "trigger_spell": 502220,
       "gate_spell": 300300,
       "learn": [
@@ -1035,7 +1035,7 @@
       "kind": "metric_delta",
       "variant": "dispel_crit_duration",
       "label_suffix": "dispel_crit_duration",
-      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.@s:560714:0@",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.@s:560714:0@",
       "trigger_spell": 502220,
       "gate_spell": 300300,
       "gate_timing": "start",
@@ -1154,7 +1154,7 @@
       "kind": "metric_delta",
       "variant": "dispel_expire_control",
       "label_suffix": "dispel_expire_control",
-      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.@s:560714:0@",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.@s:560714:0@",
       "trigger_spell": 502220,
       "gate_spell": 300300,
       "gate_timing": "start",
@@ -3308,7 +3308,7 @@
       "kind": "metric_delta",
       "variant": "spell_hit_str",
       "label_suffix": "spell_hit_str",
-      "quote": "and your spell hit chance by $s1% of your Strength.",
+      "quote": "and your spell hit rating by $s1% of your Strength.",
       "trigger_spell": 60229,
       "gate_spell": 805121,
       "target": "caster",
@@ -3322,7 +3322,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "805121 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1<<7 = CR_HIT_SPELL, rating 7), MiscValueB 0 (Strength), BasePoints 4 + 1 = 5 ($s1; Spell.dbc). With Greatness 60229 (+300 Strength -> 408), int32(408 * 0.05) = +20 spell hit rating on top of reference spell_hit_rating 10000 (10020 vs 10000 control). Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): keep spell hit rating on server and update client text to 'spell hit rating'. Reference search 2026-11-24/25 (ev2.md): coa-history: 0 events (passive); spell.csv.gz identical aura 220 misc 128; coabuildhub 805121 matches."
+      "observe_source": "805121 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1<<7 = CR_HIT_SPELL, rating 7), MiscValueB 0 (Strength), BasePoints 4 + 1 = 5 ($s1; Spell.dbc). With Greatness 60229 (+300 Strength -> 408), int32(408 * 0.05) = +20 spell hit rating on top of reference spell_hit_rating 10000 (10020 vs 10000 control). Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): keep spell hit rating on server client text updated to 'spell hit rating' in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Reference search 2026-11-24/25 (ev2.md): coa-history: 0 events (passive); spell.csv.gz identical aura 220 misc 128; coabuildhub 805121 matches."
     },
     {
       "spell": 804286,
@@ -17775,7 +17775,7 @@
       "kind": "metric_delta",
       "variant": "radius",
       "label_suffix": "radius",
-      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
       "gate_spell": 806382,
       "trigger_spell": 804275,
       "target": "caster",
@@ -17855,7 +17855,7 @@
       "kind": "metric_delta",
       "variant": "period",
       "label_suffix": "period",
-      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
       "gate_timing": "start",
       "trigger_spell": 804275,
       "target": "caster",
@@ -17888,7 +17888,7 @@
       "kind": "metric_delta",
       "variant": "heal_base",
       "label_suffix": "heal_base",
-      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
       "gate_spell": 806382,
       "trigger_spell": 804275,
       "target": "caster",
@@ -17950,7 +17950,7 @@
       "kind": "metric_delta",
       "variant": "heal_sp",
       "label_suffix": "heal_sp",
-      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
       "gate_spell": 806382,
       "trigger_spell": 804275,
       "target": "caster",
@@ -18016,7 +18016,7 @@
       "kind": "metric_delta",
       "variant": "duration",
       "label_suffix": "duration",
-      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
       "gate_timing": "start",
       "trigger_only_after": true,
       "trigger_spell": 804275,
@@ -18066,7 +18066,7 @@
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling O-15 Q-cu-15 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 6 sec duration ending with Satiate 804275 (DurationIndex 32 = 6000 ms; AscensionCultistAuras.cpp:195-198,233-241) and update 806382 client text $807219d (10 sec) -> $804275d (6 sec). Reads Dark Matter driver aura 807124 on caster absent before cast (0), held at 5600 ms (game_time [5450, 5850] > 5400 ms = 0.9 * 6000) with 5 +- 1 ally heals from 807219, and gone at 6400 ms (game_time [6150, 6550] < 6600 ms = 1.1 * 6000). Live evidence (ev1.md, strong): 9 logs, 3 players, 32 sessions, max 6.009 s / 6 ticks, 0 sessions > 6.01 s."
+      "observe_source": "Owner ruling O-15 Q-cu-15 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 6 sec duration ending with Satiate 804275 (DurationIndex 32 = 6000 ms; AscensionCultistAuras.cpp:195-198,233-241) client text updated $807219d (10 sec) -> $804275d (6 sec) in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Reads Dark Matter driver aura 807124 on caster absent before cast (0), held at 5600 ms (game_time [5450, 5850] > 5400 ms = 0.9 * 6000) with 5 +- 1 ally heals from 807219, and gone at 6400 ms (game_time [6150, 6550] < 6600 ms = 1.1 * 6000). Live evidence (ev1.md, strong): 9 logs, 3 players, 32 sessions, max 6.009 s / 6 ticks, 0 sessions > 6.01 s."
     },
     {
       "spell": 804056,
@@ -20756,7 +20756,7 @@
       "kind": "metric_delta",
       "variant": "reach_60",
       "label_suffix": "reach_60",
-      "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+      "quote": "Reaching 60 Insanity increases your Magic damage dealt by $573285s1% for $573285d.",
       "trigger_spell": 806897,
       "gate_spell": 300307,
       "target": "dummy",
@@ -20821,7 +20821,7 @@
       "kind": "metric_delta",
       "variant": "below_60",
       "label_suffix": "below_60",
-      "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+      "quote": "Reaching 60 Insanity increases your Magic damage dealt by $573285s1% for $573285d.",
       "trigger_spell": 806897,
       "gate_spell": 300307,
       "target": "dummy",
@@ -20886,7 +20886,7 @@
       "kind": "metric_delta",
       "variant": "duration",
       "label_suffix": "duration",
-      "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+      "quote": "Reaching 60 Insanity increases your Magic damage dealt by $573285s1% for $573285d.",
       "trigger_spell": 806897,
       "gate_spell": 300307,
       "gate_timing": "start",
@@ -20965,7 +20965,7 @@
       "kind": "hit_ratio",
       "variant": "shadow_damage",
       "label_suffix": "shadow_damage",
-      "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+      "quote": "Reaching 60 Insanity increases your Magic damage dealt by $573285s1% for $573285d.",
       "expected": 1.1,
       "observe_spell": 502182,
       "learn": [
@@ -21020,7 +21020,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "Shadow-school check for 300307 Embrace the Void helper 573285 (Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, bp 9 + die 1 = +10%, EffectMiscValue[0] = 126 Magic schools; Spell.dbc): uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup verified by companion 300307 reach_60. Owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only +10% and update client text to 'Magic damage dealt'. Paired with melee_damage (expected 1.0, proving Physical excluded). Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
+      "observe_source": "Shadow-school check for 300307 Embrace the Void helper 573285 (Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, bp 9 + die 1 = +10%, EffectMiscValue[0] = 126 Magic schools; Spell.dbc): uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup verified by companion 300307 reach_60. Owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only +10% client text updated to 'Magic damage dealt' in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Paired with melee_damage (expected 1.0, proving Physical excluded). Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
     },
     {
       "spell": 300307,
@@ -21028,7 +21028,7 @@
       "kind": "hit_ratio",
       "variant": "melee_damage",
       "label_suffix": "melee_damage",
-      "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
+      "quote": "Reaching 60 Insanity increases your Magic damage dealt by $573285s1% for $573285d.",
       "expected": 1.0,
       "metric": "melee_damage_total",
       "swing_hand": 0,
@@ -21076,7 +21076,7 @@
       "refresh": true,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "Physical-school negative check for 300307 Embrace the Void under owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only 573285 Effect[0] EffectMiscValue[0] = 126 (excluding Physical bit 1) and update client text to 'Magic damage dealt'. Uses refresh: true so every swing trial resets 500706=50 and casts 806897 (+10 -> 60, verified by companion 300307 reach_60 and 300307 duration 10 s >> 3.4 s swing+settle), keeping 573285 active across all 20 swings (with void_on_cast_failure: true guarding every 806897 cast). Physical white swings expect 1.0 (+0%, excluding +10%), proving Physical is not boosted while companion shadow_damage proves +10% Magic. Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
+      "observe_source": "Physical-school negative check for 300307 Embrace the Void under owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only 573285 Effect[0] EffectMiscValue[0] = 126 (excluding Physical bit 1) client text updated to 'Magic damage dealt' in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Uses refresh: true so every swing trial resets 500706=50 and casts 806897 (+10 -> 60, verified by companion 300307 reach_60 and 300307 duration 10 s >> 3.4 s swing+settle), keeping 573285 active across all 20 swings (with void_on_cast_failure: true guarding every 806897 cast). Physical white swings expect 1.0 (+0%, excluding +10%), proving Physical is not boosted while companion shadow_damage proves +10% Magic. Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
     },
     {
       "spell": 301181,
@@ -21667,7 +21667,7 @@
       "kind": "metric_delta",
       "variant": "spell_amp",
       "label_suffix": "spell_amp",
-      "quote": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
+      "quote": "The target takes $803746s1% more damage from all sources while you are channeling this spell.",
       "trigger_spell": 800432,
       "gate_spell": 800432,
       "target": "dummy",
@@ -21771,7 +21771,7 @@
       "kind": "metric_delta",
       "variant": "phys_control",
       "label_suffix": "phys_control",
-      "quote": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
+      "quote": "The target takes $803746s1% more damage from all sources while you are channeling this spell.",
       "trigger_spell": 800432,
       "gate_spell": 800432,
       "target": "dummy",
@@ -21867,7 +21867,7 @@
       "tolerance": 0.02,
       "wait_ms": 500,
       "expire_ms": 5500,
-      "observe_source": "Owner ruling O-15 Q-cu-22 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 803746 Effect[0] EffectMiscValue[0] = 127 (SPELL_SCHOOL_MASK_ALL, +15% to all damage including Physical) and remove 'spell ' from 800432 client text ('more damage from all sources'). Grouped ally casts Physical Void Zone 92559 (SchoolMask 1, DmgClass 0, exact 1000 raw Physical): cumulative after / before expected ratio 2.15 +- 0.02 (900 + 1035 = 1935, excluding 2.00 [0%] and 2.30 [+30%]). Both arms read exact 500706 == 20 and 680601 == 1 (after_setup_stacks + ally_arm) and 803746 0 -> 1. Live evidence (ev1.md, strong): Logs 103/104, 9 boss windows, Physical hits 1.142-1.164x. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast."
+      "observe_source": "Owner ruling O-15 Q-cu-22 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 803746 Effect[0] EffectMiscValue[0] = 127 (SPELL_SCHOOL_MASK_ALL, +15% to all damage including Physical) client text updated to 'more damage from all sources' in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Grouped ally casts Physical Void Zone 92559 (SchoolMask 1, DmgClass 0, exact 1000 raw Physical): cumulative after / before expected ratio 2.15 +- 0.02 (900 + 1035 = 1935, excluding 2.00 [0%] and 2.30 [+30%]). Both arms read exact 500706 == 20 and 680601 == 1 (after_setup_stacks + ally_arm) and 803746 0 -> 1. Live evidence (ev1.md, strong): Logs 103/104, 9 boss windows, Physical hits 1.142-1.164x. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast."
     },
     {
       "spell": 800432,
@@ -21875,7 +21875,7 @@
       "kind": "metric_delta",
       "variant": "amp_aura",
       "label_suffix": "amp_aura",
-      "quote": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell.",
+      "quote": "The target takes $803746s1% more damage from all sources while you are channeling this spell.",
       "trigger_spell": 800432,
       "gate_timing": "start",
       "trigger_only_after": true,
@@ -37574,7 +37574,7 @@
       "wait_ms": 500,
       "expire_ms": 2000,
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling O-15 Q-cu-25 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep unconditional Madness 804369 Effect[0] EffectSpellClassMask[0] = 131072 (+3%/stack on Obliteration Beam 805573 even without Corrupting Whispers 805606) and remove the $?s805606 conditional guard from 804369 client text. Without 805606 (verified 0 in both phases via ally_arm), cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X expects ratio 2.015 +- 0.002 (excluding 2.000 [0%] and 2.030 [+6%]). Live evidence (ev2.md, strong): 4 logs, 3 players, 16 same-cast identical-debuff comparisons show +2.82% to +3.11%/stack with 0 805606/706725 events in 186 logs.",
+      "observe_source": "Owner ruling O-15 Q-cu-25 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep unconditional Madness 804369 Effect[0] EffectSpellClassMask[0] = 131072 (+3%/stack on Obliteration Beam 805573 even without Corrupting Whispers 805606) client text updated to remove the $?s805606 conditional guard on 804369 in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Without 805606 (verified 0 in both phases via ally_arm), cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X expects ratio 2.015 +- 0.002 (excluding 2.000 [0%] and 2.030 [+6%]). Live evidence (ev2.md, strong): 4 logs, 3 players, 16 same-cast identical-debuff comparisons show +2.82% to +3.11%/stack with 0 805606/706725 events in 186 logs.",
       "select_dummy": true
     },
     {
@@ -37974,7 +37974,7 @@
       "wait_ms": 500,
       "expire_ms": 2000,
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling O-15 Q-cu-25 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep unconditional Madness 804369 Effect[0] EffectSpellClassMask[0] = 131072 (+3%/stack on Obliteration Beam 805573 even without Corrupting Whispers 805606) and remove the $?s805606 conditional guard from 804369 client text. Without 805606 (verified 0 in both phases via ally_arm), cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X expects ratio 2.015 +- 0.002 (excluding 2.000 [0%] and 2.030 [+6%]). Live evidence (ev2.md, strong): 4 logs, 3 players, 16 same-cast identical-debuff comparisons show +2.82% to +3.11%/stack with 0 805606/706725 events in 186 logs.",
+      "observe_source": "Owner ruling O-15 Q-cu-25 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep unconditional Madness 804369 Effect[0] EffectSpellClassMask[0] = 131072 (+3%/stack on Obliteration Beam 805573 even without Corrupting Whispers 805606) client text updated to remove the $?s805606 conditional guard on 804369 in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Without 805606 (verified 0 in both phases via ally_arm), cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X expects ratio 2.015 +- 0.002 (excluding 2.000 [0%] and 2.030 [+6%]). Live evidence (ev2.md, strong): 4 logs, 3 players, 16 same-cast identical-debuff comparisons show +2.82% to +3.11%/stack with 0 805606/706725 events in 186 logs.",
       "select_dummy": true
     },
     {
@@ -38252,7 +38252,7 @@
       "kind": "metric_delta",
       "variant": "stack_cap_base",
       "label_suffix": "stack_cap_base",
-      "quote": "stacking up to $?s301317[8][$706913u] times.",
+      "quote": "stacking up to $?s301317[7][$706913u] times.",
       "trigger_spell": 502220,
       "target": "dummy",
       "measure_actor": "dummy",
@@ -38321,7 +38321,7 @@
       "kind": "metric_delta",
       "variant": "stack_cap_301317",
       "label_suffix": "stack_cap_301317",
-      "quote": "stacking up to $?s301317[8][$706913u] times.",
+      "quote": "stacking up to $?s301317[7][$706913u] times.",
       "trigger_spell": 502220,
       "gate_spell": 301317,
       "learn": [
@@ -38354,7 +38354,7 @@
       "wait_ms": 23000,
       "expire_ms": 6000,
       "void_on_cast_failure": true,
-      "observe_source": "Owner ruling O-15 Q-cu-26 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 7-stack cap (Withered 706913 base StackAmount 4 + Call of C'Thun 301317 SPELLMOD_MAX_AURA_STACKS +3 = 7) and update Darkwither's conditional text $?s301317[8][$706913u] -> $?s301317[7][$706913u] on all 9 ranks. Precondition 300306 extends Darkwither to 24 s (10 ticks with 301317): expects 4 stacks before learning 301317 and 7 stacks after (tolerance 0, excluding 4 and 8). Live evidence (ev2.md, strong): 5 logs, 4 players, 740 dose events: 11 applications reached stack 7, 30 refreshes at stack 7, 0 occurrences of stack 8."
+      "observe_source": "Owner ruling O-15 Q-cu-26 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 7-stack cap (Withered 706913 base StackAmount 4 + Call of C'Thun 301317 SPELLMOD_MAX_AURA_STACKS +3 = 7) client text updated $?s301317[8][$706913u] -> $?s301317[7][$706913u] on all 9 ranks in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). Precondition 300306 extends Darkwither to 24 s (10 ticks with 301317): expects 4 stacks before learning 301317 and 7 stacks after (tolerance 0, excluding 4 and 8). Live evidence (ev2.md, strong): 5 logs, 4 players, 740 dose events: 11 applications reached stack 7, 30 refreshes at stack 7, 0 occurrences of stack 8."
     },
     {
       "spell": 704476,
@@ -38703,7 +38703,7 @@
       "kind": "metric_delta",
       "variant": "ap_base",
       "label_suffix": "ap_base",
-      "quote": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have.",
+      "quote": "Increases your attack power by 2 for every 100 armor value you have.",
       "trigger_spell": 60235,
       "gate_spell": 680569,
       "target": "caster",
@@ -38732,7 +38732,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "680569 Effect[0] aura 285 SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR BasePoints 49 + DieSides 1 = 50 (StatSystem.cpp:660-663: attPowerMod += int32(GetArmor() / 50) = 1 AP per 50 armor = 2 AP per 100 armor; Spell.dbc). At Dreadnought reference armor 182 (read via ally_arm), int(182 / 50) = +3 AP (376 -> 379, tol 0.1). Paired with ap_armor at 5182 armor (+103 AP) to prove the exact slope. Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
+      "observe_source": "680569 Effect[0] aura 285 SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR BasePoints 49 + DieSides 1 = 50 (StatSystem.cpp:660-663: attPowerMod += int32(GetArmor() / 50) = 1 AP per 50 armor = 2 AP per 100 armor; Spell.dbc). At Dreadnought reference armor 182 (read via ally_arm), int(182 / 50) = +3 AP (376 -> 379, tol 0.1). Paired with ap_armor at 5182 armor (+103 AP) to prove the exact slope. Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): client text updated to '2 for every 100 armor' in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035); server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
     },
     {
       "spell": 680569,
@@ -38740,7 +38740,7 @@
       "kind": "metric_delta",
       "variant": "ap_armor",
       "label_suffix": "ap_armor",
-      "quote": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have.",
+      "quote": "Increases your attack power by 2 for every 100 armor value you have.",
       "trigger_spell": 60235,
       "gate_spell": 680569,
       "target": "caster",
@@ -38784,7 +38784,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Second armor point for 680569 (StatSystem.cpp:663 attPowerMod += int32(GetArmor() / 50)): Lesser Armor 673 (Effect[0] aura 22 armor) at amount 5000 raises armor to 5182 (read via ally_arm) -> int(5182 / 50) = +103 AP (376 -> 479, tol 0.1). With ap_base (182 -> +3 AP), proves exact slope +100 AP / +5000 armor = 1 AP per 50 armor = 2 AP per 100 armor. Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
+      "observe_source": "Second armor point for 680569 (StatSystem.cpp:663 attPowerMod += int32(GetArmor() / 50)): Lesser Armor 673 (Effect[0] aura 22 armor) at amount 5000 raises armor to 5182 (read via ally_arm) -> int(5182 / 50) = +103 AP (376 -> 479, tol 0.1). With ap_base (182 -> +3 AP), proves exact slope +100 AP / +5000 armor = 1 AP per 50 armor = 2 AP per 100 armor. Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): client text updated to '2 for every 100 armor' in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035); server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
     },
     {
       "spell": 578115,
@@ -45411,7 +45411,7 @@
       "kind": "metric_delta",
       "variant": "mind_rot_hit",
       "label_suffix": "mind_rot_hit",
-      "quote": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
+      "quote": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.",
       "trigger_spell": 800432,
       "gate_spell": 300300,
       "target": "dummy",
@@ -46451,7 +46451,7 @@
       "kind": "metric_delta",
       "variant": "heal_once_2_allies",
       "label_suffix": "heal_once_2_allies",
-      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
       "gate_spell": 806382,
       "trigger_spell": 804275,
       "target": "caster",
@@ -46530,7 +46530,7 @@
       "kind": "metric_delta",
       "variant": "heal_once_3_allies",
       "label_suffix": "heal_once_3_allies",
-      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d.",
+      "quote": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
       "gate_spell": 806382,
       "trigger_spell": 804275,
       "target": "caster",
@@ -48064,7 +48064,7 @@
       "expire_ms": 16000,
       "void_on_cast_failure": true,
       "phase_since": true,
-      "observe_source": "Owner ruling O-15 Q-cu-20 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 0% Insanity scaling on Horrific Revelation 704473 (AscensionCultistAuras.cpp:230, AscensionCultistData.h:98: 0.678496 * SP only) and remove ', scaling with Insanity,' from 704473 client text. With 524877 learned at start, +2000 SP, and 16255 -100 (no crit), tick-1 heal of 704473 at 0 Insanity (5 after tick 1) vs 80 Insanity (85 after tick 1, verified by ally_arm) expects ratio 1.00 +- 0.02 (base [144..150] + 1356.99 = [1500..1508], die spread +-0.2%). Live evidence (ev1.md, suggestive): 2 logs, 1 player, flat non-crit 698-702 and 829-834 across 60-100 Insanity."
+      "observe_source": "Owner ruling O-15 Q-cu-20 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 0% Insanity scaling on Horrific Revelation 704473 (AscensionCultistAuras.cpp:230, AscensionCultistData.h:98: 0.678496 * SP only) client text updated to drop ', scaling with Insanity,' on 704473 in rev_20261125_01_cultist_client_texts.sql (Cultist ADR 0035). With 524877 learned at start, +2000 SP, and 16255 -100 (no crit), tick-1 heal of 704473 at 0 Insanity (5 after tick 1) vs 80 Insanity (85 after tick 1, verified by ally_arm) expects ratio 1.00 +- 0.02 (base [144..150] + 1356.99 = [1500..1508], die spread +-0.2%). Live evidence (ev1.md, suggestive): 2 logs, 1 player, flat non-crit 698-702 and 829-834 across 60-100 Insanity."
     },
     {
       "spell": 572103,
