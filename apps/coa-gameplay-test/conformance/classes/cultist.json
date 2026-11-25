@@ -3322,7 +3322,7 @@
       "tolerance": 1,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "805121 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1<<7 = CR_HIT_SPELL, rating 7), MiscValueB 0 (Strength), BasePoints 4 + 1 = 5 ($s1; Spell.dbc). With Greatness 60229 (+300 Strength -> 408), int32(408 * 0.05) = +20 spell hit rating on top of reference spell_hit_rating 10000 (10020 vs 10000 control). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 805121 matches."
+      "observe_source": "805121 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 128 (1<<7 = CR_HIT_SPELL, rating 7), MiscValueB 0 (Strength), BasePoints 4 + 1 = 5 ($s1; Spell.dbc). With Greatness 60229 (+300 Strength -> 408), int32(408 * 0.05) = +20 spell hit rating on top of reference spell_hit_rating 10000 (10020 vs 10000 control). Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): keep spell hit rating on server and update client text to 'spell hit rating'. Reference search 2026-11-24/25 (ev2.md): coa-history: 0 events (passive); spell.csv.gz identical aura 220 misc 128; coabuildhub 805121 matches."
     },
     {
       "spell": 804286,
@@ -4474,12 +4474,12 @@
     },
     {
       "spell": 704434,
-      "name": "Protection From Light (Holy damage taken -10% on top of -3%)",
+      "name": "Protection From Light (Holy damage taken -10%; Q-cu-8)",
       "kind": "taken_hit",
       "variant": "holy_taken",
       "label_suffix": "holy_taken",
       "judge": "damage_ratio",
-      "expected": 0.873,
+      "expected": 0.9,
       "quote": "In addition, your Holy damage taken is reduced by $s2%.",
       "strike_spell": 41394,
       "caster_health_pct": 100,
@@ -4513,7 +4513,7 @@
           ]
         }
       ],
-      "observe_source": "704434 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 2 (Holy), BasePoints -11 + 1 = -10 ($s2 = 10; Spell.dbc). On a Holy strike (Light of the Naaru 41394, 1100 Holy), Effect[0] (-3% all) and Effect[1] (-10% Holy) both apply multiplicatively: 0.97 * 0.90 = 0.873 (control without 704434 vs treatment with real learn). Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub 704434 matches."
+      "observe_source": "704434 Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, MiscValue 2 (Holy), BasePoints -11 + 1 = -10 ($s2 = 10; Spell.dbc; SQL spell_group 2000185 stack_rule=3). Owner ruling O-12 Q-cu-8 (2026-11-24, Cultist ADR 0032): 'In addition' starts a new sentence stating a distinct -10% Holy effect rather than stacking onto Effect[0]'s -3% party/raid reduction; server applies -10% on Holy strike Light of the Naaru 41394 (1100 -> 990, expected 0.90; control without 704434 vs treatment with real learn), no server or text change. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub 704434 matches."
     },
     {
       "spell": 704895,
@@ -17991,7 +17991,7 @@
     },
     {
       "spell": 806382,
-      "name": "Dark Matter (duration 10 sec per $807219d)",
+      "name": "Dark Matter (duration 6 sec with Satiate; Q-cu-15)",
       "kind": "metric_delta",
       "variant": "duration",
       "label_suffix": "duration",
@@ -18018,9 +18018,9 @@
               "target": "ally"
             },
             "before_expected": 0,
-            "expected": 9,
+            "expected": 5,
             "tolerance": 1,
-            "source": "Tooltip promises 1 sec ticks for $807219d = 10 sec (9..10 ticks over 9500 ms)."
+            "source": "Owner ruling O-15 Q-cu-15 and O-18 (Cultist ADR 0033): Dark Matter ticks every 1 sec during Satiate's 6 sec channel ($804275d = 6000 ms), landing 5 ticks by 5600 ms (4..6 accepted, excluding 0 and 9..10)."
           }
         ]
       },
@@ -18031,21 +18031,21 @@
       "before_expected": 0,
       "expected": 1,
       "after_expiry_expected": 0,
-      "wait_ms": 9500,
-      "expiry_wait_ms": 1000,
+      "wait_ms": 5600,
+      "expiry_wait_ms": 800,
       "expire_ms": 500,
       "game_time": {
         "after": [
-          9200,
-          9800
+          5450,
+          5850
         ],
         "expired": [
-          10200,
-          10800
+          6150,
+          6550
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "Spell.dbc 806382 tooltip promises \"every $807124T2 sec for $807219d\" ($807219d = DurationIndex 1 = 10000 ms). Reads Dark Matter driver aura 807124 on caster at 9500 ms (expected 1 if 10000 ms, game_time [9200, 9800]) and 10500 ms (expected 0, game_time [10200, 10800]), plus 807219 tick count on ally (expected 9..10). Note: Satiate 804275 has DurationIndex 32 = 6000 ms, 807124 has DurationIndex 31 = 8000 ms, and AscensionCultistAuras.cpp:195-198 removes 807124 when Satiate ends at 6000 ms. Reference search 2026-11-24: coa-history spell 807124: 41 applies/removals in 10 logs, 807219: 2871 heals in 10 logs; coabuildhub entry 806382 matches verbatim."
+      "observe_source": "Owner ruling O-15 Q-cu-15 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 6 sec duration ending with Satiate 804275 (DurationIndex 32 = 6000 ms; AscensionCultistAuras.cpp:195-198,233-241) and update 806382 client text $807219d (10 sec) -> $804275d (6 sec). Reads Dark Matter driver aura 807124 on caster absent before cast (0), held at 5600 ms (game_time [5450, 5850] > 5400 ms = 0.9 * 6000) with 5 +- 1 ally heals from 807219, and gone at 6400 ms (game_time [6150, 6550] < 6600 ms = 1.1 * 6000). Live evidence (ev1.md, strong): 9 logs, 3 players, 32 sessions, max 6.009 s / 6 ticks, 0 sessions > 6.01 s."
     },
     {
       "spell": 804056,
@@ -20940,7 +20940,7 @@
     },
     {
       "spell": 300307,
-      "name": "Embrace the Void (+10% Shadow damage dealt after reaching 60 Insanity, supporting evidence)",
+      "name": "Embrace the Void (+10% Shadow/Magic damage dealt after reaching 60 Insanity; Q-cu-21)",
       "kind": "hit_ratio",
       "variant": "shadow_damage",
       "label_suffix": "shadow_damage",
@@ -20999,16 +20999,16 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "Supporting Shadow-school check for 300307 Embrace the Void helper 573285 (Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, bp 9 + die 1 = +10%; Spell.dbc): uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup whose 500706 (50 -> 60) and 573285 (0 -> 0 control, 0 -> 1 treatment) reads are proved by companion 300307 reach_60. Paired with alerting melee_damage (Physical excluded by EffectMiscValue[0] = 126). Reference search 2026-11-25: see reach_60."
+      "observe_source": "Shadow-school check for 300307 Embrace the Void helper 573285 (Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, bp 9 + die 1 = +10%, EffectMiscValue[0] = 126 Magic schools; Spell.dbc): uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup verified by companion 300307 reach_60. Owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only +10% and update client text to 'Magic damage dealt'. Paired with melee_damage (expected 1.0, proving Physical excluded). Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
     },
     {
       "spell": 300307,
-      "name": "Embrace the Void (Physical melee damage dealt check after reaching 60 Insanity)",
+      "name": "Embrace the Void (Physical melee excluded: Magic-only +10%; Q-cu-21)",
       "kind": "hit_ratio",
       "variant": "melee_damage",
       "label_suffix": "melee_damage",
       "quote": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d.",
-      "expected": 1.1,
+      "expected": 1.0,
       "metric": "melee_damage_total",
       "swing_hand": 0,
       "observe_spell": 0,
@@ -21052,9 +21052,10 @@
         ]
       },
       "critical": false,
+      "refresh": true,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "Physical-school check for 300307 Embrace the Void 'increases your damage dealt by $573285s1%' (ADR 0287 ruling 'tout inclus': unqualified 'damage dealt' includes Physical). Uses the exact same 500706=50 + 806897 (+10 -> 60) arm setup verified by companion 300307 reach_60 (500706 50 -> 60, 573285 0 -> 0 in control and 0 -> 1 in treatment). Server defect note: 573285 Effect[0] carries EffectMiscValue[0] = 126 (magic schools only, omitting Physical bit 1) with no pending SQL or AscensionCultistContracts.cpp override, so Physical white swings stay at ~+0% against expected +10% (alerting). Reference search 2026-11-25: see reach_60."
+      "observe_source": "Physical-school negative check for 300307 Embrace the Void under owner ruling O-15 Q-cu-21 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep Magic-only 573285 Effect[0] EffectMiscValue[0] = 126 (excluding Physical bit 1) and update client text to 'Magic damage dealt'. Uses refresh: true so every swing trial resets 500706=50 and casts 806897 (+10 -> 60, verified by companion 300307 reach_60 and 300307 duration 10 s >> 3.4 s swing+settle), keeping 573285 active across all 20 swings (with void_on_cast_failure: true guarding every 806897 cast). Physical white swings expect 1.0 (+0%, excluding +10%), proving Physical is not boosted while companion shadow_damage proves +10% Magic. Live evidence (ev1.md, suggestive): Devzou Log 141 Shadow spells 1.095-1.106x vs Physical melee 1.020x."
     },
     {
       "spell": 301181,
@@ -21745,7 +21746,7 @@
     },
     {
       "spell": 800432,
-      "name": "Psychic Suppression (Physical negative control: 'more spell damage' must not amplify Physical)",
+      "name": "Psychic Suppression (+15% Physical damage taken from all sources while channeling; Q-cu-22)",
       "kind": "metric_delta",
       "variant": "phys_control",
       "label_suffix": "phys_control",
@@ -21788,7 +21789,7 @@
           {
             "spell": 92559,
             "power": 0,
-            "source": "Void Zone 92559 (Spell.dbc: SchoolMask 1 Physical, DmgClass 0, Effect[0] SCHOOL_DAMAGE bp 999 + die 1 = 1000, instant, 0 mana, 0 CD) tests that 'more spell damage' excludes Physical damage"
+            "source": "Void Zone 92559 (Spell.dbc: SchoolMask 1 Physical, DmgClass 0, Effect[0] SCHOOL_DAMAGE bp 999 + die 1 = 1000, instant, 0 mana, 0 CD) proves +15% all-school amplification includes Physical damage under O-15 Q-cu-22 / O-18 (Cultist ADR 0033)."
           }
         ],
         "arms": [
@@ -21840,12 +21841,12 @@
         "target": "dummy"
       },
       "before_expected": 900,
-      "expected": 1800,
-      "expected_ratio": 2.0,
+      "expected": 1935,
+      "expected_ratio": 2.15,
       "tolerance": 0.02,
       "wait_ms": 500,
       "expire_ms": 5500,
-      "observe_source": "Negative school control for 800432 Psychic Suppression 'takes $803746s1% more spell damage from all sources': tooltip restricts the +15% debuff to spell damage (magic schools 126), so Physical Void Zone 92559 (SchoolMask 1 Physical, DmgClass 0, exact 1000 raw Physical) from the grouped ally must stay at 0% increase (cumulative after / before ratio == 2.00 +- 0.02). Both arms read exact 500706 == 20 and 680601 == 1 (after_setup_stacks + ally_arm) and 803746 0 -> 1. Server defect note: 803746 Effect[0] carries EffectMiscValue[0] = 127 (SPELL_SCHOOL_MASK_ALL, including Physical bit 1) with no pending SQL or AscensionCultistContracts.cpp override, so Unit.cpp:10114,11724 amplifies Physical by +15% (ratio ~2.15, alerting). void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast while enemy debuffs apply cleanly. Reference search 2026-11-25: see damage_base."
+      "observe_source": "Owner ruling O-15 Q-cu-22 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 803746 Effect[0] EffectMiscValue[0] = 127 (SPELL_SCHOOL_MASK_ALL, +15% to all damage including Physical) and remove 'spell ' from 800432 client text ('more damage from all sources'). Grouped ally casts Physical Void Zone 92559 (SchoolMask 1, DmgClass 0, exact 1000 raw Physical): cumulative after / before expected ratio 2.15 +- 0.02 (900 + 1035 = 1935, excluding 2.00 [0%] and 2.30 [+30%]). Both arms read exact 500706 == 20 and 680601 == 1 (after_setup_stacks + ally_arm) and 803746 0 -> 1. Live evidence (ev1.md, strong): Logs 103/104, 9 boss windows, Physical hits 1.142-1.164x. void_on_cast_failure omitted because 800432 OnAuraApply (AscensionCultistAuras.cpp:66-69) fires on both Effect[0] (enemy) and Effect[1] (self), emitting 2 harmless native SPELL_FAILED_DONT_REPORT (27) on the self-target sub-cast."
     },
     {
       "spell": 800432,
@@ -22358,7 +22359,7 @@
     },
     {
       "spell": 803398,
-      "name": "Eldritch Devastation (less damage with each enemy struck: 0.90x on first chain target)",
+      "name": "Eldritch Devastation (no chain falloff: 1.00x on first chain target; Q-cu-17)",
       "kind": "metric_delta",
       "variant": "chain_falloff",
       "label_suffix": "chain_falloff",
@@ -22459,10 +22460,10 @@
           "spell": 803398,
           "target": "dummy"
         },
-        "ratio": 0.9,
+        "ratio": 1.0,
         "tolerance": 0.03,
         "least": 30000,
-        "source": "803398 Effect[0] EffectChainTarget 5, EffectDamageMultiplier 0.90 (Spell.dbc)"
+        "source": "Owner ruling O-17 Q-cu-17 (2026-11-25, Cultist ADR 0032, leave 'on colle au live'): chained periodic ticks deal full 1.00x damage (ratio 1.00 +- 0.03 excludes 0.90)."
       },
       "metric": "spell_damage_total",
       "fields": {
@@ -22470,11 +22471,11 @@
         "target": "area1"
       },
       "before_expected": 0,
-      "expected": 35883,
+      "expected": 39870,
       "wait_ms": 4800,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "803398 Eldritch Devastation 'dealing less damage with each enemy struck': Effect[0] EffectDamageMultiplier[0] = 0.90 (Spell.dbc), so first chain target area1 (6 yd) must take 0.90 +- 0.03 of primary dummy (3 yd) damage at +20000 SP (non-crit, 823764 no resist). Control reads 500706 == 0, 680601 == 0; treatment runs 2x 806897 setup casts and reads exact 500706 == 20, 680601 == 1 via after_setup_stacks and ally_arm. Core server defect note: Spell.cpp:1934-1940,8655-8659 applies m_damageMultipliers only to direct m_damage, never periodic SPELL_EFFECT_APPLY_AURA damage, so area1/dummy measures ~1.000 against 0.90 +- 0.03 (alerting). Reference search 2026-11-25: see damage_base."
+      "observe_source": "Owner ruling O-17 Q-cu-17 (2026-11-25, Cultist ADR 0032): keep no chain falloff on Eldritch Devastation 803398 ('leave', no server or text change; Spell.cpp:1934-1940,8655-8659 does not apply EffectDamageMultiplier 0.90 to periodic auras). First chain target area1 (6 yd) vs primary dummy (3 yd) at +20000 SP (non-crit, 823764 no resist) expects same_arm_ratio 1.00 +- 0.03, excluding 0.90. Control reads 500706 == 0, 680601 == 0; treatment runs 2x 806897 setup casts and reads exact 500706 == 20, 680601 == 1 via after_setup_stacks and ally_arm. Live evidence (ev1.md, strong): 4 logs, 3 players, 594 clean adjacent-target ratios, median 0.9830, mode 1.00 (356/594 = 59.9%)."
     },
     {
       "spell": 301008,
@@ -37432,7 +37433,7 @@
     },
     {
       "spell": 500719,
-      "name": "Glimpse of Madness R1 (Obliteration Beam unboosted without 805606)",
+      "name": "Glimpse of Madness R1 (Madness increases Obliteration Beam by 3% without 805606; Q-cu-25)",
       "kind": "metric_delta",
       "variant": "beam_damage_without_805606",
       "label_suffix": "beam_damage_without_805606",
@@ -37516,13 +37517,13 @@
         "target": "dummy"
       },
       "before_expected": 70000,
-      "expected": 140000,
-      "expected_ratio": 2.0,
-      "tolerance": 0.003,
+      "expected": 141050,
+      "expected_ratio": 2.015,
+      "tolerance": 0.002,
       "wait_ms": 500,
       "expire_ms": 2000,
       "void_on_cast_failure": true,
-      "observe_source": "False branch of conditional $?s805606[ or Obliteration Beam][] in Madness 804369: without 805606 (verified 0 in both phases via ally_arm), tooltip reads 'Your Gaze of C'thun causes 3% increased damage,' omitting Obliteration Beam, so 805573 damage must remain unchanged (expected_ratio 1.00 +- 0.005). Server defect note: 804369 Effect[0] EffectSpellClassMask[0] = 131072 statically includes 805573 unconditionally in Spell.dbc, so if the server applies +3% without 805606 this alerts honestly. Reference search 2026-11-25: coa-history 500719: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500719 matches verbatim. Cumulative 2 hits in control (2.00*X) vs 4 unboosted hits (4.00*X) -> expected_ratio 2.000 +- 0.003 (excludes 2.015 [+3%]).",
+      "observe_source": "Owner ruling O-15 Q-cu-25 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep unconditional Madness 804369 Effect[0] EffectSpellClassMask[0] = 131072 (+3%/stack on Obliteration Beam 805573 even without Corrupting Whispers 805606) and remove the $?s805606 conditional guard from 804369 client text. Without 805606 (verified 0 in both phases via ally_arm), cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X expects ratio 2.015 +- 0.002 (excluding 2.000 [0%] and 2.030 [+6%]). Live evidence (ev2.md, strong): 4 logs, 3 players, 16 same-cast identical-debuff comparisons show +2.82% to +3.11%/stack with 0 805606/706725 events in 186 logs.",
       "select_dummy": true
     },
     {
@@ -37832,7 +37833,7 @@
     },
     {
       "spell": 500767,
-      "name": "Glimpse of Madness R2 (Obliteration Beam unboosted without 805606)",
+      "name": "Glimpse of Madness R2 (Madness increases Obliteration Beam by 3% without 805606; Q-cu-25)",
       "kind": "metric_delta",
       "variant": "beam_damage_without_805606",
       "label_suffix": "beam_damage_without_805606",
@@ -37916,13 +37917,13 @@
         "target": "dummy"
       },
       "before_expected": 70000,
-      "expected": 140000,
-      "expected_ratio": 2.0,
-      "tolerance": 0.003,
+      "expected": 141050,
+      "expected_ratio": 2.015,
+      "tolerance": 0.002,
       "wait_ms": 500,
       "expire_ms": 2000,
       "void_on_cast_failure": true,
-      "observe_source": "False branch of conditional $?s805606[ or Obliteration Beam][] in Madness 804369: without 805606 (verified 0 in both phases via ally_arm), tooltip reads 'Your Gaze of C'thun causes 3% increased damage,' omitting Obliteration Beam, so 805573 damage must remain unchanged (expected_ratio 1.00 +- 0.005). Server defect note: 804369 Effect[0] EffectSpellClassMask[0] = 131072 statically includes 805573 unconditionally in Spell.dbc, so if the server applies +3% without 805606 this alerts honestly. Reference search 2026-11-25: coa-history 500767: 0 events (passive; positive control 804369 Madness: 972 SPELL_AURA_APPLIED_DOSE in 5 logs; 805573 Obliteration Beam: 1879 hits in 159 casts); coabuildhub 500767 matches verbatim. Cumulative 2 hits in control (2.00*X) vs 4 unboosted hits (4.00*X) -> expected_ratio 2.000 +- 0.003 (excludes 2.015 [+3%]).",
+      "observe_source": "Owner ruling O-15 Q-cu-25 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep unconditional Madness 804369 Effect[0] EffectSpellClassMask[0] = 131072 (+3%/stack on Obliteration Beam 805573 even without Corrupting Whispers 805606) and remove the $?s805606 conditional guard from 804369 client text. Without 805606 (verified 0 in both phases via ally_arm), cumulative 2 hits in control (2.00*X) vs +setup(1.00*X)+trigger(1.03*X) = 4.03*X expects ratio 2.015 +- 0.002 (excluding 2.000 [0%] and 2.030 [+6%]). Live evidence (ev2.md, strong): 4 logs, 3 players, 16 same-cast identical-debuff comparisons show +2.82% to +3.11%/stack with 0 805606/706725 events in 186 logs.",
       "select_dummy": true
     },
     {
@@ -38265,7 +38266,7 @@
     },
     {
       "spell": 502220,
-      "name": "Darkwither (Withered stack cap with Call of C'Thun 301317: tooltip 8 vs server 7)",
+      "name": "Darkwither (Withered caps at 7 stacks with Call of C'Thun 301317; Q-cu-26)",
       "kind": "metric_delta",
       "variant": "stack_cap_301317",
       "label_suffix": "stack_cap_301317",
@@ -38297,12 +38298,12 @@
         "spell": 706913
       },
       "before_expected": 4,
-      "expected": 8,
+      "expected": 7,
       "tolerance": 0,
       "wait_ms": 23000,
       "expire_ms": 6000,
       "void_on_cast_failure": true,
-      "observe_source": "True branch of conditional $?s301317[8][$706913u]: with Call of C'Thun 301317 learned, Darkwither's tooltip states hardcoded literal '8' times (expected 8). Precondition 300306 extends Darkwither to 24 s (10 ticks with 301317, same pattern as 301317 withered_stacks). Server defect/tooltip mismatch note: 301317 Effect[0] SPELLMOD_MAX_AURA_STACKS adds +3 to base 4 -> 7 stacks, contradicting Darkwither's hardcoded literal 8 (alerts honestly). Reference search 2026-11-25: coa-history 502220: 484 SPELL_PERIODIC_DAMAGE events in 2 logs; 706913 Withered: 740 SPELL_AURA_APPLIED_DOSE in 5 logs; coabuildhub 502220 matches verbatim."
+      "observe_source": "Owner ruling O-15 Q-cu-26 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 7-stack cap (Withered 706913 base StackAmount 4 + Call of C'Thun 301317 SPELLMOD_MAX_AURA_STACKS +3 = 7) and update Darkwither's conditional text $?s301317[8][$706913u] -> $?s301317[7][$706913u] on all 9 ranks. Precondition 300306 extends Darkwither to 24 s (10 ticks with 301317): expects 4 stacks before learning 301317 and 7 stacks after (tolerance 0, excluding 4 and 8). Live evidence (ev2.md, strong): 5 logs, 4 players, 740 dose events: 11 applications reached stack 7, 30 refreshes at stack 7, 0 occurrences of stack 8."
     },
     {
       "spell": 704476,
@@ -38680,7 +38681,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "680569 Effect[0] aura 285 SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR BasePoints 49 + DieSides 1 = 50 (StatSystem.cpp:660-663: attPowerMod += int32(GetArmor() / 50) = 1 AP per 50 armor = 2 AP per 100 armor; Spell.dbc). At Dreadnought reference armor 182 (read via ally_arm), int(182 / 50) = +3 AP (376 -> 379, tol 0.1). Paired with ap_armor at 5182 armor (+103 AP) to prove the exact slope. Owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
+      "observe_source": "680569 Effect[0] aura 285 SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR BasePoints 49 + DieSides 1 = 50 (StatSystem.cpp:660-663: attPowerMod += int32(GetArmor() / 50) = 1 AP per 50 armor = 2 AP per 100 armor; Spell.dbc). At Dreadnought reference armor 182 (read via ally_arm), int(182 / 50) = +3 AP (376 -> 379, tol 0.1). Paired with ap_armor at 5182 armor (+103 AP) to prove the exact slope. Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
     },
     {
       "spell": 680569,
@@ -38732,7 +38733,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Second armor point for 680569 (StatSystem.cpp:663 attPowerMod += int32(GetArmor() / 50)): Lesser Armor 673 (Effect[0] aura 22 armor) at amount 5000 raises armor to 5182 (read via ally_arm) -> int(5182 / 50) = +103 AP (376 -> 479, tol 0.1). With ap_base (182 -> +3 AP), proves exact slope +100 AP / +5000 armor = 1 AP per 50 armor = 2 AP per 100 armor. Owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
+      "observe_source": "Second armor point for 680569 (StatSystem.cpp:663 attPowerMod += int32(GetArmor() / 50)): Lesser Armor 673 (Effect[0] aura 22 armor) at amount 5000 raises armor to 5182 (read via ally_arm) -> int(5182 / 50) = +103 AP (376 -> 479, tol 0.1). With ap_base (182 -> +3 AP), proves exact slope +100 AP / +5000 armor = 1 AP per 50 armor = 2 AP per 100 armor. Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): correct CLIENT TEXT to '2 for every 100 armor' at class end; leave server unchanged (1 AP per 50 armor). Reference search 2026-11-25: coa-history 680569: 0 events (passive); coabuildhub 680569 also displays the broken 0 formula."
     },
     {
       "spell": 578115,
@@ -47936,13 +47937,162 @@
         "stop_target": "dummy"
       },
       "observe_source": "Spell.dbc 561035 Effect[0] aura 108 SPELLMOD_DURATION BasePoints 24 + DieSides 1 = +25% ($s1), EffectSpellClassMask[0] 134217728 (SpellFamilyName 31). Presence of Y'Shaarj 803035 (active stance, ProcChance 20) triggers Despoiled Ground 805180 (Effect[0] PERSISTENT_AREA_AURA) on dummy with SPELLVALUE_AURA_DURATION = ModifiedDuration(player, 807632) (807632 SpellFamilyFlags[0] 134217728, DurationIndex 29 = 12000 ms, SpellDuration.dbc; AscensionCultistEvents.cpp:27-33,100-102,249-253; SpellEffects.cpp:2892-2899): 12000 ms base (control) -> 15000 ms (+25% with 561035). Two-duration rolled-feed contrast (ADR 1308) with stop_target='dummy' (ADR 1297) casts 92559 Void Zone up to 38 times/arm (0.083% pair union bound cap risk) with 803035 active in both arms, proving 805180 expires inside 12000 +- 600 ms before learning 561035 and inside 15000 +- 750 ms after learning 561035."
+    },
+    {
+      "spell": 524877,
+      "name": "Horrific Revelations (Horrific Revelation heal does not scale with Insanity; Q-cu-20)",
+      "kind": "metric_delta",
+      "variant": "no_insanity_scaling",
+      "label_suffix": "no_insanity_scaling",
+      "quote": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.@s:704473:0@",
+      "gate_timing": "start",
+      "trigger_spell": 704476,
+      "gate_spell": 524877,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "player_spell_power": {
+        "amount": 2000,
+        "hit_arm": true
+      },
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          10000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 500706
+            },
+            "before_expected": 5,
+            "expected": 85,
+            "tolerance": 0,
+            "source": "Control phase starts at 0 Insanity (+5 from tick 1 = 5); treatment phase sets 80 Insanity via after_auras (+5 from tick 1 = 85)."
+          }
+        ]
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704473,
+        "target": "ally"
+      },
+      "before_expected": 1400,
+      "expected": 1400,
+      "expected_ratio": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 1500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "Owner ruling O-15 Q-cu-20 (2026-11-25) and O-18 (2026-11-25, Cultist ADR 0033): keep 0% Insanity scaling on Horrific Revelation 704473 (AscensionCultistAuras.cpp:230, AscensionCultistData.h:98: 0.678496 * SP only) and remove ', scaling with Insanity,' from 704473 client text. With 524877 learned at start, +2000 SP, and 16255 -100 (no crit), tick-1 heal of 704473 at 0 Insanity (5 after tick 1) vs 80 Insanity (85 after tick 1, verified by ally_arm) expects ratio 1.00 +- 0.02 (base [144..150] + 1356.99 = [1500..1508], die spread +-0.2%). Live evidence (ev1.md, suggestive): 2 logs, 1 player, flat non-crit 698-702 and 829-834 across 60-100 Insanity."
+    },
+    {
+      "spell": 572103,
+      "name": "Tentacle of N'Zoth (killing the tentacle ends Thoughtseize silence early)",
+      "kind": "metric_delta",
+      "variant": "tentacle_death_ends_silence",
+      "label_suffix": "tentacle_death_ends_silence",
+      "quote": "If the tentacle dies, the silence effect will end.",
+      "gate_timing": "start",
+      "trigger_spell": 572103,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 66903,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300,
+        "after_trigger_ms": 1000,
+        "owned_entry": 501464
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 501464
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Tentacle 501464 is alive in the un-struck control phase (1) and dead after 1x 66903 strike (16000 Holy) in the after phase (0)."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 806596
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "observe_source": "Tentacle of N'Zoth 572103 (AscensionCultistSummons.cpp:178-186,216-219): JustDied calls ClearThoughtseize() with graceMs=0, immediately removing Thoughtseize 806596 (silence) from the dummy. Both phases summon 501464 (8000 ms duration, ~700 HP = player->GetMaxHealth()/3) which applies 806596 to dummy at t=0. Control (before, no strike because strike.owned_entry strikes in after phase only; ADR 0530, modelled on necromancer.json 504866 ghoul_shield): at t=2500 ms tentacle is alive (owned_creature_count == 1) and 806596 is present (1). After 9000 ms expiry, treatment (after) summons a fresh tentacle, waits 1000 ms, then striker casts Hammer of the Righteous 66903 (16000 Holy, 0 resist) x1 at owned_entry 501464, killing it: by t=2800 ms (well inside 8000 ms) owned_creature_count == 0 and 806596 is removed (0). Reference search 2026-11-25: see 572103 damage_base."
     }
   ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],
   "conditional_spells": [],
-  "weapon_percent_before_flat": [],
+  "weapon_percent_before_flat": [
+    806222,
+    806825,
+    806826,
+    806827,
+    806828,
+    578263,
+    804152,
+    555351,
+    555352,
+    555353,
+    555354,
+    572846
+  ],
   "self_stack_bonus": [],
   "dual_target_effects": [],
   "target_aura_gates": [],

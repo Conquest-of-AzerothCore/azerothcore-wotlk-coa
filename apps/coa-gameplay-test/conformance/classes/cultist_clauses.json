@@ -454,9 +454,11 @@
     "clause": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot.",
     "labels": [
       "300300 behaviour_metric_delta periodic",
-      "300300 behaviour_metric_delta channeled"
+      "300300 behaviour_metric_delta channeled",
+      "300300 behaviour_metric_delta dispel_crit"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) for dispel type under owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): Mind Rot 560943 keeps Dispel=1 (Magic) on the server, and client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.' at class end; application is behaviour-proven by periodic/channeled and Magic dispel by dispel_crit (Dispel Magic 988, also linked on r43)."
   },
   {
     "spell": 300300,
@@ -574,7 +576,8 @@
           "300307 behaviour_metric_delta below_60"
         ]
       }
-    ]
+    ],
+    "reason": "Claim 0 ('increases your damage dealt by $573285s1%') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-21 (2026-11-25, magic_only) and O-18 (2026-11-25, Cultist ADR 0033): server keeps Magic-only +10% (573285 EffectMiscValue[0]=126, matching live log Devzou Log 141 Shadow 1.095-1.106x vs melee 1.020x), client text updates 'damage dealt' -> 'Magic damage dealt' at class end, and 300307 shadow_damage (+10%) + melee_damage (+0%, expected 1.0) prove both halves in game."
   },
   {
     "spell": 300308,
@@ -996,7 +999,16 @@
         ]
       }
     ],
-    "reason": "Claim '$n attacks' proves the initial charge count 10 against 9/11 at runtime via aura_charges (301262 behaviour_metric_delta initial_charges, readback / data evidence class in coverage.py:454). Split claim 'or $n attacks' (appended at end) is a tool gap for proving Saronite Blessing 600327 actually ends on the 10th auto-attack before its 15000 ms duration: attack_swings waits un-hasted reference intervals without exact per-swing counting, Heretic staff 2535 (3300 ms / 2640 ms hasted) delivers <= 6 swings in 15000 ms, melee crits refresh 600327 back to 10 charges, fed_charge_casts is cast-time-only, and block_charge_strikes is block-only."
+    "reason": "Claim '$n attacks' proves the initial charge count 10 against 9/11 at runtime via aura_charges (301262 behaviour_metric_delta initial_charges, readback / data evidence class in coverage.py:454). Split claim 'or $n attacks' (appended at end) is a tool gap for proving Saronite Blessing 600327 actually ends on the 10th auto-attack before its 15000 ms duration: attack_swings waits un-hasted reference intervals without exact per-swing counting, Heretic staff 2535 (3300 ms / 2640 ms hasted) delivers <= 6 swings in 15000 ms, melee crits refresh 600327 back to 10 charges, fed_charge_casts is cast-time-only, and block_charge_strikes is block-only.",
+    "tool_gap": {
+      "reason": "No existing conformance kind proves Saronite Blessing 600327 ends on the 10th auto-attack before its 15000 ms duration ('or $n attacks', claims[2]): attack_swings waits un-hasted reference intervals without exact per-swing counting, Heretic staff 2535 (3300 ms / 2640 ms hasted) delivers <= 6 swings in 15000 ms, melee crits refresh 600327 back to 10 charges, fed_charge_casts is cast-time-only, and block_charge_strikes is block-only. Initial charge count 10 is verified as data via 301262 initial_charges (aura_charges readback).",
+      "attempts": [
+        {
+          "agent": "cu-g6",
+          "report": ".agents/plans/cu-g6/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301315,
@@ -1345,7 +1357,8 @@
           "500719 behaviour_metric_delta beam_damage_without_805606"
         ]
       }
-    ]
+    ],
+    "reason": "Claim 1 ('$?s805606[ or Obliteration Beam][] causes $s1% increased damage,') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), client text removes the $?s805606 conditional guard on 804369 at class end, and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states."
   },
   {
     "spell": 500719,
@@ -1506,7 +1519,8 @@
           "500767 behaviour_metric_delta beam_damage_without_805606"
         ]
       }
-    ]
+    ],
+    "reason": "Claim 1 ('$?s805606[ or Obliteration Beam][] causes $s1% increased damage,') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), client text removes the $?s805606 conditional guard on 804369 at class end, and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states."
   },
   {
     "spell": 500767,
@@ -1802,10 +1816,12 @@
       },
       {
         "claim": "scaling with Insanity",
-        "labels": []
+        "labels": [
+          "524877 behaviour_metric_delta no_insanity_scaling"
+        ]
       }
     ],
-    "reason": "Alert & owner question (claim 1 'scaling with Insanity', uncounted): 704473 tooltip states 'Heals a friendly target for ${$m1+0+$SP*0.678496}, scaling with Insanity, and increases their critical strike chance by $s2%, stacking $u times, for $d.' Measured ratio between 0 and 80 Insanity (500706 stacks) on tick-1 non-crit heal of 704473 (cu-g8c/prove-p3 runs 20261125-002444 and 20261125-002520, build b6e563ae7771): 1.007 (298 -> 300) and 0.997 (300 -> 299) \u2014 no scaling at all where the tooltip says it scales (AscensionCultistAuras.cpp:222 calls plain Cast(player, GetTarget(), 704473) and AscensionCultistData.h:98 carries only 0.678496f healing SP coef, with zero Insanity-scaling code anywhere in src/server/coa/AscensionCultist*.cpp). Owner question: the tooltip, Spell.dbc, and pending_db_world/ state no numeric Insanity scaling rate, so the invented expected_ratio 1.5 +- 0.4 was removed from cultist.json (cu-rg8 I5) and an owner ruling is required to define the intended rate before committing a ratio expectation."
+    "reason": "Claim 1 ('scaling with Insanity') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 0% Insanity scaling on Horrific Revelation 704473 (matching archived live logs: 2 logs, 1 player, flat non-crit heals across 60-100 Insanity), client text removes ', scaling with Insanity,' on 704473 at class end, and 524877 no_insanity_scaling proves the 1.00 +- 0.02 ratio between 0 and 80 Insanity."
   },
   {
     "spell": 524877,
@@ -2207,7 +2223,7 @@
         ]
       }
     ],
-    "reason": "Owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control in cu-t2 batch-b2 20261125-055332 / 20261125-055401) covers \"and may briefly trick enemies into ignoring you.\" with no server change. Copy movement direction (\"that run in a random direction\") remains a tool gap.",
+    "reason": "Claim 3 ('and may briefly trick enemies into ignoring you.') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat, Cultist ADR 0032): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control) covers 'and may briefly trick enemies into ignoring you.' with no server or client text change. Copy movement direction ('that run in a random direction') remains a tool gap.",
     "tool_gap": {
       "reason": "No existing conformance metric/kind reads an owned creature's movement path or heading to prove that Hallucination 560301's 3 copies (entry 840025, AscensionCultistSummons.cpp:278-283 Wander(me) -> MovePoint at a random angle) run in a random direction (owned_creature_distance_2d only measures scalar distance from the caster and has no STATE_PROMISES entry).",
       "attempts": [
@@ -2541,17 +2557,10 @@
   {
     "spell": 572103,
     "clause": "If the tentacle dies, the silence effect will end.",
-    "labels": [],
-    "kind": "claim",
-    "tool_gap": {
-      "reason": "No existing harness action or conformance kind kills an owned TempSummon (501464, GetOwnedCreature) mid-duration to verify JustDied -> ClearThoughtseize() (AscensionCultistSummons.cpp:159-169) ends 806596 on the target while an unkilled control keeps 806596 active at the same timestamp: harness action 'die' with pet:true only kills player->GetPet() (CoAGameplayTest.cpp:8247-8254), and attack_nearby kill:true requires IsValidAttackTarget (hostile to caster). Nearest kind: metric_delta with a kill_owned_after_ms option and harness 'die' supporting owned_entry.",
-      "attempts": [
-        {
-          "agent": "cu-t3",
-          "report": ".agents/plans/cu-t3/report.md"
-        }
-      ]
-    }
+    "labels": [
+      "572103 behaviour_metric_delta tentacle_death_ends_silence"
+    ],
+    "kind": "claim"
   },
   {
     "spell": 572103,
@@ -2882,7 +2891,7 @@
           "680569 behaviour_metric_delta ap_base",
           "680569 behaviour_metric_delta ap_armor"
         ],
-        "reason": "Proved in play, audit classification pending (uncounted): server behaviour proved against ruled client text '2 for every 100 armor' per owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24: correct client text at class end, leave server 1 AP per 50 armor unchanged; proved at armor 182 -> +3 AP and armor 5182 -> +103 AP); audit still classes this sub-claim as data because STATE_PROMISES['attack_power'] matches 'attack power' on claims[1] only."
+        "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 1 AP per 50 armor (proved in play by ap_base +3 AP at 182 armor and ap_armor +103 AP at 5182 armor) and client text fixes '${($m1*$m2)*2}' -> '100' ('2 for every 100 armor') at class end; coverage.py currently audits claims[0] as data because STATE_PROMISES['attack_power'] matches 'attack power' on claims[1] only."
       },
       {
         "claim": "Increases your attack power by 2",
@@ -2890,7 +2899,7 @@
           "680569 behaviour_metric_delta ap_base",
           "680569 behaviour_metric_delta ap_armor"
         ],
-        "reason": "Counted against ruled client text '2 for every 100 armor' per owner ruling Q-cu-4 (section O-12 of mentor-decisions.md, 2026-11-24: correct client text at class end, leave server 1 AP per 50 armor unchanged; proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
+        "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) and behaviour-proven against approved O-18 text '2 for every 100 armor' under owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 1 AP per 50 armor (proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
       }
     ]
   },
@@ -2926,7 +2935,8 @@
     "spell": 680574,
     "clause": "Your successful blocks now have a $s2% chance to critically block for twice the normal amount.",
     "labels": [
-      "680574 effect_value e1 #0"
+      "680574 effect_value e1 #0",
+      "680574 behaviour_metric_delta crit_block_base"
     ],
     "kind": "claim",
     "tool_gap": {
@@ -2989,7 +2999,8 @@
       "ruling": null,
       "spell": 680575,
       "dbc_differs": "no field differs from Spell.dbc"
-    }
+    },
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-5 (2026-11-24, Cultist ADR 0032): keep 'Eldritch Shock' (matching server Spell.dbc and rev_20261007_58_void_augmentation_tooltip.sql; 2026-09-01 archive video 'Twilight Shock' recorded as observation only), behaviour-proven by 680575 shock_cleave."
   },
   {
     "spell": 680579,
@@ -3368,7 +3379,8 @@
     "labels": [
       "704434 behaviour_hit_ratio holy_taken"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-8 (2026-11-24, Cultist ADR 0032): 'In addition' starts a new sentence stating a distinct -10% Holy effect rather than numeric stacking onto the -3% party/raid reduction; server behaviour (-10% Holy, 0.90) kept with no client text change and proved by 704434 taken_hit holy_taken (expected 0.90)."
   },
   {
     "spell": 704476,
@@ -3503,6 +3515,7 @@
     "spell": 704881,
     "clause": "Increases the duration of Embrace the Void by $/1000;s3 sec",
     "labels": [
+      "704881 behaviour_metric_delta duration_contrast",
       "704881 behaviour_metric_delta duration_expiry"
     ],
     "kind": "claim"
@@ -4240,7 +4253,8 @@
       "800432 behaviour_metric_delta amp_aura",
       "800432 behaviour_metric_delta phys_control"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps all-school +15% amplification (803746 EffectMiscValue[0]=127, matching archived live logs: 2 logs, 9 boss windows, Physical 1.142-1.164x), client text removes 'spell ' ('more damage from all sources') at class end, and 800432 spell_amp + phys_control (+15% on Physical too) prove both in game."
   },
   {
     "spell": 502220,
@@ -4284,7 +4298,8 @@
       "502220 behaviour_metric_delta stack_cap_base",
       "502220 behaviour_metric_delta stack_cap_301317"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033): server keeps 7-stack cap with Call of C'Thun 301317 (4 base + 3 additional = 7, matching archived live logs: 5 logs, 4 players, 740 dose events, 11 at stack 7, 30 refreshes at 7, 0 at 8), client text updates '$?s301317[8]' -> '$?s301317[7]' on all 9 ranks at class end, and 502220 stack_cap_base (4) + stack_cap_301317 (7) prove both caps in game."
   },
   {
     "spell": 800463,
@@ -4483,7 +4498,8 @@
           "803398 behaviour_metric_delta chain_falloff"
         ]
       }
-    ]
+    ],
+    "reason": "Claim 3 ('dealing less damage with each enemy struck') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-17 Q-cu-17 (2026-11-25, leave 'on colle au live', Cultist ADR 0032): server keeps full periodic damage on every chained target with no -10% falloff (matching archived live logs: 594 ratios, median 0.9830, mode 1.00 = 59.9%), client text stays unchanged (kept deviation from literal tooltip), and 803398 chain_falloff guards the ruled 1.00 +- 0.03 chain ratio."
   },
   {
     "spell": 802728,
@@ -4832,7 +4848,8 @@
     "labels": [
       "805121 behaviour_metric_delta spell_hit_str"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033): server keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength as spell hit rating, proved in game by 805121 spell_hit_str: 10000 -> 10020 at 408 Strength) and client text updates 'spell hit chance' -> 'spell hit rating' at class end; coverage.py audits as data until the O-18 text SQL lands and matches STATE_PROMISES['combat_rating']."
   },
   {
     "spell": 805126,
@@ -5094,7 +5111,8 @@
           "806382 behaviour_metric_delta heal_sp"
         ]
       }
-    ]
+    ],
+    "reason": "Claim 2 ('for $807219d') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-15 (2026-11-25, channel_text) and O-18 (2026-11-25, Cultist ADR 0033): server keeps Dark Matter ending with the 6 sec Satiate 804275 channel (matching archived live logs: 32 sessions, max 6.009 s / 6 ticks), client text updates '$807219d' (10 sec) -> '$804275d' (6 sec) at class end, and 806382 duration proves the ruled 6 sec duration in game."
   },
   {
     "spell": 806384,
