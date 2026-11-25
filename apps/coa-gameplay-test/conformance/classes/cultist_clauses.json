@@ -691,8 +691,12 @@
   {
     "spell": 300753,
     "clause": "While Herald of the Depths is active, your Forbidden Ritual will cooldown faster.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300753 behaviour_metric_delta cd_faster",
+      "300753 behaviour_metric_delta herald_gate"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof (no rate invented). Forbidden Ritual 502273 (3 s cast, 60 s CategoryRecoveryTime) attempted again 55 s after 1st cast finishes with Herald of the Depths 520326 active: refused SPELL_FAILED_NOT_READY (67) without 300753 and succeeds (0, 2nd cast lands) with 300753. Condition-off arm (herald_gate, Herald absent): refused (67) in both phases."
   },
   {
     "spell": 301008,
@@ -724,23 +728,71 @@
     "spell": 301068,
     "clause": "Casting Wrath of the Black Empire now causes your subsequent Wraths of the Black Empire, within $301067d,",
     "labels": [
-      "301068 spell_duration 301067 #0"
+      "301068 behaviour_metric_delta buff_duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 301068,
     "clause": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
-    "labels": [
-      "301068 effect_value 301067e1 #1"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "to deal $301067s2% more damage each",
+        "labels": [
+          "301068 behaviour_metric_delta wrath_damage_1stack",
+          "301068 behaviour_metric_delta wrath_damage_2stacks"
+        ]
+      },
+      {
+        "claim": "and unleash Apocalyptic Skies upon the enemy.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "301068 Row 66[1] (\"and unleash Apocalyptic Skies upon the enemy.\") references the sub-spell Apocalyptic Skies @s:301988:0@ (Row 67), whose sub-claim Row 67[2] (\"before disappearing.\") remains an unproven tool gap (summon_cast_once). Per review I4, Row 66[1] is left uncounted rather than double-counting Row 67[0] portal_spawn alone.",
+      "attempts": [
+        {
+          "agent": "cu-t2b",
+          "report": ".agents/plans/cu-t2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301068,
     "clause": "Spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Spawns a void portal",
+        "labels": [
+          "301068 behaviour_metric_delta portal_spawn"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "301068 behaviour_metric_delta portal_cast_gaze",
+          "301068 behaviour_metric_delta portal_cast_horrorbolt",
+          "301068 behaviour_metric_delta portal_cast_beam",
+          "301068 behaviour_metric_delta portal_only_three"
+        ]
+      },
+      {
+        "claim": "before disappearing.",
+        "labels": []
+      }
+    ],
+    "tool_gap": {
+      "reason": "Matches merged Depths of Madness 706911 tool_gap for \"before disappearing.\" (Row 67[2]): while portal_only_three proves 100% of portal 533030 damage comes from {520332, 800416, 805573} and 0 heals, no existing conformance kind proves per-portal exact-one-cast and post-cast despawn (\"before disappearing.\": 533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, AscensionCultistSummons.cpp:290-297).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301180,
@@ -825,20 +877,63 @@
   {
     "spell": 301200,
     "clause": "Casting Wrath of the Black Empire now spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Wrath of the Black Empire now spawns a void portal",
+        "labels": [
+          "301200 behaviour_metric_delta portal_spawn"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "301200 behaviour_metric_delta portal_cast_gaze",
+          "301200 behaviour_metric_delta portal_cast_horrorbolt",
+          "301200 behaviour_metric_delta portal_cast_beam",
+          "301200 behaviour_metric_delta portal_only_three"
+        ]
+      },
+      {
+        "claim": "before disappearing.",
+        "labels": []
+      }
+    ],
+    "tool_gap": {
+      "reason": "Matches merged Depths of Madness 706911 tool_gap for \"before disappearing.\" (Row 75[2]): while portal_only_three proves 100% of portal 533030 damage comes from {520332, 800416, 805573} and 0 heals, no existing conformance kind proves per-portal exact-one-cast and post-cast despawn (\"before disappearing.\": 533030 schedules DespawnOrUnsummon 5 s after non-channeled cast or 10 s after channeled 805572 cast inside its 12000 ms summon duration, AscensionCultistSummons.cpp:290-297).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 301209,
     "clause": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies and healing done by Black Blood can now critically strike.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies",
+        "labels": [
+          "301209 behaviour_metric_delta covenant_2_lowest_allies",
+          "301209 behaviour_metric_delta covenant_2_lowest_caster"
+        ]
+      },
+      {
+        "claim": "and healing done by Black Blood can now critically strike.",
+        "labels": [
+          "301209 behaviour_metric_delta black_blood_crit"
+        ]
+      }
+    ]
   },
   {
     "spell": 301209,
     "clause": "@ext:Healing done in this way can affect the original target.:ext@",
     "labels": [
-      "301209 effect_value #0"
+      "301209 behaviour_metric_delta covenant_2_lowest_allies"
     ],
     "kind": "claim"
   },
@@ -1555,22 +1650,27 @@
     "spell": 520388,
     "clause": "Behold a vision of doom, causing direct damage or healing done to apply Vision of Doom to nearby targets for $520450d.",
     "labels": [
-      "520388 spell_duration 520450 #0"
+      "520388 behaviour_metric_delta apply_enemy_duration",
+      "520388 behaviour_metric_delta apply_ally_duration",
+      "520388 behaviour_metric_delta damage_100pct"
     ],
     "kind": "claim"
   },
   {
     "spell": 520388,
     "clause": "Can only occur once every 3 sec.",
-    "labels": [],
+    "labels": [
+      "520388 behaviour_metric_delta icd_closed",
+      "520388 behaviour_metric_delta icd_open"
+    ],
     "kind": "claim"
   },
   {
     "spell": 520388,
     "clause": "At the end of the duration, they are damaged or healed for $s1% of the damage or healing that doomed them.",
     "labels": [
-      "520388 effect_value e0 #1",
-      "520388 aura_amount e0 #1"
+      "520388 behaviour_metric_delta damage_100pct",
+      "520388 behaviour_metric_delta heal_100pct"
     ],
     "kind": "claim"
   },
@@ -1582,13 +1682,14 @@
       {
         "claim": "Lasts for $d",
         "labels": [
-          "520388 aura_duration_ms #2"
+          "520388 behaviour_metric_delta buff_duration"
         ]
       },
       {
         "claim": "$n instances of damage or healing",
         "labels": [
-          "520388 effect_value #3"
+          "520388 behaviour_metric_delta four_instances_hold",
+          "520388 behaviour_metric_delta five_instances_consume"
         ]
       }
     ]
@@ -1596,8 +1697,22 @@
   {
     "spell": 520388,
     "clause": "Doomed enemies are unable to be healed and the damage or healing done by this effect can critically strike.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Doomed enemies are unable to be healed",
+        "labels": [
+          "520388 behaviour_metric_delta heal_block"
+        ]
+      },
+      {
+        "claim": "and the damage or healing done by this effect can critically strike.",
+        "labels": [
+          "520388 behaviour_metric_delta damage_can_crit",
+          "520388 behaviour_metric_delta heal_can_crit"
+        ]
+      }
+    ]
   },
   {
     "spell": 520405,
@@ -2118,20 +2233,53 @@
       {
         "claim": "for $706932d",
         "labels": [
-          "560301 spell_duration 706932 #0"
+          "560301 behaviour_metric_delta copies_duration"
         ]
       },
       {
         "claim": "Create 3 copies of yourself",
+        "labels": [
+          "560301 behaviour_metric_delta copies_duration"
+        ]
+      },
+      {
+        "claim": "that run in a random direction",
+        "labels": []
+      },
+      {
+        "claim": "and may briefly trick enemies into ignoring you.",
         "labels": []
       }
-    ]
+    ],
+    "tool_gap": {
+      "reason": "No existing conformance metric/kind reads an owned creature's movement path or heading to prove that Hallucination 560301's 3 copies (entry 840025, AscensionCultistSummons.cpp:278-283 Wander(me) -> MovePoint at a random angle) run in a random direction (owned_creature_distance_2d only measures scalar distance from the caster and has no STATE_PROMISES entry). In addition, 840025 has no taunt/aggro-redirect script in AscensionCultistSummons.cpp:278-283 (only player->GetThreatMgr().RemoveMeFromThreatLists() on cast in AscensionCultistAbilities.cpp:448), so \"may briefly trick enemies into ignoring you\" is recorded as an owner question.",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 560301,
     "clause": "Significantly reduces your threat and removes all movement impairing effects from you.",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Significantly reduces your threat",
+        "labels": [
+          "560301 behaviour_metric_delta threat_reduce",
+          "560301 behaviour_metric_delta threat_reduce_control"
+        ]
+      },
+      {
+        "claim": "and removes all movement impairing effects from you.",
+        "labels": [
+          "560301 behaviour_metric_delta removes_movement_impairing"
+        ]
+      }
+    ]
   },
   {
     "spell": 560320,
@@ -2492,7 +2640,20 @@
     "spell": 574147,
     "clause": "Your healing power is increased based on your main-hand weapon damage.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "No existing conformance kind or metric_delta option varies the equipped main-hand weapon between two or three items of clearly different weapon damage (e.g., Dreadnought 2534 Rondel 28.46-45.46, Heretic 2535 War Staff 84.53-119.41, Godblade 2531 Great Axe 90.86-127.3) at equal attack_power inside one scenario while reading weapon_damage_min, attack_power, and healing_power and judging strictly rising direction with no invented figure (D-38). attack_power_arms confounds attack power with main-hand weapon damage (review I1), without_item only supports cast_failure, and separate per-weapon-set scenarios cannot compare healing_power across scenarios without inventing numeric thresholds forbidden by D-38. Smallest extension: Python-only weapon_damage_arms option on metric_delta (modeled on attack_power_arms, no finished-class impact).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        },
+        {
+          "agent": "cu-t2b",
+          "report": ".agents/plans/cu-t2b/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 574318,
@@ -2899,16 +3060,25 @@
   {
     "spell": 680579,
     "clause": "Increases your critical strike rating based on your parry and dodge rating.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "680579 behaviour_metric_delta crit_rating_zero",
+      "680579 behaviour_metric_delta crit_rating_dodge",
+      "680579 behaviour_metric_delta crit_rating_parry"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof (Templar Improved Benediction precedent, no coefficient invented). At 0 dodge & 0 parry rating: crit rating 0 -> 0 (rules out flat bonus); with +96 dodge rating fixture 18062: 0 -> 96 (>= 1); with +60 parry rating fixture 13668: 0 -> 60 (>= 1)."
   },
   {
     "spell": 680579,
     "clause": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
     "labels": [
-      "680579 effect_value 681475e0 #0"
+      "680579 behaviour_metric_delta dreadnought_cd_held",
+      "680579 behaviour_metric_delta dreadnought_cd_ready",
+      "680579 behaviour_metric_delta dreadfall_cd_held",
+      "680579 behaviour_metric_delta dreadfall_cd_ready"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): $/1000;681475s1 = 2 sec per crit. 5 forced crits cut 10 s (10% off 10 s = +-1 s): Dreadnought 567524 (45 s -> 35 s) refused (67) at 34.4 s in both phases and succeeds (0) at 35.6 s in treatment only; Dreadfall 806175 (25 s -> 15 s; 1 dash 807815 crit + 4 Horrorbolt 800416 crits) refused (67) at 14.4 s in both phases and succeeds (0) at 15.6 s in treatment only."
   },
   {
     "spell": 680581,
@@ -2922,10 +3092,29 @@
   {
     "spell": 680600,
     "clause": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1% and they now generates a large amount of threat.",
-    "labels": [
-      "680600 effect_value e0 #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1%",
+        "labels": [
+          "680600 behaviour_hit_ratio hammer_damage",
+          "680600 behaviour_hit_ratio slam_damage"
+        ]
+      },
+      {
+        "claim": "and they now generates a large amount of threat.",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "Two blockers on \"and they now generates a large amount of threat.\": (1) Owner question: Eldritch Strength 680600 Effect[1] adds +15% SPELLMOD_THREAT (bp=14+1) to Hammer of Twilight 806830 and Entropic Slam 572846; the wording is not the Templar \"High Threat\" x2 phrase (ADR 0296) and +15% is far below x2, so owner confirmation is needed on whether +15% satisfies \"generates a large amount of threat\"; (2) Tool gap: standalone kind threat_above_control (kinds/threat_above_control.py) does not support gate_spell (passive learn contrast) or Insanity phase_auras (500706 + 680602/680603), so a passive threat modifier on Insanity-gated spells cannot be run under threat_above_control without extending threat_above_control.",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680607,
@@ -2945,7 +3134,16 @@
     "spell": 680609,
     "clause": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
     "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Void Strikes 680609 periodically refreshes helper 567529 (AscensionCultistAuras.cpp:171-184) granting flat SPELLMOD_EFFECT1 equal to CR_DEFENSE_SKILL on Blade of the Empire 502122 and Entropic Slam 572846 (unfigured \"based on your defense rating\"). power_term_direction (power_term_direction.py) only allows power_metric in {attack_power, agility, max_health} and has no defense_rating metric (combat_rating 1 / aura 189 misc 2), so no existing unfigured-scaling kind can prove positive defense-rating direction without inventing an expected figure. Extension: add defense_rating to power_term_direction.POWER_METRICS (reading combat_rating 1 and accepting permanent rating-fixture auras such as 24774 +180 defense).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 680750,
@@ -3503,7 +3701,16 @@
     "labels": [
       "706177 effect_value e0 #0"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "tool_gap": {
+      "reason": "Improved Sermon of Dread 706177 Effect[0] adds +30% SPELLMOD_EFFECT1 (bp=29+1) to Sermon of Dread 620614 (aura 344 flat AP debuff -140-rpl on enemies). effectiveness_delta.READ_METRICS only supports {melee_crit_chance, spell_crit_chance, dodge_chance, parry_chance, armor, spell_power, attack_time_ms, combat_rating} and lacks attack_power, even though the harness already reads attack_power on any unit including dummy (CoAGameplayTest.cpp:4076). Extension: add attack_power to effectiveness_delta.READ_METRICS (with target/actor dummy support for enemy debuffs).",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 706179,
@@ -3540,26 +3747,36 @@
     "spell": 706182,
     "clause": "Avoiding an attack now generates $520773q2 Insanity.",
     "labels": [
-      "706182 effect_value #4"
+      "706182 behaviour_metric_delta avoid_insanity"
     ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta transform",
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "2 Charges,",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "60 sec recharge",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
     "kind": "claim"
   },
   {
@@ -3570,19 +3787,20 @@
       {
         "claim": "reducing your damage taken by ${-($u*$m2)}%",
         "labels": [
-          "706182 effect_value 804711e1 #0"
+          "706182 behaviour_metric_delta damage_reduction"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "706182 spell_duration 804711 #1"
+          "706182 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "$u attacks",
         "labels": [
-          "706182 max_stacks 804711 #2"
+          "706182 behaviour_metric_delta four_attacks_hold",
+          "706182 behaviour_metric_delta five_attacks_remove"
         ]
       }
     ]
@@ -3591,20 +3809,25 @@
     "spell": 706182,
     "clause": "For the duration, each attack received will decrease the value by $s2%.",
     "labels": [
-      "706182 effect_value 804711e1 #3"
+      "706182 behaviour_metric_delta decay_step"
     ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "Usable while stunned.",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta usable_while_stunned"
+    ],
     "kind": "claim"
   },
   {
     "spell": 706182,
     "clause": "Scales with modifiers to Abyssal Ward.",
-    "labels": [],
+    "labels": [
+      "706182 behaviour_metric_delta scales_shroud_of_pride",
+      "706182 behaviour_metric_delta scales_void_tolerance"
+    ],
     "kind": "claim"
   },
   {
@@ -4848,10 +5071,36 @@
   {
     "spell": 806175,
     "clause": "Raise your shield and charge towards an enemy, dealing ${$AP*0.5} Shadow damage to enemies you pass through, generating additional threat.",
-    "labels": [
-      "806175 effect_value #0"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$AP*0.5} Shadow damage to enemies you pass through",
+        "labels": [
+          "806175 behaviour_metric_delta damage_ref",
+          "806175 behaviour_metric_delta damage_ap",
+          "806175 behaviour_metric_delta pass_through"
+        ]
+      },
+      {
+        "claim": "generating additional threat.",
+        "labels": [
+          "806175 behaviour_metric_delta threat_above_control"
+        ]
+      },
+      {
+        "claim": "Raise your shield and charge towards an enemy",
+        "labels": []
+      }
     ],
-    "kind": "claim"
+    "tool_gap": {
+      "reason": "No existing conformance option counts Dreadfall 806175's \"charge towards an enemy\" as behaviour evidence under no-tool-code-changes: metric_delta_options/displacement.py:8 STATE_PROMISES[\"displacement_2d\"] = r\"dash\\w*|direction|distance|leap\\w*|range|yds?\" does not match \"charge\", and coverage.py:530 STATE_PROMISES[\"distance_2d\"] = r\"location|hook\\w*|pull\\w*\" does not match \"charge\", so any displacement/distance_2d entry is classified as data rather than behaviour. Extension: add \"charge\\w*\" to STATE_PROMISES[\"displacement_2d\"]. (Note: 806175 pass_through is a separate real server alert: 807815 retains EffectChainTarget[0]=20 in Spell.dbc, causing UpdateDash casts to chain and double-hit passed-through enemies and overshoot to area2 at 25 yd.)",
+      "attempts": [
+        {
+          "agent": "cu-t2",
+          "report": ".agents/plans/cu-t2/report.md"
+        }
+      ]
+    }
   },
   {
     "spell": 578263,
