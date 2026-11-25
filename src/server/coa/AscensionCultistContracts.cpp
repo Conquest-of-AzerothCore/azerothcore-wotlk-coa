@@ -259,6 +259,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].ApplyAuraName = SPELL_AURA_PERIODIC_DUMMY;
     if (id == 806039)
         info->Effects[1].Effect = SPELL_EFFECT_DUMMY;
+    if (id == 704473)
+        info->Effects[0].RealPointsPerLevel = 0.0f;
     info->_InitializeExplicitTargetMask();
 }
 }
