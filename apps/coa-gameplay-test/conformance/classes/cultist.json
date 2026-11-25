@@ -3517,6 +3517,251 @@
       "observe_source": "706181 Effect[0] aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT, MiscValue 127, BasePoints 19 + 1 = 20 ($s1; Spell.dbc); Effect[1] is aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 8 BasePoints 19 (+20%, class mask includes 578115). Tooltip promises +20% absorption effectiveness once: Void Shield 578115 (776..830 at SP 0) struck by Light of the Naaru 41394 (1100 Holy) must absorb [931, 996] after a real learn of 706181 (control 776..830); a double-dip (1.44x) would exceed 996 and alert. Reference search 2026-11-24: coa-history (186 indexed logs, positive control 502182 Horrorbolt: 27 casts): 0 events (passive); coabuildhub spells_master_index.json checked; installed server Spell.dbc governs. coabuildhub has no entry for 706181."
     },
     {
+      "spell": 706181,
+      "name": "Darkward (Forbidden Ritual absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_ritual",
+      "label_suffix": "absorb_ritual",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 502273,
+      "gate_spell": 706181,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1032,
+      "expected": 1238,
+      "tolerance": 47,
+      "after_at_least": 1183,
+      "after_at_most": 1293,
+      "wait_ms": 1500,
+      "expire_ms": 11000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 300,
+        "after_trigger_ms": 3500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): AscensionCultist::ApplyContracts neutralizes Darkward 706181 Effect[1] (SPELLMOD_ALL_EFFECTS +20%) so Effect[0] (aura 317 SPELL_AURA_ASCENSION_MOD_ABSORB_AMOUNT_PCT +20%) applies once. Forbidden Ritual 502273 ([986..1078] at SP 0, 3000 ms cast) struck at 3500 ms by 2x Light of the Naaru 41394 (2200 Holy > 1.44x max 1552) absorbs [986..1078] before learn and [1183..1293] (+20% once) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Dark Veil caster absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_dark_veil",
+      "label_suffix": "absorb_dark_veil",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 520345,
+      "gate_spell": 706181,
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 92559,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 969,
+      "expected": 1162,
+      "tolerance": 2,
+      "after_at_least": 1161,
+      "after_at_most": 1164,
+      "wait_ms": 150,
+      "expire_ms": 5000,
+      "strike": {
+        "spell": 92559,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Dark Veil 520345 -> 520346 Effect[1] (caster shield, SpellFamilyFlags[2] 67108864, 875 + 0.25 * 376 AP = 969 on 1st tick at 1500 ms) previously double-dipped 706181 Effect[0] + Effect[1] to 1394. With Effect[1] dummied, 2x Void Zone 92559 (1954 Physical > 1394) at 1500 ms absorbs 969 before learn and floor(969 * 1.20) = 1162 (+20% once) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Dark Veil ally absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_dark_veil_ally",
+      "label_suffix": "absorb_dark_veil_ally",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 520345,
+      "gate_spell": 706181,
+      "target": "ally",
+      "measure_actor": "ally",
+      "disable_regeneration": true,
+      "cast_power": 2000,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          10000,
+          10000
+        ],
+        "ally_strikes": true
+      },
+      "metric": "health",
+      "fields": {},
+      "before_expected": 9015,
+      "expected": 9208,
+      "tolerance": 3,
+      "after_at_least": 9205,
+      "after_at_most": 9211,
+      "wait_ms": 150,
+      "expire_ms": 5000,
+      "strike": {
+        "spell": 92559,
+        "health": 10000,
+        "max_health": 10000,
+        "count": 2,
+        "wait_ms": 50,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Dark Veil 520345 -> 520346 Effect[0] on grouped ally also scales from caster's aura 317 (SpellAuraEffects.cpp:645 target = caster). Against 2x Void Zone 92559 (1954 Physical on level-60 Cultist ally starting at 10000 HP), unlearned 520346 absorbs 969 (ally health 10000 - 1954 + 969 = 9015) and learned 706181 absorbs 1162 (+20% once, ally health 10000 - 1954 + 1162 = 9208; 1.44x double-dip would leave 9440). Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 706181,
+      "name": "Darkward (Dreadnought absorbed damage +20%)",
+      "kind": "metric_delta",
+      "variant": "absorb_dreadnought",
+      "label_suffix": "absorb_dreadnought",
+      "quote": "Increases the effectiveness of your damage absorption effects by $s1%.",
+      "trigger_spell": 567552,
+      "gate_spell": 706181,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          80,
+          "caster",
+          "caster"
+        ],
+        [
+          680604,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 2641,
+      "expected": 3169,
+      "tolerance": 2,
+      "after_at_least": 3167,
+      "after_at_most": 3171,
+      "wait_ms": 1500,
+      "expire_ms": 13000,
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 4,
+        "wait_ms": 300,
+        "after_trigger_ms": 500
+      },
+      "void_on_cast_failure": true,
+      "phase_since": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Dreadnought 567552 (SpellFamilyFlags[2] 8192, reached only by 706181 Effect[0] aura 317) absorbs 2116 + 3*104 STA + 3*71 INT = 2641 at level 60 reference stats (precondition fixture: 80 Insanity 500706 + 680604 marker). Struck by 4x Light of the Naaru 41394 (4400 Holy > 3169), spell_absorb_total reads 2641 before learn and floor(2641 * 1.20) = 3169 (+20% preserved) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
+      "spell": 704889,
+      "name": "Twilight Guardian (Darkward 706181 increases shield absorb by +20%)",
+      "kind": "metric_delta",
+      "variant": "darkward_absorb",
+      "label_suffix": "darkward_absorb",
+      "quote": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+      "trigger_spell": 572141,
+      "gate_spell": 706181,
+      "learn": [
+        704889
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          500706,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 1500,
+        "reaction": 0
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572141
+        },
+        "increments": true
+      },
+      "metric": "spell_absorb_total",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 1.0,
+      "expected": 1.2,
+      "tolerance": 0.01,
+      "after_at_least": 1.19,
+      "after_at_most": 1.21,
+      "wait_ms": 500,
+      "expire_ms": 9000,
+      "void_on_cast_failure": true,
+      "observe_source": "Owner ruling O-12 Q-cu-7 (Cultist ADR 0013): Twilight Guardian 704889 -> Copy 850002 (SpellFamilyName 31, SpellFamilyFlags [0, 0, 0], reached only by Darkward 706181 Effect[0] aura 317 at SpellAuraEffects.cpp:639-657) shields for 100% of Twilight Shieldtoss 572141 damage (for_entry(704889) equips Dreadnought 2534 + 2129 shield). Struck by 2x Light of the Naaru 41394 (2200 Holy > max shield) in both phases, ratio_to_metric (increments) divides absorbed damage by 572141 damage dealt: 1.00 before learning 706181 and 1.20 (+20% preserved) after learning 706181. Reference search 2026-11-24: coa-history 706181: 0 events; coabuildhub has no entry for 706181."
+    },
+    {
       "spell": 706189,
       "name": "Gift of C'Thun (Shadow damage +4%)",
       "kind": "hit_ratio",

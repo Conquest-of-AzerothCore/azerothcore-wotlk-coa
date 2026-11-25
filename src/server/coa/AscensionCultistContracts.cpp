@@ -186,6 +186,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[0].MiscValue = SPELL_SCHOOL_MASK_ALL;
     if (id == 573315)
         info->Effects[1].SpellClassMask = flag96(131072, 0, 0);
+    if (id == 706181)
+        dummy(1);
     if (id == 680576)
     {
         info->Effects[1].ApplyAuraName = SPELL_AURA_MOD_DECREASE_SPEED;
