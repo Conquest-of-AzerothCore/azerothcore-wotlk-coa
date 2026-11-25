@@ -908,7 +908,7 @@
     "spell": 302015,
     "clause": "Casting Gaze of C'thun now has a $h% chance to cause your Tentacles to blast the enemy with eldritch energy,",
     "labels": [
-      "302015 effect_value #0"
+      "302015 behaviour_metric_delta blast_rate"
     ],
     "kind": "claim"
   },
@@ -916,7 +916,7 @@
     "spell": 302015,
     "clause": "dealing ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} Shadow damage.",
     "labels": [
-      "302015 effect_value 573311e0 #1"
+      "302015 script_hit 573311 blast_damage"
     ],
     "kind": "claim"
   },
@@ -3240,7 +3240,8 @@
     "spell": 706911,
     "clause": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
     "labels": [
-      "706911 effect_value #0"
+      "706911 behaviour_metric_delta portal_rate",
+      "706911 behaviour_metric_delta portal_casts"
     ],
     "kind": "claim"
   },

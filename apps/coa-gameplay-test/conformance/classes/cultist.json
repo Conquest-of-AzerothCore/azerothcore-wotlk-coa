@@ -21317,6 +21317,265 @@
       "expire_ms": 21000,
       "void_on_cast_failure": true,
       "observe_source": "Twilight Domination 520405 Effect[0] SPELL_AURA_ADD_PCT_MODIFIER (108), MiscValue 8 (SPELLMOD_ALL_EFFECTS), BasePoints 24 + DieSides 1 = +25% ($s1 = 25), SpellClassMask[1] 65536 matching Eldritch Obelisk 560322 SpellFamilyFlags[1] 65536 (Spell.dbc). Grouped ally inside 15 yd of Eldritch Obelisk reads run_speed_rate 1.40 (+40%) before learning 520405 and 1.50 (+50% = 40% * 1.25) after learning 520405 (21000 ms expire_ms clears the 20000 ms Obelisk between phases). Reference search 2026-11-25: coabuildhub spells_master_index.json matches installed Spell.dbc; coa-history checked (0 events). Installed Spell.dbc governs (G-9)."
+    },
+    {
+      "spell": 302015,
+      "kind": "flat_chance_rate",
+      "variant": "blast_rate",
+      "label_suffix": "blast_rate",
+      "name": "Eldritch Command (30% chance on Gaze of C'Thun cast for Tentacle to blast with 573311)",
+      "quote": "Casting Gaze of C'thun now has a $h% chance to cause your Tentacles to blast the enemy with eldritch energy,",
+      "chance_pct": 30,
+      "learn": [
+        802044
+      ],
+      "trigger_spell": 500110,
+      "trigger_target": "dummy",
+      "cast_power": 2000,
+      "setup": {
+        "spell": 802044,
+        "target": "caster",
+        "power": 2000,
+        "every": 12
+      },
+      "layout": [
+        {
+          "do": "setup",
+          "wait_ms": 1700
+        },
+        {
+          "do": "start"
+        },
+        {
+          "do": "trigger",
+          "wait_ms": 1700
+        },
+        {
+          "do": "end"
+        }
+      ],
+      "trial": {
+        "metric": "spell_cast_count",
+        "spell": 500110
+      },
+      "event": {
+        "metric": "owned_creature_spell_cast_count",
+        "entry": 50096,
+        "spell": 573311
+      },
+      "cycles": 235,
+      "unlearned_cycles": 4,
+      "trials_per_cycle": 1,
+      "parts": 32,
+      "streams": 3,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Gaze of C'Thun 500110 is single-target (no AoE, no chain) cast at each stream's own dummy; Tentacle of Y'shaarj 50096 spawns within 2 yd of its owner (within_yd 2.5) and selects targets within 40 yd (AscensionCultistSummons.cpp:176; combat_reach_yd 4); 3 streams are spaced 50 yd apart (hypot(50, 3) - 2.5 = 47.59 yd > 46 yd), and ward hits on other dummies are checked before every setup recast and at the end.",
+        "wards": [
+          {
+            "entries": [
+              50096
+            ],
+            "within_yd": 2.5,
+            "reach_yd": 40,
+            "combat_reach_yd": 4,
+            "spells": [
+              802046,
+              573311
+            ]
+          }
+        ]
+      },
+      "observe_source": "Eldritch Command 302015 ProcChance 30 ($h = 30; Spell.dbc); AscensionCultistAbilities.cpp:138-139 rolls Chance(player, 302015) on each Gaze of C'Thun 500110 cast and calls Command(player, target, true) -> Tentacle 50096 casts 573311 (AscensionCultistSummons.cpp:205-206). Setup refreshes 802044 (30s duration) every 12 cycles (20.4s < 30s) before each cycle's start read so owned creature 50096 is present for every owned_creature_spell_cast_count read. Control (unlearned, 384 trials): 0 casts of 573311. Treatment: 235 cycles x 3 streams x 32 parts = 22560 trials (>= 21950 flip-proof requirement for 30% +-2 pts, residual <= 0.1% per pair). Reference search 2026-11-25: coa-history 573311 has 258 hits + 3 misses; coabuildhub matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 302015,
+      "name": "Eldritch Command (Tentacle blast 573311 Shadow damage)",
+      "kind": "script_hit",
+      "label_suffix": "blast_damage",
+      "quote": "dealing ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} Shadow damage.",
+      "hit_spell": 573311,
+      "caster_entry": 50096,
+      "unresisted": true,
+      "learn": [
+        802044,
+        500110
+      ],
+      "cast_power": 2000,
+      "casts": [
+        [
+          802044,
+          "caster"
+        ],
+        [
+          500110,
+          "dummy"
+        ],
+        [
+          500110,
+          "dummy"
+        ],
+        [
+          500110,
+          "dummy"
+        ]
+      ],
+      "trials": 16,
+      "minimum_hits": 3,
+      "settle_ms": 1000,
+      "observe_source": "Eldritch Command 573311 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Shadow, BasePoints 11 + DieSides 1 = 12, RealPointsPerLevel 1.5, BaseLevel 14, SpellLevel 14, MaxLevel 0; AscensionCultistData.h:93 {573311, 0, 0.225f, 0.10f, 0, 0, 0}. Tooltip formula ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} resolves to 118.6 at level 60 reference stats (12 + 46*1.5 + 0 + 37.6). 16 trials x 3 Gaze casts = 48 attempts at 30% proc rate (expected 14.4 blasts; P(<3 hits) < 1e-5); control without 302015 produces 0 hits of 573311. Reference search 2026-11-25: coa-history 573311 has 258 hits (mean 527); coabuildhub matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 706911,
+      "kind": "flat_chance_rate",
+      "variant": "portal_rate",
+      "label_suffix": "portal_rate",
+      "name": "Depths of Madness (15% chance on Gaze of C'Thun damage to spawn Void Portal 533030)",
+      "quote": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+      "chance_pct": 15,
+      "trigger_spell": 500110,
+      "trigger_target": "dummy",
+      "cast_power": 2000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "caster aura 823764 (target magic resistance -9999) prevents full Shadow resist on Gaze of C'Thun 520332 so every cast lands a damage trial"
+        }
+      ],
+      "cast_wait_ms": 1700,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 520332,
+        "target": "dummy"
+      },
+      "event": {
+        "metric": "owned_creature_summon_count",
+        "entry": 533030
+      },
+      "cycles": 445,
+      "unlearned_cycles": 4,
+      "trials_per_cycle": 1,
+      "parts": 16,
+      "streams": 2,
+      "isolation": {
+        "reach_yd": 0,
+        "source": "Gaze of C'Thun 500110/520332 is single-target cast at each stream's own dummy; Void Portal 533030 spawns within 3 yd of dummy (within 6.5 yd of caster) and casts within 40 yd (AscensionCultistSummons.cpp:176; combat_reach_yd 4); 2 streams are spaced 100 yd apart (hypot(100, 3) - 6.5 = 93.54 yd >> 46 yd), and portal placement is asserted each cycle.",
+        "wards": [
+          {
+            "entries": [
+              533030
+            ],
+            "within_yd": 6.5,
+            "reach_yd": 40,
+            "combat_reach_yd": 4
+          }
+        ]
+      },
+      "observe_source": "Depths of Madness 706911 ProcChance 15 ($h = 15; Spell.dbc); AscensionCultistEvents.cpp:98,230-232 rolls Chance(player, 706911) on Gaze of C'Thun 520332 damage and summons Void Portal 533030 for 12000 ms. Control (unlearned, 128 trials): 0 summons of 533030. Treatment: 445 cycles x 2 streams x 16 parts = 14240 trials (>= 14163 flip-proof requirement for 15% +-2 pts, residual <= 0.1% per pair). Uniform 1-of-3 spell pick distribution of 533030 is tracked separately in tool-queue.md. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim; coa-history checked (0 events for 706911)."
+    },
+    {
+      "spell": 706911,
+      "name": "Depths of Madness (spawned Void Portal casts damaging spell and disappears)",
+      "kind": "metric_delta",
+      "variant": "portal_casts",
+      "label_suffix": "portal_casts",
+      "quote": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+      "trigger_spell": 500110,
+      "gate_spell": 706911,
+      "learn": [
+        800416,
+        805572
+      ],
+      "target": "dummy",
+      "setup_casts": [
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110,
+        500110
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1700,
+      "cast_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 533030
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Every spawned Void Portal 533030 disappears within 12000 ms after casting (checked at wait_ms 13000)"
+          }
+        ]
+      },
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 533030
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 13000,
+      "expire_ms": 500,
+      "observe_source": "Complements 706911 portal_rate (15% spawn rate): 48 casts of Gaze of C'Thun 500110 with spell pen 823764 (precondition fixture; P(0 portals) = 0.85^48 = 0.041% per run, 0.082% <= 0.1% per pair) produce 0 portal damage hits before learning 706911 and >= 1 owned_creature_damage_count(533030) after learning 706911 (AscensionCultistSummons.cpp:290-297), with owned_creature_count(533030) == 0 at wait_ms 13000 confirming portals disappear after casting. void_on_cast_failure omitted because 500110 emits harmless SPELL_FAILED_DONT_REPORT (27) on unused ally effect 520335. Uniform 1-of-3 spell pick distribution is tracked separately in tool-queue.md. Reference search 2026-11-25: coabuildhub matches installed Spell.dbc verbatim."
     }
   ],
   "player_observations": [],
