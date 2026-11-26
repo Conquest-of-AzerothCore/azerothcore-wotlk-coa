@@ -260,6 +260,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 705746)
         info->Effects[0].ApplyAuraName = SPELL_AURA_SCHOOL_HEAL_ABSORB;
+    if (id == 707194)
+        info->AscensionInheritsResolvedAmount = true;
     if (id == 808017)
     {
         info->Effects[2].ApplyAuraName = SPELL_AURA_SPELL_MAGNET;
