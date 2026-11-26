@@ -1816,7 +1816,7 @@
     },
     {
       "spell": 560261,
-      "name": "Darkfallen's Embrace R1 (Bloodbolt range extended to 42 yd)",
+      "name": "Darkfallen's Embrace R1 (Bloodbolt range extended to 42.3 yd)",
       "kind": "metric_delta",
       "variant": "bloodbolt_range_extended",
       "label_suffix": "bloodbolt_range_extended",
@@ -1824,7 +1824,7 @@
       "trigger_spell": 578305,
       "gate_spell": 560261,
       "target": "dummy",
-      "dummy_distance": 42,
+      "dummy_distance": 42.3,
       "cast_power": 300,
       "metric": "cast_failure",
       "fields": {
@@ -1834,11 +1834,11 @@
       "expected": 0,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "$s2 = 5 (560261 Effect[1] aura 107 SPELLMOD_RANGE MiscValue 5 BasePoints 4 + DieSides 1 = +5 yd, EffectSpellClassMask [33951874, 663552, 2097176] matching Bloodbolt 578305 base range 35 yd; Spell.dbc). Spell::CheckRange adds caster + dummy combat reach (1.5 + 1.275 = 2.775 yd; ~37.775 yd base, ~42.775 yd extended). At dummy_distance 42 yd, Bloodbolt is refused out of range (97 SPELL_FAILED_OUT_OF_RANGE) without 560261 (control) and accepted (0) after learning 560261. Paired with bloodbolt_range_capped at 44 yd and Taldaram's Torment Sanguine range pair. Reference search 2026-11-26: coa-history 560261: 0 events (578305: 3019 casts in 17 logs); coabuildhub 560261 matches verbatim."
+      "observe_source": "$s2 = 5 (560261 Effect[1] aura 107 SPELLMOD_RANGE MiscValue 5 BasePoints 4 + DieSides 1 = +5 yd, EffectSpellClassMask [33951874, 663552, 2097176] matching Bloodbolt 578305 base range 35 yd; Spell.dbc). Spell::CheckRange adds caster + dummy combat reach (1.5 + 1.275 = 2.775 yd; 37.775 yd base, 42.775 yd extended; +-10% of +5 yd = 42.275/43.275 yd). At dummy_distance 42.3 yd (> 42.275 yd), Bloodbolt is refused out of range (97 SPELL_FAILED_OUT_OF_RANGE) without 560261 (control) and accepted (0) after learning 560261. Paired with bloodbolt_range_capped at 43.2 yd and Taldaram's Torment Sanguine range pair. Reference search 2026-11-26: coa-history 560261: 0 events (578305: 3019 casts in 17 logs); coabuildhub 560261 matches verbatim."
     },
     {
       "spell": 560261,
-      "name": "Darkfallen's Embrace R1 (Bloodbolt refused beyond extended range at 44 yd)",
+      "name": "Darkfallen's Embrace R1 (Bloodbolt refused beyond extended range at 43.2 yd)",
       "kind": "metric_delta",
       "variant": "bloodbolt_range_capped",
       "label_suffix": "bloodbolt_range_capped",
@@ -1846,7 +1846,7 @@
       "trigger_spell": 578305,
       "gate_spell": 560261,
       "target": "dummy",
-      "dummy_distance": 44,
+      "dummy_distance": 43.2,
       "cast_power": 300,
       "metric": "cast_failure",
       "fields": {
@@ -1856,11 +1856,11 @@
       "expected": 97,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "Upper range bracket for 560261 on Bloodbolt 578305 (35 + 5 + 2.775 reach = 42.775 yd): at dummy_distance 44 yd, Bloodbolt is refused out of range (97) both before and after learning 560261, excluding +10 yd. Reference search 2026-11-26: coa-history 560261: 0 events; coabuildhub 560261 matches."
+      "observe_source": "Upper range bracket for 560261 on Bloodbolt 578305 (35 + 5 + 2.775 reach = 42.775 yd; +10% of +5 yd = 43.275 yd): at dummy_distance 43.2 yd (< 43.275 yd), Bloodbolt is refused out of range (97) both before and after learning 560261, excluding +10% off the +5 yd delta and +10 yd. Reference search 2026-11-26: coa-history 560261: 0 events; coabuildhub 560261 matches."
     },
     {
       "spell": 560261,
-      "name": "Darkfallen's Embrace R1 (Taldaram's Torment Sanguine range extended to 37 yd)",
+      "name": "Darkfallen's Embrace R1 (Taldaram's Torment Sanguine range extended to 37.3 yd)",
       "kind": "metric_delta",
       "variant": "taldaram_range_extended",
       "label_suffix": "taldaram_range_extended",
@@ -1868,7 +1868,7 @@
       "trigger_spell": 802580,
       "gate_spell": 560261,
       "target": "dummy",
-      "dummy_distance": 37,
+      "dummy_distance": 37.3,
       "metric": "cast_failure",
       "fields": {
         "spell": 802580
@@ -1877,11 +1877,11 @@
       "expected": 0,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "Sanguine-spell check for 560261 (+5 yd SPELLMOD_RANGE): Taldaram's Torment 802580 (base range 30 yd + 2.775 reach = 32.775 yd base, 37.775 yd extended; G-23 subset: 2 of 15 spell names under same Effect[1] class mask). At dummy_distance 37 yd, refused (97) before learning 560261 and accepted (0) after. Paired with taldaram_range_capped at 39 yd. Reference search 2026-11-26: coa-history 802580: 932 casts in 17 logs; coabuildhub 560261 matches verbatim."
+      "observe_source": "Sanguine-spell check for 560261 (+5 yd SPELLMOD_RANGE): Taldaram's Torment 802580 (base range 30 yd + 2.775 reach = 32.775 yd base, 37.775 yd extended; +-10% of +5 yd = 37.275/38.275 yd; G-23 subset: 2 of 15 spell names under same Effect[1] class mask). At dummy_distance 37.3 yd (> 37.275 yd), refused (97) before learning 560261 and accepted (0) after. Paired with taldaram_range_capped at 38.2 yd. Reference search 2026-11-26: coa-history 802580: 932 casts in 17 logs; coabuildhub 560261 matches verbatim."
     },
     {
       "spell": 560261,
-      "name": "Darkfallen's Embrace R1 (Taldaram's Torment refused beyond extended range at 39 yd)",
+      "name": "Darkfallen's Embrace R1 (Taldaram's Torment refused beyond extended range at 38.2 yd)",
       "kind": "metric_delta",
       "variant": "taldaram_range_capped",
       "label_suffix": "taldaram_range_capped",
@@ -1889,7 +1889,7 @@
       "trigger_spell": 802580,
       "gate_spell": 560261,
       "target": "dummy",
-      "dummy_distance": 39,
+      "dummy_distance": 38.2,
       "metric": "cast_failure",
       "fields": {
         "spell": 802580
@@ -1898,7 +1898,7 @@
       "expected": 97,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "Upper range bracket for 560261 on Taldaram's Torment 802580 (30 + 5 + 2.775 reach = 37.775 yd): at dummy_distance 39 yd, refused (97) both before and after learning 560261. Reference search 2026-11-26: coa-history 802580: 932 casts in 17 logs; coabuildhub 560261 matches verbatim."
+      "observe_source": "Upper range bracket for 560261 on Taldaram's Torment 802580 (30 + 5 + 2.775 reach = 37.775 yd; +10% of +5 yd = 38.275 yd): at dummy_distance 38.2 yd (< 38.275 yd), refused (97) both before and after learning 560261, excluding +10% off the +5 yd delta. Reference search 2026-11-26: coa-history 802580: 932 casts in 17 logs; coabuildhub 560261 matches verbatim."
     },
     {
       "spell": 561348,
@@ -1921,7 +1921,7 @@
     },
     {
       "spell": 561348,
-      "name": "Darkfallen's Embrace R2 (Bloodbolt range extended to 47 yd)",
+      "name": "Darkfallen's Embrace R2 (Bloodbolt range extended to 47.3 yd)",
       "kind": "metric_delta",
       "variant": "bloodbolt_range_extended",
       "label_suffix": "bloodbolt_range_extended",
@@ -1929,7 +1929,7 @@
       "trigger_spell": 578305,
       "gate_spell": 561348,
       "target": "dummy",
-      "dummy_distance": 47,
+      "dummy_distance": 47.3,
       "cast_power": 300,
       "metric": "cast_failure",
       "fields": {
@@ -1939,11 +1939,11 @@
       "expected": 0,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "$s2 = 10 (561348 Effect[1] aura 107 SPELLMOD_RANGE BasePoints 9 + DieSides 1 = +10 yd on Bloodbolt 578305 base 35 yd + 2.775 reach = 37.775 yd base, 47.775 yd extended; Spell.dbc). At dummy_distance 47 yd, refused (97) without 561348 (control) and accepted (0) after learning 561348. Paired with bloodbolt_range_capped at 49 yd. Reference search 2026-11-26: coa-history 561348: 0 events; server Spell.dbc governs rank 2 (561348, +10 yd)."
+      "observe_source": "$s2 = 10 (561348 Effect[1] aura 107 SPELLMOD_RANGE BasePoints 9 + DieSides 1 = +10 yd on Bloodbolt 578305 base 35 yd + 2.775 reach = 37.775 yd base, 47.775 yd extended; +-10% of +10 yd = 46.775/48.775 yd; Spell.dbc). At dummy_distance 47.3 yd (> 46.775 yd), refused (97) without 561348 (control) and accepted (0) after learning 561348. Paired with bloodbolt_range_capped at 48.2 yd. Reference search 2026-11-26: coa-history 561348: 0 events; server Spell.dbc governs rank 2 (561348, +10 yd)."
     },
     {
       "spell": 561348,
-      "name": "Darkfallen's Embrace R2 (Bloodbolt refused beyond extended range at 49 yd)",
+      "name": "Darkfallen's Embrace R2 (Bloodbolt refused beyond extended range at 48.2 yd)",
       "kind": "metric_delta",
       "variant": "bloodbolt_range_capped",
       "label_suffix": "bloodbolt_range_capped",
@@ -1951,7 +1951,7 @@
       "trigger_spell": 578305,
       "gate_spell": 561348,
       "target": "dummy",
-      "dummy_distance": 49,
+      "dummy_distance": 48.2,
       "cast_power": 300,
       "metric": "cast_failure",
       "fields": {
@@ -1961,11 +1961,11 @@
       "expected": 97,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "Upper range bracket for 561348 on Bloodbolt 578305 (35 + 10 + 2.775 reach = 47.775 yd): at dummy_distance 49 yd, refused (97) both before and after learning 561348. Reference search 2026-11-26: coa-history 561348: 0 events; server Spell.dbc governs."
+      "observe_source": "Upper range bracket for 561348 on Bloodbolt 578305 (35 + 10 + 2.775 reach = 47.775 yd; +10% of +10 yd = 48.775 yd): at dummy_distance 48.2 yd (< 48.775 yd), refused (97) both before and after learning 561348, excluding +10% off the +10 yd delta. Reference search 2026-11-26: coa-history 561348: 0 events; server Spell.dbc governs."
     },
     {
       "spell": 561348,
-      "name": "Darkfallen's Embrace R2 (Taldaram's Torment Sanguine range extended to 42 yd)",
+      "name": "Darkfallen's Embrace R2 (Taldaram's Torment Sanguine range extended to 42.3 yd)",
       "kind": "metric_delta",
       "variant": "taldaram_range_extended",
       "label_suffix": "taldaram_range_extended",
@@ -1973,7 +1973,7 @@
       "trigger_spell": 802580,
       "gate_spell": 561348,
       "target": "dummy",
-      "dummy_distance": 42,
+      "dummy_distance": 42.3,
       "metric": "cast_failure",
       "fields": {
         "spell": 802580
@@ -1982,11 +1982,11 @@
       "expected": 0,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "Sanguine-spell check for 561348 (+10 yd SPELLMOD_RANGE): Taldaram's Torment 802580 (30 + 10 + 2.775 reach = 42.775 yd extended; G-23 subset: 2 of 15 spell names under same Effect[1] class mask). At dummy_distance 42 yd, refused (97) before learning 561348 and accepted (0) after. Paired with taldaram_range_capped at 44 yd. Reference search 2026-11-26: coa-history 802580: 932 casts; server Spell.dbc governs."
+      "observe_source": "Sanguine-spell check for 561348 (+10 yd SPELLMOD_RANGE): Taldaram's Torment 802580 (30 + 10 + 2.775 reach = 42.775 yd extended; +-10% of +10 yd = 41.775/43.775 yd; G-23 subset: 2 of 15 spell names under same Effect[1] class mask). At dummy_distance 42.3 yd (> 41.775 yd), refused (97) before learning 561348 and accepted (0) after. Paired with taldaram_range_capped at 43.2 yd. Reference search 2026-11-26: coa-history 802580: 932 casts; server Spell.dbc governs."
     },
     {
       "spell": 561348,
-      "name": "Darkfallen's Embrace R2 (Taldaram's Torment refused beyond extended range at 44 yd)",
+      "name": "Darkfallen's Embrace R2 (Taldaram's Torment refused beyond extended range at 43.2 yd)",
       "kind": "metric_delta",
       "variant": "taldaram_range_capped",
       "label_suffix": "taldaram_range_capped",
@@ -1994,7 +1994,7 @@
       "trigger_spell": 802580,
       "gate_spell": 561348,
       "target": "dummy",
-      "dummy_distance": 44,
+      "dummy_distance": 43.2,
       "metric": "cast_failure",
       "fields": {
         "spell": 802580
@@ -2003,7 +2003,7 @@
       "expected": 97,
       "wait_ms": 600,
       "expire_ms": 1600,
-      "observe_source": "Upper range bracket for 561348 on Taldaram's Torment 802580 (30 + 10 + 2.775 reach = 42.775 yd): at dummy_distance 44 yd, refused (97) both before and after learning 561348. Reference search 2026-11-26: coa-history 802580: 932 casts; server Spell.dbc governs."
+      "observe_source": "Upper range bracket for 561348 on Taldaram's Torment 802580 (30 + 10 + 2.775 reach = 42.775 yd; +10% of +10 yd = 43.775 yd): at dummy_distance 43.2 yd (< 43.775 yd), refused (97) both before and after learning 561348, excluding +10% off the +10 yd delta. Reference search 2026-11-26: coa-history 802580: 932 casts; server Spell.dbc governs."
     },
     {
       "spell": 561227,
@@ -2040,7 +2040,7 @@
       "wait_ms": 5500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 50 (561227 Effect[0] aura 108 SPELLMOD_ALL_EFFECTS MiscValue 8 BasePoints 49 + DieSides 1 = +50%, EffectSpellClassMask[0] 1342177280 covering Blood Shield 504296, Vital Shield 504849/804309, Coagulated Shield 504897, Thick Pelt 556233; Spell.dbc). Vital Shield 504849 applies Effect[0] aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT MiscValue 40 (Nature|Shadow) +15% -> int32(15*1.5) = +22% and Effect[1] periodic trigger of Shadow heal 804309 every 5000 ms (2% -> 3% of 10000 max HP = 200 -> 300). Because 804309 is Shadow (SchoolMask 32), Vital Shield's own Effect[0] scales it: 200 * 1.15 = 230 before learning 561227 (control) and 300 * 1.22 = 366 after (cumulative 596, gain 366 +- 1 excludes 230 = 0%, 460 = +100%, and +-10% off +50%). Reference search 2026-11-26: coa-history 561227: 0 events (504849: 7 casts in 6 logs); coabuildhub 561227 matches verbatim."
+      "observe_source": "$s1 = 50 (561227 Effect[0] aura 108 SPELLMOD_ALL_EFFECTS MiscValue 8 BasePoints 49 + DieSides 1 = +50%, EffectSpellClassMask[0] 1342177280 covering Blood Shield 504296, Vital Shield 504849/804309, Coagulated Shield 504897, Thick Pelt 556233; Spell.dbc). G-23 subset: tests Vital Shield 504849/804309 (both effects across vital_shield_hot and vital_shield_heal_taken) out of the 4 shields sharing Effect[0]'s single SPELLMOD_ALL_EFFECTS class mask (note Thick Pelt 556233 calls CalcValue() without caster at AscensionBloodmageTalents.cpp:749). Vital Shield 504849 applies Effect[0] aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT MiscValue 40 (Nature|Shadow) +15% -> int32(15*1.5) = +22% and Effect[1] periodic trigger of Shadow heal 804309 every 5000 ms (2% -> 3% of 10000 max HP = 200 -> 300). Because 804309 is Shadow (SchoolMask 32), Vital Shield's own Effect[0] scales it: 200 * 1.15 = 230 before learning 561227 (control) and 300 * 1.22 = 366 after (cumulative 596, gain 366 +- 1 excludes 230 = 0%, 460 = +100%, and +-10% off +50%). Reference search 2026-11-26: coa-history 561227: 0 events (504849: 7 casts in 6 logs); coabuildhub 561227 matches verbatim."
     },
     {
       "spell": 561227,
@@ -2103,7 +2103,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "expected_source": "Second shield effect check for 561227 (+50% SPELLMOD_ALL_EFFECTS): Vital Shield 504849 Effect[0] aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT MiscValue 40 (Nature|Shadow) BasePoints 14 + 1 = +15% -> int32(15 * 1.5) = +22% with 561227 (SpellInfo.cpp:592 truncation). Sanguine Mend 802310 (SchoolMask 32 Shadow) cast on self at +20000 SP with Vital Shield cast in both arms scales by 1.22 / 1.15 = 1.06087 (+6.09%, G-19 +-2 pt band [4.09%, 8.09%] excludes 0% and double +13.04%). Reference search 2026-11-26: coa-history 561227: 0 events; coabuildhub 561227 matches verbatim."
+      "expected_source": "Second shield effect check for 561227 (+50% SPELLMOD_ALL_EFFECTS; G-23 subset: Vital Shield 504849/804309 of 4 shields under Effect[0] class mask [1342177280, 0, 0]): Vital Shield 504849 Effect[0] aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT MiscValue 40 (Nature|Shadow) BasePoints 14 + 1 = +15% -> int32(15 * 1.5) = +22% with 561227 (SpellInfo.cpp:592 truncation). Sanguine Mend 802310 (SchoolMask 32 Shadow) cast on self at +20000 SP with Vital Shield cast in both arms scales by 1.22 / 1.15 = 1.06087 (+6.09%, G-19 +-2 pt band [4.09%, 8.09%] excludes 0% and double +13.04%). Reference search 2026-11-26: coa-history 561227: 0 events; coabuildhub 561227 matches verbatim."
     },
     {
       "spell": 561278,
@@ -2184,11 +2184,11 @@
       "before_expected": 4170,
       "expected": 4570,
       "expected_gain": 400,
-      "tolerance": 140,
+      "tolerance": 20,
       "wait_ms": 40000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 50 (570758 Effect[0] aura 108 SPELLMOD_EFFECT2 MiscValue 12 BasePoints 49 + 1 = +50% over Blood Shield 504296 Effect[1] aura 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT 50 -> 75; Effect[1] aura 108 SPELLMOD_EFFECT3 MiscValue 23 +50% over Effect[2] aura 116 100 -> 150; Spell.dbc). Player::OCTRegenHPPerSpirit (Player.cpp:2157-2188, 5759-5780) at level 60 Spirit 114 (gtOCTRegenHP 0.138889, gtRegenHPPerSpt 0.5): base tick = (50*0.138889 + 64*0.5)*2 = 77.8889 HP per 2 s. With Blood Shield 504296 (+50%): int32(77.8889*1.5) = 116 HP/2s; with 570758 (+75%): int32(77.8889*1.75) = 136 HP/2s (+20 HP/tick). Over 40000 ms (20 ticks) from caster_health [2000, 10000] (identical 504296 10% base HP cast cost in both arms), treatment gains +400 HP over control (tolerance 140 covers +-1 tick phase jitter while excluding 0 gain and +800 double). Reference search 2026-11-26: coa-history 570758: 0 events (504296: 74 casts in 23 logs); coabuildhub 570758 says 'increases your health regeneration by 50% more.' matching multiplicative 50 -> 75."
+      "observe_source": "$s1 = 50 (570758 Effect[0] aura 108 SPELLMOD_EFFECT2 MiscValue 12 BasePoints 49 + 1 = +50% over Blood Shield 504296 Effect[1] aura 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT 50 -> 75; Effect[1] aura 108 SPELLMOD_EFFECT3 MiscValue 23 +50% over Effect[2] aura 116 100 -> 150; Spell.dbc). Player::OCTRegenHPPerSpirit (Player.cpp:2157-2188, 5759-5780) at level 60 Spirit 114 (gtOCTRegenHP 0.138889, gtRegenHPPerSpt 0.5): base tick = (50*0.138889 + 64*0.5)*2 = 77.8889 HP per 2 s. With Blood Shield 504296 (+50%): int32(77.8889*1.5) = 116 HP/2s; with 570758 (+75%): int32(77.8889*1.75) = 136 HP/2s (+20 HP/tick). Over 40000 ms (20 ticks) from caster_health [2000, 10000] (identical 504296 10% base HP cast cost in both arms), treatment gains +400 HP over control (4170 -> 4570; tolerance 20 = +-5% per G-19 excludes +-10% = +360/+440, 0 gain, and +800 double). Reference search 2026-11-26: coa-history 570758: 0 events (504296: 74 casts in 23 logs); coabuildhub 570758 says 'increases your health regeneration by 50% more.' matching multiplicative 50 -> 75."
     },
     {
       "spell": 707371,
@@ -2409,9 +2409,10 @@
         ]
       },
       "critical": false,
-      "trials": 20,
+      "trials": 100,
+      "parts": 2,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 20 (680685 Effect[1] aura 108 SPELLMOD_ALL_EFFECTS MiscValue 8 BasePoints 19 + 1 = +20% on Sanguine Rupture 572907 Effect[0] 142 TRIGGER_SPELL_WITH_VALUE -> 800775; Spell.dbc). Tests whether Sanguine Rupture 800775 damage at +20000 SP (with 823764 spellpen and 47440 +100000 max HP) actually scales by +20% (G-19 band [18%, 22%]). Reference search 2026-11-26: coa-history 680685: 0 events (572907: 1505 casts in 19 logs); coabuildhub 680685 matches verbatim."
+      "observe_source": "$s1 = 20 (680685 Effect[1] aura 108 SPELLMOD_ALL_EFFECTS MiscValue 8 BasePoints 19 + 1 = +20% on Sanguine Rupture 572907 Effect[0] 142 TRIGGER_SPELL_WITH_VALUE -> 800775; Spell.dbc). Tests whether Sanguine Rupture 800775 damage at +20000 SP (with 823764 spellpen and 47440 +100000 max HP across 2 pooled parts x 100 trials = 200 trials/arm so 99% half-width stays well below 1.0 pt) actually scales by +20% (G-19 band [18%, 22%]). Reference search 2026-11-26: coa-history 680685: 0 events (572907: 1505 casts in 19 logs); coabuildhub 680685 matches verbatim."
     },
     {
       "spell": 680716,
@@ -2622,14 +2623,14 @@
       "fields": {
         "stat": 4
       },
-      "before_expected": 154,
-      "expected": 162,
+      "before_expected": 155,
+      "expected": 163,
       "expected_gain": 8,
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "Second Offering family check for 704635 (+20% SPELLMOD_ALL_EFFECTS): Bloodsoaked Offering 572403 adds +40 Spirit on reference Spirit 114 (= 154); with 704635, 40 * 1.20 = +48 Spirit (= 162, gain +8, tolerance 0). Reference search 2026-11-26: coa-history 704635: 0 events (572403: 1 cast in 1 log); coabuildhub 704635 matches verbatim."
+      "observe_source": "Second Offering family check for 704635 (+20% SPELLMOD_ALL_EFFECTS): Bloodsoaked Offering 572403 adds +40 flat Spirit before 704635 and 40 * 1.20 = +48 flat Spirit with 704635. On Human Bloodmage (base Spirit 111 * 1.03 The Human Spirit racial 20598 = 114 reference Spirit): floor((111 + 40) * 1.03) = 155 before and floor((111 + 48) * 1.03) = 163 after (gain +8, tolerance 0 excludes 0, double +17, and +-10% off 20%). Reference search 2026-11-26: coa-history 704635: 0 events (572403: 1 cast in 1 log); coabuildhub 704635 matches verbatim."
     },
     {
       "spell": 706256,
@@ -2895,7 +2896,7 @@
           ]
         }
       ],
-      "observe_source": "${$m2-1} = 1 (300590 Effect[1] aura 107 SPELLMOD_JUMP_TARGETS MiscValue 17 BasePoints 1 + DieSides 1 = +2 on EffectSpellClassMask[0] 524288 matching Sanguine Mend 802310 ChainTarget 0 -> 2 total targets = primary + 1 additional nearby ally; Spell.dbc, Spell.cpp:1932). Three injured grouped allies stand at 3, 5, and 8 yd: without 300590 (control) Sanguine Mend 802310 heals only primary (bounce=0, third=0); after learning 300590 it heals primary and bounce while leaving third unhealed (0), proving exactly +1 additional target. Reference search 2026-11-26: coa-history 300590: 0 events; coabuildhub 300590 holds an older swapped tooltip ('9 additional / 1%'), installed server Spell.dbc governs (G-9)."
+      "observe_source": "${$m2-1} = 1 (300590 Effect[1] aura 107 SPELLMOD_JUMP_TARGETS MiscValue 17 BasePoints 1 + DieSides 1 = +2 on EffectSpellClassMask[0] 524288 matching Sanguine Mend 802310 ChainTarget 0 -> 2 total targets = primary + 1 additional nearby ally; Spell.dbc, Spell.cpp:1932). Three injured grouped allies stand at 3, 5, and 8 yd: without 300590 (control) Sanguine Mend 802310 heals only primary (bounce=0, third=0); after learning 300590 it heals primary and bounce while leaving third unhealed (0), proving exactly +1 additional target. Limit: no witness spell is cast on third, so third = 0 confirms only two allies were healed at these coordinates and does not independently exclude a line-of-sight or placement fault on third. Reference search 2026-11-26: coa-history 300590: 0 events; coabuildhub 300590 holds an older swapped tooltip ('9 additional / 1%'), installed server Spell.dbc governs (G-9)."
     },
     {
       "spell": 300590,
