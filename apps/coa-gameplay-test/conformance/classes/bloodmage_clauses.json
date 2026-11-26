@@ -1007,8 +1007,9 @@
     "spell": 504849,
     "clause": "Protects the caster with vital magic, increasing your Shadow and Nature healing received by $s1%",
     "labels": [
-      "504849 effect_value e0 #0",
-      "504849 aura_amount e0 #0"
+      "504849 behaviour_hit_ratio shadow_healing",
+      "504849 behaviour_hit_ratio nature_healing",
+      "504849 behaviour_hit_ratio holy_healing_control"
     ],
     "kind": "claim"
   },
@@ -1019,13 +1020,13 @@
       {
         "claim": "and restoring $804309s1% of your maximum health",
         "labels": [
-          "504849 effect_value 804309e0 #1"
+          "504849 behaviour_metric_delta periodic_heal_pct"
         ]
       },
       {
         "claim": "every $t2 sec.",
         "labels": [
-          "504849 aura_amplitude_ms #2"
+          "504849 behaviour_metric_delta periodic_interval"
         ]
       }
     ],
@@ -1035,7 +1036,8 @@
     "spell": 504849,
     "clause": "Lasts $d.",
     "labels": [
-      "504849 aura_duration_ms #3"
+      "504849 behaviour_cast_applies_aura duration",
+      "504849 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
@@ -1043,7 +1045,7 @@
     "spell": 504849,
     "clause": "@ext: Only 1 Shield can be active at a time.:ext@",
     "labels": [
-      "504849 effect_value #4"
+      "504849 behaviour_exclusivity"
     ],
     "kind": "claim"
   },
@@ -1092,7 +1094,7 @@
     "spell": 504896,
     "clause": "Your Bloodbolt now heals for an additional $s1% of the damage dealt.",
     "labels": [
-      "504896 effect_value e0 #0"
+      "504896 behaviour_metric_delta bloodbolt_leech"
     ],
     "kind": "claim"
   },

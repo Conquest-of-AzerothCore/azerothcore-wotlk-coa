@@ -1749,6 +1749,248 @@
       },
       "void_on_cast_failure": true,
       "observe_source": "Duration bracket for 301363 (+100% SPELLMOD_DURATION) on Hypovolemic Shock 572412 (15000 ms -> 30000 ms; Spell.dbc, SpellDuration.dbc). With 301363 learned (gate_timing start), reads aura 572412 = 0 before cast, 1 at game_time [29000, 29500] ms (> 28500 ms = 15000 + 0.9*15000), and 0 at game_time [30700, 31300] ms (< 31500 ms = 15000 + 1.1*15000), excluding 10% off on both sides of both the +15000 ms increase and 30000 ms total. Paired with hypovolemic_shock_contrast. Reference search 2026-11-26: see hypovolemic_shock_contrast."
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield (Shadow healing received +15%)",
+      "kind": "hit_ratio",
+      "variant": "shadow_healing",
+      "label_suffix": "shadow_healing",
+      "quote": "Protects the caster with vital magic, increasing your Shadow and Nature healing received by $s1%",
+      "expected": 1.15,
+      "metric": "spell_heal_total",
+      "observe_spell": 504085,
+      "learn": [
+        504085
+      ],
+      "caster": "caster",
+      "target": "caster",
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          504849
+        ],
+        "casts": [
+          {
+            "spell": 504849,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "504849 Effect[0] aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT, EffectMiscValue[0] 40 (Nature 8 | Shadow 32), BasePoints 14 + DieSides 1 = +15% ($s1; /srv/coa/server-data/dbc Spell.dbc). Casts Sanguine Mend rank 8 (504085, SchoolMask 32 Shadow, lvl 56, 200 Rage cost, cast_power 1000 = 100 Rage to cover out-of-combat Rage decay during the 2500 ms cast, Mortal Form default) on caster with fixture spell_power 20000 (control: without 504849; treatment: learns and casts 504849 on caster for real, health cost 12% base HP + 50 healed back each trial). Expected ratio 1.15 (+15%). Reference search 2026-11-26: coa-history spell 504849 (7 casts, 4 applies, 3 refreshes, 2 removals across 6 logs), spell 804309 (1268 SPELL_HEAL events across 12 logs, school 0x20); ~/CoaServer/reference skill_line_ability.csv lists 504849 under skill 500; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield (Nature healing received +15%)",
+      "kind": "hit_ratio",
+      "variant": "nature_healing",
+      "label_suffix": "nature_healing",
+      "quote": "Protects the caster with vital magic, increasing your Shadow and Nature healing received by $s1%",
+      "expected": 1.15,
+      "metric": "spell_heal_total",
+      "observe_spell": 25297,
+      "learn": [
+        25297
+      ],
+      "caster": "caster",
+      "target": "caster",
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          504849
+        ],
+        "casts": [
+          {
+            "spell": 504849,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "504849 Effect[0] aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT, EffectMiscValue[0] 40 (Nature 8 | Shadow 32), BasePoints 14 + DieSides 1 = +15% ($s1; /srv/coa/server-data/dbc Spell.dbc). Casts Healing Touch rank 11 (25297, SchoolMask 8 Nature, lvl 60, 33% base mana = 0 on Rage class 20, 2200 ms cast) on caster with fixture spell_power 20000 (control: without 504849; treatment: learns and casts 504849 on caster for real). Expected ratio 1.15 (+15%). Reference search 2026-11-26: coa-history spell 504849 (7 casts across 6 logs); ~/CoaServer/reference skill_line_ability.csv lists 504849; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield (control: Holy healing received unchanged)",
+      "kind": "hit_ratio",
+      "variant": "holy_healing_control",
+      "label_suffix": "holy_healing_control",
+      "quote": "Protects the caster with vital magic, increasing your Shadow and Nature healing received by $s1%",
+      "expected": 1.0,
+      "metric": "spell_heal_total",
+      "observe_spell": 10917,
+      "learn": [
+        10917
+      ],
+      "caster": "caster",
+      "target": "caster",
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          504849
+        ],
+        "casts": [
+          {
+            "spell": 504849,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "School-restriction control for 504849 Effect[0] aura 319 SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT, EffectMiscValue[0] 40 (Nature 8 | Shadow 32; /srv/coa/server-data/dbc Spell.dbc). Tooltip specifies Shadow and Nature healing received only. Casts Flash Heal rank 7 (10917, SchoolMask 2 Holy, lvl 56, 18% base mana = 0 on Rage class 20, 1500 ms cast) on caster with fixture spell_power 20000 (control: without 504849; treatment: learns and casts 504849 on caster). Expected ratio 1.00 (+0% on Holy). Reference search 2026-11-26: coa-history spell 504849 (7 casts across 6 logs); installed Spell.dbc governs."
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield (periodic heal restores 2% max health, 2.3% under own +15% Shadow healing received)",
+      "kind": "metric_delta",
+      "variant": "periodic_heal_pct",
+      "label_suffix": "periodic_heal_pct",
+      "quote": "and restoring $804309s1% of your maximum health every $t2 sec.",
+      "trigger_spell": 504849,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 804309,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "max_health",
+        "fields": {}
+      },
+      "before_expected": 0,
+      "expected": 0.023,
+      "tolerance": 0.001,
+      "wait_ms": 6000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5500,
+          9500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504849 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude[1] 5000 ms ($t2), triggers 804309 (SchoolMask 32 Shadow, DmgClass 0, Effect[0] 136 SPELL_EFFECT_HEAL_PCT BasePoints 1 + DieSides 1 = 2% of max health, $804309s1; /srv/coa/server-data/dbc Spell.dbc). Under 504849's own Effect[0] +15% Shadow healing received (Spell::EffectHealPct SpellEffects.cpp:2617-2621 -> Unit::SpellHealingBonusTaken Unit.cpp:10994; Necromancer 680388 Q-b1-2 self-scaling precedent), one 804309 tick heals floor(floor(max_health * 2 / 100) * 1.15) = 2.3% (0.023) of max_health. Control (uncast before phase) reads 0; after casting 504849, waits 6000 ms (game_time [5500, 9500], strictly after tick 1 at 5000 ms and before tick 2 at 10000 ms) and reads spell_heal_total(804309) / max_health = 0.023 +- 0.001 (excludes 0, 0.020, and 0.046). Reference search 2026-11-26: coa-history spell 804309 (1268 SPELL_HEAL events across 12 logs, 0 crits, school 0x20 Shadow, log 85 ticks every 5.0 s); installed Spell.dbc governs."
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield (periodic heal ticks every 5 sec)",
+      "kind": "metric_delta",
+      "variant": "periodic_interval",
+      "label_suffix": "periodic_interval",
+      "quote": "and restoring $804309s1% of your maximum health every $t2 sec.",
+      "trigger_spell": 504849,
+      "target": "caster",
+      "measure_actor": "caster",
+      "phase_auras": [
+        [
+          504849,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_heal",
+        "spell": 804309,
+        "target": "caster",
+        "since_spell": 504849
+      },
+      "before_expected": 5000,
+      "expected": 5000,
+      "tolerance": 250,
+      "wait_ms": 16500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "504849 Effect[1] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL, EffectAmplitude[1] 5000 ms ($t2 = 5 sec), triggers 804309 (/srv/coa/server-data/dbc Spell.dbc). Clears 504849 before each phase cast, waits 16500 ms (3 ticks at 5000, 10000, 15000 ms -> 2 intervals, 1500 ms post-tick buffer), and reads event_interval_median_ms of 804309 spell_heal events on caster since 504849 cast: 5000 +- 250 ms (5% band excludes 4500 and 5500 ms, 10% off on both sides; uncast control proving 0 ticks is periodic_heal_pct). Reference search 2026-11-26: coa-history log 85 shows consecutive 804309 SPELL_HEAL timestamps 5.00 s apart (21:06:46.827, :51.880, :56.837, :01.849, :06.825); installed Spell.dbc governs."
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 504849,
+      "target": "caster",
+      "cast_spell": 504849,
+      "cast_target": "caster",
+      "observe_source": "504849 DurationIndex 30 = 1800000 ms ($d, 30 min; /srv/coa/server-data/dbc SpellDuration.dbc), instant self-cast aura on caster. Real cast of 504849: reads aura_duration_ms absent before cast and ~1800000 ms after cast, and proves expiry via behaviour_expiry around 1800000 ms (excluding +-5% = 90000 ms on both sides, accelerated clock ADR 0139). Reference search 2026-11-26: coa-history spell 504849 (7 casts, 4 applies, 3 refreshes, 2 removals across 6 logs); installed Spell.dbc governs."
+    },
+    {
+      "spell": 504849,
+      "name": "Vital Shield",
+      "kind": "exclusivity",
+      "quote": "@ext: Only 1 Shield can be active at a time.:ext@",
+      "chain": [
+        504296,
+        504849,
+        504897
+      ],
+      "wait_ms": 1500,
+      "observe_source": "data/sql/updates/pending_db_world/rev_20260907_02_exclusive_self_buffs.sql spell_group 1129 (stack_rule 2, 'Local Bloodmage: one active Shield per caster') lists Blood Shield 504296, Vital Shield 504849, and Coagulated Shield 504897. Casts each Shield in turn and loops back to 504296, verifying each cast removes the previous Shield and keeps only itself. Reference search 2026-11-26: coa-history logs show 504296 (74 casts), 504849 (7 casts), 504897 (15 casts); installed Spell.dbc and pending_db_world govern."
+    },
+    {
+      "spell": 504896,
+      "name": "Hematoma (Bloodbolt heals for an additional 40% of damage dealt)",
+      "kind": "metric_delta",
+      "variant": "bloodbolt_leech",
+      "label_suffix": "bloodbolt_leech",
+      "quote": "Your Bloodbolt now heals for an additional $s1% of the damage dealt.",
+      "trigger_spell": 578305,
+      "gate_spell": 504896,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "measure_actor": "caster",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 578305,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 578305,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "before_expected": 1.0,
+      "expected": 1.4,
+      "tolerance": 0.005,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "504896 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 27 SPELLMOD_VALUE_MULTIPLIER, BasePoints 39 + DieSides 1 = +40% ($s1), EffectSpellClassMask[1] 131072 matching Bloodbolt 578305 (rank 8, lvl 60, SchoolMask 32 Shadow, 300 Rage, instant, Speed 30 yd/s, Effect[0] 9 SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier[0] 1.0; /srv/coa/server-data/dbc Spell.dbc). Spell::EffectHealthLeech / Spell.cpp:2934-2954 multiplies non-overkill damage by CalcValueMultiplier (1.0 without 504896 -> 1.40 with 504896). Casts 578305 at dummy 10 yd away (travel ~333 ms, wait_ms 1500 gives >1100 ms post-flight buffer) with 823764 spellpen fixture and phase_since isolating each cast: spell_heal_total / spell_damage_total reads 1.00 +- 0.005 before learning 504896 and 1.40 +- 0.005 after (excludes 1.00 no-effect, 1.20 rank 1, and 1.80 double-applied). Reference search 2026-11-26: coa-history spell 504896 (0 events, passive), spell 578305 (3764 SPELL_DAMAGE mean 1371.0 and 3764 SPELL_HEAL mean 1362.0 across 17 logs); ~/CoaServer/reference mind_of_ascension_talent.csv lists Hematoma ranks {504758, 504896}, bindmysoul/coabuildhub show rank 1 504758 (+20%); installed Spell.dbc governs."
     }
   ],
   "player_observations": [],
