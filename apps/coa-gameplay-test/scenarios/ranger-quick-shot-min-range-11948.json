@@ -1,0 +1,143 @@
+{
+  "schema": 1,
+  "name": "Ranger Quick Shot uses the 5-30 yd ranged minimum like Auto Shot (#11948)",
+  "contract": "Quick Shot ranks 1-7 (500074, 572727-572732) ship in Spell.dbc with RangeIndex 54 (Monster Shoot: RangeMin 5, RangeMax 30, Flags 0) instead of RangeIndex 113 (Hunter Range 2: RangeMin 0, RangeMax 30, Flags 2 = SPELL_RANGE_RANGED). In Spell::CheckRange, Flags 0 with RangeMin 5 checks Unit::IsWithinCombatRange(target, 5.0), which adds both combat reaches (1.5 + 1.275 = 2.775 yd against creature 36, rejecting casts closer than 7.775 yd), while Auto Shot 75 (RangeIndex 114, Flags 2 = SPELL_RANGE_RANGED) checks IsWithinRange(target, GetMeleeRange(target)) = 5.0 yd. At level 7 without Ravager (92116), both Quick Shot Rank 1 (500074) and Rank 2 (572727) must fail SPELL_FAILED_TOO_CLOSE (128) at 4 yds, succeed and deal damage at 6 yds (where Auto Shot 75 also succeeds, and where RangeIndex 54 previously failed SPELL_FAILED_TOO_CLOSE), and keep a 30 yd maximum range.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 7,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "close_dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 7,
+      "health": 500000,
+      "distance": 4,
+      "reaction": 0,
+      "stationary": true
+    },
+    {
+      "id": "six_yd_dummy",
+      "owner": "ranger",
+      "entry": 36,
+      "level": 7,
+      "health": 500000,
+      "distance": 6,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and spawns settle", "ms": 3000 },
+    { "action": "unlearn", "actor": "ranger", "spell": 92116 },
+    { "action": "learn", "actor": "ranger", "spell": 75 },
+    { "action": "learn", "actor": "ranger", "spell": 264 },
+    { "action": "learn", "actor": "ranger", "spell": 500074 },
+    { "action": "learn", "actor": "ranger", "spell": 572727 },
+    { "action": "add_item", "actor": "ranger", "item": 2504 },
+    { "action": "equip", "actor": "ranger", "item": 2504, "slot": 17 },
+    { "action": "wait", "label": "Let equipment settle", "ms": 1500 },
+    {
+      "action": "assert",
+      "label": "SETUP: Ravager is not known",
+      "actor": "ranger",
+      "metric": "knows_spell",
+      "spell": 92116,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Quick Shot Rank 2 keeps 30 yd max range",
+      "actor": "ranger",
+      "metric": "spell_max_range",
+      "spell": 572727,
+      "min": 29.99,
+      "max": 30.01
+    },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "actor": "ranger", "spell": 572727, "target": "close_dummy" },
+    {
+      "action": "assert",
+      "label": "CONTROL: Quick Shot Rank 2 is too close at 4 yds",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 572727,
+      "equals": 128,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear GCD", "ms": 2000 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "actor": "ranger", "spell": 500074, "target": "close_dummy" },
+    {
+      "action": "assert",
+      "label": "CONTROL: Quick Shot Rank 1 is too close at 4 yds",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 500074,
+      "equals": 128,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear GCD", "ms": 2000 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "actor": "ranger", "spell": 572727, "target": "six_yd_dummy" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quick Shot Rank 2 succeeds at 6 yds",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 572727,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quick Shot Rank 2 deals damage at 6 yds",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 572727,
+      "target": "six_yd_dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Clear GCD", "ms": 2000 },
+    { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    { "action": "cast", "actor": "ranger", "spell": 500074, "target": "six_yd_dummy" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quick Shot Rank 1 succeeds at 6 yds",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 500074,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Quick Shot Rank 1 deals damage at 6 yds",
+      "actor": "ranger",
+      "metric": "spell_damage_count",
+      "spell": 500074,
+      "target": "six_yd_dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Clear GCD", "ms": 2000 },
+    { "action": "cast", "actor": "ranger", "spell": 75, "target": "six_yd_dummy" },
+    {
+      "action": "assert",
+      "label": "COMPARISON: Auto Shot also succeeds at 6 yds",
+      "actor": "ranger",
+      "metric": "cast_failure",
+      "spell": 75,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

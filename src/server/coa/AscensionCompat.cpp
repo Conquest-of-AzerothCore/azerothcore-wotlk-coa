@@ -4576,6 +4576,7 @@ private:
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
       572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
+  static constexpr uint32 SPELL_RANGE_INDEX_FIELD = 46;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
   static constexpr uint32 CHARGE_SPELL_VISUAL = 867;
@@ -5795,6 +5796,9 @@ private:
     }
     if (IsChromaticShardRank(info->Id))
       row.Values[SPELL_WIRE_SLOT(SPELL_INTERRUPT_FLAGS_FIELD)] &= ~uint32(SPELL_INTERRUPT_FLAG_MOVEMENT);
+    if (info->SpellFamilyName == 27 &&
+        (info->Id == 500074 || (info->Id >= 572727 && info->Id <= 572732)) && info->RangeEntry)
+      row.Values[SPELL_WIRE_SLOT(SPELL_RANGE_INDEX_FIELD)] = info->RangeEntry->ID;
     if (info->Id == VAULT_CLIENT_SPELL)
       row.Values[SPELL_WIRE_SLOT(SPELL_VISUAL_FIELD)] = CHARGE_SPELL_VISUAL;
     if (info->Id == TinkerReplenishmentFieldAura)
