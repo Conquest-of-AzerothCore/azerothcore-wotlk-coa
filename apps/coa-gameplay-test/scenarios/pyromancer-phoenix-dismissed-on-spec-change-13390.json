@@ -27,7 +27,7 @@
       "id": "pyro",
       "race": 1,
       "class": 24,
-      "level": 80,
+      "level": 60,
       "allow_regeneration": false
     }
   ],
@@ -64,6 +64,11 @@
       "metric": "knows_spell",
       "spell": 800796,
       "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "pyro",
+      "value": 3000
     },
     {
       "action": "cast",
@@ -198,6 +203,11 @@
       "metric": "knows_spell",
       "spell": 800796,
       "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "pyro",
+      "value": 3000
     },
     {
       "action": "cast",
