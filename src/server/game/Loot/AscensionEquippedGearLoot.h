@@ -9,6 +9,7 @@ struct Loot;
 namespace AscensionEquippedGearLoot
 {
 bool AddLoot(Creature const* creature, Loot& loot, uint16 lootMode);
+bool SameAppearance(uint32 leftDisplay, uint32 rightDisplay);
 }
 
 #endif

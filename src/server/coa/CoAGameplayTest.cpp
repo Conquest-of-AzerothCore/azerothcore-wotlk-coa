@@ -9,6 +9,7 @@
 #include "ArenaTeamMgr.h"
 #include "AscensionBattlegroundCatchUp.h"
 #include "AscensionCoATalentState.h"
+#include "AscensionEquippedGearLoot.h"
 #include "AscensionItemScaling.h"
 #include "AscensionNativeItemScaling.h"
 #include "AscensionQuestLog.h"
@@ -4969,8 +4970,11 @@ private:
                 for (LootItem const& item : loot.items)
                 {
                     ItemTemplate const* gear = sObjectMgr->GetItemTemplate(item.itemid);
-                    Require(gear && gear->DisplayInfoID && displays.contains(gear->DisplayInfoID),
-                        "Equipped gear loot does not match a visible item");
+                    Require(gear && gear->DisplayInfoID && std::any_of(displays.begin(), displays.end(),
+                        [gear](uint32 display)
+                        {
+                            return AscensionEquippedGearLoot::SameAppearance(display, gear->DisplayInfoID);
+                        }), "Equipped gear loot does not match a visible item");
                     Require(gear->RequiredLevel <= creature.GetLevel() && gear->Quality <= ITEM_QUALITY_UNCOMMON,
                         "Equipped gear loot exceeded its level or quality limit");
                     Require(gear->Bonding == NO_BIND || gear->Bonding == BIND_WHEN_EQUIPPED,
