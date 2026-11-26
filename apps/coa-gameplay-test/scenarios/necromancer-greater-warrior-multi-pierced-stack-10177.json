@@ -51,12 +51,6 @@
       "spell": 504868
     },
     {
-      "action": "set_power",
-      "actor": "necro",
-      "power": 0,
-      "value": 5000
-    },
-    {
       "action": "cast",
       "label": "Raise first Greater Skeletal Warrior",
       "actor": "necro",
@@ -75,12 +69,6 @@
       "action": "wait",
       "label": "Clear the global cooldown",
       "ms": 1600
-    },
-    {
-      "action": "set_power",
-      "actor": "necro",
-      "power": 0,
-      "value": 5000
     },
     {
       "action": "cast",
