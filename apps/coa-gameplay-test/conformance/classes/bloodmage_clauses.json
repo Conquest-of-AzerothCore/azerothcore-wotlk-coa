@@ -4953,13 +4953,18 @@
   {
     "spell": 803585,
     "clause": "Brings a dead player back to life with $s1% health and mana.",
-    "labels": [],
+    "labels": [
+      "803585 behaviour_cast_combat peaceful health",
+      "803585 behaviour_cast_combat peaceful mana"
+    ],
     "kind": "claim"
   },
   {
     "spell": 803585,
     "clause": "For the next $d,",
-    "labels": [],
+    "labels": [
+      "803585 behaviour_metric_delta duration"
+    ],
     "kind": "claim"
   },
   {
