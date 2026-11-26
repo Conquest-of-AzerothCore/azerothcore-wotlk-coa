@@ -60,6 +60,10 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: dummy17 kept its declared level after settling", "actor": "dummy17", "metric": "level", "equals": 17 },
+    { "action": "assert", "label": "SETUP: dummy17 kept its declared max health after settling", "actor": "dummy17", "metric": "max_health", "equals": 1000000 },
+    { "action": "assert", "label": "SETUP: dummy60 kept its declared level after settling", "actor": "dummy60", "metric": "level", "equals": 60 },
+    { "action": "assert", "label": "SETUP: dummy60 kept its declared max health after settling", "actor": "dummy60", "metric": "max_health", "equals": 1000000 },
 
     { "action": "learn", "actor": "base17", "spell": 201 },
     { "action": "learn", "actor": "base17", "spell": 1180 },
@@ -112,6 +116,8 @@
     { "action": "set_aura", "actor": "scaled60", "spell": 823764, "stacks": 1 },
 
     { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: dummy17 max health stayed stable before baseline casts", "actor": "dummy17", "metric": "max_health", "equals": 1000000 },
+    { "action": "assert", "label": "SETUP: dummy60 max health stayed stable before baseline casts", "actor": "dummy60", "metric": "max_health", "equals": 1000000 },
 
     { "action": "cast", "label": "Baseline level-17 Rank 1 cast", "actor": "base17", "spell": 712326, "target": "dummy17" },
     { "action": "assert", "label": "SETUP: base17 landed one critical hit", "actor": "base17", "metric": "spell_damage_count", "spell": 712326, "target": "dummy17", "critical": true, "equals": 1, "within_ms": 2000 },
