@@ -52,6 +52,9 @@ def main():
         return (ROOT / name).read_text(encoding='utf-8')
 
     compat = source('src/server/coa/AscensionCompat.cpp')
+    patch_stream = method(compat, 'void SendPatchStream(Player *player)')
+    assert 'ClientSpellRow(player, PrismaticSetting::Spell)' in patch_stream, \
+        'the Thorium Setting spell patch must resolve through the player-aware spell row lookup'
     items = source('src/server/game/Handlers/ItemHandler.cpp')
     objects = source('src/server/game/Globals/ObjectMgr.h')
     buffer = source('src/server/shared/Packets/ByteBuffer.cpp')

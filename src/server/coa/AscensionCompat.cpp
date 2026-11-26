@@ -4378,7 +4378,7 @@ public:
     for (SuperTrackPatchRow const &row : rows.SuperTracks)
       bytes += SendSuperTrackRow(player, row);
 
-    if (std::optional<SpellPatchRow> const row = ClientSpellRow(PrismaticSetting::Spell))
+    if (std::optional<SpellPatchRow> const row = ClientSpellRow(player, PrismaticSetting::Spell))
       SendSpellRow(player, *row);
 
     for (QuestSuperTrackPatch const &patch : rows.QuestSuperTracks)
