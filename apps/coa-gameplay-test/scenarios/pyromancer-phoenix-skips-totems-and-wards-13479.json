@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "name": "Pyromancer: Phoenix periodic healing skips totems and Witch Doctor wards (#13479)",
+  "contract": [
+    "#13479: Phoenix Egg 800796 spawns creature 50258, whose UpdateAI casts periodic heal 707110 on every unit",
+    "returned by AscensionPyromancer::Allies(). Spell.dbc gives 707110 TARGET_UNIT_SRC_AREA_PARTY, whose native",
+    "target check (WorldObjectSpellTargetCheck) rejects IsTotem(); live Ascension combat logs confirm 0 heals on",
+    "SUMMON_TYPE_TOTEM wards, idols, effigies, and totems while players and Phoenix 50258 are healed. Previously,",
+    "AscensionPyromancer::Allies() checked only IsInRaidWith() and IsFriendlyTo(), without excluding IsTotem()",
+    "or CREATURE_TYPE_TOTEM (11), so both native Shaman totems (IsTotem() == true) and Witch Doctor wards/idols",
+    "(plain TempSummons with creature_template.type == CREATURE_TYPE_TOTEM) received 707110 heals. In a 3-player",
+    "party (Pyromancer, Witch Doctor, Shaman) with Serpent Ward (50105), Spirit Idol (50106), and Stoneskin Totem",
+    "(5873) active beside the Phoenix, one tick of 707110 heals the 3 party players and Phoenix 50258 (total",
+    "spell_heal_count == 4, spell_cast_count == 4) rather than 7, while all three totems/wards remain present."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "pyro",
+      "race": 2,
+      "class": 24,
+      "level": 42,
+      "allow_regeneration": false
+    },
+    {
+      "id": "wd",
+      "race": 2,
+      "class": 13,
+      "level": 42,
+      "allow_regeneration": false
+    },
+    {
+      "id": "shaman",
+      "race": 2,
+      "class": 7,
+      "level": 42,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "pyro",
+      "target": "wd"
+    },
+    {
+      "action": "group",
+      "actor": "pyro",
+      "target": "shaman"
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 800796
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 500960
+    },
+    {
+      "action": "learn",
+      "actor": "wd",
+      "spell": 500961
+    },
+    {
+      "action": "learn",
+      "actor": "shaman",
+      "spell": 8071
+    },
+    {
+      "action": "add_item",
+      "label": "Give Shaman an Earth Totem for Stoneskin Totem",
+      "actor": "shaman",
+      "item": 5175,
+      "count": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "pyro",
+      "value": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "wd",
+      "value": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "shaman",
+      "value": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Witch Doctor summons Serpent Ward (50105, CREATURE_TYPE_TOTEM)",
+      "actor": "wd",
+      "spell": 500960
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "owned_creature_count",
+      "entry": 50105,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Witch Doctor summons Spirit Idol (50106, CREATURE_TYPE_TOTEM)",
+      "actor": "wd",
+      "spell": 500961
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "owned_creature_count",
+      "entry": 50106,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Shaman summons Stoneskin Totem (5873, native Totem)",
+      "actor": "shaman",
+      "spell": 8071
+    },
+    {
+      "action": "assert",
+      "actor": "shaman",
+      "metric": "owned_creature_count",
+      "entry": 5873,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "wd",
+      "value": 500
+    },
+    {
+      "action": "set_health",
+      "actor": "shaman",
+      "value": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "wd",
+      "metric": "health",
+      "save_as": "wd_hp"
+    },
+    {
+      "action": "snapshot",
+      "actor": "shaman",
+      "metric": "health",
+      "save_as": "shaman_hp"
+    },
+    {
+      "action": "cast",
+      "label": "Pyromancer summons Phoenix beside the party and wards/totems",
+      "actor": "pyro",
+      "spell": 800796,
+      "destination": {
+        "x": -8916.41,
+        "y": -115.853,
+        "z": 82.3711
+      }
+    },
+    {
+      "action": "assert",
+      "actor": "pyro",
+      "metric": "owned_creature_count",
+      "entry": 50258,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Wait for the first Phoenix periodic heal tick to hit the Witch Doctor",
+      "actor": "pyro",
+      "metric": "spell_heal_count",
+      "spell": 707110,
+      "target": "wd",
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: all wards and totems are still active during the Phoenix tick",
+      "actor": "wd",
+      "metric": "owned_creature_count",
+      "entry": 50105,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "owned_creature_count",
+      "entry": 50106,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "shaman",
+      "metric": "owned_creature_count",
+      "entry": 5873,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Shaman player received the Phoenix heal",
+      "actor": "pyro",
+      "metric": "spell_heal_count",
+      "spell": 707110,
+      "target": "shaman",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Pyromancer received the Phoenix heal",
+      "actor": "pyro",
+      "metric": "spell_heal_count",
+      "spell": 707110,
+      "target": "pyro",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: total Phoenix 707110 heal count is 4 (3 players + Phoenix 50258), excluding Serpent Ward, Spirit Idol, and Stoneskin Totem",
+      "actor": "pyro",
+      "metric": "spell_heal_count",
+      "spell": 707110,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: total 707110 cast count is 4, confirming zero casts hit any ward or totem",
+      "actor": "pyro",
+      "metric": "spell_cast_count",
+      "spell": 707110,
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "actor": "wd",
+      "metric": "health",
+      "relative_to": "wd_hp",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "shaman",
+      "metric": "health",
+      "relative_to": "shaman_hp",
+      "min": 1
+    }
+  ]
+}
