@@ -90,7 +90,11 @@
   {
     "spell": 92113,
     "clause": "Your damaging Mortal Form spells can now be cast while moving.",
-    "labels": [],
+    "labels": [
+      "92113 behaviour_metric_delta moving_cast_bloodmoon",
+      "92113 behaviour_metric_delta moving_cast_scarlet_delirium",
+      "92113 behaviour_metric_delta moving_cast_healing_control"
+    ],
     "kind": "claim"
   },
   {
@@ -837,7 +841,7 @@
     "spell": 504134,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "504134 effect_value #6"
+      "504134 behaviour_metric_delta mortal_form_gate"
     ],
     "kind": "claim"
   },
@@ -848,25 +852,26 @@
       {
         "claim": "up to $i enemies",
         "labels": [
-          "504134 effect_value #0"
+          "504134 behaviour_metric_delta target_cap_ten"
         ]
       },
       {
         "claim": "within $a1 yds of you",
         "labels": [
-          "504134 effect_radius e0 #1"
+          "504134 behaviour_metric_delta radius_edge_base"
         ]
       },
       {
         "claim": "causing them to bleed for ${($d*1000/$T1)*($m1+0+$SP*.28)} Shadow damage",
         "labels": [
-          "504134 effect_value #2"
+          "504134 behaviour_metric_delta damage_base",
+          "504134 behaviour_metric_delta damage_sp"
         ]
       },
       {
         "claim": "over $d",
         "labels": [
-          "504134 aura_duration_ms #3"
+          "504134 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -876,7 +881,8 @@
     "spell": 504134,
     "clause": "Empowered: Radius increased by $524896s1 yds",
     "labels": [
-      "504134 effect_value 524896e0 #4"
+      "504134 behaviour_metric_delta empowered_radius_edge",
+      "504134 behaviour_metric_delta empowered_radius_contrast"
     ],
     "kind": "claim"
   },
@@ -884,7 +890,7 @@
     "spell": 504134,
     "clause": "and costs $524896s2% less Rage.",
     "labels": [
-      "504134 effect_value 524896e1 #5"
+      "504134 behaviour_metric_delta empowered_cost"
     ],
     "kind": "claim"
   },
@@ -2153,14 +2159,17 @@
   {
     "spell": 563736,
     "clause": "Each point of Rage now increases the damage of Bloodbolt by 1%,",
-    "labels": [],
+    "labels": [
+      "563736 behaviour_hit_ratio damage_40_rage",
+      "563736 behaviour_hit_ratio damage_100_rage"
+    ],
     "kind": "claim"
   },
   {
     "spell": 563736,
     "clause": "but its Rage cost is increased by $/10;s2.",
     "labels": [
-      "563736 effect_value e1 #0"
+      "563736 behaviour_metric_delta rage_cost"
     ],
     "kind": "claim"
   },
@@ -2539,12 +2548,19 @@
       {
         "claim": "Increases the critical strike chance of abilities that require Cursed Form by $s1%",
         "labels": [
-          "680675 effect_value e0 #0"
+          "680675 behaviour_metric_delta crit_bite_above_75",
+          "680675 behaviour_metric_delta crit_bite_below_35",
+          "680675 behaviour_metric_delta crit_claw_sweep_above_75",
+          "680675 behaviour_metric_delta crit_ravenous_below_35",
+          "680675 behaviour_metric_delta crit_mortal_control"
         ]
       },
       {
         "claim": "on enemies above 75% or below 35% health",
-        "labels": []
+        "labels": [
+          "680675 behaviour_metric_delta crit_mid_74_control",
+          "680675 behaviour_metric_delta crit_mid_36_control"
+        ]
       }
     ],
     "kind": "claim"
@@ -2553,7 +2569,10 @@
     "spell": 680675,
     "clause": "In addition, melee critical strikes now have a $h% chance to make your next Dark Liturgy or Bloodmoon Blast instant cast.",
     "labels": [
-      "680675 effect_value #1"
+      "680675 behaviour_metric_delta proc_rate",
+      "680675 behaviour_metric_delta proc_noncrit_control",
+      "680675 behaviour_metric_delta instant_bloodmoon",
+      "680675 behaviour_metric_delta instant_dark_liturgy"
     ],
     "kind": "claim"
   },
@@ -4341,7 +4360,7 @@
     "spell": 802580,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "802580 effect_value #2"
+      "802580 behaviour_metric_delta mortal_form_gate"
     ],
     "kind": "claim"
   },
@@ -4352,13 +4371,13 @@
       {
         "claim": "Corrupt an enemy's heart, causing them to bleed for $o1 Shadow damage",
         "labels": [
-          "802580 effect_value #3"
+          "802580 behaviour_metric_delta bleed_damage"
         ]
       },
       {
         "claim": "over $d.",
         "labels": [
-          "802580 aura_duration_ms #0"
+          "802580 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4368,7 +4387,7 @@
     "spell": 802580,
     "clause": "Generates $/10;582765s1 Rage every time it deals damage.",
     "labels": [
-      "802580 effect_value 582765e0 #1"
+      "802580 behaviour_metric_delta rage_per_tick"
     ],
     "kind": "claim"
   },
@@ -4376,7 +4395,8 @@
     "spell": 802580,
     "clause": "@ext:Periodic damage dealt through this can critically strike.:ext@",
     "labels": [
-      "802580 effect_value #4"
+      "802580 behaviour_metric_delta periodic_crit",
+      "802580 behaviour_metric_delta direct_crit_control"
     ],
     "kind": "claim"
   },
@@ -4917,18 +4937,21 @@
       {
         "claim": "has a $h% chance",
         "labels": [
-          "801963 effect_value #0"
+          "801963 proc_rate"
         ]
       },
       {
         "claim": "for $505349d",
         "labels": [
-          "801963 spell_duration 505349 #1"
+          "801963 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "generate 1 Blood Shard",
-        "labels": []
+        "labels": [
+          "801963 proc_rate",
+          "801963 behaviour_metric_delta mortal_control"
+        ]
       }
     ],
     "kind": "claim"
@@ -4936,20 +4959,26 @@
   {
     "spell": 801963,
     "clause": "up to 8.",
-    "labels": [],
+    "labels": [
+      "801963 behaviour_metric_delta cap_eight"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801963,
     "clause": "Dealing damage with Bloodbolt will launch 1 Blood Shard,",
-    "labels": [],
+    "labels": [
+      "801963 behaviour_metric_delta bloodbolt_launches_one"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801963,
     "clause": "dealing ${$504115m1+$AP*0.05+$SP*.1} Spellshadow damage to your target.",
     "labels": [
-      "801963 effect_value 504115e0 #2"
+      "801963 behaviour_metric_delta bloodbolt_shard_base",
+      "801963 behaviour_metric_delta bloodbolt_shard_sp",
+      "801963 behaviour_metric_delta bloodbolt_shard_ap"
     ],
     "kind": "claim"
   },
@@ -5996,7 +6025,7 @@
     "spell": 807489,
     "clause": "Your Bloodbolt now leeches $s1% more health,",
     "labels": [
-      "807489 effect_value e0 #0"
+      "807489 behaviour_metric_delta bloodbolt_leech"
     ],
     "kind": "claim"
   },
@@ -6004,7 +6033,7 @@
     "spell": 807489,
     "clause": "but it now costs $/10;s2 additional Rage.",
     "labels": [
-      "807489 effect_value e1 #1"
+      "807489 behaviour_metric_delta rage_cost"
     ],
     "kind": "claim"
   },
