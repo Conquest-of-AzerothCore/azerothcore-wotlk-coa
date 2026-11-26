@@ -2,13 +2,40 @@
 
 Ordinary stage creatures keep the core kill reward path enabled. Loot mode zero suppresses their normal
 item and money loot; reputation remains disabled. Kill XP follows the core's level, group, range and
-no-XP rules, then the existing Manastorm depth/native experience modifiers. Helpers retain their exclusions.
+no-XP rules, then applies the Manastorm experience formula (`ManastormExperienceFormula.h`). Helpers
+retain their exclusions.
 
 `Manastorm.ExperienceRate` in `manastorm-endless.conf` (default `0.3`, a 70% reduction) multiplies both
 kill XP and newly earned floor XP. It is reloadable; floor XP already earned keeps its saved amount.
 
+## Depth scaling and anti-boost rules
+
+- **Solo runs (`N = 1`)** receive the full bounded hyperbolic depth bonus
+  `DepthBonusFraction(d) = (d - 1) / ((d - 1) + 100)` (`+0%` at depth 1, `+50%` at depth 101,
+  asymptotic cap `+100%`) with no group, raid, level-gap, or contribution penalties.
+- **Additive external stacking:** The depth bonus stacks additively with positive external kill XP
+  multipliers (`SPELL_AURA_MOD_XP_PCT`, RAF `1.5x`, Prestige `9930831` below `MaxPlayerLevel`, respecting
+  `OnPlayerHasNoBonusExperience` and Destiny Weaver Experience Bonus Control) via
+  `1 + DepthBonusFraction(effectiveDepth) / externalMultiplier`.
+- **Group/raid personal depth cap (`N >= 2`):** Each member's effective depth is capped to
+  `min(runDepth, personalBestDepth + 5)`, and each group completion advances a member's recorded
+  progression by at most `+1` floor above their personal best (unless checkpoint bypass is active).
+- **Group effort, raid size and level gap (`N >= 2`):**
+  - Floor XP multiplies by `FloorGroupEffortFactor = clamp(groupHealthMultiplier / N, 0, 1)`.
+  - Both kill XP and floor XP multiply by `RaidSizeFactor = (5 / N)^2` for `N > 5` (`1.0` for `1..5`).
+  - `LevelGapFactor` scales linearly from `1.0` at a 5-level gap to `0.0` at a 10-level gap (and `0.0`
+    whenever any member reaches `MaxPlayerLevel`), using the stage's peak member count and highest level
+    even if a high-level carry leaves before completion.
+- **Dual-pool combat contribution (`N >= 2`):** Members earn full contribution (`1.0`) when either their
+  real creature HP damage share or their cross-player effective healing share reaches `40% / N`, ramping
+  down to a `10%` floor. Cross-healing excludes self-heals and pets, requires the healed player to have
+  damaged stage creatures, and is capped by that player's unhealed damage taken from stage creatures
+  (up to one health bar). Kills outside `100` yards, during `Preparing`, during the `previousStage`
+  transfer window, or by departing members still on an owned stage award `0` XP.
+
 Floor XP is a configurable reconstruction, not a recovered original Ascension amount. A successful
-objective completion awards each eligible run member the repeatable RDF reward for their own level.
+objective completion awards each eligible run member the repeatable RDF reward for their own level
+scaled by `Manastorm.ExperienceRate` and the group/level/contribution factors above.
 Replaying a floor in another run earns it again; entering or using a portal does not award XP.
 
 ## Installation and configuration
@@ -17,6 +44,8 @@ Rebuild the updated source. Before starting it, apply:
 
 - `data/sql/db-world/base/83_manastorm_floor_experience.sql` to `acore_world`.
 - `data/sql/db-characters/base/05_manastorm_pending_experience.sql` to `acore_characters`.
+- `data/sql/updates/pending_db_world/zzz_20261126_01_manastorm_raid_group_scaling.sql` to `acore_world`
+  (extends Normal and Endgame group scaling tables to 6–15 members).
 
 Both files preserve existing data when reapplied. They are module migrations, not full database dumps.
 

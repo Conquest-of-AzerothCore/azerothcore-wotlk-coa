@@ -6,6 +6,7 @@
 #include <limits>
 #include <unordered_set>
 #include <memory>
+#include <shared_mutex>
 #include <unordered_map>
 #include <vector>
 #include <array>
@@ -328,7 +329,8 @@ void CaptureStageLinks(Player* player, ManastormRun&) { stageLinkCaptures.push_b
 // ACTUAL_PROTECTED_PORTAL
 // ACTUAL_LEFT_ENTRANCE
 struct ManastormMgr {
- ManastormRun const*run=nullptr;std::map<uint64,std::unique_ptr<ManastormRun>>_runs;
+ ManastormRun const*run=nullptr;mutable std::shared_mutex _runsMutex;std::map<uint64,std::unique_ptr<ManastormRun>>_runs;
+ ManastormRun* FindRunById(uint64 id) { auto i = _runs.find(id); return i != _runs.end() ? i->second.get() : nullptr; }
 ManastormRun const* GetRunFor(Player const* player) const
 {
     return run && player && std::find(run->members.begin(), run->members.end(),
