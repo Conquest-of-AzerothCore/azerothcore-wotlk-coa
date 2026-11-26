@@ -2358,7 +2358,7 @@
         ]
       },
       {
-        "claim": "$?s560259[ Duration increased by $/1000;570744s1 sec per stack of Thirst.][]",
+        "claim": "$?s560259[ \r\n\r\nDuration increased by $/1000;570744s1 sec per stack of Thirst.][]",
         "labels": [
           "573357 behaviour_metric_delta vampyr_lord_thirst_duration",
           "573357 behaviour_metric_delta blood_constructor_thirst_duration"
@@ -2372,19 +2372,19 @@
     "kind": "claim",
     "claims": [
       {
-        "claim": "Ravenous Strike critical strike chance and critical damage by $s1% against Diseased targets",
+        "claim": "Increases the critical strike chance",
         "labels": [
-          "575335 behaviour_metric_delta ravenous_strike_crit_dmg",
-          "575335 behaviour_metric_delta ravenous_strike_clean_control",
           "575335 behaviour_metric_delta ravenous_strike_crit_chance",
-          "575335 behaviour_metric_delta ravenous_strike_crit_chance_clean"
+          "575335 behaviour_metric_delta ravenous_strike_crit_chance_clean",
+          "575335 behaviour_metric_delta claw_sweep_crit_chance"
         ]
       },
       {
-        "claim": "Claw Sweep critical strike chance and critical damage by $s1% against Diseased targets",
+        "claim": "and critical damage of Ravenous Strike and Claw Sweep by $s1% against Diseased targets.",
         "labels": [
+          "575335 behaviour_metric_delta ravenous_strike_crit_dmg",
+          "575335 behaviour_metric_delta ravenous_strike_clean_control",
           "575335 behaviour_metric_delta claw_sweep_crit_dmg",
-          "575335 behaviour_metric_delta claw_sweep_crit_chance",
           "575335 behaviour_metric_delta bloodfang_bite_wrong_mask"
         ]
       }
