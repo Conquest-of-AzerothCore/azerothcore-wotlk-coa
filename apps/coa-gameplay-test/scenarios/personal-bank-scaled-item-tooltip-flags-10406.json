@@ -18,6 +18,13 @@
   "steps": [
     { "action": "wait", "label": "Let spawn AI settle", "ms": 2000 },
     { "action": "level_scaling_packet", "actor": "hero", "value": 1 },
+    { "action": "add_item", "label": "Grant Tattered Cloth Vest (193) to occupy chest slot 4 before looting", "actor": "hero", "item": 193, "count": 1 },
+    { "action": "equip", "label": "Equip Tattered Cloth Vest so auto-equip leaves looted Lionfur Armor unequipped", "actor": "hero", "item": 193, "slot": 4 },
+    {
+      "action": "assert",
+      "label": "SETUP: chest slot 4 is occupied by Tattered Cloth Vest (193)",
+      "actor": "hero", "metric": "equipped_item", "slot": 4, "equals": 193
+    },
     { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "hero", "item": 134985, "count": 1 },
     { "action": "use_item", "label": "Place the Alliance Personal Bank vault", "actor": "hero", "item": 134985, "spell": 100702 },
     { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
@@ -71,8 +78,7 @@
       "actor": "hero", "metric": "item_count", "item": 17922, "equals": 1, "within_ms": 2000
     },
     { "action": "equip", "label": "Equip Lionfur Armor to make it soulbound", "actor": "hero", "item": 17922, "slot": 4 },
-    { "action": "add_item", "label": "Grant Tattered Cloth Vest (193) to swap Lionfur Armor back to bags", "actor": "hero", "item": 193, "count": 1 },
-    { "action": "equip", "label": "Equip Tattered Cloth Vest so soulbound Lionfur Armor moves to bags", "actor": "hero", "item": 193, "slot": 4 },
+    { "action": "equip", "label": "Re-equip Tattered Cloth Vest so soulbound Lionfur Armor moves to bags", "actor": "hero", "item": 193, "slot": 4 },
     {
       "action": "assert",
       "label": "SETUP: Lionfur Armor is now soulbound (ITEM_FIELD_FLAGS=1)",
