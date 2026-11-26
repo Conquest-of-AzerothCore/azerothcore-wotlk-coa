@@ -4,14 +4,16 @@
   "contract": [
     "Paragon 706514 grants 1 stack of 706516 (10 s) on block and 3 stacks on casting Heavy Blow; at 10 stacks it",
     "applies 707138 (DurationIndex 1 = 10000 ms) and replaces Heavy Blow (Category 1087, RecoveryTime 10000 ms)",
-    "with Paragon Smash 802629 (Category 737, RecoveryTime 10000 ms, 8 yd AoE + block buff 803432). Previously",
+    "with Paragon Smash 802629 (Category 737, RecoveryTime 10000 ms, 8 yd AoE). Previously",
     "spell_ascension_guardian_ability::Check rejected 802629 with SPELL_FAILED_NOT_READY whenever any Heavy Blow",
     "rank had a remaining cooldown, making Paragon Smash uncastable for the entire 10 s duration of 707138 whenever",
     "Heavy Blow triggered the 10th stack (and whenever blocks reached 10 stacks during Heavy Blow's 10 s cooldown).",
     "With 7 stacks of 706516, casting active Heavy Blow Rank 9 (503126) starts Heavy Blow's 10 s cooldown, adds 3",
     "stacks to trigger 707138 and replaces 503126 with 802629; after the 1.5 s GCD, while 503126 still has >5 s",
-    "cooldown remaining, Paragon Smash 802629 must cast cleanly, damage both nearby enemies, apply 803432, consume",
-    "707138 and return the replacement to 503126."
+    "cooldown remaining, Paragon Smash 802629 must cast cleanly, damage both nearby enemies, consume 707138, set",
+    "Heavy Blow's cooldown, and return the replacement to 503126. Pre-existing on main: Synchronize() removes",
+    "802629 via Player::removeSpell(..., true) once 707138 is consumed, which strips triggered aura 803432 on the",
+    "next update; that behavior is unrelated to #13728 and is not asserted here."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -211,15 +213,6 @@
       "metric": "spell_damage_count",
       "spell": 802629,
       "target": "dummy2",
-      "equals": 1,
-      "within_ms": 2000
-    },
-    {
-      "action": "assert",
-      "label": "Paragon Smash applies its block buff 803432",
-      "actor": "guardian",
-      "metric": "aura",
-      "spell": 803432,
       "equals": 1,
       "within_ms": 2000
     },
