@@ -1640,6 +1640,12 @@
           "caster"
         ]
       ],
+      "after_setup_reads": [
+        {
+          "spell": 562572,
+          "expected": 1
+        }
+      ],
       "phase_since": true,
       "metric": "spell_heal_total",
       "fields": {
@@ -1652,7 +1658,8 @@
       "tolerance": 0.02,
       "wait_ms": 500,
       "expire_ms": 11000,
-      "observe_source": "$504553s1 = 20% (562572 Effect[2] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL -> 504553 Marrowbite; 504553 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT BasePoints -21 + DieSides 1 = -20%, DurationIndex 1 = 10000 ms; Spell.dbc). Bloodfang Bite 572551 (DmgClass 2 melee) hits hostile enemy player (race 2), who casts Rejuvenation 9840 on itself: control (without 562572) heals full; treatment (after real 562572 cast) expects 0.80 ratio (-20%, tolerance 0.02). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504553 Marrowbite 1315 applies in 19 logs; coabuildhub 504710/562572 match."
+      "void_on_cast_failure": true,
+      "observe_source": "$504553s1 = 20% (562572 Effect[2] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL -> 504553 Marrowbite; 504553 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT BasePoints -21 + DieSides 1 = -20%, DurationIndex 1 = 10000 ms; Spell.dbc). Bloodfang Bite 572551 (DmgClass 2 melee, void_on_cast_failure=true) hits hostile enemy player (race 2), who casts Rejuvenation 9840 on itself: control (without 562572) heals full; treatment (after real 562572 cast, after_setup_reads confirms 562572 == 1) expects 0.80 ratio (-20%, tolerance 0.02). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504553 Marrowbite 1315 applies in 19 logs; coabuildhub 504710/562572 match."
     },
     {
       "spell": 504710,
@@ -1723,7 +1730,7 @@
       "trigger_spell": 562572,
       "gate_spell": 562572,
       "gate_cast": true,
-      "attack_swings": 4,
+      "attack_swings": 5,
       "target": "dummy",
       "measure_actor": "dummy",
       "caster_health": [
@@ -1740,7 +1747,37 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "$504553u = 2 (504553 StackAmount 2, DurationIndex 1 = 10000 ms; 562572 Effect[2] aura 42 -> 504553; Spell.dbc). Caster makes 4 auto-attack swings at dummy before casting 562572 (control: 0 stacks) and 4 swings after casting 562572 (treatment: capped at 2 stacks, tolerance 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504553 Marrowbite 1315 applies in 19 logs; coabuildhub 504710/562572 match."
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562572
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Accursed Form 562572 is absent in control and active in treatment."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "melee_damage_count",
+            "fields": {},
+            "before_expected": 4.5,
+            "expected": 9.0,
+            "tolerance": 2.5,
+            "source": "Confirms >= 2 melee auto-attack swings landed on dummy in both control (2..7 cumulative) and treatment (6.5..11.5 cumulative; 5 swings per phase)."
+          }
+        ]
+      },
+      "observe_source": "$504553u = 2 (504553 StackAmount 2, DurationIndex 1 = 10000 ms; 562572 Effect[2] aura 42 -> 504553; Spell.dbc). Caster makes 5 auto-attack swings at dummy before casting 562572 (control: 0 stacks) and 5 swings after casting 562572 (treatment: capped at 2 stacks, tolerance 0, void_on_cast_failure=true; ally_arm confirms aura 562572 0 -> 1 and >= 2 melee swings landed in each phase). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504553 Marrowbite 1315 applies in 19 logs; coabuildhub 504710/562572 match."
     },
     {
       "spell": 504710,
@@ -2201,7 +2238,7 @@
     },
     {
       "spell": 807487,
-      "name": "The Hunter and the Hunted (charges target within $804854R = 20 yd at 18.5 yd)",
+      "name": "The Hunter and the Hunted (charges target within $804854R = 20 yd at 19.5 yd)",
       "kind": "metric_delta",
       "variant": "charge_in_range",
       "label_suffix": "charge_in_range",
@@ -2213,7 +2250,7 @@
       "gate_spell": 807487,
       "target": "caster",
       "select_dummy": true,
-      "dummy_distance": 18.5,
+      "dummy_distance": 19.5,
       "measure_actor": "caster",
       "caster_health": [
         100000,
@@ -2225,41 +2262,11 @@
         "bearing": 0
       },
       "before_expected": 0,
-      "expected": 16.5,
+      "expected": 18.0,
       "tolerance": 2.5,
       "wait_ms": 1500,
       "expire_ms": 31000,
       "void_on_cast_failure": true,
-      "observe_source": "$804854R = 20 yd (804854 Dark Embrace RangeIndex 3 = SpellRange.dbc ID 3 'Twenty yards' RangeMax 20.0 yd, Effect[0] 96 SPELL_EFFECT_CHARGE; Spell.dbc; AscensionBloodmageTalents.cpp:437-450,504-509 casts 804854 when Cursed Form activates if target within GetMaxRange()). Dummy placed at 18.5 yd (> 18.0 yd = -10% of 20 yd) and selected via select_dummy; caster activates Blood Curse 562720: control (before 807487) displacement = 0 yd; treatment (after 807487) charges forward along bearing 0 toward dummy (displacement ~16.5 yd, tolerance 2.5, excluding 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804854 Dark Embrace 446 applies in 14 logs; coabuildhub spells_master_index.json 807487 matches."
-    },
-    {
-      "spell": 807487,
-      "name": "The Hunter and the Hunted (does not charge beyond $804854R = 20 yd at 21.5 yd)",
-      "kind": "metric_delta",
-      "variant": "charge_out_of_range",
-      "label_suffix": "charge_out_of_range",
-      "quote": "When you activate a Cursed Form you now charge to your target if they are within $804854R yds.",
-      "learn": [
-        562720
-      ],
-      "trigger_spell": 562720,
-      "gate_spell": 807487,
-      "target": "caster",
-      "select_dummy": true,
-      "dummy_distance": 21.5,
-      "measure_actor": "caster",
-      "caster_health": [
-        100000,
-        100000
-      ],
-      "metric": "position_x",
-      "fields": {},
-      "displacement": {},
-      "before_expected": 0,
-      "expected": 0,
-      "tolerance": 0.5,
-      "wait_ms": 1500,
-      "expire_ms": 31000,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -2274,7 +2281,91 @@
             "before_expected": 1,
             "expected": 1,
             "tolerance": 0,
-            "source": "Confirms Blood Curse 562720 itself succeeded in both phases."
+            "source": "Confirms Blood Curse 562720 activated cleanly in both control and treatment."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804854
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Dark Embrace 804854 did not fire before learning 807487 and landed on dummy at 19.5 yd after learning 807487."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "Human player combat reach (UNIT_FIELD_COMBATREACH = 1.5 yd; Object.cpp:2898-2901)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.275,
+            "expected": 1.275,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "Harvest Golem (entry 36, model 367) combat reach = 1.275 yd (creature_model_info.sql:259; Object.cpp:2898-2901)."
+          }
+        ]
+      },
+      "observe_source": "$804854R = 20 yd (804854 Dark Embrace RangeIndex 3 = SpellRange.dbc ID 3 'Twenty yards' RangeMax 20.0 yd, Effect[0] 96 SPELL_EFFECT_CHARGE; Spell.dbc; AscensionBloodmageTalents.cpp:437-450,504-509). Both WorldObject::IsWithinDistInMap (Object.cpp:1257-1289,2898-2901) and Spell::CheckRange (Spell.cpp:7324,7360) add caster + target combat reach (G-29, docs/coa/class-conformance.md:248,262-266): 20.0 + 1.5 (Human) + 1.275 (Harvest Golem 36, model 367, creature_model_info.sql:259) = 22.775 yd IsWithinDistInMap pre-check boundary; for SPELL_EFFECT_CHARGE, Spell.cpp:6450,6457-6458 sets PathGenerator::SetPathLengthLimit(20.0 * 1.5 + 1.275 = 31.275) which truncates _pointPathLimit = uint32(31.275 / 4.0) = 7 (SMOOTH_PATH_STEP_SIZE = 4.0f, PathGenerator.h:46,90; PathGenerator.cpp:689-692,984-1006), capping straight smooth paths at 5 * 4.0 = 20.0 yd (6 points < 7; distances 20.0 < d < 22.775 need 7 points and trigger PATHFIND_SHORT -> SPELL_FAILED_NOPATH -> 27). Dummy stands at 19.5 yd (18.0 = -10% of 20 yd < 19.5 <= 20.0): control (before 807487) reads 0 yd displacement; treatment (after 807487) charges ~18.0 yd along bearing 0 (tolerance 2.5, void_on_cast_failure=true, 0 cast_failures), with combat_reach terms (1.5 and 1.275) read directly from server via ally_arm. Paired with charge_out_of_range (23.5 yd). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804854 Dark Embrace 446 applies in 14 logs; coabuildhub spells_master_index.json 807487 matches."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (does not charge outside G-29 effective $804854R = 22.775 yd boundary at 23.5 yd)",
+      "kind": "metric_delta",
+      "variant": "charge_out_of_range",
+      "label_suffix": "charge_out_of_range",
+      "quote": "When you activate a Cursed Form you now charge to your target if they are within $804854R yds.",
+      "learn": [
+        562720
+      ],
+      "trigger_spell": 562720,
+      "gate_spell": 807487,
+      "target": "caster",
+      "select_dummy": true,
+      "dummy_distance": 23.5,
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.5,
+      "wait_ms": 1500,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562720
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Blood Curse 562720 itself succeeded in both control and treatment."
           },
           {
             "actors": [
@@ -2287,11 +2378,33 @@
             "before_expected": 0,
             "expected": 0,
             "tolerance": 0,
-            "source": "Confirms Dark Embrace 804854 did not land on out-of-range dummy at 21.5 yd."
+            "source": "Confirms Dark Embrace 804854 was not cast on out-of-range dummy at 23.5 yd."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.5,
+            "expected": 1.5,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "Human player combat reach (UNIT_FIELD_COMBATREACH = 1.5 yd; Object.cpp:2898-2901)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.275,
+            "expected": 1.275,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "Harvest Golem (entry 36, model 367) combat reach = 1.275 yd (creature_model_info.sql:259; Object.cpp:2898-2901)."
           }
         ]
       },
-      "observe_source": "Upper range boundary for $804854R = 20 yd (SpellRange.dbc ID 3 RangeMax 20.0 yd; AscensionBloodmageTalents.cpp:447 IsWithinDistInMap(target, 20.0f) plus Spell::CheckRange refusing 804854 beyond 20 yd). Dummy placed at 21.5 yd (< 22.0 yd = +10% of 20 yd) and selected via select_dummy: activating 562720 (confirmed active via ally_arm) with 807487 learned produces 0 yd displacement (tolerance 0.5) and 0 Dark Embrace 804854 aura on dummy, bracketing 20 yd between 18.5 yd (charges) and 21.5 yd (does not charge). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804854 Dark Embrace 446 applies in 14 logs; coabuildhub 807487 matches."
+      "observe_source": "Upper range boundary for $804854R = 20 yd (SpellRange.dbc ID 3 RangeMax 20.0 yd; G-29 effective IsWithinDistInMap boundary = 20.0 + 1.5 + 1.275 = 22.775 yd via WorldObject::IsWithinDistInMap Object.cpp:1257-1289,2898-2901 and Spell::CheckRange Spell.cpp:7324,7360; Harvest Golem 36 model 367 combat reach 1.275 yd from creature_model_info.sql:259; docs/coa/class-conformance.md:248,262-266). Dummy spawns at +23.5 yd (22.775 < 23.5 < 24.775 = +10% of 20 yd): IsWithinDistInMap returns false before casting 804854, yielding 0 yd displacement (tolerance 0.5), 0 Dark Embrace 804854 aura on dummy, aura 562720 = 1 in both phases, and empty cast_failures (void_on_cast_failure=true), bracketing the range between 19.5 yd (charges, inside 20.0 yd PathGenerator 6-point smooth-path cap) and 23.5 yd (does not charge). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804854 Dark Embrace 446 applies in 14 logs; coabuildhub 807487 matches."
     },
     {
       "spell": 807487,
@@ -3340,7 +3453,7 @@
       "wait_ms": 600,
       "expire_ms": 31000,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 15% (804223 Effect[0] aura 107 SPELLMOD_EFFECT2 +15 on 562572 Effect[1] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE MiscValue 13 AURA_STATE_HEALTHLESS_35_PERCENT, plus bloodmage_blood_scent_damage UnitScript AscensionBloodmageTalents.cpp:176-221; Spell.dbc). Both phases cast real Accursed Form 562572 and strike dummy below 35% HP (phase_target_health_pct [32, 28]) with Bloodfang Bite 572551 at +20000 AP (non-crit 16255=-100); treatment learns 804223 between phases (expire_ms 31000 clears control 562572). Expected ratio 1.15 (tolerance 0.02 -> [1.13, 1.17], excluding 1.00 and double-dip 1.3225). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804223 0 events (passive), 807300 4240 hits/heals in 3 logs; coabuildhub spells_master_index.json 804223 matches verbatim."
+      "observe_source": "$s1 = 15% (bloodmage_talent_contracts at AscensionBloodmageTalents.cpp:1691-1694 rewrites 804223 Effect[0] from SPELL_AURA_ADD_FLAT_MODIFIER SPELLMOD_EFFECT2 to SPELL_AURA_DUMMY on load so only bloodmage_blood_scent_damage UnitScript at AscensionBloodmageTalents.cpp:176-221 applies the +15% damage bonus; Spell.dbc). Both phases cast real Accursed Form 562572 and strike dummy below 35% HP (phase_target_health_pct [32, 28]) with Bloodfang Bite 572551 at +20000 AP (non-crit 16255=-100); treatment learns 804223 between phases (expire_ms 31000 clears control 562572). Expected ratio 1.15 (tolerance 0.02 -> [1.13, 1.17], excluding 1.00 and double-dip 1.3225). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804223 0 events (passive), 807300 4240 hits/heals in 3 logs; coabuildhub spells_master_index.json 804223 matches verbatim."
     },
     {
       "spell": 804223,
