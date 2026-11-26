@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionXoroth.h"
+#include "CombatManager.h"
 #include "GossipDef.h"
 #include "Map.h"
 #include "MotionMaster.h"
@@ -150,6 +151,38 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             Reduce(player, 524897, std::abs(Amount(804012, 1, player)));
         }
     }
+    Unit* CombatTarget(Player* player) const
+    {
+        if (Unit* victim = player->GetVictim(); victim && player->IsValidAttackTarget(victim))
+            return victim;
+        auto validCombat = [this, player](Unit* candidate)
+        {
+            return candidate && candidate->IsAlive() && player->IsValidAttackTarget(candidate) &&
+                player->IsInCombatWith(candidate) && me->IsWithinDistInMap(candidate, 40.0f) &&
+                me->IsWithinLOSInMap(candidate);
+        };
+        if (Unit* selected = player->GetSelectedUnit(); validCombat(selected))
+            return selected;
+        Unit* nearest = nullptr;
+        auto consider = [this, &nearest, &validCombat](Unit* candidate)
+        {
+            if (validCombat(candidate) && (!nearest || me->GetDistance(candidate) < me->GetDistance(nearest)))
+                nearest = candidate;
+        };
+        for (Unit* attacker : player->getAttackers())
+            consider(attacker);
+        if (nearest)
+            return nearest;
+        if (Unit* helper = me->getAttackerForHelper();
+            helper && helper->IsAlive() && player->IsValidAttackTarget(helper) &&
+            me->IsWithinDistInMap(helper, 40.0f) && me->IsWithinLOSInMap(helper))
+            return helper;
+        for (auto const& pair : player->GetCombatManager().GetPvECombatRefs())
+            consider(pair.second->GetOther(player));
+        for (auto const& pair : player->GetCombatManager().GetPvPCombatRefs())
+            consider(pair.second->GetOther(player));
+        return nearest;
+    }
     void UpdateAI(uint32 diff) override
     {
         Player* player = ObjectAccessor::GetPlayer(*me, owner);
@@ -190,14 +223,7 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             me->AttackStop();
         if (!me->GetVictim())
         {
-            Unit* target = player->GetVictim();
-            if (!target || !player->IsValidAttackTarget(target))
-                target = player->getAttackerForHelper();
-            if (!target || !player->IsValidAttackTarget(target))
-                target = me->getAttackerForHelper();
-            if (!target || !player->IsValidAttackTarget(target))
-                target = player->GetCombatManager().GetAnyTarget();
-            if (target && player->IsValidAttackTarget(target))
+            if (Unit* target = CombatTarget(player))
                 AttackStart(target);
             else if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
             {

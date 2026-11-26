@@ -1,0 +1,465 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Aspect of Time chains up to 3 additional casts (#13732)",
+  "contract": [
+    "Aspect of Time 504750 (Draconic level-20 passive, ProcChance 33, EffectBasePoints[0] 44 + DieSides 1 = 45%)",
+    "reads: Damage dealt by Echo of Nozdormu and Flames of Neltharion now has a 33% chance to cast an additional",
+    "time for 45% of the damage dealt. Damage dealt in this way can trigger this effect up to 3 additional times.",
+    "Aspect's Blessing 802168 guarantees the initial Aspect of Time trigger. Helper 503864 has Speed 35.0 in",
+    "Spell.dbc, so Spell::AddUnitTarget always delays its hit by at least 142 ms (min 5 yd / 35 yd/s). Previously",
+    "AscensionPyromancer::Aspect looped synchronously reading State(player).aspectDamage right after Copy(), which",
+    "was always 0 until 503864 landed asynchronously, breaking the loop after 1 hit. Chaining from 503864's",
+    "OnSpellHitResult with per-Spell remaining depth 3->2->1->0 delivers up to 4 total 503864 hits summing to",
+    "0.45 + 0.45^2 + 0.45^3 + 0.45^4 (~0.7846) of Echo of Nozdormu damage. A -100% SPELLMOD_CHANCE_OF_SUCCESS",
+    "mutant on 504750 proves Aspect's Blessing triggers only 1 hit (~0.45) when chain procs fail; a +300% mutant",
+    "(33% * 4 = 100% clamped) proves both Aspect's Blessing and plain Echo of Nozdormu chain to exactly 4 hits and",
+    "stop at the 3-additional-trigger cap. Level-80 Pyromancer learning Explode (800792) and Echo of Nozdormu",
+    "passive (520937) so AscensionPyromancer::Refresh teaches and keeps Echo of Nozdormu Rank 10 (567590) active",
+    "as Explode's replacement, with spell penetration aura 823764 and spell_hit_rating 10000."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_power": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "pyro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Precondition: spell penetration fixture removes partial resists",
+      "actor": "pyro",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "learn",
+      "label": "Learn Aspect of Time (504750)",
+      "actor": "pyro",
+      "spell": 504750
+    },
+    {
+      "action": "learn",
+      "label": "Learn Aspect's Blessing (802168)",
+      "actor": "pyro",
+      "spell": 802168
+    },
+    {
+      "action": "learn",
+      "label": "Learn Explode (800792) for Echo of Nozdormu replacement",
+      "actor": "pyro",
+      "spell": 800792
+    },
+    {
+      "action": "learn",
+      "label": "Learn Echo of Nozdormu passive (520937) so Refresh teaches and keeps Rank 10 (567590)",
+      "actor": "pyro",
+      "spell": 520937
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Echo of Nozdormu Rank 10 (567590) is learned",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 567590,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Echo of Nozdormu Rank 10 (567590) replaces Explode (800792)",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 567590,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Aspect of Time passive aura is active",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 504750,
+      "equals": 1
+    },
+    {
+      "action": "spell_mod_mutant",
+      "label": "CONTROL: zero Aspect of Time proc chance (-100% SPELLMOD_CHANCE_OF_SUCCESS)",
+      "actor": "pyro",
+      "spell": 504750,
+      "op": 18,
+      "percent": -100
+    },
+    {
+      "action": "set_aura",
+      "label": "Provide Embers for Echo of Nozdormu",
+      "actor": "pyro",
+      "spell": 807533,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "label": "Cast Aspect's Blessing for guaranteed initial trigger",
+      "actor": "pyro",
+      "spell": 802168
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Aspect's Blessing buff is active",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 802168,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let global cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 567590,
+      "target": "dummy",
+      "save_as": "echo_c0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 567590,
+      "target": "dummy",
+      "save_as": "echo_d0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "save_as": "aspect_c0"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 503864,
+      "target": "dummy",
+      "save_as": "aspect_d0"
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: Cast Echo of Nozdormu with Aspect's Blessing and 0% chain chance",
+      "actor": "pyro",
+      "spell": 567590,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Echo of Nozdormu hits dummy",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 567590,
+      "target": "dummy",
+      "relative_to": "echo_c0",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Guaranteed Aspect of Time hit lands",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_c0",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Wait past chained missile window",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: No chained hits occur when 504750 proc chance is 0%",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_c0",
+      "equals": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 567590,
+      "target": "dummy",
+      "relative_to": "echo_d0",
+      "save_as": "ctrl_echo_dmg"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Single Aspect of Time hit deals 45% of Echo of Nozdormu damage",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_d0",
+      "ratio_to": "ctrl_echo_dmg",
+      "min": 0.43,
+      "max": 0.47
+    },
+    {
+      "action": "set_aura",
+      "label": "Clear -100% mutant owner aura",
+      "actor": "pyro",
+      "spell": 100523,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Prior mutant removed",
+      "actor": "pyro",
+      "metric": "spell_mod_mutants",
+      "equals": 0
+    },
+    {
+      "action": "spell_mod_mutant",
+      "label": "Force 100% Aspect of Time proc chance (+300% on 33% base = 132% clamped)",
+      "actor": "pyro",
+      "spell": 504750,
+      "op": 18,
+      "percent": 300
+    },
+    {
+      "action": "reset_cooldown",
+      "label": "Reset Aspect's Blessing cooldown for second test arm",
+      "actor": "pyro",
+      "spell": 802168
+    },
+    {
+      "action": "set_aura",
+      "label": "Refill Embers",
+      "actor": "pyro",
+      "spell": 807533,
+      "stacks": 5
+    },
+    {
+      "action": "cast",
+      "label": "Cast Aspect's Blessing before Echo of Nozdormu",
+      "actor": "pyro",
+      "spell": 802168
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Aspect's Blessing is active",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 802168,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let global cooldown expire",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 567590,
+      "target": "dummy",
+      "save_as": "echo_c1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 567590,
+      "target": "dummy",
+      "save_as": "echo_d1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "save_as": "aspect_c1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 503864,
+      "target": "dummy",
+      "save_as": "aspect_d1"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Echo of Nozdormu with Aspect's Blessing and 100% Aspect of Time chance",
+      "actor": "pyro",
+      "spell": 567590,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Second Echo of Nozdormu hits dummy",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 567590,
+      "target": "dummy",
+      "relative_to": "echo_c1",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Aspect of Time chains 3 additional times for 4 total hits",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_c1",
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Wait past another missile flight window to verify 3-chain cap",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Aspect of Time stops at 4 hits (1 initial + 3 chained)",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_c1",
+      "equals": 4
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 567590,
+      "target": "dummy",
+      "relative_to": "echo_d1",
+      "save_as": "chain_echo_dmg"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 4 chained hits total 0.45 + 0.45^2 + 0.45^3 + 0.45^4 (~0.785) of Echo damage",
+      "actor": "pyro",
+      "metric": "spell_damage_total",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_d1",
+      "ratio_to": "chain_echo_dmg",
+      "min": 0.76,
+      "max": 0.80
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Aspect's Blessing is no longer active for plain Echo arm",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 802168,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Refill Embers",
+      "actor": "pyro",
+      "spell": 807533,
+      "stacks": 5
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 567590,
+      "target": "dummy",
+      "save_as": "echo_c2"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "save_as": "aspect_c2"
+    },
+    {
+      "action": "cast",
+      "label": "Cast plain Echo of Nozdormu without Aspect's Blessing",
+      "actor": "pyro",
+      "spell": 567590,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Plain Echo of Nozdormu hits dummy",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 567590,
+      "target": "dummy",
+      "relative_to": "echo_c2",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Plain Echo of Nozdormu also triggers 4 Aspect of Time hits",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_c2",
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "wait",
+      "label": "Wait past missile flight window to verify cap without Aspect's Blessing",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Plain Echo of Nozdormu stops at 4 Aspect of Time hits",
+      "actor": "pyro",
+      "metric": "spell_damage_count",
+      "spell": 503864,
+      "target": "dummy",
+      "relative_to": "aspect_c2",
+      "equals": 4
+    }
+  ]
+}

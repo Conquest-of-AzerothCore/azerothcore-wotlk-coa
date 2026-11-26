@@ -1262,10 +1262,15 @@ bool SpellInfo::ComputeIsStackableWithRanks() const
     if (SpellName[0] && std::string_view(SpellName[0]).starts_with(RunicTattoos))
         return false;
 
-    // Pyromancer Ascensions (Executus, Ragnaros) are stance-bar spells whose ranks replace each other.
+    // Pyromancer Descensions/Ascensions (Executus, Ragnaros) are stance-bar spells whose ranks replace each other.
     constexpr std::string_view Ascensions = "Ascension of ";
-    if (SpellName[0] && std::string_view(SpellName[0]).starts_with(Ascensions))
-        return false;
+    constexpr std::string_view Descensions = "Descension of ";
+    if (SpellName[0])
+    {
+        std::string_view const name(SpellName[0]);
+        if (name.starts_with(Ascensions) || name.starts_with(Descensions))
+            return false;
+    }
 
     if (IsPassive())
         return false;

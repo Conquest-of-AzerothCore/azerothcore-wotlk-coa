@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Runemaster Fist of the Ancients scales with 55% AP and 20% SP across ranks without low-level penalty (#13044)",
+  "contract": [
+    "Fist of the Ancients (ranks 1-7: 712326, 712330-712335) tooltip in Spell.dbc reads: 'Smash an enemy and 1 nearby",
+    "enemy with your rune-engraved fists, dealing ${$m1+0+$AP*.55+$SP*0.2} Elemental Damage and triggering your Weapon",
+    "Engraving.' Spell.dbc EffectBonusMultiplier[0] is 0 on all ranks and spell_bonus_data had no row for 712326, so",
+    "Unit::SpellDamageBonusDone applied 0 AP and 0 SP scaling. Rank 1 (712326, SpellLevel 15, MaxLevel 22) also took",
+    "the stock 18.75% low-level spell-power penalty in Unit::CalculateLevelPenalty without IgnoreSpellLevelPenalty.",
+    "Level 17 arms (base17, ap17 +2000 AP, sp17 +2000 SP) cast Rank 1 712326 on a level 17 dummy; level 60 arms",
+    "(base60, scaled60 +2000 AP +2000 SP) cast Rank 6 712334 on a level 60 dummy, filtering damage by primary target.",
+    "All actors equip main-hand and off-hand weapons (SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON), carry",
+    "melee_hit_rating/expertise_rating/melee_crit_rating 10000 (deterministic 2.0x melee-class crits,",
+    "Unit.cpp:1754-1755, no miss/dodge/parry) and spell penetration aura 823764 (0 partial resist per ADR 0154;",
+    "SchoolMask 28 Fire|Nature|Frost has no armor mitigation). Every Runemaster also holds class PvE tuning aura",
+    "887020 (CoA Aura - Runemaster Class, AscensionClassTuning.h:41, Unit.cpp:9401,10068-10076): aura 341",
+    "MiscValue 127, BaseLevel 10, MaxLevel 60, BasePoints 0, DieSides 1, RealPointsPerLevel 0.2",
+    "(SpellInfo.cpp:479-516 -> +2% = 1.02x at level 17; +11% = 1.11x at level 60). Expected critical damage",
+    "deltas: +2000 AP on Rank 1 adds 2*(0.55*2000)*1.02 = 2244 (DieSides 7 spread +/-6*1.02*2 = +/-12.24 ->",
+    "2220..2268); +2000 SP on Rank 1 at level 17 adds 2*(0.20*2000)*1.02 = 816 without the 18.75% penalty",
+    "(which would yield 2*325*1.02 = 663; band 792..840); Rank 6 at level 60 with +2000 AP and +2000 SP adds",
+    "2*(1100+400)*1.11 = 3330 (DieSides 57 spread +/-56*1.11*2 = +/-124.32 -> 3190..3470)."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
+  "players": [
+    {
+      "id": "base17", "race": 1, "class": 32, "level": 17,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "melee_crit_rating": 10000
+    },
+    {
+      "id": "ap17", "race": 1, "class": 32, "level": 17,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "melee_crit_rating": 10000,
+      "attack_power": 2000
+    },
+    {
+      "id": "sp17", "race": 1, "class": 32, "level": 17,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "melee_crit_rating": 10000,
+      "spell_power": 2000
+    },
+    {
+      "id": "base60", "race": 1, "class": 32, "level": 60,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "melee_crit_rating": 10000
+    },
+    {
+      "id": "scaled60", "race": 1, "class": 32, "level": 60,
+      "melee_hit_rating": 10000, "expertise_rating": 10000, "melee_crit_rating": 10000,
+      "attack_power": 2000, "spell_power": 2000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy17", "owner": "base17", "entry": 36, "level": 17,
+      "health": 1000000, "distance": 3, "reaction": 0, "stationary": true
+    },
+    {
+      "id": "dummy60", "owner": "base60", "entry": 36, "level": 60,
+      "health": 1000000, "distance": 3, "reaction": 0, "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: dummy17 kept its declared level after settling", "actor": "dummy17", "metric": "level", "equals": 17 },
+    { "action": "assert", "label": "SETUP: dummy17 kept its declared max health after settling", "actor": "dummy17", "metric": "max_health", "equals": 1000000 },
+    { "action": "assert", "label": "SETUP: dummy60 kept its declared level after settling", "actor": "dummy60", "metric": "level", "equals": 60 },
+    { "action": "assert", "label": "SETUP: dummy60 kept its declared max health after settling", "actor": "dummy60", "metric": "max_health", "equals": 1000000 },
+
+    { "action": "learn", "actor": "base17", "spell": 201 },
+    { "action": "learn", "actor": "base17", "spell": 1180 },
+    { "action": "learn", "actor": "base17", "spell": 674 },
+    { "action": "add_item", "actor": "base17", "item": 25 },
+    { "action": "equip", "actor": "base17", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "base17", "item": 2092 },
+    { "action": "equip", "actor": "base17", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "base17", "spell": 712326 },
+    { "action": "set_aura", "actor": "base17", "spell": 823764, "stacks": 1 },
+
+    { "action": "learn", "actor": "ap17", "spell": 201 },
+    { "action": "learn", "actor": "ap17", "spell": 1180 },
+    { "action": "learn", "actor": "ap17", "spell": 674 },
+    { "action": "add_item", "actor": "ap17", "item": 25 },
+    { "action": "equip", "actor": "ap17", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "ap17", "item": 2092 },
+    { "action": "equip", "actor": "ap17", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "ap17", "spell": 712326 },
+    { "action": "set_aura", "actor": "ap17", "spell": 823764, "stacks": 1 },
+
+    { "action": "learn", "actor": "sp17", "spell": 201 },
+    { "action": "learn", "actor": "sp17", "spell": 1180 },
+    { "action": "learn", "actor": "sp17", "spell": 674 },
+    { "action": "add_item", "actor": "sp17", "item": 25 },
+    { "action": "equip", "actor": "sp17", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "sp17", "item": 2092 },
+    { "action": "equip", "actor": "sp17", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "sp17", "spell": 712326 },
+    { "action": "set_aura", "actor": "sp17", "spell": 823764, "stacks": 1 },
+
+    { "action": "learn", "actor": "base60", "spell": 201 },
+    { "action": "learn", "actor": "base60", "spell": 1180 },
+    { "action": "learn", "actor": "base60", "spell": 674 },
+    { "action": "add_item", "actor": "base60", "item": 25 },
+    { "action": "equip", "actor": "base60", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "base60", "item": 2092 },
+    { "action": "equip", "actor": "base60", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "base60", "spell": 712334 },
+    { "action": "set_aura", "actor": "base60", "spell": 823764, "stacks": 1 },
+
+    { "action": "learn", "actor": "scaled60", "spell": 201 },
+    { "action": "learn", "actor": "scaled60", "spell": 1180 },
+    { "action": "learn", "actor": "scaled60", "spell": 674 },
+    { "action": "add_item", "actor": "scaled60", "item": 25 },
+    { "action": "equip", "actor": "scaled60", "item": 25, "slot": 15 },
+    { "action": "add_item", "actor": "scaled60", "item": 2092 },
+    { "action": "equip", "actor": "scaled60", "item": 2092, "slot": 16 },
+    { "action": "learn", "actor": "scaled60", "spell": 712334 },
+    { "action": "set_aura", "actor": "scaled60", "spell": 823764, "stacks": 1 },
+
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "SETUP: dummy17 max health stayed stable before baseline casts", "actor": "dummy17", "metric": "max_health", "equals": 1000000 },
+    { "action": "assert", "label": "SETUP: dummy60 max health stayed stable before baseline casts", "actor": "dummy60", "metric": "max_health", "equals": 1000000 },
+
+    { "action": "cast", "label": "Baseline level-17 Rank 1 cast", "actor": "base17", "spell": 712326, "target": "dummy17" },
+    { "action": "assert", "label": "SETUP: base17 landed one critical hit", "actor": "base17", "metric": "spell_damage_count", "spell": 712326, "target": "dummy17", "critical": true, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: base17 had zero partial resist", "actor": "base17", "metric": "spell_resist_total", "spell": 712326, "target": "dummy17", "equals": 0 },
+    { "action": "snapshot", "label": "Baseline level-17 Rank 1 critical damage", "actor": "base17", "metric": "spell_damage_total", "spell": 712326, "target": "dummy17", "save_as": "base17_dmg" },
+
+    { "action": "cast", "label": "AP-scaled level-17 Rank 1 cast", "actor": "ap17", "spell": 712326, "target": "dummy17" },
+    { "action": "assert", "label": "SETUP: ap17 landed one critical hit", "actor": "ap17", "metric": "spell_damage_count", "spell": 712326, "target": "dummy17", "critical": true, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: ap17 had zero partial resist", "actor": "ap17", "metric": "spell_resist_total", "spell": 712326, "target": "dummy17", "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: +2000 AP adds 55% AP x 1.02 tuning (2244 crit delta) on Rank 1", "actor": "ap17", "metric": "spell_damage_total", "spell": 712326, "target": "dummy17", "relative_to": "base17_dmg", "min": 2220, "max": 2268 },
+
+    { "action": "cast", "label": "SP-scaled level-17 Rank 1 cast", "actor": "sp17", "spell": 712326, "target": "dummy17" },
+    { "action": "assert", "label": "SETUP: sp17 landed one critical hit", "actor": "sp17", "metric": "spell_damage_count", "spell": 712326, "target": "dummy17", "critical": true, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: sp17 had zero partial resist", "actor": "sp17", "metric": "spell_resist_total", "spell": 712326, "target": "dummy17", "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: +2000 SP adds full 20% SP x 1.02 tuning (816 crit delta, no low-level penalty) on Rank 1", "actor": "sp17", "metric": "spell_damage_total", "spell": 712326, "target": "dummy17", "relative_to": "base17_dmg", "min": 792, "max": 840 },
+
+    { "action": "cast", "label": "Baseline level-60 Rank 6 cast", "actor": "base60", "spell": 712334, "target": "dummy60" },
+    { "action": "assert", "label": "SETUP: base60 landed one critical hit", "actor": "base60", "metric": "spell_damage_count", "spell": 712334, "target": "dummy60", "critical": true, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: base60 had zero partial resist", "actor": "base60", "metric": "spell_resist_total", "spell": 712334, "target": "dummy60", "equals": 0 },
+    { "action": "snapshot", "label": "Baseline level-60 Rank 6 critical damage", "actor": "base60", "metric": "spell_damage_total", "spell": 712334, "target": "dummy60", "save_as": "base60_dmg" },
+
+    { "action": "cast", "label": "AP+SP-scaled level-60 Rank 6 cast", "actor": "scaled60", "spell": 712334, "target": "dummy60" },
+    { "action": "assert", "label": "SETUP: scaled60 landed one critical hit", "actor": "scaled60", "metric": "spell_damage_count", "spell": 712334, "target": "dummy60", "critical": true, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: scaled60 had zero partial resist", "actor": "scaled60", "metric": "spell_resist_total", "spell": 712334, "target": "dummy60", "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Rank 6 inherits 55% AP + 20% SP x 1.11 tuning (3330 crit delta) from first rank", "actor": "scaled60", "metric": "spell_damage_total", "spell": 712334, "target": "dummy60", "relative_to": "base60_dmg", "min": 3190, "max": 3470 }
+  ]
+}

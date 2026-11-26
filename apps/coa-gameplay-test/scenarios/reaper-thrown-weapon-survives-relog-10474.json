@@ -1,0 +1,26 @@
+{
+  "schema": 1,
+  "name": "Reaper: an equipped thrown weapon stays equipped after a relog (#10474)",
+  "contract": [
+    "Issue #10474: Reapers (class 30) are granted Thrown (skill 176, spell 2567) by AscensionLiveBaseline::Proficiencies,",
+    "but SkillRaceClassInfo 233 (the sole row for skill 176) allowed classes 4, 10, 12 and 18 only (mask 133640).",
+    "At login _LoadSkills dropped skill 176 as invalid for class 30, so _LoadInventory rejected the equipped thrown",
+    "weapon with EQUIP_ERR_NO_REQUIRED_PROFICIENCY and mailed it back before OnPlayerLogin re-granted Thrown.",
+    "Expected: a level 33 Reaper equips Grave Spite (415041, RequiredLevel 32, INVTYPE_THROWN) in the ranged slot (17),",
+    "and after a relog Grave Spite stays in slot 17 and is not mailed."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "reaper", "race": 1, "class": 30, "level": 33 }
+  ],
+  "steps": [
+    { "action": "add_item", "actor": "reaper", "item": 415041 },
+    { "action": "equip", "actor": "reaper", "item": 415041, "slot": 17 },
+    { "action": "assert", "label": "SETUP: the Reaper has Thrown", "actor": "reaper", "metric": "skill_value", "skill": 176, "min": 1 },
+    { "action": "assert", "label": "SETUP: Grave Spite is equipped in the ranged slot", "actor": "reaper", "metric": "equipped_item", "slot": 17, "equals": 415041, "within_ms": 3000 },
+    { "action": "relog", "actor": "reaper" },
+    { "action": "assert", "label": "DISCRIMINATING: Grave Spite stays equipped after the relog", "actor": "reaper", "metric": "equipped_item", "slot": 17, "equals": 415041, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Grave Spite was not mailed back", "actor": "reaper", "metric": "mail_has_item", "item": 415041, "equals": 0 },
+    { "action": "assert", "label": "Thrown is still known after the relog", "actor": "reaper", "metric": "skill_value", "skill": 176, "min": 1 }
+  ]
+}

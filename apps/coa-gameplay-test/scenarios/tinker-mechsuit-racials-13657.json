@@ -1,0 +1,264 @@
+{
+  "schema": 1,
+  "name": "Tinker: racial abilities work while Build: Mechsuit is active (#13657)",
+  "contract": [
+    "Report #13657: while in Build: Mechsuit (801384/803451), an Orc Tinker cannot use Blood Fury (814285) or other",
+    "racial abilities. The Mechsuit applies SPELL_AURA_MOUNTED through 803451 and FORM_TINKER_MECHSUIT (49, with",
+    "SHAPESHIFT_FLAG_STANCE set), and Spell::CheckCast only exempted SpellFamilyName 34 abilities and consumable",
+    "items from SPELL_FAILED_NOT_MOUNTED (64). Racial spells belong to the racial skill lines (including CoA skill",
+    "lines 11125 and 11760) and lack SPELL_ATTR0_ALLOW_WHILE_MOUNTED, so every active combat racial failed with",
+    "SPELL_FAILED_NOT_MOUNTED. Expected: an Orc Tinker (Blood Fury 814285, skill 125), Troll Tinker (Berserking",
+    "26297, skill 733), and Draenei Tinker (Gift of the Naaru 814282, CoA skill 11760 with NOT_SHAPESHIFTED) cast",
+    "their racials cleanly inside Build: Mechsuit and remain in the suit. Control: an Orc Tinker on an ordinary mount",
+    "(Black Wolf 578) is still refused Blood Fury with SPELL_FAILED_NOT_MOUNTED (64)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "orc_mech",
+      "race": 2,
+      "class": 28,
+      "level": 20
+    },
+    {
+      "id": "troll_mech",
+      "race": 8,
+      "class": 28,
+      "level": 20
+    },
+    {
+      "id": "draenei_mech",
+      "race": 11,
+      "class": 28,
+      "level": 20
+    },
+    {
+      "id": "orc_mount",
+      "race": 2,
+      "class": 28,
+      "level": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks, racial grants and level scaling settle",
+      "ms": 3000
+    },
+    { "action": "learn", "label": "orc_mech fixture: Mechsuit talent", "actor": "orc_mech", "spell": 92141 },
+    { "action": "learn", "label": "orc_mech fixture: Build: Mechsuit", "actor": "orc_mech", "spell": 801384 },
+    { "action": "set_aura", "label": "orc_mech fixture: pre-fill Scrap", "actor": "orc_mech", "spell": 801816, "stacks": 100 },
+    { "action": "learn", "label": "troll_mech fixture: Mechsuit talent", "actor": "troll_mech", "spell": 92141 },
+    { "action": "learn", "label": "troll_mech fixture: Build: Mechsuit", "actor": "troll_mech", "spell": 801384 },
+    { "action": "set_aura", "label": "troll_mech fixture: pre-fill Scrap", "actor": "troll_mech", "spell": 801816, "stacks": 100 },
+    { "action": "learn", "label": "draenei_mech fixture: Mechsuit talent", "actor": "draenei_mech", "spell": 92141 },
+    { "action": "learn", "label": "draenei_mech fixture: Build: Mechsuit", "actor": "draenei_mech", "spell": 801384 },
+    { "action": "set_aura", "label": "draenei_mech fixture: pre-fill Scrap", "actor": "draenei_mech", "spell": 801816, "stacks": 100 },
+    {
+      "action": "assert",
+      "label": "SETUP: Orc Tinker knows hybrid Blood Fury 814285",
+      "actor": "orc_mech",
+      "metric": "knows_spell",
+      "spell": 814285,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Troll Tinker knows Berserking 26297",
+      "actor": "troll_mech",
+      "metric": "knows_spell",
+      "spell": 26297,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Draenei Tinker knows hybrid Gift of the Naaru 814282",
+      "actor": "draenei_mech",
+      "metric": "knows_spell",
+      "spell": 814282,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Control Orc Tinker knows Blood Fury 814285",
+      "actor": "orc_mount",
+      "metric": "knows_spell",
+      "spell": 814285,
+      "equals": 1
+    },
+    { "action": "cast", "label": "orc_mech enters Build: Mechsuit", "actor": "orc_mech", "spell": 801384 },
+    { "action": "cast", "label": "troll_mech enters Build: Mechsuit", "actor": "troll_mech", "spell": 801384 },
+    { "action": "cast", "label": "draenei_mech enters Build: Mechsuit", "actor": "draenei_mech", "spell": 801384 },
+    {
+      "action": "assert",
+      "label": "SETUP: orc_mech is in Build: Mechsuit",
+      "actor": "orc_mech",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: orc_mech holds Mechsuit mount aura 803451",
+      "actor": "orc_mech",
+      "metric": "aura",
+      "spell": 803451,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: troll_mech is in Build: Mechsuit",
+      "actor": "troll_mech",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: draenei_mech is in Build: Mechsuit",
+      "actor": "draenei_mech",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let Build: Mechsuit global cooldown clear",
+      "ms": 2000
+    },
+    { "action": "cast", "label": "orc_mech casts Blood Fury in Mechsuit", "actor": "orc_mech", "spell": 814285 },
+    { "action": "cast", "label": "troll_mech casts Berserking in Mechsuit", "actor": "troll_mech", "spell": 26297 },
+    {
+      "action": "cast",
+      "label": "draenei_mech casts Gift of the Naaru in Mechsuit",
+      "actor": "draenei_mech",
+      "spell": 814282,
+      "target": "draenei_mech"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Blood Fury buff applies inside Build: Mechsuit",
+      "actor": "orc_mech",
+      "metric": "aura",
+      "spell": 814285,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Blood Fury is not refused inside Build: Mechsuit",
+      "actor": "orc_mech",
+      "metric": "cast_failure",
+      "spell": 814285,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "orc_mech stays in Build: Mechsuit after Blood Fury",
+      "actor": "orc_mech",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Berserking buff applies inside Build: Mechsuit",
+      "actor": "troll_mech",
+      "metric": "aura",
+      "spell": 26297,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Berserking is not refused inside Build: Mechsuit",
+      "actor": "troll_mech",
+      "metric": "cast_failure",
+      "spell": 26297,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "troll_mech stays in Build: Mechsuit after Berserking",
+      "actor": "troll_mech",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Gift of the Naaru HoT applies inside Build: Mechsuit",
+      "actor": "draenei_mech",
+      "metric": "aura",
+      "spell": 814282,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Gift of the Naaru is not refused inside Build: Mechsuit",
+      "actor": "draenei_mech",
+      "metric": "cast_failure",
+      "spell": 814282,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "draenei_mech stays in Build: Mechsuit after Gift of the Naaru",
+      "actor": "draenei_mech",
+      "metric": "aura",
+      "spell": 801384,
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "CONTROL: mount orc_mount on ordinary ground mount Black Wolf 578",
+      "actor": "orc_mount",
+      "spell": 578,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: orc_mount holds ordinary mount aura 578",
+      "actor": "orc_mount",
+      "metric": "aura",
+      "spell": 578,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "CONTROL: orc_mount tries Blood Fury on an ordinary mount",
+      "actor": "orc_mount",
+      "spell": 814285
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blood Fury is still refused with SPELL_FAILED_NOT_MOUNTED (64) on an ordinary mount",
+      "actor": "orc_mount",
+      "metric": "cast_failure",
+      "spell": 814285,
+      "equals": 64,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blood Fury buff does not apply on an ordinary mount",
+      "actor": "orc_mount",
+      "metric": "aura",
+      "spell": 814285,
+      "equals": 0
+    }
+  ]
+}

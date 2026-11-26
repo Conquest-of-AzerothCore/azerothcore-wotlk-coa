@@ -712,6 +712,32 @@ private:
     uint32 _original;
 };
 
+uint32 StartupMaxPlayerLevel()
+{
+    static uint32 const level = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    return level;
+}
+
+class MaxPlayerLevelConfig
+{
+public:
+    explicit MaxPlayerLevelConfig(uint32 level) : _original(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    {
+        sWorld->setIntConfig(CONFIG_MAX_PLAYER_LEVEL, level);
+    }
+
+    MaxPlayerLevelConfig(MaxPlayerLevelConfig const&) = delete;
+    MaxPlayerLevelConfig& operator=(MaxPlayerLevelConfig const&) = delete;
+
+    ~MaxPlayerLevelConfig()
+    {
+        sWorld->setIntConfig(CONFIG_MAX_PLAYER_LEVEL, _original);
+    }
+
+private:
+    uint32 _original;
+};
+
 struct CaseAccounts
 {
     std::vector<std::string> accounts;
@@ -2386,6 +2412,12 @@ public:
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
                 "Invalid quest log size");
             _questLogSize.emplace(*questLogSize);
+        }
+        if (auto maxPlayerLevel = _scenario.get_optional<uint32>("max_player_level"))
+        {
+            Require(*maxPlayerLevel >= 1 && *maxPlayerLevel <= StartupMaxPlayerLevel(),
+                "Invalid max player level");
+            _maxPlayerLevel.emplace(*maxPlayerLevel);
         }
         _report.put("schema", 1);
         _report.put("run_id", _runId);
@@ -9984,6 +10016,7 @@ private:
     std::optional<ChatLogConfig> _chatLog;
     std::optional<BattlegroundKillXpConfig> _battlegroundKillXp;
     std::optional<QuestLogSizeConfig> _questLogSize;
+    std::optional<MaxPlayerLevelConfig> _maxPlayerLevel;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;
     std::optional<PlacementAuditTotals> _placementAudit;
@@ -10040,6 +10073,7 @@ public:
             return;
 
         _enabled = true;
+        StartupMaxPlayerLevel();
         _started = Clock::now();
         ProcCounter::Begin();
         AuraApplyCounter::Begin();

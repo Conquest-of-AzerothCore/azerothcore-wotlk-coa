@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Dusksinger Band rests on the Stonard hall table instead of floating (#10379)",
+  "contract": "#10379 reported Dusksinger Band (entry 254392, guid 6940389, drops 354257) floating in Stonard. The map-pass row at (-10462.1, -3321.3, 22.032) hovered +1.07 yd above the Swamporcgreathall.wmo floor (20.9641). Expected: the pickup stands at its first-pass realm-dump spot (-10461.5, -3316.34, 22.032) flush on Taurenlogchair02.m2 (floor 22.0128, gap +0.019 yd), is grounded with clear headroom, not submerged, and opens with loot from the reporter's standing spot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -10459.98,
+    "y": -3318.11,
+    "z": 22.014,
+    "o": 2.4
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 50
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the Dusksinger Band pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 254392,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its restored first-pass table spot",
+      "metric": "spawn_distance",
+      "x": -10461.5,
+      "y": -3316.34,
+      "z": 22.032,
+      "max": 0.3,
+      "guid": 6940389,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup rests flush on the table instead of floating +1.07 yd",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.25,
+      "guid": 6940389,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is classified as grounded",
+      "metric": "spawn_placement",
+      "tolerance": 0.5,
+      "equals": 0,
+      "guid": 6940389,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup has open headroom above the table",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6940389,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not submerged",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940389,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 254392
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

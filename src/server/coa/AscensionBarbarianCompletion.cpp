@@ -188,6 +188,22 @@ void ApplyContracts(SpellInfo* info)
         info->AttributesEx |= SPELL_ATTR1_NO_THREAT;
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
     }
+    if (Family(info, 1, 262144) && id != 807236 &&
+        info->Effects[EFFECT_0].Effect == SPELL_EFFECT_NORMALIZED_WEAPON_DMG &&
+        info->Effects[EFFECT_0].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY &&
+        info->Effects[EFFECT_1].Effect == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE &&
+        info->Effects[EFFECT_1].TargetA.GetTarget() == TARGET_UNIT_TARGET_ENEMY)
+    {
+        if (!info->Effects[EFFECT_0].ChainTarget)
+            info->Effects[EFFECT_0].ChainTarget = 1;
+        if (!info->Effects[EFFECT_1].ChainTarget)
+            info->Effects[EFFECT_1].ChainTarget = 1;
+    }
+    if (Family(info, 0, 262144))
+        info->AttributesEx4 |= SPELL_ATTR4_BOUNCY_CHAIN_MISSILES;
+    if (id == 806960)
+        if (SpellRangeEntry const* range = sSpellRangeStore.LookupEntry(13))
+            info->RangeEntry = range;
     if (id == 801761)
     {
         SpellEffectInfo& cost = info->Effects[EFFECT_1];

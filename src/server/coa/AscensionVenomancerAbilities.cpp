@@ -109,10 +109,10 @@ public:
                 spell->SetScriptValue(800848,std::max(1,window->GetDuration()));
         if (Spender(info))
         {
-            uint32 marks = Count(player,Brood);
-            spell->SetScriptValue(Brood,marks);
-            spell->SetScriptValue(Brood+1,uint64(BroodMultiplier(marks,player->HasAura(804969) ? Amount(804969) : 0)*10000));
-            Resource(player,Brood,-int32(marks));
+            uint32 marks = std::min(Count(player, Brood), 5u);
+            spell->SetScriptValue(Brood, marks);
+            spell->SetScriptValue(Brood + 1, uint64(BroodMultiplier(marks, player->HasAura(804969) ? Amount(804969) : 0) * 10000));
+            Resource(player, Brood, -int32(marks));
         }
         if (Any(info,{803197,805094,803196}))
         {

@@ -1,0 +1,124 @@
+{
+  "schema": 1,
+  "name": "Tinker: casting a Module does not apply bogus 0% Machine Synergy buff 707495 (#13022)",
+  "contract": [
+    "#13022: Tinker players saw a permanent 'Machine Synergy' buff reading 'Increases damage dealt by 0% and haste by 0%. Stacks 3 times.' without knowing where it came from.",
+    "AscensionTinker::ActivateModule applied 707495 (Machine Synergy Pet, rewritten in AscensionTinkerContracts.cpp to a 0-value permanent dummy with SPELL_ATTR0_DO_NOT_DISPLAY but without SPELL_ATTR0_PASSIVE) to the Tinker whenever any Module was cast. Because Aura::CanBeSentToClient checks !IsPassive() rather than SPELL_ATTR0_DO_NOT_DISPLAY, 707495 was sent to the client in a visible aura slot with 0% amounts while never being read back anywhere.",
+    "The fix stops ActivateModule from applying 707495, strips any legacy 707495 in ActivateModule and Refresh, and marks 707495 passive and unsaved in AscensionTinkerContracts.cpp.",
+    "DISCRIMINATING: Casting Power Module (707688) and switching to Mana Module (803659) leaves 707495 absent on the Tinker while still enforcing one active Module kind across recipients, strips any legacy 707495 aura, and leaves the real pet/turret Machine Synergy buff (707278) at 5% damage / 3% haste."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "tinker", "race": 1, "class": 28, "level": 60 },
+    { "id": "ally", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "tinker", "spell": 707688 },
+    { "action": "learn", "actor": "tinker", "spell": 803659 },
+    {
+      "action": "cast",
+      "label": "Cast Power Module on an ally",
+      "actor": "tinker",
+      "spell": 707688,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Power Module lands on the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 707688,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: casting a Module does not apply bogus Machine Synergy 707495 to the Tinker",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 707495,
+      "equals": 0
+    },
+    { "action": "wait", "label": "Wait past GCD before switching Modules", "ms": 1600 },
+    {
+      "action": "cast",
+      "label": "Switch to Mana Module on self",
+      "actor": "tinker",
+      "spell": 803659,
+      "target": "tinker"
+    },
+    {
+      "action": "assert",
+      "label": "Mana Module lands on the Tinker",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 803659,
+      "caster": "tinker",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: switching Modules still removes the previous Power Module from the ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 707688,
+      "caster": "tinker",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: switching Modules still leaves 707495 absent on the Tinker",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 707495,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Seed a legacy saved 707495 aura on the Tinker",
+      "actor": "tinker",
+      "spell": 707495,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Tinker Refresh strips any legacy 707495 aura",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 707495,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: real pet/turret Machine Synergy 707278 keeps 5% damage dealt",
+      "actor": "tinker",
+      "metric": "spell_effect_value",
+      "spell": 707278,
+      "effect": 0,
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: real pet/turret Machine Synergy 707278 keeps 3% spell haste",
+      "actor": "tinker",
+      "metric": "spell_effect_value",
+      "spell": 707278,
+      "effect": 1,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: real pet/turret Machine Synergy 707278 keeps 3% melee/ranged haste",
+      "actor": "tinker",
+      "metric": "spell_effect_value",
+      "spell": 707278,
+      "effect": 2,
+      "equals": 3
+    }
+  ]
+}

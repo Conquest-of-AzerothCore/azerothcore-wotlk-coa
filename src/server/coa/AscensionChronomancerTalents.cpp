@@ -297,9 +297,12 @@ class spell_ascension_the_bieko_effect : public SpellScript
         int32 const spellId = GetSpellInfo()->Effects[effIndex].MiscValue;
         if (!player || spellId <= 0)
             return;
-        if (uint32 const remaining = player->GetSpellCooldownDelay(uint32(spellId)))
-            if (int32 const reduction = int32(CalculatePct(remaining, std::clamp(GetEffectValue(), 0, 100))))
-                ModifyAscensionCooldown(player, uint32(spellId), -reduction, false);
+        uint32 remaining = player->GetSpellCooldownDelay(uint32(spellId));
+        for (uint32 rankId = sSpellMgr->GetFirstSpellInChain(uint32(spellId)); rankId;
+            rankId = sSpellMgr->GetNextSpellInChain(rankId))
+            remaining = std::max(remaining, player->GetSpellCooldownDelay(rankId));
+        if (int32 const reduction = int32(CalculatePct(remaining, std::clamp(GetEffectValue(), 0, 100))))
+            ModifyAscensionCooldown(player, uint32(spellId), -reduction, false);
     }
 
     void Register() override

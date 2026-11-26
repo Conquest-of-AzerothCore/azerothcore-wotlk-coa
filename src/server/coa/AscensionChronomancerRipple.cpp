@@ -288,6 +288,8 @@ public:
             return;
         if (info->Id == Clasp)
             info->Effects[EFFECT_2].Effect = 0;
+        if (info->Id == EndOfTimeRelease && info->Effects[EFFECT_1].IsAura(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE))
+            info->Effects[EFFECT_1].MiscValue = SPELL_SCHOOL_MASK_ALL;
         if (info->Id == Protection)
         {
             SpellEffectInfo& cleanup = info->Effects[EFFECT_1];

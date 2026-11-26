@@ -1,0 +1,428 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Burning Heat swaps only the highest Sunflare rank into Sun Ray (#13674)",
+  "contract": [
+    "Report #13674: when Burning Heat 704908 procs and the Sun Cleric casts the instant Sun Ray 504764, Sunflare",
+    "can drop off the action bar and become uncastable. Sunflare ranks (800231 and 502386..502397) are mana spells,",
+    "so SpellInfo::IsStackableWithRanks keeps every learned rank active. AscensionSunCleric::Refresh previously",
+    "mapped every known Sunflare rank to 504764, so on proc Player::SetTemporarySpellReplacement saw sharedReplacement",
+    "and sent SMSG_REMOVED_SPELL(504764) plus one SMSG_SUPERCEDED_SPELL per rank, and on revert saw previousShared and",
+    "sent SMSG_LEARNED_SPELL for every rank except the arbitrary last rank in m_spells hash order. Expected with",
+    "ranks 1..11 known (top rank 502395 on button 0): gaining 803238 replaces only 502395 with 504764 (one supersede",
+    "for 504764, no lower rank replaced, no learned alert); casting it consumes 803238, grants Scorch Marks 807059,",
+    "and restores 502395 with a single supersede for 502395 and zero supersedes for lower ranks; repeating while",
+    "Scorch Marks is active behaves the same; ending Scorch Marks unlearns 504764 while 502395 stays on button 0 and",
+    "casts cleanly."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 4,
+      "stationary": true
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login state, spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    { "action": "learn", "label": "Sunflare rank 1", "actor": "cleric", "spell": 800231 },
+    { "action": "learn", "label": "Sunflare rank 2", "actor": "cleric", "spell": 502386 },
+    { "action": "learn", "label": "Sunflare rank 3", "actor": "cleric", "spell": 502387 },
+    { "action": "learn", "label": "Sunflare rank 4", "actor": "cleric", "spell": 502388 },
+    { "action": "learn", "label": "Sunflare rank 5", "actor": "cleric", "spell": 502389 },
+    { "action": "learn", "label": "Sunflare rank 6", "actor": "cleric", "spell": 502390 },
+    { "action": "learn", "label": "Sunflare rank 7", "actor": "cleric", "spell": 502391 },
+    { "action": "learn", "label": "Sunflare rank 8", "actor": "cleric", "spell": 502392 },
+    { "action": "learn", "label": "Sunflare rank 9", "actor": "cleric", "spell": 502393 },
+    { "action": "learn", "label": "Sunflare rank 10", "actor": "cleric", "spell": 502394 },
+    { "action": "learn", "label": "Sunflare rank 11", "actor": "cleric", "spell": 502395 },
+    {
+      "action": "set_action_button",
+      "label": "Place top known Sunflare rank 11 on button 0",
+      "actor": "cleric",
+      "spell": 502395,
+      "button": 0
+    },
+    { "action": "wait", "ms": 1500 },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 800231,
+      "save_as": "chat_r1"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 502394,
+      "save_as": "chat_r10"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 502395,
+      "save_as": "chat_r11"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 504764,
+      "save_as": "chat_sr"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: top Sunflare rank stands for itself before Burning Heat procs",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 502395,
+      "equals": 502395
+    },
+    {
+      "action": "set_aura",
+      "label": "First proc: apply Burning Heat Sun Ray marker 803238",
+      "actor": "cleric",
+      "spell": 803238,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: top Sunflare rank 11 becomes Sun Ray",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 502395,
+      "equals": 504764,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: lower rank 1 is not replaced by Sun Ray",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 800231,
+      "equals": 800231
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: lower rank 10 is not replaced by Sun Ray",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 502394,
+      "equals": 502394
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: proc emits exactly one supersede to Sun Ray, not one per rank",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 504764,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Sun Ray temporary grant stays unannounced",
+      "actor": "cleric",
+      "metric": "spellbook_learned_alerts",
+      "spell": 504764,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "First Sunflare cast, redirected to Sun Ray",
+      "actor": "cleric",
+      "spell": 502395,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Sun Ray grants Scorch Marks 807059",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 807059,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Sun Ray consumes the Burning Heat marker 803238",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 803238,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Top Sunflare rank 11 is restored",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 502395,
+      "equals": 502395,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: revert emits one supersede back to top rank 502395",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502395,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 1",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 800231,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 2",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502386,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 3",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502387,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 4",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502388,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 5",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502389,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 6",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502390,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 7",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502391,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 8",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502392,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 9",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502393,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no supersede targets lower rank 10",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502394,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: button 0 still holds top rank 502395",
+      "actor": "cleric",
+      "metric": "action_button",
+      "button": 0,
+      "equals": 502395
+    },
+    { "action": "wait", "ms": 1600 },
+    {
+      "action": "set_aura",
+      "label": "Second proc while Scorch Marks is still up",
+      "actor": "cleric",
+      "spell": 803238,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Second proc swaps top rank 11 to Sun Ray",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 502395,
+      "equals": 504764,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Second Sunflare cast, redirected to Sun Ray",
+      "actor": "cleric",
+      "spell": 502395,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Second cast consumes marker 803238",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 803238,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Top rank 11 is restored after second cycle",
+      "actor": "cleric",
+      "metric": "temporary_spell_replacement",
+      "spell": 502395,
+      "equals": 502395,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Two proc cycles emit exactly two supersedes to Sun Ray",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 504764,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Two proc cycles emit exactly two supersedes back to rank 11",
+      "actor": "cleric",
+      "metric": "spellbook_superseded_for",
+      "spell": 502395,
+      "equals": 2
+    },
+    {
+      "action": "set_aura",
+      "label": "Scorch Marks ends so temporary Sun Ray unlearns",
+      "actor": "cleric",
+      "spell": 807059,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Temporary Sun Ray unlearns when Scorch Marks ends",
+      "actor": "cleric",
+      "metric": "knows_spell",
+      "spell": 504764,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Button 0 still holds top rank 502395 after Sun Ray unlearns",
+      "actor": "cleric",
+      "metric": "action_button",
+      "button": 0,
+      "equals": 502395
+    },
+    { "action": "wait", "ms": 1600 },
+    {
+      "action": "cast",
+      "label": "Cast ordinary Sunflare rank 11 after cycles finish",
+      "actor": "cleric",
+      "spell": 502395,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Sunflare rank 11 completes cleanly with no failure",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 502395,
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Sunflare rank 11 has no cast failure",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 502395,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no extra learned chat line for rank 1",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 800231,
+      "relative_to": "chat_r1",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no extra learned chat line for rank 10",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 502394,
+      "relative_to": "chat_r10",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no extra learned chat line for rank 11",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 502395,
+      "relative_to": "chat_r11",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "No chat line for Sun Ray across both cycles",
+      "actor": "cleric",
+      "metric": "client_chat_lines_for",
+      "spell": 504764,
+      "relative_to": "chat_sr",
+      "equals": 0
+    }
+  ]
+}

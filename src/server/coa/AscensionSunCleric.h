@@ -24,6 +24,7 @@ constexpr uint32 RejuvenatingRays = 807240;
 constexpr uint32 Rejuvenating = 807239;
 constexpr uint32 ValianceExtraAttack = 681472;
 constexpr uint32 ValianceMarker = 681531;
+constexpr uint32 SunStride = 680700;
 struct SunClericState
 {
     EventMap timers;

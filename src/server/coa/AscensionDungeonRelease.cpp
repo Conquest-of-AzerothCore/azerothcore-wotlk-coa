@@ -35,7 +35,7 @@ struct RaidReleaseHold : DataMap::Base
 
 bool InRaidFight(Map* map)
 {
-    if (!map->IsRaid())
+    if (!map->IsRaid() || map->IsScriptedPrivateInstance())
         return false;
     InstanceMap* instanceMap = map->ToInstanceMap();
     InstanceScript* instance = instanceMap ? instanceMap->GetInstanceScript() : nullptr;
@@ -182,7 +182,8 @@ public:
 
     void OnPlayerReleasedGhost(Player* player) override
     {
-        if (player->GetMap()->IsDungeon())
+        Map* map = player->GetMap();
+        if (map->IsDungeon() && !map->IsScriptedPrivateInstance())
             player->CustomData.GetDefault<PendingDungeonRelease>(PENDING_DUNGEON_RELEASE);
     }
 
@@ -191,8 +192,9 @@ public:
         if (!player->CustomData.Erase(PENDING_DUNGEON_RELEASE))
             return true;
 
-        if (player->IsAlive() || !player->GetMap()->IsDungeon() || !player->m_InstanceValid
-            || InRaidFight(player->GetMap()))
+        Map* map = player->GetMap();
+        if (player->IsAlive() || !map->IsDungeon() || map->IsScriptedPrivateInstance() || !player->m_InstanceValid
+            || InRaidFight(map))
             return true;
 
         Position start;

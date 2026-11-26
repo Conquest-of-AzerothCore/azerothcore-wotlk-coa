@@ -25,6 +25,12 @@ constexpr RunebladeLevelContract RunebladeLevels[] =
     {573445, 48, 52}, {573446, 54, 58}, {573447, 60, 66}
 };
 
+constexpr RunebladeLevelContract FistOfTheAncientsLevels[] =
+{
+    {712326, 15, 22}, {712330, 24, 30}, {712331, 32, 38}, {712332, 40, 46},
+    {712333, 48, 54}, {712334, 56, 62}, {712335, 64, 72}
+};
+
 bool IsScalingBrand(uint32 id)
 {
     return id == 712299 || (id >= 712301 && id <= 712307);
@@ -121,6 +127,16 @@ void ApplyAscensionRunemasterScalingContracts(SpellInfo* info)
             info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE && !info->Effects[EFFECT_0].BonusMultiplier &&
             info->Effects[EFFECT_1].Effect == SPELL_EFFECT_TRIGGER_SPELL && info->Effects[EFFECT_1].TriggerSpell == 712324 &&
             !info->Effects[EFFECT_2].Effect)
+            info->IgnoreSpellLevelPenalty = true;
+
+    for (RunebladeLevelContract const& contract : FistOfTheAncientsLevels)
+        if (info->Id == contract.SpellId && info->SpellLevel == contract.SpellLevel &&
+            info->BaseLevel == contract.SpellLevel && info->MaxLevel == contract.MaxLevel &&
+            info->SpellFamilyFlags == flag96(0, 0, 32768) && info->DmgClass == SPELL_DAMAGE_CLASS_MELEE &&
+            info->SchoolMask == (SPELL_SCHOOL_MASK_FIRE | SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_FROST) &&
+            info->Effects[EFFECT_0].Effect == SPELL_EFFECT_SCHOOL_DAMAGE && !info->Effects[EFFECT_0].BonusMultiplier &&
+            info->Effects[EFFECT_1].Effect == SPELL_EFFECT_TRIGGER_SPELL &&
+            info->Effects[EFFECT_1].TriggerSpell == 712403 && !info->Effects[EFFECT_2].Effect)
             info->IgnoreSpellLevelPenalty = true;
 
     if (info->Id < 712301 || info->Id > 712307 || info->SpellFamilyFlags != flag96(0, 4096, 0))
