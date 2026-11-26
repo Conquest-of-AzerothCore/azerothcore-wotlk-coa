@@ -2368,6 +2368,491 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 705734,
+      "name": "Transfusion (percentage swap with 40% floor raise)",
+      "kind": "ally_heal_reach",
+      "variant": "swap_floor",
+      "quote": "Increases the lower health percentage of the two to $s1%, if below that amount.",
+      "caster_health": [
+        80000,
+        100000
+      ],
+      "allies": [
+        {
+          "id": "ally",
+          "dx": 3,
+          "dy": 0,
+          "grouped": true,
+          "health": 10000,
+          "maximum": 50000
+        },
+        {
+          "id": "bystander",
+          "dx": 3,
+          "dy": 3,
+          "grouped": true,
+          "health": 30000,
+          "maximum": 60000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 705734,
+          "target": "ally",
+          "watch_ms": 500,
+          "poll_ms": 250
+        }
+      ],
+      "checks": [
+        {
+          "name": "swap_floor",
+          "judge": "health_swap",
+          "spell": 705734,
+          "levelled": [
+            "caster",
+            "ally"
+          ],
+          "apart": [
+            "bystander"
+          ],
+          "tolerance": 0.5,
+          "floor_from_effect": true
+        }
+      ],
+      "observe_source": "Transfusion 705734 (Spell.dbc Effect[0] 77 SPELL_EFFECT_SCRIPT_EFFECT, BasePoints 39 + DieSides 1 = 40 = $s1, TargetA 57 TARGET_UNIT_TARGET_RAID, PowerType 1 Rage, ManaCost 200, RecoveryTime 180000; rev_20260920_84_bloodmage_transfusion_swap.sql binds spell_ascension_bloodmage_transfusion at AscensionBloodmageVitality.cpp:152-177). Distinct maximum health fixtures (caster 80000/100000 = 80%, grouped ally 10000/50000 = 20%, grouped bystander control 30000/60000 = 50%, regen off) distinguish percentage swapping from flat HP swapping: real cast of 705734 at ally (watch_ms 500) leaves caster at max(20%, 40%) = 40% (40000/100000; flat swap would be 10%, no-floor swap 20%, average 50%), ally at 80% (40000/50000; flat swap would clamp at 100%), and bystander unchanged at 50% within 0.5 points. Reference search 2026-11-26: coa-history spell 705734: 0 events in 186 logs; ~/CoaServer/reference coabuildhub spells_master_index.json and bindmysoul talents.normalized.json match Spell.dbc verbatim."
+    },
+    {
+      "spell": 705734,
+      "name": "Transfusion (pure percentage swap above 40% floor)",
+      "kind": "ally_heal_reach",
+      "variant": "swap_above_floor",
+      "quote": "Swap health percentages with an ally.",
+      "caster_health": [
+        60000,
+        100000
+      ],
+      "allies": [
+        {
+          "id": "ally",
+          "dx": 3,
+          "dy": 0,
+          "grouped": true,
+          "health": 40000,
+          "maximum": 50000
+        },
+        {
+          "id": "bystander",
+          "dx": 3,
+          "dy": 3,
+          "grouped": true,
+          "health": 25000,
+          "maximum": 50000
+        }
+      ],
+      "casts": [
+        {
+          "spell": 705734,
+          "target": "ally",
+          "watch_ms": 500,
+          "poll_ms": 250
+        }
+      ],
+      "checks": [
+        {
+          "name": "swap_above_floor",
+          "judge": "health_swap",
+          "spell": 705734,
+          "levelled": [
+            "caster",
+            "ally"
+          ],
+          "apart": [
+            "bystander"
+          ],
+          "tolerance": 0.5,
+          "floor_from_effect": true
+        }
+      ],
+      "observe_source": "Companion pure-swap arm for Transfusion 705734 (AscensionBloodmageVitality.cpp:152-177) with both units above the 40% floor and opposite direction (caster < ally): caster 60000/100000 = 60%, grouped ally 40000/50000 = 80%, grouped bystander control 25000/50000 = 50% (regen off). Real cast of 705734 at ally (watch_ms 500) leaves caster at 80% (80000/100000; flat swap would be 40%, average 70%), ally at 60% (30000/50000; flat swap would clamp at 100%), and bystander unchanged at 50% within 0.5 points. Reference search 2026-11-26: see swap_floor."
+    },
+    {
+      "spell": 681190,
+      "name": "Endure the Curse (Physical damage taken -30%)",
+      "kind": "taken_hit",
+      "variant": "damage_taken_physical",
+      "label_suffix": "damage_taken_physical",
+      "judge": "damage_ratio",
+      "expected": 0.7,
+      "quote": "Reduce all damage taken by $s2%",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 5,
+      "settle_ms": 200,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              33143,
+              1
+            ],
+            [
+              524861,
+              1
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 681190,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            681190
+          ],
+          "auras": [
+            [
+              33143,
+              1
+            ],
+            [
+              524861,
+              1
+            ]
+          ],
+          "opening_casts": [
+            [
+              681190,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 300,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 681190,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Endure the Curse 681190 (Spell.dbc Effect[1] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 127 all schools, BasePoints -31 + DieSides 1 = -30 = -$s2%; DurationIndex 1 = 10000 ms; CasterAuraSpell 524861 Cursed Form precondition fixture; rev_20260920_92_bloodmage_endure_the_curse.sql binds aura_ascension_endure_the_curse at AscensionBloodmageVitality.cpp:318-349 so Effect[0] absorb -1 does not drop the aura on first damage). Precondition fixtures on both arms: 33143 (-1000% crit taken) and 524861 (Cursed Form). Passive striker casts 92559 (1000 fixed Physical, CANT_MISS) 5 times at caster at 100% of 100000 HP (well above 10% threshold, total window ~2.8 s << 10 s duration): control without 681190 vs treatment after a real cast of 681190 -> ratio 0.70. Reference search 2026-11-26: coa-history spell 681190: 32 casts / 32 applies / 32 removals across 6 logs (681189: 0 events); ~/CoaServer/reference coabuildhub spells_master_index.json and bindmysoul talents.normalized.json match Spell.dbc."
+    },
+    {
+      "spell": 681190,
+      "name": "Endure the Curse (Holy magic damage taken -30%)",
+      "kind": "taken_hit",
+      "variant": "damage_taken_holy",
+      "label_suffix": "damage_taken_holy",
+      "judge": "damage_ratio",
+      "expected": 0.7,
+      "quote": "Reduce all damage taken by $s2%",
+      "strike_spell": 41394,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 5,
+      "settle_ms": 200,
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              33143,
+              1
+            ],
+            [
+              524861,
+              1
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 681190,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            681190
+          ],
+          "auras": [
+            [
+              33143,
+              1
+            ],
+            [
+              524861,
+              1
+            ]
+          ],
+          "opening_casts": [
+            [
+              681190,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 300,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 681190,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "observe_source": "Magic-school companion for Endure the Curse 681190 ('all damage taken', Effect[1] MiscValue 127 all schools). Passive striker casts 41394 (1100 fixed Holy magic damage, zero armor/resistance) 5 times at caster at 100% of 100000 HP (precondition fixtures 33143 and 524861): control 1100 vs treatment after a real cast of 681190 770 -> ratio 0.70. Reference search 2026-11-26: see damage_taken_physical."
+    },
+    {
+      "spell": 681190,
+      "name": "Endure the Curse (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "for $d.",
+      "expected_ms": 10000,
+      "applied_aura": 681190,
+      "target": "caster",
+      "cast_spell": 681190,
+      "cast_target": "caster",
+      "observe_source": "Endure the Curse 681190 DurationIndex 1 = 10000 ms ($d = 10 sec; Spell.dbc, CasterAuraSpell 524861 precondition fixture via required_aura_steps). Real cast of 681190 on caster: absent before cast, reads ~10000 ms after cast, and behaviour_expiry brackets natural expiration around 10000 ms (+-5% = 500 ms excluded on both sides). Reference search 2026-11-26: coa-history 681190 has 32 applies / 32 removals across 6 logs; coabuildhub spells_master_index.json says 'for 10 seconds'."
+    },
+    {
+      "spell": 681190,
+      "name": "Endure the Curse (30% max health heal amount)",
+      "kind": "metric_delta",
+      "variant": "heal_amount",
+      "label_suffix": "heal_amount",
+      "quote": "will instantly heal you for $681189s1% of your maximum health.",
+      "trigger_spell": 681190,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 10500,
+        "max_health": 100000,
+        "wait_ms": 300,
+        "after_trigger_ms": 200
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0,
+        "block": 0
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681189,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 30000,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Endure the Curse 681190 -> 681189 (Spell.dbc Effect[0] 136 SPELL_EFFECT_HEAL_PCT, BasePoints 29 + DieSides 1 = 30 = $681189s1%; AscensionBloodmageVitality.cpp:331-341). Precondition fixtures: 524861 (Cursed Form CasterAuraSpell), 33143 (-1000% crit taken), 16255 set to -100% crit so 681189 cannot critically heal, regen off, avoidance 0 (caster_avoidance guards unblocked landed strikes in both phases). Passive striker casts 41394 (1100 fixed Holy -> 770 under 681190) at 10500/100000 HP (drops to 9730 < 10000 = 10%): control without 681190 heals 0; treatment after real cast of 681190 triggers 681189 for exact 30% of 100000 = 30000 heal total. Reference search 2026-11-26: see damage_taken_physical."
+    },
+    {
+      "spell": 681190,
+      "name": "Endure the Curse (below 10% threshold triggers heal)",
+      "kind": "metric_delta",
+      "variant": "threshold_below",
+      "label_suffix": "threshold_below",
+      "quote": "taking damage that would reduce your health below 10%",
+      "trigger_spell": 681190,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 10500,
+        "max_health": 100000,
+        "wait_ms": 300,
+        "after_trigger_ms": 200
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0,
+        "block": 0
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681189,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Lower bracket of the 10% health threshold for Endure the Curse 681190 (AscensionBloodmageVitality.cpp:337: GetHealth() < damage + CountPctFromMaxHealth(10)). Precondition fixtures: 524861 (CasterAuraSpell), 33143 (-1000% crit taken), regen off, caster_avoidance 0/0/0 verifying unblocked landed strikes in both phases. Starting at 10500/100000 HP (10.5%), one 41394 Holy strike (770 damage under 681190) would reduce HP to 9730 (9.73% < 10%): control without 681190 reads 0 heals of 681189; treatment with real 681190 cast reads 1 heal. Paired with threshold_above (10900/100000 -> 10.13% -> 0 heals). Reference search 2026-11-26: see damage_taken_physical."
+    },
+    {
+      "spell": 681190,
+      "name": "Endure the Curse (above 10% threshold does not trigger heal)",
+      "kind": "metric_delta",
+      "variant": "threshold_above",
+      "label_suffix": "threshold_above",
+      "quote": "taking damage that would reduce your health below 10%",
+      "trigger_spell": 681190,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "strike": {
+        "spell": 41394,
+        "health": 10900,
+        "max_health": 100000,
+        "wait_ms": 300,
+        "after_trigger_ms": 200
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0,
+        "block": 0
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 681189,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket of the 10% health threshold for Endure the Curse 681190 (AscensionBloodmageVitality.cpp:337). Same precondition fixtures as threshold_below (524861, 33143, regen off, caster_avoidance 0/0/0 verifying unblocked landed 41394 strike in both phases). Starting at 10900/100000 HP (10.9%), one 41394 Holy strike (770 damage under 681190) reduces HP to 10130 (10.13% >= 10%): both control and treatment read 0 heals of 681189. Paired with threshold_below (9.73% -> 1 heal), bracketing the 10% threshold within [9.73%, 10.13%]. Reference search 2026-11-26: see damage_taken_physical."
+    },
+    {
+      "spell": 681190,
+      "name": "Endure the Curse (can only occur once per application)",
+      "kind": "once_per_aura_proc",
+      "variant": "once_per_aura",
+      "label_suffix": "once_per_aura",
+      "quote": "Can only occur once.",
+      "proc_spell": 681189,
+      "strike_spell": 41394,
+      "strike_health": 10500,
+      "strike_max_health": 100000,
+      "caster_auras": [
+        [
+          33143,
+          1
+        ],
+        [
+          524861,
+          1
+        ]
+      ],
+      "wait_ms": 300,
+      "observe_source": "Endure the Curse 681190 once-per-application gate (aura_ascension_endure_the_curse::_healed at AscensionBloodmageVitality.cpp:321,335-340; DurationIndex 1 = 10000 ms). Precondition fixtures: 33143 (-1000% crit taken) and 524861 (Cursed Form CasterAuraSpell), regen off, avoidance 0. Four landed 41394 Holy strikes (770 damage under 681190, 1100 without) at 10500/100000 HP (all cross below 10%, verified by spell_log_count delta == 1 per strike): control before 681190 -> 0 heals of 681189; app 1 hit 1 -> +1 heal (681190 stays 1); reset HP and app 1 hit 2 inside the same 681190 application -> +0 heals (681190 stays 1); cancel + re-cast 681190 and app 2 hit 3 -> +1 heal (total 2), proving per-application once-only gating that resets on reapplication. Reference search 2026-11-26: see damage_taken_physical."
+    },
+    {
+      "spell": 1200012,
+      "name": "Blood Covenant (summoning ritual and party summon)",
+      "kind": "summon_ritual",
+      "variant": "summon_ritual",
+      "label_suffix": "summon_ritual",
+      "quote": "Once allies are inside, they may help summon party and raid members to your current location.",
+      "ritual_entry": 194111,
+      "stone_entry": 194114,
+      "portal_entry": 179944,
+      "observe_source": "Blood Covenant 1200012 (Spell.dbc Effect[0] 50 SPELL_EFFECT_TRANS_DOOR MiscValue 194111; rev_20260930_31_bloodmage_blood_covenant.sql defines GO 194111 SUMMONING_RITUAL 3 participants triggering 1200014 5000 ms cast -> GO 194114 Blood Covenant Rune MEETINGSTONE -> 23598 -> 59782 -> GO 179944 Meeting Stone Summoning Portal -> 7720 Ritual of Summoning Effect setting summon_pending; modeled on apps/coa-gameplay-test/scenarios/bloodmage-blood-covenant-summons-party-11165.json). Four grouped level-60 Bloodmages (caster, first, second, faraway teleported ~506 yd away): pre-cast control reads 0/0/0 objects and summon_pending 0; caster casts 1200012 -> 194111 count 1; first+second click 194111 -> 194114 count 1 (faraway summon_pending stays 0); first selects faraway and clicks 194114 -> 179944 count 1 (faraway summon_pending stays 0); second clicks 179944 -> faraway summon_pending == 1. Reference search 2026-11-26: coa-history spell 1200012: 6 SPELL_CAST_SUCCESS + 6 SPELL_CREATE across 3 logs, spell 1200014: 4 SPELL_CREATE across 3 logs; ~/CoaServer/reference ascension-data skill_line_ability.csv lists 1200012 on skill 73; installed Spell.dbc governs."
+    },
+    {
+      "spell": 1200012,
+      "name": "Blood Covenant (90% health sacrifice check)",
+      "kind": "metric_delta",
+      "variant": "health_sacrifice",
+      "label_suffix": "health_sacrifice",
+      "quote": "Sacrifice 90% of your own health to carve a large blood rune into the ground.",
+      "trigger_spell": 1200012,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 10000,
+      "expected": 1000,
+      "tolerance": 200,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Truthful tooltip test for Blood Covenant 1200012 row#552 ('Sacrifice 90% of your own health to carve a large blood rune into the ground.'). Spell.dbc 1200012 has PowerType -2 (POWER_HEALTH), ManaCost 0, ManaCostPercentage 90. With caster_health [10000, 10000] and regen off, sacrificing 90% of the caster's own health leaves 1000 HP (tolerance 200 = 2 pts per G-19). Server SpellInfo::CalcPowerCost (SpellInfo.cpp:3212-3214) instead multiplies ManaCostPercentage by GetCreateHealth() (level-60 Bloodmage BaseHP = 65 + 1483 - 44 = 1504 via rev_20260903_01_live_class_baseline.sql:928 + rev_20260912_00_custom_class_stat_progression.sql, Druid fallback 11), deducting 1353 HP (13.53% of 10000, or 64.3% of natural level-60 max health 2104) and leaving 8647 HP. Kept unweakened per G-31 / Bucket 4 cross-ref A so the alert stands honestly for owner ruling (see ADR 1318 for Cultist base_health comparison; Bloodmage has no base_mana). Reference search 2026-11-26: see summon_ritual."
     }
   ],
   "player_observations": [],

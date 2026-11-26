@@ -17,7 +17,7 @@ TOTAL_METRIC = 'spell_heal_total'
 EFFECTIVE_METRIC = 'spell_effective_heal_total'
 READ_METRICS = {'count': COUNT_METRIC, 'total': TOTAL_METRIC, 'effective': EFFECTIVE_METRIC}
 JUDGES_BY_NAME = ('reach', 'offsets', 'per_source', 'share', 'count', 'aura_reach', 'immune_window', 'drain',
-                  'health_share')
+                  'health_share', 'health_swap')
 AURA_JUDGES = ('aura_reach', 'immune_window')
 DRAIN_RELATIONS = ('more', 'equal')
 AURA_METRIC = 'aura'
@@ -86,6 +86,9 @@ class ReachCheck:
     tolerance: float = 0.0
     control_allowed: tuple[str, ...] = ()
     relation: str = 'more'
+    floor_pct: float = 0.0
+    floor_from_effect: bool = False
+    floor_effect: int = 0
 
 
 @dataclass(frozen=True)
@@ -130,7 +133,9 @@ def reach_check(raw: dict, quote: str) -> ReachCheck:
                       tuple(raw.get('removed', ())), tuple(raw.get('kept', ())), tuple(raw.get('immune', ())),
                       raw.get('early_ms'), raw.get('late_ms'), raw.get('low_cast'), raw.get('high_cast'),
                       tuple(raw.get('levelled', ())), tuple(raw.get('apart', ())), float(raw.get('tolerance', 0.0)),
-                      tuple(raw.get('control_allowed', ())), raw.get('relation', 'more'))
+                      tuple(raw.get('control_allowed', ())), raw.get('relation', 'more'),
+                      float(raw.get('floor_pct', 0.0)), bool(raw.get('floor_from_effect', False)),
+                      int(raw.get('floor_effect', 0)))
 
 
 def ally_heal_reach_spec(entry: dict) -> AllyHealReachSpec:
@@ -269,6 +274,43 @@ def validate_extended_check(spec: AllyHealReachSpec, check: ReachCheck) -> None:
         if unhealthy or (CASTER in named and spec.caster_health is None):
             raise ValueError(f'{spec.spell} {KIND} check {check.name} needs a health fixture on '
                              f'{unhealthy or [CASTER]}')
+    if check.judge == 'health_swap':
+        named = set(check.levelled) | set(check.apart)
+        if (len(check.levelled) != 2 or len(set(check.levelled)) != 2 or not named <= known
+                or set(check.levelled) & set(check.apart) or check.tolerance <= 0):
+            raise ValueError(f'{spec.spell} {KIND} check {check.name} swaps two distinct known units disjoint from '
+                             f'apart with a positive tolerance')
+        if (not 0.0 <= check.floor_pct <= 100.0 or (check.floor_from_effect and check.floor_pct)
+                or (check.floor_from_effect and check.floor_effect not in (0, 1, 2))):
+            raise ValueError(f'{spec.spell} {KIND} check {check.name} floor_pct must be in [0, 100] and exclusive '
+                             f'with floor_from_effect (effect 0..2)')
+        unhealthy = [ally.id for ally in spec.allies if ally.id in named and ally.health is None]
+        if unhealthy or (CASTER in named and spec.caster_health is None):
+            raise ValueError(f'{spec.spell} {KIND} check {check.name} needs a health fixture on '
+                             f'{unhealthy or [CASTER]}')
+        start0, start1 = unit_health_pct(spec, check.levelled[0]), unit_health_pct(spec, check.levelled[1])
+        if abs(start0 - start1) <= SPREAD_FLOOR * check.tolerance:
+            raise ValueError(f'{spec.spell} {KIND} check {check.name} swapped units must start separated by more than '
+                             f'{SPREAD_FLOOR} tolerances')
+
+
+def unit_health_pct(spec: AllyHealReachSpec, unit: str) -> float:
+    if unit == CASTER:
+        return 100.0 * float(spec.caster_health[0]) / float(spec.caster_health[1])
+    ally = next(item for item in spec.allies if item.id == unit)
+    return 100.0 * float(ally.health) / float(ally.maximum)
+
+
+def resolved_floor_pct(records: Records | None, check: ReachCheck) -> float:
+    if check.floor_from_effect:
+        if records is None:
+            raise ValueError(f'{check.spell} {KIND} check {check.name} needs DBC records for floor_from_effect')
+        value = float(records.single_value(check.spell, check.floor_effect))
+        if not 0.0 <= value <= 100.0:
+            raise ValueError(f'{check.spell} {KIND} check {check.name} effect {check.floor_effect} floor {value:g} '
+                             f'is outside [0, 100]')
+        return value
+    return float(check.floor_pct)
 
 
 def phases(spec: AllyHealReachSpec) -> tuple[str, ...]:
@@ -441,7 +483,7 @@ def check_metric(check: ReachCheck) -> str:
         return AURA_METRIC
     if check.judge == 'drain':
         return POWER_METRIC
-    if check.judge == 'health_share':
+    if check.judge in ('health_share', 'health_swap'):
         return HEALTH_METRIC
     return COUNT_METRIC
 
@@ -458,7 +500,7 @@ def aura_model(spec: AllyHealReachSpec, check: ReachCheck) -> dict:
             'early_ms': check.early_ms, 'late_ms': check.late_ms, 'probe_cast': probe_cast, 'aura_reads': reads}
 
 
-def extended_model(spec: AllyHealReachSpec, check: ReachCheck) -> dict:
+def extended_model(spec: AllyHealReachSpec, check: ReachCheck, records: Records | None = None) -> dict:
     if check.judge in AURA_JUDGES:
         return aura_model(spec, check)
     if check.judge == 'drain':
@@ -469,19 +511,22 @@ def extended_model(spec: AllyHealReachSpec, check: ReachCheck) -> dict:
         if check.relation != 'more':
             model |= {'relation': check.relation, 'tolerance': check.tolerance}
         return model
-    if check.judge == 'health_share':
+    if check.judge in ('health_share', 'health_swap'):
         reads = {phase: {moment: {unit: {field: health_label(spec, phase, moment, unit, field)
                                          for field in ('health', 'max_health')}
                                   for unit in health_units(spec)}
                          for moment in ('start', 'end')}
                  for phase in phases(spec)}
-        return {'levelled': list(check.levelled), 'apart': list(check.apart), 'tolerance': check.tolerance,
-                'health_reads': reads}
+        model = {'levelled': list(check.levelled), 'apart': list(check.apart), 'tolerance': check.tolerance,
+                 'health_reads': reads}
+        if check.judge == 'health_swap':
+            model['floor_pct'] = resolved_floor_pct(records, check)
+        return model
     return {}
 
 
-def check_model(spec: AllyHealReachSpec, check: ReachCheck, reads: dict) -> dict:
-    return {'kind': KIND, 'metric': check_metric(check), 'quote': check.quote, **extended_model(spec, check),
+def check_model(spec: AllyHealReachSpec, check: ReachCheck, reads: dict, records: Records | None = None) -> dict:
+    return {'kind': KIND, 'metric': check_metric(check), 'quote': check.quote, **extended_model(spec, check, records),
             **({'control_allowed': list(check.control_allowed)} if check.control_allowed else {}),
             'judge': check.judge, 'spell': check.spell, 'reference': check.reference, 'minimum': check.minimum,
             'healed': list(check.healed), 'unhealed': list(check.unhealed), 'witness_spell': check.witness_spell,
@@ -532,8 +577,8 @@ def ally_heal_reach_scenario(class_file: dict, spec: AllyHealReachSpec) -> tuple
         'steps': steps}
     reads = reads_model(spec)
     expectations = [Expectation(check_label(spec, check), BEHAVIOUR_METRIC_DELTA, spec.spell, check.spell, None,
-                                expected_text(check), prose_rule(check.quote, spec.spell),
-                                check_model(spec, check, reads))
+                                expected_text(check, records), prose_rule(check.quote, spec.spell),
+                                check_model(spec, check, reads, records))
                     for check in spec.checks]
     return timed(scenario, waited_ms(steps)), expectations
 
@@ -566,7 +611,7 @@ def raid_text(spec: AllyHealReachSpec) -> str:
             f'not see {grouped[PARTY_ALLIES:]}.')
 
 
-def expected_text(check: ReachCheck) -> str:
+def expected_text(check: ReachCheck, records: Records | None = None) -> str:
     if check.judge == 'count':
         return f'{int(check.expected)}'
     if check.judge == 'aura_reach':
@@ -579,6 +624,10 @@ def expected_text(check: ReachCheck) -> str:
         return f'cast {check.high_cast} above cast {check.low_cast}'
     if check.judge == 'health_share':
         return f'{len(check.levelled)} levelled'
+    if check.judge == 'health_swap':
+        floor = resolved_floor_pct(records, check)
+        pair = f'{check.levelled[0]} <-> {check.levelled[1]}'
+        return f'{pair} (floor {floor:g}%)' if floor > 0 else pair
     if check.judge == 'reach':
         return str(len(check.healed))
     if check.judge == 'offsets':
@@ -885,9 +934,53 @@ def health_share_verdict(base, run, model: dict):
                                f'within {tolerance:g}')
 
 
+def health_swap_verdict(base, run, model: dict):
+    u0, u1 = model['levelled']
+    units = (*model['levelled'], *model['apart'])
+    reads = {}
+    for phase in model['phases']:
+        for moment in ('start', 'end'):
+            for unit in units:
+                value = health_pct(run, model, phase, moment, unit)
+                if isinstance(value, str):
+                    return replace(base, explanation=value)
+                reads[(phase, moment, unit)] = value
+    tolerance = float(model['tolerance'])
+    s0, s1 = reads[(TREATMENT, 'start', u0)], reads[(TREATMENT, 'start', u1)]
+    e0, e1 = reads[(TREATMENT, 'end', u0)], reads[(TREATMENT, 'end', u1)]
+    if abs(s0 - s1) <= SPREAD_FLOOR * tolerance:
+        return replace(base, status='unmeasured', measured=abs(s0 - s1),
+                       explanation=f'the swapped units start at [{s0:.3f}, {s1:.3f}] percent, too close to tell a '
+                                   f'swap from the fixture')
+    floor = float(model.get('floor_pct', 0.0))
+    lower = min(s0, s1)
+    raised = max(lower, floor)
+    expected = {u0: s1 if s1 > lower else raised, u1: s0 if s0 > lower else raised}
+    max_error = max(abs(e0 - expected[u0]), abs(e1 - expected[u1]))
+    moved = [unit for unit in model['apart']
+             if abs(reads[(TREATMENT, 'end', unit)] - reads[(TREATMENT, 'start', unit)]) > tolerance]
+    leaked = ([unit for unit in units
+               if abs(reads[(CONTROL, 'end', unit)] - reads[(CONTROL, 'start', unit)]) > tolerance]
+              if CONTROL in model['phases'] else [])
+    status = 'ok' if max_error <= tolerance and not moved and not leaked else 'alert'
+    swap_text = ', '.join(
+        f'{unit} {reads[(TREATMENT, "start", unit)]:.3f} to {reads[(TREATMENT, "end", unit)]:.3f} '
+        f'(expected {expected[unit]:.3f})' for unit in (u0, u1))
+    apart_text = (', apart: ' + ', '.join(
+        f'{unit} {reads[(TREATMENT, "start", unit)]:.3f} to {reads[(TREATMENT, "end", unit)]:.3f}'
+        for unit in model['apart']) if model['apart'] else '')
+    control_text = (f'; control phase moved {leaked}' if leaked else
+                    '; control phase unchanged' if CONTROL in model['phases'] else '')
+    return replace(base, status=status, measured=max_error, expected=0.0, low=0.0, high=tolerance,
+                   explanation=f'health swap (floor {floor:g}%): {swap_text}{apart_text}{control_text}; '
+                               f'both swapped units must match within {tolerance:g} points, {model["apart"]} '
+                               f'unchanged within {tolerance:g}')
+
+
 VERDICTS = {'reach': reach_verdict, 'offsets': offsets_verdict, 'per_source': per_source_verdict,
             'share': share_verdict, 'count': count_verdict, 'aura_reach': aura_reach_verdict,
-            'immune_window': immune_window_verdict, 'drain': drain_verdict, 'health_share': health_share_verdict}
+            'immune_window': immune_window_verdict, 'drain': drain_verdict, 'health_share': health_share_verdict,
+            'health_swap': health_swap_verdict}
 
 
 def ally_heal_reach_verdict(base, run, model: dict):

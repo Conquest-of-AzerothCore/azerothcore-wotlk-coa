@@ -79,9 +79,18 @@ Opt-in fields for claims that are not heals:
 - `health_share`: the `levelled` units (allies with a health fixture, or `caster` with `caster_health`) end the window
   within `tolerance` health points of each other from a start spread of at least ten tolerances (else unmeasured), and
   the `apart` units move by no more than the tolerance.
+- `health_swap` (ADR 1324, provisional): swaps health percentages between exactly two distinct `levelled` units
+  (disjoint from `apart`, both with health fixtures and starting percentages separated by more than ten tolerances,
+  else unmeasured), raising only the lower of the two starting percentages to a floor if below it (`floor_pct` literal
+  in `[0, 100]` or `floor_from_effect: true` reading `floor_effect` 0..2 from `Spell.dbc`, mutually exclusive). Both
+  swapped units must end within `tolerance` percentage points of their expected swapped/floored percentages, `apart`
+  units must remain unchanged within `tolerance`, and when `gate_spell` is set the control phase must leave all named
+  units unchanged. Giving the two units different `maximum` health distinguishes percentage swapping from flat HP
+  swapping. Evidence metric `health` (`event`).
 - `reach` takes `control_allowed`: allies whose control heals are allowed (a gated claim about the allies beyond a
   target the control heals too).
 
 Witch Doctor: Disciple of Sseratus 300660 `hex_jump`, For Da Loa! 705906 `mass_reach` and `mass_immune`, Spirit Link
 Idol 706369 `link_share`, Mojo Beam 501117 `beam_lasts` and `beam_drain`, Spirit Out Of The Bottle 301175
 `bottle_allies`.
+Bloodmage: Transfusion 705734 `swap_floor` and `swap_above_floor`.

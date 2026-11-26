@@ -2188,5 +2188,19 @@ class UseTimeContrastPartnerTest(unittest.TestCase):
             self.assertEqual(self.evidence(self.NEXT, *self.pair()), [DATA])
 
 
+class SummonPendingEvidenceTest(unittest.TestCase):
+    def test_summon_pending_is_registered_as_event_evidence(self):
+        label = '1200012 behaviour_metric_delta summon_ritual'
+        self.assertEqual(METRIC_EVIDENCE['summon_pending'], EVENT)
+        clauses = [claim('Once allies are inside, they may help summon party and raid members.', label)]
+        self.assertEqual(evidence_of(clauses, [judged(label, BEHAVIOUR_METRIC_DELTA, 'summon_pending')])[0],
+                         [BEHAVIOUR])
+        self.assertEqual(evidence_of(clauses, [judged(label, BEHAVIOUR_METRIC_DELTA, 'summon_pending',
+                                                      status='alert')])[0], [UNPROVEN])
+        unclassed = {key: kind for key, kind in METRIC_EVIDENCE.items() if key != 'summon_pending'}
+        with mock.patch.dict(METRIC_EVIDENCE, unclassed, clear=True), self.assertRaises(EvidenceError):
+            evidence_of(clauses, [judged(label, BEHAVIOUR_METRIC_DELTA, 'summon_pending')])
+
+
 if __name__ == '__main__':
     unittest.main()
