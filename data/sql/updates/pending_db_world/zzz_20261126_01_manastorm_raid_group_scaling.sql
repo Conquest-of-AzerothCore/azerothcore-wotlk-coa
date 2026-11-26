@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS `manastorm_Endgame_group_scaling` (
   KEY `idx_endgame_group_scaling_enabled` (`enabled`, `min_members`, `max_members`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DELETE FROM `manastorm_group_scaling` WHERE `min_members` BETWEEN 6 AND 15 AND `max_members` BETWEEN 6 AND 15;
+DELETE FROM `manastorm_group_scaling` WHERE `min_members` = `max_members` AND `min_members` BETWEEN 6 AND 15;
 INSERT INTO `manastorm_group_scaling` (`min_members`, `max_members`, `health_multiplier`, `global_damage_multiplier`, `melee_multiplier`, `spell_multiplier`, `enabled`) VALUES
 (6, 6, 4.00, 1.25, 1, 1, 1),
 (7, 7, 4.60, 1.30, 1, 1, 1),
@@ -36,7 +36,7 @@ INSERT INTO `manastorm_group_scaling` (`min_members`, `max_members`, `health_mul
 (14, 14, 8.80, 1.65, 1, 1, 1),
 (15, 15, 9.40, 1.70, 1, 1, 1);
 
-DELETE FROM `manastorm_Endgame_group_scaling` WHERE `min_members` BETWEEN 6 AND 15 AND `max_members` BETWEEN 6 AND 15;
+DELETE FROM `manastorm_Endgame_group_scaling` WHERE `min_members` = `max_members` AND `min_members` BETWEEN 6 AND 15;
 INSERT INTO `manastorm_Endgame_group_scaling` (`min_members`, `max_members`, `health_multiplier`, `global_damage_multiplier`, `melee_multiplier`, `spell_multiplier`, `enabled`) VALUES
 (6, 6, 4.00, 1.75, 1, 1, 1),
 (7, 7, 4.60, 1.90, 1, 1, 1),
