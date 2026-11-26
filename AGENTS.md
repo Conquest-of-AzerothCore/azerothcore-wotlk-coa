@@ -5,8 +5,8 @@ This fork implements Conquest of Azeroth (CoA).
 
 ## Rules
 
-Read every rule file before starting work; they apply to all tasks. Claude Code imports them through the
-references below.
+Every rule file applies to all tasks. Claude Code and its subagents load them through the `@` references below,
+so do not read them again; agents without import support read each file before starting work.
 
 - General rules, comments and expected values → @.agents/rules/general.md
 - Development workflow, superpowers process skills and their repository overrides → @.agents/rules/workflow.md
