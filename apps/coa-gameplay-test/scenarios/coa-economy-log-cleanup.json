@@ -4,9 +4,11 @@
   "contract": [
     "With CoA.EconomyLog.KeepDays = 90 (the default), the economy log's daily cleanup deletes every coa_economy_log row whose time is more than 90 days before the cleanup and keeps every newer row.",
     "A level-60 Human destroys Grand Marshal's Longsword (12584, epic), which writes one item_destroy row; a cleanup now and one 89 days later keep it, one 91 days later deletes it.",
-    "The background cleanup the worldserver runs at startup and once a day deletes the same rows: a second sword's item_destroy row is gone after a background cleanup 91 days later."
+    "The background cleanup the worldserver runs at startup and once a day deletes the same rows: a second sword's item_destroy row is gone after a background cleanup 91 days later.",
+    "A KeepDays change (a config reload) drops a background cleanup in progress and starts it again with the new value. A third sword's row would be deleted by a background cleanup 91 days later, but KeepDays becomes 180 before its first batch: the row is kept. A background cleanup 181 days later under 180 would delete it, but KeepDays becomes 0 before its first batch: nothing is deleted. Back at 90, a background cleanup 91 days later deletes it.",
+    "The KeepDays change follows the cleanup start in the next step: the harness runs one step per world update, and the background cleanup sends its first delete no earlier than the update after its first probe."
   ],
-  "timeout_ms": 60000,
+  "timeout_ms": 90000,
   "economy_log": true,
   "players": [
     {"id": "keeper", "race": 1, "class": 1, "level": 60}
@@ -27,6 +29,20 @@
     {"action": "destroy_item", "label": "Destroy a second Grand Marshal's Longsword", "actor": "keeper", "item": 12584},
     {"action": "assert", "label": "THE LOG: the second sword's item_destroy row", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "equals": 1, "within_ms": 2000},
     {"action": "economy_log_cleanup", "label": "Background cleanup 91 days later", "actor": "keeper", "days_ahead": 91, "background": true},
-    {"action": "assert", "label": "THE LOG: deleted by the background cleanup", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 0, "within_ms": 10000}
+    {"action": "assert", "label": "THE LOG: deleted by the background cleanup", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 0, "within_ms": 10000},
+    {"action": "add_item", "actor": "keeper", "item": 12584},
+    {"action": "destroy_item", "label": "Destroy a third Grand Marshal's Longsword", "actor": "keeper", "item": 12584},
+    {"action": "assert", "label": "THE LOG: the third sword's item_destroy row", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "equals": 1, "within_ms": 2000},
+    {"action": "economy_log_cleanup", "label": "Background cleanup 91 days later (KeepDays 90 would delete the row)", "actor": "keeper", "days_ahead": 91, "background": true},
+    {"action": "economy_log_keep_days", "label": "KeepDays becomes 180 before the first batch", "actor": "keeper", "days": 180},
+    {"action": "wait", "label": "As long as the control below may take to delete", "ms": 10000},
+    {"action": "assert", "label": "THE LOG: the cleanup uses the new KeepDays and keeps the row", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 1},
+    {"action": "economy_log_cleanup", "label": "Background cleanup 181 days later (KeepDays 180 would delete the row)", "actor": "keeper", "days_ahead": 181, "background": true},
+    {"action": "economy_log_keep_days", "label": "KeepDays becomes 0 (keep everything) before the first batch", "actor": "keeper", "days": 0},
+    {"action": "wait", "label": "As long as the control below may take to delete", "ms": 10000},
+    {"action": "assert", "label": "THE LOG: KeepDays 0 stops the cleanup in progress", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 1},
+    {"action": "economy_log_keep_days", "label": "KeepDays back to 90", "actor": "keeper", "days": 90},
+    {"action": "economy_log_cleanup", "label": "Background cleanup 91 days later", "actor": "keeper", "days_ahead": 91, "background": true},
+    {"action": "assert", "label": "CONTROL: at 90 days the background cleanup deletes the row", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "economy_save": false, "equals": 0, "within_ms": 10000}
   ]
 }

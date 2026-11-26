@@ -386,6 +386,15 @@ void CoAEconomyLog::Cleanup(uint32 now, bool wait)
         CharacterDatabase.DirectExecute("DELETE FROM coa_economy_log WHERE time < {} LIMIT {}", cutoff, CleanupBatch);
 }
 
+uint32 CoAEconomyLog::SetKeepDays(uint32 days, uint32 now)
+{
+    uint32 const previous = s_keepDays.exchange(days);
+    s_cleanupCutoff.reset();
+    s_cleanupRowsLeft.reset();
+    Cleanup(now, false);
+    return previous;
+}
+
 namespace
 {
     class CoAEconomyLogPlayer : public PlayerScript
@@ -719,10 +728,14 @@ namespace
         CoAEconomyLogWorld() : WorldScript("CoAEconomyLogWorld", { WORLDHOOK_ON_AFTER_CONFIG_LOAD, WORLDHOOK_ON_STARTUP,
             WORLDHOOK_ON_UPDATE }) { }
 
-        void OnAfterConfigLoad(bool) override
+        void OnAfterConfigLoad(bool reload) override
         {
             s_enabled = sConfigMgr->GetOption<bool>("CoA.EconomyLog.Enable", false);
-            s_keepDays = sConfigMgr->GetOption<uint32>("CoA.EconomyLog.KeepDays", 90);
+            uint32 const keepDays = sConfigMgr->GetOption<uint32>("CoA.EconomyLog.KeepDays", 90);
+            if (reload)
+                CoAEconomyLog::SetKeepDays(keepDays, Now());
+            else
+                s_keepDays = keepDays;
         }
 
         void OnStartup() override

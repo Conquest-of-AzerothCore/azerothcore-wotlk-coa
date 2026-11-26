@@ -101,6 +101,7 @@ namespace CoAEconomyLog
     void GainedInto(CharacterDatabaseTransaction trans, uint32 guid, CoAEconomyRow const& tag, Item const* item,
         uint32 count);
     void Cleanup(uint32 now, bool wait);
+    uint32 SetKeepDays(uint32 days, uint32 now);
     uint32 QueuedRows(Player const* player);
 
     class GainScope

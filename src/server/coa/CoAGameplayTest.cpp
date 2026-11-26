@@ -713,6 +713,23 @@ private:
     bool _original;
 };
 
+class EconomyLogKeepDays
+{
+public:
+    explicit EconomyLogKeepDays(uint32 original) : _original(original) { }
+
+    EconomyLogKeepDays(EconomyLogKeepDays const&) = delete;
+    EconomyLogKeepDays& operator=(EconomyLogKeepDays const&) = delete;
+
+    ~EconomyLogKeepDays()
+    {
+        CoAEconomyLog::SetKeepDays(_original, uint32(GameTime::GetGameTime().count()));
+    }
+
+private:
+    uint32 _original;
+};
+
 class QuestLogSizeConfig
 {
 public:
@@ -9201,6 +9218,13 @@ private:
         else if (action == "economy_log_cleanup")
             CoAEconomyLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY,
                 !step.get<bool>("background", false));
+        else if (action == "economy_log_keep_days")
+        {
+            uint32 const previous = CoAEconomyLog::SetKeepDays(step.get<uint32>("days"),
+                uint32(GameTime::GetGameTime().count()));
+            if (!_economyLogKeepDays)
+                _economyLogKeepDays.emplace(previous);
+        }
         else if (action == "start_challenge")
         {
             WorldPacket packet(CMSG_COA_START_CHALLENGE, 8);
@@ -10121,6 +10145,7 @@ private:
     std::optional<QuestLogSizeConfig> _questLogSize;
     std::optional<MaxPlayerLevelConfig> _maxPlayerLevel;
     std::optional<EconomyLogConfig> _economyLog;
+    std::optional<EconomyLogKeepDays> _economyLogKeepDays;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;
     std::optional<PlacementAuditTotals> _placementAudit;
