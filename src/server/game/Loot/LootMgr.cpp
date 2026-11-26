@@ -527,8 +527,14 @@ void Loot::AddItem(LootStoreItem const& item)
                 {
                     if (auto member = itr->GetSource())
                     {
-                        if (sourceCreature && !item.conditions.empty() && !member->IsAtLootRewardDistance(sourceCreature))
-                            continue;
+                        if (sourceCreature && !item.conditions.empty())
+                        {
+                            bool canLoot = member->IsAtLootRewardDistance(sourceCreature);
+                            if (!canLoot && !sourceCreature->GetAllowedLooters().empty())
+                                canLoot = sourceCreature->HasAllowedLooter(member->GetGUID());
+                            if (!canLoot)
+                                continue;
+                        }
                         if (generatedLoot.AllowedForPlayer(member, sourceWorldObjectGUID))
                         {
                             canSeeItemInLootWindow = true;
