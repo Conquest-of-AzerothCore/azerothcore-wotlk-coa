@@ -18,7 +18,8 @@ namespace
 {
 enum RangeIndex : uint32
 {
-    SPELL_RANGE_THIRTY_YARDS = 4
+    SPELL_RANGE_THIRTY_YARDS = 4,
+    SPELL_RANGE_VISION = 6
 };
 constexpr uint32 STANCE_GLOBAL_COOLDOWN_MS = 1500;
 constexpr std::array<uint32, 8> FLESH_TO_WORMS_RANKS = {500338, 501855, 501856, 501857,
@@ -229,6 +230,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (id == 500991)
         info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_THIRTY_YARDS);
+    if (id == 803779)
+        info->RangeEntry = sSpellRangeStore.LookupEntry(SPELL_RANGE_VISION);
     if (id == 504868 || id == 504907)
         info->AttributesEx3 |= SPELL_ATTR3_ALWAYS_HIT;
     if (id == 300580)
