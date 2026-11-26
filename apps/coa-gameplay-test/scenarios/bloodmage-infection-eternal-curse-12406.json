@@ -90,6 +90,11 @@
       "spell": 804197
     },
     {
+      "action": "wait",
+      "label": "Wait for Eternal Curse's 1.5 s global cooldown before casting Rotclaw",
+      "ms": 1600
+    },
+    {
       "action": "cast",
       "label": "Apply Rotclaw bleed to the nearby target",
       "actor": "bloodmage",
