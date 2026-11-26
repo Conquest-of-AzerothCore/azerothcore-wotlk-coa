@@ -1,19 +1,27 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "CellImpl.h"
 #include "Creature.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "MotionMaster.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
+#include "SpellMgr.h"
 #include "SpellScript.h"
 #include "TemporarySummon.h"
 #include <algorithm>
+#include <cmath>
 
 namespace
 {
 enum ChronomancerMovement : uint32
 {
     InfiniteClone = 50071,
+    UnstableChronoglassNpc = 506015,
+    UnstableChronoglassMagnet = 506638,
     CloneAppearance = 45204,
     InfiniteCloneAura = 704154,
     Rewind = 801294,
@@ -220,12 +228,129 @@ public:
         }
     }
 };
+
+struct npc_ascension_unstable_chronoglass : ScriptedAI
+{
+    explicit npc_ascension_unstable_chronoglass(Creature* creature) : ScriptedAI(creature) { }
+
+    uint32 remainingRedirects = 3;
+
+    void IsSummonedBy(WorldObject* summoner) override
+    {
+        SpellInfo const* magnet = sSpellMgr->GetSpellInfo(UnstableChronoglassMagnet);
+        remainingRedirects = magnet && magnet->ProcCharges ? magnet->ProcCharges : 3;
+        me->SetReactState(REACT_PASSIVE);
+        me->SetUnitFlag(UNIT_FLAG_DISABLE_MOVE);
+        me->SetControlled(true, UNIT_STATE_ROOT);
+        me->GetMotionMaster()->Clear(false);
+        me->GetMotionMaster()->MoveIdle();
+
+        Player* player = summoner ? summoner->ToPlayer() : nullptr;
+        if (!player || player->getClass() != CLASS_CHRONOMANCER)
+            return;
+
+        std::list<Creature*> previous;
+        player->GetAllMinionsByEntry(previous, UnstableChronoglassNpc);
+        for (Creature* glass : previous)
+            if (glass != me)
+                glass->ToTempSummon()->UnSummon();
+    }
+
+    void DamageTaken(Unit*, uint32& damage, DamageEffectType damagetype, SpellSchoolMask) override
+    {
+        if (remainingRedirects > 0 && damagetype != DIRECT_DAMAGE && damage >= me->GetHealth())
+            damage = me->GetHealth() > 1 ? me->GetHealth() - 1 : 0;
+    }
+
+    bool ConsumeRedirect(Unit const* attacker, SpellInfo const* info)
+    {
+        if (!remainingRedirects)
+            return false;
+        --remainingRedirects;
+        if (!remainingRedirects)
+        {
+            uint32 delayMs = 250;
+            if (info && info->Speed > 0.0f && attacker)
+            {
+                float dist = std::max(5.0f, attacker->GetDistance(me));
+                delayMs = uint32(std::floor(dist / info->Speed * 1000.0f)) + 250;
+            }
+            me->DespawnOrUnsummon(Milliseconds(delayMs));
+        }
+        return true;
+    }
+
+    void UpdateAI(uint32) override
+    {
+        if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != IDLE_MOTION_TYPE)
+        {
+            me->GetMotionMaster()->Clear(false);
+            me->GetMotionMaster()->MoveIdle();
+        }
+    }
+};
+
+class chronomancer_chronoglass_magnet : public UnitScript
+{
+public:
+    chronomancer_chronoglass_magnet() : UnitScript("chronomancer_chronoglass_magnet", true,
+        {UNITHOOK_SPELL_MAGNET_TARGET}) { }
+
+    Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* info) override
+    {
+        if (!attacker || !victim || !info || info->IsPositive() || victim->GetEntry() == UnstableChronoglassNpc)
+            return nullptr;
+        SpellInfo const* magnet = sSpellMgr->GetSpellInfo(UnstableChronoglassMagnet);
+        float radius = magnet ? magnet->Effects[EFFECT_0].CalcRadius() : 30.0f;
+        if (radius <= 0.0f)
+            radius = 30.0f;
+
+        std::list<Unit*> units;
+        Acore::AnyUnitInObjectRangeCheck check(victim, radius);
+        Acore::UnitListSearcher<Acore::AnyUnitInObjectRangeCheck> search(victim, units, check);
+        Cell::VisitObjects(victim, search, radius);
+        units.sort([victim](Unit const* left, Unit const* right)
+        {
+            float d1 = victim->GetExactDist(left);
+            float d2 = victim->GetExactDist(right);
+            return d1 == d2 ? left->GetGUID() < right->GetGUID() : d1 < d2;
+        });
+
+        for (Unit* unit : units)
+        {
+            Creature* glass = unit->ToCreature();
+            if (!glass || glass->GetEntry() != UnstableChronoglassNpc || !glass->IsAlive() || !glass->IsAIEnabled)
+                continue;
+            Unit* ownerUnit = glass->GetOwner();
+            if (!ownerUnit)
+                if (TempSummon* summon = glass->ToTempSummon())
+                    ownerUnit = summon->GetSummonerUnit();
+            Player* owner = ownerUnit ? ownerUnit->ToPlayer() : nullptr;
+            if (!owner || owner->getClass() != CLASS_CHRONOMANCER)
+                continue;
+            if (victim != owner && (!owner->IsFriendlyTo(victim) || !owner->IsInRaidWith(victim)))
+                continue;
+            if (!attacker->IsInMap(glass) || !attacker->InSamePhase(glass))
+                continue;
+            if (info->CheckExplicitTarget(attacker, glass) != SPELL_CAST_OK ||
+                !attacker->IsValidAttackTarget(glass, info) ||
+                !glass->IsWithinLOSInMap(victim) || !attacker->IsWithinLOSInMap(glass))
+                continue;
+            if (auto* ai = dynamic_cast<npc_ascension_unstable_chronoglass*>(glass->AI());
+                ai && ai->ConsumeRedirect(attacker, info))
+                return glass;
+        }
+        return nullptr;
+    }
+};
 }
 
 void AddSC_AscensionChronomancerMovement()
 {
     new chronomancer_movement_contracts();
+    new chronomancer_chronoglass_magnet();
     RegisterCreatureAI(npc_ascension_infinite_clone);
+    RegisterCreatureAI(npc_ascension_unstable_chronoglass);
     RegisterSpellScript(spell_ascension_rewind);
     RegisterSpellScript(aura_ascension_backtrack);
     RegisterSpellScript(spell_ascension_displacement);
