@@ -10,10 +10,16 @@
     "Level 17 arms (base17, ap17 +2000 AP, sp17 +2000 SP) cast Rank 1 712326 on a level 17 dummy; level 60 arms",
     "(base60, scaled60 +2000 AP +2000 SP) cast Rank 6 712334 on a level 60 dummy, filtering damage by primary target.",
     "All actors equip main-hand and off-hand weapons (SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON), carry",
-    "10000 (deterministic 2.0x melee-class crits, no miss/dodge/parry) and spell penetration aura 823764 (0 partial",
-    "resist per ADR 0154). Expected critical damage deltas: +2000 AP adds 2*(0.55*2000)=2200 (die spread +/-12 ->",
-    "2170..2230); +2000 SP at level 17 adds 2*(0.20*2000)=800 without the 18.75% penalty (which would yield 650;",
-    "band 770..830); Rank 6 at level 60 with +2000 AP and +2000 SP adds 2*1500=3000 (die spread +/-112 -> 2870..3130)."
+    "melee_hit_rating/expertise_rating/melee_crit_rating 10000 (deterministic 2.0x melee-class crits,",
+    "Unit.cpp:1754-1755, no miss/dodge/parry) and spell penetration aura 823764 (0 partial resist per ADR 0154;",
+    "SchoolMask 28 Fire|Nature|Frost has no armor mitigation). Every Runemaster also holds class PvE tuning aura",
+    "887020 (CoA Aura - Runemaster Class, AscensionClassTuning.h:41, Unit.cpp:9401,10068-10076): aura 341",
+    "MiscValue 127, BaseLevel 10, MaxLevel 60, BasePoints 0, DieSides 1, RealPointsPerLevel 0.2",
+    "(SpellInfo.cpp:479-516 -> +2% = 1.02x at level 17; +11% = 1.11x at level 60). Expected critical damage",
+    "deltas: +2000 AP on Rank 1 adds 2*(0.55*2000)*1.02 = 2244 (DieSides 7 spread +/-6*1.02*2 = +/-12.24 ->",
+    "2220..2268); +2000 SP on Rank 1 at level 17 adds 2*(0.20*2000)*1.02 = 816 without the 18.75% penalty",
+    "(which would yield 2*325*1.02 = 663; band 792..840); Rank 6 at level 60 with +2000 AP and +2000 SP adds",
+    "2*(1100+400)*1.11 = 3330 (DieSides 57 spread +/-56*1.11*2 = +/-124.32 -> 3190..3470)."
   ],
   "timeout_ms": 90000,
   "location": { "map": 0, "x": -8949.95, "y": -132.493, "z": 83.5312, "o": 0 },
@@ -115,12 +121,12 @@
     { "action": "cast", "label": "AP-scaled level-17 Rank 1 cast", "actor": "ap17", "spell": 712326, "target": "dummy17" },
     { "action": "assert", "label": "SETUP: ap17 landed one critical hit", "actor": "ap17", "metric": "spell_damage_count", "spell": 712326, "target": "dummy17", "critical": true, "equals": 1, "within_ms": 2000 },
     { "action": "assert", "label": "SETUP: ap17 had zero partial resist", "actor": "ap17", "metric": "spell_resist_total", "spell": 712326, "target": "dummy17", "equals": 0 },
-    { "action": "assert", "label": "CONTRACT: +2000 AP adds 55% AP (2200 crit delta) on Rank 1", "actor": "ap17", "metric": "spell_damage_total", "spell": 712326, "target": "dummy17", "relative_to": "base17_dmg", "min": 2170, "max": 2230 },
+    { "action": "assert", "label": "CONTRACT: +2000 AP adds 55% AP x 1.02 tuning (2244 crit delta) on Rank 1", "actor": "ap17", "metric": "spell_damage_total", "spell": 712326, "target": "dummy17", "relative_to": "base17_dmg", "min": 2220, "max": 2268 },
 
     { "action": "cast", "label": "SP-scaled level-17 Rank 1 cast", "actor": "sp17", "spell": 712326, "target": "dummy17" },
     { "action": "assert", "label": "SETUP: sp17 landed one critical hit", "actor": "sp17", "metric": "spell_damage_count", "spell": 712326, "target": "dummy17", "critical": true, "equals": 1, "within_ms": 2000 },
     { "action": "assert", "label": "SETUP: sp17 had zero partial resist", "actor": "sp17", "metric": "spell_resist_total", "spell": 712326, "target": "dummy17", "equals": 0 },
-    { "action": "assert", "label": "CONTRACT: +2000 SP adds full 20% SP (800 crit delta, no low-level penalty) on Rank 1", "actor": "sp17", "metric": "spell_damage_total", "spell": 712326, "target": "dummy17", "relative_to": "base17_dmg", "min": 770, "max": 830 },
+    { "action": "assert", "label": "CONTRACT: +2000 SP adds full 20% SP x 1.02 tuning (816 crit delta, no low-level penalty) on Rank 1", "actor": "sp17", "metric": "spell_damage_total", "spell": 712326, "target": "dummy17", "relative_to": "base17_dmg", "min": 792, "max": 840 },
 
     { "action": "cast", "label": "Baseline level-60 Rank 6 cast", "actor": "base60", "spell": 712334, "target": "dummy60" },
     { "action": "assert", "label": "SETUP: base60 landed one critical hit", "actor": "base60", "metric": "spell_damage_count", "spell": 712334, "target": "dummy60", "critical": true, "equals": 1, "within_ms": 2000 },
@@ -130,6 +136,6 @@
     { "action": "cast", "label": "AP+SP-scaled level-60 Rank 6 cast", "actor": "scaled60", "spell": 712334, "target": "dummy60" },
     { "action": "assert", "label": "SETUP: scaled60 landed one critical hit", "actor": "scaled60", "metric": "spell_damage_count", "spell": 712334, "target": "dummy60", "critical": true, "equals": 1, "within_ms": 2000 },
     { "action": "assert", "label": "SETUP: scaled60 had zero partial resist", "actor": "scaled60", "metric": "spell_resist_total", "spell": 712334, "target": "dummy60", "equals": 0 },
-    { "action": "assert", "label": "CONTRACT: Rank 6 inherits 55% AP + 20% SP (3000 crit delta) from first rank", "actor": "scaled60", "metric": "spell_damage_total", "spell": 712334, "target": "dummy60", "relative_to": "base60_dmg", "min": 2870, "max": 3130 }
+    { "action": "assert", "label": "CONTRACT: Rank 6 inherits 55% AP + 20% SP x 1.11 tuning (3330 crit delta) from first rank", "actor": "scaled60", "metric": "spell_damage_total", "spell": 712334, "target": "dummy60", "relative_to": "base60_dmg", "min": 3190, "max": 3470 }
   ]
 }
