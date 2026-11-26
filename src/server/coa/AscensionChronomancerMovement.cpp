@@ -296,7 +296,7 @@ public:
     chronomancer_chronoglass_magnet() : UnitScript("chronomancer_chronoglass_magnet", true,
         {UNITHOOK_SPELL_MAGNET_TARGET}) { }
 
-    Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* info) override
+    Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* info, bool& ignoreM2Los) override
     {
         if (!attacker || !victim || !info || info->IsPositive() || victim->GetEntry() == UnstableChronoglassNpc)
             return nullptr;
@@ -339,7 +339,10 @@ public:
                 continue;
             if (auto* ai = dynamic_cast<npc_ascension_unstable_chronoglass*>(glass->AI());
                 ai && ai->ConsumeRedirect(attacker, info))
+            {
+                ignoreM2Los = true;
                 return glass;
+            }
         }
         return nullptr;
     }

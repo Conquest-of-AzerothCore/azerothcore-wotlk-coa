@@ -9099,10 +9099,12 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
                 return magnet;
             }
     }
-    if (Unit* magnet = sScriptMgr->SpellMagnetTarget(this, victim, spellInfo))
+    bool ignoreM2Los = false;
+    if (Unit* magnet = sScriptMgr->SpellMagnetTarget(this, victim, spellInfo, ignoreM2Los))
         if (magnet->IsAlive() && IsInMap(magnet) && InSamePhase(magnet) &&
             spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK &&
-            _IsValidAttackTarget(magnet, spellInfo) && IsWithinLOSInMap(magnet, VMAP::ModelIgnoreFlags::M2))
+            _IsValidAttackTarget(magnet, spellInfo) &&
+            IsWithinLOSInMap(magnet, ignoreM2Los ? VMAP::ModelIgnoreFlags::M2 : VMAP::ModelIgnoreFlags::Nothing))
             return magnet;
     return victim;
 }
