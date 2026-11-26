@@ -290,7 +290,8 @@ public:
         if (Named(info, 805629) && player->HasAura(300318))
             Reduce(player, 680630, std::abs(Amount(570145, 1)));
         if (Gavel(info) && spell->GetScriptValue(503691))
-            Reduce(player, id, INT32_MAX);
+            for (uint32 root : {800611, 800614, 800617})
+                Reduce(player, root, INT32_MAX);
         if (spell->GetScriptValue(Dawn) && player->HasAura(803719) && player->HasAura(707528))
             ReducePercent(player,id,std::abs(Amount(707528)));
         if (id == 520024)

@@ -15,11 +15,13 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "WorldPacket.h"
 #include <algorithm>
 #include <memory>
 #include <mutex>
 #include <tuple>
 #include <unordered_map>
+#include <vector>
 namespace AscensionSunCleric
 {
 namespace
@@ -102,14 +104,39 @@ uint32 Highest(Player* player, uint32 root)
 }
 void Reduce(Player* player, uint32 root, int32 milliseconds)
 {
+    std::vector<uint32> cleared;
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), root))
         {
             if (milliseconds == INT32_MAX)
+            {
                 player->RemoveSpellCooldown(pair.first, true);
+                cleared.push_back(pair.first);
+            }
             else
                 player->ModifySpellCooldown(pair.first, -milliseconds);
         }
+    if (cleared.empty())
+        return;
+    ObjectGuid const owner = player->GetGUID();
+    player->m_Events.AddEventAtOffset([owner, cleared = std::move(cleared)]()
+    {
+        Player* target = ObjectAccessor::FindPlayer(owner);
+        if (!target)
+            return;
+        for (uint32 spellId : cleared)
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
+            if (!info || !target->HasActiveSpell(spellId) || target->HasSpellCooldown(spellId))
+                continue;
+            if (uint32 remaining = target->GetGlobalCooldownMgr().GetGlobalCooldown(info))
+            {
+                WorldPacket data;
+                target->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, remaining);
+                target->SendDirectMessage(&data);
+            }
+        }
+    }, 0ms);
 }
 void SetHelper(Player* player, uint32 id, bool enabled)
 {
