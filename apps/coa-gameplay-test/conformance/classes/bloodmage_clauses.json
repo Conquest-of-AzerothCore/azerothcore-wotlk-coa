@@ -2919,9 +2919,10 @@
     "spell": 704625,
     "clause": "Casting Bloodbolt or Bloodfang Bite now reduces the cooldown of your Blood Pact by $/1000;804205S1 sec.",
     "labels": [
-      "704625 cost_gate 801955 blood_pact_cd without",
-      "704625 cost_gate 801955 blood_pact_cd with",
-      "704625 cost_gate 801955 blood_pact_cd beyond"
+      "704625 behaviour_metric_delta bloodbolt_through",
+      "704625 behaviour_metric_delta bloodbolt_still_cd",
+      "704625 behaviour_metric_delta bloodfang_through",
+      "704625 behaviour_metric_delta bloodfang_still_cd"
     ],
     "kind": "claim"
   },
