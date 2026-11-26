@@ -157,7 +157,11 @@
   {
     "spell": 300226,
     "clause": "While above 50% maximum health,",
-    "labels": [],
+    "labels": [
+      "300226 behaviour_metric_delta health_cost_at_50_control",
+      "300226 behaviour_metric_delta damage_at_50_control",
+      "300226 behaviour_metric_delta heal_at_50_control"
+    ],
     "kind": "claim"
   },
   {
@@ -167,13 +171,17 @@
       {
         "claim": "abilities that cost Rage now consume $704257s2% of your maximum health",
         "labels": [
-          "300226 effect_value 704257e1 #0"
+          "300226 behaviour_metric_delta health_cost_above_50",
+          "300226 behaviour_metric_delta health_cost_at_50_control"
         ]
       },
       {
         "claim": "to damage or heal your target for an additional $301273s1% of the value.",
         "labels": [
-          "300226 effect_value 301273e0 #1"
+          "300226 behaviour_metric_delta damage_above_50",
+          "300226 behaviour_metric_delta damage_at_50_control",
+          "300226 behaviour_metric_delta heal_above_50",
+          "300226 behaviour_metric_delta heal_at_50_control"
         ]
       }
     ],
@@ -1221,7 +1229,9 @@
     "spell": 572895,
     "clause": "Unleash a powerful surge of blood, dealing ${$m1+0+$sps*0.5+$spi*1} Shadow damage to an enemy,",
     "labels": [
-      "572895 effect_value #5"
+      "572895 behaviour_metric_delta damage_base",
+      "572895 behaviour_metric_delta damage_sp",
+      "572895 behaviour_metric_delta damage_spi"
     ],
     "kind": "claim"
   },
@@ -1238,13 +1248,15 @@
       {
         "claim": "within $520315a1 yds of the target",
         "labels": [
-          "572895 effect_radius 520315e0 #1"
+          "572895 behaviour_metric_delta heal_radius"
         ]
       },
       {
         "claim": "for ${$m3+0+$BH*.3+$spi*1}",
         "labels": [
-          "572895 effect_value #6"
+          "572895 behaviour_metric_delta heal_base",
+          "572895 behaviour_metric_delta heal_sp",
+          "572895 behaviour_metric_delta heal_spi"
         ]
       }
     ],
@@ -1257,13 +1269,14 @@
       {
         "claim": "Increases your party and raid members attack or spell power by $s2",
         "labels": [
-          "572895 effect_value e1 #2"
+          "572895 behaviour_metric_delta empowered_party_raid"
         ]
       },
       {
         "claim": "for $807563d",
         "labels": [
-          "572895 spell_duration 807563 #3"
+          "572895 behaviour_metric_delta empowered_duration_held",
+          "572895 behaviour_metric_delta empowered_duration_expired"
         ]
       }
     ],
@@ -1273,7 +1286,8 @@
     "spell": 572895,
     "clause": "plus an additional ${$807687m1+$807687ppl1} for you, scaling with level.",
     "labels": [
-      "572895 effect_value 807687e0 #4"
+      "572895 behaviour_metric_delta empowered_self_l60",
+      "572895 behaviour_metric_delta empowered_self_l50"
     ],
     "kind": "claim"
   },
@@ -1978,7 +1992,10 @@
   {
     "spell": 570735,
     "clause": "Removes the health cost of your Blood Shield and Vital Shield.",
-    "labels": [],
+    "labels": [
+      "570735 behaviour_metric_delta blood_shield_cost",
+      "570735 behaviour_metric_delta vital_shield_cost"
+    ],
     "kind": "claim"
   },
   {
@@ -2444,19 +2461,22 @@
       {
         "claim": "every $681036t1 sec",
         "labels": [
-          "680732 aura_amplitude_ms #0"
+          "680732 behaviour_metric_delta period"
         ]
       },
       {
         "claim": "for $681036d",
         "labels": [
-          "680732 spell_duration 681036 #1"
+          "680732 behaviour_metric_delta duration_held",
+          "680732 behaviour_metric_delta duration_expired"
         ]
       },
       {
         "claim": "heal allies affected by Blood Rituals for ${$681036m1+$681036ppl1+$BH*0.1}",
         "labels": [
-          "680732 effect_value #2"
+          "680732 behaviour_metric_delta bloodbolt_heal_base",
+          "680732 behaviour_metric_delta bloodbolt_heal_sp",
+          "680732 behaviour_metric_delta cursed_trigger"
         ]
       }
     ],
@@ -2512,7 +2532,8 @@
     "spell": 680823,
     "clause": "Your periodic damage and healing now has a $h% chance to grant a stack of Pooled Vitality.",
     "labels": [
-      "680823 effect_value #0"
+      "680823 behaviour_metric_delta dot_rate",
+      "680823 behaviour_metric_delta hot_rate"
     ],
     "kind": "claim"
   },
@@ -2579,19 +2600,21 @@
       {
         "claim": "heals up to $681025i allies",
         "labels": [
-          "681026 effect_value #0"
+          "681026 behaviour_metric_delta cap"
         ]
       },
       {
         "claim": "within $681025a1 yds",
         "labels": [
-          "681026 effect_radius 681025e0 #1"
+          "681026 behaviour_metric_delta radius"
         ]
       },
       {
         "claim": "for ${$681025m1+$681025ppl1+$SP*0.25+$SPI*0.5}",
         "labels": [
-          "681026 effect_value 681025e0 #2"
+          "681026 behaviour_metric_delta heal_base",
+          "681026 behaviour_metric_delta heal_sp",
+          "681026 behaviour_metric_delta heal_spi"
         ]
       }
     ],
@@ -2641,14 +2664,18 @@
     "spell": 681078,
     "clause": "Spells that cost health now grant a stack of Pooled Vitality, stacking $680687u times.",
     "labels": [
-      "681078 max_stacks 680687 #0"
+      "681078 behaviour_metric_delta grant_one",
+      "681078 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
   {
     "spell": 681078,
     "clause": "Mortal Form spells that cost Rage consume 10 stacks of Pooled Vitality to become empowered.",
-    "labels": [],
+    "labels": [
+      "681078 behaviour_metric_delta consume_empower",
+      "681078 behaviour_metric_delta cursed_no_consume"
+    ],
     "kind": "claim"
   },
   {
@@ -2743,7 +2770,7 @@
     "spell": 681336,
     "clause": "Triggering Pooled Vitality now also generates $/10;s1 Rage.",
     "labels": [
-      "681336 effect_value e0 #0"
+      "681336 behaviour_metric_delta rage_gain"
     ],
     "kind": "claim"
   },
@@ -3766,7 +3793,8 @@
     "spell": 707900,
     "clause": "Instantly regenerate $s1% of your maximum Rage in exchange for health.",
     "labels": [
-      "707900 effect_value e0 #0"
+      "707900 behaviour_metric_delta rage_base",
+      "707900 behaviour_metric_delta rage_scaled_max"
     ],
     "kind": "claim"
   },
@@ -4755,18 +4783,22 @@
       {
         "claim": "every $T1 sec",
         "labels": [
-          "804805 aura_amplitude_ms #0"
+          "804805 behaviour_metric_delta period_before",
+          "804805 behaviour_metric_delta period_after"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "804805 aura_duration_ms #1"
+          "804805 behaviour_cast_applies_aura duration",
+          "804805 behaviour_expiry duration"
         ]
       },
       {
         "claim": "Instantly gain 10 stacks of Pooled Vitality",
-        "labels": []
+        "labels": [
+          "804805 behaviour_metric_delta instant_stacks"
+        ]
       }
     ],
     "kind": "claim"
@@ -5388,7 +5420,8 @@
     "spell": 807490,
     "clause": "Each stack of Pooled Vitality now increases your Spirit by $s1%.",
     "labels": [
-      "807490 effect_value e0 #0"
+      "807490 behaviour_metric_delta spirit_one_stack",
+      "807490 behaviour_metric_delta spirit_five_stacks"
     ],
     "kind": "claim"
   },
@@ -5428,7 +5461,10 @@
   {
     "spell": 807566,
     "clause": "Casting Infuse or Vampyr's Kiss now generates 2 additional stacks of Pooled Vitality.",
-    "labels": [],
+    "labels": [
+      "807566 behaviour_metric_delta infuse_stacks",
+      "807566 behaviour_metric_delta vampyrs_kiss_stacks"
+    ],
     "kind": "claim"
   },
   {
