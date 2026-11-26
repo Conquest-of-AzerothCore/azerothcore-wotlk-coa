@@ -12,7 +12,6 @@
 #include "GuildPackets.h"
 #include "Item.h"
 #include "ItemScript.h"
-#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -256,14 +255,6 @@ void SendItemLevel(Player* player, Item const* item)
         SendItemLevel(player, item->GetGUID(), NativeItemScaling::InstanceLevel(item));
 }
 
-[[nodiscard]] int32 BankSlotFlags(Item const* item)
-{
-    if (LocalLevelScaling::ItemPreviewActive())
-        return int32(LocalLevelScaling::AuctionPreviewLevel(item->GetGUID().GetCounter(), item->GetTemplate()));
-
-    return item->GetInt32Value(ITEM_FIELD_FLAGS);
-}
-
 [[nodiscard]] bool RefuseSoulboundIntoRealmBank(Player* player, OpenBank const& bank, Item* item)
 {
     if (bank.OwnerKind != OWNER_REALM || !item->IsSoulBound())
@@ -331,7 +322,7 @@ void SendTabList(Player* player, OpenBank const& bank, uint8 tab, bool sendAllSl
             info.Count = int32(item->GetCount());
             info.Charges = int32(std::abs(item->GetSpellCharges()));
             info.EnchantmentID = int32(item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
-            info.Flags = BankSlotFlags(item);
+            info.Flags = item->GetInt32Value(ITEM_FIELD_FLAGS);
             info.RandomPropertiesID = item->GetItemRandomPropertyId();
             info.RandomPropertiesSeed = int32(item->GetItemSuffixFactor());
 
