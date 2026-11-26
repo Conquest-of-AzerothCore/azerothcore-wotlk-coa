@@ -1,6 +1,6 @@
 {
   "schema": 1,
-  "name": "Betrayer's Blow never stuns the Felsworn or its party through self-targeted Chaos Rush (#13373)",
+  "name": "Betrayer's Blow never stuns the Felsworn through self-targeted Chaos Rush (#13373)",
   "contract": [
     "Betrayer's Inclinations 804758 (Felsworn) tooltip: while active, your attacks against Demons have a 10%",
     "chance to deliver Betrayer's Blow 804766, which damages and stuns the target. #13085 gave 804758 the proc",
@@ -8,13 +8,13 @@
     "effects all target the caster, so its hit fires the proc with the Felsworn as the action target, and the",
     "blow is cast on the Felsworn. Spell::CheckCast skips the enemy check for an aura-triggered self cast, and",
     "Inner Demon 804216 (shapeshift form 56, creature type Demon) passes the Demon-only target type, so #13373",
-    "reports a self stun. Expected: the blow only reaches a valid attack target, never the Felsworn or a party",
-    "member. The Felsworn, in Inner Demon and grouped with a warrior, casts Chaos Rush 150 times. Before each",
-    "cast it returns to a passive wolf anchor and its creature type is checked to be Demon; the 5 s Inner",
-    "Demon fixture is refreshed every third cast, and charges, cooldown and global cooldown are cleared so",
-    "every cast lands. With the defect at least one blow reaches the Felsworn with probability 1 - 0.9^150",
-    "(residual about 1.4e-7). The encounter timeline must show no Betrayer's Blow aura on either player, and",
-    "neither may end stunned. Blows on Demon enemies stay covered by the #13005 scenario."
+    "reports a self stun. Expected: the blow never reaches the Felsworn. The Felsworn, in Inner Demon, casts",
+    "Chaos Rush 150 times. Before each cast it returns to a passive wolf anchor and its creature type is",
+    "checked to be Demon; the 5 s Inner Demon fixture is refreshed every third cast, and charges, cooldown and",
+    "global cooldown are cleared so every cast lands. With the defect at least one blow reaches the Felsworn",
+    "with probability 1 - 0.9^150 (residual about 1.4e-7), so the self assertion discriminates. The grouped",
+    "Humanoid warrior is a control only: the Demon-only target type excludes it and no cast makes it the action",
+    "target, so its checks pass with or without the fix. Blows on Demon enemies stay covered by the #13005 case."
   ],
   "timeout_ms": 600000,
   "location": {"map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0},
@@ -1659,7 +1659,7 @@
       "metric": "timeline_count", "event": "aura_applied", "spell": 804766, "target_actors": ["felsworn"], "equals": 0
     },
     {
-      "action": "assert", "label": "DISCRIMINATING: Betrayer's Blow never lands on the party member",
+      "action": "assert", "label": "CONTROL: Betrayer's Blow never lands on the Humanoid party member",
       "actor": "felsworn", "metric": "timeline_count", "event": "aura_applied", "spell": 804766,
       "target_actors": ["ally"], "equals": 0
     },
@@ -1668,7 +1668,7 @@
       "equals": 0
     },
     {
-      "action": "assert", "label": "REGRESSION: the party member is not stunned", "actor": "ally", "metric": "stunned",
+      "action": "assert", "label": "CONTROL: the party member is not stunned", "actor": "ally", "metric": "stunned",
       "equals": 0
     }
   ]
