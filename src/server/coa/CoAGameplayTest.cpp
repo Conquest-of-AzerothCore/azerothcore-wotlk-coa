@@ -710,6 +710,12 @@ private:
     uint32 _original;
 };
 
+uint32 StartupMaxPlayerLevel()
+{
+    static uint32 const level = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    return level;
+}
+
 class MaxPlayerLevelConfig
 {
 public:
@@ -2295,7 +2301,7 @@ public:
         }
         if (auto maxPlayerLevel = _scenario.get_optional<uint32>("max_player_level"))
         {
-            Require(*maxPlayerLevel >= 1 && *maxPlayerLevel <= STRONG_MAX_LEVEL,
+            Require(*maxPlayerLevel >= 1 && *maxPlayerLevel <= StartupMaxPlayerLevel(),
                 "Invalid max player level");
             _maxPlayerLevel.emplace(*maxPlayerLevel);
         }
@@ -9757,6 +9763,7 @@ public:
             return;
 
         _enabled = true;
+        StartupMaxPlayerLevel();
         _started = Clock::now();
         ProcCounter::Begin();
         AuraApplyCounter::Begin();
