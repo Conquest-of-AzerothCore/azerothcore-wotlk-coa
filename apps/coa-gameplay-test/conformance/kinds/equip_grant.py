@@ -14,6 +14,8 @@ ORDER = 49
 EQUIP_GRANT_METRIC = 'equip_grant_accepted'
 ARMS = ('unlearned', 'learned')
 PAIR_KEYS = {'main_hand', 'off_hand', 'skill_line', 'source'}
+MAX_SPECIALIZATION = 0xFFFF
+SWITCH_COPPER = 1000000
 
 
 @dataclass(frozen=True)
@@ -31,6 +33,8 @@ class EquipGrantSpec:
     quote: str
     pairs: tuple[EquipPair, ...]
     label_suffix: str = 'equip'
+    specialization: int | None = None
+    unlearn_after_specialization: tuple[int, ...] = ()
 
 
 def equip_pair(raw) -> EquipPair:
@@ -46,8 +50,24 @@ def equip_grant_spec(entry: dict) -> EquipGrantSpec:
     pairs = entry.get('pairs')
     if not isinstance(pairs, list) or not pairs:
         raise ValueError(f'{entry["spell"]} equip_grant needs a non-empty list of pairs')
+    specialization = entry.get('specialization')
+    if specialization is not None and (type(specialization) is not int or not 1 <= specialization <= MAX_SPECIALIZATION):
+        raise ValueError(f'{entry["spell"]} equip_grant specialization must be 1 to {MAX_SPECIALIZATION}, '
+                         f'not {specialization!r}')
+    raw_unlearn = entry.get('unlearn_after_specialization')
+    unlearn_after = ()
+    if raw_unlearn is not None:
+        if specialization is None:
+            raise ValueError(f'{entry["spell"]} equip_grant unlearn_after_specialization requires specialization')
+        if not isinstance(raw_unlearn, list) or not raw_unlearn \
+                or not all(type(spell) is int and spell > 0 for spell in raw_unlearn) \
+                or len(set(raw_unlearn)) != len(raw_unlearn):
+            raise ValueError(f'{entry["spell"]} equip_grant unlearn_after_specialization must be a non-empty list of '
+                             f'distinct positive spell ids, not {raw_unlearn!r}')
+        unlearn_after = tuple(raw_unlearn)
     return EquipGrantSpec(int(entry['spell']), entry['name'], entry['quote'],
-                          tuple(equip_pair(pair) for pair in pairs), entry.get('label_suffix', 'equip'))
+                          tuple(equip_pair(pair) for pair in pairs), entry.get('label_suffix', 'equip'),
+                          specialization, unlearn_after)
 
 
 def pair_label(spec: EquipGrantSpec, arm: str, index: int, slot: int) -> str:
@@ -73,12 +93,26 @@ def equip_grant_scenario(class_file: dict, spec: EquipGrantSpec) -> tuple[dict, 
     steps = base_steps(class_file) + [
         {'action': 'set_skill', 'actor': CASTER, 'skill': line, 'value': skill_target(class_file),
          'maximum': skill_target(class_file)} for line in skills]
-    steps.append({'action': 'unlearn', 'actor': CASTER, 'spell': spec.spell})
+    if spec.specialization is not None:
+        steps += [{'action': 'money', 'actor': CASTER, 'copper': SWITCH_COPPER},
+                  {'action': 'specialization', 'actor': CASTER, 'id': spec.specialization}]
+        unlearn_spells = spec.unlearn_after_specialization or (spec.spell,)
+        steps += [{'action': 'unlearn', 'actor': CASTER, 'spell': spell} for spell in unlearn_spells]
+    else:
+        steps.append({'action': 'unlearn', 'actor': CASTER, 'spell': spec.spell})
     for arm in ARMS:
         if arm == 'learned':
             steps.append({'action': 'learn', 'actor': CASTER, 'spell': spec.spell})
         for index, pair in enumerate(spec.pairs):
             steps += pair_steps(spec, arm, index, pair)
+    spec_note = ''
+    if spec.specialization is not None:
+        spec_note = (f' The caster is given {SWITCH_COPPER} copper and switches to specialization '
+                     f'{spec.specialization} before the unlearned arm')
+        if spec.unlearn_after_specialization:
+            spec_note += f', then unlearns {list(spec.unlearn_after_specialization)} before testing the refused equip.'
+        else:
+            spec_note += '.'
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour equip grant',
@@ -89,7 +123,7 @@ def equip_grant_scenario(class_file: dict, spec: EquipGrantSpec) -> tuple[dict, 
                      + '; '.join(f'{pair.main_hand} with {pair.off_hand} (skill line {pair.skill_line}, '
                                  f'{pair.source})' for pair in spec.pairs)
                      + '. Each arm reads both hands with equipped_item: the off hand does not hold its item without '
-                       'the grant and holds it with the grant, the main hand holds its item in both.'),
+                       'the grant and holds it with the grant, the main hand holds its item in both.' + spec_note),
         'players': [player_fixture(class_file)],
         'creatures': [],
         'steps': steps}

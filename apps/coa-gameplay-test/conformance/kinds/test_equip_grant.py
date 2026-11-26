@@ -71,6 +71,52 @@ class EquipGrantTests(unittest.TestCase):
             with self.subTest(pairs=pairs), self.assertRaisesRegex(ValueError, 'equip_grant'):
                 equip_grant_spec(entry(pairs=pairs))
 
+    def test_specialization_and_unlearn_after_specialization_run_before_the_unlearned_arm(self):
+        scenario, [expectation] = self.built(specialization=99, unlearn_after_specialization=[GRANT, 800157, 674])
+        steps = run.validate(scenario)['steps']
+        money = next(index for index, step in enumerate(steps) if step['action'] == 'money')
+        spec = next(index for index, step in enumerate(steps) if step['action'] == 'specialization')
+        unlearns = [(index, step['spell']) for index, step in enumerate(steps) if step['action'] == 'unlearn']
+        first_refused = next(index for index, step in enumerate(steps)
+                             if step['action'] == 'equip' and step.get('rejected'))
+        learn = next(index for index, step in enumerate(steps)
+                     if step['action'] == 'learn' and step.get('spell') == GRANT)
+        self.assertEqual(steps[money]['copper'], 1000000)
+        self.assertEqual(steps[spec]['id'], 99)
+        self.assertLess(money, spec)
+        self.assertEqual([spell for _, spell in unlearns], [GRANT, 800157, 674])
+        self.assertLess(spec, unlearns[0][0])
+        self.assertLess(unlearns[-1][0], first_refused)
+        self.assertLess(first_refused, learn)
+        self.assertIn('specialization 99', scenario['contract'])
+        self.assertIn('[707072, 800157, 674]', scenario['contract'])
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(self.values(expectation)),
+                                         expectation).status, 'ok')
+
+    def test_specialization_without_explicit_unlearn_list_unlearns_the_grant_spell(self):
+        scenario, _ = self.built(specialization=99)
+        steps = run.validate(scenario)['steps']
+        self.assertEqual([step['spell'] for step in steps if step['action'] == 'unlearn'], [GRANT])
+        self.assertIn('specialization 99', scenario['contract'])
+
+    def test_default_omits_specialization_steps_and_bad_specialization_options_are_refused(self):
+        scenario, _ = self.built()
+        self.assertFalse(any(step['action'] in ('money', 'specialization') for step in scenario['steps']))
+        bad_cases = [
+            {'specialization': 0},
+            {'specialization': True},
+            {'specialization': 0x10000},
+            {'specialization': '99'},
+            {'unlearn_after_specialization': [GRANT]},
+            {'specialization': 99, 'unlearn_after_specialization': []},
+            {'specialization': 99, 'unlearn_after_specialization': [GRANT, GRANT]},
+            {'specialization': 99, 'unlearn_after_specialization': [0]},
+            {'specialization': 99, 'unlearn_after_specialization': [True]},
+        ]
+        for changes in bad_cases:
+            with self.subTest(changes=changes), self.assertRaisesRegex(ValueError, 'equip_grant'):
+                equip_grant_spec(entry(**changes))
+
 
 if __name__ == '__main__':
     unittest.main()
