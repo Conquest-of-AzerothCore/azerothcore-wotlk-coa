@@ -62,7 +62,7 @@
 
     { "action": "use_nearby_gameobject", "label": "Carrier clicks the Homebound Portal (93187)", "actor": "carrier", "entry": 80775, "owner": "helper" },
     { "action": "assert", "label": "DISCRIMINATING: Homebound Portal is refused while carrying Crow's Cache", "actor": "carrier", "metric": "cast_failure", "spell": 93187, "min": 1, "within_ms": 2000 },
-    { "action": "wait", "label": "Wait past the 10-second Homebound Portal cast time in case a cast went through", "ms": 11000 },
+    { "action": "wait", "label": "Wait past Homebound Portal cast time in case a cast went through", "ms": 4000 },
 
     { "action": "cast", "label": "Carrier tries Stuck (7355)", "actor": "carrier", "spell": 7355 },
     { "action": "assert", "label": "DISCRIMINATING: Auto-Unstuck is refused while carrying Crow's Cache", "actor": "carrier", "metric": "cast_failure", "spell": 7355, "min": 1, "within_ms": 2000 },
@@ -71,6 +71,6 @@
     { "action": "assert", "label": "Carrier still holds Crow's Cache", "actor": "carrier", "metric": "item_count", "item": 1615010, "equals": 1 },
 
     { "action": "use_nearby_gameobject", "label": "CONTROL: helper without Crow's Cache uses the same Homebound Portal", "actor": "helper", "entry": 80775, "owner": "helper" },
-    { "action": "assert", "label": "CONTROL: helper is teleported to their Eastern Kingdoms homebind (map 0)", "actor": "helper", "metric": "map_id", "equals": 0, "within_ms": 16000 }
+    { "action": "assert", "label": "CONTROL: helper is teleported to their Eastern Kingdoms homebind (map 0)", "actor": "helper", "metric": "map_id", "equals": 0, "within_ms": 8000 }
   ]
 }
