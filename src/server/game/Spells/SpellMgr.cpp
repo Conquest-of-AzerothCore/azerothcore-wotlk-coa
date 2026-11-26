@@ -364,6 +364,11 @@ int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellInfo const
     if (spellproto->SpellFamilyName == 19 && spellproto->Id == 803325)
         return 8 * IN_MILLISECONDS;
 
+    // Scarlet Delirium's tooltip specifies eight seconds against players, before diminishing returns.
+    if (spellproto->SpellFamilyName == 26 && (spellproto->SpellFamilyFlags[2] & 0x100) &&
+        spellproto->Effects[EFFECT_0].IsAura(SPELL_AURA_MOD_FEAR))
+        return 8 * IN_MILLISECONDS;
+
     // Explicit diminishing duration
     switch (spellproto->SpellFamilyName)
     {
