@@ -1,0 +1,203 @@
+{
+  "schema": 1,
+  "name": "Necromancer Grave March redirects distant melee and ranged minions (#13232)",
+  "contract": "Grave March (500991, 30 yd range from the Necromancer) commands all responding Undead minions to focus the target enemy. Previously Order() in AscensionNecromancerSummons.cpp skipped any minion further than 60 yd from or out of LOS of the new target, and DoAction() skipped any ranged minion (Skeletal Mage 50075, Skeletal Archer 50076, Banshee 50323, Frost Wyrm 50177) outside its 40 yd InReach check instead of moving it into range. In part 1, the Necromancer raises a Skeletal Mage (50075) and Ghoul (50073), puts them on enemy_a (+10 yd), relocates to +26 yd (20 yd from enemy_c at +46 yd, while the Skeletal Mage stays > 40 yd from enemy_c), and casts Grave March on enemy_c: the Skeletal Mage must drop enemy_a, move into 40 yd range without closing to melee (>= 20 yd), engage enemy_c, and cast Frost Nova (805955). In part 2, enemy_c moves +24 yd to +70 yd (pulling the Ghoul > 60 yd from enemy_b at +5 yd), the Necromancer returns to 0 yd (5 yd from enemy_b), and casts Grave March on enemy_b: the Ghoul must immediately switch victim to enemy_b and close within 10 yd.",
+  "timeout_ms": 120000,
+  "location": { "map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0 },
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "enemy_b", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 5, "reaction": 0, "stationary": true },
+    { "id": "enemy_a", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 10, "reaction": 0, "stationary": true },
+    { "id": "enemy_c", "owner": "n", "entry": 36, "level": 60, "health": 1000000, "distance": 46, "reaction": 0 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login, spawns and Life Force settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500331 },
+    { "action": "learn", "actor": "n", "spell": 500971 },
+    { "action": "learn", "actor": "n", "spell": 500991 },
+    { "action": "cast", "label": "Raise Skeletal Mage (2 s cast)", "actor": "n", "spell": 500331 },
+    {
+      "action": "assert",
+      "label": "SETUP: Skeletal Mage is raised",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50075,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear GCD after Skeletal Mage", "ms": 1500 },
+    { "action": "cast", "label": "Raise Ghoul (1.5 s cast)", "actor": "n", "spell": 500971 },
+    {
+      "action": "assert",
+      "label": "SETUP: Ghoul is raised",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    { "action": "wait", "label": "Clear GCD after Ghoul", "ms": 1500 },
+    { "action": "cast", "label": "Engage both minions on enemy_a", "actor": "n", "spell": 500991, "target": "enemy_a" },
+    {
+      "action": "assert",
+      "label": "SETUP: Skeletal Mage engages enemy_a",
+      "actor": "n",
+      "metric": "owned_creature_victim",
+      "entry": 50075,
+      "target": "enemy_a",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ghoul engages enemy_a",
+      "actor": "n",
+      "metric": "owned_creature_victim",
+      "entry": 50073,
+      "target": "enemy_a",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Clear Grave March 2 s cooldown", "ms": 2500 },
+    { "action": "relocate", "label": "Move Necromancer toward enemy_c (step 1)", "actor": "n", "dx": 16 },
+    { "action": "relocate", "label": "Move Necromancer within 20 yd of enemy_c (step 2)", "actor": "n", "dx": 10 },
+    {
+      "action": "assert",
+      "label": "SETUP: Skeletal Mage is more than 40 yd from enemy_c",
+      "actor": "n",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50075,
+      "target": "enemy_c",
+      "min": 42
+    },
+    { "action": "cast", "label": "Grave March onto enemy_c while Skeletal Mage is > 40 yd away", "actor": "n", "spell": 500991, "target": "enemy_c" },
+    {
+      "action": "assert",
+      "label": "SETUP: Grave March succeeds at 20 yd",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 500991,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Skeletal Mage drops enemy_a",
+      "actor": "n",
+      "metric": "owned_creature_victim",
+      "entry": 50075,
+      "target": "enemy_a",
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Skeletal Mage moves into range and engages enemy_c",
+      "actor": "n",
+      "metric": "owned_creature_victim",
+      "entry": 50075,
+      "target": "enemy_c",
+      "equals": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Skeletal Mage stays at range instead of closing to melee",
+      "actor": "n",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50075,
+      "target": "enemy_c",
+      "min": 20
+    },
+    {
+      "action": "snapshot",
+      "label": "Skeletal Mage cast count once engaged on enemy_c",
+      "actor": "n",
+      "metric": "spell_go_count",
+      "spell": 805955,
+      "entry": 50075,
+      "save_as": "mage_casts_on_c"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Skeletal Mage casts its attack at enemy_c",
+      "actor": "n",
+      "metric": "spell_go_count",
+      "spell": 805955,
+      "entry": 50075,
+      "relative_to": "mage_casts_on_c",
+      "min": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ghoul is engaged on enemy_c",
+      "actor": "n",
+      "metric": "owned_creature_victim",
+      "entry": 50073,
+      "target": "enemy_c",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "move_point", "label": "Have enemy_c flee +24 yd to pull Ghoul > 60 yd from enemy_b", "actor": "enemy_c", "dx": 24 },
+    { "action": "relocate", "label": "Return Necromancer toward enemy_b (step 1)", "actor": "n", "dx": -16 },
+    { "action": "relocate", "label": "Return Necromancer within 5 yd of enemy_b (step 2)", "actor": "n", "dx": -10 },
+    {
+      "action": "assert",
+      "label": "SETUP: Ghoul has chased enemy_c more than 60 yd away from enemy_b",
+      "actor": "n",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50073,
+      "target": "enemy_b",
+      "min": 62,
+      "within_ms": 18000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ghoul is still attacking enemy_c before Grave March",
+      "actor": "n",
+      "metric": "owned_creature_victim",
+      "entry": 50073,
+      "target": "enemy_c",
+      "equals": 1
+    },
+    { "action": "cast", "label": "Grave March onto enemy_b while Ghoul is > 60 yd away", "actor": "n", "spell": 500991, "target": "enemy_b" },
+    {
+      "action": "assert",
+      "label": "SETUP: Grave March succeeds on enemy_b at 5 yd",
+      "actor": "n",
+      "metric": "cast_failure",
+      "spell": 500991,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ghoul > 60 yd away switches victim to enemy_b",
+      "actor": "n",
+      "metric": "owned_creature_victim",
+      "entry": 50073,
+      "target": "enemy_b",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ghoul runs back from > 60 yd to close on enemy_b",
+      "actor": "n",
+      "metric": "owned_creature_distance_2d",
+      "entry": 50073,
+      "target": "enemy_b",
+      "max": 10,
+      "within_ms": 18000
+    }
+  ]
+}

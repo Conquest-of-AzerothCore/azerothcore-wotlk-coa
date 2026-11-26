@@ -473,10 +473,11 @@ void Order(Player* player, Unit* target, uint32 spell)
         if (!creature->IsDamageEnoughForLootingAndReward())
             creature->LowerPlayerDamageReq(creature->GetHealth(), true, player->GetLevel());
     State(player).focus = target->GetGUID();
+    bool const focusOrder = spell == 500991;
     for (Creature* minion : Minions(player))
     {
-        if (!Responds(minion->GetEntry(), spell) || !minion->IsWithinDistInMap(target, 60.0f) ||
-            !minion->IsWithinLOSInMap(target))
+        if (!Responds(minion->GetEntry(), spell) ||
+            (!focusOrder && (!minion->IsWithinDistInMap(target, 60.0f) || !minion->IsWithinLOSInMap(target))))
             continue;
         minion->AI()->SetGUID(target->GetGUID(), 1);
         minion->AI()->SetData(1, spell);
@@ -669,9 +670,20 @@ class npc_ascension_necromancer : public ScriptedAI
     {
         Player* player = Owner(me);
         Unit* target = ObjectAccessor::GetUnit(*me, _target);
-        if (action != 1 || !player || Pacified(player) || !target || !target->IsAlive() || !InReach(me, target) ||
+        if (action != 1 || !player || Pacified(player) || !target || !target->IsAlive() ||
             !Responds(me->GetEntry(), _command) || me->HasUnitState(UNIT_STATE_CONTROLLED))
             return;
+        if (!InReach(me, target))
+        {
+            if (_command == 500991 && me->GetEntry() != 523032)
+            {
+                me->AttackStop();
+                me->InterruptNonMeleeSpells(false);
+                _followRange = 0.0f;
+                me->GetMotionMaster()->MovePoint(0, target->GetPosition());
+            }
+            return;
+        }
         AttackStart(target);
         if (_command == 500991)
             return;
@@ -805,23 +817,34 @@ class npc_ascension_necromancer : public ScriptedAI
                 }
                 else if (!me->GetVictim() && me->GetEntry() != 523032)
                 {
-                    Unit* target = ObjectAccessor::GetUnit(*me, State(player).focus);
-                    if (!target || !player->IsValidAttackTarget(target) || !InReach(me, target))
-                        target = player->GetVictim();
-                    if (!target && !player->getAttackers().empty())
-                        target = *player->getAttackers().begin();
-                    if (!target && player->HasAura(500982))
-                        for (Unit* unit : Nearby(me, 20.0f))
-                            if (player->IsValidAttackTarget(unit) && player->IsHostileTo(unit) &&
-                                me->IsWithinLOSInMap(unit))
-                            {
-                                target = unit;
-                                break;
-                            }
-                    if (target)
-                        AttackStart(target);
-                    if (!me->GetVictim() && Follows(me->GetEntry()))
-                        Regroup(player);
+                    Unit* focus = ObjectAccessor::GetUnit(*me, State(player).focus);
+                    if (focus && (!focus->IsAlive() || !player->IsValidAttackTarget(focus)))
+                        focus = nullptr;
+                    if (focus && Ranged(me->GetEntry()) && !InReach(me, focus) && me->CanCreatureAttack(focus, false))
+                    {
+                        _followRange = 0.0f;
+                        me->GetMotionMaster()->MovePoint(0, focus->GetPosition());
+                    }
+                    else
+                    {
+                        Unit* target = focus;
+                        if (!target || !InReach(me, target))
+                            target = player->GetVictim();
+                        if (!target && !player->getAttackers().empty())
+                            target = *player->getAttackers().begin();
+                        if (!target && player->HasAura(500982))
+                            for (Unit* unit : Nearby(me, 20.0f))
+                                if (player->IsValidAttackTarget(unit) && player->IsHostileTo(unit) &&
+                                    me->IsWithinLOSInMap(unit))
+                                {
+                                    target = unit;
+                                    break;
+                                }
+                        if (target)
+                            AttackStart(target);
+                        if (!me->GetVictim() && Follows(me->GetEntry()))
+                            Regroup(player);
+                    }
                 }
                 if (me->GetEntry() == 50078 && me->IsAlive() && !me->GetVictim() && me->getAttackers().empty() &&
                     !me->HasAuraType(SPELL_AURA_MOD_STEALTH))
