@@ -42,6 +42,11 @@ bool InReach(Creature const* minion, Unit const* target)
     return !Ranged(minion->GetEntry()) ||
            (minion->IsWithinDistInMap(target, 40.0f) && minion->IsWithinLOSInMap(target));
 }
+bool AggressiveTarget(Player const* player, Creature const* minion, Unit const* unit)
+{
+    return unit && player->IsValidAttackTarget(unit) && player->IsHostileTo(unit) && unit->IsHostileTo(player) &&
+           InReach(minion, unit) && minion->IsWithinLOSInMap(unit);
+}
 bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
@@ -632,6 +637,15 @@ class npc_ascension_necromancer : public ScriptedAI
             return _empoweredPlagueBonus;
         return 0;
     }
+    void MoveInLineOfSight(Unit* who) override
+    {
+        Player* player = Owner(me);
+        if (!player || me->IsEngaged() || !me->HasReactState(REACT_AGGRESSIVE) || Pacified(player) ||
+            Stationary(me->GetEntry()) || me->GetEntry() == 523032)
+            return;
+        if (AggressiveTarget(player, me, who) && me->CanStartAttack(who))
+            AttackStart(who);
+    }
     void AttackStart(Unit* target) override
     {
         Player* player = Owner(me);
@@ -825,8 +839,7 @@ class npc_ascension_necromancer : public ScriptedAI
                         target = *player->getAttackers().begin();
                     if (!target && player->HasAura(500982))
                         for (Unit* unit : Nearby(me, 20.0f))
-                            if (player->IsValidAttackTarget(unit) && player->IsHostileTo(unit) &&
-                                me->IsWithinLOSInMap(unit))
+                            if (AggressiveTarget(player, me, unit))
                             {
                                 target = unit;
                                 break;

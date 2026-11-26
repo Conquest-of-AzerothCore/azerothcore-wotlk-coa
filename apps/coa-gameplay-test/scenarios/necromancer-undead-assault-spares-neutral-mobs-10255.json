@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Undead: Assault spares neutral monster-masked mobs while pulling hostile ones (#10255)",
+  "contract": [
+    "Issue #10255. Undead: Assault (500982) puts Necromancer minions into aggressive stance. Blackfathom Deeps neutral turtles such as Snapping Crustacean (4822) use FactionTemplate 350 (ourMask 8 = FACTION_MASK_MONSTER, hostileMask 0), so player->IsHostileTo(turtle) and minion->IsHostileTo(turtle) are true while turtle->IsHostileTo(player) is false (REP_NEUTRAL).",
+    "Before the fix, both CreatureAI::MoveInLineOfSight (under REACT_AGGRESSIVE) and UpdateAI's 20-yard scan checked only one-sided hostility toward the target and immediately pulled faction-350 neutral mobs.",
+    "Discriminating check: with Undead: Assault active and a Lesser Skeletal Warrior (50065) raised 5 yards from a faction-350 Snapping Crustacean, the minion must not target it and neither the turtle nor the Necromancer may enter combat.",
+    "Control: after teleporting beside a faction-128 hostile creature (ourMask 8, hostileMask 1) 35 yards away without attacking, the same Assault minion must autonomously engage that hostile creature."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0 },
+  "players": [
+    { "id": "n", "race": 5, "class": 23, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "turtle", "owner": "n", "entry": 4822, "faction": 350, "level": 60, "health": 1000000, "distance": 5, "stationary": true },
+    { "id": "hostile", "owner": "n", "entry": 36, "faction": 128, "level": 60, "health": 1000000, "distance": 35, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and the Life Force aura settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 500982 },
+    { "action": "learn", "actor": "n", "spell": 500970 },
+    { "action": "cast", "label": "Activate Undead: Assault", "actor": "n", "spell": 500982 },
+    {
+      "action": "assert", "label": "SETUP: Undead: Assault aura is active", "actor": "n",
+      "metric": "aura", "spell": 500982, "equals": 1, "within_ms": 3000
+    },
+    { "action": "cast", "label": "Raise a Lesser Skeletal Warrior", "actor": "n", "spell": 500970 },
+    {
+      "action": "assert", "label": "SETUP: Lesser Skeletal Warrior is present", "actor": "n",
+      "metric": "owned_creature_count", "entry": 50065, "equals": 1, "within_ms": 5000
+    },
+    { "action": "wait", "label": "Let MoveInLineOfSight and several 1-second Assault scans run beside the neutral turtle", "ms": 6000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Assault minion does not target the faction-350 neutral turtle", "actor": "n",
+      "metric": "owned_creature_victim", "entry": 50065, "target": "turtle", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the neutral turtle never enters combat", "actor": "turtle",
+      "metric": "combat", "equals": 0
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: the Necromancer stays out of combat", "actor": "n",
+      "metric": "combat", "equals": 0
+    },
+    {
+      "action": "teleport", "label": "Move beside the hostile creature 35 yards away", "actor": "n",
+      "map": 1, "x": -2682.6, "y": 19.0, "z": 14.5, "o": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Assault minion autonomously engages the faction-128 hostile creature", "actor": "n",
+      "metric": "owned_creature_victim", "entry": 50065, "target": "hostile", "equals": 1, "within_ms": 10000
+    },
+    {
+      "action": "assert", "label": "CONTROL: the hostile creature enters combat", "actor": "hostile",
+      "metric": "combat", "equals": 1, "within_ms": 3000
+    }
+  ]
+}
