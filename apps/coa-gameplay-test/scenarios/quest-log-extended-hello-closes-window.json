@@ -214,7 +214,8 @@
       "action": "assert",
       "label": "SETUP: before HELLO the Extra Quests window lists the overflow quest",
       "actor": "hero",
-      "metric": "whisper_contains",
+      "metric": "whispers_received",
+      "from": "hero",
       "text": "COAQLOG\tBEGIN 1 64",
       "equals": 1,
       "within_ms": 3000
@@ -278,8 +279,9 @@
       "action": "assert",
       "label": "No further window list follows",
       "actor": "hero",
-      "metric": "whisper_contains",
-      "text": "COAQLOG\tBEGIN",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tBEGIN 1 64",
       "equals": 1
     },
     {
