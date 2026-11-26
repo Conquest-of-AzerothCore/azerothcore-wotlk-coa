@@ -341,5 +341,154 @@ class AllyEffectJudgeTests(unittest.TestCase):
                 scenario_of(entry)
 
 
+TRANSFUSION = 705734
+SWAP_FLOOR_ENTRY = {
+    'spell': TRANSFUSION, 'kind': 'ally_heal_reach', 'variant': 'swap_floor', 'name': 'Transfusion floor',
+    'quote': 'Increases the lower health percentage of the two to $s1%, if below that amount.',
+    'caster_health': [80000, 100000],
+    'allies': [{'id': 'ally', 'dx': 3, 'dy': 0, 'health': 10000, 'maximum': 50000},
+               {'id': 'bystander', 'dx': 3, 'dy': 3, 'health': 30000, 'maximum': 60000}],
+    'casts': [{'spell': TRANSFUSION, 'target': 'ally', 'watch_ms': 500, 'poll_ms': 250}],
+    'checks': [{'name': 'swap_floor', 'judge': 'health_swap', 'spell': TRANSFUSION,
+                'levelled': [CASTER, 'ally'], 'apart': ['bystander'], 'tolerance': 0.5, 'floor_from_effect': True}]}
+SWAP_PURE_ENTRY = {
+    'spell': TRANSFUSION, 'kind': 'ally_heal_reach', 'variant': 'swap_pure', 'name': 'Transfusion pure swap',
+    'quote': 'Swap health percentages with an ally.',
+    'caster_health': [60000, 100000],
+    'allies': [{'id': 'ally', 'dx': 3, 'dy': 0, 'health': 40000, 'maximum': 50000},
+               {'id': 'bystander', 'dx': 3, 'dy': 3, 'health': 25000, 'maximum': 50000}],
+    'casts': [{'spell': TRANSFUSION, 'target': 'ally', 'watch_ms': 500, 'poll_ms': 250}],
+    'checks': [{'name': 'swap_pure', 'judge': 'health_swap', 'spell': TRANSFUSION,
+                'levelled': [CASTER, 'ally'], 'apart': ['bystander'], 'tolerance': 0.5, 'floor_from_effect': True}]}
+
+
+def health_values(expectation, readings: dict) -> dict:
+    values = {}
+    for phase, moments in expectation.model['health_reads'].items():
+        for moment, units in moments.items():
+            for unit, fields in units.items():
+                health, maximum = readings[(phase, moment, unit)]
+                values[fields['health']] = float(health)
+                values[fields['max_health']] = float(maximum)
+    return values
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class HealthSwapJudgeTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.class_file = load_class_file(20)
+        cls.floor_scenario, [cls.floor_exp] = behaviour_scenario(cls.class_file, SWAP_FLOOR_ENTRY)
+        cls.pure_scenario, [cls.pure_exp] = behaviour_scenario(cls.class_file, SWAP_PURE_ENTRY)
+        cls.gated_scenario, [cls.gated_exp] = behaviour_scenario(
+            cls.class_file, {**SWAP_PURE_ENTRY, 'gate_spell': 681078})
+
+    def test_floor_from_effect_reads_dbc_floor_and_validates_scenario(self):
+        run.validate(self.floor_scenario)
+        expectation = self.floor_exp
+        self.assertEqual(expectation.model['floor_pct'], 40.0)
+        self.assertEqual(expectation.model['metric'], 'health')
+        self.assertIn('floor 40%', expectation.displayed)
+        readings = {('treatment', 'start', CASTER): (80000, 100000),
+                    ('treatment', 'start', 'ally'): (10000, 50000),
+                    ('treatment', 'start', 'bystander'): (30000, 60000),
+                    ('treatment', 'end', CASTER): (40000, 100000),
+                    ('treatment', 'end', 'ally'): (40000, 50000),
+                    ('treatment', 'end', 'bystander'): (30000, 60000)}
+        verdict = judge_behaviour(base_verdict(expectation), FakeRun(health_values(expectation, readings)), expectation)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_pure_swap_above_floor_passes_and_rejects_flat_swap_and_no_floor_mutants(self):
+        run.validate(self.pure_scenario)
+        pure = self.pure_exp
+        ok_readings = {('treatment', 'start', CASTER): (60000, 100000),
+                       ('treatment', 'start', 'ally'): (40000, 50000),
+                       ('treatment', 'start', 'bystander'): (25000, 50000),
+                       ('treatment', 'end', CASTER): (80000, 100000),
+                       ('treatment', 'end', 'ally'): (30000, 50000),
+                       ('treatment', 'end', 'bystander'): (25000, 50000)}
+        self.assertEqual(judge_behaviour(base_verdict(pure), FakeRun(health_values(pure, ok_readings)), pure).status,
+                         'ok')
+        flat_swap = {**ok_readings, ('treatment', 'end', CASTER): (40000, 100000),
+                     ('treatment', 'end', 'ally'): (50000, 50000)}
+        self.assertEqual(judge_behaviour(base_verdict(pure), FakeRun(health_values(pure, flat_swap)), pure).status,
+                         'alert')
+        averaged = {**ok_readings, ('treatment', 'end', CASTER): (70000, 100000),
+                    ('treatment', 'end', 'ally'): (35000, 50000)}
+        self.assertEqual(judge_behaviour(base_verdict(pure), FakeRun(health_values(pure, averaged)), pure).status,
+                         'alert')
+        moved_apart = {**ok_readings, ('treatment', 'end', 'bystander'): (40000, 50000)}
+        self.assertEqual(judge_behaviour(base_verdict(pure), FakeRun(health_values(pure, moved_apart)), pure).status,
+                         'alert')
+
+    def test_floor_mutant_without_raise_or_raising_higher_unit_alerts(self):
+        floored = self.floor_exp
+        no_floor = {('treatment', 'start', CASTER): (80000, 100000),
+                    ('treatment', 'start', 'ally'): (10000, 50000),
+                    ('treatment', 'start', 'bystander'): (30000, 60000),
+                    ('treatment', 'end', CASTER): (20000, 100000),
+                    ('treatment', 'end', 'ally'): (40000, 50000),
+                    ('treatment', 'end', 'bystander'): (30000, 60000)}
+        self.assertEqual(judge_behaviour(base_verdict(floored), FakeRun(health_values(floored, no_floor)),
+                                         floored).status, 'alert')
+        both_below = {('treatment', 'start', CASTER): (10000, 100000),
+                      ('treatment', 'start', 'ally'): (10000, 50000),
+                      ('treatment', 'start', 'bystander'): (30000, 60000),
+                      ('treatment', 'end', CASTER): (20000, 100000),
+                      ('treatment', 'end', 'ally'): (20000, 50000),
+                      ('treatment', 'end', 'bystander'): (30000, 60000)}
+        self.assertEqual(judge_behaviour(base_verdict(floored), FakeRun(health_values(floored, both_below)),
+                                         floored).status, 'ok')
+        raised_both = {**both_below, ('treatment', 'end', CASTER): (40000, 100000)}
+        self.assertEqual(judge_behaviour(base_verdict(floored), FakeRun(health_values(floored, raised_both)),
+                                         floored).status, 'alert')
+
+    def test_gated_health_swap_checks_control_phase_stays_unchanged(self):
+        run.validate(self.gated_scenario)
+        expectation = self.gated_exp
+        base_readings = {('control', 'start', CASTER): (60000, 100000),
+                         ('control', 'start', 'ally'): (40000, 50000),
+                         ('control', 'start', 'bystander'): (25000, 50000),
+                         ('control', 'end', CASTER): (60000, 100000),
+                         ('control', 'end', 'ally'): (40000, 50000),
+                         ('control', 'end', 'bystander'): (25000, 50000),
+                         ('treatment', 'start', CASTER): (60000, 100000),
+                         ('treatment', 'start', 'ally'): (40000, 50000),
+                         ('treatment', 'start', 'bystander'): (25000, 50000),
+                         ('treatment', 'end', CASTER): (80000, 100000),
+                         ('treatment', 'end', 'ally'): (30000, 50000),
+                         ('treatment', 'end', 'bystander'): (25000, 50000)}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(health_values(expectation, base_readings)),
+                                         expectation).status, 'ok')
+        leaked = {**base_readings, ('control', 'end', CASTER): (80000, 100000)}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(health_values(expectation, leaked)),
+                                         expectation).status, 'alert')
+
+    def test_close_starting_percentages_return_unmeasured_and_invalid_layouts_are_refused(self):
+        from kinds.ally_heal_reach import ally_heal_reach_spec
+        expectation = self.pure_exp
+        too_close = {('treatment', 'start', CASTER): (60000, 100000),
+                     ('treatment', 'start', 'ally'): (31000, 50000),
+                     ('treatment', 'start', 'bystander'): (25000, 50000),
+                     ('treatment', 'end', CASTER): (62000, 100000),
+                     ('treatment', 'end', 'ally'): (30000, 50000),
+                     ('treatment', 'end', 'bystander'): (25000, 50000)}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(health_values(expectation, too_close)),
+                                         expectation).status, 'unmeasured')
+        for bad in ({'levelled': [CASTER, 'ally', 'bystander']},
+                    {'levelled': [CASTER, CASTER]},
+                    {'apart': ['ally']},
+                    {'tolerance': 0},
+                    {'floor_pct': 120},
+                    {'floor_pct': 20, 'floor_from_effect': True},
+                    {'floor_from_effect': True, 'floor_effect': 5}):
+            entry = {**SWAP_PURE_ENTRY, 'checks': [{**SWAP_PURE_ENTRY['checks'][0], **bad}]}
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                ally_heal_reach_spec(entry)
+        equal_start = {**SWAP_PURE_ENTRY, 'caster_health': [80000, 100000]}
+        with self.assertRaises(ValueError):
+            ally_heal_reach_spec(equal_start)
+
+
 if __name__ == '__main__':
     unittest.main()

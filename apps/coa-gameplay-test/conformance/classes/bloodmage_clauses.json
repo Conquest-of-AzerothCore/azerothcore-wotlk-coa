@@ -2764,14 +2764,15 @@
       {
         "claim": "Reduce all damage taken by $s2%",
         "labels": [
-          "681190 effect_value e1 #0",
-          "681190 aura_amount e1 #0"
+          "681190 behaviour_hit_ratio damage_taken_physical",
+          "681190 behaviour_hit_ratio damage_taken_holy"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "681190 aura_duration_ms #1"
+          "681190 behaviour_cast_applies_aura duration",
+          "681190 behaviour_expiry duration"
         ]
       }
     ],
@@ -2784,12 +2785,15 @@
       {
         "claim": "will instantly heal you for $681189s1% of your maximum health",
         "labels": [
-          "681190 effect_value 681189e0 #2"
+          "681190 behaviour_metric_delta heal_amount"
         ]
       },
       {
         "claim": "taking damage that would reduce your health below 10%",
-        "labels": []
+        "labels": [
+          "681190 behaviour_metric_delta threshold_below",
+          "681190 behaviour_metric_delta threshold_above"
+        ]
       }
     ],
     "kind": "claim"
@@ -2797,7 +2801,9 @@
   {
     "spell": 681190,
     "clause": "Can only occur once.",
-    "labels": [],
+    "labels": [
+      "681190 behaviour_metric_delta once_per_aura"
+    ],
     "kind": "claim"
   },
   {
@@ -3534,14 +3540,18 @@
   {
     "spell": 705734,
     "clause": "Swap health percentages with an ally.",
-    "labels": [],
+    "labels": [
+      "705734 behaviour_metric_delta swap_above_floor",
+      "705734 behaviour_metric_delta swap_floor"
+    ],
     "kind": "claim"
   },
   {
     "spell": 705734,
     "clause": "Increases the lower health percentage of the two to $s1%, if below that amount.",
     "labels": [
-      "705734 effect_value e0 #0"
+      "705734 behaviour_metric_delta swap_floor",
+      "705734 behaviour_metric_delta swap_above_floor"
     ],
     "kind": "claim"
   },
@@ -5663,13 +5673,17 @@
   {
     "spell": 1200012,
     "clause": "Sacrifice 90% of your own health to carve a large blood rune into the ground.",
-    "labels": [],
+    "labels": [
+      "1200012 behaviour_metric_delta health_sacrifice"
+    ],
     "kind": "claim"
   },
   {
     "spell": 1200012,
     "clause": "Once allies are inside, they may help summon party and raid members to your current location.",
-    "labels": [],
+    "labels": [
+      "1200012 behaviour_metric_delta summon_ritual"
+    ],
     "kind": "claim"
   }
 ]
