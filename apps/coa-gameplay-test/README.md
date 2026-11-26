@@ -399,7 +399,7 @@ case (an omitted field is disabled) and is likewise run exclusively. Its optiona
 `AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional `chat_log: true`
 turns `CoA.ChatLog.Enable` on for that case and back to the configured state when it ends, and is likewise run
 exclusively; with it, `chat_log_max_pending` (1-1000000) sets `CoA.ChatLog.MaxPendingRows` for the case. Optional `battleground_kill_xp: true` turns `Battleground.GiveXPForKills` on for that case in the same
-way, and is likewise run exclusively. Optional
+way, and is likewise run exclusively. Optional `max_player_level` (1-255) sets `MaxPlayerLevel` for that case and restores it when the case ends, and is likewise run exclusively. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
 the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops

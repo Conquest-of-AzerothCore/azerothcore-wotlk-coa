@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Tinker: Gatling Gun is in the Mechanics tab, not General (#13642)",
+  "contract": [
+    "Issue #13642. Gatling Gun (500213) is learned with Build: Mechsuit (801384, SkillLineAbility row 87469,",
+    "SkillLine 102 Mechanics) and had no SkillLineAbility row, so the client filed it under General while every",
+    "other Mechsuit ability (801384, 801387, 805372, 801389) sits in SkillLine 102. Row 845, a duplicate of row",
+    "12779 (Explosive Trap 13813, SkillLine 50) that differs only in MinSkillLineRank, is repurposed for 500213 at",
+    "SkillLine 102, and the client patch streams that row after Gatling Gun is learned through Build: Mechsuit.",
+    "Explosive Trap keeps SkillLine 50 through its twin rows 12779 and 10131."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {"id": "tinker", "race": 1, "class": 28, "level": 80}
+  ],
+  "steps": [
+    {"action": "assert", "actor": "tinker", "metric": "skill_line_for_spell", "spell": 801384, "equals": 102,
+     "label": "CONTROL: Build: Mechsuit is in the Mechanics line"},
+    {"action": "assert", "actor": "tinker", "metric": "skill_line_for_spell", "spell": 13813, "equals": 50,
+     "label": "CONTROL: row 845's old spell keeps its line through the twin rows"},
+    {"action": "assert", "actor": "tinker", "metric": "skill_line_for_spell", "spell": 500213, "equals": 102,
+     "label": "DISCRIMINATING: Gatling Gun carries the Mechanics line"},
+    {"action": "assert", "actor": "tinker", "metric": "knows_spell", "spell": 500213, "equals": 0,
+     "label": "SETUP: Gatling Gun is not yet known before Build: Mechsuit"},
+    {"action": "learn", "actor": "tinker", "spell": 801384,
+     "label": "learn Build: Mechsuit so Tinker refresh teaches Gatling Gun"},
+    {"action": "assert", "actor": "tinker", "metric": "knows_spell", "spell": 500213, "equals": 1,
+     "within_ms": 5000, "label": "SETUP: Gatling Gun is taught with Build: Mechsuit"},
+    {"action": "assert", "actor": "tinker", "metric": "skill_line_after_learned", "spell": 500213, "equals": 1,
+     "within_ms": 5000, "label": "DISCRIMINATING: the row follows the learn announcement"},
+    {"action": "assert", "actor": "tinker", "metric": "skill_line_ability", "spell": 500213, "equals": 102,
+     "within_ms": 5000, "label": "DISCRIMINATING: the client patch carries SkillLine 102 for Gatling Gun"}
+  ]
+}

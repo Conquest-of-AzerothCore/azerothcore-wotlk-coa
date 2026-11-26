@@ -335,10 +335,17 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32 diff) override
     {
-        if (player->GetSession()->IsHeadlessBot() || !player->IsInWorld() || player->IsQuestLogExtended())
+        if (player->GetSession()->IsHeadlessBot() || !player->IsInWorld())
             return;
 
         OverflowView* view = player->CustomData.Get<OverflowView>(ViewKey);
+        if (player->IsQuestLogExtended())
+        {
+            if (view)
+                CloseWindow(player, *view);
+            return;
+        }
+
         if (!view && !player->HasOverflowQuests())
             return;
 
@@ -366,6 +373,13 @@ public:
     }
 
 private:
+    static void CloseWindow(Player* player, OverflowView const& view)
+    {
+        if (!view.Sent.empty() || view.WindowCodeSent)
+            SendAddon(player, "EMPTY");
+        player->CustomData.Erase(ViewKey);
+    }
+
     static void Refresh(Player* player, OverflowView& view, bool force)
     {
         std::vector<std::string> messages = BuildMessages(player);
@@ -403,6 +417,8 @@ private:
 
         if (window)
             Refresh(player, *player->CustomData.GetDefault<OverflowView>(ViewKey), action == "LIST");
+        else if (action == "LIST")
+            SendAddon(player, "EMPTY");
     }
 };
 }

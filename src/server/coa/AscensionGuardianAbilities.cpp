@@ -116,10 +116,6 @@ class spell_ascension_guardian_ability : public SpellScript
         }
         if (GetSpellInfo()->Id == 802629 && !GetCaster()->HasAura(707138))
             return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
-        if (GetSpellInfo()->Id == 802629)
-            for (auto const& pair : GetCaster()->ToPlayer()->GetSpellMap())
-                if (AscensionGuardian::HeavyBlow(pair.first) && GetCaster()->ToPlayer()->GetSpellCooldownDelay(pair.first))
-                    return SPELL_FAILED_NOT_READY;
         return SPELL_CAST_OK;
     }
 

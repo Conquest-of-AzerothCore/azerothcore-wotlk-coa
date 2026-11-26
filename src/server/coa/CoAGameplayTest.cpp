@@ -73,6 +73,7 @@
 #include "Player.h"
 #include "ReputationMgr.h"
 #include "QuestDef.h"
+#include "QuestLogExtended.h"
 #include "QueryCallback.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -711,6 +712,32 @@ private:
     uint32 _original;
 };
 
+uint32 StartupMaxPlayerLevel()
+{
+    static uint32 const level = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    return level;
+}
+
+class MaxPlayerLevelConfig
+{
+public:
+    explicit MaxPlayerLevelConfig(uint32 level) : _original(sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL))
+    {
+        sWorld->setIntConfig(CONFIG_MAX_PLAYER_LEVEL, level);
+    }
+
+    MaxPlayerLevelConfig(MaxPlayerLevelConfig const&) = delete;
+    MaxPlayerLevelConfig& operator=(MaxPlayerLevelConfig const&) = delete;
+
+    ~MaxPlayerLevelConfig()
+    {
+        sWorld->setIntConfig(CONFIG_MAX_PLAYER_LEVEL, _original);
+    }
+
+private:
+    uint32 _original;
+};
+
 struct CaseAccounts
 {
     std::vector<std::string> accounts;
@@ -1300,6 +1327,7 @@ struct Actor
     uint32 challengeStartResponses = 0;
     uint32 challengeStartLastCode = 0;
     std::map<uint64, std::map<uint16, uint32>> unitValues;
+    std::map<uint16, uint32> questLogSentAtExtendedState;
     std::map<uint32, uint32> creatureQueryRank;
     std::map<uint32, std::vector<uint32>> creatureQueryQuestItems;
     std::map<uint32, uint32> clientCastTimeMs;
@@ -1700,6 +1728,18 @@ std::unordered_map<uint32, uint32> const& NativeCustomAttrRowIds()
 void ObservePacket(Actor& actor, WorldPacket const& packet)
 {
     ObserveExtensionPacket(actor, packet);
+    if (packet.GetOpcode() == QuestLogExtended::StateOpcode)
+    {
+        actor.questLogSentAtExtendedState.clear();
+        auto const self = actor.unitValues.find(actor.guid.GetRawValue());
+        if (self != actor.unitValues.end())
+            for (uint16 slot = 0; slot < NATIVE_QUEST_LOG_SIZE; ++slot)
+            {
+                auto const value = self->second.find(PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET + QUEST_ID_OFFSET);
+                if (value != self->second.end())
+                    actor.questLogSentAtExtendedState[slot] = value->second;
+            }
+    }
     if (packet.GetOpcode() == SMSG_CHAR_CREATE && packet.size() == sizeof(uint8))
         actor.charCreateResult = packet.read<uint8>(0);
     if (packet.GetOpcode() == SMSG_STABLE_RESULT && packet.size() == sizeof(uint8))
@@ -2373,6 +2413,12 @@ public:
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
                 "Invalid quest log size");
             _questLogSize.emplace(*questLogSize);
+        }
+        if (auto maxPlayerLevel = _scenario.get_optional<uint32>("max_player_level"))
+        {
+            Require(*maxPlayerLevel >= 1 && *maxPlayerLevel <= StartupMaxPlayerLevel(),
+                "Invalid max player level");
+            _maxPlayerLevel.emplace(*maxPlayerLevel);
         }
         _report.put("schema", 1);
         _report.put("run_id", _runId);
@@ -7272,6 +7318,12 @@ private:
             }
             return -1.0;
         }
+        if (metric == "quest_log_sent_slot_at_extended_state")
+        {
+            auto const& sent = _actors.at(step.get<std::string>("actor")).questLogSentAtExtendedState;
+            auto const found = sent.find(uint16(step.get<uint32>("slot")));
+            return found == sent.end() ? -1.0 : double(found->second);
+        }
         if (metric == "quest_poi_count")
             return QuestPoiCount(_actors.at(step.get<std::string>("actor")), step.get<uint32>("quest"));
         if (metric == "quest_log_has_room")
@@ -9965,6 +10017,7 @@ private:
     std::optional<ChatLogConfig> _chatLog;
     std::optional<BattlegroundKillXpConfig> _battlegroundKillXp;
     std::optional<QuestLogSizeConfig> _questLogSize;
+    std::optional<MaxPlayerLevelConfig> _maxPlayerLevel;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;
     std::optional<PlacementAuditTotals> _placementAudit;
@@ -10021,6 +10074,7 @@ public:
             return;
 
         _enabled = true;
+        StartupMaxPlayerLevel();
         _started = Clock::now();
         ProcCounter::Begin();
         AuraApplyCounter::Begin();

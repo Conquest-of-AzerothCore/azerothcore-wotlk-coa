@@ -96,7 +96,8 @@ class aura_ascension_venomancer_event : public AuraScript
             case 706030: return damage && periodic && Chance(player,id);
             case 706035: return (damage || healing) && critical && Chance(player,id,5000);
             case 706271: return damage && periodic && Chance(player,id,2000);
-            case 706938: return healing && Named(info,504342);
+            case 706938: return event.GetHealInfo() && event.GetHealInfo()->GetHeal() &&
+                !(event.GetTypeMask() & TAKEN_HIT_PROC_FLAG_MASK) && Named(info,504342);
             case 707224: return damage && Named(info,804986);
             case 707233: return damage && periodic && (!info || info->Id != 707234) && Chance(player,id);
             case 707382: return damage && critical && info && info->Id == 504705;

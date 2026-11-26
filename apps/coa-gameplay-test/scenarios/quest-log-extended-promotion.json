@@ -1,8 +1,8 @@
 {
   "schema": 1,
-  "name": "Quest log: promotion clears the overflow slot in 0x8F7 the same tick (PromotionClearsOverflowSlotSameTick)",
+  "name": "Quest log: promotion clears the overflow slot in 0x8F7 only after the native slot holds the quest",
   "contract": [
-    "With Quests.LogSize 64 and 26 quests, slot 25 holds the 26th quest (318); after HELLO (0x8F6) the client has the 0x8F7 snapshot. Abandoning client slot 3 promotes the overflow quest into it, and exactly one 0x8F7 delta clears slot 25 (questId 0) within 1000 ms."
+    "With Quests.LogSize 64 and 26 quests, slot 25 holds the 26th quest (318); after HELLO (0x8F6) the client has the 0x8F7 snapshot. Abandoning client slot 3 promotes the overflow quest into it, and exactly one 0x8F7 delta clears slot 25 (questId 0) within 1000 ms. When that delta arrives, the client has already received quest 318 in native slot 3 through SMSG_UPDATE_OBJECT, so the quest is never absent from every slot."
   ],
   "timeout_ms": 90000,
   "quest_log_size": 64,
@@ -263,6 +263,14 @@
       "offset": 5,
       "within_ms": 1000,
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The client already had quest 318 in native slot 3 when the clearing 0x8F7 arrived",
+      "actor": "hero",
+      "metric": "quest_log_sent_slot_at_extended_state",
+      "slot": 3,
+      "equals": 318
     },
     {
       "action": "assert",

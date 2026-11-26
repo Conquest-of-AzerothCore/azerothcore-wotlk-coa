@@ -77,12 +77,15 @@ void Scale(Creature* unit, Player* player)
 bool EngagedTarget(Creature* summon, Player* player, Unit* target)
 {
     return target && target->IsAlive() && player->IsValidAttackTarget(target) && player->IsInCombatWith(target) &&
-           summon->IsWithinDistInMap(target, 40.0f) && !target->HasBreakableByDamageCrowdControlAura();
+           summon->IsWithinDistInMap(target, 40.0f) && summon->IsWithinLOSInMap(target) &&
+           !target->HasBreakableByDamageCrowdControlAura();
 }
 Unit* CombatTarget(Creature* summon, Player* player)
 {
     if (Unit* target = player->GetVictim(); EngagedTarget(summon, player, target))
         return target;
+    if (Unit* selected = player->GetSelectedUnit(); EngagedTarget(summon, player, selected))
+        return selected;
     Unit* nearest = nullptr;
     auto consider = [&](Unit* candidate)
     {
@@ -97,7 +100,8 @@ Unit* CombatTarget(Creature* summon, Player* player)
         return nearest;
     if (Unit* helper = summon->getAttackerForHelper();
         helper && helper->IsAlive() && player->IsValidAttackTarget(helper) &&
-        summon->IsWithinDistInMap(helper, 40.0f) && !helper->HasBreakableByDamageCrowdControlAura())
+        summon->IsWithinDistInMap(helper, 40.0f) && summon->IsWithinLOSInMap(helper) &&
+        !helper->HasBreakableByDamageCrowdControlAura())
         return helper;
     for (auto const& [guid, reference] : player->GetCombatManager().GetPvECombatRefs())
         if (!reference->IsSuppressedFor(player))

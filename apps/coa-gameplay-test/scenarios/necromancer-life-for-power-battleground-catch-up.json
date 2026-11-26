@@ -1,0 +1,697 @@
+{
+  "schema": 1,
+  "name": "Necromancer: Life For Power shield is not rescaled by the widened battleground catch-up",
+  "contract": "A level 12 Undead Necromancer (nec) and a level 29 Orc Warrior (mate) of the Horde enter a Warsong Gulch of the 10-29 bracket against two level 29 Human Warriors (a1, a2). The widened bracket lifts nec's health and multiplies its damage, healing and absorbs by the ratio of lifted to own health, where a player's health is basehealth + 20 + 10 per Stamina above 20. From player_class_stats (CoA.ClassLevelSixtyStats.Enable defaults to 0, so ascension_class_stats is not joined; the Undead race Stamina modifier is 0): Necromancer level 12 BaseHP 170 and Stamina 30 give 170 + 20 + 100 = 290; level 29 BaseHP 393 and Stamina 41 give 393 + 20 + 210 = 623. The ratio is 623 / 290 = 2.14828 and the maximum health gain is 223 base health + 11 Stamina x 10 = 333. Life For Power (705746) converts 20% of each heal taken into the shield 707194, recast with the stored amount plus the new piece and capped at maximum health before the cast. The converted piece already carries the ratio through the heal it comes from, so the shield spell itself is never scaled again: scaled_output nec to nec with 1000 healing and spell 707194 gives 1000, while an ordinary self heal (Flash Heal 2061) gives round(1000 x 2.14828) = 2148. Greater Heal 25213 (coa-dbc-viewer record: EffectBasePoints 1247, EffectDieSides 218, BaseLevel 68, ManaCostPercentage 32) heals at least 1248 before the ratio for a caster below its base level and costs 32% of the level 12 base mana 218 = 70, so nec's mana is set to 200 before each cast. Warsong Gulch autocasts PvP - Battleground - Dampening 74411 (spell_area 3277), whose effects lower healing taken (aura 136) and absorb amounts (aura 317) by 20% (EffectBasePoints -21). One heal therefore heals at least 1248 x 0.8 x 2.148 = 2145 and converts at least 428, more than the room left after the first shield, so from the second heal on each recast carries stored + room = maximum health and Dampening leaves int(0.8 x maximum health): after twelve heals the shield holds between 0.799 and 0.8 of maximum health. With the shield scaled again on each recast, the first heal alone produced about 428 x 0.8 x 2.148 = 735, above the lifted maximum health of 623; the shield must never exceed it after any heal. No assertion depends on a critical heal or another random roll: a critical heal only converts more, and the cap bounds it.",
+  "timeout_ms": 300000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "nec",
+      "race": 5,
+      "class": 23,
+      "level": 12
+    },
+    {
+      "id": "mate",
+      "race": 2,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "a1",
+      "race": 1,
+      "class": 1,
+      "level": 29
+    },
+    {
+      "id": "a2",
+      "race": 1,
+      "class": 1,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "nec",
+      "metric": "max_health",
+      "save_as": "nec_health"
+    },
+    {
+      "action": "client_packet",
+      "actor": "nec",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "mate",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "a1",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "a2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        {
+          "u64": 0
+        },
+        {
+          "u32": 2
+        },
+        {
+          "u32": 0
+        },
+        {
+          "u8": 0
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "nec is invited to the 10-29 bracket",
+      "actor": "nec",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "mate is invited to the 10-29 bracket",
+      "actor": "mate",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "a1 is invited to the 10-29 bracket",
+      "actor": "a1",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "a2 is invited to the 10-29 bracket",
+      "actor": "a2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "nec",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "nec"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "nec enters Warsong Gulch",
+      "actor": "nec",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "mate",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "mate"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "mate enters Warsong Gulch",
+      "actor": "mate",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "a1",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "a1"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "a1 enters Warsong Gulch",
+      "actor": "a1",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "a2",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 0
+        },
+        {
+          "invited_battleground_type": "a2"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "a2 enters Warsong Gulch",
+      "actor": "a2",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "teleport",
+      "label": "nec meets the others outdoors",
+      "actor": "nec",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "mate meets the others outdoors",
+      "actor": "mate",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "a1 meets the others outdoors",
+      "actor": "a1",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "teleport",
+      "label": "a2 meets the others outdoors",
+      "actor": "a2",
+      "map": 489,
+      "x": 1304.63,
+      "y": 1455.89,
+      "z": 317.694,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "nec has the Necromancer output ratio 623 / 290",
+      "actor": "nec",
+      "metric": "battleground_output_ratio",
+      "min": 2.1478,
+      "max": 2.1488,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "nec maximum health rises by 223 base health and 11 Stamina (333)",
+      "actor": "nec",
+      "metric": "max_health",
+      "relative_to": "nec_health",
+      "equals": 333,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "the Life For Power shield spell is never scaled again",
+      "actor": "nec",
+      "metric": "scaled_output",
+      "target": "nec",
+      "amount": 1000,
+      "spell": 707194,
+      "healing": true,
+      "equals": 1000
+    },
+    {
+      "action": "assert",
+      "label": "an ordinary self heal still scales to 2148",
+      "actor": "nec",
+      "metric": "scaled_output",
+      "target": "nec",
+      "amount": 1000,
+      "spell": 2061,
+      "healing": true,
+      "equals": 2148
+    },
+    {
+      "action": "learn",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "set_aura",
+      "spell": 705746,
+      "stacks": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "snapshot",
+      "metric": "max_health",
+      "save_as": "mh",
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 1: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 2: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 3: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 4: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 5: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 6: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 7: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 8: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 9: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 10: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 11: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "set_power",
+      "power": 0,
+      "value": 200,
+      "actor": "nec"
+    },
+    {
+      "action": "cast",
+      "spell": 25213,
+      "actor": "nec"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "assert",
+      "label": "heal 12: the shield never exceeds lifted maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "max": 1,
+      "actor": "nec"
+    },
+    {
+      "action": "assert",
+      "label": "twelve heals fill the shield to the Dampening share of maximum health",
+      "metric": "aura_amount",
+      "spell": 707194,
+      "ratio_to": "mh",
+      "min": 0.799,
+      "max": 0.8,
+      "actor": "nec"
+    }
+  ]
+}

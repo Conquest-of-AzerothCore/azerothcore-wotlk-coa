@@ -42,6 +42,7 @@
 #include "ScriptedGossip.h"
 #include "SpellMgr.h"
 #include "TemporarySummon.h"
+#include "World.h"
 #include "WorldSession.h"
 
 #include <algorithm>
@@ -278,11 +279,14 @@ namespace
 
         uint8 const classId = uint8(player->getClass());
         uint32 const spec = ActiveSpec(player);
+        uint32 const maxPlayerLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
 
-        auto add = [&rows, classId, windowView, player, spec](uint32 spellId, uint8 requiredLevel,
+        auto add = [&rows, classId, windowView, player, spec, maxPlayerLevel](uint32 spellId, uint8 requiredLevel,
                                                 uint32 requiredAbility)
         {
             if (!spellId || !sSpellMgr->GetSpellInfo(spellId))
+                return;
+            if (windowView && requiredLevel > maxPlayerLevel)
                 return;
             if (!AscensionFelsworn::CanLearnRift(player, spellId))
                 return;
@@ -639,6 +643,15 @@ namespace
         return false;
     }
 
+    bool ExceedsMaxPlayerLevel(Player *player, uint32 spellId)
+    {
+        uint32 const maxPlayerLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+        for (Row const &row : BuildRows(player, false))
+            if (row.SpellId == spellId)
+                return row.RequiredLevel > maxPlayerLevel;
+        return false;
+    }
+
     /// A purchase from the window. Returns true when the packet belonged to a book, whether
     /// or not the ability was granted.
     bool HandlePurchase(Player *player, WorldPacket const &packet)
@@ -676,6 +689,7 @@ namespace
                 AscensionTrainerProficiency::ReplacedByTalent(player, wanted) ||
                 IsTreeSpell(uint32(player->getClass()), wanted) ||
                 HasRankOrBetter(player, wanted) ||
+                ExceedsMaxPlayerLevel(player, wanted) ||
                 (player->getClass() == CLASS_GUARDIAN && AscensionGuardian::Ballad(wanted)))
             {
                 WorldPacket failed(SMSG_TRAINER_BUY_FAILED);

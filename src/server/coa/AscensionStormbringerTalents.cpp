@@ -68,7 +68,8 @@ enum StormbringerTalentSpells : uint32
     SPELL_CONDUCTIVE_PASSIVE = 92098,
     SPELL_CONDUCTIVE = 567559,
     SPELL_CONDUCTION = 567560,
-    SPELL_AEROBLAST_ECHO = 802750
+    SPELL_AEROBLAST_ECHO = 802750,
+    SPELL_CHARGE = 804826
 };
 
 constexpr int32 ASCENSION_SPELLMOD_BONUS_MULTIPLIER = 41;
@@ -241,6 +242,12 @@ public:
             (IsConjureStorm(info) || IsUpdraft(info)) &&
             !spell->IsTriggered() && player->HasSpell(SPELL_CONJURATION_MASTERY))
             player->CastSpell(player, SPELL_REFUND_STATIC_10, true);
+
+        if (player && !spell->IsTriggered() && spell->GetCastTime() > 0 &&
+            (info->DmgClass == SPELL_DAMAGE_CLASS_MAGIC ||
+                info->HasAttribute(SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC)) &&
+            player->HasAura(SPELL_CHARGE))
+            player->RemoveAurasDueToSpell(SPELL_CHARGE);
     }
 
     void OnSpellHitResult(Spell* spell, Unit* target, uint8 miss, uint32 damage, uint32, bool critical) override
