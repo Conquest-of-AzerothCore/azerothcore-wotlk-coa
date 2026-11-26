@@ -157,7 +157,15 @@ int main() {
     }
     others[0].best = 1;
     check(ValidateEnter(&leader,1) == nullptr, "Leader 100/member 1 can enter depth 1");
-    check(ValidateEnter(&leader,100) != nullptr, "Leader cannot bypass the least-progressed member");
+    check(ValidateEnter(&leader,100) == nullptr, "Leader progress alone unlocks depth 100 for a less-progressed member");
+    others[0].best = 0;
+    check(ValidateEnter(&leader,100) == nullptr, "Member without any progress follows the leader");
+    others[0].best = 1;
+    leader.best = 1;
+    others[1].best = 100;
+    check(ValidateEnter(&leader,100) != nullptr, "Member progress cannot unlock a depth the leader has not reached");
+    leader.best = 100;
+    others[1].best = 100;
     others[0].online = false;
     check(ValidateEnter(&leader,1) != nullptr, "Offline member blocked");
     others[0].online = true; others[0].combat = true;
