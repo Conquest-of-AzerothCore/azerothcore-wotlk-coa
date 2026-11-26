@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Native item scaling scales laddered shirt items (#13397)",
-  "contract": "#13397: NativeItemScaling::IsScalingItem gated on ItemScaling::LiftableEntry, which called EligibleItem and rejected INVTYPE_BODY (4, shirts) even when the shirt had a scaling ladder in ItemStat.dbc. Quest 258 (A Hunter's Challenge) rewards Fine Cloth Shirt 859 (INVTYPE_BODY, ItemLevel 12, laddered in ItemStat.dbc) as choice 0. Expected: a level 39 character with scaling on receives shirt 859 with a non-zero stored scaling level (min 1) and can equip it, while a level 39 character with scaling off receives shirt 859 with scaling level 0.",
+  "contract": "#13397: NativeItemScaling::IsScalingItem gated on ItemScaling::LiftableEntry, which called EligibleItem and rejected INVTYPE_BODY (4, shirts) even when the shirt had a scaling ladder in ItemStat.dbc. Quest 258 (A Hunter's Challenge) rewards Fine Cloth Shirt 859 (INVTYPE_BODY, ItemLevel 12, laddered in ItemStat.dbc) as choice 0. In QuestTemplateScaling.dbc, quest 258 has MinLevel 17, MaxLevel 60, and highest threshold <= 39 at level 21 with offset -4, giving curve level clamp(39 - 4, 17, 60) = 35. Expected: a level 39 character with scaling on receives shirt 859 with stored scaling level 35 and can equip it, while a level 39 character with scaling off receives shirt 859 with scaling level 0.",
   "timeout_ms": 60000,
   "players": [
     { "id": "scaled", "race": 1, "class": 1, "level": 39 },
@@ -16,7 +16,7 @@
     { "action": "reward_quest", "actor": "scaled", "quest": 258, "choice": 0 },
     { "action": "assert", "actor": "scaled", "metric": "quest_rewarded", "quest": 258, "equals": 1 },
     { "action": "assert", "label": "The scaled player receives shirt 859", "actor": "scaled", "metric": "item_count", "item": 859, "equals": 1 },
-    { "action": "assert", "label": "DISCRIMINATING: native item scaling assigns a scaling level to shirt 859", "actor": "scaled", "metric": "carried_item_scaling_level", "item": 859, "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: native item scaling assigns quest 258 curve level 35 to shirt 859", "actor": "scaled", "metric": "carried_item_scaling_level", "item": 859, "equals": 35 },
     { "action": "equip", "actor": "scaled", "item": 859, "slot": 3 },
 
     { "action": "prepare_quest", "actor": "authored", "quest": 258 },
