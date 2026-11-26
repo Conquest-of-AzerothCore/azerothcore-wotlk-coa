@@ -13382,10 +13382,12 @@ bool Unit::IgnoresSpellMinRange(SpellInfo const* spellInfo) const
                 break;
             case IGNORE_MIN_RANGE_RANGED_ABILITIES:
                 // Ravager's old mask only names a subset of the current shots.
-                // Its description covers all ranged abilities, including the
-                // native auto-repeat shots that use another spell family.
-                if (shotRange || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED ||
-                    spellInfo->IsRangedWeaponSpell())
+                // Its description covers ranged abilities ("your ranged abilities",
+                // unlike Deadeye's "and Auto Shot"); exempting Auto Shot lets it
+                // fire in melee range and repeatedly reset melee swing timers.
+                if (!spellInfo->IsAutoRepeatRangedSpell() &&
+                    (shotRange || spellInfo->DmgClass == SPELL_DAMAGE_CLASS_RANGED ||
+                     spellInfo->IsRangedWeaponSpell()))
                     return true;
                 break;
             case IGNORE_MIN_RANGE_CLASS_MASK:

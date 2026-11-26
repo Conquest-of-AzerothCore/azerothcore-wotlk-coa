@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Primalist: Spirit of Life renders at normalized summon scale 0.4 (#12469)",
+  "contract": "Spirit of Life (creature 840002), summoned by Primordial Earth (806536 -> Spirits of Life 572853) and Eternally Chosen (802888 -> 572826), uses display 8824 whose CreatureDisplayInfo.dbc Scale is 2.5 on ModelID 141 (Ent.mdx, ~3.43 model units tall at scale 1.0). With creature_template_model.DisplayScale left at 1, each Spirit of Life rendered ~8.58 model units tall. Setting DisplayScale = 0.4 on creature_template_model (840002, Idx 0, CreatureDisplayID 8824) normalizes effective scale to 2.5 * 0.4 = 1.0 (~3.43 units, matching Druid Force of Nature Treant 1964 display 18922 on the same ModelID 141) without altering shared display 8824 or world mob 9601. Expected: casting 572853 summons Spirit of Life 840002 with display 8824 and owned_creature_scale 0.4.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "primalist",
+      "race": 2,
+      "class": 31,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "teleport", "actor": "primalist", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "learn", "actor": "primalist", "spell": 572853 },
+    { "action": "cast", "label": "Summon Spirit of Life", "actor": "primalist", "spell": 572853 },
+    { "action": "assert", "label": "SETUP: Spirits of Life summons a Spirit of Life", "actor": "primalist", "metric": "owned_creature_count", "entry": 840002, "min": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: Spirit of Life keeps its captured display 8824", "actor": "primalist", "metric": "owned_creature_display", "entry": 840002, "equals": 8824 },
+    { "action": "assert", "label": "DISCRIMINATING: Spirit of Life renders at DisplayScale 0.4 instead of 1.0", "actor": "primalist", "metric": "owned_creature_scale", "entry": 840002, "min": 0.399, "max": 0.401 }
+  ]
+}

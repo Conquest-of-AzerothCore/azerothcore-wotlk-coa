@@ -42,6 +42,7 @@
 #include "WeatherMgr.h"
 #include "WorldState.h"
 #include "WorldStatePackets.h"
+#include <algorithm>
 #include <limits>
 
 /// @todo: this import is not necessary for compilation and marked as unused by the IDE
@@ -858,7 +859,9 @@ void Player::RewardProfessionXP(uint32 skillId, uint32 current, uint32 gray, uin
         return !noBonusExperience || effect->GetAmount() <= 0;
     });
     double const reward = rates * auraMultiplier;
-    uint32 xp = static_cast<uint32>(std::min(reward, double(std::numeric_limits<uint32>::max())));
+    uint32 xp = reward > 0.0
+        ? std::max<uint32>(1u, static_cast<uint32>(std::min(reward, double(std::numeric_limits<uint32>::max()))))
+        : 0;
     sScriptMgr->OnPlayerGiveXP(this, xp, nullptr, XPSOURCE_PROFESSION);
     GiveXP(xp, nullptr, 1.0f, false, XPSOURCE_PROFESSION);
 }
