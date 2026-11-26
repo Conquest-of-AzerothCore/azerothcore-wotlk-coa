@@ -29,6 +29,10 @@
       "action": "assert", "label": "CONTROL: Bent Staff displays Apprentice's Staff transmog", "actor": "angler",
       "metric": "visible_item", "slot": 15, "equals": 20978
     },
+    {
+      "action": "set_skill", "label": "SETUP: grant Fishing skill (356) required for fishing pole proficiency",
+      "actor": "angler", "skill": 356, "value": 1, "maximum": 75
+    },
     { "action": "equip", "actor": "angler", "item": 6256, "slot": 15 },
     {
       "action": "assert", "label": "SETUP: Fishing Pole is equipped in main hand", "actor": "angler",
