@@ -83,6 +83,12 @@ inline std::uint32_t Spare(std::uint32_t remaining, std::uint32_t inLog)
     return remaining > inLog ? remaining - inLog : 0;
 }
 
+inline bool CanRepeatDaily(std::uint32_t remaining, std::uint32_t inLog, bool heldInLog)
+{
+    std::uint32_t const others = heldInLog && inLog ? inLog - 1 : inLog;
+    return Spare(remaining, others) > 0;
+}
+
 inline std::uint32_t ScaledCost(std::uint32_t reward, double multiplier, std::uint32_t minimum, std::uint32_t maximum)
 {
     double const scaled = std::round(double(reward) * std::max(0.0, multiplier));

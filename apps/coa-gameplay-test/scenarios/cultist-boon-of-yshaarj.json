@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Boon of Y'shaarj grants max health from Intellect at both ranks (#965)",
-  "contract": "Spell.dbc 560080 (rank 1) and 561335 (rank 2) each carry two SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT (328) effects on STAT_INTELLECT (EffectMiscValueB=3): effect 0 with EffectMiscValue=POWER_MANA (0) and effect 1 with EffectMiscValue=POWER_HEALTH (-2), both EffectBasePoints 199/399 resolving (DieSides=1) to 200/400, matching the tooltip \"Increases the amount of mana and now health per point of Intellect by 200%/400%.\" AuraEffect::HandleAscensionModMaxManaFromStat (SpellAuraEffects.cpp) only recognized POWER_MANA and silently dropped the POWER_HEALTH effect, so max_health never moved on either rank while max_power already did. Since both effects share identical EffectBasePoints/DieSides/source stat, once the POWER_HEALTH branch is wired the same way as POWER_MANA, rank 2's max_health gain over baseline must be exactly double rank 1's (400% vs 200%), independent of the fixture's actual Intellect value.",
+  "contract": "Spell.dbc 560080 (rank 1) and 561335 (rank 2) each carry two SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT (328) effects on STAT_INTELLECT (EffectMiscValueB=3): effect 0 with EffectMiscValue=POWER_MANA (0) and effect 1 with EffectMiscValue=POWER_HEALTH (-2), both EffectBasePoints 199/399 resolving (DieSides=1) to 200/400, matching the tooltip \"Increases the amount of mana and now health per point of Intellect by 200%/400%.\" Under owner ruling Cultist Q-cu-24 / O-16 (2026-11-25, Cultist ADR 0021), Boon of Y'shaarj applies +200% (rank 1) and +400% (rank 2) to Cultist Intellect-to-mana scaling (45/75 mana per point above 20, 3/5 for the first 20) and to a base of 0.25 health per Intellect point (0.75 health/Int at rank 1, 1.25 health/Int at rank 2, 0 without the talent). Rank 2's max_health gain over baseline therefore stands in a 5/3 ratio (1.25 / 0.75 = 1.6667) to rank 1's, bounded [1.60, 1.75] to allow integer truncation while excluding the old 2.0 ratio.",
   "timeout_ms": 60000,
   "players": [
     { "id": "rank_one", "race": 1, "class": 25, "level": 40 },
@@ -43,9 +43,9 @@
       "relative_to": "health_before_r2", "min": 1, "within_ms": 1000
     },
     {
-      "action": "assert", "label": "Rank 2 (400%) grants exactly twice rank 1's (200%) max health bonus",
+      "action": "assert", "label": "Rank 2 (1.25 HP/Int) grants 5/3 of rank 1's (0.75 HP/Int) max health bonus",
       "actor": "rank_two", "metric": "max_health",
-      "relative_to": "health_before_r2", "ratio_to": "health_delta_r1", "min": 1.9, "max": 2.1
+      "relative_to": "health_before_r2", "ratio_to": "health_delta_r1", "min": 1.60, "max": 1.75
     }
   ]
 }

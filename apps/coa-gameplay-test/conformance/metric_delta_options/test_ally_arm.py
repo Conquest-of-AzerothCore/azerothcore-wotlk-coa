@@ -842,5 +842,108 @@ class AllyAttackAndStrikeTests(unittest.TestCase):
         self.assertEqual(off.status, 'alert')
 
 
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AllyArmAttackSwingsAndPerAllyHealthTests(unittest.TestCase):
+    PER_HEALTH = {'ally': [3000, 10000], 'ally2': [7000, 10000], 'ally3': [1000, 10000]}
+    AURAS = [[527023, 1, 'ally', 'caster'], [527023, 1, 'ally2', 'caster']]
+    AURA_PRESENT = {'actors': ['ally'], 'metric': 'aura', 'fields': {'spell': 527023}, 'before_expected': 1,
+                    'expected': 1, 'tolerance': 0, 'source': 'seeded aura on ally'}
+    MAX_HP_PRECOND = {'actors': ['ally'], 'metric': 'max_health', 'before_expected': 10000, 'expected': 10000,
+                      'tolerance': 0, 'source': 'seeded max health on ally', 'precondition': True}
+    OTHER_ZERO = {'actors': ['caster'], 'metric': 'spell_heal_count', 'fields': {'spell': 527023, 'target': 'ally2'},
+                  'before_expected': 0, 'expected': 0, 'tolerance': 0, 'source': 'higher-health ally gets 0 heals'}
+
+    def swing_entry(self, **ally_opts) -> dict:
+        base = {**parry_entry(), 'disable_regeneration': True, 'wait_ms': 200,
+                'ally_arm': {'allies': 3, 'ally_health': self.PER_HEALTH, 'ally_auras': self.AURAS,
+                             'arms': [self.AURA_PRESENT, self.MAX_HP_PRECOND, self.OTHER_ZERO], **ally_opts}}
+        return base
+
+    def test_per_ally_health_and_ally_auras_run_before_both_attack_swing_phases(self):
+        scenario, [expectation] = behaviour_scenario(templar(), self.swing_entry())
+        run.validate(scenario)
+        steps = scenario['steps']
+        attacks = [index for index, step in enumerate(steps) if step['action'] == 'attack']
+        self.assertEqual(len(attacks), 2)
+        healths = [(index, step['actor'], step['value'], step['maximum'])
+                   for index, step in enumerate(steps) if step['action'] == 'set_health']
+        self.assertEqual([(actor, val, mx) for _, actor, val, mx in healths],
+                         [('ally', 3000, 10000), ('ally2', 7000, 10000), ('ally3', 1000, 10000)] * 2)
+        auras = [(index, step['spell'], step['stacks'], step.get('target'), step.get('caster'))
+                 for index, step in enumerate(steps) if step['action'] == 'set_aura' and step['spell'] == 527023]
+        self.assertEqual([(sp, st, tgt, cst) for _, sp, st, tgt, cst in auras],
+                         [(527023, 1, 'ally', 'caster'), (527023, 1, 'ally2', 'caster')] * 2)
+        self.assertLess(max(idx for idx, *_ in healths[:3]), attacks[0])
+        self.assertLess(max(idx for idx, *_ in auras[:2]), attacks[0])
+        self.assertLess(attacks[0], min(idx for idx, *_ in healths[3:]))
+        self.assertLess(max(idx for idx, *_ in auras[2:]), attacks[1])
+        self.assertIn('per-ally health: ally to 3000 of 10000, ally2 to 7000 of 10000, ally3 to 1000 of 10000',
+                      scenario['contract'])
+        self.assertIn('sets ally auras [[527023, 1, \'ally\', \'caster\'], [527023, 1, \'ally2\', \'caster\']]',
+                      scenario['contract'])
+        self.assertEqual(expectation.model['ally_arm']['allies'], ['ally', 'ally2', 'ally3'])
+
+    def test_per_ally_health_and_ally_auras_also_work_in_cast_phases(self):
+        entry = ally_entry(ally_health={'ally': [3000, 10000], 'ally2': [7000, 10000]},
+                           ally_auras=[[527023, 1, 'ally', 'caster']])
+        scenario, _ = behaviour_scenario(templar(), entry)
+        run.validate(scenario)
+        healths = [(step['actor'], step['value']) for step in scenario['steps'] if step['action'] == 'set_health']
+        self.assertEqual(healths, [('ally', 3000), ('ally2', 7000)] * 2)
+        auras = [(step.get('target'), step.get('caster')) for step in scenario['steps']
+                 if step['action'] == 'set_aura' and step['spell'] == 527023]
+        self.assertEqual(auras, [('ally', 'caster')] * 2)
+
+    def test_judges_ok_mutant_wrong_ally_alert_and_missing_precondition_unmeasured(self):
+        _, [expectation] = behaviour_scenario(templar(), self.swing_entry())
+        model = expectation.model
+        arms = model['ally_arm']['arms']
+        ok_values = {model['before_label']: float(model['before_expected']),
+                     model['after_label']: float(model['expected']),
+                     arms[0]['before'][0]: 1.0, arms[0]['after'][0]: 1.0,
+                     arms[1]['before'][0]: 10000.0, arms[1]['after'][0]: 10000.0,
+                     arms[2]['before'][0]: 0.0, arms[2]['after'][0]: 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(ok_values), expectation).status, 'ok')
+        mutant_wrong_ally = {**ok_values, arms[2]['after'][0]: 2.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(mutant_wrong_ally), expectation).status,
+                         'alert')
+        mutant_missing_aura = {**ok_values, arms[0]['after'][0]: 0.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(mutant_missing_aura), expectation).status,
+                         'alert')
+        off_precond = {**ok_values, arms[1]['after'][0]: 9000.0}
+        self.assertEqual(judge_behaviour(base_verdict(expectation), FakeRun(off_precond), expectation).status,
+                         'unmeasured')
+
+    def test_plain_attack_swings_without_new_keys_stays_unchanged(self):
+        plain, [plain_exp] = behaviour_scenario(templar(), parry_entry())
+        self.assertFalse(any(step['action'] == 'set_health' for step in plain['steps']))
+        self.assertNotIn('per-ally health', plain['contract'])
+        self.assertNotIn('ally auras', plain['contract'])
+        self.assertNotIn('ally_arm', plain_exp.model)
+
+    def test_malformed_per_ally_health_and_ally_auras_are_refused(self):
+        bad = [
+            {'allies': 2, 'ally_health': {}},
+            {'allies': 2, 'ally_health': {'ally3': [3000, 10000]}},
+            {'allies': 2, 'ally_health': {'ally': [0, 10000]}},
+            {'allies': 2, 'ally_health': {'ally': [11000, 10000]}},
+            {'allies': 2, 'ally_health': {'ally': [True, 10000]}},
+            {'allies': 0, 'ally_health': {'ally': [3000, 10000]}, 'arms': [HEALTH_ARM]},
+            {'allies': 2, 'ally_auras': []},
+            {'allies': 2, 'ally_auras': [[527023, 1, 'ally']]},
+            {'allies': 2, 'ally_auras': [[0, 1, 'ally', 'caster']]},
+            {'allies': 2, 'ally_auras': [[527023, -1, 'ally', 'caster']]},
+            {'allies': 2, 'ally_auras': [[527023, 1, 'caster', 'caster']]},
+            {'allies': 0, 'ally_auras': [[527023, 1, 'ally', 'caster']], 'arms': [HEALTH_ARM]},
+        ]
+        for option in bad:
+            with self.subTest(option=option), self.assertRaises(ValueError):
+                parse(option)
+        for bad_unit in ('ally4', 'dummy'):
+            with self.subTest(unit=bad_unit), self.assertRaises(ValueError):
+                behaviour_scenario(templar(), steed_entry(ally_arm={
+                    'allies': 2, 'ally_auras': [[527023, 1, 'ally', bad_unit]]}))
+
+
 if __name__ == '__main__':
     unittest.main()

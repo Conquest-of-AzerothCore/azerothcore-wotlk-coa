@@ -105,6 +105,8 @@ class Workspace:
         self.runs = {}
         self.cast_failures = {}
         self.builds = {}
+        self.max_step_ms = '25'
+        self.class_file = CLASS_FILE
 
     def close(self):
         shutil.rmtree(self.root, ignore_errors=True)
@@ -131,8 +133,8 @@ class Workspace:
             self.builds[folder] = self.builds.pop(key)
 
     def manifest(self, known_modifiers=None, **base_overrides):
-        manifest = {'schema': 1, 'class_id': CLASS_FILE['class_id'], 'class_name': CLASS_FILE['name'],
-                    'level': CLASS_FILE['level'], 'class_file': CLASS_FILE, 'scenarios': self.scenarios,
+        manifest = {'schema': 1, 'class_id': self.class_file['class_id'], 'class_name': self.class_file['name'],
+                    'level': self.class_file['level'], 'class_file': self.class_file, 'scenarios': self.scenarios,
                     'known_modifiers': known_modifiers if known_modifiers is not None else
                     [{**asdict(CLASS_TUNING), 'base_points': -1, 'real_points_per_level': -0.4}]}
         path = self.root / 'out' / 'manifest.json'
@@ -145,7 +147,7 @@ class Workspace:
             every = [{'index': str(index), **step} for index, step in enumerate(base + steps)]
             commit, binary = self.builds.get(key, (WORKSPACE_COMMIT, WORKSPACE_BUILD))
             result = {'schema': '1', 'run_id': f'run-{key}', 'scenario': key, 'status': 'passed',
-                      'message': 'All assertions passed', 'max_step_ms': '25', 'steps': every,
+                      'message': 'All assertions passed', 'max_step_ms': self.max_step_ms, 'steps': every,
                       'server_version': f'AzerothCore rev. {commit} 2026-11-10 11:09:47 +0100 (test branch)'}
             if key in self.cast_failures:
                 result['cast_failures'] = self.cast_failures[key]
@@ -991,6 +993,86 @@ class CompareTest(unittest.TestCase):
                                   constant_reader(Displayed('$d', 20000.0, None, 'duration_ms')))
         self.assertEqual((verdicts[label].status, verdicts[label].low), ('ok', 19925.0))
 
+    def test_aura_duration_carry_in_is_opt_in_aura_only_and_preserves_one_percent_sensitivity(self):
+        from compare import AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY, aura_duration_map_update_carry_in
+        label = '1001 aura_duration_ms #0'
+        cd_label = '1001 cooldown_ms'
+
+        def judge_aura(expected_ms, actual_ms, max_step='1', opt_in=True, steps=None):
+            self.fresh()
+            self.workspace.max_step_ms = max_step
+            self.workspace.class_file = ({**CLASS_FILE, AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY: opt_in}
+                                         if opt_in is not None else CLASS_FILE)
+            run_steps = steps if steps is not None else [
+                plain_step('cast'), assert_step('1001 cast_failure', '0'), assert_step('1001 aura_present', '1'),
+                assert_step(label, str(actual_ms))]
+            verdicts = self.value_run(
+                [expectation(label, 'aura_duration_ms', '$d', 'read duration_ms')],
+                ['$d'], run_steps, constant_reader(Displayed('$d', float(expected_ms), None, 'duration_ms')))
+            return verdicts[label]
+
+        def judge_cooldown(expected_ms, actual_ms, max_step='1', opt_in=True):
+            self.fresh()
+            self.workspace.max_step_ms = max_step
+            self.workspace.class_file = ({**CLASS_FILE, AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY: opt_in}
+                                         if opt_in is not None else CLASS_FILE)
+            run_steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'),
+                         assert_step(cd_label, str(actual_ms))]
+            verdicts = self.value_run(
+                [expectation(cd_label, 'cooldown_ms', str(expected_ms), 'max(RecoveryTime, CategoryRecoveryTime)')],
+                [], run_steps, constant_reader())
+            return verdicts[cd_label]
+
+        default_v = judge_aura(15000, 14990, '1', opt_in=None)
+        false_v = judge_aura(15000, 14990, '1', opt_in=False)
+        self.assertEqual((default_v.status, default_v.low, default_v.high), ('alert', 14997.0, 15000.0))
+        self.assertEqual((false_v.status, false_v.low, false_v.high), ('alert', 14997.0, 15000.0))
+        self.assertNotIn('map-update carry-in', default_v.explanation)
+        self.assertEqual(default_v.explanation, false_v.explanation)
+
+        cd_v = judge_cooldown(15000, 14990, '1', opt_in=True)
+        self.assertEqual((cd_v.status, cd_v.low, cd_v.high), ('alert', 14998.0, 15000.0))
+        self.assertNotIn('map-update carry-in', cd_v.explanation)
+        self.assertEqual(judge_cooldown(500, 495, '1', opt_in=True).status, 'alert')
+
+        ok_502216 = judge_aura(15000, 14990, '1', opt_in=True)
+        self.assertEqual((ok_502216.status, ok_502216.low, ok_502216.high), ('ok', 14988.0, 15000.0))
+        self.assertIn('plus 9 ms map-update carry-in', ok_502216.explanation)
+        self.assertEqual(judge_aura(15000, 14988, '1', opt_in=True).status, 'ok')
+        self.assertEqual(judge_aura(15000, 14987, '1', opt_in=True).status, 'alert')
+        self.assertEqual(judge_aura(15000, 15001, '1', opt_in=True).status, 'alert')
+
+        one_step_8ms = judge_aura(15000, 14983, '8', opt_in=True,
+                                  steps=[plain_step('cast'), assert_step(label, '14983')])
+        self.assertEqual((one_step_8ms.status, one_step_8ms.low), ('ok', 14983.0))
+        self.assertEqual(judge_aura(15000, 14982, '8', opt_in=True,
+                                    steps=[plain_step('cast'), assert_step(label, '14982')]).status, 'alert')
+        three_step_8ms = judge_aura(15000, 14967, '8', opt_in=True)
+        self.assertEqual((three_step_8ms.status, three_step_8ms.low), ('ok', 14967.0))
+        self.assertEqual(judge_aura(15000, 14966, '8', opt_in=True).status, 'alert')
+
+        for duration_ms, one_pct_short, one_tick_short in (
+                (1000, 990, 500), (15000, 14850, 12000), (60000, 59400, 57000)):
+            with self.subTest(duration_ms=duration_ms, kind='one_pct_short'):
+                self.assertEqual(judge_aura(duration_ms, one_pct_short, '1', opt_in=True).status, 'alert')
+            with self.subTest(duration_ms=duration_ms, kind='one_tick_short'):
+                self.assertEqual(judge_aura(duration_ms, one_tick_short, '1', opt_in=True).status, 'alert')
+        short_1000 = judge_aura(1000, 990, '1', opt_in=True)
+        self.assertEqual(short_1000.low, 997.0)
+        self.assertNotIn('map-update carry-in', short_1000.explanation)
+
+        no_cast = judge_aura(15000, 15000, '1', opt_in=True, steps=[assert_step(label, '15000')])
+        self.assertEqual((no_cast.status, no_cast.low), ('ok', 15000.0))
+        self.assertNotIn('map-update carry-in', no_cast.explanation)
+
+        at_ten = judge_aura(15000, 14990, '10', opt_in=True)
+        self.assertEqual((at_ten.status, at_ten.low), ('ok', 14970.0))
+        self.assertNotIn('map-update carry-in', at_ten.explanation)
+
+        for bad in (1, 'true', None, []):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                aura_duration_map_update_carry_in({AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY: bad})
+
     def test_foreign_aura_grant_duration_on_the_ally_matches_the_duration_token(self):
         label = '1001 aura_duration_ms 2002 #0'
         steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'),
@@ -1067,6 +1149,28 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([expectation(label, 'power_cost', '15', 'ManaCost divisor 10')], [],
                                   [assert_step(label, '150')], constant_reader())
         self.assertEqual((verdicts[label].status, verdicts[label].measured), ('ok', 15.0))
+
+    def test_base_mana_percent_power_cost_is_compared_and_alerts_on_mismatch(self):
+        label = '1001 power_cost'
+        rule = 'ManaCost 0 + 12% of base_mana 1512 divisor 1'
+        ok = self.value_run([expectation(label, 'power_cost', '181', rule)], [],
+                            [assert_step(label, '181')], constant_reader())
+        self.assertEqual((ok[label].status, ok[label].measured, ok[label].expected), ('ok', 181.0, 181.0))
+        self.fresh()
+        bad = self.value_run([expectation(label, 'power_cost', '181', rule)], [],
+                             [assert_step(label, '196')], constant_reader())
+        self.assertEqual(bad[label].status, 'alert')
+
+    def test_base_health_percent_power_cost_is_compared_and_alerts_on_mismatch(self):
+        label = '1001 power_cost'
+        rule = 'ManaCost 0 + 10% of base_health 1418 divisor 1'
+        ok = self.value_run([expectation(label, 'power_cost', '141', rule)], [],
+                            [assert_step(label, '141')], constant_reader())
+        self.assertEqual((ok[label].status, ok[label].measured, ok[label].expected), ('ok', 141.0, 141.0))
+        self.fresh()
+        bad = self.value_run([expectation(label, 'power_cost', '141', rule)], [],
+                             [assert_step(label, '155')], constant_reader())
+        self.assertEqual(bad[label].status, 'alert')
 
     def test_known_aura_absent_is_an_alert(self):
         label = 'known_aura 887007'

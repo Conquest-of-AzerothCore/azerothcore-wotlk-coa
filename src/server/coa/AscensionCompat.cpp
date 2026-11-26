@@ -467,7 +467,8 @@ enum AscensionItems : uint32
     ITEM_HEARTWOOD_KEY = 1041710,
     ITEM_CUIRBOULLI_BOOTS = 2143,
     ITEM_RED_RIBBONED_WRAPPING_PAPER = 5042,
-    ITEM_ASHEN_TABLET = 9302130
+    ITEM_ASHEN_TABLET = 9302130,
+    ITEM_KEEPERS_SCROLL_AMANTHUL = 246199
 };
 
 constexpr std::array<uint32, 9> BUSHCRAFT_CRAFTED_ITEMS =
@@ -4567,9 +4568,11 @@ private:
   static constexpr uint32 SPELL_CASTER_AURA_SPELL_FIELD = 24;
   static constexpr uint32 SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD = 26;
   static constexpr uint32 SPELL_CAST_TIME_INDEX_FIELD = 28;
+  static constexpr uint32 SPELL_RECOVERY_TIME_FIELD = 29;
   static constexpr uint32 SPELL_CATEGORY_RECOVERY_TIME_FIELD = 30;
   static constexpr uint32 SPELL_INTERRUPT_FLAGS_FIELD = 31;
   static constexpr uint32 SPELL_EFFECTS_FIELD = 71;
+  static constexpr uint32 SPELL_EFFECT_BASE_POINTS_FIELD = 80;
   static constexpr uint32 SPELL_EFFECT_TARGETS_FIELD = 86;
   static constexpr uint32 SPELL_EFFECT_TARGETS_B_FIELD = 89;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
@@ -4577,8 +4580,10 @@ private:
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
       572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
+  static constexpr uint32 SPELL_RANGE_INDEX_FIELD = 46;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
+  static constexpr uint32 GUARDIAN_STANDARD_OF_RECOVERY_AURA = 500266;
   static constexpr uint32 CHARGE_SPELL_VISUAL = 867;
   static constexpr char const* REPLENISHMENT_FIELD_DESCRIPTION =
       "Nearby allies are restored: $/10;560751s1 Rage, Energy, Focus and Runic Power and $560819s1% base mana "
@@ -5775,6 +5780,12 @@ private:
     }
     if (info->Id == AscensionSunCleric::Dawn)
       row.Values[4] = info->Attributes;
+    if (info->Id == AscensionSunCleric::SunStride)
+    {
+      row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
+      row.Values[SPELL_ATTRIBUTES_FIELD + 1] = info->AttributesEx;
+      row.Values[SPELL_ATTRIBUTES_FIELD + 5] = info->AttributesEx5;
+    }
     if (info->Id == AscensionStormbringer::SPELL_ATMOSPHERIC_PRESSURE)
     {
       row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
@@ -5788,10 +5799,22 @@ private:
       row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_FIELD)] = 0;
       row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_RECOVERY_TIME_FIELD)] = 0;
     }
+    if (info->Id == 520292 || info->Id == 520857)
+    {
+      row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_FIELD)] = info->GetCategory();
+      row.Values[SPELL_WIRE_SLOT(SPELL_RECOVERY_TIME_FIELD)] = info->RecoveryTime;
+      row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_RECOVERY_TIME_FIELD)] = info->CategoryRecoveryTime;
+    }
     if (IsChromaticShardRank(info->Id))
       row.Values[SPELL_WIRE_SLOT(SPELL_INTERRUPT_FLAGS_FIELD)] &= ~uint32(SPELL_INTERRUPT_FLAG_MOVEMENT);
+    if (info->SpellFamilyName == 27 &&
+        (info->Id == 500074 || (info->Id >= 572727 && info->Id <= 572732)) && info->RangeEntry)
+      row.Values[SPELL_WIRE_SLOT(SPELL_RANGE_INDEX_FIELD)] = info->RangeEntry->ID;
     if (info->Id == VAULT_CLIENT_SPELL)
       row.Values[SPELL_WIRE_SLOT(SPELL_VISUAL_FIELD)] = CHARGE_SPELL_VISUAL;
+    if (info->Id == GUARDIAN_STANDARD_OF_RECOVERY_AURA)
+      row.Values[SPELL_WIRE_SLOT(SPELL_EFFECT_BASE_POINTS_FIELD)] =
+          static_cast<uint32>(info->Effects[EFFECT_0].BasePoints);
     if (info->Id == TinkerReplenishmentFieldAura)
     {
       for (uint8 effect = 0; effect < 2; ++effect)
@@ -6244,6 +6267,7 @@ public:
     _woodworkingAppearancePatches.clear();
     _woodworkingItemAppearancePatches.clear();
     _serverPetAppearancePatches.clear();
+    _illusionAppearancePatches.clear();
     _incarnationCategories.clear();
     _petCategories.clear();
     _petTokens.clear();
@@ -6268,11 +6292,21 @@ public:
     ClientDBC appearances;
     bool appearancesLoaded =
         appearances.Load(GetClientDBCPath("Appearances.dbc"), 17);
+    std::vector<std::array<uint32, 17>> illusionCandidates;
     for (uint32 row = 0; row < appearances.GetRecordCount(); ++row) {
       ClientDBC::Record record = appearances.GetRecord(row);
       uint32 appearanceId = record.GetUInt32(0);
       if (!appearanceId)
         continue;
+
+      if (record.GetString(2) == "APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT" && record.GetUInt32(8))
+      {
+        std::array<uint32, 17> patch{};
+        for (uint32 field = 0; field < patch.size(); ++field)
+          patch[field] = record.GetUInt32(field);
+        patch[2] = 0;
+        illusionCandidates.push_back(patch);
+      }
 
       uint32 displayId = record.GetUInt32(3);
       _appearances[appearanceId] =
@@ -6347,6 +6381,12 @@ public:
           items.push_back(itemId);
       }
     }
+    for (auto& patch : illusionCandidates)
+      if (_itemSetItems.contains(patch[8]))
+      {
+        patch[8] = 0;
+        _illusionAppearancePatches.push_back(patch);
+      }
 
     ClientDBC vanity;
     bool vanityLoaded =
@@ -6473,6 +6513,7 @@ public:
     }
 
     SendWoodworkingAppearanceCatalog(player);
+    SendIllusionAppearancePatches(player);
 
     std::shared_ptr<PlayerCollectionState> state = TakeLoginState(player);
     if (!state)
@@ -7004,6 +7045,12 @@ public:
         }
     }
 
+  static bool IsFishingPole(ItemTemplate const* proto)
+  {
+    return proto && proto->Class == ITEM_CLASS_WEAPON &&
+           proto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE;
+  }
+
   void OnVisibleItemSet(Player *player, uint8 slot, Item *item) {
     if (!item)
       return;
@@ -7012,13 +7059,17 @@ public:
     if (!state)
       return;
 
+    bool const equippedFishingPole = IsFishingPole(item->GetTemplate());
     uint8 itemCategoryId = AppearanceCategoryForEquipmentSlot(slot);
     if (itemCategoryId)
     {
       uint32 appearanceId = state->ActiveAppearances[itemCategoryId];
       auto appearanceItr = _appearances.find(appearanceId);
       if (appearanceItr != _appearances.end() &&
-          appearanceItr->second.SourceItem) {
+          appearanceItr->second.SourceItem &&
+          (!equippedFishingPole ||
+           IsFishingPole(sObjectMgr->GetItemTemplate(appearanceItr->second.SourceItem))))
+      {
         player->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2,
                                appearanceItr->second.SourceItem);
         if (state->CollectedAppearances.contains(appearanceId) &&
@@ -7026,6 +7077,9 @@ public:
           sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::Transmogrified, appearanceId);
       }
     }
+
+    if (equippedFishingPole)
+      return;
 
     uint8 effectCategoryId = WeaponEffectCategoryForEquipmentSlot(slot);
     if (!effectCategoryId || !state->CanSeeSpellAppearances)
@@ -7725,6 +7779,19 @@ private:
 
         std::lock_guard lock(_woodworkingRowMutex);
         _sentWoodworkingItems[player->GetGUID().GetCounter()] = std::move(sent);
+    }
+
+    void SendIllusionAppearancePatches(Player* player)
+    {
+        for (auto const& row : _illusionAppearancePatches)
+        {
+            WorldPacket packet(SMSG_PATCH_APPEARANCES,
+                17 * sizeof(uint32) + sizeof("APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT"));
+            for (uint32 field : row)
+                packet << field;
+            packet << "APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT";
+            player->GetSession()->SendPacket(&packet);
+        }
     }
 
 public:
@@ -9011,6 +9078,7 @@ private:
   std::vector<uint32> _allVanityItemIds;
     std::vector<std::array<uint32, 17>> _woodworkingAppearancePatches;
   std::vector<std::array<uint32, 17>> _serverPetAppearancePatches;
+    std::vector<std::array<uint32, 17>> _illusionAppearancePatches;
     std::vector<std::array<uint32, 3>> _woodworkingItemAppearancePatches;
     std::mutex _woodworkingRowMutex;
     std::unordered_map<uint32, std::unordered_set<uint32>> _sentWoodworkingItems;
@@ -12109,6 +12177,7 @@ void AddAscensionCompatScripts() {
   Ascension::ClientItemPatches::Instance().Register(ITEM_CUIRBOULLI_BOOTS);
   Ascension::ClientItemPatches::Instance().Register(ITEM_RED_RIBBONED_WRAPPING_PAPER);
   Ascension::ClientItemPatches::Instance().Register(ITEM_ASHEN_TABLET);
+  Ascension::ClientItemPatches::Instance().Register(ITEM_KEEPERS_SCROLL_AMANTHUL);
   for (uint32 itemId : BUSHCRAFT_CRAFTED_ITEMS)
     Ascension::ClientItemPatches::Instance().Register(itemId);
   for (uint32 itemId : GOBLIN_SALVAGE_QUEST_ITEMS)

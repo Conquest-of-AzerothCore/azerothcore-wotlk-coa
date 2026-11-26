@@ -1,0 +1,102 @@
+{
+  "schema": 1,
+  "name": "Bloodscalp Skullpiercer rests at its Bloodscalp camp realm-dump spot (#9984)",
+  "contract": "#9984 reported Bloodscalp Skullpiercer (gameobject 95739 Bloodscalp Bow, guid 6940154, item 415084) missing in Stranglethorn Vale. 2026_09_23_05_worldforged_map.sql moved it from a rounded 2-digit pin (0.25, 0.10) to (-11592.1, 626.3, 50.549), 15.0 yd SW and 11.34 yd below the camp. Restoring the first-pass realm-dump spot (-11582.900, 638.158, 61.889) puts it on Barrel02.m2 (boundZ 60.73..62.59, non-VMap prop above terrain 60.90) at camp level so it is visible and lootable.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -11582.9,
+    "y": 638.158,
+    "z": 60.9,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bloodscalp Bow is spawned in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95739,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: pickup stands at its realm-dump position instead of 18.8 yd away down the slope",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -11582.9,
+      "y": 638.158,
+      "z": 61.889,
+      "max": 0.3,
+      "guid": 6940154,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "pickup has open sky above it",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6940154,
+      "spawn_type": "gameobject",
+      "min": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "pickup is not underwater",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6940154,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95739
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "pickup opens cleanly from camp level",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "pickup yields its loot",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

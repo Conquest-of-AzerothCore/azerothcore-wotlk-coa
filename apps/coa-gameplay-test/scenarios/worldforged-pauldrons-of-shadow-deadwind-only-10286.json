@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Pauldrons of Shadow spawns only in Deadwind Pass, not Swamp of Sorrows (#10286)",
+  "contract": "#10286 reported Pauldrons of Shadow (item 354460, ilvl 63, reqLevel 58, Fallen Traveler's Pauldrons 254516) spawning in Swamp of Sorrows (level 35 zone) at guid 6940873 (-10316.3, -3207.0, 22.833). Both the CoA realm dump (6900243) and CoA sidekick data place 254516 solely in Deadwind Pass (guid 6940872, -10624.4, -1904.64, 118.146). Expected: guid 6940873 in Swamp of Sorrows is not spawned and guid 6940872 in Deadwind Pass remains spawned.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -10316.3,
+    "y": -3207.0,
+    "z": 23.3,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 19,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the stray Swamp of Sorrows pickup is not spawned",
+      "metric": "spawn_active",
+      "spawn": 6940873,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -10624.4,
+      "y": -1904.64,
+      "z": 118.6,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the Deadwind Pass pickup remains spawned",
+      "metric": "spawn_active",
+      "spawn": 6940872,
+      "equals": 1
+    }
+  ]
+}

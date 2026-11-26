@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Dragon's Edge keeps max and current mana steady (#13663)",
+  "contract": [
+    "Dragon's Edge 300755 (Draconic level-10 passive, SpellFamilyName 30) grants Intellect equal to 100% of spell",
+    "critical strike rating via hidden aura 900755 (Dragon's Edge Crit to Intellect, SpellFamilyName 36, Aura 29",
+    "STAT_INTELLECT, BasePoints -1 + DieSides 1 = 0, DurationIndex 32 = 6000 ms). Three defects caused periodic",
+    "max-mana drops and silent current-mana loss: (1) AscensionPyromancerContracts::ApplyContracts returned early",
+    "for SpellFamilyName != 30 before its 900755 branch, so 900755 kept DurationIndex 32 (6000 ms) instead of",
+    "SpellDuration 21 (-1 permanent); (2) 300755 effect 1 (SPELL_AURA_PERIODIC_TRIGGER_SPELL, 5000 ms -> 900755)",
+    "was not dummied, so every 5 s it recast 900755 at 0 Intellect, dropping max mana by 15 * CR_CRIT_SPELL and",
+    "clamping current mana down in Unit::SetMaxPower until the 500 ms Refresh restored it; (3) Refresh's",
+    "AuraEffect::ChangeAmount removed the full old Intellect before re-applying the new amount, transiently",
+    "clamping current mana whenever spell crit rating changed. With 200 spell crit rating (+3000 max mana at",
+    "15 mana/Intellect), 900755 must be permanent (-1), 300755 effect 1 must have amplitude 0, max and current",
+    "mana must stay intact past 6500 ms after Essence of Malygos 802120 fills mana above mana_base, and toggling",
+    "QA Test +100 All Crit Rating 10036 (200 -> 300 -> 200) must change max mana by +-1500 without losing mana."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 80,
+      "spell_crit_rating": 200
+    }
+  ],
+  "creatures": [],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Dragon's Edge Intellect aura is absent before learning 300755",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 900755,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Base max mana before Dragon's Edge",
+      "actor": "pyro",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "mana_base"
+    },
+    {
+      "action": "snapshot",
+      "label": "Base current mana before Dragon's Edge",
+      "actor": "pyro",
+      "metric": "power",
+      "power": 0,
+      "save_as": "power_base"
+    },
+    {
+      "action": "learn",
+      "label": "Learn Dragon's Edge (300755)",
+      "actor": "pyro",
+      "spell": 300755
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Refresh applies 900755",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 900755,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 900755 grants 200 Intellect matching 200 spell crit rating",
+      "actor": "pyro",
+      "metric": "aura_amount",
+      "spell": 900755,
+      "effect": 0,
+      "equals": 200,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 900755 has permanent duration (-1), not 6000 ms",
+      "actor": "pyro",
+      "metric": "aura_duration_ms",
+      "spell": 900755,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 300755 effect 1 periodic trigger is dummied (amplitude 0)",
+      "actor": "pyro",
+      "metric": "aura_amplitude_ms",
+      "spell": 300755,
+      "effect": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 200 Intellect raises max mana by 3000",
+      "actor": "pyro",
+      "metric": "max_power",
+      "power": 0,
+      "relative_to": "mana_base",
+      "equals": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Essence of Malygos to fill mana into the Dragon's Edge bonus band",
+      "actor": "pyro",
+      "spell": 802120
+    },
+    {
+      "action": "cast",
+      "label": "Cast Essence of Malygos on self",
+      "actor": "pyro",
+      "spell": 802120,
+      "target": "pyro"
+    },
+    {
+      "action": "wait",
+      "label": "Let Essence of Malygos complete its 6 s duration",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Essence of Malygos has expired",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 802120,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "label": "Current mana once filled above mana_base",
+      "actor": "pyro",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_full"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Current mana is at least 2000 above the pre-Dragon's-Edge ceiling",
+      "actor": "pyro",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "power_base",
+      "min": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Wait past legacy 5000 ms periodic trigger and 6000 ms expiry",
+      "ms": 6500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 900755 remains active past 6500 ms",
+      "actor": "pyro",
+      "metric": "aura",
+      "spell": 900755,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 900755 keeps 200 Intellect",
+      "actor": "pyro",
+      "metric": "aura_amount",
+      "spell": 900755,
+      "effect": 0,
+      "equals": 200
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Max mana stayed at mana_base + 3000",
+      "actor": "pyro",
+      "metric": "max_power",
+      "power": 0,
+      "relative_to": "mana_base",
+      "equals": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Current mana did not drop during the 6500 ms idle window",
+      "actor": "pyro",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_full",
+      "min": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Current mana before dynamic crit rating increase",
+      "actor": "pyro",
+      "metric": "power",
+      "power": 0,
+      "save_as": "mana_before_buff"
+    },
+    {
+      "action": "snapshot",
+      "label": "Max mana before dynamic crit rating increase",
+      "actor": "pyro",
+      "metric": "max_power",
+      "power": 0,
+      "save_as": "max_before_buff"
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply QA Test +100 All Crit Rating (200 -> 300)",
+      "actor": "pyro",
+      "spell": 10036,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Refresh updates 900755 to 300 Intellect",
+      "actor": "pyro",
+      "metric": "aura_amount",
+      "spell": 900755,
+      "effect": 0,
+      "equals": 300,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Max mana rises by 1500 from +100 Intellect",
+      "actor": "pyro",
+      "metric": "max_power",
+      "power": 0,
+      "relative_to": "max_before_buff",
+      "equals": 1500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Gaining crit rating does not transiently clamp current mana",
+      "actor": "pyro",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before_buff",
+      "min": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Remove QA Test +100 All Crit Rating (300 -> 200)",
+      "actor": "pyro",
+      "spell": 10036,
+      "stacks": 0
+    },
+    {
+      "action": "assert",
+      "label": "Refresh returns 900755 to 200 Intellect",
+      "actor": "pyro",
+      "metric": "aura_amount",
+      "spell": 900755,
+      "effect": 0,
+      "equals": 200,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Max mana returns exactly to max_before_buff",
+      "actor": "pyro",
+      "metric": "max_power",
+      "power": 0,
+      "relative_to": "max_before_buff",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Losing crit rating does not clamp current mana below the new max mana",
+      "actor": "pyro",
+      "metric": "power",
+      "power": 0,
+      "relative_to": "mana_before_buff",
+      "min": 0
+    }
+  ]
+}

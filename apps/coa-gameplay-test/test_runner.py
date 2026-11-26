@@ -244,12 +244,83 @@ class RunnerTests(unittest.TestCase):
                 'aura': 807299, 'every_ms': 4300, 'max_casts': 10, 'cast_power': 2272, 'reset_cooldown': True}
         self.assert_step_validates(step)
         self.assert_step_validates({**step, 'power': 0})
+        self.assert_step_validates({**step, 'stop_target': 'target'})
+        self.assert_step_validates({**step, 'stop_target': 'caster'})
         for change in ({'max_casts': 0}, {'max_casts': 201}, {'every_ms': 0}, {'every_ms': 9001}, {'aura': 0},
-                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100}):
+                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100},
+                       {'stop_target': 'ghost'}, {'stop_target': 1}):
             self.assert_step_rejected({**step, **change})
         self.assert_step_rejected({key: value for key, value in step.items() if key != 'cast_power'} | {'power': 0})
         for field in ('spell', 'aura', 'every_ms', 'max_casts'):
             self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def test_cast_until_owned_creature_action_fields(self):
+        step = {'action': 'cast_until_owned_creature', 'actor': 'caster', 'spell': 500110, 'target': 'target',
+                'entry': 533030, 'every_ms': 1700, 'max_casts': 10, 'cast_power': 2000, 'reset_cooldown': True}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'power': 0})
+        for change in ({'max_casts': 0}, {'max_casts': 201}, {'every_ms': 0}, {'every_ms': 9001}, {'entry': 0},
+                       {'reset_cooldown': 1}, {'cast_power': -1}, {'actor': 'target'}, {'within_ms': 100}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'cast_power'} | {'power': 0})
+        for field in ('spell', 'entry', 'every_ms', 'max_casts'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def test_owned_creature_total_cast_count_metric_fields(self):
+        step = {'action': 'snapshot', 'actor': 'caster', 'metric': 'owned_creature_total_cast_count',
+                'entry': 533030, 'save_as': 'total'}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'triggered': False})
+        self.assert_step_validates({**step, 'cumulative': True})
+        self.assert_step_validates({**step, 'spell': 500110, 'triggered': False, 'cumulative': True})
+        for change in ({'actor': 'target'}, {'entry': 0}, {'spell': 0}, {'triggered': 0}, {'triggered': 'false'},
+                       {'cumulative': 1}, {'cumulative': 'true'}):
+            self.assert_step_rejected({**step, **change})
+        self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster',
+                                   'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
+                                   'triggered': False, 'save_as': 'bad'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster',
+                                   'metric': 'owned_creature_spell_cast_count', 'entry': 533030, 'spell': 500110,
+                                   'cumulative': True, 'save_as': 'bad'})
+
+    def test_attack_until_swings_action_fields(self):
+        step = {'action': 'attack_until_swings', 'actor': 'caster', 'target': 'target',
+                'swings': 9, 'timeout_ms': 12000}
+        self.assert_step_validates(step)
+        self.assert_step_validates({**step, 'hand': 0})
+        self.assert_step_validates({**step, 'hand': 1})
+        for change in ({'actor': 'target'}, {'swings': 0}, {'swings': 51}, {'swings': True},
+                       {'timeout_ms': 0}, {'timeout_ms': 90001}, {'hand': 2}, {'hand': True}):
+            self.assert_step_rejected({**step, **change})
+        for field in ('target', 'swings', 'timeout_ms'):
+            self.assert_step_rejected({key: value for key, value in step.items() if key != field})
+
+    def test_melee_blocks_taken_metric_fields(self):
+        for metric in ('melee_blocks_taken_count', 'melee_blocks_taken_total'):
+            step = {'action': 'snapshot', 'actor': 'caster', 'metric': metric, 'save_as': 'blocks'}
+            self.assert_step_validates(step)
+            for kind in ('all', 'normal', 'critical', 'other'):
+                self.assert_step_validates({**step, 'block_kind': kind})
+            self.assert_step_rejected({**step, 'block_kind': 'bogus'})
+            self.assert_step_rejected({**step, 'actor': 'target'})
+        self.assert_step_validates({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_blocks_taken_count',
+                                    'block_kind': 'full', 'save_as': 'full'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_blocks_taken_total',
+                                   'block_kind': 'full', 'save_as': 'bad'})
+        self.assert_step_rejected({'action': 'snapshot', 'actor': 'caster', 'metric': 'melee_attacks_taken',
+                                   'block_kind': 'normal', 'save_as': 'bad'})
+
+    def test_owned_creature_copy_coordinate_metric_fields(self):
+        for metric in ('owned_creature_copy_x', 'owned_creature_copy_y'):
+            step = {'action': 'snapshot', 'actor': 'caster', 'metric': metric, 'entry': 840025,
+                    'index': 0, 'save_as': 'coord'}
+            self.assert_step_validates(step)
+            self.assert_step_validates({**step, 'index': 2})
+            for change in ({'actor': 'target'}, {'entry': 0}, {'index': -1}, {'index': 32}, {'index': True}):
+                self.assert_step_rejected({**step, **change})
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'entry'})
+            self.assert_step_rejected({key: value for key, value in step.items() if key != 'index'})
 
     def test_combat_avoidance_block_is_a_percent_with_an_optional_refusal(self):
         step = {'action': 'set_combat_avoidance', 'actor': 'caster', 'block': 100}
@@ -468,6 +539,23 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(bonus=bonus), self.assertRaises(ValueError):
                 run.validate(scenario)
 
+    def test_creature_dx_dy_offset_validation(self):
+        for offset in ({'dx': -5.0, 'dy': 0.0}, {'dx': 0.0, 'dy': 10.5}, {'dx': -60, 'dy': 80}, {'dy': -12.5},
+                       {'dx': 0}):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0].pop('distance', None)
+            scenario['creatures'][0].update(offset)
+            with self.subTest(offset=offset):
+                self.assertIs(run.validate(scenario), scenario)
+        for bad in ({'distance': 3, 'dx': 5}, {'distance': 3, 'dy': 5}, {'dx': 101}, {'dy': -101},
+                    {'dx': 80, 'dy': 80}, {'dx': True}, {'dy': float('nan')}, {'dx': float('inf')}, {'dx': '5'}):
+            scenario = copy.deepcopy(self.scenario)
+            if 'distance' not in bad:
+                scenario['creatures'][0].pop('distance', None)
+            scenario['creatures'][0].update(bad)
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                run.validate(scenario)
+
     def test_creature_min_level_armor_validation(self):
         for value in (True, False):
             scenario = copy.deepcopy(self.scenario)
@@ -478,6 +566,32 @@ class RunnerTests(unittest.TestCase):
             scenario['creatures'][0]['min_level_armor'] = value
             with self.subTest(value=value), self.assertRaises(ValueError):
                 run.validate(scenario)
+
+    def test_creature_face_caster_validation(self):
+        for value in (True, False):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0]['face_caster'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value in (1, 0, 'true', None):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['creatures'][0]['face_caster'] = value
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                run.validate(scenario)
+
+    def test_melee_avoidance_dealt_validation(self):
+        for metric in ('melee_misses_dealt', 'melee_dodges_dealt', 'melee_parries_dealt'):
+            for extra in ({}, {'hand': 0}, {'hand': 1}):
+                scenario = copy.deepcopy(self.scenario)
+                scenario['steps'].append({'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0, **extra})
+                with self.subTest(metric=metric, extra=extra):
+                    self.assertIs(run.validate(scenario), scenario)
+            for bad in ({'actor': 'target'}, {'hand': 2}, {'hand': -1}, {'hand': True},
+                        {'victim_state': 3}, {'glancing': False}, {'blocked': False}):
+                scenario = copy.deepcopy(self.scenario)
+                step = {'action': 'assert', 'actor': 'caster', 'metric': metric, 'min': 0, **bad}
+                scenario['steps'].append(step)
+                with self.subTest(metric=metric, bad=bad), self.assertRaises(ValueError):
+                    run.validate(scenario)
 
     def test_creature_actor_spell_immunity_metrics(self):
         for step in ({'metric': 'spell_immune', 'spell': 853},
@@ -874,6 +988,17 @@ class RunnerTests(unittest.TestCase):
             scenario = copy.deepcopy(self.scenario)
             scenario['quest_log_size'] = value
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'quest_log_size'):
+                run.validate(scenario)
+
+    def test_max_player_level_accepts_the_level_range(self):
+        for value in (1, 60, 80, 255):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['max_player_level'] = value
+            self.assertIs(run.validate(scenario), scenario)
+        for value in (0, 256, '60', True):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['max_player_level'] = value
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'max_player_level'):
                 run.validate(scenario)
 
     def test_quest_abandon_takes_a_quest_and_an_optional_log_slot(self):

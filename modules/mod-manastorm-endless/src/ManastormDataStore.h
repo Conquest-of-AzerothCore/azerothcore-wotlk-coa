@@ -76,10 +76,12 @@ public:
     ManastormScalingPoint GetScalingForDepth(uint32 depth, bool endgame = false) const;
 
     // Effective runtime scaling = generic depth curve x matching
-    // member-count range. Missing group ranges are neutral 1.0x.
+    // member-count range.
     ManastormScalingPoint GetScalingForDepth(
         uint32 depth,
         uint32 memberCount, bool endgame = false) const;
+
+    double GetGroupHealthMultiplier(uint32 memberCount, bool endgame = false) const;
 
     std::size_t GetSegmentCount() const { return _segments.size(); }
     std::size_t GetScalingPointCount() const { return _scalingCurve.size(); }

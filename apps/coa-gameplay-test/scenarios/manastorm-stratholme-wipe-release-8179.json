@@ -1,0 +1,110 @@
+{
+  "schema": 1,
+  "name": "Manastorm Stratholme: a solo wipe at Magistrate Barthilas ejects the player to the faction hub on release (#8179)",
+  "contract": [
+    "#8179: releasing spirit after wiping in a Manastorm Stratholme run never reached ManastormMgr::HandleReleaseAfterWipe",
+    "because ascension_dungeon_release_player (src/server/coa/AscensionDungeonRelease.cpp) registers before module scripts",
+    "and handled every dungeon map without excluding scripted private instances. Its OnPlayerCanRepopAtGraveyard matched",
+    "Stratholme's public areatrigger_teleport entrance, resurrected the player at 50% health inside the private Manastorm",
+    "instance, and returned false, short-circuiting PLAYERHOOK_CAN_REPOP_AT_GRAVEYARD before manastorm_playerscript ran.",
+    "The fix excludes Map::IsScriptedPrivateInstance() in AscensionDungeonRelease so Manastorm's own release handler",
+    "runs FailRun and returns the player alive to their faction Manastorm hub pad (Orgrimmar guid 6901539, map 1).",
+    "Discriminating assertions: after release_spirit, private_instance drops to 0, alive is 1, map_id is 1, and",
+    "point_distance_2d to (1648.1, -4431.11) is within 5 yd; without the fix, private_instance stays 1 on map 329."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "n",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "n",
+      "command": ".manastorm segment test 138"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player entered a private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the instance is visible to this lane",
+      "actor": "n",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "actor": "n",
+      "guid": 9950286
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: leaving the preparation bubble at Magistrate Barthilas clears its safety aura and activates the stage",
+      "actor": "n",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "die",
+      "actor": "n"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the lone member is dead and the run wiped to AwaitingExit",
+      "actor": "n",
+      "metric": "alive",
+      "equals": 0
+    },
+    {
+      "action": "release_spirit",
+      "actor": "n"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: releasing spirit ejected the player out of the private Manastorm instance",
+      "actor": "n",
+      "metric": "private_instance",
+      "within_ms": 5000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player is alive after Manastorm wipe ejection",
+      "actor": "n",
+      "metric": "alive",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player landed on Kalimdor (map 1), not Stratholme (map 329)",
+      "actor": "n",
+      "metric": "map_id",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the player landed at the Horde Manastorm hub pad in Orgrimmar",
+      "actor": "n",
+      "metric": "point_distance_2d",
+      "x": 1648.1,
+      "y": -4431.11,
+      "max": 5
+    }
+  ]
+}

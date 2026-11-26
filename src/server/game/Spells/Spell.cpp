@@ -6202,9 +6202,38 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
     // Divine Charge explicitly permits its recipients to cast on the finite steed.
     bool divineSteed = m_caster->IsOnDivineSteed();
     bool tinkerMechsuitConsumable = m_CastItem && m_CastItem->GetTemplate()->Class == ITEM_CLASS_CONSUMABLE;
-    bool tinkerMechsuit = m_caster->IsPlayer() && m_caster->getClass() == CLASS_TINKER &&
-        (m_spellInfo->SpellFamilyName == 34 || tinkerMechsuitConsumable) && !m_caster->IsInFlight() &&
-        m_caster->HasAura(801384, m_caster->GetGUID()) && m_caster->HasAura(803451, m_caster->GetGUID());
+    bool const inTinkerMechsuit = m_caster->IsPlayer() && m_caster->ToPlayer()->IsInTinkerMechsuit();
+    bool tinkerMechsuitRacial = false;
+    if (inTinkerMechsuit && m_spellInfo->SpellFamilyName != 34 && !tinkerMechsuitConsumable)
+    {
+        SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(m_spellInfo->Id);
+        for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            switch (itr->second->SkillLine)
+            {
+                case SKILL_RACIAL_HUMAN:
+                case SKILL_ORC_RACIAL:
+                case SKILL_RACIAL_DWARVEN:
+                case SKILL_RACIAL_NIGHT_ELF:
+                case SKILL_RACIAL_UNDED:
+                case SKILL_RACIAL_TAUREN:
+                case SKILL_RACIAL_GNOME:
+                case SKILL_RACIAL_TROLL:
+                case SKILL_RACIAL_BLOODELF:
+                case SKILL_RACIAL_DRAENEI:
+                case 11125:
+                case 11760:
+                    tinkerMechsuitRacial = true;
+                    break;
+                default:
+                    break;
+            }
+            if (tinkerMechsuitRacial)
+                break;
+        }
+    }
+    bool tinkerMechsuit = inTinkerMechsuit &&
+        (m_spellInfo->SpellFamilyName == 34 || tinkerMechsuitConsumable || tinkerMechsuitRacial);
     if (m_caster->IsMounted() && m_caster->IsPlayer() && !HasTriggeredCastFlag(TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE) &&
             !m_spellInfo->IsPassive() && !m_spellInfo->HasAttribute(SPELL_ATTR0_ALLOW_WHILE_MOUNTED) && !divineSteed &&
             !tinkerMechsuit &&

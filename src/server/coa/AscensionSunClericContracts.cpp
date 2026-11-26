@@ -118,6 +118,8 @@ void ApplyContracts(SpellInfo* info)
         info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
         Ascension::ClientSpellPatches::Instance().Register(id);
     }
+    if (id == SunStride)
+        Ascension::ClientSpellPatches::Instance().Register(id);
     if (id == SolarPower)
         dummy(1);
     if (id == 800764)

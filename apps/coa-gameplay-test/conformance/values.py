@@ -22,9 +22,17 @@ EFFECTS = range(3)
 HOSTILE_TARGETS = frozenset({2, 6, 15, 16, 24})
 SELF_TARGETS = frozenset({0, 1})
 FRIEND_TARGETS = frozenset({21})
+RAID_TARGETS = frozenset({57})
 RESURRECT_EFFECTS = frozenset({18, 113})
 ALLY = 'ally'
 ALLY_CASTS_KEY = 'value_ally_casts'
+HONOUR_MIN_RANGE_KEY = 'honour_min_range'
+BASE_MANA_POWER_COST_KEY = 'base_mana_power_cost'
+BASE_HEALTH_KEY = 'base_health'
+PERCENT_POWER_COST_CONTRACT = (
+    ' Percentage power_cost multiplies ManaCostPercentage by server create mana/health from the class file '
+    '(the same server table SpellInfo::CalcPowerCost reads), proving the percentage is applied in '
+    'CalcPowerCost rather than that the base mana/health table value is right or that power was spent in a cast.')
 ALLY_SETUP_SETTLE_MS = 2000
 CHARGE_OFFSET_YD = 10
 NOMINAL_MELEE_RANGE_YD = 5.0
@@ -149,16 +157,30 @@ def armed_for(class_file: dict, records: Records, rank_id: int) -> dict:
     return armed(class_file, weapon_requirement(records, rank_id, class_file), rank_id)
 
 
-def cast_distance(records: Records, spell_id: int) -> float:
+def honour_min_range(class_file: dict | None) -> bool:
+    if class_file is None or HONOUR_MIN_RANGE_KEY not in class_file:
+        return False
+    value = class_file[HONOUR_MIN_RANGE_KEY]
+    if type(value) is not bool:
+        raise ValueError(f'{HONOUR_MIN_RANGE_KEY} must be a boolean')
+    return value
+
+
+def cast_distance(records: Records, spell_id: int, min_range: bool = False) -> float:
     range_index = records.field('Spell', spell_id, 'RangeIndex')
-    if records.field('SpellRange', range_index, 'Flags') != SPELL_RANGE_RANGED:
-        return DUMMY_DISTANCE
+    flags = records.field('SpellRange', range_index, 'Flags')
     low = records.field('SpellRange', range_index, 'RangeMin[0]')
+    if flags != SPELL_RANGE_RANGED and not (min_range and low > 0):
+        return DUMMY_DISTANCE
     high = records.field('SpellRange', range_index, 'RangeMax[0]')
     distance = (low + high) / 2
-    if distance <= low + NOMINAL_MELEE_RANGE_YD:
-        raise ValueError(f'{spell_id} range {range_index} ({low:g}-{high:g} yd, ranged) leaves no distance past its '
-                         f'minimum plus the {NOMINAL_MELEE_RANGE_YD:g} yd melee range')
+    if flags == SPELL_RANGE_RANGED:
+        if distance <= low + NOMINAL_MELEE_RANGE_YD:
+            raise ValueError(f'{spell_id} range {range_index} ({low:g}-{high:g} yd, ranged) leaves no distance past its '
+                             f'minimum plus the {NOMINAL_MELEE_RANGE_YD:g} yd melee range')
+    elif distance <= low or distance >= high:
+        raise ValueError(f'{spell_id} range {range_index} ({low:g}-{high:g} yd) leaves no valid cast distance '
+                         f'between its minimum and maximum')
     return distance
 
 
@@ -197,6 +219,12 @@ def targets_ally(facts: RankFacts) -> bool:
                for effect in EFFECTS)
 
 
+def targets_raid(facts: RankFacts) -> bool:
+    return any(facts.effects[effect] and (facts.target_a[effect] in RAID_TARGETS
+                                          or facts.target_b[effect] in RAID_TARGETS)
+               for effect in EFFECTS)
+
+
 def targets_resurrect(facts: RankFacts) -> bool:
     return any(facts.effects[effect] in RESURRECT_EFFECTS for effect in EFFECTS)
 
@@ -223,8 +251,12 @@ def gap_closer_expectation(rank_id: int, spell_id: int, label: str, target_kind:
     return steps, expectation
 
 
-def aura_carrier(facts: RankFacts, effect: int) -> dict:
-    if facts.target_a[effect] in SELF_TARGETS or not is_hostile(facts):
+def aura_carrier(facts: RankFacts, effect: int, ally_cast: bool = False) -> dict:
+    if facts.target_a[effect] in SELF_TARGETS:
+        return {'actor': CASTER, 'caster': CASTER}
+    if ally_cast and facts.target_a[effect] in FRIEND_TARGETS | RAID_TARGETS:
+        return {'actor': ALLY, 'caster': CASTER}
+    if not is_hostile(facts):
         return {'actor': CASTER, 'caster': CASTER}
     return {'actor': TARGET, 'caster': CASTER}
 
@@ -283,9 +315,24 @@ def required_aura_steps(facts: RankFacts) -> list[dict]:
     return [{'action': 'set_aura', 'actor': CASTER, 'spell': facts.caster_aura_spell, 'stacks': 1}]
 
 
+def cast_aura_entry(aura) -> tuple[int, int]:
+    if type(aura) is int and aura > 0:
+        return aura, 1
+    if (isinstance(aura, list) and len(aura) == 2
+            and type(aura[0]) is int and aura[0] > 0
+            and type(aura[1]) is int and aura[1] > 0):
+        return aura[0], aura[1]
+    raise ValueError(f'cast_auras entry must be a positive spell id or [spell, positive_stacks], not {aura!r}')
+
+
 def cast_aura_steps(class_file: dict, spell: int) -> list[dict]:
-    return [{'action': 'set_aura', 'actor': CASTER, 'spell': aura, 'stacks': 1}
-            for entry in class_file.get('cast_auras', []) if entry['spell'] == spell for aura in entry['auras']]
+    steps = []
+    for entry in class_file.get('cast_auras', []):
+        if entry['spell'] == spell:
+            for aura in entry['auras']:
+                aura_spell, stacks = cast_aura_entry(aura)
+                steps.append({'action': 'set_aura', 'actor': CASTER, 'spell': aura_spell, 'stacks': stacks})
+    return steps
 
 
 def value_ally_cast(class_file: dict, rank_id: int) -> tuple[int, ...] | None:
@@ -487,14 +534,50 @@ def per_tick_ticks(records: Records, spell_id: int, effect: int) -> float:
     return int(ticks) if ticks.is_integer() else ticks
 
 
-def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts) -> Expectation:
+def base_mana_for_power_cost(class_file: dict | None) -> int | None:
+    if class_file is None or BASE_MANA_POWER_COST_KEY not in class_file:
+        return None
+    enabled = class_file[BASE_MANA_POWER_COST_KEY]
+    if type(enabled) is not bool:
+        raise ValueError(f'{BASE_MANA_POWER_COST_KEY} must be a boolean')
+    if not enabled:
+        return None
+    base = class_file.get('base_mana')
+    if (not isinstance(base, dict) or base.get('power') != MANA
+            or type(base.get('value')) is not int or base['value'] <= 0):
+        raise ValueError(f'{BASE_MANA_POWER_COST_KEY} requires base_mana with power {MANA} and a positive integer value')
+    return base['value']
+
+
+def base_health_for_power_cost(class_file: dict | None) -> int | None:
+    if base_mana_for_power_cost(class_file) is None or BASE_HEALTH_KEY not in class_file:
+        return None
+    base = class_file[BASE_HEALTH_KEY]
+    if not isinstance(base, dict) or type(base.get('value')) is not int or base['value'] <= 0:
+        raise ValueError(f'{BASE_HEALTH_KEY} requires a positive integer value')
+    return base['value']
+
+
+def power_cost_expectation(label: str, spell_id: int, rank_id: int, facts: RankFacts,
+                           base_mana: int | None = None, base_health: int | None = None) -> Expectation:
     divisor = POWER_DISPLAY_DIVISOR.get(facts.power_type, 1)
     if facts.mana_cost_per_level:
         displayed = f'{facts.mana_cost} + {facts.mana_cost_per_level} per level'
         rule = UNREADABLE + f'ManaCostPerlevel {facts.mana_cost_per_level} scales with the spell rank of the client'
     elif facts.mana_cost_percentage:
-        displayed = f'{facts.mana_cost} + {facts.mana_cost_percentage}% of base power'
-        rule = UNREADABLE + f'ManaCostPercentage {facts.mana_cost_percentage} needs the base power of the caster'
+        if base_mana is not None and facts.power_type == MANA:
+            expected = facts.mana_cost + (base_mana * facts.mana_cost_percentage) // 100
+            displayed = str(expected // divisor)
+            rule = (f'ManaCost {facts.mana_cost} + {facts.mana_cost_percentage}% of base_mana {base_mana} '
+                    f'divisor {divisor}')
+        elif base_health is not None and facts.power_type == HEALTH_POWER:
+            expected = facts.mana_cost + (base_health * facts.mana_cost_percentage) // 100
+            displayed = str(expected // divisor)
+            rule = (f'ManaCost {facts.mana_cost} + {facts.mana_cost_percentage}% of base_health {base_health} '
+                    f'divisor {divisor}')
+        else:
+            displayed = f'{facts.mana_cost} + {facts.mana_cost_percentage}% of base power'
+            rule = UNREADABLE + f'ManaCostPercentage {facts.mana_cost_percentage} needs the base power of the caster'
     else:
         displayed = str(facts.mana_cost // divisor)
         rule = f'ManaCost divisor {divisor}'
@@ -589,6 +672,7 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
                  calc_amount_hooks_measurement(label, spell_id, effect)]
                 + effect_modifier_measurements(records, label, spell_id, effect))
 
+    ally_cast = value_ally_cast(class_file, rank_id)
     summon_carrier = summon_aura_carrier(class_file, rank_id)
     summon_reads = False
 
@@ -600,7 +684,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         if carried_by_summon(carrier_effect):
             summon_reads = True
             return summon_aura_measurement(label, metric, rank_id, summon_carrier)
-        return measurement(label, metric=metric, spell=rank_id, **aura_carrier(facts, carrier_effect), **fields)
+        use_ally_cast = ally_cast is not None and not is_hostile(facts) and not targets_resurrect(facts)
+        return measurement(label, metric=metric, spell=rank_id,
+                           **aura_carrier(facts, carrier_effect, use_ally_cast), **fields)
 
     def summon_gap(carrier_effect: int, metric: str) -> str:
         return summon_aura_gap(metric) if carried_by_summon(carrier_effect) else ''
@@ -792,12 +878,17 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         expect(label, 'effect_value', None, '',
                GENERIC + 'tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")')
 
-    ally_cast = value_ally_cast(class_file, rank_id)
     cast_steps: list[dict] = []
+    percent_cost_checked = False
     if not facts.passive:
         label = f'{rank_id} power_cost'
         measured.append(measurement(label, CASTER, 'spell_power_cost', spell=rank_id))
-        expectations.append(power_cost_expectation(label, spell.spell_id, rank_id, facts))
+        power_cost = power_cost_expectation(label, spell.spell_id, rank_id, facts,
+                                            base_mana_for_power_cost(class_file),
+                                            base_health_for_power_cost(class_file))
+        expectations.append(power_cost)
+        percent_cost_checked = (not facts.mana_cost_per_level and bool(facts.mana_cost_percentage)
+                                and not power_cost.rule.startswith(UNREADABLE))
         if facts.recast_ms > 0:
             label = f'{rank_id} cooldown_ms'
             after_cast.append(measurement(label, CASTER, 'cooldown_ms', spell=rank_id))
@@ -814,6 +905,8 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
             cast_steps.append({'action': 'die', 'actor': ALLY})
             cast['target'] = ALLY
         elif ally_cast is not None:
+            if targets_raid(facts):
+                cast_steps.append({'action': 'group', 'actor': CASTER, 'target': ALLY})
             cast_steps += ally_setup_steps(records, ally_cast)
             cast['target'] = ALLY
         cast_steps += required_aura_steps(facts) + cast_aura_steps(class_file, rank_id)
@@ -823,7 +916,9 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
         if facts.cast_time_ms:
             cast_steps.append({'action': 'wait', 'label': CAST_WAIT_LABEL,
                                'ms': facts.cast_time_ms + CAST_MARGIN_MS})
-        travel_ms = missile_wait_ms(records, rank_id, cast_distance(records, rank_id)) if is_hostile(facts) else 0
+        use_min_range = honour_min_range(class_file)
+        travel_ms = (missile_wait_ms(records, rank_id, cast_distance(records, rank_id, use_min_range))
+                     if is_hostile(facts) else 0)
         if travel_ms:
             cast_steps.append({'action': 'wait', 'label': MISSILE_WAIT_LABEL, 'ms': travel_ms})
         cast_steps.append(measurement(f'{rank_id} cast_failure', CASTER, 'cast_failure', spell=rank_id))
@@ -847,14 +942,16 @@ def value_scenario(class_file: dict, spell: ClassSpell, rank_id: int,
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spell.name} {rank_id}',
-        'contract': 'No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.',
+        'contract': ('No-combat check of the effect values, cost, cooldown and aura of one rank against its tooltip.'
+                     + (PERCENT_POWER_COST_CONTRACT if percent_cost_checked else '')),
         'players': [player_fixture(class_file)],
         'steps': learn + sampled + cast_steps + after_cast + ally_grant_proofs}
     summon_target = summon_reads and is_hostile(facts_of(records, summon_carrier['summon']))
     if (is_hostile(facts) or summon_target) and cast_wanted:
         placed = rank_id if is_hostile(facts) else summon_carrier['summon']
         scenario['creatures'] = [{'id': TARGET, 'owner': CASTER, 'entry': DUMMY_ENTRY, 'level': class_file['level'],
-                                  'health': DUMMY_HEALTH, 'distance': cast_distance(records, placed)}]
+                                  'health': DUMMY_HEALTH,
+                                  'distance': cast_distance(records, placed, honour_min_range(class_file))}]
     if (targets_resurrect(facts) or needs_ally_target or ally_cast is not None) and cast_wanted:
         scenario['players'].append({**player_fixture(class_file), 'id': ALLY})
     return scenario, expectations, periodic_totals

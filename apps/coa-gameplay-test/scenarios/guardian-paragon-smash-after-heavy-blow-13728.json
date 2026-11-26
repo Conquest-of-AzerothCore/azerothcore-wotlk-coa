@@ -1,0 +1,249 @@
+{
+  "schema": 1,
+  "name": "Guardian Paragon Smash is castable while Heavy Blow is on cooldown (#13728)",
+  "contract": [
+    "Paragon 706514 grants 1 stack of 706516 (10 s) on block and 3 stacks on casting Heavy Blow; at 10 stacks it",
+    "applies 707138 (DurationIndex 1 = 10000 ms) and replaces Heavy Blow (Category 1087, RecoveryTime 10000 ms)",
+    "with Paragon Smash 802629 (Category 737, RecoveryTime 10000 ms, 8 yd AoE). Previously",
+    "spell_ascension_guardian_ability::Check rejected 802629 with SPELL_FAILED_NOT_READY whenever any Heavy Blow",
+    "rank had a remaining cooldown, making Paragon Smash uncastable for the entire 10 s duration of 707138 whenever",
+    "Heavy Blow triggered the 10th stack (and whenever blocks reached 10 stacks during Heavy Blow's 10 s cooldown).",
+    "With 7 stacks of 706516, casting active Heavy Blow Rank 9 (503126) starts Heavy Blow's 10 s cooldown, adds 3",
+    "stacks to trigger 707138 and replaces 503126 with 802629; after waiting 4.5 s so 503126 has 5000-6000 ms",
+    "cooldown remaining (negative control), Paragon Smash 802629 must cast cleanly, damage both nearby enemies,",
+    "consume 707138, reset Heavy Blow's cooldown to its 10 s recovery window (7000-10000 ms, positive control),",
+    "and return the replacement to 503126. Pre-existing on main: Synchronize() removes",
+    "802629 via Player::removeSpell(..., true) once 707138 is consumed, which strips triggered aura 803432 on the",
+    "next update; that behavior is unrelated to #13728 and is not asserted here."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "guardian",
+      "race": 1,
+      "class": 18,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 1000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy1",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "dummy2",
+      "owner": "guardian",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 5,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 851
+    },
+    {
+      "action": "add_item",
+      "actor": "guardian",
+      "item": 2362
+    },
+    {
+      "action": "equip",
+      "label": "Equip main-hand weapon for Heavy Blow",
+      "actor": "guardian",
+      "item": 851,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "label": "Equip shield in off hand",
+      "actor": "guardian",
+      "item": 2362,
+      "slot": 16
+    },
+    {
+      "action": "learn",
+      "label": "Learn Heavy Blow Rank 9 (503126)",
+      "actor": "guardian",
+      "spell": 503126
+    },
+    {
+      "action": "learn",
+      "label": "Learn Paragon (706514)",
+      "actor": "guardian",
+      "spell": 706514
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Paragon passive aura is active",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 706514,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture 7 Paragon stacks before Heavy Blow",
+      "actor": "guardian",
+      "spell": 706516,
+      "stacks": 7
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Heavy Blow is not replaced before 10 stacks",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 503126,
+      "equals": 503126
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Cast Heavy Blow to add 3 stacks and trigger Paragon Smash while starting Heavy Blow's 10 s cooldown",
+      "actor": "guardian",
+      "spell": 503126,
+      "target": "dummy1"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Heavy Blow cast succeeded",
+      "actor": "guardian",
+      "metric": "cast_failure",
+      "spell": 503126,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Heavy Blow reached 10 Paragon stacks and applied Paragon Smash aura 707138",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 707138,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: 706516 stack aura cleared on proc",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 706516,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Heavy Blow is replaced by Paragon Smash 802629",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 503126,
+      "equals": 802629,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Wait 4.5 s so Heavy Blow's 10 s cooldown decays to 5000-6000 ms while 707138 remains active",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Heavy Blow cooldown is between 5000 and 6000 ms before Paragon Smash",
+      "actor": "guardian",
+      "metric": "cooldown_ms",
+      "spell": 503126,
+      "min": 5000,
+      "max": 6000
+    },
+    {
+      "action": "set_power",
+      "actor": "guardian",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "DISCRIMINATING: Cast Paragon Smash while Heavy Blow is still on cooldown",
+      "actor": "guardian",
+      "spell": 802629
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Paragon Smash cast is accepted (not rejected with SPELL_FAILED_NOT_READY)",
+      "actor": "guardian",
+      "metric": "cast_failure",
+      "spell": 802629,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Paragon Smash hits primary nearby target",
+      "actor": "guardian",
+      "metric": "spell_damage_count",
+      "spell": 802629,
+      "target": "dummy1",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Paragon Smash hits second nearby target in AoE",
+      "actor": "guardian",
+      "metric": "spell_damage_count",
+      "spell": 802629,
+      "target": "dummy2",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Paragon Smash consumes ready aura 707138",
+      "actor": "guardian",
+      "metric": "aura",
+      "spell": 707138,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Heavy Blow cooldown is reset to Paragon Smash recovery time (7000-10000 ms)",
+      "actor": "guardian",
+      "metric": "cooldown_ms",
+      "spell": 503126,
+      "min": 7000,
+      "max": 10000
+    },
+    {
+      "action": "assert",
+      "label": "Replacement returns to Heavy Blow once 707138 is consumed",
+      "actor": "guardian",
+      "metric": "temporary_spell_replacement",
+      "spell": 503126,
+      "equals": 503126,
+      "within_ms": 2000
+    }
+  ]
+}

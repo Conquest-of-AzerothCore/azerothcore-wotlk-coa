@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Worldforged Abandoned Banner stands at its Echo Isles realm dump spot instead of sunk on the beach (#12491)",
+  "contract": "#12491 reported the Abandoned Banner pickup (gameobject entry 95628, guid 6942059, drops Raptorscale Cloak 450697) in Echo Isles, Durotar clipping through the ground. The realm-map pass moved it 14.5 yd off the Stranglethornruins06.m2 ruins to the beach (-799.8, -5399.2) and rev_20261006_65 dropped its z to bare terrain (0.0208), sinking the hanging banner model into the ground. rev_20261125_12491 restores first-pass row 6901076 (-794.285, -5385.820, 4.801). Expected: the banner stands at that spot, hangs 1.23 yd above terrain, is not under water, and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -794.3,
+    "y": -5385.8,
+    "z": 3.6,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95628,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the banner stands at its first-pass realm spot (-794.285, -5385.820, 4.801) instead of 14.5 yd away on the beach",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -794.285,
+      "y": -5385.820,
+      "z": 4.801,
+      "max": 0.3,
+      "guid": 6942059,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the hanging banner sits ~1.23 yd above terrain instead of sunk at 0.00 yd",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": 0.9,
+      "max": 1.5,
+      "guid": 6942059,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the banner is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6942059,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "no model surface lies above the banner",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6942059,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95628
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the banner is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

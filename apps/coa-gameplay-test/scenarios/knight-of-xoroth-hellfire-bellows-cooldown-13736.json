@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Hellfire Bellows reduces and fully resets its cooldown on server and client per Demonfire consumed (#13736)",
+  "contract": "Hellfire Bellows 520292 (Knight of Xoroth, base cooldown 15000 ms) reads 'Cooldown is reduced by $/1000;704195s3 sec for each Demonfire consumed' (704195 effect 2 is -3000 ms, so 2 Demonfire leave 9000 ms and 5 or 6 Demonfire fully reset the 15000 ms cooldown). Previously, 520292 and its triggered behind-cone child 520857 shared Category 14 with 520857 carrying a 15000 ms CategoryRecoveryTime on the client while 520292 carried 0 RecoveryTime, and Player::ModifySpellCooldown never erased the cooldown or sent SMSG_CLEAR_COOLDOWN when a reduction reached or exceeded the remaining time. Now both spells clear Category 14 and stream their server recovery values to the client, and Player::ModifySpellCooldown calls RemoveSpellCooldown(spellId, true) when a reduction zeros the cooldown. A level-60 knight casts 520292 at 2 Demonfire (leaving ~9 s cooldown), then resets cooldown and casts at 5 Demonfire (asserting 0 ms server cooldown, an SMSG_CLEAR_COOLDOWN packet, and client_cooldown_ready == 1), then waits only the 1.6 s GCD and immediately recasts at 6 Demonfire without any client cooldown block.",
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 60,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 520292 },
+    { "action": "assert", "label": "SETUP: knight knows Hellfire Bellows", "actor": "knight", "metric": "knows_spell", "spell": 520292, "equals": 1 },
+    { "action": "assert", "label": "SETUP: client knows Hellfire Bellows", "actor": "knight", "metric": "client_knows_spell", "spell": 520292, "equals": 1 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 2, "label": "Two Demonfire stacks" },
+    { "action": "cast", "label": "Cast Hellfire Bellows with 2 Demonfire", "actor": "knight", "spell": 520292, "target": "enemy" },
+    { "action": "assert", "label": "SETUP: 2-stack Hellfire Bellows hit enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 520292, "target": "enemy", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: Demonfire was consumed", "actor": "knight", "metric": "aura_stacks", "spell": 500906, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: 2 Demonfire reduce the 15 s cooldown by 6 s to ~9 s", "actor": "knight", "metric": "cooldown_ms", "spell": 520292, "min": 7000, "max": 9500 },
+
+    { "action": "reset_cooldown", "actor": "knight", "spell": 520292 },
+    { "action": "wait", "label": "Clear the global cooldown", "ms": 1600 },
+
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 5, "label": "Five Demonfire stacks (15 s reduction)" },
+    { "action": "snapshot", "actor": "knight", "metric": "client_cooldown_clears", "spell": 520292, "save_as": "clears_before_five" },
+    { "action": "cast", "label": "Cast Hellfire Bellows with 5 Demonfire", "actor": "knight", "spell": 520292, "target": "enemy" },
+    { "action": "assert", "label": "SETUP: 5-stack Hellfire Bellows hit enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 520292, "target": "enemy", "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: 5 Demonfire reset server cooldown to 0", "actor": "knight", "metric": "cooldown_ms", "spell": 520292, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: server sends SMSG_CLEAR_COOLDOWN for 5-stack reset", "actor": "knight", "metric": "client_cooldown_clears", "spell": 520292, "relative_to": "clears_before_five", "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: client shows Hellfire Bellows ready immediately after 5-stack reset", "actor": "knight", "metric": "client_cooldown_ready", "spell": 520292, "equals": 1 },
+
+    { "action": "wait", "label": "Wait only the 1.6 s GCD inside the 15 s base cooldown", "ms": 1600 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 6, "label": "Six Demonfire stacks (18 s reduction)" },
+    { "action": "snapshot", "actor": "knight", "metric": "client_cooldown_clears", "spell": 520292, "save_as": "clears_before_six" },
+    { "action": "cast", "label": "Immediately recast Hellfire Bellows with 6 Demonfire", "actor": "knight", "spell": 520292, "target": "enemy" },
+    { "action": "assert", "label": "CONTRACT: immediate recast hits enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 520292, "target": "enemy", "equals": 3, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTRACT: client never blocked the reset recast", "actor": "knight", "metric": "client_cooldown_blocked_casts", "spell": 520292, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: 6 Demonfire also reset server cooldown to 0 without underflow", "actor": "knight", "metric": "cooldown_ms", "spell": 520292, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: server sends SMSG_CLEAR_COOLDOWN for 6-stack reset", "actor": "knight", "metric": "client_cooldown_clears", "spell": 520292, "relative_to": "clears_before_six", "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: client shows Hellfire Bellows ready after 6-stack reset", "actor": "knight", "metric": "client_cooldown_ready", "spell": 520292, "equals": 1 }
+  ]
+}

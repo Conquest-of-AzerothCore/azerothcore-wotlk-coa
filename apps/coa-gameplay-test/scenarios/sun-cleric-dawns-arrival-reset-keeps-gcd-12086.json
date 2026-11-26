@@ -1,0 +1,220 @@
+{
+  "schema": 1,
+  "name": "Dawn's Arrival cooldown reset keeps Gavel of Light's remaining global cooldown on the client (#12086)",
+  "contract": [
+    "Dawnbreak (800654) and Gavel of Light (800611, rank 8 = 502473) are instant spells (CastingTimeIndex 1, Speed 0)",
+    "sharing StartRecoveryCategory 133 and StartRecoveryTime 1500 ms. When Dawnbreak procs Dawn's Arrival (503690, 40%",
+    "chance), sun_cleric_spells::OnSpellCast resets all three Gavel roots through AscensionSunCleric::Reduce(..., INT32_MAX),",
+    "which calls Player::RemoveSpellCooldown(..., true) and sends SMSG_CLEAR_COOLDOWN. Because Spell::prepare runs an",
+    "instant spell's cast() before TriggerGlobalCooldown(), and SMSG_CLEAR_COOLDOWN clears the global cooldown sweep on the",
+    "client action button (same mechanism as Electrocutioner #11288 in SpellEffects.cpp), Gavel of Light looked ready",
+    "immediately after Dawnbreak while the server still refused it with SPELL_FAILED_NOT_READY for 1.5 s. Reduce now",
+    "schedules a next-update resend of the remaining global cooldown via SMSG_SPELL_COOLDOWN for each active cleared rank",
+    "(matching ResendRemainingGlobalCooldowns in SpellEffects.cpp). Gavel of Light is a mana spell (PowerType 0), so",
+    "SpellInfo::ComputeIsStackableWithRanks returns true and Player::addSpell keeps every learned rank active (ranks 1..8",
+    "including 800611 and 502473 both have spell_active == 1). The scenario learns Gavel of Light ranks 1 through 8, puts",
+    "502473 on its 5 s category cooldown (confirming no SMSG_SPELL_COOLDOWN packet is sent by the cast itself), then casts",
+    "Dawnbreak until Dawn's Arrival (503691) procs (up to 20 casts at 40%: miss probability 0.6^20 = 3.7e-5). After the",
+    "reset, 502473's server cooldown is 0, active learned ranks 502473 and 800611 receive SMSG_SPELL_COOLDOWN with",
+    "1..1500 ms for the remaining GCD, non-Gavel Dawnbreak (800654) receives no cooldown packet (-1), and after the GCD",
+    "clears the free Gavel cast succeeds and consumes 503691 without starting a new server cooldown."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "cleric",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 503690 },
+    { "action": "learn", "actor": "cleric", "spell": 800654 },
+    { "action": "learn", "actor": "cleric", "spell": 800611 },
+    { "action": "learn", "actor": "cleric", "spell": 502467 },
+    { "action": "learn", "actor": "cleric", "spell": 502468 },
+    { "action": "learn", "actor": "cleric", "spell": 502469 },
+    { "action": "learn", "actor": "cleric", "spell": 502470 },
+    { "action": "learn", "actor": "cleric", "spell": 502471 },
+    { "action": "learn", "actor": "cleric", "spell": 502472 },
+    { "action": "learn", "actor": "cleric", "spell": 502473 },
+    { "action": "add_item", "actor": "cleric", "item": 406570 },
+    { "action": "equip", "actor": "cleric", "item": 406570, "slot": 15 },
+    { "action": "add_item", "actor": "cleric", "item": 406742 },
+    { "action": "equip", "actor": "cleric", "item": 406742, "slot": 16 },
+    {
+      "action": "assert",
+      "label": "SETUP: Gavel of Light rank 8 (502473) is active",
+      "actor": "cleric",
+      "metric": "spell_active",
+      "spell": 502473,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gavel of Light rank 1 (800611) also remains active (mana spell downranking)",
+      "actor": "cleric",
+      "metric": "spell_active",
+      "spell": 800611,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no cooldown packet observed for 502473 before reset",
+      "actor": "cleric",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 502473,
+      "equals": -1
+    },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 502473,
+      "target": "dummy",
+      "label": "Put Gavel of Light rank 8 on its 5 s category cooldown"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: initial Gavel of Light cast succeeded",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 502473,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gavel of Light is on cooldown",
+      "actor": "cleric",
+      "metric": "cooldown_ms",
+      "spell": 502473,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: normal Gavel cast sent no SMSG_SPELL_COOLDOWN packet for 502473",
+      "actor": "cleric",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 502473,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "Wait for the Gavel global cooldown to clear before casting Dawnbreak",
+      "actor": "cleric",
+      "metric": "global_cooldown_ms",
+      "spell": 800654,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast_until_aura",
+      "label": "Cast Dawnbreak until Dawn's Arrival (503691) procs and resets Gavels",
+      "actor": "cleric",
+      "spell": 800654,
+      "aura": 503691,
+      "every_ms": 1700,
+      "max_casts": 20,
+      "cast_power": 1000,
+      "reset_cooldown": true
+    },
+    { "action": "wait", "label": "Let the next-update GCD resend event fire", "ms": 100 },
+    {
+      "action": "assert",
+      "label": "SETUP: Dawn's Arrival buff is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 503691,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Gavel of Light server cooldown is reset to 0",
+      "actor": "cleric",
+      "metric": "cooldown_ms",
+      "spell": 502473,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the reset re-sent the remaining global cooldown packet for active rank 502473",
+      "actor": "cleric",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 502473,
+      "min": 1,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: the reset also re-sent the remaining global cooldown packet for active learned rank 800611",
+      "actor": "cleric",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 800611,
+      "min": 1,
+      "max": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: non-Gavel Dawnbreak (800654) received no cooldown resend packet",
+      "actor": "cleric",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 800654,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "Wait for Dawnbreak global cooldown to expire",
+      "actor": "cleric",
+      "metric": "global_cooldown_ms",
+      "spell": 502473,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    { "action": "set_power", "actor": "cleric", "power": 0, "value": 1000 },
+    {
+      "action": "cast",
+      "actor": "cleric",
+      "spell": 502473,
+      "target": "dummy",
+      "label": "Cast free Gavel of Light consuming Dawn's Arrival"
+    },
+    { "action": "wait", "label": "Let free Gavel's next-update GCD resend event fire", "ms": 100 },
+    {
+      "action": "assert",
+      "label": "CONTRACT: free Gavel of Light cast succeeded",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 502473,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Dawn's Arrival buff was consumed",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 503691,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: free Gavel of Light incurred no server cooldown",
+      "actor": "cleric",
+      "metric": "cooldown_ms",
+      "spell": 502473,
+      "equals": 0
+    }
+  ]
+}

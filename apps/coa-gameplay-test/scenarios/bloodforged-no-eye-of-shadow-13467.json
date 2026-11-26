@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Rare Hidden Cache never drops Bloodforged The Eye of Shadow (#13467)",
+  "contract": "Requires Bloodforged.Enable = 1 with rev_20261126_13467_bloodforged_remove_eye_of_shadow.sql applied. Bloodforged The Eye of Shadow (6018665, item level 50, required level 60) is an unsellable statless copy of Priest quest trinket 18665 and is removed from coa_bloodforged_catalogue. Across 10,000 Rare Hidden Cache (gameobject loot 9671) rolls, 6018665 never drops (0%), while Bloodforged Writ of the Emperor (6098000) continues to drop.",
+  "players": [
+    {
+      "id": "opener",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A valid level-60 epic still drops from a Rare Hidden Cache",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9671,
+      "item": 6098000,
+      "min": 0.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodforged The Eye of Shadow (6018665) never drops (#13467)",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9671,
+      "item": 6018665,
+      "equals": 0
+    }
+  ]
+}

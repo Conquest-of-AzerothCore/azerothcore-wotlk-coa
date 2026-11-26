@@ -1,0 +1,80 @@
+{
+  "schema": 1,
+  "name": "Maiev's Ring Glaives (Backsheath) hands out both main-hand and offhand weapons (#13196)",
+  "contract": "Maiev's Ring Glaives (Backsheath) 198440 (item_ethereal_set_cache, spell 60034) states in ItemAddon.dbc that it contains both a main-hand and an offhand version, but ethereal_bazaar_set_cache only listed the main-hand Maiev's Ring Glaive (Backsheath) 5532425. Expected: opening 198440 hands out both 5532425 (main-hand) and 198441 (Maiev's Ring Glaive (Offhand Backsheath)) and consumes the cache.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 198440
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: at least two inventory slots are free",
+      "actor": "p",
+      "metric": "free_inventory_slots",
+      "min": 2
+    },
+    {
+      "action": "use_item",
+      "label": "Open Maiev's Ring Glaives (Backsheath)",
+      "actor": "p",
+      "item": 198440,
+      "spell": 60034
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "the cache opens without being refused",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 60034,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "the main-hand Maiev's Ring Glaive (Backsheath) is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 5532425,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the offhand Maiev's Ring Glaive (Offhand Backsheath) is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 198441,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the cache itself is consumed",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 198440,
+      "equals": 0
+    }
+  ]
+}

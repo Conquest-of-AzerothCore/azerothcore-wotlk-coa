@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Deck Hand Boots display 165025 streams with an inventory icon (#10377)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "Deck Hand Boots (2081389) is the sole item using display 165025, whose client and server ItemDisplayInfo.dbc row has an empty InventoryIcon_1.",
+    "The login patch stream sends display 165025 via SMSG_PATCH_ITEM_DISPLAY_INFO (opcode 2411 / 0x096B) with INV_Boots_05 and preserves Cloth_B_05SwashA_Boot_LL and Cloth_B_05SwashA_Boot_FO.",
+    "Expected before: the login stream sends no row 165025.",
+    "Socketless packet verification confirms the server streams the patched row; client replacement of an existing row requires a live client check."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the login stream sends display 165025",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2411,
+      "row": 165025,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Display 165025 carries the INV_Boots_05 icon",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2411,
+      "row": 165025,
+      "text": "INV_Boots_05",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Display 165025 preserves Cloth_B_05SwashA_Boot_LL",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2411,
+      "row": 165025,
+      "text": "Cloth_B_05SwashA_Boot_LL",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Display 165025 preserves Cloth_B_05SwashA_Boot_FO",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2411,
+      "row": 165025,
+      "text": "Cloth_B_05SwashA_Boot_FO",
+      "equals": 1
+    }
+  ]
+}

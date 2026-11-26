@@ -11,14 +11,11 @@ namespace Ascension
 {
 class RenewalContributions
 {
-    struct Contribution
-    {
-        std::uint64_t Next;
-        std::uint64_t Expires;
-        std::uint32_t Period;
-        std::int32_t Amount;
-    };
-    std::vector<Contribution> _contributions;
+    bool _active = false;
+    std::uint64_t _next = 0;
+    std::uint64_t _expires = 0;
+    std::uint32_t _period = 0;
+    std::int32_t _amount = 0;
 
     static std::int32_t Clamp(std::uint64_t amount)
     {
@@ -26,58 +23,96 @@ class RenewalContributions
             std::numeric_limits<std::int32_t>::max()));
     }
 
+    static std::uint64_t SaturatingMul(std::uint64_t a, std::uint64_t b)
+    {
+        return a && b > std::numeric_limits<std::uint64_t>::max() / a
+            ? std::numeric_limits<std::uint64_t>::max()
+            : a * b;
+    }
+
+    static std::uint64_t SaturatingAdd(std::uint64_t a, std::uint64_t b)
+    {
+        return b > std::numeric_limits<std::uint64_t>::max() - a
+            ? std::numeric_limits<std::uint64_t>::max()
+            : a + b;
+    }
+
+    std::uint64_t RemainingTicks() const
+    {
+        if (!_active || !_period || _next > _expires)
+            return 0;
+        return 1 + (_expires - _next) / _period;
+    }
+
 public:
     void Add(std::uint64_t now, std::int32_t amount, std::uint32_t duration, std::uint32_t period)
     {
-        if (amount > 0 && duration && period)
-            _contributions.push_back({now + period, now + duration, period, amount});
+        if (amount <= 0 || !duration || !period)
+            return;
+
+        if (_active && _expires <= now)
+        {
+            _active = false;
+            _amount = 0;
+        }
+
+        std::uint64_t remainingPool = _active ? SaturatingMul(std::uint64_t(_amount), RemainingTicks()) : 0;
+        std::uint64_t newTicks = duration / period;
+        std::uint64_t newPool = SaturatingMul(std::uint64_t(amount), newTicks);
+        std::uint64_t expires = now + duration;
+
+        if (!_active)
+        {
+            _active = true;
+            _next = now + period;
+            _expires = expires;
+        }
+        else
+        {
+            _expires = std::max(_expires, expires);
+            if (_next > now + period)
+                _next = now + period;
+        }
+        _period = period;
+
+        std::uint64_t totalTicks = RemainingTicks();
+        _amount = totalTicks ? Clamp(SaturatingAdd(remainingPool, newPool) / totalTicks) : 0;
     }
 
     std::vector<std::int32_t> Advance(std::uint64_t now)
     {
         std::vector<std::int32_t> ticks;
-        for (;;)
+        if (!_active)
+            return ticks;
+        while (_period && _next <= _expires && _next <= now)
         {
-            std::uint64_t next = std::numeric_limits<std::uint64_t>::max();
-            for (auto const& entry : _contributions)
-                if (entry.Next <= entry.Expires)
-                    next = std::min(next, entry.Next);
-            if (next > now)
-                break;
-            std::uint64_t amount = 0;
-            for (auto& entry : _contributions)
-                if (entry.Next == next && entry.Next <= entry.Expires)
-                {
-                    amount += entry.Amount;
-                    entry.Next += entry.Period;
-                }
-            ticks.push_back(Clamp(amount));
+            if (_amount > 0)
+                ticks.push_back(_amount);
+            _next += _period;
         }
-        std::erase_if(_contributions, [now](auto const& entry) { return entry.Expires <= now; });
+        if (_expires <= now)
+        {
+            _active = false;
+            _amount = 0;
+        }
         return ticks;
     }
 
     std::int32_t Amount() const
     {
-        std::uint64_t amount = 0;
-        for (auto const& entry : _contributions)
-            amount += entry.Amount;
-        return Clamp(amount);
+        return _active ? _amount : 0;
     }
 
     std::int32_t Remaining(std::uint64_t now) const
     {
-        std::uint64_t expires = now;
-        for (auto const& entry : _contributions)
-            expires = std::max(expires, entry.Expires);
-        return Clamp(expires - now);
+        return _active && _expires > now ? Clamp(_expires - now) : 0;
     }
 
     std::int32_t Delay(std::uint64_t now) const
     {
-        std::uint64_t next = std::numeric_limits<std::uint64_t>::max();
-        for (auto const& entry : _contributions)
-            next = std::min(next, std::min(entry.Next, entry.Expires));
+        if (!_active)
+            return 1;
+        std::uint64_t next = std::min(_next, _expires);
         return next > now ? std::max(1, Clamp(next - now)) : 1;
     }
 };

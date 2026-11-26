@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Cultist: two Cultists' Tentacles of N'Zoth isolate Thoughtseize removal by owner (O-22)",
+  "contract": "Owner ruling O-22 (2026-11-25, Cultist ADR 0036) on Tentacle of N'Zoth 572103 and Thoughtseize 806596 (Spell.dbc: RangeIndex 11 = 15.0 yd, DurationIndex 31 = 8000 ms; creature 501464 combat reach 0.75 yd + Harvest Golem 36 combat reach 1.275 yd = 17.025 yd centre-to-centre; 501464 spawns inside SpellRadius[8] = 5.0 yd disk around target). Geometry along clear-LOS south -y axis: caster1 at (0,0) casts 572103 on dummy at (0,-2) (tentacle1 within 5.0 yd disk). Dummy moves -10.5 yd to (0,-12.5): distance to tentacle1 is [5.5..15.5] yd < 17.025 yd (in-range control: caster1 keeps 806596 == 1). caster2 at (0,-15) then casts 572103 on dummy at (0,-12.5) (tentacle2 within 5.0 yd disk); both caster1 and caster2 hold 806596 == 1 on dummy. Dummy moves -12.0 yd to (0,-24.5): by 2D triangle inequality over each 5.0 yd spawn disk, distance to tentacle1 is [17.5..27.5] yd > 17.025 yd (drops caster1's 806596 -> 0), while distance to tentacle2 is [7.0..17.0] yd < 17.025 yd (keeps caster2's 806596 -> 1). Total elapsed time is ~3.9 s < 8.0 s tentacle duration. What fails this scenario: leaving caster1's 806596 active out of range (step4_c1_aura == 1), stripping 806596 globally via RemoveAurasDueToSpell instead of keying on owner (step4_c2_aura == 0), or dropping caster1's 806596 while dummy is still in range at step2.",
+  "timeout_ms": 40000,
+  "players": [
+    { "id": "caster1", "race": 1, "class": 25, "level": 60 },
+    { "id": "caster2", "race": 1, "class": 25, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster1", "entry": 36, "level": 60, "health": 500000, "dx": 0.0, "dy": -2.0, "stationary": false }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "caster1", "spell": 572103 },
+    { "action": "learn", "actor": "caster2", "spell": 572103 },
+    { "action": "relocate", "actor": "caster2", "dy": -15.0 },
+    { "action": "set_aura", "actor": "caster1", "target": "dummy", "spell": 11305, "stacks": 1 },
+    { "action": "set_power", "actor": "caster1", "power": 0, "value": 2000 },
+    { "action": "set_power", "actor": "caster2", "power": 0, "value": 2000 },
+    { "action": "cast", "actor": "caster1", "spell": 572103, "target": "dummy" },
+    { "action": "wait", "label": "c1 applied", "ms": 300 },
+    { "action": "assert", "label": "step1_c1_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "caster": "caster1", "equals": 1 },
+    { "action": "move_point", "actor": "dummy", "dx": 0.0, "dy": -10.5 },
+    { "action": "wait", "label": "dummy moves inside c1 range", "ms": 1500 },
+    { "action": "assert", "label": "step2_c1_dist", "actor": "caster1", "metric": "owned_creature_distance_2d", "entry": 501464, "target": "dummy", "max": 17.0 },
+    { "action": "assert", "label": "step2_c1_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "caster": "caster1", "equals": 1 },
+    { "action": "cast", "actor": "caster2", "spell": 572103, "target": "dummy" },
+    { "action": "wait", "label": "c2 applied", "ms": 300 },
+    { "action": "assert", "label": "step3_c1_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "caster": "caster1", "equals": 1 },
+    { "action": "assert", "label": "step3_c2_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "caster": "caster2", "equals": 1 },
+    { "action": "move_point", "actor": "dummy", "dx": 0.0, "dy": -12.0 },
+    { "action": "wait", "label": "dummy leaves c1 range, stays in c2 range", "ms": 1800 },
+    { "action": "assert", "label": "step4_c1_dist", "actor": "caster1", "metric": "owned_creature_distance_2d", "entry": 501464, "target": "dummy", "min": 17.025 },
+    { "action": "assert", "label": "step4_c2_dist", "actor": "caster2", "metric": "owned_creature_distance_2d", "entry": 501464, "target": "dummy", "max": 17.025 },
+    { "action": "assert", "label": "step4_c1_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "caster": "caster1", "equals": 0 },
+    { "action": "assert", "label": "step4_c2_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "caster": "caster2", "equals": 1 }
+  ]
+}

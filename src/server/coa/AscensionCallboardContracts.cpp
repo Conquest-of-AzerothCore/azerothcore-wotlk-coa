@@ -670,7 +670,8 @@ public:
 
         std::shared_ptr<Catalogue const> const contracts = CurrentCatalogue();
         ContractType const* contract = contracts->ForQuest(quest->GetQuestId());
-        return contract && SpareFor(player, *contracts, *contract, CurrentSettings()) > 0;
+        return contract && CanRepeatDaily(RemainingFor(player, *contract, CurrentSettings()),
+            InLog(player, *contracts, *contract), player->FindQuestSlot(quest->GetQuestId()) < MAX_QUEST_LOG_SIZE);
     }
 
     [[nodiscard]] bool OnPlayerQuestGiverChooseReward(Player* player, Object*, Quest const* quest, uint32) override

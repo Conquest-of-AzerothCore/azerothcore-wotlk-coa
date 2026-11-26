@@ -24,10 +24,14 @@ MAXIMUM_STEPS = 10000
 ATTACK_POWER_AURA = 99
 STAT_AURA = 29
 AGILITY = 1
+COMBAT_RATING_AURA = 189
+DEFENSE_RATING = 1
+DEFENSE_RATING_MASK = 1 << DEFENSE_RATING
 HEALTH_AURAS = frozenset({34, 133})
 ABSORB_AURA = 69
 ATTACK_POWER = 'attack_power'
-POWER_METRICS = {ATTACK_POWER: 'attack power', 'agility': 'Agility', 'max_health': 'maximum health'}
+POWER_METRICS = {ATTACK_POWER: 'attack power', 'agility': 'Agility', 'max_health': 'maximum health',
+                 'defense_rating': 'defense rating'}
 ABSORB = 'absorb'
 STRIKE_SETTLE_MS = 500
 ARMS = ('control low', 'control high', 'learned high', 'learned low')
@@ -57,6 +61,8 @@ class PowerTermDirectionSpec:
     refill_spell: int | None = None
     power_stacks: int = 1
     power_companions: tuple[tuple[int, int, str], ...] = ()
+    power_settle_ms: int = 0
+    restore_charges: bool = False
 
 
 def power_term_direction_spec(entry: dict) -> PowerTermDirectionSpec:
@@ -81,6 +87,12 @@ def power_term_direction_spec(entry: dict) -> PowerTermDirectionSpec:
     power_stacks = entry.get('power_stacks', 1)
     if not isinstance(power_stacks, int) or power_stacks < 1:
         raise ValueError(f'{spell} {KIND} power_stacks is a positive stack count')
+    power_settle_ms = entry.get('power_settle_ms', 0)
+    if isinstance(power_settle_ms, bool) or not isinstance(power_settle_ms, int) or power_settle_ms < 0:
+        raise ValueError(f'{spell} {KIND} power_settle_ms is a non-negative integer')
+    restore_charges = entry.get('restore_charges', False)
+    if type(restore_charges) is not bool:
+        raise ValueError(f'{spell} {KIND} restore_charges is a boolean')
     spec = PowerTermDirectionSpec(spell, entry['name'], entry['quote'], int(entry['talent']),
                                   int(entry['cast_spell']), int(entry['power_aura']), entry['power_aura_source'],
                                   int(entry['casts']), int(entry['cast_wait_ms']),
@@ -89,7 +101,8 @@ def power_term_direction_spec(entry: dict) -> PowerTermDirectionSpec:
                                   entry.get('power_metric', ATTACK_POWER), entry.get('hit_spell'),
                                   entry.get('cast_power'), entry.get('sample'), entry.get('strike_spell'),
                                   entry.get('refill_spell'), power_stacks,
-                                  tuple((aura['spell'], aura['stacks'], aura['source']) for aura in companions))
+                                  tuple((aura['spell'], aura['stacks'], aura['source']) for aura in companions),
+                                  power_settle_ms, restore_charges)
     if spec.power_metric not in POWER_METRICS:
         raise ValueError(f'{spell} {KIND} power_metric is one of {sorted(POWER_METRICS)}')
     if spec.hit_spell is not None and (not isinstance(spec.hit_spell, int) or spec.sample == ABSORB):
@@ -130,6 +143,8 @@ def arm_reads(spec: PowerTermDirectionSpec, arm: str) -> dict:
 def power_read(spec: PowerTermDirectionSpec, label: str) -> dict:
     if spec.power_metric == 'agility':
         return measurement(label, CASTER, 'stat', stat=AGILITY)
+    if spec.power_metric == 'defense_rating':
+        return measurement(label, CASTER, 'combat_rating', rating=DEFENSE_RATING)
     return measurement(label, CASTER, spec.power_metric)
 
 
@@ -144,6 +159,13 @@ def check_power_aura(records: Records, spec: PowerTermDirectionSpec) -> None:
                    == AGILITY for effect, aura in enumerate(auras)):
             raise ValueError(f'{spec.spell} {KIND} power aura {spec.power_aura} carries no SPELL_AURA_MOD_STAT '
                              f'of Agility')
+    elif spec.power_metric == 'defense_rating':
+        if not any(aura == COMBAT_RATING_AURA
+                   and (int(records.field('Spell', spec.power_aura, f'EffectMiscValue[{effect}]') or 0)
+                        & DEFENSE_RATING_MASK)
+                   for effect, aura in enumerate(auras)):
+            raise ValueError(f'{spec.spell} {KIND} power aura {spec.power_aura} carries no SPELL_AURA_MOD_RATING '
+                             f'of defense rating')
     elif not HEALTH_AURAS & set(auras):
         raise ValueError(f'{spec.spell} {KIND} power aura {spec.power_aura} carries no maximum health aura '
                          f'{sorted(HEALTH_AURAS)}')
@@ -238,7 +260,9 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
             if spec.sample == ABSORB:
                 steps += [*mana, *fixtures, *absorb_cast_steps(spec, reads[arm], cast)]
                 continue
-            steps += [*mana, *fixtures, {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell},
+            reset = ([{'action': 'restore_charges', 'actor': CASTER, 'spell': spec.cast_spell}]
+                     if spec.restore_charges else [])
+            steps += [*mana, *fixtures, *reset, {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.cast_spell},
                       {'action': 'cast', 'actor': CASTER, 'spell': spec.cast_spell, 'target': TARGET},
                       {'action': 'wait', 'label': f'{arm} cast', 'ms': spec.cast_wait_ms}] + sample(arm, cast)
         if spec.power_metric != ATTACK_POWER:
@@ -251,11 +275,13 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
                 for spell, stacks in ((spec.power_aura, spec.power_stacks),
                                       *((spell, stacks) for spell, stacks, _ in spec.power_companions))]
 
+    settle = ([{'action': 'wait', 'label': 'power settle', 'ms': spec.power_settle_ms}]
+              if spec.power_settle_ms else [])
     learned = [spec.cast_spell] + ([spec.refill_spell] if spec.sample == ABSORB else [])
     steps = (base_steps(class_file) + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
-             + phase('control low') + power(True) + phase('control high')
-             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.talent}] + phase('learned high')
-             + power(False) + phase('learned low'))
+             + phase('control low') + power(True) + settle + phase('control high')
+             + [{'action': 'learn', 'actor': CASTER, 'spell': spec.talent}] + settle + phase('learned high')
+             + power(False) + settle + phase('learned low'))
     if len(steps) > MAXIMUM_STEPS:
         raise ValueError(f'{spec.spell} {KIND} needs {len(steps)} steps, more than {MAXIMUM_STEPS}')
     scenario = {
@@ -280,7 +306,10 @@ def power_term_direction_scenario(class_file: dict, spec: PowerTermDirectionSpec
                      + (f' The caster\'s power {facts.power_type} is set to {spec.cast_power} before each cast.'
                         if spec.cast_power is not None else '')
                      + ''.join(f' Aura {spell} is set at {stacks} stacks with the {power_name} aura in the high arms '
-                               f'({source}).' for spell, stacks, source in spec.power_companions)),
+                               f'({source}).' for spell, stacks, source in spec.power_companions)
+                     + (f' Waits {spec.power_settle_ms} ms after toggling the {power_name} aura or learning '
+                        f'{spec.talent} so periodic helper auras refresh.' if spec.power_settle_ms else '')
+                     + (f' Restores charges of {spec.cast_spell} before each cast.' if spec.restore_charges else '')),
         'players': [player_fixture(class_file)],
         'creatures': [creature_fixture(class_file)] + ([
             {'id': STRIKER, 'owner': CASTER, 'entry': TAKEN_HIT_STRIKER_ENTRY, 'level': class_file['level'],

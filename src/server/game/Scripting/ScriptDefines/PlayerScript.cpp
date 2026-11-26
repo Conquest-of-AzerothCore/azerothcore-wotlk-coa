@@ -145,8 +145,14 @@ void ScriptMgr::OnPlayerBeforeSendLoot(Player* player, ObjectGuid lootGuid, Loot
 
 void ScriptMgr::OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource)
 {
-    amount = static_cast<uint32>(std::min(double(amount) * sWorld->getRate(RATE_XP_GLOBAL),
-        double(std::numeric_limits<uint32>::max())));
+    if (amount > 0)
+    {
+        float const rate = sWorld->getRate(RATE_XP_GLOBAL);
+        amount = rate > 0.0f
+            ? std::max<uint32>(1u, static_cast<uint32>(std::min(double(amount) * rate,
+                double(std::numeric_limits<uint32>::max()))))
+            : 0;
+    }
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GIVE_EXP, script->OnPlayerGiveXP(player, amount, victim, xpSource));
 }
 

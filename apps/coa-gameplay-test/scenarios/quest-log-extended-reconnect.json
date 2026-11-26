@@ -1,0 +1,323 @@
+{
+  "schema": 1,
+  "name": "Quest log: a reconnect to a character still in the world drops the 0x8F6 capability",
+  "contract": [
+    "The extended quest log capability belongs to the client that announced it. After HELLO (0x8F6) the server sends one 0x8F7 snapshot. When a new session takes over the character still in the world (native reconnect, no login hook), the new client has not announced 0x8F6: a Kobold Vermin (6) kill credited to the overflow quest Kobold Camp Cleanup (7) sends no 0x8F7. Once the new client sends HELLO it receives a full snapshot again."
+  ],
+  "timeout_ms": 90000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "creatures": [
+    {
+      "id": "kobold",
+      "owner": "hero",
+      "entry": 6,
+      "level": 1,
+      "distance": 5,
+      "faction": 14
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 7",
+      "actor": "hero",
+      "quest": 7,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Kobold Camp Cleanup is in the first overflow slot",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 7,
+      "equals": 25
+    },
+    {
+      "action": "client_packet",
+      "label": "The client announces the extended quest log (0x8F6, version 1, 64 slots)",
+      "actor": "hero",
+      "opcode": 2294,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 64
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first client receives the 0x8F7 snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "reconnect",
+      "label": "A new client takes over the character still in the world",
+      "actor": "hero"
+    },
+    {
+      "action": "attack_nearby",
+      "label": "Kill a Kobold Vermin",
+      "actor": "hero",
+      "entry": 6,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "The overflow quest counts the kill",
+      "actor": "hero",
+      "metric": "quest_objective_count",
+      "quest": 7,
+      "index": 0,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let further ticks pass",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "The new client, which sent no HELLO, receives no 0x8F7",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "The client announces the extended quest log (0x8F6, version 1, 64 slots)",
+      "actor": "hero",
+      "opcode": 2294,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 64
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "After its own HELLO the new client receives a snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "within_ms": 2000,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "The new snapshot is full",
+      "actor": "hero",
+      "metric": "server_packet_u8",
+      "opcode": 2295,
+      "offset": 1,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The new snapshot carries the kill",
+      "actor": "hero",
+      "metric": "server_packet_u8",
+      "opcode": 2295,
+      "offset": 13,
+      "equals": 1
+    }
+  ]
+}

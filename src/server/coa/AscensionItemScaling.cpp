@@ -588,6 +588,17 @@ bool LiftableEntry(uint32 entry)
     return proto && Liftable(*proto);
 }
 
+bool NativeScalableEntry(uint32 entry)
+{
+    ItemTemplate const* proto = sObjectMgr->GetItemTemplate(entry);
+    if (!proto || !NativeEligibleItem(proto->Quality, proto->Class, proto->InventoryType, proto->ItemLevel,
+            proto->ScalingStatDistribution, proto->StartQuest) || IsWorldforgedDescription(proto->Description))
+        return false;
+
+    std::shared_lock lock(unliftableMutex);
+    return !unliftableEntries.contains(proto->ItemId);
+}
+
 void HandleStatQuery(WorldSession* session, WorldPacket const& packet)
 {
     if (!session || packet.size() != sizeof(uint64) || !capturedStats.Size())

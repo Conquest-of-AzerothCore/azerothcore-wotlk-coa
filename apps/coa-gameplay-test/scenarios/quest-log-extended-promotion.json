@@ -1,0 +1,332 @@
+{
+  "schema": 1,
+  "name": "Quest log: promotion clears the overflow slot in 0x8F7 only after the native slot holds the quest",
+  "contract": [
+    "With Quests.LogSize 64 and 26 quests, slot 25 holds the 26th quest (318); after HELLO (0x8F6) the client has the 0x8F7 snapshot. Abandoning client slot 3 promotes the overflow quest into it, and exactly one 0x8F7 delta clears slot 25 (questId 0) within 1000 ms. When that delta arrives, the client has already received quest 318 in native slot 3 through SMSG_UPDATE_OBJECT, so the quest is never absent from every slot."
+  ],
+  "timeout_ms": 90000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 318",
+      "actor": "hero",
+      "quest": 318,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: quest 318 is in the first overflow slot",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 318,
+      "equals": 25
+    },
+    {
+      "action": "client_packet",
+      "label": "The client announces the extended quest log (0x8F6, version 1, 64 slots)",
+      "actor": "hero",
+      "opcode": 2294,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 64
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The server answers with the 0x8F7 snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The snapshot holds quest 318 in slot 25",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2295,
+      "offset": 5,
+      "equals": 318
+    },
+    {
+      "action": "client_packet",
+      "label": "Abandon client slot 3 (CMSG_QUESTLOG_REMOVE_QUEST)",
+      "actor": "hero",
+      "opcode": 404,
+      "fields": [
+        {
+          "u8": 3
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "A 0x8F7 delta clears slot 25 (questId 0)",
+      "actor": "hero",
+      "metric": "server_packet_u32",
+      "opcode": 2295,
+      "offset": 5,
+      "within_ms": 1000,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The client already had quest 318 in native slot 3 when the clearing 0x8F7 arrived",
+      "actor": "hero",
+      "metric": "quest_log_sent_slot_at_extended_state",
+      "slot": 3,
+      "equals": 318
+    },
+    {
+      "action": "assert",
+      "label": "The delta is not full",
+      "actor": "hero",
+      "metric": "server_packet_u8",
+      "opcode": 2295,
+      "offset": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "The delta lists one entry",
+      "actor": "hero",
+      "metric": "server_packet_u8",
+      "opcode": 2295,
+      "offset": 3,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The delta entry is slot 25",
+      "actor": "hero",
+      "metric": "server_packet_u8",
+      "opcode": 2295,
+      "offset": 4,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "The promotion sends exactly one 0x8F7",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Quest 318 moved into client slot 3",
+      "actor": "hero",
+      "metric": "quest_log_client_slot",
+      "quest": 318,
+      "equals": 3
+    },
+    {
+      "action": "wait",
+      "label": "Let further ticks pass",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "No further 0x8F7 follows the promotion",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "equals": 2
+    }
+  ]
+}

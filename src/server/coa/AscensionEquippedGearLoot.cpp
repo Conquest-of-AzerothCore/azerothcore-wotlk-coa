@@ -1,6 +1,7 @@
 #include "AscensionEquippedGearLoot.h"
 #include "AscensionBloodforging.h"
 #include "AscensionCreaturePreset.h"
+#include "ClientDBC.h"
 #include "Config.h"
 #include "Creature.h"
 #include "DBCStores.h"
@@ -10,11 +11,13 @@
 #include "ObjectMgr.h"
 #include "Random.h"
 #include "ScriptMgr.h"
+#include "World.h"
 #include <algorithm>
 #include <array>
 #include <atomic>
 #include <cctype>
 #include <cmath>
+#include <filesystem>
 #include <string>
 #include <string_view>
 #include <tuple>
@@ -32,9 +35,81 @@ enum class Role
     Defender
 };
 
+constexpr uint32 ITEM_DISPLAY_INFO_FIELDS = 25;
+
 std::atomic_bool enabled{false};
 std::atomic<float> chance{5.0f};
 std::unordered_map<uint64, std::vector<uint32>> itemsByAppearance;
+std::unordered_map<uint64, std::vector<uint32>> itemsByVisualGroup;
+std::unordered_map<uint32, uint32> visualGroupByDisplay;
+
+std::string DisplayVisualSignature(ClientDBC::Record const& record)
+{
+    constexpr std::array<uint32, 4> modelFields = {1, 2, 3, 4};
+    constexpr std::array<uint32, 8> textureFields = {15, 16, 17, 18, 19, 20, 21, 22};
+    constexpr std::array<uint32, 7> integerFields = {7, 8, 9, 13, 14, 23, 24};
+
+    bool hasVisual = false;
+    std::string signature;
+    for (uint32 field : modelFields)
+    {
+        std::string_view const value = record.GetString(field);
+        if (!value.empty())
+            hasVisual = true;
+        signature.append(value);
+        signature.push_back('\0');
+    }
+    for (uint32 field : textureFields)
+    {
+        std::string_view const value = record.GetString(field);
+        if (!value.empty())
+            hasVisual = true;
+        signature.append(value);
+        signature.push_back('\0');
+    }
+    if (!hasVisual)
+        return {};
+    for (uint32 field : integerFields)
+    {
+        signature.append(std::to_string(record.GetUInt32(field)));
+        signature.push_back('\0');
+    }
+    return signature;
+}
+
+void LoadVisualGroups()
+{
+    visualGroupByDisplay.clear();
+    ClientDBC displays;
+    std::filesystem::path const path = std::filesystem::path(sWorld->GetDataPath()) / "dbc" / "ItemDisplayInfo.dbc";
+    if (!displays.Load(path.string(), ITEM_DISPLAY_INFO_FIELDS))
+        return;
+
+    std::unordered_map<std::string, uint32> canonicalBySignature;
+    for (uint32 row = 0; row < displays.GetRecordCount(); ++row)
+    {
+        ClientDBC::Record const record = displays.GetRecord(row);
+        uint32 const displayId = record.GetUInt32(0);
+        if (!displayId)
+            continue;
+        std::string signature = DisplayVisualSignature(record);
+        if (signature.empty())
+            continue;
+        auto const found = canonicalBySignature.emplace(std::move(signature), displayId).first;
+        visualGroupByDisplay.emplace(displayId, found->second);
+    }
+}
+
+bool SameVisualDisplay(uint32 leftDisplay, uint32 rightDisplay)
+{
+    if (!leftDisplay || !rightDisplay)
+        return false;
+    if (leftDisplay == rightDisplay)
+        return true;
+    auto const left = visualGroupByDisplay.find(leftDisplay);
+    auto const right = visualGroupByDisplay.find(rightDisplay);
+    return left != visualGroupByDisplay.end() && right != visualGroupByDisplay.end() && left->second == right->second;
+}
 
 uint32 SlotType(uint32 inventoryType)
 {
@@ -150,19 +225,15 @@ Role CreatureRole(Creature const& creature)
     return creature.GetCreatureTemplate()->unit_class == CLASS_MAGE ? Role::Caster : Role::Physical;
 }
 
-uint32 MatchingItem(uint32 display, uint32 slot, uint32 level, Role role, Loot const& loot,
-    ItemTemplate const* weapon = nullptr)
+uint32 BestCandidate(std::vector<uint32> const& entries, uint32 display, uint32 slot, uint32 level, Role role,
+    Loot const& loot, ItemTemplate const* weapon)
 {
-    auto const found = itemsByAppearance.find(AppearanceKey(display, slot));
-    if (found == itemsByAppearance.end())
-        return 0;
-
     uint32 best = 0;
     std::tuple<uint32, uint32, uint32> bestScore{};
-    for (uint32 entry : found->second)
+    for (uint32 entry : entries)
     {
         ItemTemplate const* item = sObjectMgr->GetItemTemplate(entry);
-        if (!item || !Wearable(*item) || item->DisplayInfoID != display
+        if (!item || !Wearable(*item) || !SameVisualDisplay(item->DisplayInfoID, display)
             || SlotType(item->InventoryType) != SlotType(slot) || GearLevel(*item) > level
             || (weapon && (item->Class != weapon->Class || item->SubClass != weapon->SubClass))
             || std::any_of(loot.items.begin(), loot.items.end(),
@@ -182,6 +253,22 @@ uint32 MatchingItem(uint32 display, uint32 slot, uint32 level, Role role, Loot c
     return best;
 }
 
+uint32 MatchingItem(uint32 display, uint32 slot, uint32 level, Role role, Loot const& loot,
+    ItemTemplate const* weapon = nullptr)
+{
+    if (auto const found = itemsByAppearance.find(AppearanceKey(display, slot)); found != itemsByAppearance.end())
+        if (uint32 const exact = BestCandidate(found->second, display, slot, level, role, loot, weapon))
+            return exact;
+
+    auto const group = visualGroupByDisplay.find(display);
+    if (group == visualGroupByDisplay.end())
+        return 0;
+    auto const found = itemsByVisualGroup.find(AppearanceKey(group->second, slot));
+    if (found == itemsByVisualGroup.end())
+        return 0;
+    return BestCandidate(found->second, display, slot, level, role, loot, weapon);
+}
+
 class Configuration : public WorldScript
 {
 public:
@@ -198,13 +285,25 @@ public:
 
     void OnStartup() override
     {
+        LoadVisualGroups();
         itemsByAppearance.clear();
+        itemsByVisualGroup.clear();
         for (auto const& [entry, item] : *sObjectMgr->GetItemTemplateStore())
-            if (Wearable(item))
-                itemsByAppearance[AppearanceKey(item.DisplayInfoID, item.InventoryType)].push_back(entry);
+        {
+            if (!Wearable(item))
+                continue;
+            itemsByAppearance[AppearanceKey(item.DisplayInfoID, item.InventoryType)].push_back(entry);
+            if (auto const group = visualGroupByDisplay.find(item.DisplayInfoID); group != visualGroupByDisplay.end())
+                itemsByVisualGroup[AppearanceKey(group->second, item.InventoryType)].push_back(entry);
+        }
         LOG_INFO("coa", "Equipped gear loot ready: {} wearable appearances", itemsByAppearance.size());
     }
 };
+}
+
+bool SameAppearance(uint32 leftDisplay, uint32 rightDisplay)
+{
+    return SameVisualDisplay(leftDisplay, rightDisplay);
 }
 
 bool AddLoot(Creature const* creature, Loot& loot, uint16 lootMode)

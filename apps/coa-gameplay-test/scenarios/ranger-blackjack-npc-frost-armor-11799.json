@@ -1,0 +1,224 @@
+{
+  "schema": 1,
+  "name": "NPC Frost Armor 12544 does not proc Chilled from Blackjack (#11799)",
+  "contract": [
+    "NPC Frost Armor 12544 (cast out of combat by Razormane Geomancer 3269 at Thorn Hill and 121 other NPCs)",
+    "has Spell.dbc ProcFlags 40 (taken melee auto-attack or melee-class spell) and triggers Chilled 6136 at 100%",
+    "chance. Like player Frost Armor (-168), Ice Armor (-7302), and Molten Armor (-30482), it must carry a",
+    "spell_proc row with SpellTypeMask 1 (PROC_SPELL_TYPE_DAMAGE), HitMask 1027 (NORMAL|CRITICAL|ABSORB), and",
+    "AttributesMask 2 (PROC_ATTR_TRIGGERED_CAN_PROC). Without that row, SpellMgr::LoadSpellProcs assigns",
+    "PROC_SPELL_TYPE_MASK_ALL (7), so non-damaging melee spells without SPELL_ATTR3_SUPPRESS_CASTER_PROCS",
+    "(Ranger Blackjack 520568 and Rogue Sap 6770) proc Chilled 6136 on hit, breaking Elude 801345 stealth.",
+    "With the fix, casting Blackjack and Sticky Fingers 804669 on a Frost-Armored Razormane Geomancer keeps",
+    "Elude active, leaves both units out of combat, and does not apply Chilled 6136; a damaging melee attack",
+    "still procs Chilled 6136 as a positive control."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 16,
+      "melee_hit_rating": 500,
+      "expertise_rating": 500,
+      "spell_hit_rating": 500
+    }
+  ],
+  "creatures": [
+    {
+      "id": "geomancer",
+      "owner": "ranger",
+      "entry": 3269,
+      "faction": 14,
+      "level": 13,
+      "health": 100000,
+      "distance": 2,
+      "stationary": true,
+      "spell_hit_bonus": 100
+    }
+  ],
+  "steps": [
+    {
+      "action": "learn",
+      "label": "Learn Elude",
+      "actor": "ranger",
+      "spell": 801345
+    },
+    {
+      "action": "learn",
+      "label": "Learn Blackjack",
+      "actor": "ranger",
+      "spell": 520568
+    },
+    {
+      "action": "learn",
+      "label": "Learn Sticky Fingers",
+      "actor": "ranger",
+      "spell": 804669
+    },
+    {
+      "action": "set_aura",
+      "label": "Ensure Razormane Geomancer has NPC Frost Armor 12544",
+      "actor": "ranger",
+      "target": "geomancer",
+      "spell": 12544,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "Geomancer has Frost Armor 12544",
+      "actor": "geomancer",
+      "metric": "aura",
+      "spell": 12544,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Enter Elude stealth",
+      "actor": "ranger",
+      "spell": 801345
+    },
+    {
+      "action": "assert",
+      "label": "Elude stealth is active",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 801345,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Allow post-stealth settle",
+      "ms": 300
+    },
+    {
+      "action": "cast",
+      "label": "Cast Blackjack on Frost-Armored Razormane Geomancer",
+      "actor": "ranger",
+      "spell": 520568,
+      "target": "geomancer"
+    },
+    {
+      "action": "assert",
+      "label": "Geomancer is sapped by Blackjack",
+      "actor": "geomancer",
+      "metric": "aura",
+      "spell": 520568,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Wait past proc dispatch window after Blackjack",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Blackjack does not proc Chilled 6136 from NPC Frost Armor",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 6136,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ranger stays in Elude stealth after Blackjack",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 801345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ranger stays out of combat after Blackjack",
+      "actor": "ranger",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Geomancer stays out of combat after Blackjack",
+      "actor": "geomancer",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Respect Blackjack 1000ms GCD before Sticky Fingers",
+      "ms": 1200
+    },
+    {
+      "action": "cast",
+      "label": "Cast Sticky Fingers on sapped Geomancer",
+      "actor": "ranger",
+      "spell": 804669,
+      "target": "geomancer"
+    },
+    {
+      "action": "wait",
+      "label": "Wait past Sticky Fingers hit window",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Ranger remains in Elude stealth after Sticky Fingers",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 801345,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Ranger still does not have Chilled 6136",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 6136,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Ranger stays out of combat after Sticky Fingers",
+      "actor": "ranger",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Geomancer stays out of combat after Sticky Fingers",
+      "actor": "geomancer",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Geomancer remains sapped after Sticky Fingers",
+      "actor": "geomancer",
+      "metric": "aura",
+      "spell": 520568,
+      "equals": 1
+    },
+    {
+      "action": "cancel_aura",
+      "label": "Drop Elude before damaging melee control",
+      "actor": "ranger",
+      "spell": 801345
+    },
+    {
+      "action": "attack",
+      "label": "Positive control: melee attack Geomancer to proc Frost Armor",
+      "actor": "ranger",
+      "target": "geomancer"
+    },
+    {
+      "action": "assert",
+      "label": "Damaging melee hit still procs Chilled 6136 from NPC Frost Armor",
+      "actor": "ranger",
+      "metric": "aura",
+      "spell": 6136,
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}

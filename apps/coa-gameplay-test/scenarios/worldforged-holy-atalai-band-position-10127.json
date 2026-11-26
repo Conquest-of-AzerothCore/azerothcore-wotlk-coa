@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Holy Atal'ai Band pickup stands on clear ground in Swamp of Sorrows (#10127)",
+  "contract": "#10127 reported the Holy Atal'ai Band pickup (entry 254368, guid 6940634, item 354233) missing in Swamp of Sorrows. The map-pass row (-10491.000, -4031.300, 17.417) sat 0.395 yd below terrain (17.8122) and inside Stranglethornruins02.m2. Expected: the pickup stands at its authoritative first-pass realm-dump position (-10488.902, -4029.453, 17.417; guid 6900144) on the shallow Pool of Tears (AreaTable 74) marsh floor (ground_gap +0.043 yd, Slow Water surface 18.3263 giving 0.909 yd wading depth, spawn_submerged 1 vs 0 at the buried spot), with open headroom and lootable via Opening (3365).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -10487.5,
+    "y": -4028.0,
+    "z": 17.374,
+    "o": 3.9
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Holy Atal'ai Band pickup is present nearby",
+      "metric": "nearby_gameobject_count",
+      "entry": 254368,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: pickup stands at its restored realm-dump position",
+      "metric": "spawn_distance",
+      "x": -10488.902,
+      "y": -4029.453,
+      "z": 17.417,
+      "max": 0.3,
+      "guid": 6940634,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: pickup rests flush on terrain instead of 0.395 yd underground",
+      "metric": "spawn_ground_gap",
+      "min": -0.15,
+      "max": 0.25,
+      "guid": 6940634,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: pickup stands clear of Stranglethornruins02.m2 overhead",
+      "metric": "spawn_headroom",
+      "min": 5.0,
+      "guid": 6940634,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: pickup rests in shallow Pool of Tears wading water (0.91 yd deep) rather than buried below terrain",
+      "metric": "spawn_submerged",
+      "equals": 1,
+      "guid": 6940634,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 254368
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "pickup opens without cast failure",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "pickup drops loot",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

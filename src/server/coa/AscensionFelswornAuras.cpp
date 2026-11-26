@@ -338,10 +338,24 @@ class aura_ascension_felsworn_resolve : public AuraScript
         OnEffectAbsorb += AuraEffectAbsorbFn(aura_ascension_felsworn_resolve::Absorb, EFFECT_1);
     }
 };
+class aura_ascension_felsworn_betrayers_inclinations : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_felsworn_betrayers_inclinations);
+    bool CheckProc(ProcEventInfo& event)
+    {
+        Unit* victim = event.GetActionTarget();
+        return victim && GetTarget()->IsValidAttackTarget(victim);
+    }
+    void Register() override
+    {
+        DoCheckProc += AuraCheckProcFn(aura_ascension_felsworn_betrayers_inclinations::CheckProc);
+    }
+};
 }
 void AddSC_AscensionFelswornAuras()
 {
     RegisterSpellScript(aura_ascension_felsworn_lifecycle);
     RegisterSpellScript(aura_ascension_felsworn_stagger);
     RegisterSpellScript(aura_ascension_felsworn_resolve);
+    RegisterSpellScript(aura_ascension_felsworn_betrayers_inclinations);
 }

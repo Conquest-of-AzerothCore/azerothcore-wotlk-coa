@@ -23,7 +23,7 @@ def main():
         subprocess.run([str(compiler), '/nologo', '/std:c++20', '/EHsc', '/W4', '/WX',
                         str(cpp), '/Fe' + str(exe)], cwd=out, check=True, timeout=60)
         subprocess.run([str(exe)], cwd=out, check=True, timeout=15)
-    print('PASS: staggered Renewal ticks, independent expiry, aggregate tooltip, delayed updates and saturation')
+    print('PASS: rolling single-HoT Renewal ticks, preserved cadence, tail expiry and saturation')
 
 
 if __name__ == '__main__':

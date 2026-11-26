@@ -1,0 +1,88 @@
+{
+  "schema": 1,
+  "name": "Hellfire Imps assist their knight after an AoE spell without melee auto-attack (#10433)",
+  "contract": [
+    "Issue #10433: Call: Hellfire Imp (804883) summons Hellfire Imp 50301 to aid the Knight of Xoroth in battle.",
+    "npc_ascension_xoroth_summon::UpdateAI only checked player->GetVictim(), which is null unless the knight starts",
+    "melee auto-attack, so imps stood idle when the knight fought with AoE spells such as Flames of Xoroth (rank 7,",
+    "573448). Expected: a summoned Hellfire Imp leaves an unengaged hostile enemy alone, and once the knight hits",
+    "that enemy with Flames of Xoroth without ever starting melee auto-attack, the imp engages and damages it."
+  ],
+  "timeout_ms": 60000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    { "id": "knight", "race": 1, "class": 17, "level": 80, "spell_hit_rating": 10000 }
+  ],
+  "creatures": [
+    { "id": "enemy", "owner": "knight", "entry": 36, "level": 80, "health": 100000, "distance": 4, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 804883 },
+    { "action": "learn", "actor": "knight", "spell": 573448 },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "cast", "label": "Call: Hellfire Imp", "actor": "knight", "spell": 804883 },
+    {
+      "action": "assert",
+      "label": "SETUP: one Hellfire Imp is out",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Confirm the imp does not pull an unengaged enemy and clear GCD", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: the unengaged enemy stays out of combat",
+      "actor": "enemy",
+      "metric": "combat",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the unengaged enemy stays at full health",
+      "actor": "enemy",
+      "metric": "health",
+      "equals": 100000
+    },
+    { "action": "set_power", "actor": "knight", "power": 1, "value": 1000 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 1 },
+    { "action": "cast", "label": "Engage with AoE Flames of Xoroth only (no melee auto-attack)", "actor": "knight", "spell": 573448, "target": "enemy" },
+    {
+      "action": "assert",
+      "label": "SETUP: Flames of Xoroth hit the enemy",
+      "actor": "knight",
+      "metric": "spell_damage_count",
+      "spell": 573448,
+      "target": "enemy",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the enemy is in combat",
+      "actor": "enemy",
+      "metric": "combat",
+      "equals": 1
+    },
+    { "action": "wait", "ms": 500 },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_hp_after_aoe" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the Hellfire Imp damages the AoE-engaged enemy",
+      "actor": "enemy",
+      "metric": "health",
+      "ratio_to": "enemy_hp_after_aoe",
+      "max": 0.9999,
+      "within_ms": 7500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the knight never melee-attacked",
+      "actor": "knight",
+      "metric": "melee_attack_count",
+      "equals": 0
+    }
+  ]
+}

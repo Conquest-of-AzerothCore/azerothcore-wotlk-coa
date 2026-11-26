@@ -1,0 +1,83 @@
+{
+  "schema": 1,
+  "name": "Last Checkpoint works in every world boss map, not only Setis'",
+  "contract": [
+    "In The Will of Soggoth's map (883) the server turns Ascension's checkpoints on (SMSG 0x767, u8 1), and the",
+    "Last Checkpoint request (CMSG 0x774, u8 1) brings a dead player's body back to the map's graveyard",
+    "(WorldSafeLocs 6083, 4410.54, 269.28), still dead, ready to release."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 883,
+    "x": 4410.5,
+    "y": 269.3,
+    "z": 78.0
+  },
+  "players": [
+    {
+      "id": "raider",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Checkpoints are on in his map",
+      "actor": "raider",
+      "metric": "server_packet_u8",
+      "opcode": 1895,
+      "offset": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "raider",
+      "map": 883,
+      "x": 4440.0,
+      "y": 269.3,
+      "z": 78.0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "die",
+      "actor": "raider"
+    },
+    {
+      "action": "client_packet",
+      "label": "Last Checkpoint",
+      "actor": "raider",
+      "opcode": 1908,
+      "fields": [
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The body is back at the graveyard",
+      "actor": "raider",
+      "metric": "position_x",
+      "min": 4405,
+      "max": 4416,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "and still dead, ready to release",
+      "actor": "raider",
+      "metric": "alive",
+      "equals": 0
+    }
+  ]
+}

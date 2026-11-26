@@ -442,3 +442,231 @@ class PollBeforeCastTests(unittest.TestCase):
     def test_the_option_is_a_boolean(self):
         with self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), {**PRE_POLL, 'poll_before_cast': 'yes'})
+
+
+TARGET_FED = {**ENTRY, 'label_suffix': 'target_fed', 'gate_spell': 801899, 'expected_ms': 3000, 'window_ms': 4000,
+              'poll_ms': 25, 'caster': False, 'feed': {'every_ms': 1700, 'stop_target': 'dummy'}}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class StopTargetFeedTests(unittest.TestCase):
+    judged = FeedTests.judged
+
+    def test_stop_target_dummy_emits_loop_field_target_stop_read_and_target_clear(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), TARGET_FED)
+        run.validate(scenario)
+        steps = scenario['steps']
+        loops = [step for step in steps if step['action'] == 'cast_until_aura']
+        self.assertEqual(len(loops), 2)
+        self.assertTrue(all(step.get('stop_target') == 'dummy' and step['aura'] == 707010 for step in loops))
+        stop_labels = {expectation.model['feed']['reads'][arm]['stop'] for arm in ('control', 'treatment')}
+        stop_reads = [step for step in steps if step.get('label') in stop_labels]
+        self.assertEqual(len(stop_reads), 2)
+        self.assertTrue(all(step['actor'] == 'dummy' and step['metric'] == 'aura' for step in stop_reads))
+        clears = [step for step in steps if step['action'] == 'set_aura' and step.get('spell') == 707010]
+        self.assertEqual(len(clears), 1)
+        self.assertEqual((clears[0]['target'], clears[0]['stacks']), ('dummy', 0))
+        trigger_clears = [(i, step) for i, step in enumerate(steps)
+                          if step['action'] == 'set_aura' and step.get('spell') == TARGET_FED['trigger_spell']]
+        learn_gate_idx = next(i for i, step in enumerate(steps)
+                              if step['action'] == 'learn' and step.get('spell') == TARGET_FED['gate_spell'])
+        self.assertEqual(len(trigger_clears), 1)
+        self.assertLess(trigger_clears[0][0], learn_gate_idx)
+        self.assertEqual((trigger_clears[0][1]['target'], trigger_clears[0][1]['stacks']), ('dummy', 0))
+        self.assertIn('until 707010 is on the dummy', scenario['contract'])
+
+    def test_without_stop_target_loop_omits_stop_target_and_reads_caster(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), FED)
+        loops = [step for step in scenario['steps'] if step['action'] == 'cast_until_aura']
+        self.assertTrue(all('stop_target' not in step for step in loops))
+        self.assertFalse(any(step['action'] == 'set_aura' for step in scenario['steps']))
+        stop_label = expectation.model['feed']['reads']['treatment']['stop']
+        stop_step = next(step for step in scenario['steps'] if step.get('label') == stop_label)
+        self.assertEqual(stop_step['actor'], 'caster')
+
+    def test_seeded_ok_alert_unmeasured_and_mutant_on_target_feed(self):
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED).status, 'ok')
+        self.assertEqual(self.judged(3900.0, entry=TARGET_FED).status, 'alert')
+        self.assertEqual(self.judged(2100.0, entry=TARGET_FED).status, 'alert')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, control_applied=True).status, 'alert')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, stop=0.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, before=1.0).status, 'unmeasured')
+        self.assertEqual(self.judged(3000.0, entry=TARGET_FED, age=200.0).status, 'unmeasured')
+        mutant = {**TARGET_FED, 'expected_ms': 4000, 'window_ms': 5500}
+        self.assertEqual(self.judged(3000.0, entry=mutant).status, 'alert')
+
+    def test_stop_target_refusals(self):
+        for bad in (
+                {**TARGET_FED, 'feed': {'every_ms': 1700, 'stop_target': 'ally'}},
+                {**TARGET_FED, 'feed': {'every_ms': 1700, 'stop_target': 1}},
+                {**TARGET_FED, 'caster': True, 'feed': {'every_ms': 1700, 'stop_target': 'dummy'}}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), bad)
+
+
+TWO_DURATION_CASTER = {
+    'spell': 561035,
+    'name': "Teachings of Mythrax (Presence of N'Zoth duration 8s -> 10s)",
+    'kind': 'last_application_expiry',
+    'label_suffix': 'nzoth_duration',
+    'quote': "Increases the duration of Presence of N'Zoth and Presence of Y'Shaarj by $s1%.",
+    'gate_spell': 561035,
+    'trigger_spell': 92559,
+    'aura': 500707,
+    'control_expected_ms': 8000,
+    'expected_ms': 10000,
+    'control_window_ms': 10000,
+    'window_ms': 12500,
+    'poll_ms': 50,
+    'caster': True,
+    'base_learn': [803037],
+    'base_casts': [803037],
+    'feed': {'every_ms': 1700, 'proc_spell': 803037},
+}
+
+TWO_DURATION_TARGET = {
+    **TWO_DURATION_CASTER,
+    'name': "Teachings of Mythrax (Presence of Y'Shaarj duration 12s -> 15s)",
+    'label_suffix': 'yshaarj_duration',
+    'aura': 805180,
+    'control_expected_ms': 12000,
+    'expected_ms': 15000,
+    'control_window_ms': 14500,
+    'window_ms': 17500,
+    'caster': False,
+    'base_learn': [803035],
+    'base_casts': [803035],
+    'feed': {'every_ms': 1700, 'proc_spell': 803035, 'stop_target': 'dummy'},
+}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class TwoDurationFeedTests(unittest.TestCase):
+    def judged(self, ctrl_lasts: float, treat_lasts: float, entry: dict = TWO_DURATION_CASTER,
+               ctrl_stop: float = 1.0, treat_stop: float = 1.0, ctrl_before: float = 0.0,
+               treat_before: float = 0.0, ctrl_age: float = 20.0, treat_age: float = 20.0,
+               ctrl_applies: float = 1.0, treat_applies: float = 2.0, ctrl_remaining: float | None = None,
+               treat_remaining: float | None = None, interval_nan: bool = False) -> Verdict:
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        values = {}
+        start = 50000.0
+        ctrl_t0 = 60000.0
+        treat_t0 = 90000.0
+        ctrl_stamps = expectation.model['feed']['reads']['control']['stamps']
+        treat_stamps = expectation.model['feed']['reads']['treatment']['stamps']
+        values[ctrl_stamps['start']] = start
+        values[ctrl_stamps['applies']] = ctrl_applies
+        values[ctrl_stamps['first']] = ctrl_t0 - start - ctrl_age
+        values[treat_stamps['applies']] = treat_applies
+        values[treat_stamps['interval']] = (float('nan') if interval_nan
+                                            else (treat_t0 - treat_age) - (ctrl_t0 - ctrl_age))
+        for arm, t0, lasts, stop, before, rem in (
+                ('control', ctrl_t0, ctrl_lasts, ctrl_stop, ctrl_before, ctrl_remaining),
+                ('treatment', treat_t0, treat_lasts, treat_stop, treat_before, treat_remaining)):
+            reads = expectation.model['feed']['reads'][arm]
+            values[reads['stop']] = stop
+            values[reads['remaining']] = lasts - 20.0 if rem is None else rem
+            for index, (time_label, applied_label, aura_label) in enumerate(expectation.model['reads'][arm]):
+                now = t0 - 5000.0 if index == 0 else t0 + (index - 1) * 59.0
+                values[time_label] = now
+                base_count = 0.0 if arm == 'control' else 1.0
+                values[applied_label] = base_count + (1.0 if index > 0 else 0.0)
+                values[aura_label] = before if index == 0 else (1.0 if now < t0 - 20.0 + lasts else 0.0)
+        base = Verdict(expectation.label, 'alert', None, None, None, None, '', 'fake', expectation.spell_id,
+                       expectation.rank_id, expectation.check)
+        return judge_behaviour(base, FakeRun(values), expectation)
+
+    def test_two_duration_generation_sizes_from_proc_spell_and_opens_one_timeline(self):
+        for entry, proc_spell, stop_target in (
+                (TWO_DURATION_CASTER, 803037, None),
+                (TWO_DURATION_TARGET, 803035, 'dummy')):
+            with self.subTest(proc_spell=proc_spell):
+                scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+                run.validate(scenario)
+                steps = scenario['steps']
+                loops = [step for step in steps if step['action'] == 'cast_until_aura']
+                self.assertEqual([step['max_casts'] for step in loops], [38, 38])
+                self.assertEqual(expectation.model['feed']['max_casts'], 38)
+                self.assertEqual(expectation.model['control_expected'], entry['control_expected_ms'])
+                if stop_target is None:
+                    self.assertTrue(all('stop_target' not in step for step in loops))
+                else:
+                    self.assertTrue(all(step.get('stop_target') == stop_target for step in loops))
+                starts = [i for i, step in enumerate(steps) if step['action'] == 'encounter_start']
+                loop_indices = [i for i, step in enumerate(steps) if step['action'] == 'cast_until_aura']
+                learn_base = next(i for i, step in enumerate(steps)
+                                  if step['action'] == 'learn' and step['spell'] == proc_spell)
+                cast_base = next(i for i, step in enumerate(steps)
+                                 if step['action'] == 'cast' and step['spell'] == proc_spell)
+                learn_gate = next(i for i, step in enumerate(steps)
+                                  if step['action'] == 'learn' and step['spell'] == 561035)
+                self.assertEqual(len(starts), 1)
+                self.assertLess(learn_base, cast_base)
+                self.assertLess(cast_base, starts[0])
+                self.assertLess(starts[0], loop_indices[0])
+                self.assertLess(loop_indices[0], learn_gate)
+                self.assertLess(learn_gate, loop_indices[1])
+                self.assertIn('interval', expectation.model['feed']['reads']['treatment']['stamps'])
+                self.assertIn('Two-duration rolled-feed contrast', scenario['contract'])
+
+    def test_existing_single_duration_feed_keeps_no_two_duration_fields(self):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), FED)
+        self.assertNotIn('control_expected', expectation.model)
+        self.assertNotIn('stamps', expectation.model['feed']['reads']['control'])
+        self.assertNotIn('interval', expectation.model['feed']['reads']['treatment']['stamps'])
+
+    def test_seeded_ok_for_caster_and_target_presences(self):
+        v1 = self.judged(8000.0, 10000.0, entry=TWO_DURATION_CASTER)
+        self.assertEqual(v1.status, 'ok', v1.explanation)
+        v2 = self.judged(12000.0, 15000.0, entry=TWO_DURATION_TARGET)
+        self.assertEqual(v2.status, 'ok', v2.explanation)
+
+    def test_seeded_mutants_alert(self):
+        self.assertEqual(self.judged(8000.0, 8000.0).status, 'alert')
+        self.assertEqual(self.judged(10000.0, 10000.0).status, 'alert')
+        self.assertEqual(self.judged(8000.0, 12000.0).status, 'alert')
+        self.assertEqual(self.judged(8000.0, 20000.0).status, 'alert')
+        wrong_treat = {**TWO_DURATION_CASTER, 'expected_ms': 12000, 'window_ms': 14000}
+        self.assertEqual(self.judged(8000.0, 10000.0, entry=wrong_treat).status, 'alert')
+        wrong_ctrl = {**TWO_DURATION_CASTER, 'control_expected_ms': 6000}
+        self.assertEqual(self.judged(8000.0, 10000.0, entry=wrong_ctrl).status, 'alert')
+
+    def test_seeded_unmeasured_on_cap_before_age_applies_or_nan(self):
+        for kwargs in (
+                {'ctrl_stop': 0.0},
+                {'treat_stop': 0.0},
+                {'ctrl_before': 1.0},
+                {'treat_before': 1.0},
+                {'ctrl_age': 200.0},
+                {'treat_age': 200.0},
+                {'ctrl_applies': 2.0},
+                {'treat_applies': 3.0},
+                {'treat_applies': 1.0},
+                {'ctrl_remaining': 0.0},
+                {'treat_remaining': 0.0},
+                {'interval_nan': True}):
+            with self.subTest(kwargs=kwargs):
+                self.assertEqual(self.judged(8000.0, 10000.0, **kwargs).status, 'unmeasured')
+
+    def test_two_duration_refusals(self):
+        for bad in (
+                {**ENTRY, 'control_expected_ms': 2000},
+                {**FED, 'feed': {'every_ms': 1700, 'proc_spell': 803037}},
+                {**FED, 'base_learn': [803037]},
+                {**FED, 'base_casts': [803037]},
+                {**TWO_DURATION_CASTER, 'feed': {'every_ms': 1700}},
+                {**TWO_DURATION_CASTER, 'feed': {'every_ms': 1700, 'proc_spell': 561035}, 'base_learn': [803037]},
+                {**TWO_DURATION_CASTER, 'base_learn': [803035], 'base_casts': [803035]},
+                {**TWO_DURATION_CASTER, 'base_learn': [803037, 561035]},
+                {**TWO_DURATION_CASTER, 'base_learn': [803037, 92559]},
+                {**TWO_DURATION_CASTER, 'base_casts': [803035]},
+                {**TWO_DURATION_CASTER, 'control_expected_ms': 9600},
+                {**TWO_DURATION_CASTER, 'control_window_ms': 8200},
+                {**TWO_DURATION_CASTER, 'same_stamp_applies': True},
+                {**TWO_DURATION_CASTER, 'feed': {'every_ms': 1700, 'proc_spell': 804056}, 'base_learn': [804056],
+                 'base_casts': []},
+                {**TWO_DURATION_CASTER, 'feed': {'every_ms': 1700, 'proc_spell': 804056}, 'base_learn': [804056],
+                 'base_casts': [804056]},
+                {**TWO_DURATION_CASTER, 'control_expected_ms': True}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), bad)

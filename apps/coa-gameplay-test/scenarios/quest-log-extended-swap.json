@@ -1,0 +1,393 @@
+{
+  "schema": 1,
+  "name": "Quest log: a client that announces 0x8F6 cannot swap past the log size or move a timed quest out of the native log",
+  "contract": [
+    "With Quests.LogSize 30 and a full log of 30, a 0x8F6 client's CMSG_QUESTLOG_SWAP_QUEST (403) may address slots up to 63, but a swap that moves a quest into an empty slot at or above the log size is refused, so the emptied native slot cannot be used to exceed Quests.LogSize.",
+    "A swap that would put a timed quest (A Hunter's Boast, 257) into a slot of 25 or more is refused: timed quests stay in the native log. A swap between two occupied slots, 1 and 27, goes through."
+  ],
+  "timeout_ms": 120000,
+  "quest_log_size": 30,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Accept the timed quest A Hunter's Boast (257)",
+      "actor": "hero",
+      "quest": 257,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 318",
+      "actor": "hero",
+      "quest": 318,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 319",
+      "actor": "hero",
+      "quest": 319,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 415",
+      "actor": "hero",
+      "quest": 415,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 419",
+      "actor": "hero",
+      "quest": 419,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the timed quest holds slot 0",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 257,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Quest 14 holds slot 3",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 14,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: quest 318 holds overflow slot 26",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 318,
+      "equals": 26
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: quest 419 holds slot 29, the last one under Quests.LogSize 30",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 419,
+      "equals": 29
+    },
+    {
+      "action": "client_packet",
+      "label": "The client announces the extended quest log (0x8F6, version 1, 64 slots)",
+      "actor": "hero",
+      "opcode": 2294,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 64
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The server answers with the 0x8F7 snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "client_packet",
+      "label": "Swap slot 3 with empty slot 50, above Quests.LogSize 30 (CMSG_QUESTLOG_SWAP_QUEST)",
+      "actor": "hero",
+      "opcode": 403,
+      "fields": [
+        {
+          "u8": 3
+        },
+        {
+          "u8": 50
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "wait",
+      "label": "Let the swap and any promotion be handled",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "REFUSED: quest 14 stays in slot 3, so slot 3 cannot be refilled past the log size",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 14,
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "The log is still full at 30",
+      "actor": "hero",
+      "metric": "quest_log_has_room",
+      "equals": 0
+    },
+    {
+      "action": "client_packet",
+      "label": "Swap the timed quest in slot 0 with overflow slot 26",
+      "actor": "hero",
+      "opcode": 403,
+      "fields": [
+        {
+          "u8": 0
+        },
+        {
+          "u8": 26
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "wait",
+      "label": "Let the swap and any promotion be handled",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "REFUSED: the timed quest stays in native slot 0",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 257,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Quest 318 stays in slot 26",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 318,
+      "equals": 26
+    },
+    {
+      "action": "client_packet",
+      "label": "Swap occupied slot 1 with occupied overflow slot 27",
+      "actor": "hero",
+      "opcode": 403,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 27
+        }
+      ],
+      "consumed": false
+    },
+    {
+      "action": "assert",
+      "label": "ALLOWED: quest 12 moves to slot 27",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 12,
+      "equals": 27,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "ALLOWED: quest 319 moves to slot 1",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 319,
+      "equals": 1
+    }
+  ]
+}

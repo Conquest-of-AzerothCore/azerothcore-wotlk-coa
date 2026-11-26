@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Weapon illusions whose enchant ID collides with ItemSet.dbc are patched clear of field 8 (#12593)",
+  "contract": [
+    "In Extensions.dll, IsAppearanceCollected (0x10091b90) reads Appearances.dbc field 8 (+0x20) without checking",
+    "displayType and looks it up in ItemSet.dbc (0xad3efc). Five APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT rows have",
+    "enchant IDs that collide with ItemSet.dbc entries: 51018 (803), 51022 (853), 51023 (943), 51025 (912, Illusion:",
+    "Demonslaying colliding with ItemSet 912 Paladin DT4), and 51046 (854). Because of that collision, the client",
+    "requires every piece of the unrelated ItemSet to be collected and shows Illusion: Demonslaying as locked in the",
+    "wardrobe even after SMSG_APPEARANCE_ADDED grants 51025. None of the client illusion rendering paths read field 8",
+    "(GetAppearanceDisplayInfo reads field 3 for displayID and field 1 for the item name). On login, the server must",
+    "send SMSG_PATCH_APPEARANCES (0x0692, opcode 1682) for the 5 colliding illusion rows with field 8 zeroed while",
+    "preserving source item, display ID, categories 15/16, and display type, leave non-colliding illusion 51019",
+    "(field 8 = 1899) unpatched, and accept applying appearance 51025 to category 15."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "wearer", "race": 1, "class": 12, "level": 40 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 2000 },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Illusion: Demonslaying (51025) patch clears field 8",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51025, "index": 8, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Illusion: Demonslaying patch preserves source item 6300508",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51025, "index": 1, "equals": 6300508
+    },
+    {
+      "action": "assert", "label": "Illusion: Demonslaying patch preserves enchant visual 912 in field 3",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51025, "index": 3, "equals": 912
+    },
+    {
+      "action": "assert", "label": "Illusion: Demonslaying patch preserves Main-Hand Illusion category 15",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51025, "index": 5, "equals": 15
+    },
+    {
+      "action": "assert", "label": "Illusion: Demonslaying patch preserves Off-Hand Illusion category 16",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51025, "index": 6, "equals": 16
+    },
+    {
+      "action": "assert", "label": "Illusion: Demonslaying patch keeps APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT",
+      "actor": "wearer", "metric": "server_packet_contains", "opcode": 1682, "row": 51025,
+      "text": "APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Colliding illusion 51018 (803) clears field 8",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51018, "index": 8, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Colliding illusion 51022 (853) clears field 8",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51022, "index": 8, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Colliding illusion 51023 (943) clears field 8",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51023, "index": 8, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Colliding illusion 51046 (854) clears field 8",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51046, "index": 8, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Non-colliding illusion 51019 (1899) is not patched",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1682, "row": 51019, "index": 0, "equals": -1
+    },
+    { "action": "apply_appearances", "actor": "wearer", "selection": { "15": 51025 } },
+    {
+      "action": "assert", "label": "Applying Illusion: Demonslaying to main hand succeeds",
+      "actor": "wearer", "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "Active appearance category 15 reports 51025",
+      "actor": "wearer", "metric": "server_packet_u32", "opcode": 1690, "index": 16, "equals": 51025
+    }
+  ]
+}

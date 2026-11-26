@@ -424,3 +424,71 @@ class AvoidedProcStackEventsTest(unittest.TestCase):
         self.assertEqual(events(model['stack_events'], list(values.values()), len(values), 999.0), len(values))
         values[model['event_labels'][3]] = 6.0
         self.assertEqual(capped(model, values), [model['event_labels'][3]])
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class AvoidedProcPauseBeforeReadsTest(unittest.TestCase):
+    def setUp(self):
+        from profile import for_entry
+        self.class_file = for_entry(class_file(), DAWN_KNIGHT)
+        self.entry = avoided_entry(self.class_file, DAWN_KNIGHT)
+
+    def paused(self) -> dict:
+        return {**self.entry, 'trigger': {**self.entry['trigger'], 'pause_before_reads': True}}
+
+    def test_default_emits_no_pause_aura_and_matches_false(self):
+        plain, plain_exp = proc_scenario(self.class_file, self.entry)
+        explicit_false, false_exp = proc_scenario(
+            self.class_file, {**self.entry, 'trigger': {**self.entry['trigger'], 'pause_before_reads': False}})
+        self.assertEqual(plain, explicit_false)
+        self.assertEqual(plain_exp, false_exp)
+        self.assertFalse([step for step in plain['steps']
+                          if step['action'] == 'set_aura' and step.get('spell') == 56])
+
+    def test_pause_before_reads_freezes_strikers_around_baseline_learn_and_final_reads(self):
+        from proc_avoided import PAUSE_AURA
+        scenario, [expectation] = proc_scenario(self.class_file, self.paused())
+        steps = run.validate(scenario)['steps']
+        strikers = [creature['id'] for creature in scenario['creatures']]
+        pause_on = [index for index, step in enumerate(steps)
+                    if step['action'] == 'set_aura' and step.get('spell') == PAUSE_AURA and step.get('stacks') == 1]
+        pause_off = [index for index, step in enumerate(steps)
+                     if step['action'] == 'set_aura' and step.get('spell') == PAUSE_AURA and step.get('stacks') == 0]
+        self.assertEqual(len(pause_on), 2 * len(strikers))
+        self.assertEqual(len(pause_off), len(strikers))
+        baseline_pause = pause_on[:len(strikers)]
+        final_pause = pause_on[len(strikers):]
+        self.assertEqual([steps[index]['target'] for index in baseline_pause], strikers)
+        self.assertEqual([steps[index]['target'] for index in pause_off], strikers)
+        self.assertEqual([steps[index]['target'] for index in final_pause], strikers)
+        baseline_read = index_of(steps, lambda step: step.get('label') == f'{DAWN_KNIGHT} proc baseline trials')
+        learn = index_of(steps, lambda step: step['action'] == 'learn' and step.get('spell') == DAWN_KNIGHT)
+        drain = index_of(steps, lambda step: step['action'] == 'wait' and step.get('label') == 'drain')
+        guard = index_of(steps, lambda step: step.get('label') == f'{DAWN_KNIGHT} avoided guard landed')
+        trials = index_of(steps, lambda step: step.get('label') == f'{DAWN_KNIGHT} proc trials')
+        events = last_index_of(steps, lambda step: step.get('label', '').startswith(f'{DAWN_KNIGHT} proc events'))
+        self.assertLess(max(baseline_pause), baseline_read)
+        self.assertLess(baseline_read, learn)
+        self.assertLess(learn, min(pause_off))
+        self.assertLess(max(pause_off), drain)
+        self.assertLess(drain, min(final_pause))
+        self.assertLess(max(final_pause), guard)
+        self.assertLess(guard, trials)
+        self.assertLess(trials, events)
+        self.assertIn(f'aura {PAUSE_AURA}', expectation.rule)
+
+    def test_non_boolean_pause_before_reads_is_refused(self):
+        for bad in (1, 'true', None, []):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                proc_plan(self.class_file,
+                          {**self.entry, 'trigger': {**self.entry['trigger'], 'pause_before_reads': bad}})
+
+    def test_pause_before_reads_with_aura_stacks_is_refused(self):
+        stack = AvoidedProcStackEventsTest.STACK
+        entry = {**self.paused(), 'event_metric': 'aura_stacks', 'stack_aura': stack, 'stack_set': 0,
+                 'stack_per_cast': 0, 'stack_cap': 6, 'events_per_proc': 1, 'baseline': True,
+                 'attempt_auras': [{'spell': stack, 'stacks': 0, 'source': 'seeded'}]}
+        with self.assertRaisesRegex(ValueError, 'pause_before_reads.*aura_stacks'):
+            proc_plan(self.class_file, entry)
+        with self.assertRaisesRegex(ValueError, 'pause_before_reads.*aura_stacks'):
+            proc_scenario(self.class_file, entry)

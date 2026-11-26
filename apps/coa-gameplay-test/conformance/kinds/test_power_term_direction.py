@@ -307,6 +307,64 @@ class PowerTermDirectionAbsorbTests(unittest.TestCase):
             built({**AGILITY_ENTRY, 'strike_spell': 54416, 'refill_spell': 17683})
 
 
+DEFENSE_ENTRY = {**ENTRY, 'name': 'Void Strikes (Blade of the Empire defense rating term direction)',
+                 'spell': 680609, 'talent': 680609,
+                 'quote': ('Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your '
+                           'defense rating.'),
+                 'cast_spell': 502122, 'power_metric': 'defense_rating', 'power_aura': 24774,
+                 'power_aura_source': 'Increased Defense 24774, aura 189 misc 2, +180 defense rating, seeded',
+                 'casts': 12, 'cast_wait_ms': 1600, 'power_settle_ms': 3000, 'restore_charges': True,
+                 'attempt_auras': [{'spell': 823764, 'stacks': 1, 'source': 'seeded spell penetration'}]}
+DEFENSE = {'control low': 0.0, 'control high': 180.0, 'learned high': 180.0, 'learned low': 0.0}
+DEFENSE_TERM = {'control low': 376.0, 'control high': 376.0, 'learned high': 578.0, 'learned low': 376.0}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class PowerTermDirectionDefenseRatingTests(unittest.TestCase):
+    def test_defense_rating_arms_read_combat_rating_one_settle_and_restore_charges(self):
+        scenario, [expectation] = built(DEFENSE_ENTRY)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        reads = {step['label']: step for step in steps if step['action'] == 'assert'}
+        arm = expectation.model['reads']['learned high']
+        self.assertEqual((reads[arm['power']]['metric'], reads[arm['power']]['rating']), ('combat_rating', 1))
+        self.assertEqual((reads[arm['power after']]['metric'], reads[arm['power after']]['rating']),
+                         ('combat_rating', 1))
+        self.assertEqual(reads[arm['attack power']]['metric'], 'attack_power')
+        self.assertEqual(reads[arm['attack power after']]['metric'], 'attack_power')
+        self.assertEqual(expectation.model['power_name'], 'defense rating')
+        settles = [step for step in steps if step.get('action') == 'wait' and step.get('label') == 'power settle']
+        self.assertEqual([step['ms'] for step in settles], [3000, 3000, 3000])
+        restores = [step for step in steps if step.get('action') == 'restore_charges' and step.get('spell') == 502122]
+        self.assertEqual(len(restores), 48)
+        self.assertIn('Waits 3000 ms after toggling the defense rating aura', scenario['contract'])
+        self.assertIn('Restores charges of 502122 before each cast.', scenario['contract'])
+
+    def test_a_term_that_grows_with_defense_rating_only_with_the_passive_passes(self):
+        verdict = variant_judged(DEFENSE_ENTRY, DEFENSE_TERM, DEFENSE)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('defense rating 0 / 180 (control)', verdict.explanation)
+        self.assertIn('direction only: no figure judged', verdict.explanation)
+
+    def test_mutant_without_the_defense_term_or_with_control_growth_alerts(self):
+        self.assertEqual(variant_judged(DEFENSE_ENTRY, {**DEFENSE_TERM, 'learned high': 376.0}, DEFENSE).status,
+                         'alert')
+        self.assertEqual(variant_judged(DEFENSE_ENTRY, {**DEFENSE_TERM, 'control high': 578.0}, DEFENSE).status,
+                         'alert')
+
+    def test_unmeasured_when_defense_rating_or_attack_power_moves(self):
+        self.assertEqual(variant_judged(DEFENSE_ENTRY, DEFENSE_TERM, DEFENSE,
+                                        after={**DEFENSE, 'learned high': 100.0}).status, 'unmeasured')
+        self.assertEqual(variant_judged(DEFENSE_ENTRY, DEFENSE_TERM, DEFENSE,
+                                        attack_after={'control high': 400.0}).status, 'unmeasured')
+
+    def test_refuses_non_defense_aura_and_invalid_options(self):
+        for change in ({'power_aura': 35785}, {'power_aura': 10033}, {'power_settle_ms': -1},
+                       {'power_settle_ms': True}, {'restore_charges': 1}, {'expected': 180}):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                built({**DEFENSE_ENTRY, **change})
+
+
 class PowerTermDirectionNullRateTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

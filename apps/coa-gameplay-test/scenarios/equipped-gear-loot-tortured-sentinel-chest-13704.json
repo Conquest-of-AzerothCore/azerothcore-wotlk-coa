@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Tortured Sentinel drops Breastplate of Shattered Honor via equipped gear loot (#13704)",
+  "contract": [
+    "Requires CoA.Enable=1, CoA.EquippedGearLoot=1 and CoA.EquippedGearLootChance=5 (shipped defaults).",
+    "Tortured Sentinel (12179, levels 56-57, Physical, CreatureDisplayInfo 12270 -> CreatureDisplayInfoExtra 3045)",
+    "wears Sentinel plate in six armor slots: head 145103, shoulders 146028, chest 3511, legs 152490, feet 154680",
+    "and hands 157132. No item_template row uses DisplayInfoID 3511 directly, but ItemDisplayInfo.dbc gives 3511",
+    "the exact same models, geosets and armor textures (Plate_B_03Sentinel_Sleeve_AU, Plate_B_03Sentinel_Chest_TU,",
+    "Plate_B_03Sentinel_Chest_TL) as 147451 (Breastplate of Shattered Honor 2062669, RequiredLevel 56, ItemLevel 61,",
+    "Strength/Stamina), which the 2026-09-13 exiles-db creature_loot export records on entry 12179 alongside the",
+    "other Sentinel pieces (2060201, 2061217, 2067742, 2069932, 2072384).",
+    "With visual-twin fallback in AscensionEquippedGearLoot, 5000 corpse-loot rolls (5% chance across 7 worn slots,",
+    "~0.71% per piece, P(0 hits) < 1e-15) must drop Breastplate of Shattered Honor (2062669) alongside existing",
+    "exact-display pieces (2060201, 2072384) and never drop out-of-band twin Corrupted Arbor Plate (2063780, req 58)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "looter", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the character settle", "ms": 2000 },
+    {
+      "action": "assert",
+      "label": "SETUP: Tortured Sentinel generates equipped gear loot at the configured rate",
+      "actor": "looter",
+      "metric": "equipped_gear_loot_rate",
+      "entry": 12179,
+      "min": 1,
+      "max": 9
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Breastplate of Shattered Honor drops from Tortured Sentinel chest display 3511",
+      "actor": "looter",
+      "metric": "equipped_gear_loot_rate",
+      "entry": 12179,
+      "item": 2062669,
+      "min": 0.05,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "REGRESSION: Helm of Twisted Vigilance still drops from exact head display 145103",
+      "actor": "looter",
+      "metric": "equipped_gear_loot_rate",
+      "entry": 12179,
+      "item": 2060201,
+      "min": 0.05,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "REGRESSION: Gauntlets of Desolate Might still drops from exact hands display 157132",
+      "actor": "looter",
+      "metric": "equipped_gear_loot_rate",
+      "entry": 12179,
+      "item": 2072384,
+      "min": 0.05,
+      "max": 3
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: higher-level visual twin Corrupted Arbor Plate (req 58) never drops from level 56-57 Sentinel",
+      "actor": "looter",
+      "metric": "equipped_gear_loot_rate",
+      "entry": 12179,
+      "item": 2063780,
+      "min": 0,
+      "max": 0
+    }
+  ]
+}

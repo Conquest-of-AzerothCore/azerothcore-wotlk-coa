@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Abandoned Trader Crate rests on Tanaris ground instead of buried below it (#13058)",
+  "contract": "#13058 reported the Abandoned Trader Crate pickup (gameobject entry 515798, guid 6941628, drops Desert Trader's Pants 515798) in Tanaris clipping through the ground. At (-8358.100, -3950.200), stock terrain height is 10.3717 while the crate stood at z 9.276 (1.10 yd below ground). rev_20261125_13058 raises it to z 10.372 on the ground. Expected: the crate stands at (-8358.100, -3950.200, 10.372), rests flush on terrain, is not under water, has clear headroom, and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -8356.0,
+    "y": -3949.0,
+    "z": 10.4,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 515798,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the crate stands on the ground at z 10.372 instead of buried at 9.276",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -8358.1,
+      "y": -3950.2,
+      "z": 10.372,
+      "max": 0.1,
+      "guid": 6941628,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the crate rests flush on terrain instead of 1.10 yd below it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.1,
+      "max": 0.1,
+      "guid": 6941628,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the crate is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6941628,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the crate is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941628,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "no model surface lies above the crate",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6941628,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 515798
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the crate is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

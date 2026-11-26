@@ -231,12 +231,20 @@ void ApplyContracts(SpellInfo* info)
     if (id == 802602)
         info->Effects[2].Effect = 0;
     if (id == 520857)
+    {
         info->Effects[0].TargetA = SpellImplicitTargetInfo(TARGET_UNIT_CONE_ENEMY_104);
+        info->CategoryEntry = nullptr;
+        info->RecoveryTime = 0;
+        info->CategoryRecoveryTime = 0;
+        Ascension::ClientSpellPatches::Instance().Register(id);
+    }
     if (id == 520292)
     {
         info->ManaCost = 200;
+        info->CategoryEntry = nullptr;
         info->RecoveryTime = 15000;
         info->CategoryRecoveryTime = 0;
+        Ascension::ClientSpellPatches::Instance().Register(id);
     }
     if (id == 804886 || id == 804011)
         for (auto& e : info->Effects)

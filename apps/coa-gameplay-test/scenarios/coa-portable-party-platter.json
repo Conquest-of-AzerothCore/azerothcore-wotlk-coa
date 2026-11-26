@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Portable Party Platter: the realm-bound item joins the Vanity collection, places the platter for 3 minutes and its gossip offers six treats to anyone",
+  "contract": [
+    "With CoA.UnlockAllVanity = 0. Retail item 207092 (spell 416145): 1 s cast, 2 h cooldown, places creature 'Portable Party Platter' <Pastry Propagator> for 3 minutes (SpellDuration 25 = 180000).",
+    "CoA item 9707200 is realm bound, so storing it adds it to the account's Vanity collection; spell 9978100 summons platter 11000400 with the desserts aura 9978101.",
+    "The platter's gossip lists Slice of Cake, Blubbery Muffin, Rocks on the Rocks, Sugarfree Firewater Sorbet, Snow in a Cone and Party Peripherals; any player can pick one.",
+    "Two players take treats from the same platter; the platter stays for its full lifetime and then despawns.",
+    "The client learns the platter's Spell, Item, VanityCollection and spell visual rows from the 5 s fallback login stream; every player gets the treat spells.",
+    "Opening the platter sends the treat choice window as client Lua over the hot-patch channel (opcode 0x8F0), so the client needs no addon."
+  ],
+  "timeout_ms": 240000,
+  "vanity_ownership": { "unlock_all": false },
+  "location": {"map": 0, "x": -8824.3, "y": 626.4, "z": 94.4, "o": 0},
+  "players": [
+    {"id": "host", "race": 1, "class": 1, "level": 60},
+    {"id": "guest", "race": 3, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI settle", "ms": 2000},
+    {"action": "add_item", "label": "Hand the host a platter", "actor": "host", "item": 9707200},
+    {"action": "assert", "label": "The stored realm-bound copy is collected", "actor": "host", "metric": "vanity_owned", "item": 9707200, "equals": 1},
+    {"action": "assert", "label": "The login stream teaches the client the platter spell", "actor": "host", "metric": "server_packets", "opcode": 2346, "row": 9978100, "equals": 1, "within_ms": 6000},
+    {"action": "assert", "label": "and the platter item row", "actor": "host", "metric": "server_packets", "opcode": 2354, "row": 9707200, "min": 1},
+    {"action": "assert", "label": "and its Vanity collection row", "actor": "host", "metric": "server_packets", "opcode": 1395, "row": 11125798, "equals": 1},
+    {"action": "assert", "label": "and the desserts state kit", "actor": "host", "metric": "server_packets", "opcode": 2349, "row": 201008, "equals": 1},
+    {"action": "assert", "label": "and the desserts aura model name", "actor": "host", "metric": "server_packets", "opcode": 2351, "row": 201000, "equals": 1},
+    {"action": "assert", "label": "A guest who owns no platter still learns the sorbet spell", "actor": "guest", "metric": "server_packets", "opcode": 2346, "row": 9978105, "equals": 1, "within_ms": 1000},
+    {"action": "use_item", "label": "Place the platter", "actor": "host", "item": 9707200, "spell": 9978100},
+    {"action": "assert", "label": "The platter stands next to the host", "actor": "host", "metric": "nearby_creature_count", "entry": 11000400, "equals": 1, "within_ms": 3000},
+    {"action": "assert", "label": "It carries the desserts", "actor": "host", "metric": "nearby_creature_count", "entry": 11000400, "spell": 9978101, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "It lasts 3 minutes", "actor": "host", "metric": "owned_creature_remaining_ms", "entry": 11000400, "min": 170000, "max": 180000},
+    {"action": "assert", "label": "The platter goes on its 2 hour cooldown", "actor": "host", "metric": "cooldown_ms", "spell": 9978100, "min": 7190000, "max": 7200000},
+    {"action": "client_packet", "label": "The host's client announces its hot-patch channel", "actor": "host", "opcode": 2289, "fields": [{"u32": 1}, {"u8": 0}]},
+    {"action": "gossip_hello", "label": "The host looks at the platter", "actor": "host", "entry": 11000400},
+    {"action": "assert", "label": "The server sends the choice window with the gossip, no client addon needed", "actor": "host", "metric": "server_packet_contains", "opcode": 2288, "text": "CoAPartyPlatterFrame", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "Six treats are offered", "actor": "host", "metric": "gossip_options", "equals": 6, "within_ms": 2000},
+    {"action": "assert", "label": "Option 1", "actor": "host", "metric": "gossip_option_text", "index": 0, "text": "Slice of Cake", "equals": 1},
+    {"action": "assert", "label": "Option 2", "actor": "host", "metric": "gossip_option_text", "index": 1, "text": "Blubbery Muffin", "equals": 1},
+    {"action": "assert", "label": "Option 3", "actor": "host", "metric": "gossip_option_text", "index": 2, "text": "Rocks on the Rocks", "equals": 1},
+    {"action": "assert", "label": "Option 4", "actor": "host", "metric": "gossip_option_text", "index": 3, "text": "Sugarfree Firewater Sorbet", "equals": 1},
+    {"action": "assert", "label": "Option 5", "actor": "host", "metric": "gossip_option_text", "index": 4, "text": "Snow in a Cone", "equals": 1},
+    {"action": "assert", "label": "Option 6", "actor": "host", "metric": "gossip_option_text", "index": 5, "text": "Party Peripherals", "equals": 1},
+    {"action": "gossip_select", "label": "Slice of Cake", "actor": "host", "option": 0},
+    {"action": "assert", "label": "The host enjoys a slice of cake", "actor": "host", "metric": "aura", "spell": 9978102, "equals": 1, "within_ms": 2000},
+    {"action": "gossip_hello", "label": "The guest looks at the same platter", "actor": "guest", "entry": 11000400},
+    {"action": "gossip_select", "label": "Sugarfree Firewater Sorbet", "actor": "guest", "option": 3},
+    {"action": "assert", "label": "The guest grows by 25%", "actor": "guest", "metric": "aura_amount", "spell": 9978105, "equals": 25, "within_ms": 2000},
+    {"action": "assert", "label": "Sharing did not remove the platter", "actor": "host", "metric": "nearby_creature_count", "entry": 11000400, "equals": 1},
+    {"action": "assert", "label": "The platter despawns after its 3 minutes", "actor": "host", "metric": "nearby_creature_count", "entry": 11000400, "equals": 0, "within_ms": 185000}
+  ]
+}
