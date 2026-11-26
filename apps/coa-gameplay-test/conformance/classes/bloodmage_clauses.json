@@ -50,8 +50,17 @@
   {
     "spell": 92112,
     "clause": "and then increases the health costs of your spells by $s1%$?s504252[, your critical strike chance by $504252s1%][]",
-    "labels": [
-      "92112 effect_value 706613e0 #4"
+    "claims": [
+      {
+        "claim": "and then increases the health costs of your spells by $s1%",
+        "labels": [
+          "92112 effect_value 706613e0 #4"
+        ]
+      },
+      {
+        "claim": "$?s504252[, your critical strike chance by $504252s1%][]",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -271,8 +280,21 @@
   {
     "spell": 300986,
     "clause": "Reduces the duration of bleed, root, and movement slowing effects against you by $s1%.",
-    "labels": [
-      "300986 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Reduces the duration of root effects against you by $s1%.",
+        "labels": [
+          "300986 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "Reduces the duration of movement slowing effects against you by $s1%.",
+        "labels": []
+      },
+      {
+        "claim": "Reduces the duration of bleed effects against you by $s1%.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -343,8 +365,17 @@
   {
     "spell": 501679,
     "clause": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage and generating Rage.",
-    "labels": [
-      "501679 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage",
+        "labels": [
+          "501679 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and generating Rage.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -826,7 +857,8 @@
     "spell": 504296,
     "clause": "Protects the caster with blood magic.",
     "labels": [],
-    "kind": "claim"
+    "kind": "no_claim",
+    "reason": "Pure flavour intro clause stating no mechanic; Blood Shield mechanics are covered by rows #87-#90 (Sun Cleric D-114 precedent, 760379)."
   },
   {
     "spell": 504296,
@@ -1107,9 +1139,18 @@
   {
     "spell": 504897,
     "clause": "and reducing the duration of interrupt and silence effects by $s2%.",
-    "labels": [
-      "504897 effect_value e1 #0",
-      "504897 aura_amount e1 #0"
+    "claims": [
+      {
+        "claim": "and reducing the duration of silence effects by $s2%.",
+        "labels": [
+          "504897 effect_value e1 #0",
+          "504897 aura_amount e1 #0"
+        ]
+      },
+      {
+        "claim": "and reducing the duration of interrupt effects by $s2%.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -1460,7 +1501,7 @@
     "clause": "Enrage, increasing your Physical damage dealt and reducing your Physical damage taken by $s1% for $d",
     "claims": [
       {
-        "claim": "increasing your Physical damage dealt and reducing your Physical damage taken by $s1%",
+        "claim": "increasing your Physical damage dealt by $s1%",
         "labels": [
           "553267 effect_value 523721e0 #2"
         ]
@@ -1470,6 +1511,10 @@
         "labels": [
           "553267 spell_duration 523721 #3"
         ]
+      },
+      {
+        "claim": "and reducing your Physical damage taken by $s1%",
+        "labels": []
       }
     ],
     "kind": "claim"
@@ -2370,8 +2415,17 @@
   {
     "spell": 680730,
     "clause": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
-    "labels": [
-      "680730 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Fleshcraft by $/1000;s1 sec.",
+        "labels": [
+          "680730 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and reduces the duration of the Sated debuff by $/1000;s1 sec.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -2740,8 +2794,17 @@
   {
     "spell": 681491,
     "clause": "Reduces the cooldown of Fleshcraft and the duration of the Sated debuff by $/1000;s1 sec.",
-    "labels": [
-      "681491 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Fleshcraft by $/1000;s1 sec.",
+        "labels": [
+          "681491 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and reduces the duration of the Sated debuff by $/1000;s1 sec.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -2998,8 +3061,17 @@
   {
     "spell": 704633,
     "clause": "Your critical strikes now reduce the cooldown of Fleshcraft and the duration of Sated on the target by $/1000;504253s1 sec.",
-    "labels": [
-      "704633 effect_value 504253e0 #0"
+    "claims": [
+      {
+        "claim": "Your critical strikes now reduce the cooldown of Fleshcraft by $/1000;504253s1 sec.",
+        "labels": [
+          "704633 effect_value 504253e0 #0"
+        ]
+      },
+      {
+        "claim": "and reduce the duration of Sated on the target by $/1000;504253s1 sec.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -3245,8 +3317,17 @@
   {
     "spell": 704661,
     "clause": "While in Eternal Curse, you now gain $s1% more attack power from Agility and Strength.",
-    "labels": [
-      "704661 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "While in Eternal Curse, you now gain $s1% more attack power from Agility",
+        "labels": [
+          "704661 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and $s1% more attack power from Strength.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -3778,7 +3859,7 @@
     "clause": "Casting Howl spells now increases the damage dealt and reduces damage taken by nearby party members by $504157s1% for $504157d.",
     "claims": [
       {
-        "claim": "increases the damage dealt and reduces damage taken by nearby party members by $504157s1%",
+        "claim": "increases the damage dealt by nearby party members by $504157s1%",
         "labels": [
           "800766 effect_value 504157e0 #0"
         ]
@@ -3788,6 +3869,10 @@
         "labels": [
           "800766 spell_duration 504157 #1"
         ]
+      },
+      {
+        "claim": "and reduces damage taken by nearby party members by $504157s1%",
+        "labels": []
       }
     ],
     "kind": "claim"
@@ -4168,10 +4253,28 @@
   {
     "spell": 801955,
     "clause": "Invoke a blood pact, exchanging health for enhanced reflexes, increasing your chance to dodge and reducing the chance for ranged attacks to hit you by $s3%$?s560257[, and increasing your healing received by $560257s1%][] for $d.",
-    "labels": [
-      "801955 effect_value e2 #0",
-      "801955 aura_amount e2 #0",
-      "801955 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "increasing your chance to dodge by $s3%",
+        "labels": [
+          "801955 effect_value e2 #0",
+          "801955 aura_amount e2 #0"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "801955 aura_duration_ms #1"
+        ]
+      },
+      {
+        "claim": "and reducing the chance for ranged attacks to hit you by $s3%",
+        "labels": []
+      },
+      {
+        "claim": "$?s560257[, and increasing your healing received by $560257s1%][]",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -4337,7 +4440,16 @@
   {
     "spell": 504085,
     "clause": "$?s681078[\r\n\r\nEmpowered: Becomes instant cast and heals yourself for $680033s1% of the heal value.][]",
-    "labels": [],
+    "claims": [
+      {
+        "claim": "$?s681078[Empowered: Becomes instant cast][]",
+        "labels": []
+      },
+      {
+        "claim": "$?s681078[and heals yourself for $680033s1% of the heal value.][]",
+        "labels": []
+      }
+    ],
     "kind": "claim"
   },
   {
@@ -4460,8 +4572,17 @@
   {
     "spell": 804201,
     "clause": "Increases your maximum health and reduces the cost of your spells and abilities by $s1%.",
-    "labels": [
-      "804201 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases your maximum health by $s1%",
+        "labels": [
+          "804201 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and reduces the cost of your spells and abilities by $s1%.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -4653,8 +4774,17 @@
   {
     "spell": 804807,
     "clause": "Reduces the cost of your abilities that require Cursed Form and increases the healing done by Blood Rituals by $s1%.",
-    "labels": [
-      "804807 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Reduces the cost of your abilities that require Cursed Form by $s1%",
+        "labels": [
+          "804807 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and increases the healing done by Blood Rituals by $s1%.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -5281,8 +5411,17 @@
   {
     "spell": 807544,
     "clause": "Increases the spell power scaling of Bloodmoon Blast, Taldaram's Torment and Bloodbolt by $s1%.",
-    "labels": [
-      "807544 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Increases the spell power scaling of Bloodmoon Blast and Bloodbolt by $s1%.",
+        "labels": [
+          "807544 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "Increases the spell power scaling of Taldaram's Torment by $s1%.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
@@ -5309,8 +5448,17 @@
   {
     "spell": 807919,
     "clause": "Reduces the cost of your abilities that require Cursed Form and increases the healing done by Blood Rituals by $s1%.",
-    "labels": [
-      "807919 effect_value e0 #0"
+    "claims": [
+      {
+        "claim": "Reduces the cost of your abilities that require Cursed Form by $s1%",
+        "labels": [
+          "807919 effect_value e0 #0"
+        ]
+      },
+      {
+        "claim": "and increases the healing done by Blood Rituals by $s1%.",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
