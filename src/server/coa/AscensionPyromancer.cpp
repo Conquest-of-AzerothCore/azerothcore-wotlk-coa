@@ -370,24 +370,25 @@ void Accumulate(Player* player, Unit* target, uint32 id, uint32 total)
         aura->SetScriptValue(id + 1, ticks);
     }
 }
+void AspectChain(Player* player, Unit* target, uint32 damage, uint32 remaining)
+{
+    uint32 const next = CalculatePct(damage, Amount(504750));
+    if (!next || !target || !target->IsAlive())
+        return;
+    auto& state = State(player);
+    bool const previousEvent = state.event;
+    uint32 const previousRemaining = state.aspectRemaining;
+    state.event = true;
+    state.aspectRemaining = remaining;
+    Copy(player, target, 503864, next);
+    state.aspectRemaining = previousRemaining;
+    state.event = previousEvent;
+}
 void Aspect(Player* player, Unit* target, uint32 damage, bool guaranteed)
 {
-    if (!damage || (!guaranteed && !Chance(player, 504750)))
+    if (!damage || !target || !target->IsAlive() || (!guaranteed && !Chance(player, 504750)))
         return;
-    bool previous = State(player).event;
-    State(player).event = true;
-    for (uint32 index = 0; index < 4 && target->IsAlive(); ++index)
-    {
-        damage = CalculatePct(damage, Amount(504750));
-        State(player).aspectDamage = 0;
-        Copy(player, target, 503864, damage);
-        damage = State(player).aspectDamage;
-        if (damage && player->HasAura(707479))
-            Copy(player, player, 707595, CalculatePct(damage, Amount(707479)));
-        if (!damage || !Chance(player, 504750))
-            break;
-    }
-    State(player).event = previous;
+    AspectChain(player, target, damage, 3);
 }
 void Refresh(Player* player)
 {
