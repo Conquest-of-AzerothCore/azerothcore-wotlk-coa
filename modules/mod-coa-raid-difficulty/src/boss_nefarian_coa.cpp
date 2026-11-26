@@ -38,8 +38,8 @@
  *   Draconic Cleave          every 8s    Tail Sweep every 20s  Fierce Blow every 8.5s
  *   Dominion                 every 45s   three players lose their soul to a Shadow
  *                                        Clone for 45s. The clone fights the raid,
- *                                        and whatever it is hit for lands on its
- *                                        owner instead. This replaces the class
+ *                                        and whatever it is hit for is split
+ *                                        across the raid. This replaces the class
  *                                        calls, which could not cover the CoA
  *                                        classes anyway.
  *   Berserk                  after 10 minutes of phase 2
@@ -785,7 +785,8 @@ namespace
     /*
      * A Shadow Clone from Dominion. It wears its owner's shape and fights the
      * raid for 45 seconds. Damage it takes is not its own: Spiritual Pain
-     * hands every hit on to the owner, and the clone keeps its health.
+     * splits every hit evenly across the living raid, and the clone keeps its
+     * health. The owner's own hits do nothing.
      */
     struct npc_nefarian_shadow_clone : public ScriptedAI
     {
@@ -814,8 +815,14 @@ namespace
             if (Player* owner = ObjectAccessor::GetPlayer(*me, _owner))
                 if (owner->IsAlive() && attacker != owner)
                 {
-                    int32 pain = int32(damage);
-                    me->CastCustomSpell(owner, SPELL_SPIRITUAL_PAIN, &pain, nullptr, nullptr, true);
+                    std::vector<Player*> const raid = PlayersOf(me, [](Player*) { return true; });
+                    if (!raid.empty())
+                    {
+                        uint32 const count = uint32(raid.size());
+                        int32 pain = int32((damage + count - 1) / count);
+                        for (Player* p : raid)
+                            me->CastCustomSpell(p, SPELL_SPIRITUAL_PAIN, &pain, nullptr, nullptr, true);
+                    }
                 }
             damage = 0;
         }
