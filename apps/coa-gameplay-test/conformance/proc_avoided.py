@@ -4,12 +4,13 @@ from values import fixture_health_step
 AVOIDED = 'avoided'
 STRIKER_ID = 'striker'
 MAX_STRIKERS = 10
+PAUSE_AURA = 56
 DODGED, PARRIED, LANDED, FULL_BLOCKED = 2, 3, 1, 5
 TRIAL_STATES = {'dodged': DODGED, 'parried': PARRIED}
 GUARD_STATES = {'landed': LANDED, 'blocked': FULL_BLOCKED}
 TRIALS_PER_ATTEMPT = 'trials_per_attempt'
 TRIGGER_FIELDS = {'action', 'striker_entry', 'swing_ms', 'dodge', 'parry', 'strikers', 'striker_auras', 'count_misses',
-                  'miss_exclusion', 'learn'}
+                  'miss_exclusion', 'learn', 'pause_before_reads'}
 READING_NAME = 'avoided swings (dodged + parried)'
 MISSES_READING_NAME = 'avoided swings (dodged + parried + missed)'
 MISSED = 'missed'
@@ -43,6 +44,12 @@ def checked_trigger(entry: dict) -> dict:
         raise ValueError(f'Proc {aura} avoided trigger striker_auras must be a list of positive spell ids')
     if type(trigger.get('count_misses', False)) is not bool:
         raise ValueError(f'Proc {aura} avoided trigger count_misses is a boolean')
+    if type(trigger.get('pause_before_reads', False)) is not bool:
+        raise ValueError(f'Proc {aura} avoided trigger pause_before_reads is a boolean')
+    from proc_stacks import AURA_STACKS
+    if pauses_before_reads(entry) and entry.get('event_metric') == AURA_STACKS:
+        raise ValueError(f'Proc {aura} avoided trigger pause_before_reads cannot be combined with '
+                         f'event_metric {AURA_STACKS} (stack drain reads run before the pause)')
     exclusion = trigger.get('miss_exclusion')
     if exclusion is not None and (not counts_misses(entry) or not isinstance(exclusion, dict)
                                   or set(exclusion) != {'min_share'} or isinstance(exclusion['min_share'], bool)
@@ -62,6 +69,18 @@ def checked_trigger(entry: dict) -> dict:
 
 def counts_misses(entry: dict) -> bool:
     return entry['trigger'].get('count_misses', False) is True
+
+
+def pauses_before_reads(entry: dict) -> bool:
+    return entry['trigger'].get('pause_before_reads', False) is True
+
+
+def pause_steps(entry: dict, on: bool) -> list[dict]:
+    if not pauses_before_reads(entry):
+        return []
+    stacks = 1 if on else 0
+    return [{'action': 'set_aura', 'actor': CASTER, 'target': striker, 'caster': striker, 'spell': PAUSE_AURA,
+             'stacks': stacks} for striker in striker_ids(entry)]
 
 
 def miss_exclusion_share(entry: dict) -> float | None:
@@ -201,7 +220,10 @@ def trial_rule(entry: dict) -> str:
             + (f'; the miss share is read in the same run: under {miss_exclusion_share(entry):g} the part cannot '
                f'separate a server that ignores misses and is unmeasured, otherwise the rate that server would '
                f'read, the stated chance x (1 - miss share), must lie outside the interval'
-               if miss_exclusion_share(entry) is not None else ''))
+               if miss_exclusion_share(entry) is not None else '')
+            + (f'; strikers are paused with aura {PAUSE_AURA} (Stun) during baseline and final counter reads so all '
+               f'counters reflect the same swing set'
+               if pauses_before_reads(entry) else ''))
 
 
 def engage_ms(entry: dict) -> int:
@@ -228,11 +250,11 @@ def baseline_steps(entry: dict, plan, swings: bool) -> list[dict]:
         if swings:
             steps += avoided_attempt_steps(entry, baseline_swings(entry, plan), plan.attempt_ms, True)
             steps += drain_steps(entry, {'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS}, True)
-        return steps + trial_steps(labels['trials'], misses=counts_misses(entry))
+        return steps + pause_steps(entry, True) + trial_steps(labels['trials'], misses=counts_misses(entry))
     if swings:
         steps += attempt_steps(entry, baseline_swings(entry, plan), plan.attempt_ms)
         steps.append({'action': 'wait', 'label': 'baseline drain', 'ms': DRAIN_MS})
-    return steps + trial_steps(labels['trials'], misses=counts_misses(entry)) + [
+    return steps + pause_steps(entry, True) + trial_steps(labels['trials'], misses=counts_misses(entry)) + [
         {**event_steps(entry)[0], 'label': labels['events']}]
 
 

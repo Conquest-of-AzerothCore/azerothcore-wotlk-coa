@@ -44,3 +44,21 @@ Options for a trigger with a cooldown and a percent cost (ADR 1192, provisional)
 
 Sun Cleric: Piety 300367 on Horusath Blast 572801 (11 parts) and Rapture 806477 (19 parts), 20%, with all four,
 `residual_target` 0.001 and `min_detectable` 4 (twice the 2-point band).
+
+Two-rate contrast with a non-zero baseline (ADR 1305, provisional), all optional and absent by default:
+
+- `base_learn`: a non-empty list of distinct positive prerequisite spell ids learned before the control arm (in
+  addition to `trigger_spell` and `reset_spell`).
+- `control_chance_pct`: expected baseline proc chance in `(0, 100)` during the control arm. Requires `base_learn` and
+  disjoint G-20 bands from `chance_pct` (`|chance_pct - control_chance_pct| > band(control) + band(treatment)`). When
+  `residual_target` and `min_detectable` are set, the per-pair target splits equally across both arms (per-arm
+  confidence `1 - target / 4`, `z = residual_z(target / 2)`), and `control_casts * parts` must reach the control arm's
+  minimum trials just as `casts * parts` reaches the treatment arm's. The judge checks both arms inside their G-20
+  bands and requires strictly non-overlapping Wilson intervals.
+- `control_attempt_auras`: optional caster auras set before each control cast instead of `attempt_auras`, only for a
+  condition contrast where `talent` is already in `base_learn` (refused when `control_attempt_auras == attempt_auras`,
+  and refused on a learned contrast where `talent` is not in `base_learn` so the two variables are never confounded).
+
+Cultist: Horrific Visions 707753 on Dark Revelation 300313 (`6%` -> `16%`, 9 pooled parts, `9,000` control and
+`19,800` treatment hits, `residual_target` 0.001, `min_detectable` 4): learned contrast at 41 Insanity and condition
+contrast at 40 vs 41 Insanity.

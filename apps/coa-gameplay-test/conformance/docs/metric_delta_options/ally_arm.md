@@ -23,7 +23,12 @@
   by `TARGET_CHECK_ALLY`), never a run's reading. The contract states it. On each use, the reviewer opens the cited
   lines and checks that the spell's whole target selection (DBC implicit targets and every script filter) reaches the
   raid, not only the party (mentor D-56).
-- `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger.
+- `ally_health`: `[value, maximum]`, set on every ally in both phases, ahead of the trigger; or a non-empty object
+  mapping distinct ally ids (`ally`, `ally2`, ...) to `[value, maximum]` (`1 <= value <= maximum`, integers, `allies
+  >= 1`, ADR 1306). The per-ally object form also runs ahead of `attack_swings` phases (`attack_phase_steps`).
+- `ally_auras` (ADR 1306, provisional): a non-empty list of `[spell, stacks, on, by]` (`allies >= 1`, `spell > 0`,
+  `stacks >= 0`, `on` and `by` in scenario units, at least one naming an ally). Sets each aura via harness `set_aura`
+  in both phases ahead of the trigger or `attack_swings` swings (with `spec.wait_ms` settle before swings).
 - `ally_power` (ADR 1244, provisional): a non-empty list of `[power, value]`, a power index 0 to 6 once each and a
   value of at least 0, needing at least one ally. Each phase sets every ally's listed power to its value with the
   harness `set_power` step, right after `ally_health` and ahead of the trigger (the harness refuses a value above the
@@ -113,7 +118,7 @@ a random value whose band differs between phases (G-19) cannot be stated in one 
 metric's: an arm does not pass through the clause gates (`CONTRAST_PROOF`, `STATE_PROMISES`, `EVENT_PROMISES`), so a
 ledger row an arm proves needs its arm checked against the clause by the class reviewer.
 
-Named points: `check`, `phase_steps`, `fixtures`, `model`, `verdict`.
+Named points: `check`, `phase_steps`, `attack_phase_steps`, `fixtures`, `model`, `verdict`.
 
 Example shape (Bless at an ally; every value comes from the entry's own source, never from this page):
 

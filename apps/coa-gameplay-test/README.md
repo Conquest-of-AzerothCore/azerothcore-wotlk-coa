@@ -360,6 +360,8 @@ and Linux binaries.
 
 ## Scenario format
 
+A creature fixture accepts `distance` (0–100 yd along `+x` from its owner, default 3) or explicit 2D offsets `dx` and
+`dy` (-100–100 yd each, planar distance at most 100 yd, mutually exclusive with `distance`).
 A creature fixture accepts `spell_hit_bonus` (0–100 percentage points) for its native spell hit modifier, read by
 magic hit rolls (`MagicSpellHitResult`), and `melee_hit_bonus` (0–100) for its native melee hit modifier
 (`m_modMeleeHitChance`), which `MeleeSpellMissChance` subtracts for its melee attacks and melee-class spells.
@@ -372,6 +374,9 @@ template's lowest level (`creature_classlevelstats` at `minlevel` times the temp
 time. A template with a level range otherwise rolls its level at spawn, and its armor with it. Melee damage, mana
 and the other level-derived stats still follow the rolled level; health comes from the `health` field. The
 conformance generator sets it on every creature fixture ([ADR 0658](../../docs/adr/0658-pin-generated-fixture-armor-to-the-template-minimum.md)).
+Optional `face_caster: true` orients the spawned fixture creature toward its `owner` player (`SetOrientation`,
+`SetFacingToObject` and home orientation) so front-arc mechanics such as parry are reachable; omitted or `false`
+leaves the default spawn orientation unchanged.
 
 Start from [scenarios/frostbolt.json](scenarios/frostbolt.json). Schema version 1 accepts up to eight players,
 twelve creatures and 10,000 sequential steps (twelve since ADR 0221; eight before). Schema version 2 raises the
@@ -583,7 +588,9 @@ assert stable maximums and final levels when testing damage coefficients.
 | `set_health_pct` | Player `actor`, `pct` (1..99) and exactly one of `entry` (nearest living creature within 100 yards) or `target` (creature fixture id): deals the missing health as direct damage from the actor through `Unit::DealDamage`, so damage-driven phase hooks fire. Refuses to raise health. Use `attack_nearby` with `kill: true` for an early exit through the normal death path. |
 | `reset_cooldown` | Player `actor`, `spell`: reset that native spell cooldown between independent cases. |
 | `restore_charges` | Player `actor`, `spell`: restore the native charge pool between independent cases. Separate from ordinary cooldowns. |
-| `cast_until_aura` | Player `actor`, `spell`, `aura`, `every_ms`, `max_casts`; optional `target`, `cast_power` (with optional `power`, default 0) and `reset_cooldown`: every `every_ms` of game time while the actor lacks `aura`, run the fixtures and submit the same cast as `cast`; stop at the first poll that reads the aura or once the last of `max_casts` casts had its `every_ms`. The step never sets the aura; its record carries `attempts` and `stopped` (`aura` or `cap`), and a judged read of the aura must follow it (ADR 1195). |
+| `cast_until_aura` | Player `actor`, `spell`, `aura`, `every_ms`, `max_casts`; optional `target`, `stop_target` (scenario unit checked for `aura`, default `actor`; ADR 1297), `cast_power` (with optional `power`, default 0) and `reset_cooldown`: every `every_ms` of game time while `stop_target` lacks `aura`, run the fixtures and submit the same cast as `cast`; stop at the first poll that reads the aura or once the last of `max_casts` casts had its `every_ms`. The step never sets the aura; its record carries `attempts` and `stopped` (`aura` or `cap`), and a judged read of the aura must follow it (ADR 1195). |
+| `cast_until_owned_creature` | Player `actor`, `spell`, `entry`, `every_ms`, `max_casts`; optional `target`, `cast_power` (with optional `power`, default 0) and `reset_cooldown`: every `every_ms` of game time while no living owned creature of `entry` is present, run the fixtures and submit the same cast as `cast`; stop at the first poll that reads a living owned creature of `entry` or once the last of `max_casts` casts had its `every_ms`. The step never spawns the creature; its record carries `attempts` and `stopped` (`creature` or `cap`), and a judged read of `owned_creature_count` must follow it (ADR 1296). |
+| `attack_until_swings` | Player `actor`, `target`, `swings` (1..50), `timeout_ms`; optional `hand` (0 main hand, 1 off hand, default 0): starts melee auto-attack (`SubmitAttackSwing`), polls `meleeAttacksByHand[hand]` on every world update, and sends `CMSG_ATTACKSTOP` on the first tick that reaches `swings` (or at `timeout_ms`). Records `swings` and `stopped` (`swings` or `timeout`) (ADR 1309). |
 | `wait` | `ms`: let the world continue updating for that much game time. |
 | `snapshot` | `actor`, `metric`, `save_as`: remember a numeric observation. |
 | `assert` | `actor`, `metric`, `equals` and/or `min`/`max`: check an observation. |
@@ -771,6 +778,8 @@ accepts `effect` (default 0). These queries submit no attack.
 `melee_attack_count` counts the actor's native melee combat packets, including extra attacks and misses.
 `melee_damage_count` counts only those dealing positive damage. Both accept `hand` (0 main hand, 1 off hand).
 `melee_damage_total` sums the positive melee damage in those packets and accepts the same hand filter.
+`melee_misses_dealt`, `melee_dodges_dealt` and `melee_parries_dealt` count the actor's outgoing melee swings that
+missed (excluding `VICTIMSTATE_EVADES`), were dodged, or were parried, accepting optional `hand` (0 or 1).
 Both damage metrics also accept the booleans `critical`, `glancing` and `blocked`, which keep only the hits whose
 packet carries (true) or lacks (false) the critical, glancing or block flag; `critical: false, glancing: false,
 blocked: false` selects plain hits.
@@ -1173,6 +1182,15 @@ lists them in the step record as `auras`: `spell`, `caster` (GUID), `caster_entr
 each (a read only, ADR 0652).
 `owned_creature_spell_cast_count` counts the casts of `spell` by that owned creature in its map instance (the
 harness cast counter), and `game_time_ms` reads the server's game time in milliseconds (reads only, ADR 0485).
+`owned_creature_total_cast_count` counts the casts of a living owned creature of `entry` in its map instance across all
+spells (or of one optional `spell`), with optional boolean `triggered` (default `true`; `false` counts only
+non-triggered casts so triggered sub-effects do not inflate a single cast) and optional boolean `cumulative` (default
+`false`; `true` reads the cumulative count across all summons of `entry` owned by `actor`, remaining readable after
+despawn); returns `-1` when `cumulative` is `false` and no living owned creature of `entry` is present (read only,
+ADR 1296).
+`owned_creature_copy_x` and `owned_creature_copy_y` read the X and Y world coordinates of the `index`-th (`0..31`)
+living owned creature of `entry` sorted ascending by GUID (returning `NaN` when fewer than `index + 1` living copies
+exist; read only, ADR 1311).
 `owned_creature_attack_time_ms` and `owned_creature_crit_chance` read the same creature's main-hand swing interval
 (`UNIT_FIELD_BASEATTACKTIME`) and its melee crit chance against the unit named by `target`.
 `owned_creature_run_speed_rate`, `owned_creature_attack_power`, `owned_creature_spell_power`,
@@ -1190,6 +1208,11 @@ entry `item`.
 `owned_creature_react_state` reads the same creature's `GetReactState()` (0 passive, 1 defensive, 2 aggressive).
 `owned_creature_avoided_count` counts the swings of creatures of `entry` that their victim dodged or parried, from the
 victim state of every `SMSG_ATTACKERSTATEUPDATE` the actor received.
+`melee_blocks_taken_count` and `melee_blocks_taken_total` count and sum `blocked_amount` on incoming
+`SMSG_ATTACKERSTATEUPDATE` hits carrying `HITINFO_BLOCK` for the player `actor`, with optional `block_kind`
+(`all` default, `normal` partial block equal to `GetShieldBlockValue()`, `critical` partial block equal to
+`2 * GetShieldBlockValue()`, `other` partial block with any other amount, and `full` for `VICTIMSTATE_BLOCKS` on
+`melee_blocks_taken_count` only; reads only, ADR 1310).
 `owned_creature_threat_multiplier` and `threat_multiplier` (the actor) read the threat multiplier the threat manager
 applies for `school_mask` (default Physical), `GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_THREAT)`.
 `owned_creature_spell_crit_chance` reads the owned creature's base spell crit chance (`m_baseSpellCritChance`).

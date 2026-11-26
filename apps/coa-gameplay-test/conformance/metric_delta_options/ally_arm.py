@@ -19,7 +19,7 @@ CASTER_ENTRY_METRICS = {'spell_heal_count', 'spell_heal_total', 'spell_effective
 CONTROL_LABEL = 'timed no-cast control'
 EXPIRE_LABEL = 'let the first effect fully expire'
 KEYS = {'allies', 'ally_health', 'ally_casts', 'control_wait', 'arms', 'ratios', 'reach_source', 'ally_attacks',
-        'ally_strikes', 'ally_class', 'ally_power'}
+        'ally_strikes', 'ally_class', 'ally_power', 'ally_auras'}
 MAX_POWERS = 7
 ALLY_ATTACK_KEYS = {'spell', 'power', 'source'}
 ALLY_ATTACK_SETTLE_MS = 2000
@@ -78,6 +78,8 @@ class AllyArm:
     ally_strike_health: int | None = None
     ally_class: int | None = None
     ally_power: tuple[tuple[int, int], ...] = ()
+    ally_health_map: tuple[tuple[str, int, int], ...] = ()
+    ally_auras: tuple[tuple[int, int, str, str], ...] = ()
 
     @property
     def ally_ids(self) -> tuple[str, ...]:
@@ -189,6 +191,51 @@ def denominator_arms(denominator) -> tuple:
     return (denominator,)
 
 
+def parse_health_pair(raw) -> tuple[int, int]:
+    if (not isinstance(raw, list) or len(raw) != 2
+            or not all(type(value) is int for value in raw) or not 1 <= raw[0] <= raw[1]):
+        raise ValueError(f'ally_arm ally_health is [value, maximum], integers with 1 <= value <= maximum, '
+                         f'not {raw!r}')
+    return raw[0], raw[1]
+
+
+def parse_ally_health(
+    raw,
+    ally_ids: tuple[str, ...],
+) -> tuple[tuple[int, int] | None, tuple[tuple[str, int, int], ...]]:
+    if raw is None:
+        return None, ()
+    if isinstance(raw, list):
+        return parse_health_pair(raw), ()
+    if not isinstance(raw, dict) or not raw or not ally_ids:
+        raise ValueError(f'ally_arm ally_health is [value, maximum] or a non-empty map of ally ids to '
+                         f'[value, maximum], not {raw!r}')
+    unknown = sorted(set(raw) - set(ally_ids))
+    if unknown:
+        raise ValueError(f'ally_arm ally_health names unknown ally ids {unknown}, outside {list(ally_ids)}')
+    parsed = tuple((unit, *parse_health_pair(raw[unit])) for unit in ally_ids if unit in raw)
+    return None, parsed
+
+
+def parse_ally_auras(raw, ally_ids: tuple[str, ...]) -> tuple[tuple[int, int, str, str], ...]:
+    if raw is None:
+        return ()
+    if not isinstance(raw, list) or not raw or not ally_ids:
+        raise ValueError(f'ally_arm ally_auras is a non-empty list of [spell, stacks, on, by] with at least one ally, '
+                         f'not {raw!r}')
+    parsed = []
+    for item in raw:
+        if (not isinstance(item, list) or len(item) != 4
+                or type(item[0]) is not int or item[0] <= 0
+                or type(item[1]) is not int or item[1] < 0
+                or not isinstance(item[2], str) or not isinstance(item[3], str)
+                or (item[2] not in ally_ids and item[3] not in ally_ids)):
+            raise ValueError(f'ally_arm ally_auras entry is [spell > 0, stacks >= 0, on, by] naming at least one ally '
+                             f'of {list(ally_ids)}, not {item!r}')
+        parsed.append((item[0], item[1], item[2], item[3]))
+    return tuple(parsed)
+
+
 def parse(raw) -> AllyArm:
     if not isinstance(raw, dict) or not raw or not set(raw) <= KEYS:
         raise ValueError(f'ally_arm is a non-empty object of {sorted(KEYS)}, not {raw!r}')
@@ -213,12 +260,11 @@ def parse(raw) -> AllyArm:
     if (attacks or 'ally_strikes' in raw) and 'control_wait' in raw:
         raise ValueError('ally_arm ally_attacks and ally_strikes add waits after the trigger, which control_wait '
                          'does not time')
-    if allies == 0 and (health is not None or casts or not raw.get('arms')):
-        raise ValueError('ally_arm allies 0 reads caster-only arms: arms, no ally_health and no ally_casts')
-    if health is not None and (not isinstance(health, list) or len(health) != 2
-                               or not all(type(value) is int for value in health) or not 1 <= health[0] <= health[1]):
-        raise ValueError(f'ally_arm ally_health is [value, maximum], integers with 1 <= value <= maximum, '
-                         f'not {health!r}')
+    if allies == 0 and (health is not None or casts or 'ally_auras' in raw or not raw.get('arms')):
+        raise ValueError('ally_arm allies 0 reads caster-only arms: arms, no ally_health, ally_auras or ally_casts')
+    ally_ids = ALLY_IDS[:allies]
+    uniform_health, health_map = parse_ally_health(health, ally_ids)
+    ally_auras = parse_ally_auras(raw.get('ally_auras'), ally_ids)
     if not isinstance(casts, list):
         raise ValueError(f'ally_arm ally_casts is a list of spell ids or stated casts, not {casts!r}')
     stated = [parse_ally_cast(cast) for cast in casts]
@@ -269,12 +315,12 @@ def parse(raw) -> AllyArm:
     if uncounted:
         raise ValueError(f'ally_arm ratio denominator lists name arms {uncounted} that read no count_metric, so they '
                          f'cannot show their events landed')
-    return AllyArm(allies, tuple(health) if health is not None else None, tuple(spell for spell, _, _ in stated),
+    return AllyArm(allies, uniform_health, tuple(spell for spell, _, _ in stated),
                    'control_wait' in raw, parsed_arms,
                    tuple(dict.fromkeys(cast for cast in stated if cast[1] > 1)),
                    parsed_ratios, raw.get('reach_source', ''),
                    tuple(parse_ally_attack(attack) for attack in attacks), 'ally_strikes' in raw, strike_health,
-                   ally_class, tuple(tuple(pair) for pair in power))
+                   ally_class, tuple(tuple(pair) for pair in power), health_map, ally_auras)
 
 
 def check(spec, ally):
@@ -307,6 +353,10 @@ def check(spec, ally):
                 raise ValueError(f'{spec.spell} ally_arm arm {index} count_metric {arm.count_metric!r} needs a '
                                  f'METRIC_EVIDENCE row that is not a readback, found {counted!r}')
             reads += [(actor, arm.count_metric, arm.fields, f'arm {index} count') for actor in arm.actors]
+    for spell, _, on, by in ally.ally_auras:
+        if on not in units or by not in units:
+            raise ValueError(f'{spec.spell} ally_arm ally_auras sets {spell} on {on!r} by {by!r}, outside scenario '
+                             f'units {sorted(units)}')
     reach_check(spec, ally)
     attacked = {spell for spell, _, _ in ally.ally_attacks}
     for actor, metric, fields, read in reads:
@@ -431,6 +481,20 @@ def after_trigger_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
         (ally_attack_steps(spec, ally, after) if ally.ally_attacks else [])
 
 
+def ally_aura_step(aura: tuple[int, int, str, str]) -> dict:
+    from profile import CASTER
+    spell, stacks, on, by = aura
+    return {'action': 'set_aura', 'actor': CASTER, 'spell': spell, 'stacks': stacks,
+            **({'target': on} if on != CASTER else {}), **({'caster': by} if by != on else {})}
+
+
+def attack_phase_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
+    steps = [{'action': 'set_health', 'actor': unit, 'value': value, 'maximum': maximum}
+             for unit, value, maximum in ally.ally_health_map]
+    steps += [ally_aura_step(aura) for aura in ally.ally_auras]
+    return steps
+
+
 def phase_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
     from profile import CASTER
     moment = 'after' if after else 'before'
@@ -447,6 +511,7 @@ def phase_steps(spec, ally: AllyArm, after: bool) -> list[dict]:
         value, maximum = ally.ally_health
         steps += [{'action': 'set_health', 'actor': unit, 'value': value, 'maximum': maximum}
                   for unit in ally.ally_ids]
+    steps += attack_phase_steps(spec, ally, after)
     steps += [{'action': 'set_power', 'actor': unit, 'power': power, 'value': value}
               for power, value in ally.ally_power for unit in ally.ally_ids]
     if ally.control_wait and not after:
@@ -549,6 +614,11 @@ def fixtures(class_file: dict, spec, ally: AllyArm, scenario: dict):
             contract += f' Each {spell} cast at {ALLY_IDS[0]} counts {count} SPELL_GO ({source}).'
     if ally.ally_health is not None:
         contract += f' Each phase sets the allies\' health to {ally.ally_health[0]} of {ally.ally_health[1]}.'
+    if ally.ally_health_map:
+        listed = ', '.join(f'{unit} to {value} of {maximum}' for unit, value, maximum in ally.ally_health_map)
+        contract += f' Each phase sets per-ally health: {listed}.'
+    if ally.ally_auras:
+        contract += f' Each phase sets ally auras {[list(aura) for aura in ally.ally_auras]} (spell, stacks, on, by).'
     for power, value in ally.ally_power:
         contract += (f' Each phase sets the allies\' power {power} to {value} ahead of the trigger (the harness '
                      f'refuses a value above the maximum).')
