@@ -13,56 +13,56 @@ class Player;
 enum class CoAEconomyEvent : uint8
 {
     VanityStoreBuy = 1,
-    VanityCollect,
-    VendorBuy,
-    VendorSell,
-    VendorBuyback,
-    BazaarRotationBuy,
-    HeirloomTokenBuy,
-    CacheOpen,
-    AhList,
-    AhCancel,
-    AhBid,
-    AhBuyout,
-    AhSold,
-    AhExpired,
-    Trade,
-    MailSend,
-    MailTake,
-    SystemMail,
-    TokensEarned,
-    TokensSpent,
-    ItemDestroy,
-    HighRiskDrop,
-    HighRiskClaim,
-    Reward,
-    StoreBuy
+    VanityCollect = 2,
+    VendorBuy = 3,
+    VendorSell = 4,
+    VendorBuyback = 5,
+    BazaarRotationBuy = 6,
+    HeirloomTokenBuy = 7,
+    CacheOpen = 8,
+    AhList = 9,
+    AhCancel = 10,
+    AhBid = 11,
+    AhBuyout = 12,
+    AhSold = 13,
+    AhExpired = 14,
+    Trade = 15,
+    MailSend = 16,
+    MailTake = 17,
+    SystemMail = 18,
+    TokensEarned = 19,
+    TokensSpent = 20,
+    ItemDestroy = 21,
+    HighRiskDrop = 22,
+    HighRiskClaim = 23,
+    Reward = 24,
+    StoreBuy = 25
 };
 
 enum class CoATokenSource : uint32
 {
     Kill = 1,
-    Quest,
-    DungeonBoss,
-    RaidBoss,
-    Cache,
-    Exchange,
-    Other
+    Quest = 2,
+    DungeonBoss = 3,
+    RaidBoss = 4,
+    Cache = 5,
+    Exchange = 6,
+    Other = 7
 };
 
 enum class CoAGrantSource : uint32
 {
     CrowsCache = 1,
-    Arena,
-    MythicPlus,
-    Manastorm,
-    DungeonBoss,
-    VoidPortal,
-    CallBoard,
-    Wildcard,
-    ToolDispenser,
-    WildcardStore,
-    ClassBundleStore
+    Arena = 2,
+    MythicPlus = 3,
+    Manastorm = 4,
+    DungeonBoss = 5,
+    VoidPortal = 6,
+    CallBoard = 7,
+    Wildcard = 8,
+    ToolDispenser = 9,
+    WildcardStore = 10,
+    ClassBundleStore = 11
 };
 
 struct CoAEconomyRow

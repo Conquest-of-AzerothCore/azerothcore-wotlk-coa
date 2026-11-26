@@ -3,7 +3,7 @@
   "name": "Economy log: Wildcard rewards, the Specialization Cache and Silas Darkmoon's stores",
   "contract": [
     "With the economy log on, a Wildcard Hero's items are logged: rewards with source 8 (Wildcard), purchases as store_buy with source 10 (Wildcard store) and the price on the first row, cache contents as cache_open with the cache as source.",
-    "Opening the Specialization Cache 2977359 gives five Tomes of Specialization: five cache_open rows. Being handed the cache itself is not logged (a once-per-account starter item).",
+    "Opening the Specialization Cache 2977359 gives five Tomes of Specialization, one each of II to VI (106954, 134980, 134981, 134982, 134983): five cache_open rows, each with a tome the character now carries and count 1. Being handed the cache itself is not logged (a once-per-account starter item).",
     "The level-10 Scroll of Fortune claim (0x6AD) gives 2 Scrolls of Fortune I 1101244 and 6 talent scrolls 97933: two reward rows.",
     "Revealing the five cards of a sealed pack 97885 pays one Darkmoon Ticket 246190 per card: one reward row for 5 tickets.",
     "Buying Starsurge 133169 from the Skill Cards store (0x6BB) for 250 Darkmoon Tickets: one store_buy row with the tickets as cost.",
@@ -58,6 +58,11 @@
       "equals": 0,
       "within_ms": 2000
     },
+    {"action": "assert", "label": "CONTROL: one Tome of Specialization II", "actor": "wild", "metric": "item_count", "item": 106954, "equals": 1},
+    {"action": "assert", "label": "CONTROL: one Tome of Specialization III", "actor": "wild", "metric": "item_count", "item": 134980, "equals": 1},
+    {"action": "assert", "label": "CONTROL: one Tome of Specialization IV", "actor": "wild", "metric": "item_count", "item": 134981, "equals": 1},
+    {"action": "assert", "label": "CONTROL: one Tome of Specialization V", "actor": "wild", "metric": "item_count", "item": 134982, "equals": 1},
+    {"action": "assert", "label": "CONTROL: one Tome of Specialization VI", "actor": "wild", "metric": "item_count", "item": 134983, "equals": 1},
     {
       "action": "set_level",
       "actor": "wild",
@@ -201,6 +206,11 @@
       "equals": 5,
       "within_ms": 2000
     },
+    {"action": "assert", "label": "THE LOG: one row for Tome of Specialization II, count 1", "actor": "wild", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 2977359, "item": 106954, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: one row for Tome of Specialization III, count 1", "actor": "wild", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 2977359, "item": 134980, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: one row for Tome of Specialization IV, count 1", "actor": "wild", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 2977359, "item": 134981, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: one row for Tome of Specialization V, count 1", "actor": "wild", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 2977359, "item": 134982, "economy_count": 1, "equals": 1},
+    {"action": "assert", "label": "THE LOG: one row for Tome of Specialization VI, count 1", "actor": "wild", "metric": "economy_log_rows", "economy_event": "cache_open", "economy_source": 2977359, "item": 134983, "economy_count": 1, "equals": 1},
     {
       "action": "assert",
       "label": "THE LOG: the handed-out Specialization Cache is no reward row",

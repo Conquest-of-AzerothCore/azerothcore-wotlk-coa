@@ -157,6 +157,14 @@
       "ms": 6000
     },
     {
+      "action": "snapshot",
+      "label": "Bazaar Tokens before the cache is opened",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_before_open"
+    },
+    {
       "action": "use_item",
       "label": "Open the cache",
       "actor": "owner",
@@ -182,11 +190,12 @@
     },
     {
       "action": "assert",
-      "label": "CONTROL: the Bazaar Tokens",
+      "label": "CONTROL: the cache gave exactly 400 Bazaar Tokens",
       "actor": "owner",
       "metric": "item_count",
       "item": 975001,
-      "min": 400
+      "relative_to": "tokens_before_open",
+      "equals": 400
     },
     {
       "action": "assert",

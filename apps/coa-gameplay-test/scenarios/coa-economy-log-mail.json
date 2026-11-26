@@ -7,7 +7,8 @@
     "The sender mails a Peacebloom (2447) and 100 copper to a character on its own account (no delivery delay); the Postmaster mails that character a Silverleaf (765). Both characters start at level 20, so each also gets the level mail with a Riding Training Pamphlet (46875, Randal Hunter 4732), another system_mail row.",
     "Returning a mail is not a send: the returned mail reaches the original sender as a system_mail, and the character who returned it writes no mail_send row. Each player-mail row names the other character and account; a taken item keeps its GUID.",
     "A mail the server sends with the receiver as its own sender (as the Welcome Warchest and the Call Board cache do) is a system_mail, and taking it names no other character.",
-    "Cash on delivery: the sender mails a Briarthorn (2450) for 50 copper; the receiver's take names the sender, the payment the server mails back is the receiver's mail_send of 50 copper to the sender, and the sender's take of that payment names the receiver."
+    "Cash on delivery: the sender mails a Briarthorn (2450) for 50 copper; the receiver's take names the sender, the payment the server mails back is the receiver's mail_send of 50 copper to the sender, and the sender's take of that payment names the receiver.",
+    "Across accounts: the sender mails 30 copper, money only so there is no delivery delay, to a character on another account. The send names that character and its account, the take names the sender and the sender's account, and neither row names its own writer's account."
   ],
   "timeout_ms": 90000,
   "economy_log": true,
@@ -26,6 +27,13 @@
       "class": 1,
       "level": 20,
       "account_of": "sender"
+    },
+    {
+      "id": "stranger",
+      "name": "Coaelmailx",
+      "race": 1,
+      "class": 1,
+      "level": 20
     }
   ],
   "steps": [
@@ -93,6 +101,17 @@
     {"action": "assert", "label": "THE LOG: the alt's payment is a send of 50 copper to the sender", "actor": "alt", "metric": "economy_log_rows", "economy_event": "mail_send", "economy_gold": -50, "economy_other": "sender", "economy_other_account": "sender", "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "THE LOG: the sender took the 50 copper from the alt", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_take", "economy_gold": 50, "economy_other": "alt", "economy_other_account": "alt", "equals": 1, "within_ms": 2000},
     {"action": "assert", "label": "THE LOG: the sender took nothing else", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_take", "equals": 1},
-    {"action": "assert", "label": "THE LOG: the payment is not a system mail", "actor": "sender", "metric": "economy_log_rows", "economy_event": "system_mail", "economy_gold": 50, "equals": 0}
+    {"action": "assert", "label": "THE LOG: the payment is not a system mail", "actor": "sender", "metric": "economy_log_rows", "economy_event": "system_mail", "economy_gold": 50, "equals": 0},
+    {"action": "money", "label": "fixture: money to mail to another account", "actor": "sender", "copper": 100},
+    {"action": "client_packet", "label": "Mail 30 copper to a character on another account (money only: no delivery delay)", "actor": "sender", "opcode": 568, "consumed": false, "fields": [{"gameobject_guid": 142119}, {"string": "Coaelmailx"}, {"string": "Economy log"}, {"string": "Other account"}, {"u32": 41}, {"u32": 0}, {"u8": 0}, {"u32": 30}, {"u32": 0}, {"u64": 0}, {"u8": 0}]},
+    {"action": "assert", "label": "The mail to the other account is sent", "actor": "sender", "metric": "server_packet_u32", "opcode": 569, "index": 2, "equals": 0, "within_ms": 1000},
+    {"action": "summon_gameobject", "actor": "stranger", "entry": 142119},
+    {"action": "snapshot", "actor": "stranger", "metric": "carried_money", "save_as": "stranger_purse"},
+    {"action": "client_packet", "label": "The other account takes the 30 copper", "actor": "stranger", "opcode": 581, "consumed": false, "fields": [{"gameobject_guid": 142119}, {"money_mail_id": 30}]},
+    {"action": "assert", "label": "The 30 copper is taken", "actor": "stranger", "metric": "carried_money", "relative_to": "stranger_purse", "equals": 30, "within_ms": 1000},
+    {"action": "assert", "label": "THE LOG: the send names the other character and its account", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "economy_gold": -30, "economy_other": "stranger", "economy_other_account": "stranger", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTROL: the send does not name the sender's own account", "actor": "sender", "metric": "economy_log_rows", "economy_event": "mail_send", "economy_gold": -30, "economy_other_account": "sender", "equals": 0},
+    {"action": "assert", "label": "THE LOG: the take names the sender and the sender's account", "actor": "stranger", "metric": "economy_log_rows", "economy_event": "mail_take", "economy_gold": 30, "economy_other": "sender", "economy_other_account": "sender", "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "CONTROL: the take does not name the receiver's own account", "actor": "stranger", "metric": "economy_log_rows", "economy_event": "mail_take", "economy_gold": 30, "economy_other_account": "stranger", "equals": 0}
   ]
 }

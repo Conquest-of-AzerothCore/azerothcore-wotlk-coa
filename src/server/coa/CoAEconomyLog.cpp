@@ -504,6 +504,7 @@ namespace
                 price = uint32(std::floor(price * player->GetReputationPriceDiscount(vendor)));
                 row.gold = -int64(price);
             }
+            std::vector<std::pair<uint32, uint32>> paidItems;
             if (crItem->ExtendedCost)
                 if (ItemExtendedCostEntry const* cost = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost))
                     for (uint8 i = 0; i < MAX_ITEM_EXTENDED_COST_REQUIREMENTS; ++i)
@@ -513,13 +514,25 @@ namespace
                         uint32 const paid = cost->reqitemcount[i] * count;
                         if (cost->reqitem[i] == AscensionBazaarTokenReserve::TOKEN_ITEM)
                             row.tokens -= int32(paid);
-                        else if (!row.costItem)
-                        {
-                            row.costItem = cost->reqitem[i];
-                            row.costCount = paid;
-                        }
+                        else
+                            paidItems.emplace_back(cost->reqitem[i], paid);
                     }
+            if (!paidItems.empty())
+            {
+                row.costItem = paidItems.front().first;
+                row.costCount = paidItems.front().second;
+            }
             CoAEconomyLog::Queue(player, row);
+            for (std::size_t i = 1; i < paidItems.size(); ++i)
+            {
+                CoAEconomyRow more = row;
+                more.itemCount = 0;
+                more.gold = 0;
+                more.tokens = 0;
+                more.costItem = paidItems[i].first;
+                more.costCount = paidItems[i].second;
+                CoAEconomyLog::Queue(player, more);
+            }
         }
 
         void OnPlayerAfterSellItem(Player* player, uint32 itemEntry, ObjectGuid::LowType itemGuid, uint32 count, uint32 money,
