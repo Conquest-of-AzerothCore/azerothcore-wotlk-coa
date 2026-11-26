@@ -1009,9 +1009,19 @@
   {
     "spell": 504849,
     "clause": "and restoring $804309s1% of your maximum health every $t2 sec.",
-    "labels": [
-      "504849 effect_value 804309e0 #1",
-      "504849 aura_amplitude_ms #2"
+    "claims": [
+      {
+        "claim": "and restoring $804309s1% of your maximum health",
+        "labels": [
+          "504849 effect_value 804309e0 #1"
+        ]
+      },
+      {
+        "claim": "every $t2 sec.",
+        "labels": [
+          "504849 aura_amplitude_ms #2"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1962,10 +1972,20 @@
   {
     "spell": 572412,
     "clause": "Induce your blood into an enemy to shock their nervous system, reducing their attack power by ${($m1+0)*-1} for $d",
-    "labels": [
-      "572412 effect_value e0 #0",
-      "572412 aura_amount e0 #0",
-      "572412 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Induce your blood into an enemy to shock their nervous system, reducing their attack power by ${($m1+0)*-1}",
+        "labels": [
+          "572412 effect_value e0 #0",
+          "572412 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "572412 aura_duration_ms #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -1980,20 +2000,40 @@
   {
     "spell": 572403,
     "clause": "Blood magic infuses the target ally, increasing their Spirit by $s1 for $d.",
-    "labels": [
-      "572403 effect_value e0 #0",
-      "572403 aura_amount e0 #0",
-      "572403 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Blood magic infuses the target ally, increasing their Spirit by $s1",
+        "labels": [
+          "572403 effect_value e0 #0",
+          "572403 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "572403 aura_duration_ms #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
   {
     "spell": 572404,
     "clause": "Blood magic infuses all party and raid members, increasing their Spirit by $s1 for $d.",
-    "labels": [
-      "572404 effect_value e0 #0",
-      "572404 aura_amount e0 #0",
-      "572404 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Blood magic infuses all party and raid members, increasing their Spirit by $s1",
+        "labels": [
+          "572404 effect_value e0 #0",
+          "572404 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "572404 aura_duration_ms #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3423,10 +3463,25 @@
   {
     "spell": 706605,
     "clause": "Drains the essence from up to $706607i nearby enemy corpses over $d to quickly regain $706608s1% maximum health",
-    "labels": [
-      "706605 effect_value #0",
-      "706605 aura_duration_ms #1",
-      "706605 effect_value 706608e0 #2"
+    "claims": [
+      {
+        "claim": "Drains the essence from up to $706607i nearby enemy corpses",
+        "labels": [
+          "706605 effect_value #0"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "706605 aura_duration_ms #1"
+        ]
+      },
+      {
+        "claim": "to quickly regain $706608s1% maximum health",
+        "labels": [
+          "706605 effect_value 706608e0 #2"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -3727,9 +3782,19 @@
   {
     "spell": 802580,
     "clause": "Corrupt an enemy's heart, causing them to bleed for $o1 Shadow damage over $d.",
-    "labels": [
-      "802580 aura_duration_ms #0",
-      "802580 effect_value #3"
+    "claims": [
+      {
+        "claim": "Corrupt an enemy's heart, causing them to bleed for $o1 Shadow damage",
+        "labels": [
+          "802580 effect_value #3"
+        ]
+      },
+      {
+        "claim": "over $d.",
+        "labels": [
+          "802580 aura_duration_ms #0"
+        ]
+      }
     ],
     "kind": "claim"
   },
@@ -4382,10 +4447,20 @@
   {
     "spell": 804203,
     "clause": "Enter a blood trance, consuming Rage every sec to allow you to heal for $s1% of all damage dealt for $d.",
-    "labels": [
-      "804203 effect_value e0 #0",
-      "804203 aura_amount e0 #0",
-      "804203 aura_duration_ms #1"
+    "claims": [
+      {
+        "claim": "Enter a blood trance, consuming Rage every sec to allow you to heal for $s1% of all damage dealt",
+        "labels": [
+          "804203 effect_value e0 #0",
+          "804203 aura_amount e0 #0"
+        ]
+      },
+      {
+        "claim": "for $d.",
+        "labels": [
+          "804203 aura_duration_ms #1"
+        ]
+      }
     ],
     "kind": "claim"
   },
