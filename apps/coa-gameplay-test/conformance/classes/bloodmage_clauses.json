@@ -503,19 +503,22 @@
       {
         "claim": "has a $h% chance",
         "labels": [
-          "504098 effect_value #0"
+          "504098 behaviour_metric_delta proc_rate"
         ]
       },
       {
         "claim": "to reduce the cost your next Sanguine Mend by $504137s1%",
         "labels": [
-          "504098 effect_value 504137e0 #1"
+          "504098 cost_gate 802310 cost without",
+          "504098 cost_gate 802310 cost with",
+          "504098 cost_gate 802310 cost next",
+          "504098 cost_gate 802310 cost released"
         ]
       },
       {
         "claim": "for $504137d",
         "labels": [
-          "504098 spell_duration 504137 #2"
+          "504098 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -676,8 +679,7 @@
     "spell": 572279,
     "clause": "Create a magical veil around an ally, absorbing $s1% of incoming damage,",
     "labels": [
-      "572279 effect_value e0 #0",
-      "572279 aura_amount e0 #0"
+      "572279 behaviour_hit_ratio half_absorb"
     ],
     "kind": "claim"
   },
@@ -688,14 +690,13 @@
       {
         "claim": "up to a maximum of ${$m2+0+$SPI*1.5+$AP*.75}",
         "labels": [
-          "572279 effect_value e1 #1",
-          "572279 aura_amount e1 #1"
+          "572279 behaviour_taken_hit cap_and_scaling"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "572279 aura_duration_ms #2"
+          "572279 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -1602,14 +1603,17 @@
     "spell": 560254,
     "clause": "Periodic damage dealt now has a $h% chance to grant you Blood Rush.",
     "labels": [
-      "560254 effect_value #0"
+      "560254 behaviour_metric_delta proc_rate"
     ],
     "kind": "claim"
   },
   {
     "spell": 560254,
     "clause": "Can only occur once every 5 sec.",
-    "labels": [],
+    "labels": [
+      "560254 behaviour_metric_delta icd_blocked",
+      "560254 behaviour_metric_delta icd_ready"
+    ],
     "kind": "claim"
   },
   {
@@ -1619,13 +1623,13 @@
       {
         "claim": "Increases your haste by $s1%",
         "labels": [
-          "560254 effect_value 504551e0 #1"
+          "560254 behaviour_metric_delta haste"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "560254 spell_duration 504551 #2"
+          "560254 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -2334,13 +2338,17 @@
       {
         "claim": "has a $h% chance",
         "labels": [
-          "680695 effect_value #0"
+          "680695 behaviour_metric_delta proc_rate"
         ]
       },
       {
         "claim": "to reduce the cooldown of Vampyr's Kiss by $/1000;680824s1 sec",
         "labels": [
-          "680695 effect_value 680824e0 #1"
+          "680695 cost_gate 504281 cooldown without",
+          "680695 cost_gate 504281 cooldown with",
+          "680695 cost_gate 504281 cooldown beyond",
+          "680695 cost_gate 504281 cooldown released",
+          "680695 behaviour_metric_delta proc_count_per_kiss"
         ]
       }
     ],
@@ -2374,7 +2382,7 @@
     "spell": 680731,
     "clause": "Your Vampyr's Kiss now regenerates $681031s1% of your maximum Rage.",
     "labels": [
-      "680731 effect_value 681031e0 #0"
+      "680731 behaviour_metric_delta rage_on_cast"
     ],
     "kind": "claim"
   },
@@ -3090,7 +3098,9 @@
   {
     "spell": 704646,
     "clause": "Your Bloodbolt now refreshes the duration of Taldaram's Torment.",
-    "labels": [],
+    "labels": [
+      "704646 behaviour_metric_delta refresh"
+    ],
     "kind": "claim"
   },
   {
@@ -3273,7 +3283,10 @@
     "spell": 704692,
     "clause": "When you use Taldaram's Torment on a Humanoid or Beast it now corrupts their blood, increasing your damage dealt against them by $532623s1%.",
     "labels": [
-      "704692 effect_value 532623e0 #0"
+      "704692 behaviour_hit_ratio humanoid_veinburst",
+      "704692 behaviour_hit_ratio beast_veinburst",
+      "704692 behaviour_metric_delta mechanical_control",
+      "704692 behaviour_hit_ratio humanoid_bloodbolt"
     ],
     "kind": "claim"
   },
@@ -3579,7 +3592,8 @@
     "spell": 707435,
     "clause": "Damage dealt by Taldaram's Torment now has a $h% chance to internally rupture, causing it to deal its damage an additional time to all enemies near the target.",
     "labels": [
-      "707435 effect_value #0"
+      "707435 effect_value #0",
+      "707435 behaviour_metric_delta rupture_aoe"
     ],
     "kind": "claim"
   },
@@ -4358,7 +4372,7 @@
     "spell": 802315,
     "clause": "Your Taldaram's Torment now generates $/10;s1 additional Rage per tick",
     "labels": [
-      "802315 effect_value e0 #0"
+      "802315 behaviour_metric_delta rage_per_tick"
     ],
     "kind": "claim"
   },
@@ -4369,13 +4383,13 @@
       {
         "claim": "increases spell critical strike chance against the target by $800988s1%",
         "labels": [
-          "802315 effect_value 800988e0 #1"
+          "802315 behaviour_metric_delta crit_taken"
         ]
       },
       {
         "claim": "for $800988d",
         "labels": [
-          "802315 spell_duration 800988 #2"
+          "802315 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4586,7 +4600,11 @@
     "spell": 804686,
     "clause": "Damage dealt by Blood Shards now reduces the cooldown of Veinburst and Reave by $/1000;802497S2 sec.",
     "labels": [
-      "804686 effect_value 802497e1 #0"
+      "804686 behaviour_metric_delta veinburst_cd_open",
+      "804686 behaviour_metric_delta veinburst_cd_early",
+      "804686 cost_gate 802469 reave_cd without",
+      "804686 cost_gate 802469 reave_cd with",
+      "804686 cost_gate 802469 reave_cd beyond"
     ],
     "kind": "claim"
   },
@@ -4801,7 +4819,7 @@
     "spell": 805035,
     "clause": "Periodic damage dealt now reduces the enemy's movement speed by $800983s1%.",
     "labels": [
-      "805035 effect_value 800983e0 #0"
+      "805035 behaviour_metric_delta slow"
     ],
     "kind": "claim"
   },
@@ -4819,13 +4837,13 @@
       {
         "claim": "has a $h% chance",
         "labels": [
-          "805591 effect_value #0"
+          "805591 behaviour_metric_delta proc_rate"
         ]
       },
       {
         "claim": "for $805592d",
         "labels": [
-          "805591 spell_duration 805592 #1"
+          "805591 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4835,7 +4853,7 @@
     "spell": 805591,
     "clause": "stacking $805592u times.",
     "labels": [
-      "805591 max_stacks 805592 #2"
+      "805591 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -4846,13 +4864,15 @@
       {
         "claim": "Increases the damage of your next Sanguine Rupture and Bloodmoon Blast against the target by $s1%",
         "labels": [
-          "805591 effect_value 805592e0 #3"
+          "805591 behaviour_hit_ratio sanguine_rupture",
+          "805591 behaviour_hit_ratio bloodmoon_blast",
+          "805591 behaviour_metric_delta consume_on_blast"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "805591 spell_duration 805592 #4"
+          "805591 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4862,14 +4882,16 @@
     "spell": 805591,
     "clause": "stacking $u times.",
     "labels": [
-      "805591 max_stacks 805592 #5"
+      "805591 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
   {
     "spell": 806049,
     "clause": "Damage dealt by Crimson Tide now grants you Sovereignty.",
-    "labels": [],
+    "labels": [
+      "806049 behaviour_metric_delta grant"
+    ],
     "kind": "claim"
   },
   {
@@ -4879,13 +4901,16 @@
       {
         "claim": "within $504272d",
         "labels": [
-          "806049 spell_duration 504272 #0"
+          "806049 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "Reduces the cost of your next Bloodbolt by $504272s1%",
         "labels": [
-          "806049 effect_value 504272e0 #1"
+          "806049 cost_gate 578305 cost without",
+          "806049 cost_gate 578305 cost with",
+          "806049 cost_gate 578305 cost next",
+          "806049 cost_gate 578305 cost beyond"
         ]
       }
     ],
@@ -4895,7 +4920,7 @@
     "spell": 806049,
     "clause": "and causes it to strike $504272s2 additional nearby enemy for each target damaged,",
     "labels": [
-      "806049 effect_value 504272e1 #2"
+      "806049 behaviour_metric_delta extra_target"
     ],
     "kind": "claim"
   },
@@ -4903,7 +4928,7 @@
     "spell": 806049,
     "clause": "stacking up to $u times.",
     "labels": [
-      "806049 max_stacks 504272 #3"
+      "806049 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -5007,7 +5032,10 @@
   {
     "spell": 806274,
     "clause": "Your Blood Veil now applies to the party members of the target.",
-    "labels": [],
+    "labels": [
+      "806274 behaviour_metric_delta caster_party",
+      "806274 behaviour_metric_delta target_party_raid_sub2"
+    ],
     "kind": "claim"
   },
   {
