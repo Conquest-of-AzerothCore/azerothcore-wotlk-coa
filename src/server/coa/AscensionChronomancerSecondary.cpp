@@ -7,6 +7,7 @@
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
+#include "WorldPacket.h"
 #include <algorithm>
 #include <limits>
 #include <vector>
@@ -114,6 +115,17 @@ void ResetChromaticShard(Player* player)
                 if (uint32 category = shard->GetCategory())
                     player->RemoveCategoryCooldown(category);
         }
+}
+
+void SyncChromaticShardClientCooldown(Player* player, uint32 shardRank)
+{
+    player->SendClearCooldown(shardRank, player);
+    if (uint32 const remaining = player->GetSpellCooldownDelay(shardRank))
+    {
+        WorldPacket data;
+        player->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, shardRank, remaining);
+        player->SendDirectMessage(&data);
+    }
 }
 
 void EruptInfiniteKeeper(Player* player, Unit* target)
@@ -442,9 +454,13 @@ class aura_ascension_aeon_rend : public AuraScript
         PreventDefaultAction();
         Unit* target = event.GetActionTarget();
         SpellInfo const* shard = event.GetSpellInfo();
-        if (target && shard)
-            GetTarget()->CastSpell(target, IsChromaticShardRank(shard->Id) ? shard->Id : uint32(SPELL_CHROMATIC_SHARD),
-                true, nullptr, effect);
+        if (!target || !shard)
+            return;
+        uint32 const shardRank = IsChromaticShardRank(shard->Id) ? shard->Id : uint32(SPELL_CHROMATIC_SHARD);
+        Unit* owner = GetTarget();
+        owner->CastSpell(target, shardRank, true, nullptr, effect);
+        if (Player* player = owner->ToPlayer(); player && !player->GetSpellCooldownDelay(shardRank))
+            player->SendClearCooldown(shardRank, player);
     }
 
     void Register() override
@@ -466,8 +482,13 @@ class spell_ascension_time_loop_shard : public SpellScript
             return;
         PreventHitDefaultEffect(effIndex);
         if (Unit* target = GetExplTargetUnit())
-            player->CastSpell(target, OwnedChromaticShardRank(player),
-                TriggerCastFlags(TRIGGERED_FULL_MASK & ~TRIGGERED_NO_PERIODIC_RESET));
+        {
+            uint32 const shardRank = OwnedChromaticShardRank(player);
+            player->CastSpell(target, shardRank,
+                TriggerCastFlags(TRIGGERED_FULL_MASK &
+                    ~(TRIGGERED_NO_PERIODIC_RESET | TRIGGERED_DISALLOW_PROC_EVENTS)));
+            SyncChromaticShardClientCooldown(player, shardRank);
+        }
     }
 
     void Suppress(SpellEffIndex effIndex)
