@@ -1,0 +1,72 @@
+{
+  "schema": 1,
+  "name": "Pyromancer Descension of Executus and Ragnaros supersede lower ranks (#13194)",
+  "contract": [
+    "In Spell.dbc, Pyromancer's aura-bar spells are named 'Descension of Executus' (ranks 1-5: 1119754-1119758) and",
+    "'Descension of Ragnaros' (ranks 1-3: 1119901, 1119944, 1119953). SpellInfo::ComputeIsStackableWithRanks previously",
+    "matched only the pre-rebrand prefix 'Ascension of ', leaving IsStackableWithRanks() true for Descension ranks so",
+    "Player::addSpell never marked superseded ranks inactive or sent SMSG_SUPERCEDED_SPELL and every rank appeared as",
+    "a separate button on the aura bar. After matching both 'Ascension of ' and 'Descension of ', learning ranks 1-4 of",
+    "Descension of Executus and ranks 1-3 of Descension of Ragnaros must leave only the highest rank active and in the",
+    "client spellbook (both immediately and after relog), prevent casting superseded ranks, and allow casting the",
+    "highest rank."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "p", "race": 1, "class": 24, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let character login settle", "ms": 3000 },
+
+    { "action": "learn", "actor": "p", "spell": 1119754 },
+    { "action": "learn", "actor": "p", "spell": 1119755 },
+    { "action": "learn", "actor": "p", "spell": 1119756 },
+    { "action": "learn", "actor": "p", "spell": 1119757 },
+
+    { "action": "assert", "label": "CONTRACT: Executus rank 1 is superseded (inactive)", "actor": "p", "metric": "spell_active", "spell": 1119754, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Executus rank 2 is superseded (inactive)", "actor": "p", "metric": "spell_active", "spell": 1119755, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Executus rank 3 is superseded (inactive)", "actor": "p", "metric": "spell_active", "spell": 1119756, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Executus rank 4 is active", "actor": "p", "metric": "spell_active", "spell": 1119757, "equals": 1 },
+
+    { "action": "assert", "label": "CONTRACT: client no longer lists Executus rank 1", "actor": "p", "metric": "client_knows_spell", "spell": 1119754, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: client no longer lists Executus rank 2", "actor": "p", "metric": "client_knows_spell", "spell": 1119755, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: client no longer lists Executus rank 3", "actor": "p", "metric": "client_knows_spell", "spell": 1119756, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: client lists Executus rank 4", "actor": "p", "metric": "client_knows_spell", "spell": 1119757, "equals": 1 },
+
+    { "action": "cast", "label": "Superseded Executus rank 3 cannot be cast", "actor": "p", "spell": 1119756 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "CONTRACT: Executus rank 3 aura is not applied", "actor": "p", "metric": "aura", "spell": 1119756, "equals": 0 },
+
+    { "action": "cast", "label": "Active Executus rank 4 casts cleanly", "actor": "p", "spell": 1119757 },
+    { "action": "assert", "label": "CONTRACT: Executus rank 4 aura is applied", "actor": "p", "metric": "aura", "spell": 1119757, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "ms": 1500 },
+
+    { "action": "learn", "actor": "p", "spell": 1119901 },
+    { "action": "learn", "actor": "p", "spell": 1119944 },
+    { "action": "learn", "actor": "p", "spell": 1119953 },
+
+    { "action": "assert", "label": "CONTRACT: Ragnaros rank 1 is superseded (inactive)", "actor": "p", "metric": "spell_active", "spell": 1119901, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Ragnaros rank 2 is superseded (inactive)", "actor": "p", "metric": "spell_active", "spell": 1119944, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Ragnaros rank 3 is active", "actor": "p", "metric": "spell_active", "spell": 1119953, "equals": 1 },
+
+    { "action": "assert", "label": "CONTRACT: client no longer lists Ragnaros rank 1", "actor": "p", "metric": "client_knows_spell", "spell": 1119901, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: client no longer lists Ragnaros rank 2", "actor": "p", "metric": "client_knows_spell", "spell": 1119944, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: client lists Ragnaros rank 3", "actor": "p", "metric": "client_knows_spell", "spell": 1119953, "equals": 1 },
+
+    { "action": "cast", "label": "Superseded Ragnaros rank 2 cannot be cast", "actor": "p", "spell": 1119944 },
+    { "action": "wait", "ms": 1500 },
+    { "action": "assert", "label": "CONTRACT: Ragnaros rank 2 aura is not applied", "actor": "p", "metric": "aura", "spell": 1119944, "equals": 0 },
+
+    { "action": "cast", "label": "Active Ragnaros rank 3 casts cleanly", "actor": "p", "spell": 1119953 },
+    { "action": "assert", "label": "CONTRACT: Ragnaros rank 3 aura is applied", "actor": "p", "metric": "aura", "spell": 1119953, "equals": 1, "within_ms": 3000 },
+
+    { "action": "relog", "label": "Relog to verify SMSG_INITIAL_SPELLS sends only the highest rank of each Descension", "actor": "p" },
+    { "action": "assert", "label": "CONTRACT: after relog Executus ranks 1-3 stay absent from client spellbook", "actor": "p", "metric": "client_knows_spell", "spell": 1119754, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: after relog Executus rank 2 stays absent from client spellbook", "actor": "p", "metric": "client_knows_spell", "spell": 1119755, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: after relog Executus rank 3 stays absent from client spellbook", "actor": "p", "metric": "client_knows_spell", "spell": 1119756, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: after relog Executus rank 4 stays in client spellbook", "actor": "p", "metric": "client_knows_spell", "spell": 1119757, "equals": 1 },
+    { "action": "assert", "label": "CONTRACT: after relog Ragnaros rank 1 stays absent from client spellbook", "actor": "p", "metric": "client_knows_spell", "spell": 1119901, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: after relog Ragnaros rank 2 stays absent from client spellbook", "actor": "p", "metric": "client_knows_spell", "spell": 1119944, "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: after relog Ragnaros rank 3 stays in client spellbook", "actor": "p", "metric": "client_knows_spell", "spell": 1119953, "equals": 1 }
+  ]
+}
