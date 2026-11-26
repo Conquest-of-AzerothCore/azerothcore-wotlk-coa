@@ -71,10 +71,20 @@
       "relative_to": "shots_at_melee", "equals": 0
     },
     { "action": "set_power", "actor": "ranger", "power": 2, "value": 100 },
+    {
+      "action": "snapshot", "actor": "ranger", "metric": "spell_damage_count", "spell": 500074, "target": "enemy",
+      "save_as": "quick_shots_before"
+    },
     { "action": "cast", "label": "Control: Quick Shot still ignores minimum range under Ravager", "actor": "ranger", "spell": 500074, "target": "enemy" },
+    { "action": "wait", "label": "Wait past Quick Shot cast and projectile resolution before checking absence of failure", "ms": 2000 },
     {
       "action": "assert", "label": "CONTROL: Ravager still removes minimum range on Ranger ranged abilities",
-      "actor": "ranger", "metric": "cast_failure", "spell": 500074, "equals": 0, "within_ms": 3000
+      "actor": "ranger", "metric": "cast_failure", "spell": 500074, "equals": 0
+    },
+    {
+      "action": "assert", "label": "CONTROL: Quick Shot landed at melee range under Ravager",
+      "actor": "ranger", "metric": "spell_damage_count", "spell": 500074, "target": "enemy",
+      "relative_to": "quick_shots_before", "equals": 1
     }
   ]
 }
