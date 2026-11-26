@@ -2701,13 +2701,13 @@
       {
         "claim": "has a $681427h% chance",
         "labels": [
-          "681427 effect_value #0"
+          "681427 behaviour_metric_delta proc_rate"
         ]
       },
       {
         "claim": "to heal a nearby ally for $681427s1% of the damage dealt",
         "labels": [
-          "681427 effect_value e0 #1"
+          "681427 behaviour_metric_delta heal_share"
         ]
       }
     ],
@@ -2717,7 +2717,8 @@
     "spell": 681444,
     "clause": "Reduces the cast time of Scarlet Delirium by $/1000;S2 sec,",
     "labels": [
-      "681444 effect_value e1 #0"
+      "681444 behaviour_metric_delta cast_held",
+      "681444 behaviour_metric_delta cast_ended"
     ],
     "kind": "claim"
   },
@@ -2725,7 +2726,7 @@
     "spell": 681444,
     "clause": "but increases the health cost by $s1%.",
     "labels": [
-      "681444 effect_value e0 #1"
+      "681444 behaviour_metric_delta health_cost"
     ],
     "kind": "claim"
   },
@@ -2918,13 +2919,14 @@
       {
         "claim": "within $556233d",
         "labels": [
-          "704626 spell_duration 556233 #0"
+          "704626 behaviour_metric_delta duration_held",
+          "704626 behaviour_metric_delta duration_gone"
         ]
       },
       {
         "claim": "reduces the Physical damage taken from the next attack by ${15+$AP*0.2}",
         "labels": [
-          "704626 effect_value #1"
+          "704626 behaviour_taken_hit reduction"
         ]
       }
     ],
