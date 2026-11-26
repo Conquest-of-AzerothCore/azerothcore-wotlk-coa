@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Leyline Channeling Rod spawns only in Westfall, not Wetlands (#10280)",
+  "contract": "#10280 reported Leyline Channeling Rod (item 521267, Westfall Supply Cache 518321) spawning in Wetlands at guid 6940699 (-3534.9, -1385.4, 9.441). Both the CoA realm dump (6900688) and CoA sidekick data place 518321 solely in Westfall (guid 6940698, -10251.334, 1757.995, 73.902). Expected: guid 6940699 in Wetlands is not spawned and guid 6940698 in Westfall remains spawned.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -3534.9,
+    "y": -1385.4,
+    "z": 9.9,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 31,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the stray Wetlands pickup is not spawned",
+      "metric": "spawn_active",
+      "spawn": 6940699,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -10251.33,
+      "y": 1758.0,
+      "z": 74.4,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the Westfall pickup remains spawned",
+      "metric": "spawn_active",
+      "spawn": 6940698,
+      "equals": 1
+    }
+  ]
+}

@@ -1664,7 +1664,8 @@ void ObserveExtensionPacket(Actor& actor, WorldPacket const& packet)
         packet.GetOpcode() != SMSG_SPELLDAMAGESHIELD && packet.GetOpcode() != SMSG_PLAY_SPELL_VISUAL &&
         packet.GetOpcode() != SMSG_MOVE_FEATHER_FALL && packet.GetOpcode() != SMSG_MOVE_NORMAL_FALL &&
         packet.GetOpcode() != SMSG_INVENTORY_CHANGE_FAILURE && packet.GetOpcode() != SMSG_QUEST_POI_QUERY_RESPONSE &&
-        packet.GetOpcode() != SMSG_LOOT_START_ROLL && packet.GetOpcode() != SMSG_LOOT_ROLL)
+        packet.GetOpcode() != SMSG_LOOT_START_ROLL && packet.GetOpcode() != SMSG_LOOT_ROLL &&
+        packet.GetOpcode() != SMSG_GUILD_BANK_LIST)
         return;
 
     ++actor.extensionPackets[packet.GetOpcode()];

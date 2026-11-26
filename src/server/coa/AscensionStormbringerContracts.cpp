@@ -23,7 +23,8 @@ enum StormbringerContractSpells : uint32
     SPELL_WINDRIDE = 804724,
     SPELL_THUNDERALE = 804762,
     SPELL_AEROBLAST = 801839,
-    SPELL_ADD_5_STATIC = 804044
+    SPELL_ADD_5_STATIC = 804044,
+    SPELL_EYE_OF_THE_STORM_ROOT = 807712
 };
 
 constexpr uint32 THUNDERALE_DURATION_INDEX = 63;
@@ -97,6 +98,8 @@ void ApplyContracts(SpellInfo* info)
     }
     if (info->Id == SPELL_WINDRIDE)
         info->AttributesEx2 |= SPELL_ATTR2_IGNORE_LINE_OF_SIGHT;
+    if (info->Id == SPELL_EYE_OF_THE_STORM_ROOT)
+        info->AttributesEx2 &= ~SPELL_ATTR2_ALLOW_DEAD_TARGET;
     if (info->Id == SPELL_ATMOSPHERIC_PRESSURE && info->HasAttribute(SPELL_ATTR5_NO_CASTER_AURA_ICON))
     {
         info->Attributes &= ~SPELL_ATTR0_AURA_IS_DEBUFF;

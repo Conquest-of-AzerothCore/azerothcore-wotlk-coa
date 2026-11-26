@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Final Embrace applies Cursed Form shapeshift helper 525047 (#10242)",
+  "contract": "#10242 reported that Final Embrace (524865) is not recognized as a shapeshift form (GetShapeshiftForm() returns 0 instead of Cursed Form, breaking action bar paging and form conditions). All three effect slots of 524865 are occupied (transform 38508, +15% speed, Hematoma periodic trigger), while Ascension's hidden companion 525047 ('Final Embrace', rank 'Shapeshift SLS', SPELL_ATTR1_NO_AURA_ICON, SPELL_ATTR2_USE_SHAPESHIFT_BAR, DurationIndex 21, SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 = SpellShapeshiftForm 57 'Cursed Form' with BonusActionBar 1 and creatureType 3 Demon) was never linked via spell_linked_spell. Expected: casting 524865 applies 525047 and changes creature_type from Humanoid (7) to Demon (3, which Unit::GetCreatureType derives solely from GetShapeshiftForm() == 57 for a Bloodmage), preserves the Blood Beast transform display (creature 38508), clears 525047 and returns creature_type to Humanoid (7) when 524865 ends, and drops 524865 if 525047 is removed.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let level scaling and login settle", "ms": 5000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 524865 },
+    {
+      "action": "assert",
+      "label": "CONTROL: Bloodmage starts as Humanoid (no shapeshift form)",
+      "actor": "bloodmage",
+      "metric": "creature_type",
+      "equals": 7
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: shapeshift helper 525047 is absent before Final Embrace",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 525047,
+      "equals": 0
+    },
+    { "action": "cast", "actor": "bloodmage", "spell": 524865 },
+    {
+      "action": "assert",
+      "label": "SETUP: Final Embrace is active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524865,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: shapeshift helper 525047 (Form 57) is linked and active",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 525047,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: SpellShapeshiftForm 57 sets creature_type to Demon (3)",
+      "actor": "bloodmage",
+      "metric": "creature_type",
+      "equals": 3
+    },
+    {
+      "action": "assert",
+      "label": "Final Embrace keeps its Blood Beast transform display (creature 38508)",
+      "actor": "bloodmage",
+      "metric": "display_of_creature",
+      "entry": 38508,
+      "equals": 1
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 524865, "stacks": 0 },
+    {
+      "action": "assert",
+      "label": "Dropping Final Embrace removes shapeshift helper 525047",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 525047,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Dropping Final Embrace restores creature_type to Humanoid (7)",
+      "actor": "bloodmage",
+      "metric": "creature_type",
+      "equals": 7
+    },
+    { "action": "reset_cooldown", "actor": "bloodmage", "spell": 524865 },
+    { "action": "cast", "actor": "bloodmage", "spell": 524865 },
+    {
+      "action": "assert",
+      "label": "SETUP: Final Embrace and shapeshift helper reapply",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 525047,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "set_aura", "actor": "bloodmage", "spell": 525047, "stacks": 0 },
+    {
+      "action": "assert",
+      "label": "Cancelling shapeshift helper 525047 drops Final Embrace 524865",
+      "actor": "bloodmage",
+      "metric": "aura",
+      "spell": 524865,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

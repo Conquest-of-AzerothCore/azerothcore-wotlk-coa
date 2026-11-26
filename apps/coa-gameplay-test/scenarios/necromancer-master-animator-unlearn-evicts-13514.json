@@ -1,0 +1,278 @@
+{
+  "schema": 1,
+  "name": "Necromancer: unlearning Master Animator evicts minions exceeding Life Force capacity (#13514)",
+  "contract": [
+    "Master Animator 504431 (CharacterAdvancement 7117) adds +1 maximum Life Force via SPELLMOD_MAX_AURA_STACKS on",
+    "Life Force 805011 (base StackAmount 2). Raising minions fills Life Force up to Capacity(player): Raise: Ghoul",
+    "500971 summons 50073 (1 Life Force) and Raise: Abomination 500335 summons 50068 (3 Life Force). When Master",
+    "Animator is unlearned, Capacity drops from 3 back to 2. Previously AscensionNecromancer::Sync lowered 805011",
+    "stacks to 2 without evicting excess minions, leaving 3 Ghouls (or a 3-Life-Force Abomination) alive indefinitely.",
+    "Expected: Sync calls Evict(player, 0), dismissing the oldest raised minion(s) until Used <= Capacity — 3 Ghouls",
+    "drop to 2 (0 free Life Force) and a 3-cost Abomination is dismissed (2 free Life Force)."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ghouls",
+      "race": 5,
+      "class": 23,
+      "level": 80
+    },
+    {
+      "id": "abom",
+      "race": 5,
+      "class": 23,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let initial Life Force synchronization settle",
+      "ms": 3000
+    },
+    {
+      "action": "unlearn",
+      "actor": "ghouls",
+      "spell": 680283
+    },
+    {
+      "action": "unlearn",
+      "actor": "ghouls",
+      "spell": 504431
+    },
+    {
+      "action": "unlearn",
+      "actor": "abom",
+      "spell": 680283
+    },
+    {
+      "action": "unlearn",
+      "actor": "abom",
+      "spell": 504431
+    },
+    {
+      "action": "learn",
+      "actor": "ghouls",
+      "spell": 500971
+    },
+    {
+      "action": "learn",
+      "actor": "abom",
+      "spell": 500335
+    },
+    {
+      "action": "assert",
+      "label": "PRECONDITION: ghouls base Life Force capacity is 2",
+      "actor": "ghouls",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "PRECONDITION: abom base Life Force capacity is 2",
+      "actor": "abom",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "label": "Learn Master Animator on both Necromancers",
+      "actor": "ghouls",
+      "spell": 504431
+    },
+    {
+      "action": "learn",
+      "actor": "abom",
+      "spell": 504431
+    },
+    {
+      "action": "assert",
+      "label": "Master Animator raises ghouls capacity to 3",
+      "actor": "ghouls",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Master Animator raises abom capacity to 3",
+      "actor": "abom",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "label": "Raise first Ghoul",
+      "actor": "ghouls",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "actor": "ghouls",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "label": "Raise second Ghoul",
+      "actor": "ghouls",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "actor": "ghouls",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 2,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "cast",
+      "label": "Raise third Ghoul into Master Animator capacity",
+      "actor": "ghouls",
+      "spell": 500971
+    },
+    {
+      "action": "assert",
+      "label": "PRECONDITION: 3 Ghouls fill Life Force capacity 3",
+      "actor": "ghouls",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 3,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "actor": "ghouls",
+      "metric": "aura_stacks",
+      "spell": 525004,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Raise Abomination (3 Life Force) into Master Animator capacity",
+      "actor": "abom",
+      "spell": 500335
+    },
+    {
+      "action": "assert",
+      "label": "PRECONDITION: 1 Abomination occupies all 3 Life Force",
+      "actor": "abom",
+      "metric": "owned_creature_count",
+      "entry": 50068,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "actor": "abom",
+      "metric": "aura_stacks",
+      "spell": 525004,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "unlearn",
+      "label": "Remove Master Animator from both Necromancers",
+      "actor": "ghouls",
+      "spell": 504431
+    },
+    {
+      "action": "unlearn",
+      "actor": "abom",
+      "spell": 504431
+    },
+    {
+      "action": "assert",
+      "label": "Life Force capacity drops back to 2 for ghouls",
+      "actor": "ghouls",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: unlearning Master Animator evicts 1 excess Ghoul (3 -> 2)",
+      "actor": "ghouls",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "ghouls has 0 free Life Force with 2 Ghouls in capacity 2",
+      "actor": "ghouls",
+      "metric": "aura_stacks",
+      "spell": 525004,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Life Force capacity drops back to 2 for abom",
+      "actor": "abom",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: unlearning Master Animator evicts the 3-cost Abomination (1 -> 0)",
+      "actor": "abom",
+      "metric": "owned_creature_count",
+      "entry": 50068,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Evicting the 3-cost Abomination frees all 2 remaining Life Force",
+      "actor": "abom",
+      "metric": "aura_stacks",
+      "spell": 525004,
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Confirm no further minions are evicted",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "ghouls",
+      "metric": "owned_creature_count",
+      "entry": 50073,
+      "equals": 2
+    }
+  ]
+}

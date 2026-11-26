@@ -1,0 +1,144 @@
+{
+  "schema": 1,
+  "name": "BWL Suppression Aura (22247) expires after 6s and does not stack across casters (#10097)",
+  "contract": "#10097 reported Suppression Aura (22247) in BWL never expiring, persisting across logout, and distorting melee attack speed when stacking. Ascension's Spell.dbc gives 22247 DurationIndex 21 (-1 ms, permanent) and SPELL_ATTR3_DOT_STACKING_RULE (0x80), while AscensionStockScriptShapes restores its three stock WotLK effects (-80% move speed, -400% melee haste = 5x attack time, -80% cast speed). Expected: 22247 has stock 6000 ms duration (DurationIndex 32), does not stack multiplicatively when cast by a second hostile caster (attack time stays 5x, not 25x), expires cleanly within 10s, and restores move speed and attack time to baseline.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "creatures": [
+    {
+      "id": "c1",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "c2",
+      "owner": "p",
+      "entry": 36,
+      "level": 60,
+      "health": 100000,
+      "distance": 4,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "attack_time_ms",
+      "save_as": "base_attack_time"
+    },
+    {
+      "action": "snapshot",
+      "actor": "p",
+      "metric": "run_speed_rate",
+      "save_as": "base_run_speed"
+    },
+    {
+      "action": "cast",
+      "actor": "c1",
+      "spell": 22247,
+      "triggered": true
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Suppression Aura (22247) applies from first caster",
+      "metric": "aura",
+      "spell": 22247,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Suppression Aura has 6000 ms finite duration instead of permanent -1",
+      "metric": "aura_duration_ms",
+      "spell": 22247,
+      "min": 3500,
+      "max": 6100
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Suppression Aura reduces run speed by 80%",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed",
+      "min": 0.15,
+      "max": 0.25
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Single Suppression Aura increases melee attack time to 5x",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time",
+      "min": 4.9,
+      "max": 5.1
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "cast",
+      "actor": "c2",
+      "spell": 22247,
+      "triggered": true
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: second caster refreshes instead of stacking attack time to 25x",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time",
+      "min": 4.9,
+      "max": 5.1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Suppression Aura expires once casts stop",
+      "metric": "aura",
+      "spell": 22247,
+      "equals": 0,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Melee attack time returns to baseline after expiry",
+      "metric": "attack_time_ms",
+      "ratio_to": "base_attack_time",
+      "min": 0.99,
+      "max": 1.01
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Run speed returns to baseline after expiry",
+      "metric": "run_speed_rate",
+      "ratio_to": "base_run_speed",
+      "min": 0.99,
+      "max": 1.01
+    }
+  ]
+}

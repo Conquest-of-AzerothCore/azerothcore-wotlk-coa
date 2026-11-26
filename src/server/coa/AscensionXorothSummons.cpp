@@ -74,6 +74,43 @@ void Scale(Creature* unit, Player* player)
     unit->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, damage * 1.2f);
     unit->UpdateDamagePhysical(BASE_ATTACK);
 }
+bool EngagedTarget(Creature* summon, Player* player, Unit* target)
+{
+    return target && target->IsAlive() && player->IsValidAttackTarget(target) && player->IsInCombatWith(target) &&
+           summon->IsWithinDistInMap(target, 40.0f) && summon->IsWithinLOSInMap(target) &&
+           !target->HasBreakableByDamageCrowdControlAura();
+}
+Unit* CombatTarget(Creature* summon, Player* player)
+{
+    if (Unit* target = player->GetVictim(); EngagedTarget(summon, player, target))
+        return target;
+    if (Unit* selected = player->GetSelectedUnit(); EngagedTarget(summon, player, selected))
+        return selected;
+    Unit* nearest = nullptr;
+    auto consider = [&](Unit* candidate)
+    {
+        if (!EngagedTarget(summon, player, candidate))
+            return;
+        if (!nearest || summon->GetDistance(candidate) < summon->GetDistance(nearest))
+            nearest = candidate;
+    };
+    for (Unit* attacker : player->getAttackers())
+        consider(attacker);
+    if (nearest)
+        return nearest;
+    if (Unit* helper = summon->getAttackerForHelper();
+        helper && helper->IsAlive() && player->IsValidAttackTarget(helper) &&
+        summon->IsWithinDistInMap(helper, 40.0f) && summon->IsWithinLOSInMap(helper) &&
+        !helper->HasBreakableByDamageCrowdControlAura())
+        return helper;
+    for (auto const& [guid, reference] : player->GetCombatManager().GetPvECombatRefs())
+        if (!reference->IsSuppressedFor(player))
+            consider(reference->GetOther(player));
+    for (auto const& [guid, reference] : player->GetCombatManager().GetPvPCombatRefs())
+        if (!reference->IsSuppressedFor(player))
+            consider(reference->GetOther(player));
+    return nearest;
+}
 struct npc_ascension_xoroth_summon : public ScriptedAI
 {
     explicit npc_ascension_xoroth_summon(Creature* creature) : ScriptedAI(creature) {}
@@ -151,38 +188,6 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             Reduce(player, 524897, std::abs(Amount(804012, 1, player)));
         }
     }
-    Unit* CombatTarget(Player* player) const
-    {
-        if (Unit* victim = player->GetVictim(); victim && player->IsValidAttackTarget(victim))
-            return victim;
-        auto validCombat = [this, player](Unit* candidate)
-        {
-            return candidate && candidate->IsAlive() && player->IsValidAttackTarget(candidate) &&
-                player->IsInCombatWith(candidate) && me->IsWithinDistInMap(candidate, 40.0f) &&
-                me->IsWithinLOSInMap(candidate);
-        };
-        if (Unit* selected = player->GetSelectedUnit(); validCombat(selected))
-            return selected;
-        Unit* nearest = nullptr;
-        auto consider = [this, &nearest, &validCombat](Unit* candidate)
-        {
-            if (validCombat(candidate) && (!nearest || me->GetDistance(candidate) < me->GetDistance(nearest)))
-                nearest = candidate;
-        };
-        for (Unit* attacker : player->getAttackers())
-            consider(attacker);
-        if (nearest)
-            return nearest;
-        if (Unit* helper = me->getAttackerForHelper();
-            helper && helper->IsAlive() && player->IsValidAttackTarget(helper) &&
-            me->IsWithinDistInMap(helper, 40.0f) && me->IsWithinLOSInMap(helper))
-            return helper;
-        for (auto const& pair : player->GetCombatManager().GetPvECombatRefs())
-            consider(pair.second->GetOther(player));
-        for (auto const& pair : player->GetCombatManager().GetPvPCombatRefs())
-            consider(pair.second->GetOther(player));
-        return nearest;
-    }
     void UpdateAI(uint32 diff) override
     {
         Player* player = ObjectAccessor::GetPlayer(*me, owner);
@@ -223,7 +228,7 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             me->AttackStop();
         if (!me->GetVictim())
         {
-            if (Unit* target = CombatTarget(player))
+            if (Unit* target = CombatTarget(me, player))
                 AttackStart(target);
             else if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
             {
