@@ -182,6 +182,12 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
     if (id == 800401)
         info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
+    if (id == 712681)
+    {
+        info->TargetAuraState = 0;
+        info->AttributesEx |= SPELL_ATTR1_NO_THREAT;
+        info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN;
+    }
     if (id == 801761)
     {
         SpellEffectInfo& cost = info->Effects[EFFECT_1];
@@ -311,7 +317,7 @@ class aura_ascension_barbarian_lifecycle : public AuraScript
 
     void Apply(AuraEffect const* effect, AuraEffectHandleModes)
     {
-        if (Spirit(GetId()))
+        if (Spirit(GetId()) && GetTarget() == GetCaster())
             if (Player* self = Owner(GetTarget()))
                 for (uint32 spirit : { 707763, 707764, 707775, 712467, 712468 })
                     if (spirit != GetId())
@@ -536,6 +542,27 @@ public:
         }
     }
 };
+
+class spell_ascension_spirit_of_bloodshed_aura : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_spirit_of_bloodshed_aura);
+
+    void FilterTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject* object)
+        {
+            Unit* unit = object ? object->ToUnit() : nullptr;
+            return !unit || !unit->IsAlive() || !unit->HealthBelowPct(35);
+        });
+    }
+
+    void Register() override
+    {
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+            spell_ascension_spirit_of_bloodshed_aura::FilterTargets,
+            EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
+    }
+};
 }
 
 void AddAscensionBarbarianCompletionScripts()
@@ -546,4 +573,5 @@ void AddAscensionBarbarianCompletionScripts()
     new barbarian_casts();
     RegisterSpellScript(aura_ascension_barbarian_tankard);
     RegisterSpellScript(aura_ascension_barbarian_lifecycle);
+    RegisterSpellScript(spell_ascension_spirit_of_bloodshed_aura);
 }

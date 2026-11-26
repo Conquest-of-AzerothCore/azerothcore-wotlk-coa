@@ -4568,6 +4568,7 @@ private:
   static constexpr uint32 SPELL_CATEGORY_RECOVERY_TIME_FIELD = 30;
   static constexpr uint32 SPELL_INTERRUPT_FLAGS_FIELD = 31;
   static constexpr uint32 SPELL_EFFECTS_FIELD = 71;
+  static constexpr uint32 SPELL_EFFECT_BASE_POINTS_FIELD = 80;
   static constexpr uint32 SPELL_EFFECT_TARGETS_FIELD = 86;
   static constexpr uint32 SPELL_EFFECT_TARGETS_B_FIELD = 89;
   static constexpr uint32 SPELL_FAMILY_NAME_FIELD = 208;
@@ -4577,6 +4578,7 @@ private:
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
+  static constexpr uint32 GUARDIAN_STANDARD_OF_RECOVERY_AURA = 500266;
   static constexpr uint32 CHARGE_SPELL_VISUAL = 867;
   static constexpr char const* REPLENISHMENT_FIELD_DESCRIPTION =
       "Nearby allies are restored: $/10;560751s1 Rage, Energy, Focus and Runic Power and $560819s1% base mana "
@@ -5790,6 +5792,9 @@ private:
       row.Values[SPELL_WIRE_SLOT(SPELL_INTERRUPT_FLAGS_FIELD)] &= ~uint32(SPELL_INTERRUPT_FLAG_MOVEMENT);
     if (info->Id == VAULT_CLIENT_SPELL)
       row.Values[SPELL_WIRE_SLOT(SPELL_VISUAL_FIELD)] = CHARGE_SPELL_VISUAL;
+    if (info->Id == GUARDIAN_STANDARD_OF_RECOVERY_AURA)
+      row.Values[SPELL_WIRE_SLOT(SPELL_EFFECT_BASE_POINTS_FIELD)] =
+          static_cast<uint32>(info->Effects[EFFECT_0].BasePoints);
     if (info->Id == TinkerReplenishmentFieldAura)
     {
       for (uint8 effect = 0; effect < 2; ++effect)

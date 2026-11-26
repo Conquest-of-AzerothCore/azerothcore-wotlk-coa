@@ -261,7 +261,10 @@ std::list<Unit*> Allies(Player* player, Unit* center, float range, uint32 count)
     if (center->IsAlive() && std::find(result.begin(), result.end(), center) == result.end())
         result.push_back(center);
     result.remove_if([player](Unit* unit)
-                     { return (unit != player && !player->IsInRaidWith(unit)) || !player->IsFriendlyTo(unit); });
+                     {
+                         return (unit != player && !player->IsInRaidWith(unit)) || !player->IsFriendlyTo(unit) ||
+                                unit->IsTotem() || unit->GetCreatureType() == CREATURE_TYPE_TOTEM;
+                     });
     result.sort(
         [](Unit* a, Unit* b)
         {
