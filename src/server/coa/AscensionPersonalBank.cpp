@@ -849,16 +849,25 @@ void HandleSwapItems(Player* player, OpenBank& bank, WorldPacket const& packet)
                 return;
             }
 
+            uint8 const playerBag = swap.AutoStore ? NULL_BAG : swap.ContainerSlot;
+            uint8 const playerSlot = swap.AutoStore ? NULL_SLOT : swap.ContainerItemSlot;
+            if (!Player::IsInventoryPos(playerBag, playerSlot) &&
+                !(playerBag == NULL_BAG && playerSlot == NULL_SLOT))
+            {
+                player->SendEquipError(EQUIP_ERR_NONE, nullptr);
+                return;
+            }
+
             if (swap.ToSlot || swap.AutoStore)
             {
                 WithdrawToPlayer(player, bank, uint8(swap.BankTab), uint8(swap.BankSlot),
-                                 swap.ContainerSlot, swap.ContainerItemSlot,
+                                 playerBag, playerSlot,
                                  uint32(std::max<int32>(0, swap.StackCount)), swap.AutoStore);
                 sScriptMgr->OnPlayerBankWithdraw(player, bank.OwnerKind == OWNER_REALM
                     ? AscensionPersonalBank::REALM : AscensionPersonalBank::PERSONAL);
             }
             else
-                DepositToBank(player, bank, swap.ContainerSlot, swap.ContainerItemSlot,
+                DepositToBank(player, bank, playerBag, playerSlot,
                               uint8(swap.BankTab), uint8(swap.BankSlot),
                               uint32(std::max<int32>(0, swap.StackCount)));
         });

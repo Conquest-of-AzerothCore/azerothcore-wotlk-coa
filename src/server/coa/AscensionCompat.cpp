@@ -6240,6 +6240,7 @@ public:
     _woodworkingAppearancePatches.clear();
     _woodworkingItemAppearancePatches.clear();
     _serverPetAppearancePatches.clear();
+    _illusionAppearancePatches.clear();
     _incarnationCategories.clear();
     _petCategories.clear();
     _petTokens.clear();
@@ -6264,11 +6265,21 @@ public:
     ClientDBC appearances;
     bool appearancesLoaded =
         appearances.Load(GetClientDBCPath("Appearances.dbc"), 17);
+    std::vector<std::array<uint32, 17>> illusionCandidates;
     for (uint32 row = 0; row < appearances.GetRecordCount(); ++row) {
       ClientDBC::Record record = appearances.GetRecord(row);
       uint32 appearanceId = record.GetUInt32(0);
       if (!appearanceId)
         continue;
+
+      if (record.GetString(2) == "APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT" && record.GetUInt32(8))
+      {
+        std::array<uint32, 17> patch{};
+        for (uint32 field = 0; field < patch.size(); ++field)
+          patch[field] = record.GetUInt32(field);
+        patch[2] = 0;
+        illusionCandidates.push_back(patch);
+      }
 
       uint32 displayId = record.GetUInt32(3);
       _appearances[appearanceId] =
@@ -6343,6 +6354,12 @@ public:
           items.push_back(itemId);
       }
     }
+    for (auto& patch : illusionCandidates)
+      if (_itemSetItems.contains(patch[8]))
+      {
+        patch[8] = 0;
+        _illusionAppearancePatches.push_back(patch);
+      }
 
     ClientDBC vanity;
     bool vanityLoaded =
@@ -6469,6 +6486,7 @@ public:
     }
 
     SendWoodworkingAppearanceCatalog(player);
+    SendIllusionAppearancePatches(player);
 
     std::shared_ptr<PlayerCollectionState> state = TakeLoginState(player);
     if (!state)
@@ -7721,6 +7739,19 @@ private:
 
         std::lock_guard lock(_woodworkingRowMutex);
         _sentWoodworkingItems[player->GetGUID().GetCounter()] = std::move(sent);
+    }
+
+    void SendIllusionAppearancePatches(Player* player)
+    {
+        for (auto const& row : _illusionAppearancePatches)
+        {
+            WorldPacket packet(SMSG_PATCH_APPEARANCES,
+                17 * sizeof(uint32) + sizeof("APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT"));
+            for (uint32 field : row)
+                packet << field;
+            packet << "APPEARANCE_DISPLAY_TYPE_ITEM_ENCHANT";
+            player->GetSession()->SendPacket(&packet);
+        }
     }
 
 public:
@@ -8983,6 +9014,7 @@ private:
   std::vector<uint32> _allVanityItemIds;
     std::vector<std::array<uint32, 17>> _woodworkingAppearancePatches;
   std::vector<std::array<uint32, 17>> _serverPetAppearancePatches;
+    std::vector<std::array<uint32, 17>> _illusionAppearancePatches;
     std::vector<std::array<uint32, 3>> _woodworkingItemAppearancePatches;
     std::mutex _woodworkingRowMutex;
     std::unordered_map<uint32, std::unordered_set<uint32>> _sentWoodworkingItems;
