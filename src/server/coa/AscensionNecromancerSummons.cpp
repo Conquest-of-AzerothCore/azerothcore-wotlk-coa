@@ -141,21 +141,6 @@ uint32 AttackSpell(uint32 entry)
         return 0;
     }
 }
-void Evict(Player* player, int32 needed)
-{
-    auto& minions = State(player).minions;
-    while (int32(Capacity(player)) - Used(player) < needed)
-    {
-        auto oldest = std::find_if(minions.begin(), minions.end(),
-                                   [](MinionRecord const& row) { return row.cost != 0; });
-        if (oldest == minions.end())
-            return;
-        ObjectGuid guid = oldest->guid;
-        minions.erase(oldest);
-        if (Creature* unit = ObjectAccessor::GetCreature(*player, guid))
-            unit->DespawnOrUnsummon();
-    }
-}
 }
 bool FollowsOwner(uint32 entry)
 {
