@@ -501,7 +501,7 @@
     "spell": 504071,
     "clause": "Increases the leech of Vampiric Feast by $s1%.",
     "labels": [
-      "504071 effect_value e0 #0"
+      "504071 behaviour_metric_delta vampiric_feast_leech"
     ],
     "kind": "claim"
   },
@@ -512,12 +512,16 @@
       {
         "claim": "extends the duration of Transgression by $/1000;561152s1 sec",
         "labels": [
-          "504071 effect_value 561152e0 #1"
+          "504071 behaviour_metric_delta extends_transgression_held",
+          "504071 behaviour_metric_delta extends_transgression_gone"
         ]
       },
       {
         "claim": "Consuming at least 9 stacks of Thirst with Vampiric Fang",
-        "labels": []
+        "labels": [
+          "504071 behaviour_metric_delta extends_transgression_held",
+          "504071 behaviour_metric_delta eight_stacks_no_extend"
+        ]
       }
     ],
     "kind": "claim"
@@ -661,7 +665,9 @@
     "spell": 504252,
     "clause": "Each stack of Thirst now increases your critical strike chance by $s1%.",
     "labels": [
-      "504252 effect_value e0 #0"
+      "504252 behaviour_metric_delta five_stacks_spell",
+      "504252 behaviour_metric_delta ten_stacks_melee",
+      "504252 behaviour_metric_delta zero_stacks"
     ],
     "kind": "claim"
   },
@@ -1685,7 +1691,7 @@
     "spell": 560256,
     "clause": "Increases your maximum Rage by $/10;s1",
     "labels": [
-      "560256 effect_value e0 #0"
+      "560256 behaviour_metric_delta max_rage"
     ],
     "kind": "claim"
   },
@@ -1696,13 +1702,14 @@
       {
         "claim": "and you now regenerate $/10;s2 Rage",
         "labels": [
-          "560256 effect_value e1 #1"
+          "560256 behaviour_metric_delta regen_amount"
         ]
       },
       {
         "claim": "every $t2 sec",
         "labels": [
-          "560256 aura_amplitude_ms #2"
+          "560256 behaviour_metric_delta regen_period_before",
+          "560256 behaviour_metric_delta regen_period_after"
         ]
       }
     ],
@@ -1938,7 +1945,11 @@
   {
     "spell": 570023,
     "clause": "Receive a bonus based on your Thirst level.",
-    "labels": [],
+    "labels": [
+      "570023 behaviour_metric_delta zero_stacks_none",
+      "570023 behaviour_metric_delta sated_haste_1",
+      "570023 behaviour_metric_delta ravenous_crit_6"
+    ],
     "kind": "claim"
   },
   {
@@ -1948,12 +1959,18 @@
       {
         "claim": "Spell haste increased by $570024s1%",
         "labels": [
-          "570023 effect_value 570024e0 #0"
+          "570023 behaviour_metric_delta sated_haste_1",
+          "570023 behaviour_metric_delta sated_haste_5"
         ]
       },
       {
         "claim": "Between 1-5 stacks of Thirst",
-        "labels": []
+        "labels": [
+          "570023 behaviour_metric_delta zero_stacks_none",
+          "570023 behaviour_metric_delta sated_haste_1",
+          "570023 behaviour_metric_delta sated_haste_5",
+          "570023 behaviour_metric_delta sated_absent_6"
+        ]
       }
     ],
     "kind": "claim"
@@ -1965,12 +1982,16 @@
       {
         "claim": "The bonus damage dealt by spell critical strikes is increased by $570025s1%",
         "labels": [
-          "570023 effect_value 570025e0 #1"
+          "570023 behaviour_metric_delta ravenous_crit_6"
         ]
       },
       {
         "claim": "Between 6-10 stacks of Thirst",
-        "labels": []
+        "labels": [
+          "570023 behaviour_metric_delta sated_absent_6",
+          "570023 behaviour_metric_delta ravenous_crit_6",
+          "570023 behaviour_metric_delta ravenous_ten_stacks"
+        ]
       }
     ],
     "kind": "claim"
@@ -3349,15 +3370,22 @@
     "spell": 704690,
     "clause": "Each point of Rage now increases the critical strike chance of Veinburst and Reave by $/1000;S1%,",
     "labels": [
-      "704690 effect_value e0 #0"
+      "704690 behaviour_metric_delta veinburst_zero_rage",
+      "704690 behaviour_metric_delta veinburst_40_rage",
+      "704690 behaviour_metric_delta reave_80_rage"
     ],
     "kind": "claim"
   },
   {
     "spell": 704690,
     "clause": "up to a maximum of 50%.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "704690 behaviour_metric_delta veinburst_zero_rage",
+      "704690 behaviour_metric_delta veinburst_cap_120_rage",
+      "704690 behaviour_metric_delta reave_cap_120_rage"
+    ],
+    "kind": "claim",
+    "promise_of": "Each point of Rage now increases the critical strike chance of Veinburst and Reave by $/1000;S1%,"
   },
   {
     "spell": 704692,
@@ -4593,14 +4621,15 @@
       {
         "claim": "Enter a blood trance, consuming Rage every sec to allow you to heal for $s1% of all damage dealt",
         "labels": [
-          "804203 effect_value e0 #0",
-          "804203 aura_amount e0 #0"
+          "804203 behaviour_metric_delta rage_drain",
+          "804203 behaviour_metric_delta heal_shadow",
+          "804203 behaviour_metric_delta heal_physical"
         ]
       },
       {
         "claim": "for $d.",
         "labels": [
-          "804203 aura_duration_ms #1"
+          "804203 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -4609,13 +4638,18 @@
   {
     "spell": 804203,
     "clause": "Can only trigger once per second.",
-    "labels": [],
+    "labels": [
+      "804203 behaviour_metric_delta icd_held",
+      "804203 behaviour_metric_delta icd_reopen"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804203,
     "clause": "If you run out of Rage the effect will end early.",
-    "labels": [],
+    "labels": [
+      "804203 behaviour_metric_delta ends_on_rage_depletion"
+    ],
     "kind": "claim"
   },
   {
@@ -4723,14 +4757,18 @@
   {
     "spell": 553272,
     "clause": "Expends Thirst Stacks",
-    "labels": [],
+    "labels": [
+      "553272 behaviour_metric_delta clears_thirst"
+    ],
     "kind": "claim"
   },
   {
     "spell": 553272,
     "clause": "Steal ${$m1+0+$SP*0.34} health from an enemy.",
     "labels": [
-      "553272 effect_value e0 #0"
+      "553272 behaviour_metric_delta damage_base",
+      "553272 behaviour_metric_delta damage_sp",
+      "553272 behaviour_metric_delta health_steal"
     ],
     "kind": "claim"
   },
@@ -4738,14 +4776,18 @@
     "spell": 553272,
     "clause": "Damage increased by $680753s3% for each Thirst stack.",
     "labels": [
-      "553272 effect_value 680753e2 #1"
+      "553272 behaviour_hit_ratio thirst_5_stacks",
+      "553272 behaviour_hit_ratio thirst_9_stacks"
     ],
     "kind": "claim"
   },
   {
     "spell": 553272,
     "clause": "Clears Insatiable and Thirst stacks.",
-    "labels": [],
+    "labels": [
+      "553272 behaviour_metric_delta clears_thirst",
+      "553272 behaviour_metric_delta clears_insatiable"
+    ],
     "kind": "claim"
   },
   {
@@ -5192,20 +5234,27 @@
   {
     "spell": 806421,
     "clause": "Being struck by an enemy while below 35% health instantly resets the cooldown of your Vampiric Fang and grants you Wretched.",
-    "labels": [],
+    "labels": [
+      "806421 behaviour_metric_delta below_35_grants_wretched",
+      "806421 behaviour_metric_delta above_35_no_proc",
+      "806421 behaviour_metric_delta resets_vampiric_fang_cd"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806421,
     "clause": "Can only occur once per minute.",
-    "labels": [],
+    "labels": [
+      "806421 behaviour_metric_delta icd_held",
+      "806421 behaviour_metric_delta icd_reopen"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806421,
     "clause": "Generates $/10;504283s1 Rage",
     "labels": [
-      "806421 effect_value 504283e0 #0"
+      "806421 behaviour_metric_delta wretched_rage"
     ],
     "kind": "claim"
   },
@@ -5216,18 +5265,20 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "806421 aura_amplitude_ms #1"
+          "806421 behaviour_metric_delta wretched_period"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "806421 spell_duration 504284 #2"
+          "806421 behaviour_metric_delta wretched_duration"
         ]
       },
       {
         "claim": "and 1 stack of Thirst",
-        "labels": []
+        "labels": [
+          "806421 behaviour_metric_delta wretched_thirst"
+        ]
       }
     ],
     "kind": "claim"
@@ -5235,7 +5286,9 @@
   {
     "spell": 806421,
     "clause": "Vampiric Fang removes this effect.",
-    "labels": [],
+    "labels": [
+      "806421 behaviour_metric_delta vampiric_fang_removes_wretched"
+    ],
     "kind": "claim"
   },
   {

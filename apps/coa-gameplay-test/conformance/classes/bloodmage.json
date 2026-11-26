@@ -2368,6 +2368,2190 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 504252,
+      "name": "Reckless Abandon (+5% spell crit at 5 stacks of Thirst)",
+      "kind": "metric_delta",
+      "variant": "five_stacks_spell",
+      "label_suffix": "five_stacks_spell",
+      "quote": "Each stack of Thirst now increases your critical strike chance by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504252,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 1 (504252 Effect[0] BasePoints 0 + DieSides 1 = 1; Spell.dbc). AscensionResourceTalents.cpp:60-80,87-94,112-123 rewrites 504252 Effect[0] to SPELL_AURA_MOD_CRIT_PCT (290) and scales its amount by 1% per stack of Thirst 706613 (precondition fixture set to 5 stacks in both phases). Reads live spell_crit_chance before (control: 504252 not learned) and after a real learn of 504252: expected gain +5.0 points (tol 0.01, excludes 0% and +10%). Reference search 2026-11-26: coa-history 504252: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 504252 matches verbatim."
+    },
+    {
+      "spell": 504252,
+      "name": "Reckless Abandon (+10% melee crit at 10 stacks of Thirst)",
+      "kind": "metric_delta",
+      "variant": "ten_stacks_melee",
+      "label_suffix": "ten_stacks_melee",
+      "quote": "Each stack of Thirst now increases your critical strike chance by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504252,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          10,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "melee_crit_chance_refreshed",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Per-stack linearity and melee crit check for Reckless Abandon 504252 (SPELL_AURA_MOD_CRIT_PCT +1% per Thirst stack, AscensionResourceTalents.cpp:78-123): with Thirst 706613 at max 10 stacks (precondition fixture in both phases), melee_crit_chance_refreshed gains +10.0 points (tol 0.01, excludes 0%, +5%, +20%) after a real learn of 504252. Reference search 2026-11-26: see five_stacks_spell."
+    },
+    {
+      "spell": 504252,
+      "name": "Reckless Abandon (+0% crit at 0 stacks of Thirst)",
+      "kind": "metric_delta",
+      "variant": "zero_stacks",
+      "label_suffix": "zero_stacks",
+      "quote": "Each stack of Thirst now increases your critical strike chance by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504252,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Zero-stack control for Reckless Abandon 504252: with 0 stacks of Thirst 706613, learning 504252 produces +0.0 points spell_crit_chance (tol 0.01), proving the crit bonus is strictly gated on Thirst stacks. Reference search 2026-11-26: see five_stacks_spell."
+    },
+    {
+      "spell": 570023,
+      "name": "Thirst for Blood (0 Thirst stacks grants neither Sated nor Ravenous)",
+      "kind": "metric_delta",
+      "variant": "zero_stacks_none",
+      "label_suffix": "zero_stacks_none",
+      "quote": "Receive a bonus based on your Thirst level.",
+      "trigger_spell": 60235,
+      "gate_spell": 570023,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570025
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ravenous 570025 stays absent at 0 stacks of Thirst 706613"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 570024
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "570023 Thirst for Blood (rev_20260920_71_bloodmage_thirst_for_blood.sql, AscensionBloodmageSecondary.cpp:429-467): periodic dummy every 500 ms checks Thirst 706613 stacks and applies Sated 570024 (1-5) or Ravenous 570025 (6-10). At 0 stacks of Thirst 706613, both Sated 570024 and Ravenous 570025 read 0 after learning 570023 and waiting 1200 ms (> 2 ticks). Reference search 2026-11-26: coa-history 570024 Sated 59 applies across 3 logs, 570025 Ravenous 319 applies across 4 logs (570023 passive 0 events); coabuildhub 570023 matches (Sated +10% spell haste, Ravenous +100% spell crit damage)."
+    },
+    {
+      "spell": 570023,
+      "name": "Thirst for Blood (1 Thirst stack grants Sated +10% spell haste)",
+      "kind": "metric_delta",
+      "variant": "sated_haste_1",
+      "label_suffix": "sated_haste_1",
+      "quote": "Between 1-5 stacks of Thirst: Spell haste increased by $570024s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 570023,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570024
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Sated 570024 is applied at 1 Thirst stack after learning 570023"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570025
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ravenous 570025 stays absent at 1 Thirst stack"
+          }
+        ]
+      },
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 0.90909,
+      "tolerance": 0.001,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "$570024s1 = 10 (570024 Sated Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 9 + DieSides 1 = +10%; Spell.dbc). At lower boundary 1 stack of Thirst 706613 (precondition fixture in both phases), waiting 1200 ms (> 2 ticks of 570023's 500 ms periodic dummy) leaves cast_speed_multiplier at 1.000 before learning 570023 (control) and 1 / 1.10 = 0.90909 +- 0.001 after (excludes 1.000 no-effect and 0.8333 double-applied), with ally_arm proving Sated 570024 = 1 and Ravenous 570025 = 0. Reference search 2026-11-26: see zero_stacks_none."
+    },
+    {
+      "spell": 570023,
+      "name": "Thirst for Blood (5 Thirst stacks grants Sated +10% spell haste)",
+      "kind": "metric_delta",
+      "variant": "sated_haste_5",
+      "label_suffix": "sated_haste_5",
+      "quote": "Between 1-5 stacks of Thirst: Spell haste increased by $570024s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 570023,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570024
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Sated 570024 is applied at upper boundary 5 Thirst stacks"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570025
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Ravenous 570025 stays absent at 5 Thirst stacks"
+          }
+        ]
+      },
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 0.90909,
+      "tolerance": 0.001,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "Upper boundary (5 Thirst stacks) check for Sated 570024 (+10% spell haste): with Thirst 706613 at 5 stacks, cast_speed_multiplier moves from 1.000 to 0.90909 +- 0.001 after learning 570023, with Sated 570024 = 1 and Ravenous 570025 = 0. Reference search 2026-11-26: see zero_stacks_none."
+    },
+    {
+      "spell": 570023,
+      "name": "Thirst for Blood (6 Thirst stacks drops Sated and activates Ravenous)",
+      "kind": "metric_delta",
+      "variant": "sated_absent_6",
+      "label_suffix": "sated_absent_6",
+      "quote": "Between 6-10 stacks of Thirst: The bonus damage dealt by spell critical strikes is increased by $570025s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 570023,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          6,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570025
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Ravenous 570025 is applied at lower boundary 6 Thirst stacks"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 570024
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "Tier transition boundary (5 -> 6 Thirst stacks) for Thirst for Blood 570023: at 6 stacks of Thirst 706613, Sated 570024 reads 0 while Ravenous 570025 reads 1 (0 before learning 570023). Reference search 2026-11-26: see zero_stacks_none."
+    },
+    {
+      "spell": 570023,
+      "name": "Thirst for Blood (6 Thirst stacks Ravenous +100% spell crit damage)",
+      "kind": "metric_delta",
+      "variant": "ravenous_crit_6",
+      "label_suffix": "ravenous_crit_6",
+      "quote": "Between 6-10 stacks of Thirst: The bonus damage dealt by spell critical strikes is increased by $570025s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 570023,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        578305
+      ],
+      "force_crit": "spell",
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          706613,
+          6,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 578305,
+          "delay_ms": 1200,
+          "target": "dummy",
+          "in_before": true
+        }
+      ],
+      "after_auras_present": [
+        {
+          "aura": 570025,
+          "source": "Ravenous 570025 applied by 570023 periodic dummy at 6 Thirst stacks"
+        }
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy"
+      },
+      "phase_since": true,
+      "before_expected": 1000,
+      "expected": 2000,
+      "expected_ratio": 2.0,
+      "tolerance": 0.05,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$570025s1 = 100 (570025 Ravenous Effect[0] aura 163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS, MiscValue 126 magic schools, BasePoints 99 + DieSides 1 = +100%; Spell.dbc). Native aura 163 semantics (Unit::SpellCriticalDamageBonus, Unit.cpp:10673-10701; Templar 705272 / Sun Cleric 300943 / Cultist 563123 / Felsworn 704607 precedent, and coabuildhub 570023 'Spell critical damage increased by 100%'): multiplies whole spell critical damage by 2.00x. With 6 stacks of Thirst 706613, +20000 SP, 823764 spellpen, and forced spell crits, waits 1200 ms (> 2 ticks of 570023) before casting Bloodbolt 578305 (DmgClass 1 Magic Shadow) at dummy in both phases: ratio after/before reads 2.00 +- 0.05 (excludes 1.00 no-effect, 1.333 bonus-only, and 3.00 double-applied), with after_auras_present confirming Ravenous 570025 is active. Reference search 2026-11-26: see zero_stacks_none.",
+      "phase_power": [
+        1,
+        500,
+        500
+      ]
+    },
+    {
+      "spell": 570023,
+      "name": "Thirst for Blood (10 Thirst stacks holds Ravenous and excludes Sated)",
+      "kind": "metric_delta",
+      "variant": "ravenous_ten_stacks",
+      "label_suffix": "ravenous_ten_stacks",
+      "quote": "Between 6-10 stacks of Thirst: The bonus damage dealt by spell critical strikes is increased by $570025s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 570023,
+      "target": "caster",
+      "phase_auras": [
+        [
+          706613,
+          10,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 570024
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Sated 570024 stays absent at upper boundary 10 Thirst stacks"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 570025
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1200,
+      "expire_ms": 500,
+      "observe_source": "Upper boundary (10 Thirst stacks) check for Ravenous 570025: at max 10 stacks of Thirst 706613, Ravenous 570025 reads 0 before learning 570023 and 1 after, while Sated 570024 stays 0. Reference search 2026-11-26: see zero_stacks_none."
+    },
+    {
+      "spell": 553272,
+      "name": "Vampiric Fang (base Shadow damage 361..412 at 0 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Steal ${$m1+0+$SP*0.34} health from an enemy.",
+      "trigger_spell": 553272,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 553272,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 386,
+      "after_at_least": 361,
+      "after_at_most": 412,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Vampiric Fang 553272 (Rank 8, BaseLevel 60, SchoolMask 32 Shadow, 200 Rage, instant, Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE BasePoints 360 DieSides 52 -> 361..412 at level 60 and 0 SP; Spell.dbc). With 823764 spellpen and 16255 set to -100% crit (non-crit), uncast control reads 0 and one real cast at dummy lands in [361, 412]. Reference search 2026-11-26: coa-history 553272: 50 casts/hits (11 crits, 140..3539, mean 1374.0) across 3 logs; coabuildhub 804726 matches verbatim (+34% SP, +10% per Thirst stack, clears Insatiable and Thirst)."
+    },
+    {
+      "spell": 553272,
+      "name": "Vampiric Fang (SP scaling +0.34 * SP at 2000 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Steal ${$m1+0+$SP*0.34} health from an enemy.",
+      "trigger_spell": 553272,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "player_spell_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 553272,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1066,
+      "after_at_least": 1041,
+      "after_at_most": 1092,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spell power scaling check for Vampiric Fang 553272 (rev_20261010_91_bloodmage_coefficients.sql sets direct_damage = 0.34 on rank-1 804726): at +2000 SP, 0.34 * 2000 = +680 -> [361+680, 412+680] = [1041, 1092] non-crit Shadow damage against 0 uncast control (disjoint from 0 SP [361, 412] and 2x SP [1721, 1772]). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 553272,
+      "name": "Vampiric Fang (steals health equal to 100% of damage dealt)",
+      "kind": "metric_delta",
+      "variant": "health_steal",
+      "label_suffix": "health_steal",
+      "quote": "Steal ${$m1+0+$SP*0.34} health from an enemy.",
+      "trigger_spell": 553272,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "player_spell_power": 2000,
+      "caster_health": [
+        10000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "health",
+      "fields": {},
+      "before_expected": 10000,
+      "expected": 11066,
+      "after_at_least": 11041,
+      "after_at_most": 11092,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Health steal proof for Vampiric Fang 553272 (AscensionBloodmageSecondary.cpp:343-344 calls Unit::DealHeal(player, player, damage) on hit): with caster held at 10000 / 100000 HP (disable_regeneration true), +2000 SP, 823764 spellpen, and -100% crit, uncast control stays at 10000 HP while one real cast restores 1041..1092 HP (health in [11041, 11092], 100% of the damage dealt, disjoint from 0%, 50% [10520, 10546], and 200% [12082, 12184]). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 553272,
+      "name": "Vampiric Fang (+50% damage at 5 stacks of Thirst)",
+      "kind": "hit_ratio",
+      "variant": "thirst_5_stacks",
+      "label_suffix": "thirst_5_stacks",
+      "quote": "Damage increased by $680753s3% for each Thirst stack.",
+      "expected": 1.5,
+      "observe_spell": 553272,
+      "learn": [
+        553272
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            706613,
+            5
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$680753s3 = 10 (680753 Effect[2] BasePoints 9 + DieSides 1 = 10% per Thirst stack; Spell.dbc). AscensionBloodmageSecondary.cpp:291-309 multiplies Vampiric Fang damage by 1.0 + stacks * 0.10. At +20000 SP (stat term dominates 52-pt die) with 823764 spellpen and non-crit hits, 5 stacks of Thirst 706613 (precondition fixture reapplied per trial) vs 0 stacks measures 1.50x (band +-2.5 pts excludes 1.00x, 1.10x, 1.90x, 2.00x). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 553272,
+      "name": "Vampiric Fang (+90% damage at 9 stacks of Thirst)",
+      "kind": "hit_ratio",
+      "variant": "thirst_9_stacks",
+      "label_suffix": "thirst_9_stacks",
+      "quote": "Damage increased by $680753s3% for each Thirst stack.",
+      "expected": 1.9,
+      "observe_spell": 553272,
+      "learn": [
+        553272
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            706613,
+            9
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Per-stack linearity check for Vampiric Fang 553272 (+10% per Thirst stack): at 9 stacks of Thirst 706613 (below 10-stack Insatiable penalty trigger) vs 0 stacks, non-crit hits at +20000 SP measure 1.90x (band +-4.5 pts excludes 1.00x, 1.50x, and 2.80x). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 553272,
+      "name": "Vampiric Fang (expends and clears Thirst stacks)",
+      "kind": "metric_delta",
+      "variant": "clears_thirst",
+      "label_suffix": "clears_thirst",
+      "quote": "Clears Insatiable and Thirst stacks.",
+      "trigger_spell": 553272,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706613
+      },
+      "before_expected": 5,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageSecondary.cpp:345 removes SPELL_BLOOD_THIRST (706613) on Vampiric Fang hit. With 5 stacks of Thirst 706613 (precondition fixture), uncast control reads 5 stacks and one real cast of 553272 at dummy clears Thirst to 0 stacks. Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 553272,
+      "name": "Vampiric Fang (clears Insatiable 706621 and 706663 stacks)",
+      "kind": "metric_delta",
+      "variant": "clears_insatiable",
+      "label_suffix": "clears_insatiable",
+      "quote": "Clears Insatiable and Thirst stacks.",
+      "trigger_spell": 553272,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          706613,
+          10,
+          "caster",
+          "caster"
+        ],
+        [
+          706621,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          706663,
+          2,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 706663
+            },
+            "before_expected": 2,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Insatiable penalty stack aura 706663 clears from 2 to 0 on Vampiric Fang hit"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 706613
+            },
+            "before_expected": 10,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Thirst 706613 clears from 10 to 0 on Vampiric Fang hit"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 706621
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageSecondary.cpp:345-347 removes Thirst 706613, Insatiable 706621, and Insatiable stack debuff 706663 on Vampiric Fang hit. With all three fixtured (10 Thirst, 1 Insatiable 706621, 2 Insatiable 706663), uncast control retains all three while one real cast of 553272 clears 706621 to 0, 706663 to 0, and 706613 to 0. Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 504071,
+      "name": "Torture (increases Vampiric Feast leech by 50%, 0.50 -> 0.75)",
+      "kind": "metric_delta",
+      "variant": "vampiric_feast_leech",
+      "label_suffix": "vampiric_feast_leech",
+      "quote": "Increases the leech of Vampiric Feast by $s1%.",
+      "trigger_spell": 578305,
+      "gate_spell": 504071,
+      "target": "dummy",
+      "dummy_distance": 10,
+      "learn": [
+        504728,
+        801076,
+        578305
+      ],
+      "setup_casts": [
+        801076
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_reads": [
+        {
+          "spell": 801076,
+          "expected": 1
+        }
+      ],
+      "cast_power": 600,
+      "player_spell_power": 2000,
+      "phase_auras": [
+        [
+          801076,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 804934,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 804934,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "before_expected": 0.5,
+      "expected": 0.75,
+      "tolerance": 0.01,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 50 (504071 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, BasePoints 49 + DieSides 1 = +50%, MiscValue 0 SPELLMOD_DAMAGE, EffectSpellClassMask[1] 32 matching Vampiric Feast 804934 SpellFamilyFlags[1] 32; Spell.dbc). Vampiric Feast 804934 (triggered by Transgression 801076 on direct spell damage, AscensionBloodmageTalents.cpp:887-917, rev_20261006_95) has SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier 0.5 and SPELL_ATTR3_IGNORE_CASTER_MODIFIERS (0x20000000): SpellDamageBonusDone returns early on IGNORE_CASTER_MODIFIERS (Unit.cpp:9794) leaving damage unchanged, while SpellHealingBonusDone applies SPELLMOD_DAMAGE (Unit.cpp:10964), raising heal/damage from 0.50 (before learning 504071) to 0.75 (after learning 504071, tol 0.01 excludes 0.50 and 1.00). Casts Transgression 801076 (verified via after_setup_reads) then Bloodbolt 578305 at dummy 10 yd away (~333 ms flight, wait_ms 1500 gives >1100 ms buffer). Reference search 2026-11-26: coa-history 804934 Vampiric Feast 257 damage (mean 323.0) and 257 heal (mean 161.0 = 0.50x) across 3 logs, 504071 passive 0 events; coabuildhub 504071 matches verbatim."
+    },
+    {
+      "spell": 504071,
+      "name": "Torture (consuming 9 Thirst with Vampiric Fang holds Transgression past 19.5 sec)",
+      "kind": "metric_delta",
+      "variant": "extends_transgression_held",
+      "label_suffix": "extends_transgression_held",
+      "quote": "Consuming at least 9 stacks of Thirst with Vampiric Fang now extends the duration of Transgression by $/1000;561152s1 sec.",
+      "trigger_spell": 553272,
+      "gate_spell": 504071,
+      "target": "dummy",
+      "learn": [
+        504728,
+        801076,
+        553272
+      ],
+      "setup_casts": [
+        801076
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_reads": [
+        {
+          "spell": 801076,
+          "expected": 1
+        }
+      ],
+      "cast_power": 600,
+      "phase_auras": [
+        [
+          801076,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706613,
+          9,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 801076
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 18000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          17900,
+          18300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;561152s1 = 5000 ms (561152 Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 4999 + DieSides 1 = +5000 ms on Transgression 801076, base duration 15000 ms -> 20000 ms; Spell.dbc). AscensionBloodmageSecondary.cpp:74,340-349 casts 561152 when Torture 504071 is active and Vampiric Fang 553272 consumes >= 9 stacks of Thirst 706613. Casts Transgression 801076 (verified via after_setup_reads), waits setup_wait_ms 1600 ms, then casts Vampiric Fang 553272 at dummy with 9 stacks of Thirst 706613: without 504071 (control), 801076 expires at 15000 ms and reads 0 at 18000 ms post-Fang (19600 ms post-Transgression); with 504071 learned, 801076 reads present (1) at game_time.after [17900, 18300] ms (19500..19900 ms post-Transgression, > +4500 ms = -10% of 5s extension) and expired (0) at game_time.expired [18650, 19150] ms (20250..20750 ms post-Transgression, bracketing the 5000 ms extension within +-10% on both sides). Reference search 2026-11-26: coa-history 801076 6 casts across 3 logs; coabuildhub 504071 matches verbatim."
+    },
+    {
+      "spell": 504071,
+      "name": "Torture (extended Transgression expires by 20.6 sec)",
+      "kind": "metric_delta",
+      "variant": "extends_transgression_gone",
+      "label_suffix": "extends_transgression_gone",
+      "quote": "Consuming at least 9 stacks of Thirst with Vampiric Fang now extends the duration of Transgression by $/1000;561152s1 sec.",
+      "trigger_spell": 553272,
+      "gate_spell": 504071,
+      "target": "dummy",
+      "learn": [
+        504728,
+        801076,
+        553272
+      ],
+      "setup_casts": [
+        801076
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_reads": [
+        {
+          "spell": 801076,
+          "expected": 1
+        }
+      ],
+      "cast_power": 600,
+      "phase_auras": [
+        [
+          801076,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706613,
+          9,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 801076
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 18800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          18650,
+          19150
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;561152s1 = 5000 ms (561152 Effect[0] 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION, BasePoints 4999 + DieSides 1 = +5000 ms on Transgression 801076, base duration 15000 ms -> 20000 ms; Spell.dbc). AscensionBloodmageSecondary.cpp:74,340-349 casts 561152 when Torture 504071 is active and Vampiric Fang 553272 consumes >= 9 stacks of Thirst 706613. Casts Transgression 801076 (verified via after_setup_reads), waits setup_wait_ms 1600 ms, then casts Vampiric Fang 553272 at dummy with 9 stacks of Thirst 706613: without 504071 (control), 801076 expires at 15000 ms and reads 0 at 18000 ms post-Fang (19600 ms post-Transgression); with 504071 learned, 801076 reads present (1) at game_time.after [17900, 18300] ms (19500..19900 ms post-Transgression, > +4500 ms = -10% of 5s extension) and expired (0) at game_time.expired [18650, 19150] ms (20250..20750 ms post-Transgression, bracketing the 5000 ms extension within +-10% on both sides). Reference search 2026-11-26: coa-history 801076 6 casts across 3 logs; coabuildhub 504071 matches verbatim.",
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 561152
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Torture duration extension 561152 casts once in the treatment phase, proving 0 aura at 20.4 s is genuine expiry of the extended aura"
+          }
+        ]
+      }
+    },
+    {
+      "spell": 504071,
+      "name": "Torture (consuming 8 Thirst with Vampiric Fang does not extend Transgression)",
+      "kind": "metric_delta",
+      "variant": "eight_stacks_no_extend",
+      "label_suffix": "eight_stacks_no_extend",
+      "quote": "Consuming at least 9 stacks of Thirst with Vampiric Fang now extends the duration of Transgression by $/1000;561152s1 sec.",
+      "trigger_spell": 553272,
+      "gate_spell": 504071,
+      "target": "dummy",
+      "learn": [
+        504728,
+        801076,
+        553272
+      ],
+      "setup_casts": [
+        801076
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "after_setup_reads": [
+        {
+          "spell": 801076,
+          "expected": 1
+        }
+      ],
+      "cast_power": 600,
+      "phase_auras": [
+        [
+          801076,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          706613,
+          8,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 561152
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Torture duration extension 561152 never casts at 8 Thirst stacks"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 801076
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 14400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14300,
+          14700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Below-threshold boundary control (8 vs 9 stacks of Thirst 706613) for Torture 504071 (AscensionBloodmageSecondary.cpp:74 TORTURE_MINIMUM_THIRST_STACKS = 9): with 8 stacks of Thirst 706613, Transgression 801076 (verified active via after_setup_reads) expires at its base 15000 ms and reads 0 at 14400 ms post-Fang (16000 ms post-Transgression, game_time.after [14300, 14700] ms) in both phases, and ally_arm proves 561152 never cast (0 -> 0). Reference search 2026-11-26: see extends_transgression_9."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (struck below 35% HP grants Wretched 504284)",
+      "kind": "metric_delta",
+      "variant": "below_35_grants_wretched",
+      "label_suffix": "below_35_grants_wretched",
+      "quote": "Being struck by an enemy while below 35% health instantly resets the cooldown of your Vampiric Fang and grants you Wretched.",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "target": "caster",
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 35916,
+        "health": 30000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 504284
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806421 Essence Harvester (rev_20260920_52_bloodmage_scripted_procs.sql: ProcFlags 1048576 PROC_FLAG_TAKEN_DAMAGE, Cooldown 60000 ms; AscensionBloodmageTalents.cpp:1009-1027 checks target->GetHealthPct() < 35.0f; Effect[0] triggers Wretched 504284; Spell.dbc). Striker casts Molten Armor 35916 (75 Fire damage, SPELL_ATTR3_NOT_A_PROC 0x200 so triggered striker cast procs AttributesMask 0 auras via SpellAuras.cpp:2256) at caster held at 30% HP (30000/100000, disable_regeneration true): Wretched 504284 reads 0 before learning 806421 (control) and 1 after. Reference search 2026-11-26: coa-history 806421/504284/504283: 0 events in 186 logs; coabuildhub 806421 matches verbatim (below 35% HP, resets Vampiric Fang CD, grants Wretched 10 Rage + 1 Thirst every 1s for 10s, 1 min ICD, Vampiric Fang removes Wretched)."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (struck above 35% HP does not grant Wretched)",
+      "kind": "metric_delta",
+      "variant": "above_35_no_proc",
+      "label_suffix": "above_35_no_proc",
+      "quote": "Being struck by an enemy while below 35% health instantly resets the cooldown of your Vampiric Fang and grants you Wretched.",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "target": "caster",
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 35916,
+        "health": 40000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 504284
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 300,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Above-threshold negative control (40% HP > 35%) for Essence Harvester 806421 (AscensionBloodmageTalents.cpp:1009-1020): struck by Molten Armor 35916 (75 dmg -> 39.925% HP > 35%) with 806421 learned does not trigger Wretched 504284 (0 -> 0). Reference search 2026-11-26: see below_35_grants_wretched."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (struck below 35% HP instantly resets Vampiric Fang cooldown)",
+      "kind": "metric_delta",
+      "variant": "resets_vampiric_fang_cd",
+      "label_suffix": "resets_vampiric_fang_cd",
+      "quote": "Being struck by an enemy while below 35% health instantly resets the cooldown of your Vampiric Fang and grants you Wretched.",
+      "trigger_spell": 553272,
+      "gate_spell": 806421,
+      "target": "dummy",
+      "learn": [
+        553272
+      ],
+      "setup_casts": [
+        553272
+      ],
+      "setup_target": "dummy",
+      "setup_wait_ms": 1600,
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 35916,
+        "health": 30000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 553272
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 500,
+      "expire_ms": 8500,
+      "observe_source": "Wretched 504284 Effect[1] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 804726 (Vampiric Fang) MiscValueB 1 (reset category 513, 8000 ms cooldown on rank-8 553272; Spell.dbc). Each phase casts Vampiric Fang 553272 (setup_casts, starting its 8000 ms CD), waits 1600 ms (past 1500 ms GCD, well inside 8000 ms CD), takes striker Molten Armor 35916 at 30% HP, and immediately attempts Vampiric Fang 553272 again: without 806421 (control), the second cast is refused on CD (cumulative spell_cast_count = 1); after learning 806421, the strike resets Vampiric Fang's CD so both setup and trigger casts succeed (+2 casts -> cumulative spell_cast_count = 3). Reference search 2026-11-26: see below_35_grants_wretched."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (1-minute ICD blocks re-trigger at ~55.6 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_held",
+      "label_suffix": "icd_held",
+      "quote": "Can only occur once per minute.",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "gate_timing": "start",
+      "target": "caster",
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 35916,
+        "health": 30000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 504284
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 55000,
+      "game_time": {
+        "after": [
+          250,
+          600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "rev_20260920_52_bloodmage_scripted_procs.sql sets spell_proc.Cooldown = 60000 ms (1 minute) on 806421. With 806421 learned at start, first Molten Armor 35916 strike at 30% HP applies Wretched 504284 (aura_apply_count = 1); second strike ~55.6 s later (300 ms strike wait + 300 ms trigger wait + 55000 ms expire_ms, past -10% = 54.0 s and < 60.0 s) is blocked by the 60 s ICD so aura_apply_count stays 1. Reference search 2026-11-26: see below_35_grants_wretched."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (1-minute ICD reopens by ~62.1 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_reopen",
+      "label_suffix": "icd_reopen",
+      "quote": "Can only occur once per minute.",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "gate_timing": "start",
+      "target": "caster",
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 35916,
+        "health": 30000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "aura_apply_count",
+      "fields": {
+        "spell": 504284
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 300,
+      "expire_ms": 61500,
+      "game_time": {
+        "after": [
+          250,
+          600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Companion to icd_held for Essence Harvester 806421 (60000 ms ICD): second Molten Armor 35916 strike ~62.1 s later (300 + 300 + 61500 ms, below +10% = 66.0 s) reopens the 60 s ICD so aura_apply_count(504284) becomes 2. Together icd_held (~55.6 s) and icd_reopen (~62.1 s) bracket 60 s inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (Wretched generates 10 Rage per 1 sec tick -> 300 internal in 3 ticks)",
+      "kind": "metric_delta",
+      "variant": "wretched_rage",
+      "label_suffix": "wretched_rage",
+      "quote": "@s:504284:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "target": "caster",
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 35916,
+        "health": 30000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504283,
+        "target": "caster",
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 300,
+      "wait_ms": 3400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3300,
+          3700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$/10;504283s1 = 10 Rage (504283 Effect[0] SPELL_EFFECT_ENERGIZE MiscValue 1 Rage BasePoints 99 + DieSides 1 = 100 internal = 10 displayed Rage per tick, triggered every 1000 ms by Wretched 504284 Effect[0]; Spell.dbc). Strike lands 100 ms before trigger 60235; reading spell_energize_total(504283, power 1) at game_time.after [3300, 3700] ms (3400..3800 ms after strike -> 3 ticks at 1000, 2000, 3000 ms) gives 0 before learning 806421 and 300 internal Rage (3 x 100) after (isolating 504283 from Thirst 706613's separate 50 Rage/stack). Reference search 2026-11-26: see below_35_grants_wretched."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (Wretched generates 1 stack of Thirst per 1 sec tick -> 3 stacks in 3 ticks)",
+      "kind": "metric_delta",
+      "variant": "wretched_thirst",
+      "label_suffix": "wretched_thirst",
+      "quote": "@s:504284:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "target": "caster",
+      "disable_regeneration": true,
+      "strike": {
+        "spell": 35916,
+        "health": 30000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 706613
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "wait_ms": 3400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3300,
+          3700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504283 Effect[1] SPELL_EFFECT_TRIGGER_SPELL triggers Thirst 706613 (+1 stack per tick) every 1000 ms from Wretched 504284 Effect[0] (Spell.dbc). At game_time.after [3300, 3700] ms (3400..3800 ms after strike -> 3 ticks), Thirst 706613 reads 0 stacks before learning 806421 and 3 stacks after (excludes 0 and 6). Reference search 2026-11-26: see below_35_grants_wretched."
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (Wretched ticks every 1 sec, bracketed inside +-10%)",
+      "kind": "metric_delta",
+      "variant": "wretched_period",
+      "label_suffix": "wretched_period",
+      "quote": "@s:504284:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "target": "caster",
+      "disable_regeneration": true,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 504283,
+        "target": "caster",
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 400,
+      "after_expiry_expected": 500,
+      "wait_ms": 4750,
+      "expiry_wait_ms": 400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4850,
+          5050
+        ],
+        "expired": [
+          5250,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$t1 = 1000 ms (Wretched 504284 Effect[0] EffectAmplitude 1000 ms; Spell.dbc). Strike lands 100 ms before trigger 60235: at game_time.after [4650, 4850] ms (4750..4950 ms after strike, strictly < 5000 ms), spell_energize_total(504283) reads 400 (4 ticks; a 900 ms period = -10% would already have 5 ticks = 500 at 4500 ms); at game_time.expired [5050, 5250] ms (5150..5350 ms after strike, strictly > 5000 ms), it reads 500 (5 ticks; an 1100 ms period = +10% would still read 400 until 5500 ms). Brackets the 1000 ms period inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        30000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 35916,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      }
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (Wretched lasts 10 sec, bracketed inside +-10%)",
+      "kind": "metric_delta",
+      "variant": "wretched_duration",
+      "label_suffix": "wretched_duration",
+      "quote": "@s:504284:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 806421,
+      "target": "caster",
+      "disable_regeneration": true,
+      "metric": "aura",
+      "fields": {
+        "spell": 504284
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9300,
+      "expiry_wait_ms": 1200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9350,
+          9750
+        ],
+        "expired": [
+          10550,
+          10950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 10000 ms (Wretched 504284 DurationIndex 1 = 10000 ms; Spell.dbc). Strike lands 100 ms before trigger 60235: before learning 806421 (control), Wretched 504284 reads 0; after learning 806421, Wretched 504284 reads present (1) at game_time.after [9250, 9650] ms (9350..9750 ms after strike, > 9000 ms = -10%) and expired (0) at game_time.expired [10400, 10800] ms (10500..10900 ms after strike, < 11000 ms = +10%), bracketing 10000 ms inside +-10% on both sides. Reference search 2026-11-26: see below_35_grants_wretched.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        30000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 35916,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      }
+    },
+    {
+      "spell": 806421,
+      "name": "Essence Harvester (Vampiric Fang removes Wretched 504284)",
+      "kind": "metric_delta",
+      "variant": "vampiric_fang_removes_wretched",
+      "label_suffix": "vampiric_fang_removes_wretched",
+      "quote": "@s:504284:0@",
+      "trigger_spell": 500123,
+      "gate_spell": 806421,
+      "gate_timing": "start",
+      "target": "dummy",
+      "learn": [
+        500123,
+        553272
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        500,
+        500
+      ],
+      "strike": {
+        "spell": 35916,
+        "health": 30000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "after_trigger_casts": [
+        {
+          "spell": 553272,
+          "delay_ms": 1600,
+          "target": "dummy",
+          "in_before": false
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 553272
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Vampiric Fang 553272 casts once in the treatment phase (0 in control)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 504284
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Wretched 504284 is applied by the 35916 strike in both phases"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 504284
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1000,
+      "expire_ms": 61500,
+      "void_on_cast_failure": true,
+      "observe_source": "Wretched 504284 tooltip (@s:504284:0@): 'Vampiric Fang removes this effect.' With 806421 learned at start, both phases take striker Molten Armor 35916 at 30% HP (separated by expire_ms 61500 ms so the 60 s ICD reopens; ally_arm confirms aura_apply_count(504284) 1 -> 2). Control phase casts no Vampiric Fang and reads Wretched 504284 = 1 at +1000 ms; treatment phase casts Vampiric Fang 553272 at dummy 1600 ms after trigger (ally_arm confirms spell_cast_count(553272) 0 -> 1) and reads Wretched 504284 at +2600 ms (well inside its 10000 ms duration), expecting 0. Reference search 2026-11-26: see below_35_grants_wretched."
+    },
+    {
+      "spell": 560256,
+      "name": "Dark Pact (increases maximum Rage by 20 -> 1000 to 1200 internal)",
+      "kind": "metric_delta",
+      "variant": "max_rage",
+      "label_suffix": "max_rage",
+      "quote": "Increases your maximum Rage by $/10;s1",
+      "trigger_spell": 60235,
+      "gate_spell": 560256,
+      "target": "caster",
+      "metric": "max_power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 1000,
+      "expected": 1200,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$/10;s1 = 20 Rage (560256 Effect[0] aura 35 SPELL_AURA_MOD_INCREASE_ENERGY MiscValue 1 Rage, BasePoints 199 + DieSides 1 = 200 internal = 20 displayed Rage; Spell.dbc). Reads live max_power(power 1) on caster before (1000 internal = 100 displayed) and after a real learn of 560256 (1200 internal = 120 displayed; excludes 1000 no-effect and 1400 double-applied). Reference search 2026-11-26: coa-history 560256: 0 events in 186 logs (passive); coabuildhub 560256 (named Blood Pact there) matches verbatim (+20 max Rage, 4 Rage every 5 sec)."
+    },
+    {
+      "spell": 560256,
+      "name": "Dark Pact (regenerates 4 Rage = 40 internal per tick)",
+      "kind": "metric_delta",
+      "variant": "regen_amount",
+      "label_suffix": "regen_amount",
+      "quote": "and you now regenerate $/10;s2 Rage every $t2 sec.",
+      "trigger_spell": 60235,
+      "gate_spell": 560256,
+      "target": "caster",
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 560256,
+        "target": "caster",
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 40,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5400,
+          6000
+        ]
+      },
+      "observe_source": "$/10;s2 = 4 Rage (560256 Effect[1] aura 24 SPELL_AURA_PERIODIC_ENERGIZE MiscValue 1 Rage, EffectAmplitude 5000 ms, BasePoints 39 + DieSides 1 = 40 internal = 4 displayed Rage per tick; Spell.dbc). Learn happens expire_ms (500 ms) before trigger 60235; reading spell_energize_total(560256, power 1) at game_time.after [5400, 6000] ms (5900..6500 ms after learn, strictly between tick 1 at 5000 ms and tick 2 at 10000 ms) gives 0 before learning 560256 and 40 internal Rage after (excludes 0 and 80). Reference search 2026-11-26: see max_rage."
+    },
+    {
+      "spell": 560256,
+      "name": "Dark Pact (tick 2 has not landed by 9.6 sec -> period > 4.5 sec)",
+      "kind": "metric_delta",
+      "variant": "regen_period_before",
+      "label_suffix": "regen_period_before",
+      "quote": "and you now regenerate $/10;s2 Rage every $t2 sec.",
+      "trigger_spell": 60235,
+      "gate_spell": 560256,
+      "target": "caster",
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 560256,
+        "target": "caster",
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 40,
+      "wait_ms": 9100,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9050,
+          9350
+        ]
+      },
+      "observe_source": "$t2 = 5000 ms (560256 Effect[1] EffectAmplitude 5000 ms; Spell.dbc). Learn happens 500 ms before trigger 60235: at game_time.after [9050, 9350] ms (9550..9850 ms after learn, strictly < 10000 ms), spell_energize_total(560256) reads 40 (1 tick; a 4500 ms period = -10% would already have 2 ticks = 80 at 9000 ms); at game_time.expired [9750, 10050] ms (10250..10550 ms after learn, strictly > 10000 ms), it reads 80 (2 ticks; a 5500 ms period = +10% would still read 40 until 11000 ms). Brackets 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see max_rage."
+    },
+    {
+      "spell": 560256,
+      "name": "Dark Pact (tick 2 has landed by 10.4 sec -> period < 5.5 sec)",
+      "kind": "metric_delta",
+      "variant": "regen_period_after",
+      "label_suffix": "regen_period_after",
+      "quote": "and you now regenerate $/10;s2 Rage every $t2 sec.",
+      "trigger_spell": 60235,
+      "gate_spell": 560256,
+      "target": "caster",
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 560256,
+        "target": "caster",
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 80,
+      "wait_ms": 9800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9750,
+          10050
+        ]
+      },
+      "observe_source": "$t2 = 5000 ms (560256 Effect[1] EffectAmplitude 5000 ms; Spell.dbc). Learn happens 500 ms before trigger 60235: at game_time.after [9050, 9350] ms (9550..9850 ms after learn, strictly < 10000 ms), spell_energize_total(560256) reads 40 (1 tick; a 4500 ms period = -10% would already have 2 ticks = 80 at 9000 ms); at game_time.expired [9750, 10050] ms (10250..10550 ms after learn, strictly > 10000 ms), it reads 80 (2 ticks; a 5500 ms period = +10% would still read 40 until 11000 ms). Brackets 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see max_rage."
+    },
+    {
+      "spell": 704690,
+      "name": "Killer Instinct (0 Rage grants +0% Veinburst crit)",
+      "kind": "metric_delta",
+      "variant": "veinburst_zero_rage",
+      "label_suffix": "veinburst_zero_rage",
+      "quote": "Each point of Rage now increases the critical strike chance of Veinburst and Reave by $/1000;S1%,",
+      "trigger_spell": 60235,
+      "gate_spell": 704690,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        504260
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 504260,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "expected_gain": 0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$/1000;S1 = 0.5% per Rage point (704690 Effect[0] aura 112 BasePoints 499 + DieSides 1 = 500, MiscValueB 50 cap, EffectSpellClassMask[0] 6291456 matching Veinburst 504260 and Reave 802469; Spell.dbc). AscensionBloodmageSecondary.cpp:265-268 adds min(GetPower(POWER_RAGE) * 500 / 10000.0f, 50.0f) in OnSpellCritChance. Negative zero-Rage partner: at 0 Rage (0 internal), spell_done_crit_chance_scripted for Veinburst 504260 gains 0.0 points (tol 0.05) after learning 704690. Reference search 2026-11-26: coa-history 704690: 0 events in 186 logs (passive); coabuildhub 704690 matches verbatim (0.5% per Rage on Veinburst and Reave, max 50%)."
+    },
+    {
+      "spell": 704690,
+      "name": "Killer Instinct (40 Rage grants +20% Veinburst crit)",
+      "kind": "metric_delta",
+      "variant": "veinburst_40_rage",
+      "label_suffix": "veinburst_40_rage",
+      "quote": "Each point of Rage now increases the critical strike chance of Veinburst and Reave by $/1000;S1%,",
+      "trigger_spell": 60235,
+      "gate_spell": 704690,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        504260
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        400,
+        400
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 504260,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Linear scaling check on Veinburst 504260 for Killer Instinct 704690 (0.5% per Rage): at 40 displayed Rage (400 internal, disable_regeneration true), spell_done_crit_chance_scripted for Veinburst 504260 gains +20.0 points (tol 0.05, excludes 0% and +40%) after learning 704690. Partnered with veinburst_zero_rage (+0). Reference search 2026-11-26: see veinburst_zero_rage."
+    },
+    {
+      "spell": 704690,
+      "name": "Killer Instinct (80 Rage grants +40% Reave crit)",
+      "kind": "metric_delta",
+      "variant": "reave_80_rage",
+      "label_suffix": "reave_80_rage",
+      "quote": "Each point of Rage now increases the critical strike chance of Veinburst and Reave by $/1000;S1%,",
+      "trigger_spell": 60235,
+      "gate_spell": 704690,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        802469
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        800,
+        800
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 802469,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 40,
+      "expected_gain": 40,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Linear scaling check on Reave 802469 for Killer Instinct 704690 (0.5% per Rage): at 80 displayed Rage (800 internal, disable_regeneration true), spell_done_crit_chance_scripted for Reave 802469 gains +40.0 points (tol 0.05, excludes 0%, +20%, +50%) after learning 704690. Partnered with veinburst_zero_rage (+0). Reference search 2026-11-26: see veinburst_zero_rage."
+    },
+    {
+      "spell": 704690,
+      "name": "Killer Instinct (120 Rage with Dark Pact caps Veinburst crit bonus at +50%)",
+      "kind": "metric_delta",
+      "variant": "veinburst_cap_120_rage",
+      "label_suffix": "veinburst_cap_120_rage",
+      "quote": "up to a maximum of 50%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704690,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        504260,
+        560256
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        1200,
+        1200
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 504260,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "expected_gain": 50,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Cap proof (50% max, MiscValueB = 50; AscensionBloodmageSecondary.cpp:267-268) on Veinburst 504260: with Dark Pact 560256 learned (max Rage 1200 internal = 120 displayed) and Rage set to 1200 (unbounded 0.5% * 120 would give +60%), spell_done_crit_chance_scripted for Veinburst 504260 gains exactly +50.0 points (tol 0.05, excludes +60% uncapped). Partnered with veinburst_zero_rage (+0). Reference search 2026-11-26: see veinburst_zero_rage."
+    },
+    {
+      "spell": 704690,
+      "name": "Killer Instinct (120 Rage with Dark Pact caps Reave crit bonus at +50%)",
+      "kind": "metric_delta",
+      "variant": "reave_cap_120_rage",
+      "label_suffix": "reave_cap_120_rage",
+      "quote": "up to a maximum of 50%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704690,
+      "target": "caster",
+      "select_dummy": true,
+      "learn": [
+        802469,
+        560256
+      ],
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        1200,
+        1200
+      ],
+      "metric": "spell_done_crit_chance_scripted",
+      "fields": {
+        "spell": 802469,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "expected_gain": 50,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Cap proof (50% max) on Reave 802469: with Dark Pact 560256 learned and Rage set to 1200 internal (120 displayed, uncapped would be +60%), spell_done_crit_chance_scripted for Reave 802469 gains exactly +50.0 points (tol 0.05, excludes +60% uncapped). Partnered with veinburst_zero_rage (+0). Reference search 2026-11-26: see veinburst_zero_rage."
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis (consumes 5 Rage/sec = 50 internal/sec while active)",
+      "kind": "metric_delta",
+      "variant": "rage_drain",
+      "label_suffix": "rage_drain",
+      "quote": "Enter a blood trance, consuming Rage every sec to allow you to heal for $s1% of all damage dealt for $d.",
+      "trigger_spell": 804203,
+      "target": "caster",
+      "cast_in_before": false,
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        1000,
+        1000
+      ],
+      "phase_power_in_uncast_before": true,
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 1000,
+      "expected": 800,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3200,
+          3800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804203 Apotheosis (Spell.dbc: PowerType 1 Rage, ManaCost 50 = 5 Rage, ManaPerSecond 50 = 5 Rage/sec, DurationIndex 9 = 30000 ms). Uncast control (phase_power_in_uncast_before) starts and stays at 1000 internal Rage (disable_regeneration true); after casting 804203 (cost 50 -> 950) and waiting game_time.after [3200, 3800] ms (3 drain ticks at 1000, 2000, 3000 ms = -150), Rage reads 800 internal (excludes 1000 uncast, 950 cost-only with no per-sec drain, and 650 double-drain). Reference search 2026-11-26: coa-history 804203: 38 casts across 13 logs, 807934 Dark Feast: 12320 heals (mean 763.0) across 13 logs; installed Spell.dbc governs."
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis (heals for 100% of Shadow spell damage dealt via Dark Feast 807934)",
+      "kind": "metric_delta",
+      "variant": "heal_shadow",
+      "label_suffix": "heal_shadow",
+      "quote": "Enter a blood trance, consuming Rage every sec to allow you to heal for $s1% of all damage dealt for $d.",
+      "trigger_spell": 501614,
+      "target": "dummy",
+      "learn": [
+        804203,
+        707900,
+        501614
+      ],
+      "setup_casts": [
+        804203,
+        707900
+      ],
+      "setup_only_after": true,
+      "setup_target": "caster",
+      "setup_wait_ms": 200,
+      "after_setup_reads": [
+        {
+          "spell": 804203,
+          "expected": 1
+        }
+      ],
+      "player_spell_power": 2000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807934,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 501614,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.01,
+      "wait_ms": 3200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 100 (804203 Effect[0] aura 354 BasePoints 99 + DieSides 1 = 100%, TriggerSpell 807934 Dark Feast SPELL_EFFECT_HEAL IGNORE_CASTER_MODIFIERS; rev_20261018_36_bloodmage_apotheosis_proc.sql + AscensionBloodmageTalents.cpp:787-824). Setup casts Apotheosis 804203 (off-GCD) then Blood Tap 707900 (200 ms later, restoring 500 Rage so Apotheosis does not deplete during cast; verified active via after_setup_reads). Bloodmoon Blast 501614 (Shadow, Health cost so Rage stays untouched, 2000 ms cast + ~142 ms flight, wait_ms 3200 gives >1000 ms post-flight buffer) at +2000 SP with 823764 spellpen and -100% crit: spell_heal_total(807934) / spell_damage_total(501614) reads 0.00 without Apotheosis (control) and 1.00 +- 0.01 with Apotheosis active (excludes 0% and 200%). Reference search 2026-11-26: see rage_drain."
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis (heals for 100% of Physical melee ability damage dealt via Dark Feast 807934)",
+      "kind": "metric_delta",
+      "variant": "heal_physical",
+      "label_suffix": "heal_physical",
+      "quote": "Enter a blood trance, consuming Rage every sec to allow you to heal for $s1% of all damage dealt for $d.",
+      "trigger_spell": 500123,
+      "target": "dummy",
+      "learn": [
+        804203,
+        707900,
+        500123
+      ],
+      "setup_casts": [
+        804203,
+        707900
+      ],
+      "setup_only_after": true,
+      "setup_target": "caster",
+      "setup_wait_ms": 200,
+      "after_setup_reads": [
+        {
+          "spell": 804203,
+          "expected": 1
+        }
+      ],
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807934,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 500123,
+          "target": "dummy"
+        }
+      },
+      "phase_since": true,
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Physical-damage arm proving Apotheosis 804203 heals for 100% of ALL damage dealt (not Shadow-only like 804195; AscensionBloodmageTalents.cpp:807-808, rev_20261018_36): Ravenous Strike 500123 (SchoolMask 1 Physical, DmgClass 2 Melee) at dummy with -100% crit gives spell_heal_total(807934) / spell_damage_total(500123) = 0.00 without Apotheosis and 1.00 +- 0.01 with Apotheosis active. Reference search 2026-11-26: see rage_drain."
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis (lasts 30 sec when Rage is sustained, bracketed inside +-10%)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "allow you to heal for $s1% of all damage dealt for $d.",
+      "trigger_spell": 804203,
+      "target": "caster",
+      "cast_power": 1000,
+      "hold_power_during_wait": {
+        "power": 1,
+        "every_ms": 5000,
+        "count": 5
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 804203
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 3500,
+      "expiry_wait_ms": 3000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          28300,
+          28900
+        ],
+        "expired": [
+          31300,
+          32100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 30000 ms (804203 DurationIndex 9 = 30000 ms; Spell.dbc). With hold_power_during_wait refilling Rage to 1000 every 5000 ms (5 times = 25000 ms) so the 5 Rage/sec drain cannot end Apotheosis early (1000 Rage alone would deplete at 19 s), uncast control reads 0 while one real cast reads present (1) at game_time.after [28300, 28900] ms (> 27000 ms = -10%) and expired (0) at game_time.expired [31300, 32100] ms (< 33000 ms = +10%), bracketing 30000 ms inside +-10% on both sides. Reference search 2026-11-26: see rage_drain.",
+      "gate_timing": "start",
+      "trigger_only_after": true
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis (1 sec ICD blocks second hit 925 ms after first)",
+      "kind": "metric_delta",
+      "variant": "icd_held",
+      "label_suffix": "icd_held",
+      "quote": "Can only trigger once per second.",
+      "trigger_spell": 802580,
+      "target": "dummy",
+      "learn": [
+        804203,
+        707900,
+        802580,
+        500123
+      ],
+      "setup_casts": [
+        804203,
+        707900
+      ],
+      "setup_only_after": true,
+      "setup_target": "caster",
+      "setup_wait_ms": 200,
+      "after_setup_reads": [
+        {
+          "spell": 804203,
+          "expected": 1
+        }
+      ],
+      "phase_auras": [
+        [
+          802580,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500123,
+          "delay_ms": 3925,
+          "target": "dummy",
+          "in_before": true
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802580,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Taldaram's Torment 802580 tick 1 lands at +3000 ms in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 500123,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Ravenous Strike 500123 lands at +3925 ms in both phases"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807934,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4300,
+          4600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "rev_20261018_36_bloodmage_apotheosis_proc.sql sets spell_proc.Cooldown = 1000 ms on 804203. Setup casts Apotheosis 804203 (off-GCD) then Blood Tap 707900 (+500 Rage, verified via after_setup_reads). Taldaram's Torment 802580 (Health cost, 0 Rage, cleared on dummy each phase) ticks at +3000 ms (triggering Dark Feast 807934 heal #1 and starting the 1000 ms ICD); instant Ravenous Strike 500123 lands at +3925 ms (925 ms after tick 1, past -10% = 900 ms and < 1000 ms; ally_arm confirms both hits land in both phases). Without Apotheosis (control), 807934 heal count is 0; with Apotheosis active, the +3925 ms strike is blocked by the 1000 ms ICD so spell_heal_count(807934) reads 1 at game_time.after [4300, 4600] ms (before tick 2 at +6000 ms). Reference search 2026-11-26: see rage_drain."
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis (1 sec ICD reopens for second hit 1075 ms after first)",
+      "kind": "metric_delta",
+      "variant": "icd_reopen",
+      "label_suffix": "icd_reopen",
+      "quote": "Can only trigger once per second.",
+      "trigger_spell": 802580,
+      "target": "dummy",
+      "learn": [
+        804203,
+        707900,
+        802580,
+        500123
+      ],
+      "setup_casts": [
+        804203,
+        707900
+      ],
+      "setup_only_after": true,
+      "setup_target": "caster",
+      "setup_wait_ms": 200,
+      "after_setup_reads": [
+        {
+          "spell": 804203,
+          "expected": 1
+        }
+      ],
+      "phase_auras": [
+        [
+          802580,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500123,
+          "delay_ms": 4075,
+          "target": "dummy",
+          "in_before": true
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802580,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Taldaram's Torment 802580 tick 1 lands at +3000 ms in both phases"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 500123,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Ravenous Strike 500123 lands at +4075 ms in both phases"
+          }
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 807934,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4450,
+          4750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Companion to icd_held for Apotheosis 804203 (1000 ms ICD): instant Ravenous Strike 500123 lands at +4075 ms (1075 ms after Taldaram's Torment 802580 tick 1 at +3000 ms, below +10% = 1100 ms; ally_arm confirms both hits land in both phases), reopening the 1000 ms ICD so spell_heal_count(807934) reads 2 at game_time.after [4450, 4750] ms (0 in control without Apotheosis). Together icd_held (925 ms) and icd_reopen (1075 ms) bracket 1000 ms inside +-10% on both sides. Reference search 2026-11-26: see rage_drain."
+    },
+    {
+      "spell": 804203,
+      "name": "Apotheosis (ends early when Rage runs out)",
+      "kind": "metric_delta",
+      "variant": "ends_on_rage_depletion",
+      "label_suffix": "ends_on_rage_depletion",
+      "quote": "If you run out of Rage the effect will end early.",
+      "trigger_spell": 804203,
+      "target": "caster",
+      "disable_regeneration": true,
+      "phase_power": [
+        1,
+        1000,
+        150
+      ],
+      "phase_auras": [
+        [
+          804203,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 804203
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Apotheosis 804203 is genuinely applied in both phases (low-Rage phase ends early rather than failing to cast)"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 804203
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 5000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4850,
+          5250
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804203 Apotheosis ManaCost 50 + ManaPerSecond 50 (5 Rage/sec, DurationIndex 9 = 30000 ms; Aura::Update removes aura when power falls below ManaPerSecond). Control phase casts 804203 at 1000 internal Rage (950 after cast -> 700 left at +5000 ms) so 804203 remains active (1); treatment phase casts 804203 at 150 internal Rage (100 after cast -> depleted by 2 s of 50/s drain) so 804203 has already ended early (0) by game_time.after [4850, 5250] ms (25 s before its 30 s base duration), while ally_arm proves aura_apply_count(804203) 1 -> 2. Reference search 2026-11-26: see rage_drain."
     }
   ],
   "player_observations": [],
