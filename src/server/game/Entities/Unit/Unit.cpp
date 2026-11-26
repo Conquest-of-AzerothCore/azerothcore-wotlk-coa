@@ -9102,7 +9102,7 @@ Unit* Unit::GetMagicHitRedirectTarget(Unit* victim, SpellInfo const* spellInfo)
     if (Unit* magnet = sScriptMgr->SpellMagnetTarget(this, victim, spellInfo))
         if (magnet->IsAlive() && IsInMap(magnet) && InSamePhase(magnet) &&
             spellInfo->CheckExplicitTarget(this, magnet) == SPELL_CAST_OK &&
-            _IsValidAttackTarget(magnet, spellInfo) && IsWithinLOSInMap(magnet))
+            _IsValidAttackTarget(magnet, spellInfo) && IsWithinLOSInMap(magnet, VMAP::ModelIgnoreFlags::M2))
             return magnet;
     return victim;
 }

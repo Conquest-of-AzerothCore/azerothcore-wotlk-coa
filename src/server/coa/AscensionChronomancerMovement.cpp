@@ -334,7 +334,8 @@ public:
                 continue;
             if (info->CheckExplicitTarget(attacker, glass) != SPELL_CAST_OK ||
                 !attacker->IsValidAttackTarget(glass, info) ||
-                !glass->IsWithinLOSInMap(victim) || !attacker->IsWithinLOSInMap(glass))
+                !glass->IsWithinLOSInMap(victim, VMAP::ModelIgnoreFlags::M2) ||
+                !attacker->IsWithinLOSInMap(glass, VMAP::ModelIgnoreFlags::M2))
                 continue;
             if (auto* ai = dynamic_cast<npc_ascension_unstable_chronoglass*>(glass->AI());
                 ai && ai->ConsumeRedirect(attacker, info))
