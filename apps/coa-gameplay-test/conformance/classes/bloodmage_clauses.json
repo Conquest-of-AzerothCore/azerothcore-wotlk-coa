@@ -415,7 +415,7 @@
     "spell": 501614,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "501614 effect_value #1"
+      "501614 behaviour_metric_delta mortal_form"
     ],
     "kind": "claim"
   },
@@ -423,15 +423,37 @@
     "spell": 501614,
     "clause": "Blast an enemy for ${$m1+$sps*0.466229} Shadow damage",
     "labels": [
-      "501614 effect_value e0 #0"
+      "501614 behaviour_metric_delta damage_base",
+      "501614 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 501614,
     "clause": "and generates Rage$?s500107[, and 1 stack of Thirst.][.]$?s807489[\r\n\r\nUsable while moving.][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and generates Rage",
+        "labels": [
+          "501614 behaviour_metric_delta generates_rage"
+        ]
+      },
+      {
+        "claim": "$?s500107[, and 1 stack of Thirst.][.]",
+        "labels": [
+          "501614 behaviour_metric_delta thirst_500107_alert",
+          "501614 behaviour_metric_delta thirst_92112_works"
+        ]
+      },
+      {
+        "claim": "$?s807489[\r\n\r\nUsable while moving.][]",
+        "labels": [
+          "501614 behaviour_metric_delta moving_807489_alert",
+          "501614 behaviour_metric_delta moving_92113_works"
+        ]
+      }
+    ]
   },
   {
     "spell": 500126,
@@ -497,10 +519,22 @@
   {
     "spell": 501132,
     "clause": "Increases the tick rate and cost of Taldaram's Torment by $s1%.",
-    "labels": [
-      "501132 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the tick rate",
+        "labels": [
+          "501132 behaviour_metric_delta tick_period_control",
+          "501132 behaviour_metric_delta tick_period_tooltip_alert"
+        ]
+      },
+      {
+        "claim": "and cost of Taldaram's Torment by $s1%",
+        "labels": [
+          "501132 behaviour_metric_delta health_cost"
+        ]
+      }
+    ]
   },
   {
     "spell": 504071,
@@ -1464,25 +1498,32 @@
       {
         "claim": "healing up to $524906i allies",
         "labels": [
-          "524907 effect_value #0"
+          "524907 behaviour_metric_delta allies_reach"
         ]
       },
       {
         "claim": "within $524906a1 yds",
         "labels": [
-          "524907 effect_radius 524906e0 #1"
+          "524907 behaviour_metric_delta allies_reach"
         ]
       },
       {
         "claim": "over $524907d",
         "labels": [
-          "524907 aura_duration_ms #2"
+          "524907 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "for ${($524907d*1000/$524907t1)*($524906m1+$524906ppl1+$bh*0.1125+$SPI*0.45+$STA*0.35)}",
         "labels": [
-          "524907 effect_value #4"
+          "524907 behaviour_metric_delta heal_base",
+          "524907 behaviour_metric_delta heal_sp"
+        ]
+      },
+      {
+        "claim": "Coalesce a powerful sanguine orb above you",
+        "labels": [
+          "524907 behaviour_metric_delta omitted_hp_cost_alert"
         ]
       }
     ],
@@ -1491,7 +1532,9 @@
   {
     "spell": 524907,
     "clause": "Generates 2 stacks of Pooled Vitality,",
-    "labels": [],
+    "labels": [
+      "524907 behaviour_metric_delta vitality_stacks"
+    ],
     "kind": "claim"
   },
   {
@@ -1501,13 +1544,14 @@
       {
         "claim": "every $t3 sec",
         "labels": [
-          "524907 aura_amplitude_ms #3"
+          "524907 behaviour_metric_delta rage_period_before",
+          "524907 behaviour_metric_delta rage_period_after"
         ]
       },
       {
         "claim": "and $/10;t3 Rage",
         "labels": [
-          "524907 effect_value #5"
+          "524907 behaviour_metric_delta rage_amount_alert"
         ]
       }
     ],
@@ -1517,7 +1561,8 @@
     "spell": 524907,
     "clause": "@ext:Healing scales with Stamina and Spirit:ext@",
     "labels": [
-      "524907 effect_value #6"
+      "524907 behaviour_hit_ratio stamina_scaling",
+      "524907 behaviour_hit_ratio spirit_scaling"
     ],
     "kind": "claim"
   },
@@ -2875,16 +2920,31 @@
   {
     "spell": 681792,
     "clause": "Increases the damage dealt and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%.",
-    "labels": [
-      "681792 effect_value e1 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage dealt",
+        "labels": [
+          "681792 behaviour_hit_ratio base_bloodbolt",
+          "681792 behaviour_hit_ratio base_bloodmoon",
+          "681792 behaviour_hit_ratio base_crimson_tide"
+        ]
+      },
+      {
+        "claim": "and spell power scaling of Bloodbolt, Bloodmoon Blast, and Crimson Tide by $s2%",
+        "labels": [
+          "681792 behaviour_hit_ratio sp_scaling_bloodbolt_alert",
+          "681792 behaviour_hit_ratio sp_scaling_bloodmoon_alert",
+          "681792 behaviour_hit_ratio sp_scaling_crimson_tide_alert"
+        ]
+      }
+    ]
   },
   {
     "spell": 681792,
     "clause": "In addition, damage dealt by Bloodbolt now reduces all resistances by ${-($803722m1+$803722ppl1)}",
     "labels": [
-      "681792 effect_value 803722e0 #1"
+      "681792 behaviour_metric_delta resist_reduction"
     ],
     "kind": "claim"
   },
@@ -2895,13 +2955,13 @@
       {
         "claim": "increases the target's Magic damage taken by $803722s2%",
         "labels": [
-          "681792 effect_value 803722e1 #2"
+          "681792 behaviour_hit_ratio magic_damage_taken"
         ]
       },
       {
         "claim": "for $803722d",
         "labels": [
-          "681792 spell_duration 803722 #3"
+          "681792 behaviour_metric_delta debuff_duration"
         ]
       }
     ],
@@ -3323,18 +3383,20 @@
       {
         "claim": "increase your spell and ability critical strike chance by $504166s1%",
         "labels": [
-          "704654 effect_value 504166e0 #0"
+          "704654 behaviour_metric_delta crit_chance_one"
         ]
       },
       {
         "claim": "for ${$504166d-1} sec",
         "labels": [
-          "704654 effect_value #1"
+          "704654 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "and critical damage by $504166s1%",
-        "labels": []
+        "labels": [
+          "704654 behaviour_hit_ratio crit_damage_alert"
+        ]
       }
     ],
     "kind": "claim"
@@ -3343,7 +3405,7 @@
     "spell": 704654,
     "clause": "stacking up to $504166u times.",
     "labels": [
-      "704654 max_stacks 504166 #2"
+      "704654 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -3351,15 +3413,17 @@
     "spell": 704654,
     "clause": "Each additional critical strike increases this by an additional $504166s1%,",
     "labels": [
-      "704654 effect_value 504166e0 #3"
+      "704654 behaviour_metric_delta crit_chance_stack",
+      "704654 behaviour_hit_ratio crit_damage_alert"
     ],
-    "kind": "claim"
+    "kind": "claim",
+    "promise_of": "Direct ability critical strikes now increase your spell and ability critical strike chance and critical damage by $504166s1% for ${$504166d-1} sec,"
   },
   {
     "spell": 704654,
     "clause": "but reduces its duration by $/1000;504166s3 sec.",
     "labels": [
-      "704654 effect_value 504166e2 #4"
+      "704654 behaviour_metric_delta duration_cut_alert"
     ],
     "kind": "claim"
   },
@@ -4016,17 +4080,28 @@
     "spell": 572907,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "572907 effect_value #1"
+      "572907 behaviour_metric_delta mortal_form"
     ],
     "kind": "claim"
   },
   {
     "spell": 572907,
     "clause": "Explode with boiling blood, dealing ${$m1+0+$sps*0.35} Shadow damage to enemies and generating Rage for each enemy hit.",
-    "labels": [
-      "572907 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$sps*0.35} Shadow damage to enemies",
+        "labels": [
+          "572907 behaviour_metric_delta damage_sp_alert"
+        ]
+      },
+      {
+        "claim": "and generating Rage for each enemy hit",
+        "labels": [
+          "572907 behaviour_metric_delta rage_per_enemy"
+        ]
+      }
+    ]
   },
   {
     "spell": 572907,
@@ -4388,7 +4463,8 @@
     "spell": 801959,
     "clause": "Allies within $806723a1 yds are protected by Shadow Colony,",
     "labels": [
-      "801959 effect_radius 806723e0 #0"
+      "801959 behaviour_metric_delta shadow_colony_in",
+      "801959 behaviour_metric_delta shadow_colony_out"
     ],
     "kind": "claim"
   },
@@ -4396,20 +4472,26 @@
     "spell": 801959,
     "clause": "giving them a $801959h% chance to trigger a Call of the Darkwing when they take direct damage.",
     "labels": [
-      "801959 effect_value #1"
+      "801959 behaviour_metric_delta ally_triggers_darkwing"
     ],
     "kind": "claim"
   },
   {
     "spell": 801959,
     "clause": "Can only occur once every 3 sec.",
-    "labels": [],
+    "labels": [
+      "801959 behaviour_metric_delta icd_3s_alert",
+      "801959 behaviour_metric_delta icd_5s_confirm",
+      "801959 behaviour_metric_delta icd_2500ms_blocked"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801959,
     "clause": "If allies have less health than you when this occurs, generate a large amount of threat against the enemy that triggered it.",
-    "labels": [],
+    "labels": [
+      "801959 behaviour_metric_delta threat_zero_ally_alert"
+    ],
     "kind": "claim"
   },
   {
@@ -4884,7 +4966,7 @@
     "spell": 804811,
     "clause": "Enrage for $d,",
     "labels": [
-      "804811 aura_duration_ms #0"
+      "804811 behaviour_metric_delta enrage_duration"
     ],
     "kind": "claim"
   },
@@ -4895,13 +4977,23 @@
       {
         "claim": "to have a $s1% reduced global cooldown and cost",
         "labels": [
-          "804811 effect_value e0 #1",
-          "804811 aura_amount e0 #1"
+          "804811 behaviour_metric_delta bite_cost",
+          "804811 behaviour_metric_delta bite_gcd_held",
+          "804811 behaviour_metric_delta bite_gcd_ready"
         ]
       },
       {
         "claim": "the next 6 Bloodfang Bites",
-        "labels": []
+        "labels": [
+          "804811 behaviour_metric_delta six_charges",
+          "804811 behaviour_metric_delta five_charges_kept"
+        ]
+      },
+      {
+        "claim": "and to trigger Call of the Darkwing",
+        "labels": [
+          "804811 behaviour_metric_delta triggers_darkwing"
+        ]
       }
     ],
     "kind": "claim"
@@ -4910,17 +5002,28 @@
     "spell": 804811,
     "clause": "Calls $s1 Shadow Bats to appear from the shadows",
     "labels": [
-      "804811 effect_value #3"
+      "804811 behaviour_metric_delta shadow_bats_count"
     ],
     "kind": "claim"
   },
   {
     "spell": 804811,
     "clause": "and strike the target for ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} Physical Damage, healing you equal to the damage dealt.",
-    "labels": [
-      "804811 effect_value 802358e0 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "strike the target for ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} Physical Damage",
+        "labels": [
+          "804811 behaviour_metric_delta bat_bite_damage"
+        ]
+      },
+      {
+        "claim": "healing you equal to the damage dealt",
+        "labels": [
+          "804811 behaviour_metric_delta bat_bite_heal_ratio"
+        ]
+      }
+    ]
   },
   {
     "spell": 804849,
