@@ -1,0 +1,232 @@
+{
+  "schema": 1,
+  "name": "Worldforged Arcane Foci and Bear's Head Apprentice Robe stand inside the Azshara mage tower (#13562)",
+  "contract": "#13562 reported both On the Importance of Arcane Foci (Arcane Tome, entry 254412, guid 6942004, drops item 354275) and Bear's Head Apprentice Robe (entry 9900009, guid 6970005, drops item 354276) missing at Bear's Head in Azshara (Redridge_Magetower.wmo). Guid 6942004 was buried 4.13 yd below .map terrain (308.977) outside the tower at (3989.600, -4750.800, 304.846); guid 6970005 sat on .map terrain at (3984.770, -4789.890, 266.609) 3.72 yd beneath the tower ground floor (270.331). rev_20261126_13562 restores first-pass realm-dump rows 6900182 (3994.597, -4766.068, 296.604; +0.585 yd above tower upper floor 296.019) and 6900184 (3984.786, -4793.709, 270.315; -0.016 yd to tower ground floor 270.331). Expected: both pickups stand at their restored tower spots, are grounded and dry with open headroom, and open with loot from clear floor positions 2 yd away.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 3992.6,
+    "y": -4766.07,
+    "z": 296.02,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p1",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    },
+    {
+      "id": "p2",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p1",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "p2",
+      "value": 1
+    },
+    {
+      "action": "teleport",
+      "actor": "p2",
+      "map": 1,
+      "x": 3982.79,
+      "y": -4793.71,
+      "z": 270.33,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Arcane Tome is in the upper tower area",
+      "actor": "p1",
+      "metric": "nearby_gameobject_count",
+      "entry": 254412,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Arcane Tome stands at realm-dump spot (3994.597, -4766.068, 296.604) instead of buried outside",
+      "actor": "p1",
+      "metric": "spawn_distance",
+      "x": 3994.597,
+      "y": -4766.068,
+      "z": 296.604,
+      "max": 0.3,
+      "guid": 6942004,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Tome rests above the upper tower floor (+0.585 yd)",
+      "actor": "p1",
+      "metric": "spawn_ground_gap",
+      "min": 0.3,
+      "max": 0.9,
+      "guid": 6942004,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Tome is grounded within 0.8 yd",
+      "actor": "p1",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6942004,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Tome is not under water",
+      "actor": "p1",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6942004,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Tome has open room headroom",
+      "actor": "p1",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6942004,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p1",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p1",
+      "spell": 3365,
+      "target_gameobject": 254412
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Arcane Tome is within reach and opens",
+      "actor": "p1",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Arcane Tome loot is shown",
+      "actor": "p1",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Bear's Head Apprentice Robe pickup is in the ground-floor area",
+      "actor": "p2",
+      "metric": "nearby_gameobject_count",
+      "entry": 9900009,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bear's Head Apprentice Robe stands on the tower ground floor (3984.786, -4793.709, 270.315) instead of underneath it",
+      "actor": "p2",
+      "metric": "spawn_distance",
+      "x": 3984.786,
+      "y": -4793.709,
+      "z": 270.315,
+      "max": 0.3,
+      "guid": 6970005,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Bear's Head Apprentice Robe rests flush on the tower ground floor",
+      "actor": "p2",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.2,
+      "guid": 6970005,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Bear's Head Apprentice Robe is grounded within 0.8 yd",
+      "actor": "p2",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6970005,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Bear's Head Apprentice Robe is not under water",
+      "actor": "p2",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6970005,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "Bear's Head Apprentice Robe has open headroom",
+      "actor": "p2",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6970005,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p2",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p2",
+      "spell": 3365,
+      "target_gameobject": 9900009
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bear's Head Apprentice Robe is within reach and opens",
+      "actor": "p2",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bear's Head Apprentice Robe loot is shown",
+      "actor": "p2",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
