@@ -258,7 +258,7 @@
     "spell": 300590,
     "clause": "Your Sanguine Mend now heals ${$m2-1} additional nearby target.",
     "labels": [
-      "300590 effect_value e1 #0"
+      "300590 behaviour_metric_delta sanguine_mend_bounce"
     ],
     "kind": "claim"
   },
@@ -266,7 +266,7 @@
     "spell": 300590,
     "clause": "Increases the critical damage of Claw Sweep and Sanguine Rupture by $s1%.",
     "labels": [
-      "300590 effect_value e0 #1"
+      "300590 behaviour_hit_ratio sanguine_rupture_crit"
     ],
     "kind": "claim"
   },
@@ -732,12 +732,14 @@
       {
         "claim": "and the damage of spells that cost health by $s2%",
         "labels": [
-          "504254 effect_value e1 #0"
+          "504254 behaviour_hit_ratio health_cost_damage"
         ]
       },
       {
         "claim": "Increases your armor penetration by $s2%",
-        "labels": []
+        "labels": [
+          "504254 behaviour_hit_ratio armor_penetration"
+        ]
       }
     ],
     "kind": "claim"
@@ -1121,7 +1123,7 @@
     "spell": 504758,
     "clause": "Your Bloodbolt now heals for an additional $s1% of the damage dealt.",
     "labels": [
-      "504758 effect_value e0 #0"
+      "504758 behaviour_metric_delta bloodbolt_leech"
     ],
     "kind": "claim"
   },
@@ -1215,12 +1217,14 @@
       {
         "claim": "and the damage of spells that cost health by $s2%",
         "labels": [
-          "504894 effect_value e1 #0"
+          "504894 behaviour_hit_ratio health_cost_damage"
         ]
       },
       {
         "claim": "Increases your armor penetration by $s2%",
-        "labels": []
+        "labels": [
+          "504894 behaviour_hit_ratio armor_penetration"
+        ]
       }
     ],
     "kind": "claim"
@@ -1444,7 +1448,9 @@
     "spell": 523727,
     "clause": "Increases the critical strike chance of your Bloodbolt, Blood Shards, and Aortic Assault by $s1%.",
     "labels": [
-      "523727 effect_value e0 #0"
+      "523727 behaviour_metric_delta bloodbolt_crit",
+      "523727 behaviour_metric_delta blood_shard_crit",
+      "523727 behaviour_metric_delta aortic_assault_crit"
     ],
     "kind": "claim"
   },
@@ -1709,7 +1715,8 @@
     "spell": 560072,
     "clause": "Increases the radius of Sanguine Rupture by $s1 yds",
     "labels": [
-      "560072 effect_value e0 #0"
+      "560072 behaviour_metric_delta radius_extended",
+      "560072 behaviour_metric_delta radius_capped"
     ],
     "kind": "claim"
   },
@@ -1717,7 +1724,7 @@
     "spell": 560072,
     "clause": "and its critical strike chance by $s2%.",
     "labels": [
-      "560072 effect_value e1 #1"
+      "560072 behaviour_metric_delta crit_gain"
     ],
     "kind": "claim"
   },
@@ -1763,7 +1770,8 @@
     "spell": 560250,
     "clause": "Increases the damage of Valanar's Vengeance and Taldaram's Torment by $s1%.",
     "labels": [
-      "560250 effect_value e0 #0"
+      "560250 behaviour_hit_ratio valanar",
+      "560250 behaviour_hit_ratio taldaram"
     ],
     "kind": "claim"
   },
@@ -1859,7 +1867,7 @@
     "spell": 560261,
     "clause": "Increases your spell haste by $s1%",
     "labels": [
-      "560261 effect_value e0 #0"
+      "560261 behaviour_metric_delta spell_haste"
     ],
     "kind": "claim"
   },
@@ -1867,7 +1875,10 @@
     "spell": 560261,
     "clause": "and increases the range of your Sanguine spells and Bloodbolt by $s2 yds.",
     "labels": [
-      "560261 effect_value e1 #1"
+      "560261 behaviour_metric_delta bloodbolt_range_extended",
+      "560261 behaviour_metric_delta bloodbolt_range_capped",
+      "560261 behaviour_metric_delta taldaram_range_extended",
+      "560261 behaviour_metric_delta taldaram_range_capped"
     ],
     "kind": "claim"
   },
@@ -1970,7 +1981,8 @@
     "spell": 561227,
     "clause": "Increases the effectiveness of your Shields by $s1%.",
     "labels": [
-      "561227 effect_value e0 #0"
+      "561227 behaviour_metric_delta vital_shield_hot",
+      "561227 behaviour_hit_ratio vital_shield_heal_taken"
     ],
     "kind": "claim"
   },
@@ -1978,7 +1990,8 @@
     "spell": 561278,
     "clause": "Reduces the cast time of Sanguine Mend by $/1000;S1 sec.",
     "labels": [
-      "561278 effect_value e0 #0"
+      "561278 behaviour_metric_delta sanguine_mend",
+      "561278 behaviour_metric_delta bloodmoon_control"
     ],
     "kind": "claim"
   },
@@ -1986,7 +1999,8 @@
     "spell": 561347,
     "clause": "Increases the damage of Valanar's Vengeance and Taldaram's Torment by $s1%.",
     "labels": [
-      "561347 effect_value e0 #0"
+      "561347 behaviour_hit_ratio valanar",
+      "561347 behaviour_hit_ratio taldaram"
     ],
     "kind": "claim"
   },
@@ -1994,7 +2008,7 @@
     "spell": 561348,
     "clause": "Increases your spell haste by $s1%",
     "labels": [
-      "561348 effect_value e0 #0"
+      "561348 behaviour_metric_delta spell_haste"
     ],
     "kind": "claim"
   },
@@ -2002,7 +2016,10 @@
     "spell": 561348,
     "clause": "and increases the range of your Sanguine spells and Bloodbolt by $s2 yds.",
     "labels": [
-      "561348 effect_value e1 #1"
+      "561348 behaviour_metric_delta bloodbolt_range_extended",
+      "561348 behaviour_metric_delta bloodbolt_range_capped",
+      "561348 behaviour_metric_delta taldaram_range_extended",
+      "561348 behaviour_metric_delta taldaram_range_capped"
     ],
     "kind": "claim"
   },
@@ -2163,7 +2180,7 @@
     "spell": 570758,
     "clause": "Your Blood Shield now increases your health regeneration by an additional $s1%.",
     "labels": [
-      "570758 effect_value e0 #0"
+      "570758 behaviour_metric_delta health_regen"
     ],
     "kind": "claim"
   },
@@ -2428,7 +2445,7 @@
     "spell": 680657,
     "clause": "Your Scarlet Delirium now deals $s3% increased damage.",
     "labels": [
-      "680657 effect_value e2 #0"
+      "680657 behaviour_hit_ratio scarlet_delirium_damage"
     ],
     "kind": "claim"
   },
@@ -2552,7 +2569,8 @@
     "spell": 680685,
     "clause": "Increases the damage of Claw Sweep, Sanguine Rupture, Ravenous Strike and Bloodmoon Blast by $s1%.",
     "labels": [
-      "680685 effect_value e0 #0"
+      "680685 behaviour_hit_ratio bloodmoon_blast",
+      "680685 behaviour_hit_ratio sanguine_rupture"
     ],
     "kind": "claim"
   },
@@ -2592,7 +2610,9 @@
   {
     "spell": 680716,
     "clause": "Your Vampiric Fang now heals you for an additional 50% of the damage dealt.",
-    "labels": [],
+    "labels": [
+      "680716 behaviour_metric_delta vampiric_fang_heal"
+    ],
     "kind": "claim"
   },
   {
@@ -3142,7 +3162,8 @@
     "spell": 704621,
     "clause": "Increases the duration of Hemostasis by $/1000;s1 sec.",
     "labels": [
-      "704621 effect_value e0 #0"
+      "704621 behaviour_metric_delta contrast",
+      "704621 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -3345,7 +3366,8 @@
     "spell": 704635,
     "clause": "Increases the effectiveness of Offerings by $s1%.",
     "labels": [
-      "704635 effect_value e0 #0"
+      "704635 behaviour_metric_delta sanguinary_offering",
+      "704635 behaviour_metric_delta bloodsoaked_offering"
     ],
     "kind": "claim"
   },
@@ -3353,7 +3375,7 @@
     "spell": 704636,
     "clause": "Grants your Bloodsore a $s1% chance to provide its benefits without being consumed.",
     "labels": [
-      "704636 effect_value e0 #0"
+      "704636 behaviour_metric_delta bloodsore_control_consume"
     ],
     "kind": "claim"
   },
@@ -3744,7 +3766,7 @@
     "spell": 706256,
     "clause": "Increases the maximum health restored by Fleshcraft by $s1%.",
     "labels": [
-      "706256 effect_value e0 #0"
+      "706256 behaviour_metric_delta fleshcraft_heal"
     ],
     "kind": "claim"
   },
@@ -3895,7 +3917,8 @@
     "spell": 706619,
     "clause": "Increases the critical strike chance of Valanar's Vengeance and Keleseth's Calamity by $s1%.",
     "labels": [
-      "706619 effect_value e0 #0"
+      "706619 behaviour_metric_delta valanar_crit",
+      "706619 behaviour_metric_delta keleseth_crit"
     ],
     "kind": "claim"
   },
@@ -3945,7 +3968,7 @@
     "spell": 707371,
     "clause": "Adds $s1% to the Armor contribution from items by Blood Shield.",
     "labels": [
-      "707371 effect_value e0 #0"
+      "707371 behaviour_metric_delta blood_shield_armor"
     ],
     "kind": "claim"
   },
@@ -4050,7 +4073,7 @@
     "spell": 707866,
     "clause": "Grants your Bloodsore a $s1% chance to provide its benefits without being consumed.",
     "labels": [
-      "707866 effect_value e0 #0"
+      "707866 behaviour_metric_delta bloodsore_control_consume"
     ],
     "kind": "claim"
   },
@@ -4821,7 +4844,7 @@
     "spell": 802576,
     "clause": "Increases the damage of your Vampiric Fang by $s1%.",
     "labels": [
-      "802576 effect_value e0 #0"
+      "802576 behaviour_hit_ratio vampiric_fang_damage"
     ],
     "kind": "claim"
   },
@@ -5675,7 +5698,8 @@
     "spell": 807292,
     "clause": "Increases the critical strike chance of Sanguine Mend and Bloodbolt by $s1%.",
     "labels": [
-      "807292 effect_value e0 #0"
+      "807292 behaviour_metric_delta sanguine_mend_crit",
+      "807292 behaviour_metric_delta bloodbolt_crit"
     ],
     "kind": "claim"
   },
