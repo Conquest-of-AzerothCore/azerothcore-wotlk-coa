@@ -42979,6 +42979,1787 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "High-Spirit arm for 704633 Effect[1] (15% of Spirit -> CR_CRIT_SPELL): precondition fixture 60235 Greatness (+300 Spirit, verified by stat 4 = 423 including Human +3% racial in both phases) gives int32(CalculatePct(423, 15)) = int32(63.45) = +63 spell crit rating (0 -> 63, tol 0, excludes 0, +17 flat, +126 double, and +-10% off 15%). Paired with crit_rating_base. Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
+    },
+    {
+      "spell": 504296,
+      "name": "Blood Shield (combat health regeneration +50% over 40.5 s)",
+      "kind": "metric_delta",
+      "variant": "combat_regen",
+      "label_suffix": "combat_regen",
+      "quote": "Your health regeneration now continues in combat and is increased by $s2%.",
+      "trigger_spell": 504134,
+      "setup_casts": [
+        504296
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "disable_regeneration": false,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 5000,
+      "expected": 7286,
+      "after_at_least": 7050,
+      "after_at_most": 7520,
+      "wait_ms": 40500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "504296 Effect[1] aura 88 SPELL_AURA_MOD_HEALTH_REGEN_PERCENT bp 49+1=+50% ($s2), Effect[2] aura 116 SPELL_AURA_MOD_REGEN_DURING_COMBAT bp 99+1=100%, ManaCostPercentage 10 (10% of 1504 base HP = 150 HP; Spell.dbc). Player::RegenerateHealth (Player.cpp:2155-2189) skips Spirit regen in combat unless HasRegenDuringCombatAura(); GtOCTRegenHP/GtRegenHPPerSpt for class 20 level 60 at Spirit 114 gives 77.89 HP/2s tick -> 77 base, x1.5 = 116.83 -> 116 HP/tick. In both phases caster starts at 5000/10000 HP and casts instant Crimson Tide 504134 at dummy (entering combat, void_on_cast_failure ensures cast landed; control staying at 5000 vs OOC 6540 proves combat): control without 504296 stays at 5000 HP over 40500 ms; treatment casts 504296 (-150 HP -> 4850, +1600 ms GCD clear + 40500 ms wait = 42100 ms = 21 ticks x 116 HP = +2436 HP -> 7286 HP, band [7050, 7520] excludes 0x combat regen 5000, 100% unboosted ~6470, and 200% double-boosted ~8100). Reference search 2026-11-26: coa-history 504296 has 74 casts/11 applies/63 refreshes across 23 logs; coabuildhub spells_master_index.json lists 504296 Blood Shield; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504296,
+      "name": "Blood Shield (item armor contribution +20%)",
+      "kind": "metric_delta",
+      "variant": "item_armor",
+      "label_suffix": "item_armor",
+      "quote": "Increases armor contribution from items by $s1%.",
+      "trigger_spell": 504296,
+      "target": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "shield_after_learn": {
+        "item": 236,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 14.6,
+      "expected_gain": 14.6,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "504296 Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 (armor), MiscValueB 0 (all item armor), bp 19+1=+20% ($s1; Spell.dbc). Caster wears Cured Leather Armor 236 (ItemAddon.dbc RebornArmorField 43 = 68 via AscensionNativeItemScaling::WornArmor, plus 5 armor from starting non-chest gear = 73 item armor; base armor 60*2 + 73 = 193) via shield_after_learn in both phases. Real cast of 504296 adds 20% of 73 = +14.6 armor (int32 -> 207, gain 14, tolerance 1, excluding 0x=+0 and 2x=+29.2). Reference search 2026-11-26: coa-history 504296 has 74 casts across 23 logs; coabuildhub lists 504296; installed Spell.dbc and ItemAddon.dbc govern."
+    },
+    {
+      "spell": 504296,
+      "name": "Blood Shield (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 504296,
+      "target": "caster",
+      "cast_spell": 504296,
+      "cast_target": "caster",
+      "observe_source": "504296 DurationIndex 30 = 1800000 ms (30 min, $d; SpellDuration.dbc). Real cast of Blood Shield 504296 on caster applies aura 504296 with 1800000 ms duration (exact same shape as Vital Shield 504849). Reference search 2026-11-26: coa-history 504296 has 74 casts across 23 logs; coabuildhub lists 504296; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504897,
+      "name": "Coagulated Shield (pushback reduction 100%)",
+      "kind": "pushback_reduction",
+      "variant": "pushback",
+      "label_suffix": "pushback",
+      "quote": "Protects the caster with a coagulated barrier, reducing spell pushback suffered from damaging attacks by 100%",
+      "cast_spell": 504819,
+      "cast_power": 1000,
+      "reducer_spell": 504897,
+      "reducer_learn": false,
+      "reducer_wait_ms": 500,
+      "strike_spell": 41394,
+      "strike_at_ms": 800,
+      "windows": [
+        [
+          1940,
+          2020
+        ],
+        [
+          2440,
+          2520
+        ],
+        [
+          1940,
+          2020
+        ]
+      ],
+      "expected_pct": 100,
+      "repeats": 10,
+      "observe_source": "504897 Effect[0] aura 149 SPELL_AURA_REDUCE_PUSHBACK bp 249+1=250% clamped to 100% immunity by Spell.cpp:8100-8102,8141-8143 (if (delayReduce >= 100) return;). Veinburst 504819 (2000 ms cast, 300 Rage) unhit, hit once at 800 ms by Light of the Naaru 41394 (+500 ms pushback -> ~2500 ms), and hit once after a real cast of 504897 (0 ms pushback -> ~2000 ms), 10 repeats each, judged in G-19 band [95%, 105%]. Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc and Spell.cpp govern."
+    },
+    {
+      "spell": 504897,
+      "name": "Coagulated Shield (silence duration -30% held at 6600 ms)",
+      "kind": "metric_delta",
+      "variant": "silence_held",
+      "label_suffix": "silence_held",
+      "quote": "and reducing the duration of interrupt and silence effects by $s2%.",
+      "trigger_spell": 800786,
+      "setup_casts": [
+        504897
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "strike": {
+        "spell": 23207,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 0
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 23207,
+        "caster": "striker"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6500,
+      "expire_ms": 22000,
+      "game_time": {
+        "after": [
+          6450,
+          6750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504897 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 9 (MECHANIC_SILENCE) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1) and void_on_cast_failure. Instant Sacrificial Rite 800786 (0 Rage, target caster) serves as the game_time anchor immediately before striker casts Silence 23207 (DmgClass 0, cannot miss via Unit.cpp:4234-4249, Mechanic 9, DurationIndex 1 = 10000 ms): 10000 ms without 504897, 7000 ms with 504897; expire_ms 22000 lets the 10000 ms silence plus 15000 ms DIMINISHING_SILENCE DR timer fully reset before treatment. Read at game_time [6450, 6750] ms (~6600 ms after strike, > 0.9*7000=6300 ms): still active (1) in both phases. Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504897,
+      "name": "Coagulated Shield (silence duration -30% ends by 7400 ms)",
+      "kind": "metric_delta",
+      "variant": "silence_ends",
+      "label_suffix": "silence_ends",
+      "quote": "and reducing the duration of interrupt and silence effects by $s2%.",
+      "trigger_spell": 800786,
+      "setup_casts": [
+        504897
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "strike": {
+        "spell": 23207,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 0
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 23207,
+        "caster": "striker"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 7300,
+      "expire_ms": 22000,
+      "game_time": {
+        "after": [
+          7250,
+          7550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504897 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 9 (MECHANIC_SILENCE) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1) and void_on_cast_failure. Striker casts Silence 23207 (DmgClass 0, 10000 ms -> 7000 ms with 504897; expire_ms 22000 clears DIMINISHING_SILENCE DR between phases) immediately after clock cast 800786. Read at game_time [7250, 7550] ms (~7400 ms after strike, < 1.1*7000=7700 ms): still active (1) in control, expired (0) in treatment. Paired with silence_held (6600 ms), brackets reduced silence duration in (6600, 7400] ms (excluding +-10%). Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504897,
+      "name": "Coagulated Shield (interrupt lockout -30% held at 5250 ms)",
+      "kind": "metric_delta",
+      "variant": "interrupt_held",
+      "label_suffix": "interrupt_held",
+      "quote": "and reducing the duration of interrupt and silence effects by $s2%.",
+      "trigger_spell": 504819,
+      "learn": [
+        578305
+      ],
+      "setup_casts": [
+        504897
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "strike": {
+        "spell": 29961,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 500
+      },
+      "after_trigger_casts": [
+        {
+          "spell": 578305,
+          "target": "dummy",
+          "delay_ms": 5150,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 504819,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Counterspell 29961 (SPELL_ATTR3_ALWAYS_HIT) interrupted Veinburst 504819 in both phases (0 damage hits on dummy; a missed interrupt lets 504819 finish and hit dummy)"
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 578305
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 10000,
+      "game_time": {
+        "after": [
+          5800,
+          6100
+        ]
+      },
+      "observe_source": "504897 Effect[2] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 26 (MECHANIC_INTERRUPT) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1). Spell::EffectInterruptCast (SpellEffects.cpp:4843-4845) calls ModSpellDuration on Counterspell 29961 (Mechanic 26, Effect 68, DurationIndex 31 = 8000 ms, AttributesEx3 0x40100 SPELL_ATTR3_ALWAYS_HIT -> 0% miss, plus 823764 on striker) interrupting Veinburst 504819 (Shadow school 32, 2000 ms cast) at 500 ms: 8000 ms Shadow lockout without 504897, 5600 ms with 504897 (Player::ProhibitSpellSchool -> SPELL_FAILED_NOT_READY = 67, Spell.cpp:5840-5845). Precondition ally_arm confirms 0 Veinburst damage hits on dummy in both phases (ruling out any missed interrupt). Probe Bloodbolt 578305 (Shadow 32, reset_cooldown false) 5250 ms after interrupt (game_time [5800, 6100] ms after trigger, > 0.9*5600=5040 ms): refused with 67 in both phases. Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504897,
+      "name": "Coagulated Shield (interrupt lockout -30% ends by 5950 ms)",
+      "kind": "metric_delta",
+      "variant": "interrupt_ends",
+      "label_suffix": "interrupt_ends",
+      "quote": "and reducing the duration of interrupt and silence effects by $s2%.",
+      "trigger_spell": 504819,
+      "learn": [
+        578305
+      ],
+      "setup_casts": [
+        504897
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "strike": {
+        "spell": 29961,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 100,
+        "after_trigger_ms": 500
+      },
+      "after_trigger_casts": [
+        {
+          "spell": 578305,
+          "target": "dummy",
+          "delay_ms": 5850,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 504819,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Counterspell 29961 (SPELL_ATTR3_ALWAYS_HIT) interrupted Veinburst 504819 in both phases (0 damage hits on dummy; a missed interrupt lets 504819 finish and hit dummy)"
+          }
+        ]
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 578305
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 10000,
+      "game_time": {
+        "after": [
+          6500,
+          6800
+        ]
+      },
+      "observe_source": "504897 Effect[2] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 26 (MECHANIC_INTERRUPT) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1). Counterspell 29961 (AttributesEx3 0x40100 SPELL_ATTR3_ALWAYS_HIT -> 0% miss, plus 823764 on striker) interrupts Veinburst 504819 (Shadow 32): 8000 ms lockout without 504897, 5600 ms with 504897. Precondition ally_arm confirms 0 Veinburst damage hits on dummy in both phases (preventing any missed-interrupt false pass). Probe Bloodbolt 578305 (Shadow 32, reset_cooldown false) 5950 ms after interrupt (game_time [6500, 6800] ms after trigger, < 1.1*5600=6160 ms): still refused (67) in control, accepted (0) in treatment. Paired with interrupt_held (5250 ms), brackets reduced lockout in (5250, 5950] ms (excluding +-10%). Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504897,
+      "name": "Coagulated Shield (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Lasts $d.",
+      "expected_ms": 1800000,
+      "applied_aura": 504897,
+      "target": "caster",
+      "cast_spell": 504897,
+      "cast_target": "caster",
+      "observe_source": "504897 DurationIndex 30 = 1800000 ms (30 min, $d; SpellDuration.dbc). Real cast of Coagulated Shield 504897 on caster applies aura 504897 with 1800000 ms duration (exact same shape as Vital Shield 504849). Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 801955,
+      "name": "Blood Pact (dodge chance +50%)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "Invoke a blood pact, exchanging health for enhanced reflexes, increasing your chance to dodge and reducing the chance for ranged attacks to hit you by $s3%$?s560257[, and increasing your healing received by $560257s1%][] for $d.",
+      "trigger_spell": 801955,
+      "target": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 50,
+      "expected_gain": 50,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "801955 Effect[2] aura 49 SPELL_AURA_MOD_DODGE_PERCENT bp 49+1=+50% ($s3; Spell.dbc). Real cast of Blood Pact 801955 on caster raises dodge_chance by +50.00 points (control uncast vs treatment cast). Reference search 2026-11-26: coa-history 801955 has 47 casts/applies/removals across 13 logs; coabuildhub lists 801955 Blood Pact; installed Spell.dbc governs."
+    },
+    {
+      "spell": 801955,
+      "name": "Blood Pact (duration 12 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Invoke a blood pact, exchanging health for enhanced reflexes, increasing your chance to dodge and reducing the chance for ranged attacks to hit you by $s3%$?s560257[, and increasing your healing received by $560257s1%][] for $d.",
+      "trigger_spell": 801955,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 801955
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 11200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          11000,
+          11500
+        ],
+        "expired": [
+          12600,
+          13100
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "801955 DurationIndex 29 = 12000 ms ($d; SpellDuration.dbc). Real cast of Blood Pact 801955 on caster: aura 801955 reads 0 before cast, 1 at [11000, 11500] ms (> 0.9*12000=10800 ms) and 0 at [12600, 13100] ms (< 1.1*12000=13200 ms), excluding +-10% on both sides. Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc governs."
+    },
+    {
+      "spell": 801955,
+      "name": "Blood Pact (ranged hit chance -50%, pooled)",
+      "kind": "taken_hit",
+      "variant": "ranged_miss",
+      "label_suffix": "ranged_miss",
+      "judge": "resist_rate",
+      "expected_points": 50,
+      "quote": "Invoke a blood pact, exchanging health for enhanced reflexes, increasing your chance to dodge and reducing the chance for ranged attacks to hit you by $s3%$?s560257[, and increasing your healing received by $560257s1%][] for $d.",
+      "strike_spell": 23577,
+      "trials": 600,
+      "parts": 24,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              801955,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "801955 Effect[0] aura 185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE bp -51+1=-50% ($s3; Spell.dbc). Unit::GetUnitMissChance(RANGED_ATTACK) (Unit.cpp:4358-4359) raises ranged miss chance from 5% to 55% (+50 pp, below the 60% clamp in Unit::MeleeSpellMissChance Unit.cpp:17003). Level 60 striker casts Pinpoint Weakness 23577 (DmgClass 3 RANGED, RangeIndex 13 0..50000 yd, Mechanic 0, Attributes 0, EquippedItemClass -1, E0 applies aura 271) at caster over 24 pooled parts x 600 trials = 14400 trials/arm (SE=0.45 pp, 99% half-width 1.17 pp <= 1.25 pp half-band, residual failure <1e-6/pair). Follows Witch Doctor 804226 / Templar 706323 (M-57, ADR 0196) resist_rate precedent where set_aura holds the aura during pooled trials while real cast of 801955 is proven by dodge & duration entries. Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc governs."
+    },
+    {
+      "spell": 801955,
+      "name": "Blood Pact (Blood Runs Cold +20% healing received)",
+      "kind": "hit_ratio",
+      "variant": "healing_received",
+      "label_suffix": "healing_received",
+      "quote": "Invoke a blood pact, exchanging health for enhanced reflexes, increasing your chance to dodge and reducing the chance for ranged attacks to hit you by $s3%$?s560257[, and increasing your healing received by $560257s1%][] for $d.",
+      "expected": 1.2,
+      "metric": "spell_heal_total",
+      "observe_spell": 504085,
+      "learn": [
+        504085,
+        801955
+      ],
+      "caster": "caster",
+      "target": "caster",
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "casts": [
+          {
+            "spell": 801955,
+            "target": "caster"
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          560257
+        ],
+        "casts": [
+          {
+            "spell": 801955,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "801955 Effect[1] aura 118 SPELL_AURA_MOD_HEALING_PCT (MiscValue 127, bp -1+1=0) modified by Blood Runs Cold 560257 Effect[0] bp 19+1=+20% ($560257s1; AscensionBloodmageTalents.cpp:1726-1729 redirects 560257 SPELLMOD_EFFECT1 -> SPELLMOD_EFFECT2). Both arms cast Blood Pact 801955 for real then Sanguine Mend 504085 (with fixture spell_power 20000, non-crit, 20 trials); treatment learns 560257 for real. Expected ratio 1.20 (+20%). Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs, 560257 has 0 events (passive); coabuildhub lists both 801955 and 560257; installed Spell.dbc governs."
+    },
+    {
+      "spell": 801955,
+      "name": "Blood Pact (dodge while casting)",
+      "kind": "metric_delta",
+      "variant": "cast_dodge",
+      "label_suffix": "cast_dodge",
+      "quote": "While active you can dodge or parry while casting.",
+      "trigger_spell": 504085,
+      "setup_casts": [
+        801955
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_since": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "dodge": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 3,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Unit::CanDefendDuringCast (Unit.cpp:5136-5141) exempts Bloodmage with aura 801955 from the casting dodge suppression in Unit::MeleeSpellHitResult (Unit.cpp:3898-3901) for melee spell Speed Slash 2118233 (DmgClass 2, SPELL_ATTR7_NO_ATTACK_MISS; also Unit::RollMeleeOutcomeAgainst Unit.cpp:3395-3397 for white melee). Follows Felsworn Carve 800206 precedent: striker casts Speed Slash 2118233 3 times 800 ms into Sanguine Mend 504085 (2500 ms cast) with dodge forced to 100% (set_combat_avoidance precondition fixture). Control (no 801955): all 3 strikes land (3); treatment (real cast of 801955): all 3 strikes dodged (0), isolated per phase via phase_since. Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc and Unit.cpp govern."
+    },
+    {
+      "spell": 801955,
+      "name": "Blood Pact (parry while casting)",
+      "kind": "metric_delta",
+      "variant": "cast_parry",
+      "label_suffix": "cast_parry",
+      "quote": "While active you can dodge or parry while casting.",
+      "trigger_spell": 504085,
+      "setup_casts": [
+        801955
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_since": true,
+      "strike": {
+        "spell": 2118233,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 3,
+        "wait_ms": 200,
+        "after_trigger_ms": 800
+      },
+      "caster_avoidance": {
+        "parry": 100
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 2118233,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 3,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Unit::CanDefendDuringCast (Unit.cpp:5136-5141) exempts Bloodmage with aura 801955 from the casting parry suppression in Unit::MeleeSpellHitResult (Unit.cpp:3921-3924) for melee spell Speed Slash 2118233 (DmgClass 2, SPELL_ATTR7_NO_ATTACK_MISS; also Unit::RollMeleeOutcomeAgainst Unit.cpp:3429-3431 for white melee). Striker casts Speed Slash 2118233 3 times 800 ms into Sanguine Mend 504085 (2500 ms cast) with parry forced to 100% (set_combat_avoidance precondition fixture) on a real Bloodmage (no foreign Parry spell injected). Control (no 801955): all 3 strikes land (3); treatment (real cast of 801955): expected 0 hits (all 3 parried). Confirmed G-3 server defect: Bloodmage currently has CanParry() == false everywhere in server/DBC (Player.cpp:311, AscensionCustomClassData.h:337-375, AscensionLiveBaselineData.h:141-155, trainer 900020, SkillLineAbility.dbc, Spell.dbc), so Unit::GetUnitParryChance (Unit.cpp:4325-4335) returns 0 and all 3 strikes land (3 -> 3 alert) despite live Ascension Bloodmages parrying natively during 801955 (coa-history: Redfury 25 parries incl. 2 during 801955, Fairgraves 15, Graf 2). Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc and Unit.cpp govern."
+    },
+    {
+      "spell": 300986,
+      "name": "Adrenaline (root duration -25%)",
+      "kind": "duration_ratio",
+      "variant": "root",
+      "label_suffix": "root",
+      "quote": "Reduces the duration of bleed, root, and movement slowing effects against you by $s1%.",
+      "expected_ratio": 0.75,
+      "vehicle_spell": 29991,
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "300986 Effect[0] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 7 (MECHANIC_ROOT) bp -26+1=-25% ($s1; Spell.dbc): root durations x0.75. Vehicle Chains of Ice 29991 (Mechanic 7, DurationIndex 1 = 10000 ms -> 7500 ms; Felsworn 300465 precedent). Reference search 2026-11-26: coa-history 300986 has 0 events (passive); coabuildhub lists 300986 Adrenaline; installed Spell.dbc governs."
+    },
+    {
+      "spell": 300986,
+      "name": "Adrenaline (snare duration -25%)",
+      "kind": "duration_ratio",
+      "variant": "snare",
+      "label_suffix": "snare",
+      "quote": "Reduces the duration of bleed, root, and movement slowing effects against you by $s1%.",
+      "expected_ratio": 0.75,
+      "vehicle_spell": 58617,
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "300986 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 11 (MECHANIC_SNARE) bp -26+1=-25% ($s1; Spell.dbc): snare durations x0.75. Vehicle Glyph of Heart Strike 58617 (DmgClass 0, EffectMechanic 11, DurationIndex 1 = 10000 ms -> 7500 ms; Felsworn 300465 precedent). Reference search 2026-11-26: coa-history 300986 has 0 events (passive); coabuildhub lists 300986 Adrenaline; installed Spell.dbc governs."
+    },
+    {
+      "spell": 300986,
+      "name": "Adrenaline (bleed duration -25%)",
+      "kind": "duration_ratio",
+      "variant": "bleed",
+      "label_suffix": "bleed",
+      "quote": "Reduces the duration of bleed, root, and movement slowing effects against you by $s1%.",
+      "expected_ratio": 0.75,
+      "vehicle_spell": 5597,
+      "striker_entry": 36,
+      "attempts": 1,
+      "margin_ms": 50,
+      "observe_source": "300986 Effect[2] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 15 (MECHANIC_BLEED) bp -26+1=-25% ($s1; Spell.dbc): bleed durations x0.75. Vehicle Serious Wound 5597 (DmgClass 0, Mechanic 15, DurationIndex 1 = 10000 ms -> 7500 ms). Reference search 2026-11-26: coa-history 300986 has 0 events (passive); coabuildhub lists 300986 Adrenaline; installed Spell.dbc governs."
+    },
+    {
+      "spell": 804807,
+      "name": "Dark Blood R1 (Cursed Form ability cost -25%)",
+      "kind": "metric_delta",
+      "variant": "cursed_cost",
+      "label_suffix": "cursed_cost",
+      "quote": "Reduces the cost of your abilities that require Cursed Form and increases the healing done by Blood Rituals by $s1%.",
+      "trigger_spell": 500444,
+      "gate_spell": 804807,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 700,
+      "expected": 775,
+      "expected_gain": 75,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "804807 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) bp -26+1=-25% ($s1) on mask [16777216, 9437185, 67127433] (Spell.dbc). Claw Sweep 500444 (Flags [0, 0, 16384], CasterAuraSpell 525031, PowerType 1 Rage, ManaCost 300 = 30 displayed Rage) cast from 1000 internal Rage with regeneration off and 525031 Cursed Form precondition fixture: 700 remaining without 804807, 775 remaining after learning 804807 (cost 300 -> 225, +75 Rage saved; expire_ms 1600 clears 1500 ms GCD). Reference search 2026-11-26: coa-history 804807 has 0 events (passive); coabuildhub lists 804807 Dark Blood; installed Spell.dbc governs."
+    },
+    {
+      "spell": 804807,
+      "name": "Dark Blood R1 (Blood Rituals healing +25%)",
+      "kind": "metric_delta",
+      "variant": "blood_rituals_heal",
+      "label_suffix": "blood_rituals_heal",
+      "quote": "Reduces the cost of your abilities that require Cursed Form and increases the healing done by Blood Rituals by $s1%.",
+      "trigger_spell": 501614,
+      "gate_spell": 804807,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_since": true,
+      "phase_auras": [
+        [
+          706623,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704119,
+        "target": "caster"
+      },
+      "before_expected": 177,
+      "expected": 221,
+      "expected_ratio": 1.25,
+      "tolerance": 0.02,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "804807 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 (SPELLMOD_DAMAGE) bp 24+1=+25% ($s1) on mask [0, 0, 512] matching Blood Rituals heal 704119 (EffectDieSides 1, deterministic base int32(3 + 3.7*47) + 1 = 177; Spell.dbc). Bloodmoon Blast 501614 (2000 ms cast at dummy) triggers 704119 on caster (AscensionBloodmageSecondary.cpp:243-244), healing caster holding Blood Rituals 706623 (precondition fixture, lines 489-507), non-crit (16255 -100). Expected heal ratio 1.25 (+25%, 177 -> 221, tol 0.02, excluding 0x=1.00 and 2x=1.50). Reference search 2026-11-26: coa-history 704119 has 2742 SPELL_HEAL events across 11 logs, 804807 has 0 events (passive); installed Spell.dbc governs."
+    },
+    {
+      "spell": 807919,
+      "name": "Dark Blood R2 (Cursed Form ability cost -50%)",
+      "kind": "metric_delta",
+      "variant": "cursed_cost",
+      "label_suffix": "cursed_cost",
+      "quote": "Reduces the cost of your abilities that require Cursed Form and increases the healing done by Blood Rituals by $s1%.",
+      "trigger_spell": 500444,
+      "gate_spell": 807919,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 700,
+      "expected": 850,
+      "expected_gain": 150,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "807919 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST) bp -51+1=-50% ($s1) on mask [16777216, 9437185, 67127433] (Spell.dbc). Claw Sweep 500444 (ManaCost 300 internal Rage, CasterAuraSpell 525031 precondition fixture) cast from 1000 internal Rage with regeneration off: 700 remaining without 807919, 850 remaining after learning 807919 (cost 300 -> 150, +150 Rage saved; expire_ms 1600 clears 1500 ms GCD). Reference search 2026-11-26: coa-history 807919 has 0 events (passive); coabuildhub absent (Rank 2); installed Spell.dbc governs."
+    },
+    {
+      "spell": 807919,
+      "name": "Dark Blood R2 (Blood Rituals healing +50%)",
+      "kind": "metric_delta",
+      "variant": "blood_rituals_heal",
+      "label_suffix": "blood_rituals_heal",
+      "quote": "Reduces the cost of your abilities that require Cursed Form and increases the healing done by Blood Rituals by $s1%.",
+      "trigger_spell": 501614,
+      "gate_spell": 807919,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_since": true,
+      "phase_auras": [
+        [
+          706623,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704119,
+        "target": "caster"
+      },
+      "before_expected": 177,
+      "expected": 265,
+      "expected_ratio": 1.5,
+      "tolerance": 0.02,
+      "wait_ms": 2600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "807919 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 (SPELLMOD_DAMAGE) bp 49+1=+50% ($s1) on mask [0, 0, 512] matching Blood Rituals heal 704119 (EffectDieSides 1, deterministic base int32(3 + 3.7*47) + 1 = 177; Spell.dbc). Bloodmoon Blast 501614 (2000 ms cast at dummy) triggers 704119 on caster (AscensionBloodmageSecondary.cpp:243-244), healing caster holding Blood Rituals 706623 (precondition fixture, lines 489-507), non-crit (16255 -100). Expected heal ratio 1.50 (+50%, 177 -> 265, tol 0.02, excluding 0x=1.00 and 2x=2.00). Reference search 2026-11-26: coa-history 704119 has 2742 SPELL_HEAL events across 11 logs, 807919 has 0 events (passive); installed Spell.dbc governs."
+    },
+    {
+      "spell": 804858,
+      "name": "Blood Trails (periodic damage spawns Blood Trail pool 804857)",
+      "kind": "metric_delta",
+      "variant": "periodic_dmg_pool",
+      "label_suffix": "periodic_dmg_pool",
+      "quote": "Periodic damage and healing now causes targets to spill a pool of blood beneath them.",
+      "trigger_spell": 504134,
+      "gate_spell": 804858,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804857
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 4000,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "804858 Effect[1] aura 42 PROC_TRIGGER_SPELL triggering Blood Trail 804857 (PERSISTENT_AREA_AURA, radius 5 yd, dur 30 s) with pending_db_world/rev_20260928_21_bloodmage_blood_trails_proc.sql ProcFlags 262144 (DONE_PERIODIC) SpellTypeMask 3 (DAMAGE|HEAL). Crimson Tide 504134 (periodic Shadow DoT, amp 3000 ms) casts 0 pools before 804858 is learned and >=1 pool 804857 by 4000 ms after learning 804858. Reference search 2026-11-26: coa-history 804857 has 54924 applies across 7 logs; coabuildhub lists 804858; installed Spell.dbc and pending_db_world govern."
+    },
+    {
+      "spell": 804858,
+      "name": "Blood Trails (periodic healing spawns Blood Trail pool 804857)",
+      "kind": "metric_delta",
+      "variant": "periodic_heal_pool",
+      "label_suffix": "periodic_heal_pool",
+      "quote": "Periodic damage and healing now causes targets to spill a pool of blood beneath them.",
+      "trigger_spell": 800786,
+      "gate_spell": 804858,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 804857
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "wait_ms": 2500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "804858 Effect[1] aura 42 PROC_TRIGGER_SPELL triggering Blood Trail 804857 via pending_db_world/rev_20260928_21_bloodmage_blood_trails_proc.sql (ProcFlags 262144, SpellTypeMask 3 DAMAGE|HEAL). Sacrificial Rite 800786 (Effect[1] aura 8 PERIODIC_HEAL, amp 1500 ms) casts 0 pools before 804858 is learned and >=1 pool 804857 by 2500 ms after learning 804858. Reference search 2026-11-26: coa-history 804857 has 54924 applies across 7 logs; coabuildhub lists 804858; installed Spell.dbc and pending_db_world govern."
+    },
+    {
+      "spell": 804858,
+      "name": "Blood Trails (Cursed Form ally gains Trail of Blood 804859 for 6 sec; Mortal Form ally excluded)",
+      "kind": "metric_delta",
+      "variant": "cursed_ally_grant",
+      "label_suffix": "cursed_ally_grant",
+      "quote": "Allies in a Cursed Form who move through the pools of blood gain Trail of Blood for $804859d.",
+      "trigger_spell": 800786,
+      "gate_spell": 804858,
+      "target": "caster",
+      "measure_actor": "ally",
+      "cast_power": 1000,
+      "ally_offsets": {
+        "ally": 2.0,
+        "ally2": 2.0
+      },
+      "ally_arm": {
+        "allies": 2,
+        "ally_auras": [
+          [
+            525031,
+            1,
+            "ally",
+            "ally"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 2.0,
+            "expected": 2.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Cursed Form ally stands at 2 yd, inside Blood Trail 804857 5 yd radius"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "caster"
+            },
+            "before_expected": 2.0,
+            "expected": 2.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Mortal Form ally2 stands at 2 yd, inside Blood Trail 804857 5 yd radius"
+          },
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804859
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Tooltip states 'Allies in a Cursed Form ... gain Trail of Blood': Mortal Form ally2 without Cursed Form must NOT gain 804859"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 804859
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3000,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "804858 -> 804857 (radius 5 yd, amp 1000 ms) -> Trail of Blood 804859 (DurationIndex 32 = 6000 ms, $804859d; Spell.dbc). Grouped ally (with Cursed Form 525031 precondition fixture) and ally2 (Mortal Form, no Cursed Form) both stand 2 yd from caster as Sacrificial Rite 800786 spawns 804857: ally gains 804859 (0 -> 1); ally2 tests the tooltip's 'Allies in a Cursed Form' gate truthfully (expected 0). Reference search 2026-11-26: coa-history 804859 has 430 applies / 14833 refreshes across 7 logs; coabuildhub lists 804858; installed Spell.dbc governs."
+    },
+    {
+      "spell": 804858,
+      "name": "Blood Trails (Trail of Blood 804859 lasts 6 sec from last refresh)",
+      "kind": "metric_delta",
+      "variant": "trail_duration",
+      "label_suffix": "trail_duration",
+      "quote": "Allies in a Cursed Form who move through the pools of blood gain Trail of Blood for $804859d.",
+      "trigger_spell": 800786,
+      "gate_spell": 804858,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804859
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 50550,
+      "expiry_wait_ms": 950,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          50350,
+          50750
+        ],
+        "expired": [
+          51300,
+          51700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804859 DurationIndex 32 = 6000 ms ($804859d; SpellDuration.dbc). Caster holds Blood Trails 804858 from start plus Cursed Form 525031 (precondition fixture in both phases so the test remains valid once the 804858 Cursed Form gate server defect is fixed): before phase (no Sacrificial Rite 800786 cast) reads 0; after phase casts Sacrificial Rite 800786 (15000 ms HoT, 1500 ms amp, 0 Rage) on caster whose ticks through t=15000 ms spawn Blood Trail 804857 pools (dur 30000 ms, 1000 ms amp), whose last refresh of 804859 lands at t~45085 ms and expires 6000 ms later at t~51020 ms: aura 804859 reads 1 at game_time [50350, 50750] ms (~5465 ms after last refresh, > 0.9*6000=5400 ms) and 0 at game_time [51300, 51700] ms (~6415 ms after last refresh, < 1.1*6000=6600 ms), excluding +-10% on both sides. Reference search 2026-11-26: coa-history 804859 has 430 applies / 430 removals across 7 logs; coabuildhub lists 804858; installed Spell.dbc governs."
+    },
+    {
+      "spell": 804858,
+      "name": "Blood Trails (Trail of Blood minimum speed 80% under -50% slow)",
+      "kind": "metric_delta",
+      "variant": "min_speed",
+      "label_suffix": "min_speed",
+      "quote": "Allies in a Cursed Form who move through the pools of blood gain Trail of Blood for $804859d.@s:804859:0@",
+      "trigger_spell": 800786,
+      "gate_spell": 804858,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          1715,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 0.5,
+      "expected": 0.8,
+      "tolerance": 0.005,
+      "wait_ms": 3000,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "804859 Effect[0] aura 305 SPELL_AURA_MOD_MINIMUM_SPEED bp 79+1=80% ($s1; Spell.dbc) earned for real via 804858 -> 804857 -> 804859 from Sacrificial Rite 800786 with Cursed Form 525031 and Hamstring 1715 (-50% slow) precondition fixtures. Control (without 804858): run_speed_rate 0.50; treatment (with 804859): clamped to 0.80 (excluding 0.50/0.60 without aura 305 and 1.00). Reference search 2026-11-26: coa-history 804859 has 430 applies / 14833 refreshes across 7 logs; coabuildhub lists 804858; installed Spell.dbc governs."
+    },
+    {
+      "spell": 804858,
+      "name": "Blood Trails (Trail of Blood movement speed +20%)",
+      "kind": "metric_delta",
+      "variant": "move_speed",
+      "label_suffix": "move_speed",
+      "quote": "Allies in a Cursed Form who move through the pools of blood gain Trail of Blood for $804859d.@s:804859:0@",
+      "trigger_spell": 800786,
+      "gate_spell": 804858,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.2,
+      "tolerance": 0.005,
+      "wait_ms": 3000,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "804859 Effect[2] aura 31 SPELL_AURA_MOD_INCREASE_SPEED bp 19+1=+20% ($s3; Spell.dbc) earned for real via 804858 -> 804857 -> 804859 from Sacrificial Rite 800786 with Cursed Form 525031 precondition fixture. Control: run_speed_rate 1.00; treatment: 1.20 (+20%). Reference search 2026-11-26: coa-history 804859 has 430 applies / 14833 refreshes across 7 logs; coabuildhub lists 804858; installed Spell.dbc governs."
+    },
+    {
+      "spell": 804858,
+      "name": "Blood Trails (Trail of Blood damage dealt +5%)",
+      "kind": "hit_ratio",
+      "variant": "damage_dealt",
+      "label_suffix": "damage_dealt",
+      "quote": "Allies in a Cursed Form who move through the pools of blood gain Trail of Blood for $804859d.@s:804859:0@",
+      "expected": 1.05,
+      "observe_spell": 578305,
+      "learn": [
+        578305,
+        800786
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            525031,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800786,
+            "target": "caster"
+          }
+        ],
+        "casts_wait_ms": 2800
+      },
+      "treatment": {
+        "learn": [
+          804858
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            525031,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800786,
+            "target": "caster"
+          }
+        ],
+        "casts_wait_ms": 2800
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "804859 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 bp 4+1=+5% ($s2; Spell.dbc) earned for real via 804858 -> 804857 -> 804859 from Sacrificial Rite 800786 (+2800 ms settle) with Cursed Form 525031 and 823764 precondition fixtures. Bloodbolt 578305 (fixture spell_power 20000, non-crit, 20 trials): expected damage ratio 1.05 (+5%). Reference search 2026-11-26: coa-history 804859 has 430 applies / 14833 refreshes across 7 logs; coabuildhub lists 804858; installed Spell.dbc governs."
+    },
+    {
+      "spell": 500445,
+      "name": "Forbidden Power (spell critical strike rating 30% of Agility)",
+      "kind": "metric_delta",
+      "variant": "spell_crit_agi",
+      "label_suffix": "spell_crit_agi",
+      "quote": "Increases your spell critical strike rating by $s1% of your Agility",
+      "trigger_spell": 60233,
+      "gate_spell": 500445,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 10
+      },
+      "before_expected": 0,
+      "expected": 108,
+      "expected_gain": 108,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "500445 Effect[0] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT MiscValue 1024 (1<<CR_CRIT_SPELL 10) MiscValueB 1 (STAT_AGILITY) bp 29+1=30% ($s1; Spell.dbc). With Greatness Agility 60233 (+300 Agility, base Agility 60 -> 360 total): 30% of 360 = +108 spell critical strike rating (tolerance 1, excluding 0x=+0 and 2x=+216). Reference search 2026-11-26: coa-history 500445 has 0 events (passive); coabuildhub lists 500445 Forbidden Power; installed Spell.dbc governs."
+    },
+    {
+      "spell": 500445,
+      "name": "Forbidden Power (spell hit rating 5% of Agility)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_agi",
+      "label_suffix": "spell_hit_agi",
+      "quote": "and spell hit rating by $s2% of your Agility.",
+      "trigger_spell": 60233,
+      "gate_spell": 500445,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10018,
+      "expected_gain": 18,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "500445 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT MiscValue 128 (1<<CR_HIT_SPELL 7) MiscValueB 1 (STAT_AGILITY) bp 4+1=5% ($s2; Spell.dbc). With Greatness Agility 60233 (+300 Agility, base Agility 60 -> 360 total): 5% of 360 = +18 spell hit rating above reference 10000 -> 10018 (tolerance 1, excluding 0x=+0 and 2x=+36). Reference search 2026-11-26: coa-history 500445 has 0 events (passive); coabuildhub lists 500445 Forbidden Power; installed Spell.dbc governs."
+    },
+    {
+      "spell": 500445,
+      "name": "Forbidden Power (Spell Penetration equals Armor Penetration Rating)",
+      "kind": "hit_ratio",
+      "variant": "spell_pen",
+      "label_suffix": "spell_pen",
+      "quote": "In addition, you now gain Spell Penetration equal to your Armor Penetration Rating.",
+      "expected": 1.8333,
+      "observe_spell": 578305,
+      "learn": [
+        578305,
+        504819
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            43926,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            25433,
+            0,
+            200
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          500445
+        ],
+        "auras": [
+          [
+            43926,
+            1
+          ],
+          [
+            16255,
+            1
+          ]
+        ],
+        "aura_amounts": [
+          [
+            16255,
+            0,
+            -100
+          ]
+        ],
+        "target_aura_amounts": [
+          [
+            25433,
+            0,
+            200
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 120,
+      "parts": 15,
+      "void_on_cast_failure": true,
+      "observe_source": "500445 Effect[2] periodic 3000 ms triggers 500447 (aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE MiscValue 124, script aura_ascension_bloodmage_forbidden_power AscensionBloodmageTalents.cpp:987-1007 / rev_20260920_82 sets amount = -CR_ARMOR_PENETRATION). Dummy holds Shadow Protection 25433 (DurationIndex 30 = 1800000 ms, pure aura 143 MOD_RESISTANCE_EXCLUSIVE Shadow, zero proc) set to 200 Shadow resistance; caster holds native permanent Armor Penetration 43926 (DurationIndex 21 = -1, single-effect aura 189 CR_ARMOR_PENETRATION, native EffectBasePoints 199 + DieSides 1 = 200, applied in arm.auras BEFORE warmup with zero aura_amounts override) plus permanent Thundering Strikes 16255 at -100 (zero crits); 2 warmup Veinburst 504819 casts (~7200 ms > 3000 ms tick) guarantee 500447 snapshots full -200 Spell Penetration BEFORE Trial 1 of every part. CoA.MonsterResistance.Enable=true (WorldConfig.cpp:387-395: PerLevel=1.0, PerPercent=5.0; Unit.cpp:2569-2607, 2668-2691): control resistance 200 + 60 level = 260 -> averageResist 260/500 = 0.52 (0.48 kept); treatment 260 - 200 = 60 -> averageResist 60/500 = 0.12 (0.88 kept); exact expected ratio 0.88/0.48 = 1.8333 (+83.33%, G-19 band +-4.17 pp; 15 parts x 162 = 2430 hits/arm, 99% half-width ~1.88 pp <= 2.08 pp half-band, excluding 0x=1.00 and 2x=2.08). Reference search 2026-11-26: coa-history 500445/500447 have 0 events (passive/hidden); coabuildhub lists 500445; installed Spell.dbc and C++ govern.",
+      "warmup": [
+        504819,
+        504819
+      ],
+      "warmup_power": 1000
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (Requires Mortal Form)",
+      "kind": "metric_delta",
+      "variant": "mortal_form",
+      "label_suffix": "mortal_form",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "trigger_spell": 803688,
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 803688
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 2500,
+      "observe_source": "803688 ExcludeCasterAuraSpell 802877 (Spell.dbc; Spell.cpp:5951-5952 returns SPELL_FAILED_CASTER_AURASTATE = 22 when caster holds 802877). Before phase (Mortal Form): Scarlet Delirium 803688 cast succeeds (0); after phase (real cast of Blood Curse 562720 applies 802877): Scarlet Delirium 803688 is refused with 22. Reference search 2026-11-26: coa-history 803688 has 10 cast starts / 17 misses in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (up to 5 nearby enemies)",
+      "kind": "fixed_count",
+      "variant": "targets",
+      "label_suffix": "targets",
+      "quote": "Flood the minds of up to $i nearby enemies with visions of unraveling flesh,",
+      "expected": 5,
+      "radius": 8,
+      "headroom": 1,
+      "metric": "aura",
+      "cast_spell": 803688,
+      "target_rank": 803688,
+      "cast_target": "caster",
+      "layout": "caster",
+      "count_primary": true,
+      "repeats": 1,
+      "dummy_entry": 6,
+      "radius_reason": "Scarlet Delirium 803688 Effect[0] TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 14 (8 yd), MaxAffectedTargets 5 ($i); dummy_entry 6 (Kobold Vermin, Humanoid) because stock dummy 36 (Harvest Golem, Mechanical) is immune to MECHANIC_FEAR 5; 6 dummies inside 8 yd prove the 5-target cap (count_primary) and the far dummy stays unhit",
+      "observe_source": "803688 MaxAffectedTargets 5 ($i=5), EffectRadiusIndex 14 (8 yd), Effect[0] aura 7 SPELL_AURA_MOD_FEAR EffectMechanic 5 (Spell.dbc). Follows Cultist Mass Nightmare 805114 fixed_count precedent with Kobold Vermin 6 (Humanoid, not Fear-immune). Reference search 2026-11-26: coa-history 803688 has 10 cast starts / 17 misses in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (fears creature target for 40 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "fearing them for $d (8 sec versus players) while draining their life essence,",
+      "trigger_spell": 803688,
+      "target": "caster",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803688,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 40000,
+      "expiry_wait_ms": 3200,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          39600,
+          40500
+        ],
+        "expired": [
+          42800,
+          43800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "803688 DurationIndex 64 = 40000 ms ($d = 40 sec, SpellDuration.dbc), 2000 ms cast -> lands ~2000 ms, expires ~42000 ms on Kobold Vermin 6 (with 823764 to suppress heartbeat/level resists). Reads 0 before cast, 1 at [39600, 40500] ms (~38000 ms after apply, > 0.9*40000=36000 ms) and 0 at [42800, 43800] ms (~41200 ms after apply, < 1.1*40000=44000 ms). Reference search 2026-11-26: coa-history 803688 has 10 cast starts in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (8 sec duration vs enemy player)",
+      "kind": "metric_delta",
+      "variant": "player_duration",
+      "label_suffix": "player_duration",
+      "quote": "fearing them for $d (8 sec versus players) while draining their life essence,",
+      "trigger_spell": 803688,
+      "target": "caster",
+      "enemy_player_race": 2,
+      "measure_actor": "enemy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803688,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9400,
+      "expiry_wait_ms": 1100,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9200,
+          9650
+        ],
+        "expired": [
+          10300,
+          10850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "803688 tooltip states '(8 sec versus players)' (stock PvP CC cap 8000 ms on MECHANIC_FEAR). Cast at enemy player (race 2, 2000 ms cast -> lands ~2000 ms, expires ~10000 ms): reads 0 before cast, 1 at [9200, 9650] ms (~7400 ms after apply, > 0.9*8000=7200 ms) and 0 at [10300, 10850] ms (~8500 ms after apply, < 1.1*8000=8800 ms). Follows Cultist 560109 player_duration precedent. Reference search 2026-11-26: coa-history 803688 has 10 cast starts in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (siphon base damage & heal at reference SP)",
+      "kind": "metric_delta",
+      "variant": "siphon_base",
+      "label_suffix": "siphon_base",
+      "quote": "siphoning ${$m2+0+$SP*0.15} health every $t2 sec.",
+      "trigger_spell": 803688,
+      "target": "caster",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803688,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 78,
+      "after_at_least": 76,
+      "after_at_most": 80,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 803688,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 78,
+            "tolerance": 2,
+            "source": "Effect[1] aura 53 SPELL_AURA_PERIODIC_LEECH heals caster equal to damage dealt (78)"
+          }
+        ]
+      },
+      "observe_source": "803688 Effect[1] aura 53 SPELL_AURA_PERIODIC_LEECH, BasePoints 77 + DieSides 1 = 78 ($m2 at BaseLevel=SpellLevel=60), amp 3000 ms, cast 2000 ms -> first tick at ~5000 ms (wait_ms 5500 captures tick 1). Non-crit (16255 -100) on Kobold Vermin 6 with 823764: deals 78 Shadow damage and leeches 78 health to caster (verified by spell_heal_total arm). Reference search 2026-11-26: coa-history 803688 has 10 cast starts in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (siphon damage & heal at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "siphon_sp",
+      "label_suffix": "siphon_sp",
+      "quote": "siphoning ${$m2+0+$SP*0.15} health every $t2 sec.",
+      "trigger_spell": 803688,
+      "target": "caster",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803688,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3078,
+      "after_at_least": 3074,
+      "after_at_most": 3082,
+      "wait_ms": 5500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 803688,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 3078,
+            "tolerance": 4,
+            "source": "Effect[1] aura 53 SPELL_AURA_PERIODIC_LEECH heals caster equal to damage dealt (78 + 20000*0.15 = 3078)"
+          }
+        ]
+      },
+      "observe_source": "803688 Effect[1] aura 53 SPELL_AURA_PERIODIC_LEECH with +20000 SP (tooltip ${$m2+0+$SP*0.15} = 78 + 3000 = 3078 per tick). First tick at ~5000 ms (2000 ms cast + 3000 ms amp, read at 5500 ms) deals 3078 Shadow damage and leeches 3078 health to caster (verified by spell_heal_total arm). Reference search 2026-11-26: coa-history 803688 has 10 cast starts in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (siphons every 3 sec: 2 ticks by 10.6 s, 3 ticks by 11.4 s)",
+      "kind": "metric_delta",
+      "variant": "period",
+      "label_suffix": "period",
+      "quote": "siphoning ${$m2+0+$SP*0.15} health every $t2 sec.",
+      "trigger_spell": 803688,
+      "target": "caster",
+      "target_entry": 6,
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 803688,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 10600,
+      "expiry_wait_ms": 800,
+      "after_expiry_expected": 3,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10450,
+          10750
+        ],
+        "expired": [
+          11250,
+          11550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "803688 Effect[1] EffectAmplitude 3000 ms ($t2 = 3 sec; Spell.dbc), 2000 ms cast -> ticks at ~5000, ~8000, ~11000 ms on Kobold Vermin 6. Reads 0 before cast, 2 at [10450, 10750] ms (~8600 ms after apply, < 3*3000=9000 ms) and 3 at [11250, 11550] ms (~9400 ms after apply, > 9000 ms), bracketing tick period in (2867, 3133] ms (+-4.4%, excluding +-10%). Reference search 2026-11-26: coa-history 803688 has 10 cast starts in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (damage below stock cap 1048 holds fear: 1 -> 1)",
+      "kind": "metric_delta",
+      "variant": "damage_holds",
+      "label_suffix": "damage_holds",
+      "quote": "Damage caused may interrupt the effect.",
+      "trigger_spell": 578305,
+      "gate_spell": 578305,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "setup_casts": [
+        803688
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2500,
+      "phase_auras": [
+        [
+          803688,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 803688,
+          "actor": "dummy",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803688,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578305,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Unbuffed non-crit Bloodbolt 578305 (~331-342 Shadow damage < 1048 stock break cap) lands on feared Kobold Vermin 6 in treatment only (0 -> 1)"
+          }
+        ]
+      },
+      "observe_source": "Cultist 560109 (D-38) / Necromancer ADR 0082 precedent (stock HandleBreakableCCAuraProc cumulative cap BaseHealth(60)/4.75 = 1048 at SpellAuraEffects.cpp:548-562,7245-7253; 803688 ProcFlags 0xa22a8): both phases cast Scarlet Delirium 803688 on Kobold Vermin 6 (verified stacks==1 by after_setup_stacks); treatment casts unbuffed non-crit Bloodbolt 578305 (~331-342 Shadow dmg < 1048, verified landed 0->1 by ally_arm) and 803688 stays active (1->1). Reference search 2026-11-26: coa-history 803688 has 10 cast starts in 1 log; coabuildhub absent; installed Spell.dbc governs."
+    },
+    {
+      "spell": 803688,
+      "name": "Scarlet Delirium (damage above stock cap 1048 breaks fear: 1 -> 0)",
+      "kind": "metric_delta",
+      "variant": "damage_breaks",
+      "label_suffix": "damage_breaks",
+      "quote": "Damage caused may interrupt the effect.",
+      "trigger_spell": 578305,
+      "gate_spell": 578305,
+      "target": "dummy",
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "cast_power": 1000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "setup_casts": [
+        803688
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 2500,
+      "phase_auras": [
+        [
+          803688,
+          0,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_setup_stacks": [
+        {
+          "spell": 803688,
+          "actor": "dummy",
+          "stacks": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 803688,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578305,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "High-SP Bloodbolt 578305 (+20000 SP, >> 1048 stock break cap) lands on feared Kobold Vermin 6 in treatment only (0 -> 1)"
+          }
+        ]
+      },
+      "observe_source": "Cultist 560109 (D-38) / Necromancer ADR 0082 precedent (stock HandleBreakableCCAuraProc cumulative cap BaseHealth(60)/4.75 = 1048 at SpellAuraEffects.cpp:548-562,7245-7253; 803688 ProcFlags 0xa22a8): both phases cast Scarlet Delirium 803688 on Kobold Vermin 6 (verified stacks==1 by after_setup_stacks); treatment casts +20000 SP Bloodbolt 578305 (>> 1048, verified landed 0->1 by ally_arm) and 803688 breaks (1->0). Reference search 2026-11-26: coa-history 803688 has 10 cast starts in 1 log; coabuildhub absent; installed Spell.dbc governs."
     }
   ],
   "player_observations": [],

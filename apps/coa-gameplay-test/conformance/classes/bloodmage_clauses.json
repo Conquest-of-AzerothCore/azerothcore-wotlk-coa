@@ -347,16 +347,23 @@
       {
         "claim": "Reduces the duration of root effects against you by $s1%.",
         "labels": [
-          "300986 effect_value e0 #0"
+          "300986 behaviour_duration_ratio root",
+          "300986 behaviour_expiry root"
         ]
       },
       {
         "claim": "Reduces the duration of movement slowing effects against you by $s1%.",
-        "labels": []
+        "labels": [
+          "300986 behaviour_duration_ratio snare",
+          "300986 behaviour_expiry snare"
+        ]
       },
       {
         "claim": "Reduces the duration of bleed effects against you by $s1%.",
-        "labels": []
+        "labels": [
+          "300986 behaviour_duration_ratio bleed",
+          "300986 behaviour_expiry bleed"
+        ]
       }
     ],
     "kind": "claim"
@@ -551,7 +558,7 @@
     "spell": 500445,
     "clause": "Increases your spell critical strike rating by $s1% of your Agility",
     "labels": [
-      "500445 effect_value e0 #0"
+      "500445 behaviour_metric_delta spell_crit_agi"
     ],
     "kind": "claim"
   },
@@ -559,14 +566,16 @@
     "spell": 500445,
     "clause": "and spell hit rating by $s2% of your Agility.",
     "labels": [
-      "500445 effect_value e1 #1"
+      "500445 behaviour_metric_delta spell_hit_agi"
     ],
     "kind": "claim"
   },
   {
     "spell": 500445,
     "clause": "In addition, you now gain Spell Penetration equal to your Armor Penetration Rating.",
-    "labels": [],
+    "labels": [
+      "500445 behaviour_hit_ratio spell_pen"
+    ],
     "kind": "claim"
   },
   {
@@ -1007,8 +1016,7 @@
     "spell": 504296,
     "clause": "Your health regeneration now continues in combat and is increased by $s2%.",
     "labels": [
-      "504296 effect_value e1 #0",
-      "504296 aura_amount e1 #0"
+      "504296 behaviour_metric_delta combat_regen"
     ],
     "kind": "claim"
   },
@@ -1016,8 +1024,7 @@
     "spell": 504296,
     "clause": "Increases armor contribution from items by $s1%.",
     "labels": [
-      "504296 effect_value e0 #1",
-      "504296 aura_amount e0 #1"
+      "504296 behaviour_metric_delta item_armor"
     ],
     "kind": "claim"
   },
@@ -1025,7 +1032,8 @@
     "spell": 504296,
     "clause": "Lasts $d.",
     "labels": [
-      "504296 aura_duration_ms #2"
+      "504296 behaviour_cast_applies_aura duration",
+      "504296 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
@@ -1033,7 +1041,7 @@
     "spell": 504296,
     "clause": "@ext: Only 1 Shield can be active at a time.:ext@",
     "labels": [
-      "504296 effect_value #3"
+      "504296 behaviour_exclusivity"
     ],
     "kind": "claim"
   },
@@ -1314,7 +1322,9 @@
   {
     "spell": 504897,
     "clause": "Protects the caster with a coagulated barrier, reducing spell pushback suffered from damaging attacks by 100%",
-    "labels": [],
+    "labels": [
+      "504897 behaviour_metric_delta pushback"
+    ],
     "kind": "claim"
   },
   {
@@ -1324,13 +1334,16 @@
       {
         "claim": "and reducing the duration of silence effects by $s2%.",
         "labels": [
-          "504897 effect_value e1 #0",
-          "504897 aura_amount e1 #0"
+          "504897 behaviour_metric_delta silence_held",
+          "504897 behaviour_metric_delta silence_ends"
         ]
       },
       {
         "claim": "and reducing the duration of interrupt effects by $s2%.",
-        "labels": []
+        "labels": [
+          "504897 behaviour_metric_delta interrupt_held",
+          "504897 behaviour_metric_delta interrupt_ends"
+        ]
       }
     ],
     "kind": "claim"
@@ -1339,7 +1352,8 @@
     "spell": 504897,
     "clause": "Lasts $d.",
     "labels": [
-      "504897 aura_duration_ms #1"
+      "504897 behaviour_cast_applies_aura duration",
+      "504897 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
@@ -1347,7 +1361,7 @@
     "spell": 504897,
     "clause": "@ext: Only 1 Shield can be active at a time.:ext@",
     "labels": [
-      "504897 effect_value #2"
+      "504897 behaviour_exclusivity"
     ],
     "kind": "claim"
   },
@@ -4774,7 +4788,7 @@
     "spell": 803688,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "803688 effect_value #4"
+      "803688 behaviour_metric_delta mortal_form"
     ],
     "kind": "claim"
   },
@@ -4782,7 +4796,7 @@
     "spell": 803688,
     "clause": "Flood the minds of up to $i nearby enemies with visions of unraveling flesh,",
     "labels": [
-      "803688 effect_value #0"
+      "803688 targets behaviour_fixed_count"
     ],
     "kind": "claim"
   },
@@ -4793,12 +4807,14 @@
       {
         "claim": "fearing them for $d",
         "labels": [
-          "803688 aura_duration_ms #1"
+          "803688 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "8 sec versus players",
-        "labels": []
+        "labels": [
+          "803688 behaviour_metric_delta player_duration"
+        ]
       }
     ],
     "kind": "claim"
@@ -4810,14 +4826,14 @@
       {
         "claim": "siphoning ${$m2+0+$SP*0.15} health",
         "labels": [
-          "803688 effect_value e1 #2",
-          "803688 aura_amount e1 #2"
+          "803688 behaviour_metric_delta siphon_base",
+          "803688 behaviour_metric_delta siphon_sp"
         ]
       },
       {
         "claim": "every $t2 sec",
         "labels": [
-          "803688 aura_amplitude_ms #3"
+          "803688 behaviour_metric_delta period"
         ]
       }
     ],
@@ -4826,7 +4842,10 @@
   {
     "spell": 803688,
     "clause": "Damage caused may interrupt the effect.",
-    "labels": [],
+    "labels": [
+      "803688 behaviour_metric_delta damage_holds",
+      "803688 behaviour_metric_delta damage_breaks"
+    ],
     "kind": "claim"
   },
   {
@@ -4889,23 +4908,26 @@
       {
         "claim": "increasing your chance to dodge by $s3%",
         "labels": [
-          "801955 effect_value e2 #0",
-          "801955 aura_amount e2 #0"
+          "801955 behaviour_metric_delta dodge"
         ]
       },
       {
         "claim": "for $d.",
         "labels": [
-          "801955 aura_duration_ms #1"
+          "801955 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "and reducing the chance for ranged attacks to hit you by $s3%",
-        "labels": []
+        "labels": [
+          "801955 behaviour_taken_hit ranged_miss"
+        ]
       },
       {
         "claim": "$?s560257[, and increasing your healing received by $560257s1%][]",
-        "labels": []
+        "labels": [
+          "801955 behaviour_hit_ratio healing_received"
+        ]
       }
     ],
     "kind": "claim"
@@ -4913,7 +4935,10 @@
   {
     "spell": 801955,
     "clause": "While active you can dodge or parry while casting.",
-    "labels": [],
+    "labels": [
+      "801955 behaviour_metric_delta cast_dodge",
+      "801955 behaviour_metric_delta cast_parry"
+    ],
     "kind": "claim"
   },
   {
@@ -5496,12 +5521,14 @@
       {
         "claim": "Reduces the cost of your abilities that require Cursed Form by $s1%",
         "labels": [
-          "804807 effect_value e0 #0"
+          "804807 behaviour_metric_delta cursed_cost"
         ]
       },
       {
         "claim": "and increases the healing done by Blood Rituals by $s1%.",
-        "labels": []
+        "labels": [
+          "804807 behaviour_metric_delta blood_rituals_heal"
+        ]
       }
     ],
     "kind": "claim"
@@ -5620,14 +5647,18 @@
   {
     "spell": 804858,
     "clause": "Periodic damage and healing now causes targets to spill a pool of blood beneath them.",
-    "labels": [],
+    "labels": [
+      "804858 behaviour_metric_delta periodic_dmg_pool",
+      "804858 behaviour_metric_delta periodic_heal_pool"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804858,
     "clause": "Allies in a Cursed Form who move through the pools of blood gain Trail of Blood for $804859d.",
     "labels": [
-      "804858 spell_duration 804859 #0"
+      "804858 behaviour_metric_delta cursed_ally_grant",
+      "804858 behaviour_metric_delta trail_duration"
     ],
     "kind": "claim"
   },
@@ -5635,7 +5666,7 @@
     "spell": 804858,
     "clause": "Movement speed cannot be reduced below $s1%.",
     "labels": [
-      "804858 effect_value 804859e0 #1"
+      "804858 behaviour_metric_delta min_speed"
     ],
     "kind": "claim"
   },
@@ -5643,7 +5674,7 @@
     "spell": 804858,
     "clause": "Movement speed increased by $s3%.",
     "labels": [
-      "804858 effect_value 804859e2 #2"
+      "804858 behaviour_metric_delta move_speed"
     ],
     "kind": "claim"
   },
@@ -5651,7 +5682,7 @@
     "spell": 804858,
     "clause": "Damage dealt increased by $s2%.",
     "labels": [
-      "804858 effect_value 804859e1 #3"
+      "804858 behaviour_hit_ratio damage_dealt"
     ],
     "kind": "claim"
   },
@@ -6308,12 +6339,14 @@
       {
         "claim": "Reduces the cost of your abilities that require Cursed Form by $s1%",
         "labels": [
-          "807919 effect_value e0 #0"
+          "807919 behaviour_metric_delta cursed_cost"
         ]
       },
       {
         "claim": "and increases the healing done by Blood Rituals by $s1%.",
-        "labels": []
+        "labels": [
+          "807919 behaviour_metric_delta blood_rituals_heal"
+        ]
       }
     ],
     "kind": "claim"
