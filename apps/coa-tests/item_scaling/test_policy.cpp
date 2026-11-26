@@ -15,6 +15,13 @@ int main()
     assert(!EligibleItem(2, ItemClassArmor, 0, 12, 0, 0));
     assert(!EligibleItem(1, ItemClassArmor, InventoryTypeShirt, 12, 0, 0));
     assert(!EligibleItem(1, ItemClassArmor, InventoryTypeTabard, 12, 0, 0));
+    assert(NativeEligibleItem(1, ItemClassArmor, InventoryTypeShirt, 12, 0, 0));
+    assert(NativeEligibleItem(3, ItemClassArmor, InventoryTypeShirt, 55, 0, 0));
+    assert(!NativeEligibleItem(1, ItemClassArmor, InventoryTypeTabard, 12, 0, 0));
+    assert(!NativeEligibleItem(2, ItemClassArmor, 0, 12, 0, 0));
+    assert(!NativeEligibleItem(7, ItemClassArmor, InventoryTypeShirt, 12, 0, 0));
+    assert(!NativeEligibleItem(2, ItemClassArmor, InventoryTypeShirt, 12, 1, 0));
+    assert(!NativeEligibleItem(2, ItemClassArmor, InventoryTypeShirt, 12, 0, 176));
     assert(!EligibleItem(0, ItemClassWeapon, 13, 0, 0, 0));
     assert(!EligibleItem(2, ItemClassArmor, 5, 12, 1, 0) && !EligibleItem(2, ItemClassArmor, 5, 12, 0, 176));
 

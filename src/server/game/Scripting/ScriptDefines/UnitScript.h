@@ -142,7 +142,7 @@ public:
         SpellInfo const* /*spell*/) { return true; }
     [[nodiscard]] virtual bool CanUnitAssist(Unit const* /*assister*/, Unit const* /*target*/,
         SpellInfo const* /*spell*/) { return true; }
-    virtual Unit* SpellMagnetTarget(Unit* /*attacker*/, Unit* /*victim*/, SpellInfo const* /*spell*/) { return nullptr; }
+    virtual Unit* SpellMagnetTarget(Unit* /*attacker*/, Unit* /*victim*/, SpellInfo const* /*spell*/, bool& /*ignoreM2Los*/) { return nullptr; }
 
     [[nodiscard]] virtual bool CanSetPhaseMask(Unit const* /*unit*/, uint32 /*newPhaseMask*/, bool /*update*/) { return true; }
 

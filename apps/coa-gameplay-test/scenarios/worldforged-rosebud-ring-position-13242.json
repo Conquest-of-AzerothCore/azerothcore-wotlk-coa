@@ -1,0 +1,93 @@
+{
+  "schema": 1,
+  "name": "Worldforged Rosebud Ring in Ashenvale sits at its reachable realm-dump spot instead of on the cliff (#13242)",
+  "contract": "#13242 reported the Rosebud Ring pickup (Ring of Druidic Whispers, gameobject entry 90389, guid 6942102, drops item 450860) in Ashenvale at an unreachable height. The realm-map pass moved it 22.94 yd north-east to the 2-digit map pin (2788.900, -1529.000, 282.281), 18.64 yd higher on a 71.6 deg cliff face. rev_20261126_13242 restores first-pass realm-dump row 6900940 (2781.930, -1550.850, 263.640) on flat 0.6 deg terrain (261.817) beside Kalidartreestump02.m2 (whose visual root geometry is not in VMap collision, so spawn_ground_gap reads +1.82 yd above terrain; do not assert spawn_placement). Expected: the pickup stands at (2781.930, -1550.850, 263.640), is not under water, and opens with loot from flat ground 2.33 yd away (24.7 yd from the broken cliff spot).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 2783.43,
+    "y": -1550.85,
+    "z": 261.85,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 4,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90389,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup stands at its realm-dump spot (2781.930, -1550.850, 263.640) instead of 22.94 yd away on the cliff",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 2781.93,
+      "y": -1550.85,
+      "z": 263.64,
+      "max": 0.3,
+      "guid": 6942102,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6942102,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 90389
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup is within reach from flat ground (2.33 yd vs 24.7 yd to the cliff) and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "name": "Barbarian: Spirit of Bloodshed debuffs sub-35% enemies, boosts Physical taken, procs Born in Blood, and resists hostile Spirit strips (#13528, #13668)",
+  "contract": [
+    "Spirit of Bloodshed 712468 periodically triggers 712681 (10 yd radius) to increase nearby enemies' Physical",
+    "damage taken while below 35% health by 10% and causes killing blows to grant Born in Blood 560521.",
+    "1) On a full-health Barbarian, 712681 must stay off a full-health enemy and must apply once that enemy drops",
+    "   below 35% health, raising white melee Physical damage taken by 10% from both the Barbarian and an ally.",
+    "2) 712468's killing-blow proc chance is 100% and deterministically grants Born in Blood 560521 across repeated kills.",
+    "3) A hostile Barbarian's enemy area Spirit aura (Spirit of Savagery 707775) applying to our Barbarian must not",
+    "   strip our Barbarian's own Spirit of Bloodshed 712468."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "b", "race": 1, "class": 12, "level": 60, "melee_hit_rating": 10000, "expertise_rating": 10000 },
+    { "id": "ally", "race": 1, "class": 12, "level": 60 },
+    { "id": "horde", "race": 2, "class": 12, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "e1", "owner": "b", "entry": 36, "level": 60, "health": 100000, "distance": 4, "stationary": true },
+    { "id": "k1", "owner": "b", "entry": 6, "level": 60, "health": 100, "distance": 4, "stationary": true },
+    { "id": "k2", "owner": "b", "entry": 6, "level": 60, "health": 100, "distance": 5, "stationary": true },
+    { "id": "k3", "owner": "b", "entry": 6, "level": 60, "health": 100, "distance": 6, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI settle", "ms": 3000 },
+    { "action": "learn", "actor": "b", "spell": 712468 },
+    { "action": "snapshot", "label": "Baseline white melee damage taken by e1 from b", "actor": "e1", "metric": "melee_damage_taken", "target": "b", "save_as": "dmg_b0" },
+    { "action": "snapshot", "label": "Baseline white melee damage taken by e1 from ally", "actor": "e1", "metric": "melee_damage_taken", "target": "ally", "save_as": "dmg_ally0" },
+    { "action": "cast", "actor": "b", "spell": 712468 },
+    { "action": "assert", "label": "SETUP: Spirit of Bloodshed is active on b", "actor": "b", "metric": "aura", "spell": 712468, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: 712468 killing-blow proc chance is 100%", "actor": "b", "metric": "spell_proc_chance", "spell": 712468, "equals": 100 },
+    { "action": "wait", "label": "Wait past two 1s ticks of 712468 while e1 is at full health", "ms": 2500 },
+    { "action": "assert", "label": "CONTROL: 712681 does not apply to a full-health enemy", "actor": "e1", "metric": "aura", "spell": 712681, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: Spirit of Bloodshed does not engage an unengaged full-health enemy", "actor": "e1", "metric": "combat", "equals": 0 },
+    { "action": "set_health_pct", "actor": "b", "target": "e1", "pct": 30 },
+    { "action": "assert", "label": "SETUP: e1 is below 35% health", "actor": "e1", "metric": "health_pct", "max": 34 },
+    { "action": "assert", "label": "DISCRIMINATING: 712681 applies to sub-35% enemy while b is at full health", "actor": "e1", "metric": "aura", "spell": 712681, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: white melee damage taken from b rises by 10%", "actor": "e1", "metric": "melee_damage_taken", "target": "b", "ratio_to": "dmg_b0", "min": 1.08, "max": 1.12 },
+    { "action": "assert", "label": "DISCRIMINATING: white melee damage taken from ally rises by 10%", "actor": "e1", "metric": "melee_damage_taken", "target": "ally", "ratio_to": "dmg_ally0", "min": 1.08, "max": 1.12 },
+    { "action": "set_aura", "actor": "b", "spell": 560521, "stacks": 0 },
+    { "action": "attack_nearby", "actor": "b", "entry": 6, "kill": true },
+    { "action": "assert", "label": "DISCRIMINATING: kill 1 grants Born in Blood", "actor": "b", "metric": "aura", "spell": 560521, "equals": 1, "within_ms": 2000 },
+    { "action": "set_aura", "actor": "b", "spell": 560521, "stacks": 0 },
+    { "action": "attack_nearby", "actor": "b", "entry": 6, "kill": true },
+    { "action": "assert", "label": "DISCRIMINATING: kill 2 grants Born in Blood", "actor": "b", "metric": "aura", "spell": 560521, "equals": 1, "within_ms": 2000 },
+    { "action": "set_aura", "actor": "b", "spell": 560521, "stacks": 0 },
+    { "action": "attack_nearby", "actor": "b", "entry": 6, "kill": true },
+    { "action": "assert", "label": "DISCRIMINATING: kill 3 grants Born in Blood", "actor": "b", "metric": "aura", "spell": 560521, "equals": 1, "within_ms": 2000 },
+    { "action": "pvp", "actor": "b", "enabled": true },
+    { "action": "pvp", "actor": "horde", "enabled": true },
+    { "action": "assert", "label": "SETUP: horde can attack b", "actor": "horde", "metric": "can_attack", "target": "b", "equals": 1, "within_ms": 2000 },
+    { "action": "learn", "actor": "horde", "spell": 707775 },
+    { "action": "cast", "actor": "horde", "spell": 707775 },
+    { "action": "assert", "label": "SETUP: hostile Spirit of Savagery area debuff applies to b", "actor": "b", "metric": "aura", "spell": 707775, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: hostile Spirit area debuff does not strip b's Spirit of Bloodshed", "actor": "b", "metric": "aura", "spell": 712468, "equals": 1 }
+  ]
+}

@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Personal Bank: refuses swapping equipped items or withdrawing into equipment slots",
+  "contract": "#12460: AscensionPersonalBank::HandleSwapItems must allow only player inventory positions (Player::IsInventoryPos or AutoStore NULL_BAG/NULL_SLOT), matching stock GuildHandler::HandleGuildBankSwapItems. Dragging an equipped item onto a non-equipment item in the Personal Bank (or withdrawing a bank item directly onto an equipment slot) must be rejected so the equipped item stays worn and the bank item stays in the bank, while ordinary auto-store withdrawal to bags still succeeds.",
+  "timeout_ms": 120000,
+  "players": [
+    { "id": "banker", "race": 1, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "add_item", "label": "Acquire the Personal Bank", "actor": "banker", "item": 134985, "count": 1 },
+    { "action": "use_item", "label": "Place the Personal Bank vault", "actor": "banker", "item": 134985, "spell": 100702 },
+    { "action": "wait", "label": "Let the vault summon land in the world", "ms": 3000 },
+    { "action": "add_item", "label": "Acquire a shirt to equip", "actor": "banker", "item": 2576, "count": 1 },
+    { "action": "equip", "label": "Equip the shirt in the shirt slot", "actor": "banker", "item": 2576, "slot": 3 },
+    {
+      "action": "assert",
+      "label": "SETUP: the shirt is equipped in slot 3",
+      "actor": "banker", "metric": "equipped_item", "slot": 3, "equals": 2576
+    },
+    { "action": "add_item", "label": "Acquire a non-equipment item (Righteous Orb)", "actor": "banker", "item": 12811, "count": 1 },
+    { "action": "personal_bank_open", "label": "Open the Personal Bank", "actor": "banker", "entry": 475001 },
+    {
+      "action": "personal_bank_swap",
+      "label": "Deposit the Righteous Orb into bank slot 0",
+      "actor": "banker", "entry": 475001, "direction": "deposit", "item": 12811, "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Righteous Orb is stored in the bank",
+      "actor": "banker", "metric": "item_count", "item": 12811, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "personal_bank_swap",
+      "label": "DISCRIMINATING: drag equipped shirt onto the Righteous Orb in bank slot 0",
+      "actor": "banker", "entry": 475001, "direction": "deposit", "item": 2576, "slot": 0
+    },
+    { "action": "wait", "label": "Let the server process the rejected deposit-swap", "ms": 500 },
+    {
+      "action": "assert",
+      "label": "The equipped shirt stays in slot 3",
+      "actor": "banker", "metric": "equipped_item", "slot": 3, "equals": 2576
+    },
+    {
+      "action": "assert",
+      "label": "The Righteous Orb is not moved out of the bank",
+      "actor": "banker", "metric": "item_count", "item": 12811, "equals": 0
+    },
+    {
+      "action": "personal_bank_swap",
+      "label": "Control: normal auto-store withdrawal to bags still succeeds",
+      "actor": "banker", "entry": 475001, "direction": "withdraw", "slot": 0
+    },
+    {
+      "action": "assert",
+      "label": "The Righteous Orb returns to the player's bags",
+      "actor": "banker", "metric": "item_count", "item": 12811, "equals": 1, "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The equipped shirt remains untouched in slot 3",
+      "actor": "banker", "metric": "equipped_item", "slot": 3, "equals": 2576
+    }
+  ]
+}

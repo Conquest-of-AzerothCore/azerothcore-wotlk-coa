@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Worldforged Tightly Sealed Lockbox rests in the sunken rowboat on Wildwind Lake lakebed (#13564)",
+  "contract": "#13564 reported the Tightly Sealed Lockbox pickup (gameobject entry 96108, guid 6942442, drops Worn Angler Cord 515158) in Wildwind Lake, Feralas unreachable on the side of the waterfall cliff. The realm-map pass moved it 19.7 yd horizontally (52.86 yd 3D) off its observed realm-dump lakebed spot (-4490.840, 180.309, -35.059; -0.038 yd to .map terrain -35.021, underwater below liq 3.768) onto an 82.1 deg cliff face (-4497.600, 161.800, 14.013, dry). rev_20261126_13564 restores first-pass row 6901352 inside the tilted sunken Wreckedrowboat.m2 (ID 165500, rolled -64.5 deg on the lakebed, upper hull at -33.715 inner / -33.563 outer, +1.496 yd above the lockbox). Because ProbeTerrain queries Map::GetHeight from z + Z_OFFSET_FIND_HEIGHT (+2.0 yd), its downward ray hits that overhanging boat hull and spawn_ground_gap reads -1.496 against the hull rather than the lakebed; do not assert spawn_ground_gap/spawn_placement here. Expected: the lockbox stands at (-4490.840, 180.309, -35.059), is submerged underwater (not on the dry cliff), sits under the sunken rowboat hull (headroom ~1.04 yd vs 10.0 yd on the cliff), and opens with loot from open water 1.75 yd away on the boat's open side.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -4492.5,
+    "y": 180.31,
+    "z": -34.5,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 96108,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the lockbox stands at its realm-dump lakebed spot (-4490.840, 180.309, -35.059) instead of 52.86 yd away on the cliff",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -4490.84,
+      "y": 180.309,
+      "z": -35.059,
+      "max": 0.3,
+      "guid": 6942442,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the lockbox is submerged underwater in Wildwind Lake instead of on the dry cliff",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 1,
+      "guid": 6942442,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the lockbox sits under the tilted sunken rowboat hull (~1.04 yd headroom) instead of open sky (10 yd) on the cliff",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 0.8,
+      "max": 1.5,
+      "guid": 6942442,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 96108
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the lockbox is within reach from beside the sunken rowboat (1.75 yd vs 52.16 yd to the cliff) and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Rare Hidden Cache never drops statless Bloodforged Replica T0.5 items (#11917, #13463)",
+  "contract": "Requires Bloodforged.Enable = 1 with rev_20261126_11917_bloodforged_remove_replica_t05.sql applied. The 32 Bloodforged Replica T0.5 cosmetic items (6078196-6078330, item level 60, required level 60) carry no primary or secondary stats and are removed from coa_bloodforged_catalogue. A Rare Hidden Cache (gameobject loot 9671) always picks one normal level-60 epic from the catalogue: reported items Bloodforged Replica Darkmantle Boots (6078262, #11917) and Bloodforged Replica Soulforge Gauntlets (6078314, #13463), plus representative cloth/mail entries (6078196, 6078282), never drop (0% across 10,000 rolls), while Bloodforged Writ of the Emperor (6098000, item level 61, RandomProperty 8676) continues to drop.",
+  "players": [
+    {
+      "id": "opener",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "A valid level-60 epic still drops from a Rare Hidden Cache",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9671,
+      "item": 6098000,
+      "min": 0.1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodforged Replica Darkmantle Boots (6078262) never drops (#11917)",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9671,
+      "item": 6078262,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodforged Replica Soulforge Gauntlets (6078314) never drops (#13463)",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9671,
+      "item": 6078314,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bloodforged Replica Sorcerer's Boots (6078196) never drops",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9671,
+      "item": 6078196,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Bloodforged Replica Beastmaster's Tunic (6078282) never drops",
+      "actor": "opener",
+      "metric": "gameobject_loot_item_rate",
+      "entry": 9671,
+      "item": 6078282,
+      "equals": 0
+    }
+  ]
+}

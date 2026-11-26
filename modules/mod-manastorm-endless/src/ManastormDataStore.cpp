@@ -1,4 +1,5 @@
 #include "ManastormDataStore.h"
+#include "ManastormExperienceFormula.h"
 
 #include "DatabaseEnv.h"
 #include "QueryResult.h"
@@ -2661,10 +2662,35 @@ ManastormScalingPoint ManastormDataStore::GetScalingForDepth(
         effective.SpellMultiplier *=
             range.SpellMultiplier;
 
-        break;
+        return effective;
+    }
+
+    if (!ranges.empty() && memberCount > 1)
+    {
+        double const damageStep = endgame ? 0.15 : 0.05;
+        effective.HealthMultiplier *=
+            float(ManastormExperienceFormula::GroupHealthMultiplierFallback(memberCount));
+        effective.GlobalDamageMultiplier *=
+            float(1.0 + (damageStep * double(memberCount - 1)));
     }
 
     return effective;
+}
+
+double ManastormDataStore::GetGroupHealthMultiplier(uint32 memberCount, bool endgame) const
+{
+    if (memberCount <= 1 || memberCount > ManastormLimits::MaxMembers)
+        return 1.0;
+
+    auto const& ranges = endgame ? _endgameGroupScalingRanges : _groupScalingRanges;
+    if (ranges.empty())
+        return 1.0;
+
+    for (ManastormGroupScalingRange const& range : ranges)
+        if (range.Matches(memberCount))
+            return double(range.HealthMultiplier);
+
+    return ManastormExperienceFormula::GroupHealthMultiplierFallback(memberCount);
 }
 
 ManastormHubReturn const*

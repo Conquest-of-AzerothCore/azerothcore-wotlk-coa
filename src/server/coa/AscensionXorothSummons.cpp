@@ -95,6 +95,10 @@ Unit* CombatTarget(Creature* summon, Player* player)
         consider(attacker);
     if (nearest)
         return nearest;
+    if (Unit* helper = summon->getAttackerForHelper();
+        helper && helper->IsAlive() && player->IsValidAttackTarget(helper) &&
+        summon->IsWithinDistInMap(helper, 40.0f) && !helper->HasBreakableByDamageCrowdControlAura())
+        return helper;
     for (auto const& [guid, reference] : player->GetCombatManager().GetPvECombatRefs())
         if (!reference->IsSuppressedFor(player))
             consider(reference->GetOther(player));
@@ -233,8 +237,12 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
                                                   me->GetEntry() != 50301);
             }
         }
-        bool engaged = UpdateVictim();
-        if ((engaged && me->GetEntry() == 50375) || (me->GetEntry() == 50301 && me->GetVictim()))
+        if (me->GetEntry() == 50301)
+        {
+            if (me->GetVictim())
+                DoMeleeAttackIfReady();
+        }
+        else if (UpdateVictim() && me->GetEntry() == 50375)
             DoMeleeAttackIfReady();
     }
 };
