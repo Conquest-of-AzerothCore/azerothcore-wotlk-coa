@@ -13,8 +13,9 @@
     "0.45 + 0.45^2 + 0.45^3 + 0.45^4 (~0.7846) of Echo of Nozdormu damage. A -100% SPELLMOD_CHANCE_OF_SUCCESS",
     "mutant on 504750 proves Aspect's Blessing triggers only 1 hit (~0.45) when chain procs fail; a +300% mutant",
     "(33% * 4 = 100% clamped) proves both Aspect's Blessing and plain Echo of Nozdormu chain to exactly 4 hits and",
-    "stop at the 3-additional-trigger cap. Level-80 Pyromancer with active Echo of Nozdormu Rank 10 (567590),",
-    "spell penetration aura 823764, and spell_hit_rating 10000."
+    "stop at the 3-additional-trigger cap. Level-80 Pyromancer learning Explode (800792) and Echo of Nozdormu",
+    "passive (520937) so AscensionPyromancer::Refresh teaches and keeps Echo of Nozdormu Rank 10 (567590) active",
+    "as Explode's replacement, with spell penetration aura 823764 and spell_hit_rating 10000."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -65,9 +66,33 @@
     },
     {
       "action": "learn",
-      "label": "Learn Echo of Nozdormu Rank 10 (567590)",
+      "label": "Learn Explode (800792) for Echo of Nozdormu replacement",
       "actor": "pyro",
-      "spell": 567590
+      "spell": 800792
+    },
+    {
+      "action": "learn",
+      "label": "Learn Echo of Nozdormu passive (520937) so Refresh teaches and keeps Rank 10 (567590)",
+      "actor": "pyro",
+      "spell": 520937
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Echo of Nozdormu Rank 10 (567590) is learned",
+      "actor": "pyro",
+      "metric": "knows_spell",
+      "spell": 567590,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Echo of Nozdormu Rank 10 (567590) replaces Explode (800792)",
+      "actor": "pyro",
+      "metric": "temporary_spell_replacement",
+      "spell": 800792,
+      "equals": 567590,
+      "within_ms": 3000
     },
     {
       "action": "assert",
