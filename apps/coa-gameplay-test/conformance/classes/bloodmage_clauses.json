@@ -309,7 +309,7 @@
     "spell": 301064,
     "clause": "Increases your Agility by $s1%",
     "labels": [
-      "301064 effect_value e0 #0"
+      "301064 behaviour_metric_delta agility"
     ],
     "kind": "claim"
   },
@@ -317,14 +317,17 @@
     "spell": 301064,
     "clause": "and your hit rating by $s2% of your Agility.",
     "labels": [
-      "301064 effect_value e1 #1"
+      "301064 behaviour_metric_delta hit_rating"
     ],
     "kind": "claim"
   },
   {
     "spell": 301064,
     "clause": "In addition, Claw Sweep now generates additional threat.",
-    "labels": [],
+    "labels": [
+      "301064 behaviour_metric_delta claw_sweep_threat",
+      "301064 behaviour_metric_delta claw_sweep_threat_control"
+    ],
     "kind": "claim"
   },
   {
@@ -369,12 +372,16 @@
       {
         "claim": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage",
         "labels": [
-          "501679 effect_value e0 #0"
+          "501679 behaviour_metric_delta damage_base",
+          "501679 behaviour_metric_delta damage_ap",
+          "501679 behaviour_metric_delta damage_sp"
         ]
       },
       {
         "claim": "and generating Rage.",
-        "labels": []
+        "labels": [
+          "501679 behaviour_metric_delta rage"
+        ]
       }
     ],
     "kind": "claim"
@@ -456,7 +463,9 @@
     "spell": 500444,
     "clause": "Swipe at nearby enemies, dealing ${$m1+0+$AP*.2+$SP*0.2} Physical damage.",
     "labels": [
-      "500444 effect_value e0 #0"
+      "500444 behaviour_metric_delta damage_base",
+      "500444 behaviour_metric_delta damage_ap",
+      "500444 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
@@ -1462,7 +1471,7 @@
     "spell": 553267,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "553267 effect_value #5"
+      "553267 behaviour_metric_delta mortal_form"
     ],
     "kind": "claim"
   },
@@ -1473,19 +1482,20 @@
       {
         "claim": "and your spell haste by $s3%",
         "labels": [
-          "553267 effect_value e2 #0",
-          "553267 aura_amount e2 #0"
+          "553267 behaviour_metric_delta spell_haste"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "553267 aura_duration_ms #1"
+          "553267 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "increasing your Shadow damage dealt by $s3%",
-        "labels": []
+        "labels": [
+          "553267 behaviour_hit_ratio shadow_damage"
+        ]
       }
     ],
     "kind": "claim"
@@ -1493,7 +1503,10 @@
   {
     "spell": 553267,
     "clause": "At the end of the duration, or whenever you trigger Accursed Form, gain Bloodchaser instead.",
-    "labels": [],
+    "labels": [
+      "553267 behaviour_metric_delta bloodchaser_on_expiry",
+      "553267 behaviour_metric_delta bloodchaser_on_accursed"
+    ],
     "kind": "claim"
   },
   {
@@ -1503,18 +1516,20 @@
       {
         "claim": "increasing your Physical damage dealt by $s1%",
         "labels": [
-          "553267 effect_value 523721e0 #2"
+          "553267 behaviour_metric_delta bloodchaser_phys_dealt"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "553267 spell_duration 523721 #3"
+          "553267 behaviour_metric_delta bloodchaser_duration"
         ]
       },
       {
         "claim": "and reducing your Physical damage taken by $s1%",
-        "labels": []
+        "labels": [
+          "553267 behaviour_hit_ratio bloodchaser_phys_taken"
+        ]
       }
     ],
     "kind": "claim"
@@ -1522,14 +1537,18 @@
   {
     "spell": 553267,
     "clause": "While active, Bloodfang Bite now launches 1 Blood Shard,",
-    "labels": [],
+    "labels": [
+      "553267 behaviour_metric_delta bloodchaser_shard_count"
+    ],
     "kind": "claim"
   },
   {
     "spell": 553267,
     "clause": "dealing ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35} Shadow Damage to your target.",
     "labels": [
-      "553267 effect_value 504115e0 #4"
+      "553267 behaviour_metric_delta bloodchaser_shard_damage_base",
+      "553267 behaviour_metric_delta bloodchaser_shard_damage_ap",
+      "553267 behaviour_metric_delta bloodchaser_shard_damage_sp"
     ],
     "kind": "claim"
   },
@@ -3321,12 +3340,18 @@
       {
         "claim": "While in Eternal Curse, you now gain $s1% more attack power from Agility",
         "labels": [
-          "704661 effect_value e0 #0"
+          "704661 behaviour_metric_delta ap_base",
+          "704661 behaviour_metric_delta ap_from_agility",
+          "704661 behaviour_metric_delta ap_outside_eternal_control"
         ]
       },
       {
         "claim": "and $s1% more attack power from Strength.",
-        "labels": []
+        "labels": [
+          "704661 behaviour_metric_delta ap_base",
+          "704661 behaviour_metric_delta ap_from_strength",
+          "704661 behaviour_metric_delta ap_outside_eternal_control"
+        ]
       }
     ],
     "kind": "claim"
@@ -3861,18 +3886,20 @@
       {
         "claim": "increases the damage dealt by nearby party members by $504157s1%",
         "labels": [
-          "800766 effect_value 504157e0 #0"
+          "800766 behaviour_hit_ratio party_damage_dealt"
         ]
       },
       {
         "claim": "for $504157d",
         "labels": [
-          "800766 spell_duration 504157 #1"
+          "800766 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "and reduces damage taken by nearby party members by $504157s1%",
-        "labels": []
+        "labels": [
+          "800766 behaviour_hit_ratio party_damage_taken"
+        ]
       }
     ],
     "kind": "claim"
@@ -4576,12 +4603,14 @@
       {
         "claim": "Increases your maximum health by $s1%",
         "labels": [
-          "804201 effect_value e0 #0"
+          "804201 behaviour_metric_delta max_health"
         ]
       },
       {
         "claim": "and reduces the cost of your spells and abilities by $s1%.",
-        "labels": []
+        "labels": [
+          "804201 behaviour_metric_delta rage_cost"
+        ]
       }
     ],
     "kind": "claim"
@@ -5105,7 +5134,8 @@
     "spell": 807785,
     "clause": "Extend the duration of your active Cursed Form by $/1000;s2 sec",
     "labels": [
-      "807785 effect_value e1 #0"
+      "807785 behaviour_metric_delta cursed_form_extend",
+      "807785 behaviour_metric_delta cursed_form_base_control"
     ],
     "kind": "claim"
   },
@@ -5116,13 +5146,13 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "807785 aura_amplitude_ms #1"
+          "807785 behaviour_metric_delta tick_period"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "807785 aura_duration_ms #2"
+          "807785 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -5132,15 +5162,20 @@
     "spell": 807785,
     "clause": "each strike causing ${$m1+0+$AP*0.12} Physical damage.",
     "labels": [
-      "807785 effect_value e0 #3",
-      "807785 aura_amount e0 #3"
+      "807785 behaviour_metric_delta strike_damage_base",
+      "807785 behaviour_metric_delta strike_damage_ap"
     ],
     "kind": "claim"
   },
   {
     "spell": 807785,
     "clause": "$?s704115[\r\n\r\nWhen this ends, enemies in front of you suffer ${$806214m1+$806214ppl1+$AP*0.6} Physical damage.][]",
-    "labels": [],
+    "labels": [
+      "807785 behaviour_metric_delta clotting_gate",
+      "807785 behaviour_metric_delta clotting_cone",
+      "807785 behaviour_metric_delta clotting_damage_base",
+      "807785 behaviour_metric_delta clotting_damage_ap"
+    ],
     "kind": "claim"
   },
   {
@@ -5153,7 +5188,7 @@
     "spell": 806310,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "806310 effect_value #2"
+      "806310 behaviour_metric_delta mortal_form"
     ],
     "kind": "claim"
   },
@@ -5164,14 +5199,33 @@
       {
         "claim": "slowing your movement speed by $s3%",
         "labels": [
-          "806310 effect_value e2 #0",
-          "806310 aura_amount e2 #0"
+          "806310 behaviour_metric_delta slow"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "806310 aura_duration_ms #1"
+          "806310 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "making you immune to damage from spells and attacks",
+        "labels": [
+          "806310 behaviour_metric_delta damage_immune_phys",
+          "806310 behaviour_metric_delta damage_immune_spell"
+        ]
+      },
+      {
+        "claim": "preventing you from casting spells",
+        "labels": [
+          "806310 behaviour_metric_delta no_cast"
+        ]
+      },
+      {
+        "claim": "preventing you from attacking",
+        "labels": [
+          "806310 behaviour_metric_delta no_attack",
+          "806310 behaviour_metric_delta no_attack_can_attack"
         ]
       }
     ],
@@ -5180,13 +5234,25 @@
   {
     "spell": 806310,
     "clause": "$?s504088[\r\n\r\nWhen Liquify ends, leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies, and fear them for $806311d.][]",
-    "labels": [],
+    "labels": [
+      "806310 behaviour_metric_delta vampiric_pools_leech_base",
+      "806310 behaviour_metric_delta vampiric_pools_leech_sp",
+      "806310 behaviour_metric_delta vampiric_pools_fear_duration"
+    ],
     "kind": "claim"
   },
   {
     "spell": 806310,
     "clause": "Usable while stunned, feared or confused.",
-    "labels": [],
+    "labels": [
+      "806310 cast_state control",
+      "806310 cast_state state",
+      "806310 cast_state allowed",
+      "806310 behaviour_metric_delta usable_while_feared",
+      "806310 behaviour_metric_delta feared_control",
+      "806310 behaviour_metric_delta usable_while_confused",
+      "806310 behaviour_metric_delta confused_control"
+    ],
     "kind": "claim"
   },
   {
@@ -5435,7 +5501,9 @@
     "spell": 807774,
     "clause": "All damage and healing done is increased by $808013s1% at night, while indoors, or in a dungeon.",
     "labels": [
-      "807774 effect_value 808013e0 #0"
+      "807774 behaviour_metric_delta night_damage",
+      "807774 behaviour_metric_delta night_healing",
+      "807774 behaviour_metric_delta day_control"
     ],
     "kind": "claim"
   },

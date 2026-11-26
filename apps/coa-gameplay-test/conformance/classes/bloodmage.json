@@ -2368,6 +2368,3153 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 301064,
+      "name": "Uncanny Movement (+25% Agility)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases your Agility by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 301064,
+      "target": "caster",
+      "metric": "stat",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 60,
+      "expected": 75,
+      "expected_ratio": 1.25,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "301064 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue 1 (Agility), BasePoints 24 + DieSides 1 = 25% ($s1, Spell.dbc). Reads caster stat 1 (Agility) before (60, reference Eternal character) and after a real learn of 301064 (60 * 1.25 = 75, ratio 1.25). Reference search 2026-11-26: coa-history 301064: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 301064 matches installed Spell.dbc verbatim."
+    },
+    {
+      "spell": 301064,
+      "name": "Uncanny Movement (hit rating +5% of Agility)",
+      "kind": "metric_delta",
+      "variant": "hit_rating",
+      "label_suffix": "hit_rating",
+      "quote": "and your hit rating by $s2% of your Agility.",
+      "trigger_spell": 60235,
+      "gate_spell": 301064,
+      "target": "caster",
+      "phase_auras": [
+        [
+          8116,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8116,
+          0,
+          200
+        ]
+      ],
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 5
+      },
+      "before_expected": 10000,
+      "expected": 10016,
+      "expected_gain": 16,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 6
+            },
+            "before_expected": 0,
+            "expected": 16,
+            "tolerance": 1,
+            "source": "301064 Effect[1] MiscValue 224 covers CR_HIT_RANGED (bit 6): 5% of 325 Agility = 16.25 -> 16"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "combat_rating",
+            "fields": {
+              "rating": 7
+            },
+            "before_expected": 10000,
+            "expected": 10016,
+            "tolerance": 1,
+            "source": "301064 Effect[1] MiscValue 224 covers CR_HIT_SPELL (bit 7): 5% of 325 Agility = 16.25 -> 16"
+          }
+        ]
+      },
+      "observe_source": "301064 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT MiscValue 224 (CR_HIT_MELEE|RANGED|SPELL bits 5,6,7), MiscValueB 1 (Agility), BasePoints 4 + DieSides 1 = 5% ($s2, Spell.dbc). Precondition fixture 8116 (MOD_STAT Agility, amount +200 via phase_aura_amounts) lifts Agility to 260 before and 325 after 301064 (+25% Agi), giving int32(325 * 0.05) = 16 hit rating across melee (5), ranged (6) and spell (7). Reference search 2026-11-26: coa-history 301064: 0 events; coabuildhub 301064 matches verbatim."
+    },
+    {
+      "spell": 301064,
+      "name": "Uncanny Movement (Claw Sweep threat +50% with talent)",
+      "kind": "metric_delta",
+      "variant": "claw_sweep_threat",
+      "label_suffix": "claw_sweep_threat",
+      "quote": "In addition, Claw Sweep now generates additional threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 301064,
+      "trigger_spell": 500444,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 300,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.5,
+      "tolerance": 0.03,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 500444,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Claw Sweep 500444 lands once in treatment (0 in uncast control)"
+          }
+        ]
+      },
+      "observe_source": "301064 Effect[2] aura 108 SPELLMOD_THREAT BasePoints 49 + DieSides 1 = +50% on SpellClassMask [0,0,16384] (Claw Sweep 500444, Spell.dbc). Reads dummy threat_per_damage against caster after one non-crit Claw Sweep (525031 Cursed Form and 16255 -100% crit precondition fixtures, AP 20000): 1.50x with 301064 vs 1.00x in claw_sweep_threat_control. Reference search 2026-11-26: coa-history 301064: 0 events, 500444: 4892 hits in 16 logs; coabuildhub 301064 matches verbatim."
+    },
+    {
+      "spell": 301064,
+      "name": "Uncanny Movement (control: Claw Sweep threat without talent is 1.0x)",
+      "kind": "metric_delta",
+      "variant": "claw_sweep_threat_control",
+      "label_suffix": "claw_sweep_threat_control",
+      "quote": "In addition, Claw Sweep now generates additional threat.",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "gate_spell": 500444,
+      "trigger_spell": 500444,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 300,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "tolerance": 0.03,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 500444,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Claw Sweep 500444 lands once in control without 301064"
+          }
+        ]
+      },
+      "observe_source": "Control for claw_sweep_threat: identical Claw Sweep 500444 cast without 301064 learned yields 1.00x threat_per_damage on the dummy. Reference search 2026-11-26: coa-history 500444: 4892 hits in 16 logs."
+    },
+    {
+      "spell": 500444,
+      "name": "Claw Sweep (base formula Physical damage)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Swipe at nearby enemies, dealing ${$m1+0+$AP*.2+$SP*0.2} Physical damage.",
+      "trigger_spell": 500444,
+      "cast_in_before": false,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500444,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 188,
+      "after_at_least": 173,
+      "after_at_most": 202,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "500444 Effect[0] SCHOOL_DAMAGE SchoolMask 1 Physical, BasePoints 146 DieSides 29 (147..175), CasterAuraSpell 525031 (precondition fixture), EquippedItemClass -1 (core ignores subclass mask 41105), spell_bonus_data rank-1 500169 direct=0.2, ap=0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql). At reference AP 223, SP 0: raw 191.6..219.6 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 500444: 4892 hits across 16 logs; coabuildhub 500169 matches."
+    },
+    {
+      "spell": 500444,
+      "name": "Claw Sweep (Physical damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Swipe at nearby enemies, dealing ${$m1+0+$AP*.2+$SP*0.2} Physical damage.",
+      "trigger_spell": 500444,
+      "cast_in_before": false,
+      "target": "dummy",
+      "cast_power": 300,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500444,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 3836,
+      "after_at_least": 3815,
+      "after_at_most": 3860,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "500444 AP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500169): at AP 20000, raw 147..175 + 4000 = 4147..4175 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 500444: 4892 hits across 16 logs."
+    },
+    {
+      "spell": 500444,
+      "name": "Claw Sweep (Physical damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Swipe at nearby enemies, dealing ${$m1+0+$AP*.2+$SP*0.2} Physical damage.",
+      "trigger_spell": 500444,
+      "cast_in_before": false,
+      "target": "dummy",
+      "cast_power": 300,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500444,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 3836,
+      "after_at_least": 3815,
+      "after_at_most": 3860,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "500444 SP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500169): at SP 20000, AP 223, raw 191.6..219.6 + 4000 = 4191.6..4219.6 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 500444: 4892 hits across 16 logs."
+    },
+    {
+      "spell": 501679,
+      "name": "Ravenous Strike (base formula Physical damage)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage and generating Rage.",
+      "trigger_spell": 501679,
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501679,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 279,
+      "after_at_least": 266,
+      "after_at_most": 293,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "501679 Effect[0] HEALTH_LEECH SchoolMask 1 Physical, BasePoints 248 DieSides 26 (249..274), CasterAuraSpell 525031 (precondition fixture), spell_bonus_data rank-1 500123 direct=0.2, ap=0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql). At AP 223, SP 0: raw 293.6..318.6 before dummy armor. Reference search 2026-11-26: coa-history 501679: 1462 hits across 16 logs; coabuildhub 500123 matches."
+    },
+    {
+      "spell": 501679,
+      "name": "Ravenous Strike (Physical damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage and generating Rage.",
+      "trigger_spell": 501679,
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501679,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 3928,
+      "after_at_least": 3905,
+      "after_at_most": 3950,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "501679 AP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500123): at AP 20000, raw 249..274 + 4000 = 4249..4274 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 501679: 1462 hits across 16 logs."
+    },
+    {
+      "spell": 501679,
+      "name": "Ravenous Strike (Physical damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage and generating Rage.",
+      "trigger_spell": 501679,
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501679,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 3928,
+      "after_at_least": 3905,
+      "after_at_most": 3950,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "501679 SP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500123): at SP 20000, AP 223, raw 293.6..318.6 + 4000 = 4293.6..4318.6 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 501679: 1462 hits across 16 logs."
+    },
+    {
+      "spell": 501679,
+      "name": "Ravenous Strike (generates Rage via 805352)",
+      "kind": "metric_delta",
+      "variant": "rage",
+      "label_suffix": "rage",
+      "quote": "Strike an enemy, dealing ${$m1+0+$AP*0.2+$SP*.2} Physical damage and generating Rage.",
+      "trigger_spell": 501679,
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "phase_power_in_uncast_before": true,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 805352
+      },
+      "before_expected": 0,
+      "expected": 71,
+      "after_at_least": 51,
+      "after_at_most": 91,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_energize_count",
+            "fields": {
+              "spell": 805352
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "501679 Effect[1] triggers 805352 exactly once on hit (0 in uncast control)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "power",
+            "fields": {
+              "power": 1
+            },
+            "before_expected": 0,
+            "expected": 71,
+            "tolerance": 20,
+            "source": "501679 Effect[1] TRIGGER_SPELL_WITH_VALUE passes bp=50 to 805352 (DieSides 41 -> 51..91 internal Rage = 5.1..9.1 Rage)"
+          }
+        ]
+      },
+      "observe_source": "501679 Effect[1] Effect 142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (bp=49, ds=1, BaseLevel/SpellLevel 60 -> 50) triggers 805352 (Effect 30 ENERGIZE MiscValue 1 Rage, DieSides 41; SpellEffects.cpp:1850 + SpellInfo.cpp:482-514 -> 50 + irand(1,41) = 51..91 internal Rage units = 5.1..9.1 Rage). Control arm uncast reads 0. Reference search 2026-11-26: coa-history 805352: 2479 SPELL_ENERGIZE events across 27 logs (min 5, max 9, mean 7.0)."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Requires Mortal Form: refused under Cursed Form 802877)",
+      "kind": "metric_delta",
+      "variant": "mortal_form",
+      "label_suffix": "mortal_form",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "trigger_spell": 553267,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "learn": [
+        562720
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          553267,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 553267
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 802877
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Casting Blood Curse 562720 applies Mortal-Form blocker 802877 (AscensionBloodmageTalents.cpp:288-292)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 553267
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "553267 applies in Mortal Form (1) and is refused under Cursed Form 802877 (0)"
+          }
+        ]
+      },
+      "observe_source": "553267 ExcludeCasterAuraSpell 802877 (Spell.dbc; AscensionBloodmageTalents.cpp:1663-1665). Cast succeeds (0) in Mortal Form and fails with SPELL_FAILED_CASTER_AURASTATE (22) after a real cast of Blood Curse 562720 which applies 802877. Reference search 2026-11-26: coa-history 553267: 103 casts in 12 logs; coabuildhub 553267 says Requires Mortal Form."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (spell haste +30%)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Enter a bloodsurge, enraging you and increasing your Shadow damage dealt and your spell haste by $s3% for $d.",
+      "trigger_spell": 553267,
+      "cast_in_before": false,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 0.769231,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "553267 Effect[2] aura 216 SPELL_AURA_HASTE_SPELLS MiscValue 126, BasePoints 29 + DieSides 1 = +30% ($s3, Spell.dbc). Live cast_speed_multiplier drops from 1.0 (uncast control) to 1/1.30 = 0.769231 (+-0.001). Reference search 2026-11-26: coa-history 553267: 103 casts in 12 logs; coabuildhub 553267 shows older +20% spell crit state (G-9)."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Enter a bloodsurge, enraging you and increasing your Shadow damage dealt and your spell haste by $s3% for $d.",
+      "trigger_spell": 553267,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 553267
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 19200,
+      "expiry_wait_ms": 1500,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          19100,
+          19600
+        ],
+        "expired": [
+          20500,
+          21200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "553267 DurationIndex 18 = 20000 ms ($d, Spell.dbc). Held at game_time [19100, 19600] ms (excluding -10% = 18000 ms) and expired by [20500, 21200] ms (excluding +10% = 22000 ms); uncast control reads 0. Reference search 2026-11-26: coa-history 553267: 103 applies/removes in 12 logs; coabuildhub 553267 says 20 sec."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Shadow damage dealt +30%)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "Enter a bloodsurge, enraging you and increasing your Shadow damage dealt and your spell haste by $s3% for $d.",
+      "expected": 1.3,
+      "observe_spell": 578305,
+      "learn": [
+        578305,
+        553267
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 553267,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "expected_source": "553267 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 32 (Shadow), BasePoints 29 + DieSides 1 = +30% ($s3, Spell.dbc). Non-crit Bloodbolt 578305 (SchoolMask 32 Shadow, health leech restores caster health each trial; 823764 beeg spellpen precondition fixture, SP 20000): treatment casts real 553267 vs control without -> 1.30x. Reference search 2026-11-26: coa-history 553267: 103 casts in 12 logs."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (grants Bloodchaser at expiry)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_on_expiry",
+      "label_suffix": "bloodchaser_on_expiry",
+      "quote": "At the end of the duration, or whenever you trigger Accursed Form, gain Bloodchaser instead.",
+      "trigger_spell": 553267,
+      "cast_in_before": false,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 523721
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 20800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 553267
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Bloodsurge 553267 has expired by 20800 ms, replaced by Bloodchaser 523721"
+          }
+        ]
+      },
+      "observe_source": "AscensionBloodmageTalents.cpp:568-570: OnAuraRemove of 553267 with AURA_REMOVE_BY_EXPIRE casts 523721 Bloodchaser. Uncast control reads 0; 20800 ms after casting 553267 (past 20000 ms duration), 523721 is active (1) and 553267 is gone (0). Reference search 2026-11-26: coa-history 523721: 103 applies matching 103 Bloodsurge casts in 12 logs."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (grants Bloodchaser instead when triggering Accursed Form)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_on_accursed",
+      "label_suffix": "bloodchaser_on_accursed",
+      "quote": "At the end of the duration, or whenever you trigger Accursed Form, gain Bloodchaser instead.",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        553267
+      ],
+      "setup_target": "caster",
+      "setup_in_before": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 562572,
+      "cast_in_before": false,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 523721
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 553267
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Bloodsurge 553267 is active in control (1) and removed when Accursed Form 562572 grants Bloodchaser instead (0)"
+          }
+        ]
+      },
+      "observe_source": "AscensionBloodmageTalents.cpp:513-518: OnAuraApply of Accursed Form 562572 while 553267 is active removes 553267 and casts 523721 Bloodchaser immediately. Before casts 553267 alone (553267=1, 523721=0); after casts 562572 (553267=0, 523721=1). Reference search 2026-11-26: coa-history 523721: 103 applies in 12 logs."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Bloodchaser +20% Physical damage dealt)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_phys_dealt",
+      "label_suffix": "bloodchaser_phys_dealt",
+      "quote": "gain Bloodchaser instead.@s:523721:0@",
+      "learn": [
+        501679,
+        562572
+      ],
+      "setup_casts": [
+        553267,
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 501679,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501679,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 3850,
+      "expected": 4620,
+      "expected_ratio": 1.2,
+      "tolerance": 0.015,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 523721
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Bloodchaser 523721 absent in control (0), earned via real 553267 -> 562572 in treatment (1)"
+          }
+        ]
+      },
+      "observe_source": "523721 Bloodchaser Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 1 (Physical), BasePoints 19 + DieSides 1 = +20% ($s1, Spell.dbc). Non-crit Ravenous Strike 501679 at AP +20000 (roll +-0.3%): before casts 501679 without 523721 (~3928); after earns real 523721 via 553267 -> 562572 and casts 501679 -> ratio 1.20 +- 0.015 (strictly excludes 1.0 and 1.4). Reference search 2026-11-26: coa-history 523721: 103 applies."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Bloodchaser lasts 30 sec)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_duration",
+      "label_suffix": "bloodchaser_duration",
+      "quote": "gain Bloodchaser instead.@s:523721:0@",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        553267
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 562572,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 523721
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 28800,
+      "expiry_wait_ms": 2200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          28700,
+          29300
+        ],
+        "expired": [
+          30600,
+          31500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "523721 DurationIndex 9 = 30000 ms ($d, Spell.dbc). Real 553267 -> 562572 grants 523721; held at game_time [28700, 29300] ms (excluding -10% = 27000 ms) and expired by [30600, 31500] ms (excluding +10% = 33000 ms); uncast control reads 0. Reference search 2026-11-26: coa-history 523721: 103 applies/102 removes in 12 logs."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Bloodchaser -20% Physical damage taken)",
+      "kind": "taken_hit",
+      "variant": "bloodchaser_phys_taken",
+      "label_suffix": "bloodchaser_phys_taken",
+      "judge": "damage_ratio",
+      "expected": 0.8,
+      "quote": "gain Bloodchaser instead.@s:523721:0@",
+      "strike_spell": 92559,
+      "caster_health_pct": 100,
+      "caster_max_health": 100000,
+      "trials": 10,
+      "learn": [
+        553267,
+        562572
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "opening_casts": [
+            [
+              562572,
+              "caster"
+            ]
+          ],
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 523721,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              562572,
+              0
+            ],
+            [
+              802877,
+              0
+            ]
+          ],
+          "opening_casts": [
+            [
+              553267,
+              "caster"
+            ],
+            [
+              562572,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 1600,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 523721,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "expected_source": "523721 Bloodchaser Effect[2] aura 87 SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN MiscValue 1 (Physical), BasePoints -21 + DieSides 1 = -20% ($s1, Spell.dbc). Both arms enter Accursed Form 562572; treatment earns real 523721 via 553267 -> 562572; striker casts 92559 (1000 Physical) 10x per arm -> 0.80x damage taken. Reference search 2026-11-26: coa-history 523721: 103 applies in 12 logs."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Bloodchaser: Bloodfang Bite launches 1 Blood Shard)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_shard_count",
+      "label_suffix": "bloodchaser_shard_count",
+      "quote": "gain Bloodchaser instead.@s:523721:0@",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        553267,
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "cast_power": 300,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          505366,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 505366
+            },
+            "before_expected": 2,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Bloodfang Bite consumes 0 shards without Bloodchaser (2) and 1 shard under Bloodchaser (1)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 523721
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Bloodchaser 523721 absent in control (0), earned via 553267 -> 562572 in treatment (1)"
+          }
+        ]
+      },
+      "observe_source": "AscensionBloodmageBloodShards.cpp:224-225: Bloodfang Bite 572551 hit while Bloodchaser 523721 is active consumes 1 stored Blood Shard (505366 precondition fixture = 2 stacks) and launches 1 Blood Shard 504115 (EMPOWERED_SHARD). Control casts 572551 without 523721 (0 shard hits, 2 stacks left); treatment earns real 523721 via 553267 -> 562572 and casts 572551 (1 shard hit, 1 stack left). Reference search 2026-11-26: coa-history 504115: 65560 hits in 18 logs."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Bloodchaser Blood Shard base Shadow damage)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_shard_damage_base",
+      "label_suffix": "bloodchaser_shard_damage_base",
+      "quote": "gain Bloodchaser instead.@s:523721:0@",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        553267,
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "cast_power": 300,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          505366,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 51,
+      "after_at_least": 50,
+      "after_at_most": 53,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "504115 Blood Shard BasePoints 17 + DieSides 1 = 18, ppl = 0, AscensionBloodmageBloodShards.cpp:52,136-139 EMPOWERED_SHARD = {0.15 AP, 0.35 SP}: at AP 223, SP 0 -> int32(18 + 223 * 0.15) = 51 Shadow damage (non-crit via 16255 -100% crit, 823764 spellpen precondition fixtures). Reference search 2026-11-26: coa-history 504115: 65560 hits."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Bloodchaser Blood Shard Shadow damage at +10000 AP)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_shard_damage_ap",
+      "label_suffix": "bloodchaser_shard_damage_ap",
+      "quote": "gain Bloodchaser instead.@s:523721:0@",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        553267,
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "cast_power": 300,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_attack_power": 10000,
+      "phase_auras": [
+        [
+          505366,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 1551,
+      "after_at_least": 1545,
+      "after_at_most": 1560,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "504115 EMPOWERED_SHARD AP term (0.15 * AP, AscensionBloodmageBloodShards.cpp:52,137): at AP 10000, SP 0 -> 18 + 1500 = 1518 Shadow damage (non-crit). Reference search 2026-11-26: coa-history 504115: 65560 hits across 18 logs."
+    },
+    {
+      "spell": 553267,
+      "name": "Bloodsurge (Bloodchaser Blood Shard Shadow damage at +10000 SP)",
+      "kind": "metric_delta",
+      "variant": "bloodchaser_shard_damage_sp",
+      "label_suffix": "bloodchaser_shard_damage_sp",
+      "quote": "gain Bloodchaser instead.@s:523721:0@",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        553267,
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "cast_power": 300,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 10000,
+      "phase_auras": [
+        [
+          505366,
+          2,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 3551,
+      "after_at_least": 3545,
+      "after_at_most": 3560,
+      "wait_ms": 1500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "504115 EMPOWERED_SHARD SP term (0.35 * SP, AscensionBloodmageBloodShards.cpp:52,138): at SP 10000, AP 223 -> int32(18 + 33.45 + 3500) = 3551 Shadow damage (non-crit). Reference search 2026-11-26: coa-history 504115: 65560 hits across 18 logs."
+    },
+    {
+      "spell": 704661,
+      "name": "Feral Strength (baseline AP gain from Agility and Strength in Eternal Curse)",
+      "kind": "metric_delta",
+      "variant": "ap_base",
+      "label_suffix": "ap_base",
+      "quote": "While in Eternal Curse, you now gain $s1% more attack power from Agility and Strength.",
+      "trigger_spell": 800157,
+      "gate_spell": 704661,
+      "target": "caster",
+      "phase_auras": [
+        [
+          800157,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 223,
+      "expected": 284.5,
+      "expected_gain": 61.5,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "704661 Effect[0] SPELLMOD_EFFECT2 +50 and Effect[1] SPELLMOD_EFFECT3 +50 boost 804320 Eternal Curse Hidden Effect[1] (aura 268 AP from Agility, 0 -> 50%) and Effect[2] (aura 268 AP from Strength, 0 -> 50%; Spell.dbc, AscensionBloodmageTalents.cpp:487-489, StatSystem.cpp:656-658). Reference Agi 60, Str 63 -> +30 + 31.5 = +61.5 AP on fresh Eternal Curse 800157 cast after learning 704661. Reference search 2026-11-26: coa-history 704661: 0 events; coabuildhub 704661 matches verbatim."
+    },
+    {
+      "spell": 704661,
+      "name": "Feral Strength (+50% AP from Agility in Eternal Curse)",
+      "kind": "metric_delta",
+      "variant": "ap_from_agility",
+      "label_suffix": "ap_from_agility",
+      "quote": "While in Eternal Curse, you now gain $s1% more attack power from Agility and Strength.",
+      "trigger_spell": 800157,
+      "gate_spell": 704661,
+      "target": "caster",
+      "phase_auras": [
+        [
+          800157,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          8116,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8116,
+          0,
+          200
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 423,
+      "expected": 584.5,
+      "expected_gain": 161.5,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Isolates 704661 Agility contribution: precondition fixture 8116 (MOD_STAT Agility, +200 via phase_aura_amounts) raises Agility 60 -> 260 in both phases, raising 704661 AP gain from +61.5 (ap_base) to +161.5 (+100.0 = exact 50% of +200 Agi). Reference search 2026-11-26: coa-history 704661: 0 events; coabuildhub 704661 matches verbatim."
+    },
+    {
+      "spell": 704661,
+      "name": "Feral Strength (+50% AP from Strength in Eternal Curse)",
+      "kind": "metric_delta",
+      "variant": "ap_from_strength",
+      "label_suffix": "ap_from_strength",
+      "quote": "While in Eternal Curse, you now gain $s1% more attack power from Agility and Strength.",
+      "trigger_spell": 800157,
+      "gate_spell": 704661,
+      "target": "caster",
+      "phase_auras": [
+        [
+          800157,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          8119,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          8119,
+          0,
+          200
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 423,
+      "expected": 584.5,
+      "expected_gain": 161.5,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Isolates 704661 Strength contribution: precondition fixture 8119 (MOD_STAT Strength, +200 via phase_aura_amounts) raises Strength 63 -> 263 in both phases, raising 704661 AP gain from +61.5 (ap_base) to +161.5 (+100.0 = exact 50% of +200 Str). Reference search 2026-11-26: coa-history 704661: 0 events; coabuildhub 704661 matches verbatim."
+    },
+    {
+      "spell": 704661,
+      "name": "Feral Strength (control: 0 AP gain outside Eternal Curse)",
+      "kind": "metric_delta",
+      "variant": "ap_outside_eternal_control",
+      "label_suffix": "ap_outside_eternal_control",
+      "quote": "While in Eternal Curse, you now gain $s1% more attack power from Agility and Strength.",
+      "trigger_spell": 60235,
+      "gate_spell": 704661,
+      "target": "caster",
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 223,
+      "expected": 223,
+      "expected_gain": 0,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Form condition control for 704661: without Eternal Curse 800157 active, learning 704661 adds 0 AP. Reference search 2026-11-26: coa-history 704661: 0 events; coabuildhub 704661 matches verbatim."
+    },
+    {
+      "spell": 800766,
+      "name": "Enraging Howls (party member damage dealt +5%)",
+      "kind": "hit_ratio",
+      "variant": "party_damage_dealt",
+      "label_suffix": "party_damage_dealt",
+      "quote": "Casting Howl spells now increases the damage dealt and reduces damage taken by nearby party members by $504157s1% for $504157d.",
+      "expected": 1.05,
+      "observe_spell": 707592,
+      "caster": "ally",
+      "target": "dummy",
+      "ally_distance": 5,
+      "learn": [
+        501682
+      ],
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "cast_wait_ms": 1600,
+      "control": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 501682,
+            "target": "caster",
+            "power": 300
+          }
+        ]
+      },
+      "treatment": {
+        "learn": [
+          800766
+        ],
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 501682,
+            "target": "caster",
+            "power": 300
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 10,
+      "void_on_cast_failure": true,
+      "expected_source": "800766 Effect[0] aura 42 proc triggers 504157 on Howl cast (rev_20260920_40_bloodmage_cast_proc_triggers.sql:71 mask [0,4,133248] matches 501682 flags [0,0,2048], CasterAuraSpell 524861 precondition fixture, 250 Rage). 504157 Effect[0] Effect 35 APPLY_AREA_AURA_PARTY aura 79 BasePoints 4 + DieSides 1 = +5% all damage done (Spell.dbc). Grouped ally 5 yd away casts fixed-damage Glacial Impact 707592 (823764 spellpen precondition fixture): 1.05x with 800766. Reference search 2026-11-26: coa-history 800766/504157: 0 events; coabuildhub 800766 matches verbatim."
+    },
+    {
+      "spell": 800766,
+      "name": "Enraging Howls (504157 lasts 10 sec on party member)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Casting Howl spells now increases the damage dealt and reduces damage taken by nearby party members by $504157s1% for $504157d.",
+      "trigger_spell": 501682,
+      "gate_spell": 800766,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 504157
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9300,
+      "expiry_wait_ms": 1400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9200,
+          9600
+        ],
+        "expired": [
+          10500,
+          10900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504157 DurationIndex 1 = 10000 ms ($504157d, Spell.dbc). Measured on grouped party member after real Howl 501682 cast (524861 precondition fixture): held at game_time [9200, 9600] ms (excluding -10% = 9000 ms) and expired by [10500, 10900] ms (excluding +10% = 11000 ms); uncast control reads 0. Reference search 2026-11-26: coa-history 504157: 0 events; coabuildhub 800766 says 10 sec."
+    },
+    {
+      "spell": 800766,
+      "name": "Enraging Howls (party member damage taken -5%)",
+      "kind": "taken_hit",
+      "variant": "party_damage_taken",
+      "label_suffix": "party_damage_taken",
+      "judge": "damage_ratio",
+      "struck": "ally",
+      "expected": 0.95,
+      "quote": "Casting Howl spells now increases the damage dealt and reduces damage taken by nearby party members by $504157s1% for $504157d.",
+      "strike_spell": 92559,
+      "trials": 6,
+      "cast_power": 300,
+      "learn": [
+        501682
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              524861,
+              1
+            ]
+          ],
+          "opening_casts": [
+            [
+              501682,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 504157,
+              "equals": 0
+            }
+          ]
+        },
+        {
+          "name": "treatment",
+          "learn": [
+            800766
+          ],
+          "auras": [
+            [
+              524861,
+              1
+            ]
+          ],
+          "opening_casts": [
+            [
+              501682,
+              "caster"
+            ]
+          ],
+          "opening_settle_ms": 500,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 504157,
+              "equals": 1
+            }
+          ]
+        }
+      ],
+      "expected_source": "504157 Effect[1] Effect 35 APPLY_AREA_AURA_PARTY aura 87 BasePoints -6 + DieSides 1 = -5% all damage taken (Spell.dbc). Both arms cast Howl 501682 (524861 precondition fixture); treatment learns 800766 so 504157 applies to grouped ally. Striker casts 92559 (1000 Physical) 6x at ally per arm -> 0.95x damage taken. Reference search 2026-11-26: coa-history 800766/504157: 0 events; coabuildhub 800766 matches verbatim."
+    },
+    {
+      "spell": 804201,
+      "name": "Eternal Hunt (+10% maximum health)",
+      "kind": "metric_delta",
+      "variant": "max_health",
+      "label_suffix": "max_health",
+      "quote": "Increases your maximum health and reduces the cost of your spells and abilities by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 804201,
+      "target": "caster",
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1000,
+      "expected": 1100,
+      "expected_ratio": 1.1,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "804201 Effect[0] aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT BasePoints 9 + DieSides 1 = +10% ($s1, Spell.dbc). Reads live caster max_health before and after real learn of 804201 -> ratio 1.10 +- 0.002. Reference search 2026-11-26: coa-history 804201: 0 events; coabuildhub 804201 shows older 5% state (G-9)."
+    },
+    {
+      "spell": 804201,
+      "name": "Eternal Hunt (-10% spell and ability cost)",
+      "kind": "metric_delta",
+      "variant": "rage_cost",
+      "label_suffix": "rage_cost",
+      "quote": "Increases your maximum health and reduces the cost of your spells and abilities by $s1%.",
+      "trigger_spell": 578305,
+      "gate_spell": 804201,
+      "target": "dummy",
+      "disable_regeneration": true,
+      "cast_power": 1000,
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 700,
+      "expected": 730,
+      "expected_gain": 30,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "804201 Effect[1] aura 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT MiscValue 127 (all schools), BasePoints -11 + DieSides 1 = -10% (Spell.dbc). Bloodbolt 578305 costs 300 internal Rage (30 Rage) from 1000 -> leaves 700 before 804201 and 730 after (270 cost, exact +30 gain, 0 tolerance). Reference search 2026-11-26: coa-history 804201: 0 events; coabuildhub 804201 older 5% (G-9)."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (extends active Accursed Form by 3 sec to 33 sec)",
+      "kind": "metric_delta",
+      "variant": "cursed_form_extend",
+      "label_suffix": "cursed_form_extend",
+      "quote": "Extend the duration of your active Cursed Form by $/1000;s2 sec",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "trigger_spell": 807785,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562572
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 31150,
+      "expiry_wait_ms": 450,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          31050,
+          31300
+        ],
+        "expired": [
+          31500,
+          31800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "807785 Effect[1] Effect 177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION MiscValue 562572 (Accursed Form, base 30000 ms), BasePoints 2999 + DieSides 1 = +3000 ms ($/1000;s2 = 3 sec, Spell.dbc, SpellEffects.cpp:899-920). 562572 is cast 1600 ms before 807785 (remaining ~28400 -> ~31400 ms after 807785): held at game_time [31050, 31300] ms (excluding +2700 ms = -10% of 3 s extension) and expired by [31500, 31800] ms (excluding +3300 ms = +10%); paired with cursed_form_base_control (30000 ms). Reference search 2026-11-26: coa-history 807785: 2661 casts in 14 logs."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (control: unextended Accursed Form lasts 30 sec)",
+      "kind": "metric_delta",
+      "variant": "cursed_form_base_control",
+      "label_suffix": "cursed_form_base_control",
+      "quote": "Extend the duration of your active Cursed Form by $/1000;s2 sec",
+      "trigger_spell": 562572,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562572
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 29500,
+      "expiry_wait_ms": 900,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29400,
+          29700
+        ],
+        "expired": [
+          30200,
+          30600
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Base duration control for cursed_form_extend: Accursed Form 562572 alone (DurationIndex 9 = 30000 ms, Spell.dbc) is held at game_time [29400, 29700] ms and expired by [30200, 30600] ms."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (strikes every 0.5 sec)",
+      "kind": "metric_delta",
+      "variant": "tick_period",
+      "label_suffix": "tick_period",
+      "quote": "and strike nearby enemies every $t1 sec for $d,",
+      "trigger_spell": 807785,
+      "target": "dummy",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807785,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 806502,
+        "target": "dummy",
+        "since_spell": 807785
+      },
+      "before_expected": 500,
+      "expected": 500,
+      "tolerance": 45,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "807785 Effect[0] aura 227 PERIODIC_TRIGGER_SPELL_WITH_VALUE EffectAmplitude 500 ms ($t1 = 0.5 sec, Spell.dbc), triggering 806502 on dummy (524861 Cursed Form precondition fixture). Median interval between 806502 damage events is 500 +- 45 ms (excluding +-10%: 450 and 550 ms); uncast control reads 0. Reference search 2026-11-26: coa-history 806502: 53642 hits in 19 logs; coabuildhub 806212 says every 0.5 sec."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (lasts 3 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and strike nearby enemies every $t1 sec for $d,",
+      "trigger_spell": 807785,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807785
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 2780,
+      "expiry_wait_ms": 420,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2720,
+          2950
+        ],
+        "expired": [
+          3050,
+          3280
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "807785 DurationIndex 27 = 3000 ms ($d, Spell.dbc; 524861 precondition fixture). Held at game_time [2720, 2950] ms (excluding -10% = 2700 ms) and expired by [3050, 3280] ms (excluding +10% = 3300 ms); uncast control reads 0. Reference search 2026-11-26: coa-history 807785: 2661 casts in 14 logs; coabuildhub 806212 says for 3 sec."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (base strike Physical damage over 6 ticks)",
+      "kind": "metric_delta",
+      "variant": "strike_damage_base",
+      "label_suffix": "strike_damage_base",
+      "quote": "each strike causing ${$m1+0+$AP*0.12} Physical damage.",
+      "trigger_spell": 807785,
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806502,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 809,
+      "after_at_least": 775,
+      "after_at_most": 845,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806502,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "3000 ms duration / 500 ms amplitude produces exactly 6 strikes of 806502"
+          }
+        ]
+      },
+      "observe_source": "807785 Effect[0] BasePoints 115 DieSides 11 (116..126) triggers 806502 (ap_bonus 0.12, rev_20261010_91) 6 times over 3000 ms. At AP 223: per-strike raw 142.76..152.76 -> 6 strikes raw 856..917 before dummy armor (non-crit via 16255 -100%, 524861 precondition fixture). Reference search 2026-11-26: coa-history 806502: 53642 hits."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (strike Physical damage at +10000 AP)",
+      "kind": "metric_delta",
+      "variant": "strike_damage_ap",
+      "label_suffix": "strike_damage_ap",
+      "quote": "each strike causing ${$m1+0+$AP*0.12} Physical damage.",
+      "trigger_spell": 807785,
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_attack_power": 10000,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806502,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 7376,
+      "after_at_least": 7340,
+      "after_at_most": 7415,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 806502,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Confirms 6 strikes of 806502 at +10000 AP"
+          }
+        ]
+      },
+      "observe_source": "806502 AP scaling 0.12 (rev_20261010_91): at AP 10000, per-strike raw 1316..1326 -> 6 strikes raw 7896..7956 before dummy armor (non-crit). Reference search 2026-11-26: coa-history 806502: 53642 hits."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (Clotting 806214 gated on talent 704115)",
+      "kind": "metric_delta",
+      "variant": "clotting_gate",
+      "label_suffix": "clotting_gate",
+      "quote": "$?s704115[ When this ends, enemies in front of you suffer ${$806214m1+$806214ppl1+$AP*0.6} Physical damage.][]",
+      "trigger_spell": 807785,
+      "gate_spell": 704115,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806214,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "807785 tooltip gates the closing Clotting 806214 hit on talent $?s704115 (Clotting 704115). Before (704115 absent) must produce 0 hits of 806214; after learning 704115 must produce 1 hit of 806214 at the 3000 ms end of 807785. Reference search 2026-11-26: coa-history 806214: 6236 hits in 16 logs."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (Clotting 806214 frontal cone hits inside, misses outside and behind)",
+      "kind": "metric_delta",
+      "variant": "clotting_cone",
+      "label_suffix": "clotting_cone",
+      "quote": "$?s704115[ When this ends, enemies in front of you suffer ${$806214m1+$806214ppl1+$AP*0.6} Physical damage.][]",
+      "trigger_spell": 807785,
+      "learn": [
+        704115
+      ],
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "cone": {
+          "angle": 54,
+          "radius": 10,
+          "offset": 3.5,
+          "source": "Clotting 806214 EffectImplicitTargetA[0]=54 (TARGET_UNIT_CONE_ENEMY_54, 54 deg at Spell.cpp:1292-1293, no spell_cone row) and EffectRadiusIndex[0]=13 (10 yd in SpellRadius.dbc)"
+        }
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806214,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806214 Clotting EffectImplicitTargetA[0]=54 (TARGET_UNIT_CONE_ENEMY_54, 54 deg cone) and EffectRadiusIndex[0]=13 (10 yd, Spell.dbc): strikes dummy inside cone, spares area1 outside edge and area2 behind caster. Reference search 2026-11-26: coa-history 806214: 6236 hits; coabuildhub 704115 says 10 yd frontal cone."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (Clotting 806214 base Physical damage)",
+      "kind": "metric_delta",
+      "variant": "clotting_damage_base",
+      "label_suffix": "clotting_damage_base",
+      "quote": "$?s704115[ When this ends, enemies in front of you suffer ${$806214m1+$806214ppl1+$AP*0.6} Physical damage.][]",
+      "trigger_spell": 807785,
+      "learn": [
+        704115
+      ],
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806214,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 662,
+      "after_at_least": 655,
+      "after_at_most": 675,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806214 Clotting Effect[0] BasePoints 599 DieSides 1 (600), ppl 0, ap_bonus 0.6 (rev_20261010_91): at AP 223, raw 600 + 133.8 = 733.8 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 806214: 6236 hits in 16 logs."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (Clotting 806214 Physical damage at +10000 AP)",
+      "kind": "metric_delta",
+      "variant": "clotting_damage_ap",
+      "label_suffix": "clotting_damage_ap",
+      "quote": "$?s704115[ When this ends, enemies in front of you suffer ${$806214m1+$806214ppl1+$AP*0.6} Physical damage.][]",
+      "trigger_spell": 807785,
+      "learn": [
+        704115
+      ],
+      "cast_in_before": false,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_attack_power": 10000,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806214,
+        "target": "dummy",
+        "school_mask": 1
+      },
+      "before_expected": 0,
+      "expected": 6136,
+      "after_at_least": 6110,
+      "after_at_most": 6165,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806214 Clotting AP scaling 0.6 (rev_20261010_91): at AP 10000, raw 600 + 6000 = 6600 before dummy armor (non-crit). Reference search 2026-11-26: coa-history 806214: 6236 hits in 16 logs."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (Requires Mortal Form: refused under Cursed Form 802877)",
+      "kind": "metric_delta",
+      "variant": "mortal_form",
+      "label_suffix": "mortal_form",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "trigger_spell": 806310,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "learn": [
+        562720
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          806310,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 806310
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 802877
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Casting Blood Curse 562720 applies Mortal-Form blocker 802877"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806310
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "806310 applies in Mortal Form (1) and is refused under Cursed Form 802877 (0)"
+          }
+        ]
+      },
+      "observe_source": "806310 ExcludeCasterAuraSpell 802877 (Spell.dbc; AscensionBloodmageTalents.cpp:1663-1665). Cast succeeds (0) in Mortal Form and fails with SPELL_FAILED_CASTER_AURASTATE (22) after real Blood Curse 562720. Reference search 2026-11-26: coa-history 806310: 14 casts in 8 logs; coabuildhub 806310 matches verbatim."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (slows movement speed by 30%)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
+      "trigger_spell": 806310,
+      "cast_in_before": false,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 0.7,
+      "expected_ratio": 0.7,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806310 Effect[2] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -31 + DieSides 1 = -30% ($s3, Spell.dbc). Caster run_speed_rate drops from 1.0 (uncast control) to 0.70 +- 0.001. Reference search 2026-11-26: coa-history 806310: 14 casts in 8 logs; coabuildhub 806310 says 30%."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
+      "trigger_spell": 806310,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 806310
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 5600,
+      "expiry_wait_ms": 750,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5500,
+          5850
+        ],
+        "expired": [
+          6150,
+          6550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "806310 DurationIndex 32 = 6000 ms ($d, Spell.dbc). Held at game_time [5500, 5850] ms (excluding -10% = 5400 ms) and expired by [6150, 6550] ms (excluding +10% = 6600 ms); uncast control reads 0. Reference search 2026-11-26: coa-history 806310: 14 applies/removes in 8 logs; coabuildhub 806310 says 6 sec."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (immune to Physical attack damage)",
+      "kind": "metric_delta",
+      "variant": "damage_immune_phys",
+      "label_suffix": "damage_immune_phys",
+      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        806310
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "strike": {
+        "spell": 92559,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 92559,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 2,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806310 Effect[1] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 127 (all schools, Spell.dbc). Striker casts 92559 (Physical) 2x in control (count 2) and 2x under real Liquify 806310 (0 new hits -> cumulative 2). Reference search 2026-11-26: coa-history 806310: 14 casts; coabuildhub 806310 matches verbatim."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (immune to spell damage)",
+      "kind": "metric_delta",
+      "variant": "damage_immune_spell",
+      "label_suffix": "damage_immune_spell",
+      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        806310
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "strike": {
+        "spell": 41394,
+        "health": 50000,
+        "max_health": 100000,
+        "count": 2,
+        "wait_ms": 200
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 41394,
+        "caster": "striker",
+        "target": "caster"
+      },
+      "before_expected": 2,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "806310 Effect[1] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 127 (all schools, Spell.dbc). Striker casts 41394 (Holy spell) 2x in control (count 2) and 2x under real Liquify 806310 (0 new hits -> cumulative 2). Reference search 2026-11-26: coa-history 806310: 14 casts; coabuildhub 806310 matches verbatim."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (prevents casting spells)",
+      "kind": "metric_delta",
+      "variant": "no_cast",
+      "label_suffix": "no_cast",
+      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
+      "trigger_spell": 578305,
+      "target": "dummy",
+      "cast_power": 300,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "setup_casts": [
+        806310
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 500,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 578305
+      },
+      "before_expected": 0,
+      "expected": 105,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "observe_source": "806310 Effect[0] aura 263 SPELL_AURA_ALLOW_ONLY_ABILITY sets PLAYER_ALLOW_ONLY_ABILITY (SpellAuraEffects.cpp:3420); Spell.cpp:5837-5838 refuses casts with SPELL_FAILED_SPELL_IN_PROGRESS (105). Bloodbolt 578305 succeeds in control (0) and is refused (105) while 806310 is active. Reference search 2026-11-26: coabuildhub 806310 matches verbatim."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (prevents melee attacking)",
+      "kind": "metric_delta",
+      "variant": "no_attack",
+      "label_suffix": "no_attack",
+      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
+      "trigger_spell": 806310,
+      "gate_spell": 806310,
+      "gate_cast": true,
+      "target": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "attack_swings": 1,
+      "metric": "melee_attack_count",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "expected_gain": 0,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 300,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806310
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Liquify 806310 is absent in control (0) and still active throughout the 3300 ms swing window in treatment (1)"
+          }
+        ]
+      },
+      "observe_source": "806310 tooltip states 'preventing you from attacking or casting spells'. gate_cast casts 806310 (6000 ms) between phases: control lands melee swings (>=1), then while 806310 is still active (aura 806310 == 1) 0 additional swings should land (expected_gain 0). Reference search 2026-11-26: coabuildhub 806310 matches verbatim."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (can_attack disabled while active)",
+      "kind": "metric_delta",
+      "variant": "no_attack_can_attack",
+      "label_suffix": "no_attack_can_attack",
+      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
+      "trigger_spell": 806310,
+      "cast_in_before": false,
+      "target": "caster",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "can_attack",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806310 tooltip states 'preventing you from attacking or casting spells'. Reads Unit::IsValidAttackTarget (can_attack) on the dummy before (1) and 500 ms after casting 806310 (expected 0). Reference search 2026-11-26: coabuildhub 806310 matches verbatim."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (Vampiric Pools 806311 leech base damage and heal, gated on 504088)",
+      "kind": "metric_delta",
+      "variant": "vampiric_pools_leech_base",
+      "label_suffix": "vampiric_pools_leech_base",
+      "quote": "$?s504088[ When Liquify ends, leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies, and fear them for $806311d.][]",
+      "trigger_spell": 806310,
+      "gate_spell": 504088,
+      "target": "caster",
+      "select_dummy": true,
+      "target_entry": 6,
+      "caster_health": [
+        10000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806311,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 476,
+      "after_at_least": 472,
+      "after_at_most": 480,
+      "wait_ms": 6600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 806311,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 476,
+            "tolerance": 5,
+            "source": "806311 Effect[0] HEALTH_LEECH heals caster for 100% of damage dealt (473..478, 0 without 504088)"
+          }
+        ]
+      },
+      "observe_source": "AscensionBloodmageTalents.cpp:549-551: OnAuraRemove of 806310 with 504088 Vampiric Pools casts 806311 (Effect[0] HEALTH_LEECH SchoolMask 32, BasePoints 95 DieSides 6 ppl 6.4 from level 1 -> 473..478 at level 60; spell_bonus_data direct=1.0 rev_20260914_04). False branch (without 504088): 0 damage/heal; true branch: 473..478 damage and matching leech heal on Kobold Vermin 6 (non-crit via 16255 -100%, 823764 spellpen). Reference search 2026-11-26: coa-history 806311: 3 hits/3 heals in 1 log; coabuildhub 504088 says 474 + 100% SP."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (Vampiric Pools 806311 leech at +10000 SP)",
+      "kind": "metric_delta",
+      "variant": "vampiric_pools_leech_sp",
+      "label_suffix": "vampiric_pools_leech_sp",
+      "quote": "$?s504088[ When Liquify ends, leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies, and fear them for $806311d.][]",
+      "trigger_spell": 806310,
+      "gate_spell": 504088,
+      "target": "caster",
+      "select_dummy": true,
+      "target_entry": 6,
+      "caster_health": [
+        10000,
+        30000
+      ],
+      "player_spell_power": {
+        "amount": 10000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806311,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 10476,
+      "after_at_least": 10470,
+      "after_at_most": 10482,
+      "wait_ms": 6600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "806311 SP scaling 1.0 (rev_20260914_04_bloodmage_talents.sql): at SP 10000, 473..478 + 10000 = 10473..10478 Shadow leech damage (0 without 504088). Reference search 2026-11-26: coa-history 806311: 3 hits/heals."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (Vampiric Pools 806311 fears nearby enemies for 6 sec)",
+      "kind": "metric_delta",
+      "variant": "vampiric_pools_fear_duration",
+      "label_suffix": "vampiric_pools_fear_duration",
+      "quote": "$?s504088[ When Liquify ends, leech ${$806311m1+$806311ppl1+$SP*1} health from nearby enemies, and fear them for $806311d.][]",
+      "trigger_spell": 806310,
+      "gate_spell": 504088,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "select_dummy": true,
+      "target_entry": 6,
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 806311,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 11500,
+      "expiry_wait_ms": 900,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          11450,
+          11850
+        ],
+        "expired": [
+          12200,
+          12550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageTalents.cpp:1742-1755 patches 806311 with DurationIndex 32 (6000 ms) and Effect[1] SPELL_AURA_MOD_FEAR. Fired when 806310 expires at 6000 ms -> fear on Kobold Vermin 6 (Humanoid) is held at game_time [11450, 11850] ms (5450..5850 ms after 806311 land, excluding -10% = 5400 ms) and expired by [12200, 12550] ms (6200..6550 ms, excluding +10% = 6600 ms)."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (usable while stunned)",
+      "kind": "cast_state",
+      "quote": "Usable while stunned, feared or confused.",
+      "state_aura": 56,
+      "control_spell": 553267,
+      "blocked_result": 108
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (usable while feared)",
+      "kind": "metric_delta",
+      "variant": "usable_while_feared",
+      "label_suffix": "usable_while_feared",
+      "quote": "Usable while stunned, feared or confused.",
+      "trigger_spell": 806310,
+      "target": "caster",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "after_auras": [
+        [
+          12096,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "phase_auras": [
+        [
+          806310,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 806310
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 12096
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Fear 12096 is active on caster in treatment (1) and absent in control (0)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806310
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "806310 applies both unfear (1) and while feared (1)"
+          }
+        ]
+      },
+      "observe_source": "806310 AttributesEx5 0x60008 includes SPELL_ATTR5_USABLE_WHILE_FEARED (0x20000, Spell.dbc). Dummy applies Fear 12096 (after_auras precondition fixture): 806310 still casts (0) while feared, paired with feared_control where Bloodsurge 553267 is refused with SPELL_FAILED_FLEEING (34)."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (control: Bloodsurge refused while feared)",
+      "kind": "metric_delta",
+      "variant": "feared_control",
+      "label_suffix": "feared_control",
+      "quote": "Usable while stunned, feared or confused.",
+      "trigger_spell": 553267,
+      "target": "caster",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "after_auras": [
+        [
+          12096,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "phase_auras": [
+        [
+          553267,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 553267
+      },
+      "before_expected": 0,
+      "expected": 34,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "observe_source": "Control for usable_while_feared: under identical Fear 12096, Bloodsurge 553267 (no USABLE_WHILE_FEARED flag) succeeds in before (0) and is refused with SPELL_FAILED_FLEEING (34) in after."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (usable while confused)",
+      "kind": "metric_delta",
+      "variant": "usable_while_confused",
+      "label_suffix": "usable_while_confused",
+      "quote": "Usable while stunned, feared or confused.",
+      "trigger_spell": 806310,
+      "target": "caster",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "after_auras": [
+        [
+          2094,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "phase_auras": [
+        [
+          806310,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 806310
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 2094
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Blind 2094 (SPELL_AURA_MOD_CONFUSE, 10 s) is active on caster in treatment (1) and absent in control (0)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806310
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "806310 applies both unconfused (1) and while confused (1)"
+          }
+        ]
+      },
+      "observe_source": "806310 AttributesEx5 0x60008 includes SPELL_ATTR5_USABLE_WHILE_CONFUSED (0x40000, Spell.dbc). Dummy applies Blind 2094 (SPELL_AURA_MOD_CONFUSE): 806310 still casts (0) while confused, paired with confused_control where Bloodsurge 553267 is refused with SPELL_FAILED_CONFUSED (26)."
+    },
+    {
+      "spell": 806310,
+      "name": "Liquify (control: Bloodsurge refused while confused)",
+      "kind": "metric_delta",
+      "variant": "confused_control",
+      "label_suffix": "confused_control",
+      "quote": "Usable while stunned, feared or confused.",
+      "trigger_spell": 553267,
+      "target": "caster",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "after_auras": [
+        [
+          2094,
+          1,
+          "caster",
+          "dummy"
+        ]
+      ],
+      "phase_auras": [
+        [
+          553267,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 553267
+      },
+      "before_expected": 0,
+      "expected": 26,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "observe_source": "Control for usable_while_confused: under identical Blind 2094 (SPELL_AURA_MOD_CONFUSE), Bloodsurge 553267 (no USABLE_WHILE_CONFUSED flag) succeeds in before (0) and is refused with SPELL_FAILED_CONFUSED (26) in after."
+    },
+    {
+      "spell": 807774,
+      "name": "Night Stalker (night outdoors: +5% damage done)",
+      "kind": "metric_delta",
+      "variant": "night_damage",
+      "label_suffix": "night_damage",
+      "quote": "All damage and healing done is increased by $808013s1% at night, while indoors, or in a dungeon.",
+      "hour": 0,
+      "trigger_spell": 578305,
+      "gate_spell": 807774,
+      "target": "dummy",
+      "cast_power": 300,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 9000,
+      "expected": 9450,
+      "expected_ratio": 1.05,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 808013
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "At hour 0 (night), 807774 periodic tick (10000 ms, expire_ms 10500) applies Night Stalker buff 808013"
+          }
+        ]
+      },
+      "observe_source": "807774 Effect[0] aura 23 periodic trigger (10000 ms) of 808013 (Effect[0] aura 79 +5% all damage done, Effect[1] aura 136 +5% all healing done, Spell.dbc); aura_ascension_bloodmage_night_stalker (AscensionBloodmageTalents.cpp:1347-1366, rev_20260930_30) allows tick when IsNight() || !IsOutdoors() || IsDungeon(). At realm-local hour 0 (night), expire_ms 10500 after learning 807774 fires the first tick -> 808013 active and non-crit Bloodbolt 578305 (SP 20000, 823764 spellpen) scales by 1.05x (+-0.005). Reference search 2026-11-26: coa-history 808013: 11 applies in 6 logs; coabuildhub 807774 says +5% at night."
+    },
+    {
+      "spell": 807774,
+      "name": "Night Stalker (night outdoors: +5% healing done)",
+      "kind": "metric_delta",
+      "variant": "night_healing",
+      "label_suffix": "night_healing",
+      "quote": "All damage and healing done is increased by $808013s1% at night, while indoors, or in a dungeon.",
+      "hour": 0,
+      "trigger_spell": 504085,
+      "gate_spell": 807774,
+      "target": "caster",
+      "cast_power": 300,
+      "caster_health": [
+        10000,
+        100000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504085,
+        "target": "caster"
+      },
+      "before_expected": 11000,
+      "expected": 11550,
+      "expected_ratio": 1.05,
+      "tolerance": 0.005,
+      "wait_ms": 3000,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 808013
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "At hour 0 (night), 807774 applies 808013 before treatment heal cast"
+          }
+        ]
+      },
+      "observe_source": "808013 Effect[1] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT MiscValue 127 +5% (Spell.dbc). At hour 0 (night), expire_ms 10500 after learning 807774 applies 808013 and non-crit Sanguine Mend 504085 (SP 20000, 16255 -100% crit) heals for 1.05x (+-0.005). Reference search 2026-11-26: coa-history 808013: 11 applies in 6 logs."
+    },
+    {
+      "spell": 807774,
+      "name": "Night Stalker (control: day outdoors gives 0% bonus and no 808013)",
+      "kind": "metric_delta",
+      "variant": "day_control",
+      "label_suffix": "day_control",
+      "quote": "All damage and healing done is increased by $808013s1% at night, while indoors, or in a dungeon.",
+      "hour": 12,
+      "trigger_spell": 578305,
+      "gate_spell": 807774,
+      "target": "dummy",
+      "cast_power": 300,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 578305,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 9000,
+      "expected": 9000,
+      "expected_ratio": 1.0,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 808013
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "At hour 12 (day outdoors), aura_ascension_bloodmage_night_stalker prevents 808013 application (0)"
+          }
+        ]
+      },
+      "observe_source": "Daytime outdoors control for night_damage/night_healing: at realm-local hour 12 outdoors, AscensionBloodmageTalents.cpp:1354-1358 calls PreventDefaultAction() and strips 808013 -> 808013 stays 0 and Bloodbolt 578305 damage ratio stays 1.00 +- 0.005."
     }
   ],
   "player_observations": [],
