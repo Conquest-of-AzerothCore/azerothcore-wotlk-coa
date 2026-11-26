@@ -11,6 +11,7 @@ constexpr unsigned CrowEntry = 994310;
 constexpr unsigned ChestEntry = 994311;
 constexpr unsigned DropEntry = 994312;
 constexpr unsigned OpenSpell = 68398;
+constexpr unsigned HomeboundPortal = 93187;
 constexpr unsigned AppearanceDebuff = 12248;
 constexpr int AppearanceDebuffMs = 60000;
 constexpr float AppearanceKnockbackRange = 30.0f;

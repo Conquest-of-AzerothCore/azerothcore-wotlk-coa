@@ -315,11 +315,14 @@ bool Hides(SpellInfo const* info)
 
 bool MovesCaster(SpellInfo const* info)
 {
+    if (info->Id == HomeboundPortal)
+        return true;
     for (SpellEffectInfo const& effect : info->GetEffects())
         switch (effect.Effect)
         {
             case SPELL_EFFECT_TELEPORT_UNITS:
             case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
+            case SPELL_EFFECT_STUCK:
             case SPELL_EFFECT_LEAP:
             case SPELL_EFFECT_LEAP_BACK:
             case SPELL_EFFECT_CHARGE:
