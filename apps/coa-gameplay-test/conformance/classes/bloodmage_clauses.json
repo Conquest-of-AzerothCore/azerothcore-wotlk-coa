@@ -1497,9 +1497,7 @@
     "claims": [
       {
         "claim": "healing up to $524906i allies",
-        "labels": [
-          "524907 behaviour_metric_delta allies_reach"
-        ]
+        "labels": []
       },
       {
         "claim": "within $524906a1 yds",
@@ -1518,12 +1516,6 @@
         "labels": [
           "524907 behaviour_metric_delta heal_base",
           "524907 behaviour_metric_delta heal_sp"
-        ]
-      },
-      {
-        "claim": "Coalesce a powerful sanguine orb above you",
-        "labels": [
-          "524907 behaviour_metric_delta omitted_hp_cost_alert"
         ]
       }
     ],
@@ -1551,7 +1543,7 @@
       {
         "claim": "and $/10;t3 Rage",
         "labels": [
-          "524907 behaviour_metric_delta rage_amount_alert"
+          "524907 behaviour_metric_delta rage_amount"
         ]
       }
     ],
@@ -4092,6 +4084,7 @@
       {
         "claim": "dealing ${$m1+0+$sps*0.35} Shadow damage to enemies",
         "labels": [
+          "572907 behaviour_metric_delta damage_base_alert",
           "572907 behaviour_metric_delta damage_sp_alert"
         ]
       },
@@ -4471,10 +4464,19 @@
   {
     "spell": 801959,
     "clause": "giving them a $801959h% chance to trigger a Call of the Darkwing when they take direct damage.",
-    "labels": [
-      "801959 behaviour_metric_delta ally_triggers_darkwing"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "giving them a $801959h% chance",
+        "labels": []
+      },
+      {
+        "claim": "to trigger a Call of the Darkwing when they take direct damage",
+        "labels": [
+          "801959 behaviour_metric_delta ally_triggers_darkwing"
+        ]
+      }
+    ]
   },
   {
     "spell": 801959,
@@ -4979,7 +4981,8 @@
         "labels": [
           "804811 behaviour_metric_delta bite_cost",
           "804811 behaviour_metric_delta bite_gcd_held",
-          "804811 behaviour_metric_delta bite_gcd_ready"
+          "804811 behaviour_metric_delta bite_gcd_ready_alert",
+          "804811 behaviour_metric_delta bite_gcd_1000ms_confirm"
         ]
       },
       {
@@ -5014,7 +5017,8 @@
       {
         "claim": "strike the target for ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} Physical Damage",
         "labels": [
-          "804811 behaviour_metric_delta bat_bite_damage"
+          "804811 behaviour_metric_delta bat_bite_damage",
+          "804811 behaviour_metric_delta bat_bite_damage_sp"
         ]
       },
       {
