@@ -26,21 +26,21 @@
       "id": "pyro",
       "race": 2,
       "class": 24,
-      "level": 42,
+      "level": 80,
       "allow_regeneration": false
     },
     {
       "id": "wd",
       "race": 2,
       "class": 13,
-      "level": 42,
+      "level": 80,
       "allow_regeneration": false
     },
     {
       "id": "shaman",
       "race": 2,
       "class": 7,
-      "level": 42,
+      "level": 80,
       "allow_regeneration": false
     }
   ],
@@ -86,21 +86,6 @@
       "actor": "shaman",
       "item": 5175,
       "count": 1
-    },
-    {
-      "action": "set_power",
-      "actor": "pyro",
-      "value": 3000
-    },
-    {
-      "action": "set_power",
-      "actor": "wd",
-      "value": 3000
-    },
-    {
-      "action": "set_power",
-      "actor": "shaman",
-      "value": 3000
     },
     {
       "action": "cast",
