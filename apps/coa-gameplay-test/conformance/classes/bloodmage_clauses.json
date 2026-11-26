@@ -853,17 +853,35 @@
   {
     "spell": 504281,
     "clause": "Curse an enemy, causing them to bleed for $o1 Shadow damage over $d$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][].",
-    "labels": [
-      "504281 effect_value #0",
-      "504281 aura_duration_ms #1"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "causing them to bleed for $o1 Shadow damage",
+        "labels": [
+          "504281 behaviour_metric_delta bleed_damage"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "504281 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "$?s680731[ and instantly regenerate $805912s1% of your maximum Rage][]",
+        "labels": [
+          "504281 behaviour_metric_delta black_heart_instant_rage",
+          "504281 behaviour_metric_delta black_heart_periodic_rage"
+        ]
+      }
+    ]
   },
   {
     "spell": 504281,
     "clause": "All periodic damage dealt to an enemy affected by Vampyr's Kiss is replicated on them equal to $681395s1% of the value.",
     "labels": [
-      "504281 effect_value 681395e0 #2"
+      "504281 behaviour_metric_delta periodic_replication",
+      "504281 behaviour_metric_delta periodic_replication_external_dot"
     ],
     "kind": "claim"
   },
@@ -1151,36 +1169,59 @@
   {
     "spell": 504728,
     "clause": "Transforms your Blood Curse into Transgression.",
-    "labels": [],
-    "kind": "claim"
-  },
-  {
-    "spell": 504728,
-    "clause": "Enter a unique Cursed Form for $d that does not disable the use of Mortal Form abilities$?s560073[, granting spell damage equal to $s1% of your Spirit][].",
     "labels": [
-      "504728 spell_duration 801076 #0"
+      "504728 behaviour_metric_delta transform_blood_curse"
     ],
     "kind": "claim"
   },
   {
     "spell": 504728,
+    "clause": "Enter a unique Cursed Form for $d that does not disable the use of Mortal Form abilities$?s560073[, granting spell damage equal to $s1% of your Spirit][].",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Enter a unique Cursed Form for $d",
+        "labels": [
+          "504728 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "that does not disable the use of Mortal Form abilities",
+        "labels": [
+          "504728 behaviour_metric_delta mortal_abilities_usable",
+          "504728 behaviour_metric_delta mortal_abilities_blood_curse_control"
+        ]
+      },
+      {
+        "claim": "$?s560073[, granting spell damage equal to $s1% of your Spirit][]",
+        "labels": [
+          "504728 behaviour_metric_delta crimson_terror_spirit_sp"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 504728,
     "clause": "While active, direct spell damage triggers a Vampiric Feast, dealing $801076s3% additional Shadow damage to enemies,",
     "labels": [
-      "504728 effect_value 801076e2 #1"
+      "504728 behaviour_metric_delta vampiric_feast_damage"
     ],
     "kind": "claim"
   },
   {
     "spell": 504728,
     "clause": "healing you equal to 50% of the damage dealt.",
-    "labels": [],
+    "labels": [
+      "504728 behaviour_metric_delta vampiric_feast_heal"
+    ],
     "kind": "claim"
   },
   {
     "spell": 504728,
     "clause": "@ext:While in a Cursed Form you are treated as if you were a Demon.:ext@",
     "labels": [
-      "504728 effect_value #2"
+      "504728 behaviour_metric_delta demon_creature_type",
+      "504728 behaviour_metric_delta demon_creature_type_blood_curse_sanity"
     ],
     "kind": "claim"
   },
@@ -1538,17 +1579,36 @@
     "spell": 524865,
     "clause": "$?a524861[][]Requires Mortal Form",
     "labels": [
-      "524865 effect_value #7"
+      "524865 behaviour_metric_delta mortal_form_accursed",
+      "524865 behaviour_metric_delta mortal_form_blood_curse"
     ],
     "kind": "claim"
   },
   {
     "spell": 524865,
     "clause": "Gorge on blood magic, entering a dramatically improved Cursed Form for $d, transforming your Bloodfang Bite into Crimson Maw, but draining your health over time.",
-    "labels": [
-      "524865 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "entering a dramatically improved Cursed Form for $d",
+        "labels": [
+          "524865 behaviour_metric_delta duration",
+          "524865 behaviour_metric_delta speed"
+        ]
+      },
+      {
+        "claim": "transforming your Bloodfang Bite into Crimson Maw",
+        "labels": [
+          "524865 behaviour_metric_delta crimson_maw_transform"
+        ]
+      },
+      {
+        "claim": "but draining your health over time.",
+        "labels": [
+          "524865 behaviour_metric_delta health_drain"
+        ]
+      }
+    ]
   },
   {
     "spell": 524865,
@@ -1557,13 +1617,13 @@
       {
         "claim": "every $t3 sec",
         "labels": [
-          "524865 aura_amplitude_ms #1"
+          "524865 behaviour_metric_delta hematoma_period"
         ]
       },
       {
         "claim": "within $a3 yds",
         "labels": [
-          "524865 effect_radius e2 #2"
+          "524865 behaviour_metric_delta hematoma_radius"
         ]
       }
     ],
@@ -1573,7 +1633,7 @@
     "spell": 524865,
     "clause": "applying Hematoma for $803392d.",
     "labels": [
-      "524865 spell_duration 803392 #3"
+      "524865 behaviour_metric_delta hematoma_duration"
     ],
     "kind": "claim"
   },
@@ -1581,7 +1641,9 @@
     "spell": 524865,
     "clause": "Deals ${$m1+0+$sps*.15+$AP*.1} Shadow Damage",
     "labels": [
-      "524865 effect_value 803392e0 #4"
+      "524865 behaviour_metric_delta hematoma_damage_base",
+      "524865 behaviour_metric_delta hematoma_damage_sp",
+      "524865 behaviour_metric_delta hematoma_damage_ap"
     ],
     "kind": "claim"
   },
@@ -1589,7 +1651,7 @@
     "spell": 524865,
     "clause": "and increases the damage the target takes from subsequent applications of Hematoma by $s2%,",
     "labels": [
-      "524865 effect_value 803392e1 #5"
+      "524865 behaviour_metric_delta hematoma_stack_amp"
     ],
     "kind": "claim"
   },
@@ -1597,14 +1659,16 @@
     "spell": 524865,
     "clause": "stacking $803392u times.",
     "labels": [
-      "524865 max_stacks 803392 #6"
+      "524865 behaviour_metric_delta hematoma_max_stacks"
     ],
     "kind": "claim"
   },
   {
     "spell": 524865,
     "clause": "Generates Rage based on damage dealt.",
-    "labels": [],
+    "labels": [
+      "524865 behaviour_metric_delta hematoma_rage"
+    ],
     "kind": "claim"
   },
   {
@@ -2524,7 +2588,7 @@
     "spell": 573357,
     "clause": "Animate a bloody amalgam to aid you in combat for $d.",
     "labels": [
-      "573357 aura_duration_ms #0"
+      "573357 behaviour_metric_delta summon_duration"
     ],
     "kind": "claim"
   },
@@ -2532,7 +2596,9 @@
     "spell": 573357,
     "clause": "The amalgam will periodically unleash a Blood Strike on its target, dealing ${$589023m1*$<scalingbp>+$sps*.4+$AP*.15} Shadow damage,",
     "labels": [
-      "573357 effect_value 589023e0 #1"
+      "573357 behaviour_metric_delta blood_strike_base",
+      "573357 behaviour_metric_delta blood_strike_sp",
+      "573357 behaviour_metric_delta blood_strike_ap"
     ],
     "kind": "claim"
   },
@@ -2540,23 +2606,59 @@
     "spell": 573357,
     "clause": "healing you for $504711s1% of the damage dealt.",
     "labels": [
-      "573357 effect_value 504711e0 #2"
+      "573357 behaviour_metric_delta blood_strike_heal"
     ],
     "kind": "claim"
   },
   {
     "spell": 573357,
     "clause": "$?s681078[\r\n\r\nEmpowered: Duration increased by $/1000;681398s2 sec and you summon 1 additional amalgam.][]$?s560259[ \r\n\r\nDuration increased by $/1000;570744s1 sec per stack of Thirst.][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Empowered: Duration increased by $/1000;681398s2 sec",
+        "labels": [
+          "573357 behaviour_metric_delta empowered_duration"
+        ]
+      },
+      {
+        "claim": "and you summon 1 additional amalgam.",
+        "labels": [
+          "573357 behaviour_metric_delta empowered_count"
+        ]
+      },
+      {
+        "claim": "$?s560259[ \r\n\r\nDuration increased by $/1000;570744s1 sec per stack of Thirst.][]",
+        "labels": [
+          "573357 behaviour_metric_delta vampyr_lord_thirst_duration",
+          "573357 behaviour_metric_delta blood_constructor_thirst_duration"
+        ]
+      }
+    ]
   },
   {
     "spell": 575335,
     "clause": "Increases the critical strike chance and critical damage of Ravenous Strike and Claw Sweep by $s1% against Diseased targets.",
-    "labels": [
-      "575335 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance",
+        "labels": [
+          "575335 behaviour_metric_delta ravenous_strike_crit_chance",
+          "575335 behaviour_metric_delta ravenous_strike_crit_chance_clean",
+          "575335 behaviour_metric_delta claw_sweep_crit_chance"
+        ]
+      },
+      {
+        "claim": "and critical damage of Ravenous Strike and Claw Sweep by $s1% against Diseased targets.",
+        "labels": [
+          "575335 behaviour_metric_delta ravenous_strike_crit_dmg",
+          "575335 behaviour_metric_delta ravenous_strike_clean_control",
+          "575335 behaviour_metric_delta claw_sweep_crit_dmg",
+          "575335 behaviour_metric_delta bloodfang_bite_wrong_mask"
+        ]
+      }
+    ]
   },
   {
     "spell": 578120,
@@ -4851,53 +4953,85 @@
   {
     "spell": 803585,
     "clause": "Brings a dead player back to life with $s1% health and mana.",
-    "labels": [
-      "803585 effect_value e0 #0"
-    ],
+    "labels": [],
     "kind": "claim"
   },
   {
     "spell": 803585,
     "clause": "For the next $d,",
-    "labels": [
-      "803585 aura_duration_ms #1"
-    ],
+    "labels": [],
     "kind": "claim"
   },
   {
     "spell": 803585,
     "clause": "the target takes $s3% increased healing, but being damaged ends the effect.",
-    "labels": [
-      "803585 effect_value e2 #2",
-      "803585 aura_amount e2 #2"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "the target takes $s3% increased healing,",
+        "labels": [
+          "803585 behaviour_metric_delta heal_taken_pct"
+        ]
+      },
+      {
+        "claim": "but being damaged ends the effect.",
+        "labels": [
+          "803585 behaviour_metric_delta damage_ends_effect"
+        ]
+      }
+    ]
   },
   {
     "spell": 803585,
     "clause": "Cannot be cast when in combat.",
-    "labels": [],
+    "labels": [
+      "803585 behaviour_metric_delta in_combat_refused"
+    ],
     "kind": "claim"
   },
   {
     "spell": 801952,
     "clause": "Mend blood and bone, healing an ally for $s1% of their maximum health and applies Sated.",
-    "labels": [
-      "801952 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "healing an ally for $s1% of their maximum health",
+        "labels": [
+          "801952 behaviour_metric_delta heal_pct"
+        ]
+      },
+      {
+        "claim": "and applies Sated.",
+        "labels": [
+          "801952 behaviour_metric_delta applies_sated"
+        ]
+      }
+    ]
   },
   {
     "spell": 801952,
     "clause": "$?s681078[\r\n\r\nEmpowered: Heals for an additional $681027s1% of your maximum health and costs $681027s2% less Rage.][]",
-    "labels": [],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Empowered: Heals for an additional $681027s1% of your maximum health",
+        "labels": [
+          "801952 behaviour_metric_delta empowered_heal"
+        ]
+      },
+      {
+        "claim": "and costs $681027s2% less Rage.",
+        "labels": [
+          "801952 behaviour_metric_delta empowered_rage_cost"
+        ]
+      }
+    ]
   },
   {
     "spell": 801952,
     "clause": "Cannot be affected by Fleshcraft for $d.",
     "labels": [
-      "801952 spell_duration 532125 #1"
+      "801952 behaviour_metric_delta sated_blocks_recast"
     ],
     "kind": "claim"
   },
@@ -5401,13 +5535,15 @@
       {
         "claim": "reduces the cooldown of your Bloodsurge by $/1000;804603s1 sec",
         "labels": [
-          "804602 effect_value 804603e0 #0"
+          "804602 cost_gate 553267 bloodsurge_cd_cut without",
+          "804602 cost_gate 553267 bloodsurge_cd_cut with",
+          "804602 cost_gate 553267 bloodsurge_cd_cut beyond"
         ]
       },
       {
         "claim": "Every $/1000;T1 second you remain in a Cursed Form",
         "labels": [
-          "804602 effect_value #1"
+          "804602 behaviour_metric_delta cursed_form_ticks"
         ]
       }
     ],
