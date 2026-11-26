@@ -13,6 +13,7 @@
 #include <limits>
 #include <map>
 #include <mutex>
+#include <tuple>
 #include <utility>
 
 namespace
@@ -68,11 +69,51 @@ bool IsPiercingShot(SpellInfo const* info)
     return IsRangerSpell(info) && (chain == CHAIN_SKULLPIERCER || chain == CHAIN_PRECISION_SHOT);
 }
 
+bool HasDirectDamageEffect(SpellInfo const* info)
+{
+    if (!info)
+        return false;
+    for (SpellEffectInfo const& effect : info->Effects)
+        switch (effect.Effect)
+        {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                return true;
+            default:
+                break;
+        }
+    return false;
+}
+
+bool IsIncendiarySpenderInfo(SpellInfo const* info)
+{
+    return IsRangerSpell(info) && info->CasterAuraSpell == SPELL_ADVANTAGE &&
+        sSpellMgr->GetFirstSpellInChain(info->Id) != SPELL_INCENDIARY_SHOT &&
+        HasDirectDamageEffect(info);
+}
+
 bool IsIncendiarySpender(Spell const* spell)
 {
-    SpellInfo const* info = spell->GetSpellInfo();
-    return !spell->IsTriggered() && IsRangerSpell(info) && info->CasterAuraSpell == SPELL_ADVANTAGE &&
-        sSpellMgr->GetFirstSpellInChain(info->Id) != SPELL_INCENDIARY_SHOT;
+    return !spell->IsTriggered() && IsIncendiarySpenderInfo(spell->GetSpellInfo());
+}
+
+Spell* ResolveIncendiarySpender(Player* player, Spell* spell, Unit* target)
+{
+    if (IsIncendiarySpender(spell))
+        return spell;
+    if (!spell->IsTriggered() || target->IsAlive())
+        return nullptr;
+    Spell* parent = player->GetCurrentSpell(CURRENT_GENERIC_SPELL);
+    if (!parent || parent == spell || !IsIncendiarySpender(parent))
+        return nullptr;
+    uint32 const id = spell->GetSpellInfo()->Id;
+    for (SpellEffectInfo const& effect : parent->GetSpellInfo()->Effects)
+        if (effect.TriggerSpell == id)
+            return parent;
+    return nullptr;
 }
 
 void ApplyPierced(Player* player, Unit* target, uint32 damage)
@@ -84,20 +125,20 @@ void ApplyPierced(Player* player, Unit* target, uint32 damage)
 }
 
 std::mutex landedDamageLock;
-std::map<std::pair<ObjectGuid, ObjectGuid>, uint32> landedDamage;
+std::map<std::tuple<ObjectGuid, ObjectGuid, uint32>, uint32> landedDamage;
 
-void RememberLandedDamage(Unit* attacker, Unit* target, uint32 damage)
+void RememberLandedDamage(Unit* attacker, Unit* target, uint32 spellId, uint32 damage)
 {
     std::lock_guard<std::mutex> lock(landedDamageLock);
     if (landedDamage.size() > 4096)
         landedDamage.clear();
-    landedDamage[{attacker->GetGUID(), target->GetGUID()}] = damage;
+    landedDamage[{attacker->GetGUID(), target->GetGUID(), spellId}] = damage;
 }
 
-uint32 TakeLandedDamage(Unit* attacker, Unit* target)
+uint32 TakeLandedDamage(Unit* attacker, Unit* target, uint32 spellId)
 {
     std::lock_guard<std::mutex> lock(landedDamageLock);
-    auto itr = landedDamage.find({attacker->GetGUID(), target->GetGUID()});
+    auto itr = landedDamage.find({attacker->GetGUID(), target->GetGUID(), spellId});
     if (itr == landedDamage.end())
         return 0;
     uint32 damage = itr->second;
@@ -196,16 +237,22 @@ public:
             !IsRangerSpell(info))
             return;
 
-        if (!damage)
-            damage = TakeLandedDamage(player, target);
+        Spell* spender = target != player ? ResolveIncendiarySpender(player, spell, target) : nullptr;
+        bool const piercing = IsPiercingShot(info);
+        if (spender == spell || piercing)
+        {
+            uint32 const remembered = TakeLandedDamage(player, target, info->Id);
+            if (!damage)
+                damage = remembered;
+        }
         if (!damage)
             return;
 
-        if (target != player && IsIncendiarySpender(spell))
-            TriggerIncendiaryExplosion(spell, player, target, damage);
+        if (spender)
+            TriggerIncendiaryExplosion(spender, player, target, damage);
         if (target == player || !target->IsAlive())
             return;
-        if (critical && IsPiercingShot(info))
+        if (critical && piercing)
             ApplyPierced(player, target, damage);
     }
 };
@@ -220,9 +267,9 @@ public:
     {
         Player* player = attacker ? attacker->ToPlayer() : nullptr;
         if (!player || player->getClass() != CLASS_RANGER || !target || !spellInfo || damage <= 0 ||
-            !IsRangerSpell(spellInfo) || spellInfo->CasterAuraSpell != SPELL_ADVANTAGE)
+            (!IsIncendiarySpenderInfo(spellInfo) && !IsPiercingShot(spellInfo)))
             return;
-        RememberLandedDamage(player, target, uint32(damage));
+        RememberLandedDamage(player, target, spellInfo->Id, uint32(damage));
     }
 };
 
