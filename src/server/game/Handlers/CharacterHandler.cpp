@@ -1173,6 +1173,7 @@ void WorldSession::HandlePlayerLoginToCharInWorld(Player* pCurrChar)
     if (pCurrChar->GetVehicle())
         pCurrChar->ExitVehicle();
 
+    pCurrChar->SetQuestLogExtended(false);
     pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
