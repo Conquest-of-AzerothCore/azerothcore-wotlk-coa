@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Holy Atal'ai Band pickup stands on clear ground in Swamp of Sorrows (#10127)",
-  "contract": "#10127 reported the Holy Atal'ai Band pickup (entry 254368, guid 6940634, item 354233) missing in Swamp of Sorrows. The map-pass row (-10491.000, -4031.300, 17.417) sat 0.395 yd below terrain (17.8122) and inside Stranglethornruins02.m2. Expected: the pickup stands at its authoritative first-pass realm-dump position (-10488.902, -4029.453, 17.417; guid 6900144), flush on terrain (ground_gap +0.043 yd), with open headroom and lootable via Opening (3365).",
+  "contract": "#10127 reported the Holy Atal'ai Band pickup (entry 254368, guid 6940634, item 354233) missing in Swamp of Sorrows. The map-pass row (-10491.000, -4031.300, 17.417) sat 0.395 yd below terrain (17.8122) and inside Stranglethornruins02.m2. Expected: the pickup stands at its authoritative first-pass realm-dump position (-10488.902, -4029.453, 17.417; guid 6900144) on the shallow Pool of Tears (AreaTable 74) marsh floor (ground_gap +0.043 yd, Slow Water surface 18.3263 giving 0.909 yd wading depth, spawn_submerged 1 vs 0 at the buried spot), with open headroom and lootable via Opening (3365).",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -70,9 +70,9 @@
     {
       "action": "assert",
       "actor": "p",
-      "label": "pickup is not submerged",
+      "label": "DISCRIMINATING: pickup rests in shallow Pool of Tears wading water (0.91 yd deep) rather than buried below terrain",
       "metric": "spawn_submerged",
-      "equals": 0,
+      "equals": 1,
       "guid": 6940634,
       "spawn_type": "gameobject"
     },
