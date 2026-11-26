@@ -19,7 +19,7 @@
       "id": "pyro",
       "race": 2,
       "class": 24,
-      "level": 35,
+      "level": 80,
       "security": 0
     }
   ],
@@ -33,12 +33,6 @@
       "action": "learn",
       "actor": "pyro",
       "spell": 800796
-    },
-    {
-      "action": "set_power",
-      "actor": "pyro",
-      "power": 0,
-      "value": 2000
     },
     {
       "action": "cast",
