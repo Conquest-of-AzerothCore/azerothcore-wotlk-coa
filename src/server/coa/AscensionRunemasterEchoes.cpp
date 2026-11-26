@@ -3,7 +3,6 @@
 #include "AscensionRunemasterEchoes.h"
 #include "DataMap.h"
 #include "GameTime.h"
-#include "ObjectAccessor.h"
 #include "Player.h"
 #include "ScriptMgr.h"
 #include "Spell.h"
@@ -115,29 +114,6 @@ uint64 OrdinarySpellEnd(Player* player, uint32 id, uint64 now)
 uint64 OrdinaryEnd(Player* player, uint64 now)
 {
     return std::max(OrdinarySpellEnd(player, ZENITH, now), OrdinarySpellEnd(player, ECHOES_ZENITH, now));
-}
-
-void ExpireSiblingCooldown(Player* player, uint32 sibling)
-{
-    auto& cooldowns = player->GetSpellCooldownMap();
-    auto found = cooldowns.find(sibling);
-    if (found == cooldowns.end() || (!found->second.end && !found->second.maxduration))
-        return;
-
-    found->second.end = 0;
-    found->second.maxduration = 0;
-    found->second.sendToSpectator = false;
-
-    ObjectGuid const guid = player->GetGUID();
-    player->m_Events.AddEventAtOffset([guid, sibling]()
-    {
-        Player* target = ObjectAccessor::FindPlayer(guid);
-        if (!target)
-            return;
-        auto& map = target->GetSpellCooldownMap();
-        if (auto itr = map.find(sibling); itr != map.end() && !itr->second.end && !itr->second.maxduration)
-            map.erase(itr);
-    }, 0ms);
 }
 
 void Store(Player* player, Ledger const& ledger)
@@ -491,7 +467,7 @@ public:
         if (maxRecoveryMs && (base->RecoveryTime >= maxRecoveryMs || canonical->ChargeRecoveryTime >= maxRecoveryMs))
             return;
         if (spellId)
-            ExpireSiblingCooldown(player, spellId == ZENITH ? ECHOES_ZENITH : ZENITH);
+            player->GetSpellCooldownMap().erase(spellId == ZENITH ? ECHOES_ZENITH : ZENITH);
         bool const hasLedger = player->FindPlayerSettings(LEDGER_KEY) != nullptr;
         bool const hasPool = player->HasStoredSpellCharges(canonical);
         if (!Owns(player, ZENITH) && !hasLedger && !hasPool)
