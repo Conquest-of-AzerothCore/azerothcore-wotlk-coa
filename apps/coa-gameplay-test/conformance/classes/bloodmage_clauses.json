@@ -528,19 +528,20 @@
       {
         "claim": "has a $h% chance",
         "labels": [
-          "504100 effect_value #0"
+          "504100 behaviour_metric_delta proc_rate"
         ]
       },
       {
         "claim": "over $504101d",
         "labels": [
-          "504100 spell_duration 504101 #1"
+          "504100 behaviour_metric_delta duration"
         ]
       },
       {
         "claim": "to heal the target for an additional ${($504101d*1000/$504101t1)*($504101m1*$<scalingbp>+$bh*0.01)}",
         "labels": [
-          "504100 effect_value #2"
+          "504100 behaviour_metric_delta hot_base",
+          "504100 behaviour_metric_delta hot_sp"
         ]
       }
     ],
@@ -807,13 +808,15 @@
       {
         "claim": "cause the target to bleed for ${($504291d*1000/$504291t1)*($504291m1*$<scalingbp>+$AP*0.01+$SP*0.05)}",
         "labels": [
-          "504292 effect_value 504291e0 #0"
+          "504292 behaviour_metric_delta bleed_base",
+          "504292 behaviour_metric_delta bleed_ap",
+          "504292 behaviour_metric_delta bleed_sp"
         ]
       },
       {
         "claim": "over $504291d",
         "labels": [
-          "504292 spell_duration 504291 #1"
+          "504292 behaviour_metric_delta bleed_duration"
         ]
       }
     ],
@@ -1662,7 +1665,7 @@
     "spell": 560257,
     "clause": "Your Blood Pact now also increases your healing received by $s1%.",
     "labels": [
-      "560257 effect_value e0 #0"
+      "560257 behaviour_hit_ratio heal_received"
     ],
     "kind": "claim"
   },
@@ -1724,21 +1727,23 @@
     "spell": 560535,
     "clause": "Increases critical strike chance of all party and raid members by $s1%.",
     "labels": [
-      "560535 effect_value e0 #0"
+      "560535 behaviour_party_stat_ratio raid_crit"
     ],
     "kind": "claim"
   },
   {
     "spell": 560535,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560535 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
     "spell": 560535,
     "clause": "In addition, you now heal for $s2% of all critical damage dealt.",
     "labels": [
-      "560535 effect_value e1 #1"
+      "560535 behaviour_metric_delta crit_heal"
     ],
     "kind": "claim"
   },
@@ -1935,7 +1940,8 @@
     "spell": 570746,
     "clause": "Increases the duration of Blood Pact by $/1000;s1 sec",
     "labels": [
-      "570746 effect_value e0 #0"
+      "570746 behaviour_metric_delta blood_pact_duration_contrast",
+      "570746 behaviour_metric_delta blood_pact_duration_expiry"
     ],
     "kind": "claim"
   },
@@ -1943,7 +1949,7 @@
     "spell": 570746,
     "clause": "and you now generate $/10;572036s1 Rage every time you dodge.",
     "labels": [
-      "570746 effect_value 572036e0 #1"
+      "570746 behaviour_metric_delta dodge_rage"
     ],
     "kind": "claim"
   },
@@ -2301,13 +2307,13 @@
       {
         "claim": "increase the critical strike chance of all party and raid members by $582766s1%",
         "labels": [
-          "680684 effect_value 582766e0 #0"
+          "680684 behaviour_metric_delta raid_crit"
         ]
       },
       {
         "claim": "for $582766d",
         "labels": [
-          "680684 spell_duration 582766 #1"
+          "680684 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -2316,8 +2322,11 @@
   {
     "spell": 680684,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "680684 behaviour_metric_delta no_stack"
+    ],
+    "kind": "claim",
+    "promise_of": "Your critical strikes now increase the critical strike chance of all party and raid members by $582766s1% for $582766d."
   },
   {
     "spell": 680685,
@@ -2779,13 +2788,13 @@
       {
         "claim": "increases the haste of all party and raid members by $685029s1%",
         "labels": [
-          "684331 effect_value 685029e0 #0"
+          "684331 behaviour_metric_delta raid_haste"
         ]
       },
       {
         "claim": "for $685029d",
         "labels": [
-          "684331 spell_duration 685029 #1"
+          "684331 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -2794,8 +2803,11 @@
   {
     "spell": 684331,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "684331 behaviour_metric_delta no_stack"
+    ],
+    "kind": "claim",
+    "promise_of": "Casting Crimson Tide now additionally increases the haste of all party and raid members by $685029s1% for $685029d."
   },
   {
     "spell": 685028,
@@ -2907,7 +2919,9 @@
     "spell": 704625,
     "clause": "Casting Bloodbolt or Bloodfang Bite now reduces the cooldown of your Blood Pact by $/1000;804205S1 sec.",
     "labels": [
-      "704625 effect_value 804205e0 #0"
+      "704625 cost_gate 801955 blood_pact_cd without",
+      "704625 cost_gate 801955 blood_pact_cd with",
+      "704625 cost_gate 801955 blood_pact_cd beyond"
     ],
     "kind": "claim"
   },
@@ -3006,7 +3020,7 @@
     "spell": 704634,
     "clause": "Your direct harmful critical strikes increase the target's Shadow damage taken from you by $504138s1%,",
     "labels": [
-      "704634 effect_value 504138e0 #0"
+      "704634 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -3014,7 +3028,7 @@
     "spell": 704634,
     "clause": "stacking up to $504138u times,",
     "labels": [
-      "704634 max_stacks 504138 #1"
+      "704634 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -3022,7 +3036,7 @@
     "spell": 704634,
     "clause": "for $504138d.",
     "labels": [
-      "704634 spell_duration 504138 #2"
+      "704634 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -3208,7 +3222,7 @@
     "spell": 704659,
     "clause": "Your Veinburst now has a $h% chance to not trigger a cooldown when cast.",
     "labels": [
-      "704659 effect_value #0"
+      "704659 behaviour_metric_delta veinburst_reset_rate"
     ],
     "kind": "claim"
   },
@@ -3549,13 +3563,13 @@
       {
         "claim": "increase the damage the target takes from bleed effects by $560288s1%",
         "labels": [
-          "706656 effect_value 560288e0 #0"
+          "706656 behaviour_hit_ratio bleed_damage"
         ]
       },
       {
         "claim": "for $560288d",
         "labels": [
-          "706656 spell_duration 560288 #1"
+          "706656 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -3628,7 +3642,7 @@
     "spell": 707626,
     "clause": "Increases the effectiveness of Blood Pact by $s2%.",
     "labels": [
-      "707626 effect_value e1 #0"
+      "707626 behaviour_metric_delta blood_pact_dodge"
     ],
     "kind": "claim"
   },
@@ -4531,13 +4545,13 @@
       {
         "claim": "increase your haste by $802029s1%",
         "labels": [
-          "804599 effect_value 802029e0 #0"
+          "804599 behaviour_metric_delta haste"
         ]
       },
       {
         "claim": "for $802029d",
         "labels": [
-          "804599 spell_duration 802029 #1"
+          "804599 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -5114,13 +5128,14 @@
       {
         "claim": "has a $h% chance",
         "labels": [
-          "806424 effect_value #0"
+          "806424 behaviour_metric_delta proc_rate",
+          "806424 behaviour_metric_delta instant_mend"
         ]
       },
       {
         "claim": "within $806425d",
         "labels": [
-          "806424 spell_duration 806425 #1"
+          "806424 behaviour_metric_delta duration"
         ]
       }
     ],
@@ -5133,13 +5148,14 @@
       {
         "claim": "increases the healing received by all allies by $704238s1%",
         "labels": [
-          "806428 effect_value 704238e0 #0"
+          "806428 behaviour_hit_ratio infuse_ally_heal",
+          "806428 behaviour_hit_ratio vampyrs_kiss_ally_heal"
         ]
       },
       {
         "claim": "for $704238d",
         "labels": [
-          "806428 spell_duration 704238 #1"
+          "806428 behaviour_metric_delta duration"
         ]
       }
     ],
