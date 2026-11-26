@@ -6,7 +6,7 @@
     "1) Hardcore - Artisan's Guild (56) awards XP in mod-coa-challenges OnPlayerUpdateSkill only when IsProfessionSkill(skillId) is true. In SkillLine.dbc Woodcutting (732) and Woodworking (757) are SKILL_CATEGORY_SECONDARY (9), so IsProfessionSkill excluded them and their skill-ups granted 0 XP.",
     "2) Ironman - Lonely Artisan (167) uses core Player::RewardProfessionXP (XPSOURCE_PROFESSION). At level 1 (next-level XP 400) with default Rate.XP.Profession=0.2, BaseFraction=0.02 and Rate.XP.Global=0.9295, orange Skinning (400*0.02*0.2*0.55*1.05=0.924) and orange Woodcutting (0.5544) truncated to 0 in RewardProfessionXP, and 1 XP awards truncated to 0 under Rate.XP.Global=0.9295.",
     "Requires mod-coa-challenges enabled (CoAChallenges.Enable=1, CoAChallenges.ProfessionXP.PointsPerLevel=50), default Rate.XP.Profession=0.2, Rate.XP.Profession.BaseFraction=0.02, Rate.XP.Global=0.9295, and dynamic XP .xp 1.",
-    "Expected: at level 1, Lonely Artisan (167) earns >=1 XP on orange Skinning and orange Woodcutting and 0 XP on gray Skinning; Artisan's Guild (56) earns >=1 XP on Woodcutting and Skinning skill-ups (1->2) and 0 XP when Woodcutting is capped at 75/75 (no skill-up). Before the fix, Lonely Artisan earned 0 XP on both and Artisan's Guild earned 0 XP on Woodcutting."
+    "Expected: at level 1 (next_level_xp 400), Lonely Artisan (167) earns 1 XP on orange Skinning (0.924 clamped to 1) and 1 XP on orange Woodcutting (0.5544 clamped to 1) and 0 XP on gray Skinning; Artisan's Guild (56) earns 7-8 XP (400/50 = 8, floor(8 * 0.9295) = 7) on Woodcutting and Skinning skill-ups (1->2) and 0 XP when Woodcutting is capped at 75/75 (no skill-up), with level remaining 1 after every gather. Before the fix, Lonely Artisan earned 0 XP on both and Artisan's Guild earned 0 XP on Woodcutting."
   ],
   "timeout_ms": 90000,
   "players": [
@@ -72,11 +72,18 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Lonely Artisan level 1 earns XP from orange Skinning",
+      "label": "DISCRIMINATING: Lonely Artisan level 1 earns 1 XP from orange Skinning",
       "actor": "lonely",
       "metric": "xp",
       "relative_to": "lonely_skin_before",
-      "min": 1
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Lonely Artisan stays level 1 after orange Skinning",
+      "actor": "lonely",
+      "metric": "level",
+      "equals": 1
     },
     {
       "action": "set_skill",
@@ -99,11 +106,18 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Lonely Artisan level 1 earns XP from orange Woodcutting",
+      "label": "DISCRIMINATING: Lonely Artisan level 1 earns 1 XP from orange Woodcutting",
       "actor": "lonely",
       "metric": "xp",
       "relative_to": "lonely_wood_before",
-      "min": 1
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Lonely Artisan stays level 1 after orange Woodcutting",
+      "actor": "lonely",
+      "metric": "level",
+      "equals": 1
     },
     {
       "action": "set_skill",
@@ -131,6 +145,13 @@
       "metric": "xp",
       "relative_to": "lonely_gray_before",
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Lonely Artisan stays level 1 after gray Skinning",
+      "actor": "lonely",
+      "metric": "level",
+      "equals": 1
     },
     {
       "action": "start_challenge",
@@ -176,11 +197,19 @@
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: Artisan's Guild level 1 earns XP from Woodcutting skill-up",
+      "label": "DISCRIMINATING: Artisan's Guild level 1 earns 7-8 XP from Woodcutting skill-up",
       "actor": "guild",
       "metric": "xp",
       "relative_to": "guild_wood_before",
-      "min": 1
+      "min": 7,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "Artisan's Guild stays level 1 after Woodcutting skill-up",
+      "actor": "guild",
+      "metric": "level",
+      "equals": 1
     },
     {
       "action": "set_skill",
@@ -203,11 +232,19 @@
     },
     {
       "action": "assert",
-      "label": "Control: Artisan's Guild level 1 earns XP from Skinning skill-up",
+      "label": "Control: Artisan's Guild level 1 earns 7-8 XP from Skinning skill-up",
       "actor": "guild",
       "metric": "xp",
       "relative_to": "guild_skin_before",
-      "min": 1
+      "min": 7,
+      "max": 8
+    },
+    {
+      "action": "assert",
+      "label": "Artisan's Guild stays level 1 after Skinning skill-up",
+      "actor": "guild",
+      "metric": "level",
+      "equals": 1
     },
     {
       "action": "set_skill",
@@ -235,6 +272,13 @@
       "metric": "xp",
       "relative_to": "guild_capped_before",
       "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Artisan's Guild stays level 1 after capped Woodcutting",
+      "actor": "guild",
+      "metric": "level",
+      "equals": 1
     }
   ]
 }
