@@ -1129,6 +1129,626 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "$s2 = 3 (704642 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + DieSides 1 = 3; Spell.dbc). StatSystem.cpp:1043 adds aura 333 into Player::m_modSpellHitChance. Reads live spell_hit_chance before and after a real learn of 704642 (expected gain +3.0 points, control is before learn). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    },
+    {
+      "spell": 681304,
+      "name": "Hemostasis (horrifies enemy in place for 4 sec)",
+      "kind": "metric_delta",
+      "variant": "horrify_duration",
+      "label_suffix": "horrify_duration",
+      "quote": "Trap an enemy in a blood orb, horrifying them in place for $d.",
+      "trigger_spell": 681304,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 299,
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 681304,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 3700,
+      "expiry_wait_ms": 550,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ],
+        "expired": [
+          4100,
+          4390
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "681304 Hemostasis DurationIndex 35 = 4000 ms ($d = 4 sec, SpellDuration.dbc), Effect[0] aura 12 SPELL_AURA_MOD_STUN (EffectMechanic 24 MECHANIC_HORROR, SchoolMask 32 Shadow, instant, 25% health cost; Spell.dbc). Targets Young Wolf (entry 299, Beast) because default dummy 36 (Harvest Golem, Mechanical) is immune to Horror (Mechanic 24). Aura 823764 removes partial Shadow resists. Control before cast reads aura 681304 absent (0); after cast it reads present (1) at game_time [3650, 3950] ms (> 3600 ms = -10%) and gone (0) at game_time [4100, 4390] ms (< 4400 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 681304: 15 SPELL_CAST_SUCCESS / 13 SPELL_AURA_APPLIED across 7 logs; bindmysoul talents.normalized.json & coabuildhub spells_master_index.json 681304 match verbatim."
+    },
+    {
+      "spell": 681304,
+      "name": "Hemostasis (reactivation window 302895 and Blood Burst replacement last 4 sec)",
+      "kind": "metric_delta",
+      "variant": "reactivation_window",
+      "label_suffix": "reactivation_window",
+      "quote": "Reactivating this ability within $302895d,",
+      "trigger_spell": 681304,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 299,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 302895
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 3700,
+      "expiry_wait_ms": 550,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ],
+        "expired": [
+          4100,
+          4390
+        ]
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "temporary_spell_replacement",
+            "fields": {
+              "spell": 681304
+            },
+            "before_expected": 681304,
+            "expected": 803326,
+            "tolerance": 0,
+            "source": "AscensionBloodmageHemostasis.cpp:48-55: landing 681304 applies window 302895 and calls SetTemporarySpellReplacement(681304, 803326) (681304 before cast, 803326 inside window)."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "302895 DurationIndex 35 = 4000 ms ($302895d = 4 sec, SpellDuration.dbc); aura_ascension_hemostasis::Apply (AscensionBloodmageHemostasis.cpp:48-55) applies 302895 to caster, temporarily learns 803326 Blood Burst, and replaces 681304 with 803326 until 302895 ends (OnRemove:80-87). Targets Young Wolf 299 (non-mechanical) with 823764 spellpen. Control before cast reads aura 302895 = 0 and temporary_spell_replacement(681304) = 681304; after cast aura 302895 = 1 and temporary_spell_replacement(681304) = 803326 at game_time [3650, 3950] ms (> 3600 ms = -10%), and aura 302895 = 0 at game_time [4100, 4390] ms (< 4400 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 302895: 15 SPELL_AURA_APPLIED / 15 REMOVED across 7 logs; bindmysoul & coabuildhub 681304 match verbatim."
+    },
+    {
+      "spell": 681304,
+      "name": "Hemostasis (Blood Burst pops Hemostasis and deals base formula Shadow damage: 232-241)",
+      "kind": "metric_delta",
+      "variant": "blood_burst_damage_base",
+      "label_suffix": "blood_burst_damage_base",
+      "quote": "instantly pops the Hemostasis, dealing ${$803326m1+0+$AP*0.43+$sps*1.03} Shadow damage",
+      "trigger_spell": 681304,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 299,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 803326,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803326,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 236,
+      "after_at_least": 232,
+      "after_at_most": 241,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 681304,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Blood Burst 803326 Effect[2] SPELL_EFFECT_REMOVE_AURA (AscensionBloodmageHemostasis.cpp:127-132) instantly pops 681304 at ~2100 ms, well before its 4000 ms duration."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680333,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Blood Burst 803326 Effect[1] triggers 680333 on target (0 before cast, 1 after pop)."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$803326m1+0+$AP*0.43+$sps*1.03} Shadow damage: Spell.dbc 803326 Effect[0] BasePoints 136 + DieSides 9 (rolled 137..145, SchoolMask 32 Shadow; no SkillLineAbility row; BaseLevel 16, MaxLevel 0, EffectRealPointsPerLevel 9.4f); pending_db_world/rev_1789379311228000700.sql spell_bonus_data (803326, direct_bonus=1.03, ap_bonus=0.43). Under owner ruling O-37 (borrowed $m without ppl follows displayed tooltip value), reference stats AP = 223, Shadow SP = 0 expect 137..145 + 223*0.43 = 232.89..240.89 -> int32 [232, 241]. Casts 681304 at Young Wolf 299 (with 823764 spellpen and 16255 -100% crit) then casts temporarily-learned 803326 at +1600 ms with 500 ms post-cast wait; ally_arm confirms 681304 is popped (0) and 680333 applied (1). Reference search 2026-11-26: coa-history 803326: 7 hits (2 crits, 1047-3560) across 4 logs; bindmysoul & coabuildhub 681304 state '137 + 43% AP + 103% shadow SP'."
+    },
+    {
+      "spell": 681304,
+      "name": "Hemostasis (Blood Burst Shadow damage at +20000 SP: 20832-20841)",
+      "kind": "metric_delta",
+      "variant": "blood_burst_damage_sp",
+      "label_suffix": "blood_burst_damage_sp",
+      "quote": "instantly pops the Hemostasis, dealing ${$803326m1+0+$AP*0.43+$sps*1.03} Shadow damage",
+      "trigger_spell": 681304,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 299,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 803326,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803326,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 20836,
+      "after_at_least": 20832,
+      "after_at_most": 20841,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for ${$803326m1+0+$AP*0.43+$sps*1.03}: under owner ruling O-37, 803326 rolled base 137..145 + AP 223*0.43 + Shadow SP 20000*1.03 = 20832.89..20840.89 -> int32 [20832, 20841] (delta +20600 over base proves 1.03 Shadow SP coefficient; player_spell_power hit_arm reads Shadow SP for bonus_data). Casts 681304 at Young Wolf 299 (823764 spellpen, 16255 -100% crit) then 803326 at +1600 ms with 500 ms wait. Reference search 2026-11-26: see blood_burst_damage_base."
+    },
+    {
+      "spell": 681304,
+      "name": "Hemostasis (Blood Burst Shadow damage at +10000 AP: 4532-4541)",
+      "kind": "metric_delta",
+      "variant": "blood_burst_damage_ap",
+      "label_suffix": "blood_burst_damage_ap",
+      "quote": "instantly pops the Hemostasis, dealing ${$803326m1+0+$AP*0.43+$sps*1.03} Shadow damage",
+      "trigger_spell": 681304,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 299,
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_attack_power": 10000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 803326,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 803326,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 4536,
+      "after_at_least": 4532,
+      "after_at_most": 4541,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP scaling arm for ${$803326m1+0+$AP*0.43+$sps*1.03}: under owner ruling O-37, 803326 rolled base 137..145 + AP (223 + 10000)*0.43 + 0 SP = 4532.89..4540.89 -> int32 [4532, 4541] (delta +4300 over base proves 0.43 AP coefficient). Casts 681304 at Young Wolf 299 (823764 spellpen, 16255 -100% crit) then 803326 at +1600 ms with 500 ms wait. Reference search 2026-11-26: see blood_burst_damage_base."
+    },
+    {
+      "spell": 681304,
+      "name": "Hemostasis (680333 reduces enemy healing received by 60%)",
+      "kind": "metric_delta",
+      "variant": "heal_reduction",
+      "label_suffix": "heal_reduction",
+      "quote": "and reducing their healing received by $680333s1%",
+      "trigger_spell": 681304,
+      "gate_spell": 681304,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "cast_in_before": false,
+      "enemy_casts_in_before": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 803326,
+          "target": "caster",
+          "delay_ms": 1600
+        }
+      ],
+      "enemy_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 23783,
+        "target": "enemy"
+      },
+      "before_expected": 1500,
+      "expected": 2099,
+      "expected_gain": 599,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "680333 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT BasePoints -61 + DieSides 1 = -60% ($680333s1 = 60, DurationIndex 1 = 10000 ms; Spell.dbc; Unit.cpp:10979-10983 GetMaxNegativeAuraModifier + AddPct). Enemy player (race 2, non-mechanical) casts Gift of Life 23783 (exact 1500 heal, EffectBasePoints 1499 + DieSides 1, DmgClass 0 no crit) in control phase without 681304 -> 1500. In treatment phase, Bloodmage learns and casts 681304 at enemy, then casts temporarily-learned 803326 at +1600 ms (hemostasis_burst_target::CanPrepare at AscensionBloodmageHemostasis.cpp:102-111 retargets 803326 onto the Hemostasis victim, popping 681304 and applying 680333), then 500 ms later enemy casts 23783 -> engine float32 AddPct(1.0f, -60.0f) = 0.399999976f, uint32(1500.0f * 0.399999976f) = uint32(599.999939f) = 599 exact (G-26/G-27 float32 truncation; cumulative 2099, expected_gain 599 +- 0; excludes 0% gain 1500 and doubled -120% gain 0). Reference search 2026-11-26: coa-history 680333: 6 SPELL_AURA_APPLIED / 6 REMOVED across 4 logs; bindmysoul & coabuildhub 681304 match verbatim."
+    },
+    {
+      "spell": 681304,
+      "name": "Hemostasis (680333 heal reduction lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "heal_reduction_duration",
+      "label_suffix": "heal_reduction_duration",
+      "quote": "for $680333d",
+      "trigger_spell": 681304,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "target_entry": 299,
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 803326,
+          "target": "dummy",
+          "delay_ms": 1600
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 680333,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9400,
+      "expiry_wait_ms": 1200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10900,
+          11350
+        ],
+        "expired": [
+          12050,
+          12500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "680333 DurationIndex 1 = 10000 ms ($680333d = 10 sec, SpellDuration.dbc), triggered by Blood Burst 803326 Effect[1] (Spell.dbc). Control before cast reads aura 680333 = 0. Casts 681304 at Young Wolf 299 (t = 0) then 803326 at +1600 ms, applying 680333 at t ~ 1600 ms (expected expiry t ~ 11600 ms). Reads aura 680333 present (1) at game_time [10900, 11350] ms (9300..9750 ms after 803326, > 9000 ms = -10%) and gone (0) at game_time [12050, 12500] ms (10450..10900 ms after 803326, < 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 680333: 6 SPELL_AURA_APPLIED / 6 REMOVED across 4 logs; bindmysoul & coabuildhub 681304 match verbatim."
+    },
+    {
+      "spell": 301363,
+      "name": "Cursed Strikes (Rotclaw unlearned vs learned at 7700 ms)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_contrast",
+      "label_suffix": "rotclaw_contrast",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 503484,
+      "gate_spell": 301363,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 7700,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          7650,
+          7950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "301363 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 1 SPELLMOD_DURATION BasePoints 99 + DieSides 1 = +100% ($s1 = 100), EffectSpellClassMask[1] 512 = SpellFamilyFlags[1] 512 of Rotclaw 503484 (highest level-60 rank, SpellLevel 58, DurationIndex 35 = 4000 ms -> 8000 ms with 301363, Radius 12 yd, CasterAuraSpell 524861 Cursed Form set via required_aura_steps precondition fixture; Spell.dbc). Armed with Eternal weapon set (2534x2 Daggers + 674) via spell_weapon_sets. At 7700 ms (game_time [7650, 7950] ms, > 7600 ms = 4000 + 0.9*4000), control without 301363 reads aura 503484 = 0 (expired at 4000 ms) while treatment with real learn of 301363 reads 1. Paired with rotclaw_duration. Reference search 2026-11-26: coa-history 301363/503484: 0 events (passive/rank; positive control Rotclaw 503479: 301 casts, 916 auras in 3 logs); bindmysoul & coabuildhub 300982 (Rank 1, 50%) match scaling to Rank 2 (301363, 100%)."
+    },
+    {
+      "spell": 301363,
+      "name": "Cursed Strikes (Rotclaw lasts 8000 ms with Cursed Strikes)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_duration",
+      "label_suffix": "rotclaw_duration",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 503484,
+      "gate_spell": 301363,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 7700,
+      "expiry_wait_ms": 550,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          7650,
+          7950
+        ],
+        "expired": [
+          8100,
+          8390
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for 301363 (+100% SPELLMOD_DURATION) on Rotclaw 503484 (4000 ms -> 8000 ms; CasterAuraSpell 524861 set via required_aura_steps precondition fixture; Spell.dbc). With 301363 learned (gate_timing start), reads aura 503484 = 0 before cast, 1 at game_time [7650, 7950] ms (> 7600 ms = 4000 + 0.9*4000), and 0 at game_time [8100, 8390] ms (< 8400 ms = 4000 + 1.1*4000), excluding 10% off on both sides of both the +4000 ms increase and 8000 ms total. Paired with rotclaw_contrast. Reference search 2026-11-26: see rotclaw_contrast."
+    },
+    {
+      "spell": 301363,
+      "name": "Cursed Strikes (Hypovolemic Shock unlearned vs learned at 29100 ms)",
+      "kind": "metric_delta",
+      "variant": "hypovolemic_shock_contrast",
+      "label_suffix": "hypovolemic_shock_contrast",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 572412,
+      "gate_spell": 301363,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 572412,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 29100,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          29000,
+          29500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "301363 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 1 SPELLMOD_DURATION BasePoints 99 + DieSides 1 = +100% ($s1 = 100), EffectSpellClassMask[0] 1048576 = SpellFamilyFlags[0] 1048576 of Hypovolemic Shock 572412 (level-60 rank, DurationIndex 8 = 15000 ms -> 30000 ms with 301363, instant, 15% health cost; Spell.dbc). At 29100 ms (game_time [29000, 29500] ms, > 28500 ms = 15000 + 0.9*15000), control without 301363 reads aura 572412 = 0 (expired at 15000 ms) while treatment with real learn of 301363 reads 1. Paired with hypovolemic_shock_duration. Reference search 2026-11-26: coa-history 572412: 72 casts across 4 logs; 301363: 0 events (passive); bindmysoul & coabuildhub 300982 match."
+    },
+    {
+      "spell": 301363,
+      "name": "Cursed Strikes (Hypovolemic Shock lasts 30000 ms with Cursed Strikes)",
+      "kind": "metric_delta",
+      "variant": "hypovolemic_shock_duration",
+      "label_suffix": "hypovolemic_shock_duration",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 572412,
+      "gate_spell": 301363,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 572412,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 29100,
+      "expiry_wait_ms": 1700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29000,
+          29500
+        ],
+        "expired": [
+          30700,
+          31300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for 301363 (+100% SPELLMOD_DURATION) on Hypovolemic Shock 572412 (15000 ms -> 30000 ms; Spell.dbc, SpellDuration.dbc). With 301363 learned (gate_timing start), reads aura 572412 = 0 before cast, 1 at game_time [29000, 29500] ms (> 28500 ms = 15000 + 0.9*15000), and 0 at game_time [30700, 31300] ms (< 31500 ms = 15000 + 1.1*15000), excluding 10% off on both sides of both the +15000 ms increase and 30000 ms total. Paired with hypovolemic_shock_contrast. Reference search 2026-11-26: see hypovolemic_shock_contrast."
     }
   ],
   "player_observations": [],
