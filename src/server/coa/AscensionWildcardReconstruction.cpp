@@ -20,6 +20,7 @@
 #include "Spell.h"
 #include "SpellMgr.h"
 #include <string_view>
+#include <vector>
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellScript.h"
@@ -777,9 +778,12 @@ class aura_wildcard_raging_momentum : public AuraScript
                 choices[index++] = name;
         std::string_view const selected = choices[urand(0, uint32(choices.size() - 1))];
         Player* owner = GetTarget()->ToPlayer();
+        std::vector<uint32> matching;
         for (auto const& [id, cooldown] : owner->GetSpellCooldownMap())
             if (ReconstructionName(sSpellMgr->GetSpellInfo(id)) == selected)
-                owner->ModifySpellCooldown(id, -3000);
+                matching.push_back(id);
+        for (uint32 id : matching)
+            owner->ModifySpellCooldown(id, -3000);
     }
     void Register() override
     {
