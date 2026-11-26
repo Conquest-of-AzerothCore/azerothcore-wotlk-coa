@@ -3773,6 +3773,7 @@
     "clause": "or if you are behind them, deal $572280s1% additional Shadow damage for each condition met.",
     "labels": [
       "802469 behaviour_metric_delta cond_behind",
+      "802469 behaviour_metric_delta cond_front",
       "802469 behaviour_metric_delta cond_all_three"
     ],
     "kind": "claim"
@@ -3968,10 +3969,10 @@
     "spell": 800782,
     "clause": "Taunts nearby enemies within $a1 yds,",
     "labels": [
+      "800782 aggro_redirect range primary after",
+      "800782 aggro_redirect range extra1 after",
       "800782 aggro_redirect edge primary after",
-      "800782 aggro_redirect edge extra1 after",
-      "800782 aggro_redirect edge extra2 after",
-      "800782 aggro_redirect edge extra3 after"
+      "800782 aggro_redirect edge extra1 after"
     ],
     "kind": "claim"
   },
@@ -3979,7 +3980,7 @@
     "spell": 800782,
     "clause": "forcing them to attack you for $d.",
     "labels": [
-      "800782 aggro_redirect edge primary after",
+      "800782 aggro_redirect range primary after",
       "800782 behaviour_metric_delta duration"
     ],
     "kind": "claim"

@@ -2107,10 +2107,10 @@
     },
     {
       "spell": 800782,
-      "name": "Blood Howl (AoE taunt 10 yd effective edge)",
+      "name": "Blood Howl (AoE taunt inside 10 yd range)",
       "kind": "aggro_redirect",
-      "variant": "edge",
-      "label_suffix": "edge",
+      "variant": "range",
+      "label_suffix": "range",
       "quote": "Taunts nearby enemies within $a1 yds,",
       "self_cast": true,
       "rooted": true,
@@ -2123,7 +2123,21 @@
         {
           "distance": 9.5,
           "expected_redirect": true
-        },
+        }
+      ],
+      "observe_source": "800782 Blood Howl Effect[0]/[1] aura 11 SPELL_AURA_MOD_TAUNT on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 13 (SpellRadius.dbc RadiusMin/Max 10.0 yd = $a1), CasterAuraSpell 524861 (precondition fixture), 11% base health cost. Two rooted REACT_DEFENSIVE dummies engaged by ally at 3.0 yd and 9.5 yd (both strictly inside stated 10 yd radius; split to 2 dummies so every dummy has before == 1 verified). Both must redirect victim to caster. Reference search 2026-11-26: coa-history 800782: 3 casts, 13 APPLIED/REMOVED in 2 logs; coabuildhub 800782 matches verbatim."
+    },
+    {
+      "spell": 800782,
+      "name": "Blood Howl (AoE taunt 10 yd effective edge)",
+      "kind": "aggro_redirect",
+      "variant": "edge",
+      "label_suffix": "edge",
+      "quote": "Taunts nearby enemies within $a1 yds,",
+      "self_cast": true,
+      "rooted": true,
+      "geometry": true,
+      "targets": [
         {
           "distance": 13.6,
           "expected_redirect": true
@@ -2133,7 +2147,7 @@
           "expected_redirect": false
         }
       ],
-      "observe_source": "800782 Blood Howl Effect[0]/[1] aura 11 SPELL_AURA_MOD_TAUNT on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 13 (SpellRadius.dbc RadiusMin/Max 10.0 yd = $a1), CasterAuraSpell 524861 (precondition fixture), 11% base health cost. Engine effective area edge (Q-rad-1): 10.0 + 2.66 (GetLeewayBonusRadius) + 1.275 (dummy combat reach) = ~13.935 yd. Four rooted REACT_DEFENSIVE dummies engaged by ally: 3.0 yd, 9.5 yd (inside stated 10 yd) and 13.6 yd (inside effective edge) must redirect to caster; 14.2 yd stays on ally. Reference search 2026-11-26: coa-history 800782: 3 casts, 13 APPLIED/REMOVED in 2 logs; coabuildhub 800782 matches verbatim."
+      "observe_source": "800782 Blood Howl effective area edge (Q-rad-1): 10.0 ($a1) + 2.66 (GetLeewayBonusRadius) + 1.275 (dummy combat reach) = ~13.935 yd. Two rooted REACT_DEFENSIVE dummies engaged by ally at 13.6 yd (inside effective edge, must redirect) and 14.2 yd (outside effective edge, must stay on ally), with before == 1 verified on both targets. Reference search 2026-11-26: coa-history 800782: 3 casts, 13 APPLIED/REMOVED in 2 logs; coabuildhub 800782 matches verbatim."
     },
     {
       "spell": 800782,
@@ -2581,11 +2595,12 @@
       "tolerance": 0.05,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Condition control for 704166 Vitality ('while in Eternal Curse'): outside Eternal Curse 800157 (around neutral trigger 60235 Greatness +Spirit), learning 704166 leaves reference Stamina (stat 2) unchanged at 78.0 -> 78.0. Reference search 2026-11-26: coa-history 704166: 0 events (passive); coabuildhub 704166 matches verbatim."
+      "observe_source": "Condition control for 704166 Vitality ('while in Eternal Curse'): outside Eternal Curse 800157 (around neutral trigger 60235 Greatness +Spirit), learning 704166 leaves reference Stamina (stat 2) unchanged at 78.0 -> 78.0. Reference search 2026-11-26: coa-history 704166: 0 events (passive); coabuildhub 704166 matches verbatim.",
+      "void_on_cast_failure": true
     },
     {
       "spell": 802469,
-      "name": "Reave (125% weapon damage + flat at reference AP, 2-hit sum)",
+      "name": "Reave (125% weapon damage + flat at reference AP, 4-hit sum)",
       "kind": "metric_delta",
       "variant": "damage_base",
       "label_suffix": "damage_base",
@@ -2599,6 +2614,12 @@
           772,
           1,
           "dummy",
+          "caster"
+        ],
+        [
+          29131,
+          1,
+          "caster",
           "caster"
         ],
         [
@@ -2627,14 +2648,26 @@
         "critical": false
       },
       "before_expected": 0,
-      "expected": 1105.4,
-      "after_at_least": 1008,
-      "after_at_most": 1202,
+      "expected": 2210.7,
+      "after_at_least": 2016,
+      "after_at_most": 2404,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip formula '125% Weapon Damage plus ${$m1+0}': 802469 Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121) BasePoints 333 + DieSides 52 (334..385, mean 359.5); Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31) BasePoints 124 + 1 = 125% ($s2). Accursed main hand 2535 War Staff (84.53..119.41, norm speed 3.3); at reference AP 223, AP/14*3.3 = 52.564 -> weapon roll 137.09..171.97; per hit 1.25*weapon + flat = 505..600 (mean 552.7); 2-hit sum (cast_power 1000, second cast after 1600 ms GCD) = 1010..1200 (band 1008..1202 excludes flat=0 342..430, flat*2 1678..1970, and missing AscensionFlatAfterWeaponPercent mean 1285, z=-2.76). Precondition fixtures: 524861, 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 772 Rend on dummy (neutral to 802469 Physical damage, avoids unrelated 805612 TargetAuraState=18 cast failure). Reference search 2026-11-26: coa-history 802469: 2034 SPELL_DAMAGE hits in 14 logs; coabuildhub 800490 matches verbatim.",
+      "observe_source": "Tooltip formula '125% Weapon Damage plus ${$m1+0}': 802469 Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121) BasePoints 333 + DieSides 52 (334..385, mean 359.5); Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31) BasePoints 124 + 1 = 125% ($s2). Accursed main hand 2535 War Staff (84.53..119.41, norm speed 3.3); at reference AP 223, AP/14*3.3 = 52.564 -> weapon roll 137.09..171.97; per hit 1.25*weapon + flat = 505..600 (mean 552.66); 4-hit sum (cast_power 1000 + periodic Rage refill fixture 29131 amount 500/s, 3 after_trigger_casts spaced 1600 ms past 1500 ms GCD) = 2020..2400 (mean 2210.7; band 2016..2404 excludes flat=0 684..860, flat*2 3356..3940, and unfixed 1.25*(weapon+flat) mean 2570.2 with paired-run flip risk ~0.004% << 0.1%). Precondition fixtures: 524861, 29131 (Rage refill only, no damage modifier), 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 772 Rend on dummy (neutral to 802469 Physical damage, avoids unrelated 805612 TargetAuraState=18 cast failure). Reference search 2026-11-26: coa-history 802469: 2034 SPELL_DAMAGE hits in 14 logs; coabuildhub 800490 matches verbatim.",
       "after_trigger_casts": [
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
         {
           "spell": 802469,
           "target": "dummy",
@@ -2656,16 +2689,23 @@
               "critical": false
             },
             "before_expected": 0,
-            "expected": 2,
+            "expected": 4,
             "tolerance": 0,
-            "source": "Confirm both non-crit casts of 802469 landed on dummy."
+            "source": "Confirm all 4 non-crit casts of 802469 landed on dummy."
           }
         ]
-      }
+      },
+      "phase_aura_amounts": [
+        [
+          29131,
+          0,
+          500
+        ]
+      ]
     },
     {
       "spell": 802469,
-      "name": "Reave (125% weapon damage + flat at +20000 AP, 2-hit sum)",
+      "name": "Reave (125% weapon damage + flat at +20000 AP, 4-hit sum)",
       "kind": "metric_delta",
       "variant": "damage_ap",
       "label_suffix": "damage_ap",
@@ -2683,6 +2723,12 @@
           "caster"
         ],
         [
+          29131,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
           985345,
           1,
           "caster",
@@ -2708,14 +2754,26 @@
         "critical": false
       },
       "before_expected": 0,
-      "expected": 12891.0,
-      "after_at_least": 12794,
-      "after_at_most": 12988,
+      "expected": 25782.1,
+      "after_at_least": 25588,
+      "after_at_most": 25976,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Tooltip '125% Weapon Damage plus ${$m1+0}' at +20000 AP (total 20223): 2535 War Staff norm 3.3 -> AP/14*3.3 = 4766.85 -> weapon roll 4851.38..4886.26; per hit 1.25*weapon + (334..385) = 6398..6493 (mean 6445.5); 2-hit sum (cast_power 1000, second cast after 1600 ms GCD) = 12796..12986 (band 12794..12988 excludes 100% weapon ~10456, 150% weapon ~15326, and missing AscensionFlatAfterWeaponPercent mean 13071, z=-2.69). Precondition fixtures: 524861, 985345, 984948, 64481, 772. Reference search 2026-11-26: coa-history 802469: 2034 hits in 14 logs; coabuildhub 800490 states '125% Weapon Damage'.",
+      "observe_source": "Tooltip '125% Weapon Damage plus ${$m1+0}' at +20000 AP (total 20223): 2535 War Staff norm 3.3 -> AP/14*3.3 = 4766.85 -> weapon roll 4851.38..4886.26; per hit 1.25*weapon + (334..385) = 6398..6493 (mean 6445.52); 4-hit sum (cast_power 1000 + periodic Rage refill fixture 29131 amount 500/s, 3 after_trigger_casts spaced 1600 ms past 1500 ms GCD) = 25592..25972 (mean 25782.1; band 25588..25976 excludes 100% weapon ~20912, 150% weapon ~30652, and unfixed 1.25*(weapon+flat) mean 26141.6 with paired-run flip risk ~0.004% << 0.1%). Precondition fixtures: 524861, 29131 (Rage refill only), 985345, 984948, 64481, 772. Reference search 2026-11-26: coa-history 802469: 2034 hits in 14 logs; coabuildhub 800490 states '125% Weapon Damage'.",
       "after_trigger_casts": [
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
         {
           "spell": 802469,
           "target": "dummy",
@@ -2737,12 +2795,19 @@
               "critical": false
             },
             "before_expected": 0,
-            "expected": 2,
+            "expected": 4,
             "tolerance": 0,
-            "source": "Confirm both non-crit casts of 802469 landed on dummy."
+            "source": "Confirm all 4 non-crit casts of 802469 landed on dummy."
           }
         ]
-      }
+      },
+      "phase_aura_amounts": [
+        [
+          29131,
+          0,
+          500
+        ]
+      ]
     },
     {
       "spell": 802469,
@@ -3048,7 +3113,7 @@
           }
         ]
       },
-      "observe_source": "802469 Reave below 35% health condition ($572280s1 = 100%; AscensionBloodmageSecondary.cpp:285-286,359-360 casts 802884 Shadow CopyDamage for 100% of dealt damage). Dummy set to 34% HP (settled 1600 ms via neutral 60235 cast so Unit::Update sets AURA_STATE_HEALTHLESS_35_PERCENT; cond_no_bleed_no_exec tests 36% = 0): 802884 fires (count=1, school_mask 32 Shadow) with ratio 802884/802469 == 1.00 +- 0.01. Reference search 2026-11-26: coa-history 802884: 936 hits in 19 logs; coabuildhub 800490 matches verbatim."
+      "observe_source": "802469 Reave below 35% health condition ($572280s1 = 100%; AscensionBloodmageSecondary.cpp:285-286,359-360 casts 802884 Shadow CopyDamage for 100% of dealt damage). Dummy set to 34% HP (settled 1600 ms via neutral 60235 cast so Unit::Update sets AURA_STATE_HEALTHLESS_35_PERCENT; cond_no_bleed_no_exec tests 36% = 0): 802884 fires (count=1, school_mask 32 Shadow) with ratio 802884/802469 == 1.00 +- 0.01. Precondition fixtures: 524861, 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 823764 (-100% spell crit), and 772 Rend on dummy (neutral to 802884 execute copy; satisfies unrelated 805612 TargetAuraState=18 so behind copy does not fail cast). Reference search 2026-11-26: coa-history 802884: 936 hits in 19 logs; coabuildhub 800490 matches verbatim."
     },
     {
       "spell": 802469,
@@ -3142,10 +3207,176 @@
             "expected": 0,
             "tolerance": 0,
             "source": "Dummy at 100% HP: execute copy 802884 stays 0."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "position_x",
+            "before_expected": -8949.95,
+            "expected": -8949.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster stays at spawn x=-8949.95 (behind +x-facing dummy at x=-8946.95)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "position_x",
+            "before_expected": -8946.95,
+            "expected": -8946.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify dummy stands at x=-8946.95 (3.0 yd ahead of caster along +x)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify 2D separation between caster and dummy is 3.0 yd (caster behind dummy)."
           }
         ]
       },
       "observe_source": "802469 Reave behind-target condition alone (not bleeding, 100% HP): caster at x=0 behind +x-facing dummy at x=3 (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). Tooltip promises +100% ($572280s1%) Shadow damage via 805612 independently of bleeding; Spell.dbc 805612 carries TargetAuraState=18 (AURA_STATE_BLEEDING) which blocks 805612 on non-bleeding targets (SPELL_FAILED_TARGET_AURASTATE -> SPELL_FAILED_DONT_REPORT 27). Reference search 2026-11-26: coa-history 805612: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (in front of bleeding target does not trigger behind Shadow copy 805612)",
+      "kind": "metric_delta",
+      "variant": "cond_front",
+      "label_suffix": "cond_front",
+      "quote": "or if you are behind them, deal $572280s1% additional Shadow damage for each condition met.",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 350,
+      "relocate_before_trigger": {
+        "dx": 3.2
+      },
+      "phase_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805612,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirm Reave 802469 landed on dummy from in front (within boundary radius so FacingCasterFlags=1 passes)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802883,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dummy carries 772 Rend bleed: bleed copy 802883 fires (1 hit), proving TargetAuraState=18 was met and only front-facing suppressed 805612."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "position_x",
+            "before_expected": -8949.95,
+            "expected": -8946.75,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster relocated +3.2 yd from x=-8949.95 to x=-8946.75 (0.2 yd in front of +x-facing dummy at x=-8946.95)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "position_x",
+            "before_expected": -8946.95,
+            "expected": -8946.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify dummy remained at x=-8946.95 (caster stands +0.2 yd ahead in dummy's front arc)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 3.0,
+            "expected": 0.2,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster-dummy separation moved from 3.0 yd behind to 0.2 yd in front (inside IsWithinBoundaryRadius)."
+          }
+        ]
+      },
+      "observe_source": "Front-facing negative control for 802469 Reave behind-target condition (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). relocate_before_trigger dx=+3.2 moves caster from x=-8949.95 to x=-8946.75, placing caster 0.2 yd in front of the +x-facing dummy at x=-8946.95 (verified by caster/dummy position_x and distance_2d preconditions; 0.2 yd stays within IsWithinBoundaryRadius in Spell.cpp:7363 so 802469 FacingCasterFlags=1 casts cleanly while dummy->HasInArc(M_PI, caster) is true; note dx=+6 exceeds boundary radius and fails SPELL_FAILED_UNIT_NOT_INFRONT 134 because relocate preserves caster orientation o=0). Dummy carries 772 Rend bleed so bleed copy 802883 fires (count=1) while behind copy 805612 stays 0 (and Reave 802469 lands 1 hit). Reference search 2026-11-26: coa-history 805612: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
     },
     {
       "spell": 802469,
@@ -3263,6 +3494,42 @@
               "school_mask": 32
             },
             "source": "Behind Shadow copy 805612 (100% of 802469 damage)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "position_x",
+            "before_expected": -8949.95,
+            "expected": -8949.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster stays at spawn x=-8949.95 (behind +x-facing dummy at x=-8946.95)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "position_x",
+            "before_expected": -8946.95,
+            "expected": -8946.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify dummy stands at x=-8946.95 (3.0 yd ahead of caster along +x)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify 2D separation between caster and dummy is 3.0 yd (caster behind dummy)."
           }
         ],
         "ratios": [
