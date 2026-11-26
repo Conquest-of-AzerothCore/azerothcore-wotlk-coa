@@ -1,0 +1,186 @@
+{
+  "schema": 1,
+  "name": "Multiple Greater Skeletal Warriors stack Pierced to 2 on a single Command: Undead (#10177)",
+  "contract": [
+    "Raise: Greater Skeletal Warrior (504901) promises that Command: Skeletal Warriors (570042) applies Pierced",
+    "(570216, -10% armor per stack for 15 sec, StackAmount 2). Live Ascension combat logs",
+    "(2026-08-30-18.19.46 WoWCombatLog.txt:8251-8284) show multiple Greater Skeletal Warriors stacking Pierced onto",
+    "one shared 2-stack debuff on a single Command. Without SPELL_ATTR0_CU_SINGLE_AURA_STACK on 570216, each",
+    "warrior's cast misses the other warrior's aura in Unit::_TryStackingOrRefreshingExistingAura and",
+    "Aura::CanStackWith removes the previous warrior's aura, pinning Pierced at 1 stack. Expected: with two",
+    "Greater Skeletal Warriors raised, one Command: Undead (504868) stacks Pierced to 2 and reduces the target's",
+    "armor by 20% (0.80x), and a subsequent Command stays capped at 2 stacks."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "necro",
+      "race": 1,
+      "class": 23,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "necro",
+      "entry": 36,
+      "level": 1,
+      "min_level_armor": true,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and Life Force settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504901
+    },
+    {
+      "action": "learn",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Raise first Greater Skeletal Warrior",
+      "actor": "necro",
+      "spell": 504901
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: one Greater Skeletal Warrior is raised",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 51065,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Clear the global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 0,
+      "value": 5000
+    },
+    {
+      "action": "cast",
+      "label": "Raise second Greater Skeletal Warrior",
+      "actor": "necro",
+      "spell": 504901
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: two Greater Skeletal Warriors are raised",
+      "actor": "necro",
+      "metric": "owned_creature_count",
+      "entry": 51065,
+      "equals": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "wait",
+      "label": "Let warriors settle in formation",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: target does not have Pierced before Command",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 570216,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline enemy armor",
+      "actor": "enemy",
+      "metric": "armor",
+      "save_as": "armor_before"
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Command: Undead once with two Greater Skeletal Warriors",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: both warriors stack Pierced to 2 on a single Command",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 570216,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 2 stacks of Pierced reduce enemy armor by 20%",
+      "actor": "enemy",
+      "metric": "armor",
+      "ratio_to": "armor_before",
+      "min": 0.79,
+      "max": 0.81
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "necro",
+      "spell": 504868
+    },
+    {
+      "action": "set_power",
+      "actor": "necro",
+      "power": 6,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Second Command: Undead stays capped at 2 stacks",
+      "actor": "necro",
+      "spell": 504868,
+      "target": "enemy"
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "Pierced remains capped at 2 stacks",
+      "actor": "enemy",
+      "metric": "aura_stacks",
+      "spell": 570216,
+      "equals": 2
+    }
+  ]
+}

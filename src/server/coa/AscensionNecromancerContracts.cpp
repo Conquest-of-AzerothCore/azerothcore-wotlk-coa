@@ -60,6 +60,8 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[EFFECT_2].Effect = SPELL_EFFECT_WEAPON_PERCENT_DAMAGE;
         info->Effects[EFFECT_2].BasePoints = 199;
     }
+    if (info->Id == 570216)
+        info->AttributesCu |= SPELL_ATTR0_CU_SINGLE_AURA_STACK;
     if (info->Id == 803767)
     {
         info->Effects[0].Effect = SPELL_EFFECT_DUMMY;
