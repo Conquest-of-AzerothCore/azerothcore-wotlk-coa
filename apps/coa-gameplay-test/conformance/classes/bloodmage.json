@@ -3328,7 +3328,7 @@
       },
       "expire_ms": 2500,
       "void_on_cast_failure": true,
-      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for cast-time reduction (Sun Cleric D-106): before phase runs at 5 real earned Thirst stacks (still casting 1 at game_time.after [2500, 2800] ms, 3900 ms cast); after phase adds 4 more stacks to 9 via precondition fixture 706613 x9 (finished 0 by 2600 ms, 2220 ms cast). Together with thirst_cast_time_5 proves 0 > 5 > 9 strictly decreasing cast time. Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for cast-time reduction (Sun Cleric D-106): both phases start from the shared precondition fixture 706613 x5 (before runs at 5 stacks, still casting 1 at game_time.after [2500, 2800] ms, 3900 ms cast); after advances from 5 to 9 stacks via 4 real Sanguine Rupture 572907 casts (finished 0 by 2600 ms, 2220 ms cast). Together with thirst_cast_time_5 proves 0 > 5 > 9 strictly decreasing cast time. Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
     },
     {
       "spell": 561179,
@@ -3465,7 +3465,7 @@
       "wait_ms": 4600,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for damage increase (Sun Cleric D-106): 5 real Thirst stacks deal ~21700; 9 stacks (706613 x9 precondition fixture) strictly exceed 23000 (direction-only, proving 0 < 5 < 9). Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for damage increase (Sun Cleric D-106): both phases start from the shared precondition fixture 706613 x5 (before runs at 5 stacks, dealing ~21700); after advances from 5 to 9 stacks via 4 real Sanguine Rupture 572907 casts (strictly exceeding 23000, direction-only, proving 0 < 5 < 9). Reference search 2026-11-26: coa-history (186 logs) 561179 Keleseth's Calamity: 838 SPELL_DAMAGE hits (255 crits, 822-6247) in 3 logs; installed Spell.dbc and pending_db_world/rev_1790836202740415940.sql govern."
     },
     {
       "spell": 572795,
@@ -3708,7 +3708,7 @@
       },
       "expire_ms": 2500,
       "void_on_cast_failure": true,
-      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for cast-time reduction (Sun Cleric D-106): 5 real Thirst stacks still casting (1) at game_time.after [2500, 2800] ms; 9 stacks (706613 x9 precondition fixture) finished (0). Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for cast-time reduction (Sun Cleric D-106): both phases start from the shared precondition fixture 706613 x5 (before runs at 5 stacks, still casting 1 at game_time.after [2500, 2800] ms); after advances from 5 to 9 stacks via 4 real Sanguine Rupture 572907 casts (finished 0 by 2600 ms). Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
     },
     {
       "spell": 572795,
@@ -3847,7 +3847,7 @@
       "wait_ms": 5000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for damage increase (Sun Cleric D-106): 5 real Thirst stacks deal ~39785; 9 stacks (706613 x9 precondition fixture) strictly exceed 42000 (proving 0 < 5 < 9). Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
+      "observe_source": "Second monotone step (5 vs 9 Thirst stacks) for damage increase (Sun Cleric D-106): both phases start from the shared precondition fixture 706613 x5 (before runs at 5 stacks, dealing ~39785); after advances from 5 to 9 stacks via 4 real Sanguine Rupture 572907 casts (strictly exceeding 42000, proving 0 < 5 < 9). Reference search 2026-11-26: coa-history (186 logs) 572795 Valanar's Vengeance: 68 SPELL_CAST_START in 4 logs; installed Spell.dbc and pending_db_world/rev_20260919_10_coa_stock_coefficient_carryover.sql govern."
     },
     {
       "spell": 578305,
@@ -4554,7 +4554,7 @@
     },
     {
       "spell": 807544,
-      "name": "The Cup Runneth Over (+20% SP scaling on Taldaram's Torment DoT at +20000 SP)",
+      "name": "The Cup Runneth Over (+20% relative SP scaling on Taldaram's Torment DoT at +100000 SP)",
       "kind": "metric_delta",
       "variant": "torment_sp",
       "label_suffix": "torment_sp",
@@ -4568,7 +4568,10 @@
         10000,
         10000
       ],
-      "player_spell_power": 20000,
+      "player_spell_power": {
+        "amount": 100000,
+        "hit_arm": true
+      },
       "phase_auras": [
         [
           823764,
@@ -4597,14 +4600,14 @@
         "periodic": true
       },
       "phase_since": true,
-      "before_expected": 20865,
-      "expected": 24865,
-      "expected_gain": 4000,
-      "tolerance": 200,
+      "before_expected": 5000,
+      "expected": 6000,
+      "expected_ratio": 1.2,
+      "tolerance": 0.03,
       "wait_ms": 16000,
       "expire_ms": 1000,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 20% (Spell.dbc 807544 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 40 SPELLMOD_SP_DOT_COEFFICIENT BasePoints 19+1 = +20%, mask[2] 2097152 = Taldaram's Torment 802580; Unit.cpp:9773). Taldaram's Torment 802580 (15 s, 5 ticks every 3 s) at +20000 SP with 823764 spellpen and 16255 -100% crit: measures +20% periodic SP scaling gain. Reference search 2026-11-26: coa-history (186 logs) 807544: 0 (passive); coabuildhub spells_master_index.json 807544 matches verbatim."
+      "observe_source": "$s1 = 20% (Spell.dbc 807544 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 40 SPELLMOD_SP_DOT_COEFFICIENT BasePoints 19+1 = +20%, mask[2] 2097152 = Taldaram's Torment 802580; Unit.cpp:9773). Coefficient-independent relative SP scaling check at +100000 SP (player_spell_power hit_arm reads Shadow SP; 823764 spellpen, 16255 -100% crit): base 5-tick damage of 802580 is ~865 (< 1% of SP-scaled damage for any realistic DoT coeff >= 0.1), so before_expected floor 5000 proves non-zero SP scaling above base ~865 while expected_ratio 1.20 +- 0.03 ([1.17, 1.23]) verifies +20% SP scaling regardless of 802580's exact Ascension coefficient (excluding 1.00 = 0x and 1.40 = 2x). Currently alerts on the real server defect (802580 BonusMultiplier 0.0 and no spell_bonus_data row -> 0 SP scaling, before ~865, ratio ~1.0). Reference search 2026-11-26: coa-history (186 logs) 807544: 0 (passive); coabuildhub spells_master_index.json 807544 matches verbatim."
     },
     {
       "spell": 561195,
@@ -4718,12 +4721,54 @@
             "metric": "spell_damage_count",
             "fields": {
               "spell": 800775,
+              "target": "dummy"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Primary dummy at 3 yd is struck by Sanguine Rupture 572907 -> 800775 in both phases."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800775,
+              "target": "area1"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "area1 at 3.5 yd is struck by Sanguine Rupture 572907 -> 800775 in both phases."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800775,
+              "target": "area2"
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "area2 at 4.0 yd is struck by Sanguine Rupture 572907 -> 800775 in both phases."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 800775,
               "target": "area3"
             },
             "before_expected": 1,
             "expected": 2,
             "tolerance": 0,
-            "source": "All 4 dummies (primary + area1..area3 inside 8 yd radius) are struck by Sanguine Rupture 572907 -> 800775."
+            "source": "area3 at 4.5 yd is struck by Sanguine Rupture 572907 -> 800775 in both phases."
           }
         ]
       },
@@ -5067,7 +5112,7 @@
     },
     {
       "spell": 504085,
-      "name": "Sanguine Mend (ally heal at +300 Spirit: 1118-1172)",
+      "name": "Sanguine Mend (ally heal at +309 Spirit / 423 total Spirit: 1120-1171)",
       "kind": "metric_delta",
       "variant": "heal_spirit",
       "label_suffix": "heal_spirit",
@@ -5082,6 +5127,7 @@
       },
       "measure_actor": "caster",
       "cast_power": 500,
+      "player_spell_power": 0,
       "phase_auras": [
         [
           60235,
@@ -5115,7 +5161,7 @@
       "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Spirit scaling arm for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58} (AscensionBloodmageVitality.cpp:120-121 bonus = SPI * 0.25): precondition fixture 60235 Greatness (+300 Spirit) adds +75 healing: 1044..1096 + 75 = 1119..1171 (band [1118, 1172], disjoint from base [1043, 1097]). Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+      "observe_source": "Spirit scaling arm for ${$m1+0+$SPI*0.25+$AP*.2+$SP*.58} (AscensionBloodmageVitality.cpp:120-121 bonus = SPI * 0.25): precondition fixture 60235 Greatness (+300 Spirit * 1.03 Human racial The Human Spirit = +309 Spirit, stat 4 = 423) at 0 SP yields int32(971..1022 + 423*0.25) + int32(223*0.2) = 1076..1127 + 44 = 1120..1171 (SpellInfo.cpp:592 and Unit.cpp:10926 truncate separately; band [1118, 1172], disjoint from base [1043, 1097]). Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
     },
     {
       "spell": 504085,
@@ -5273,25 +5319,41 @@
     },
     {
       "spell": 504085,
-      "name": "Sanguine Mend ($?s681078 unempowered at 0 stacks casts 0 self-heal 681032)",
+      "name": "Sanguine Mend ($?s681078 unempowered at 0 stacks casts 0 self-heal 681032 on injured caster)",
       "kind": "metric_delta",
       "variant": "empowered_self_heal_no_stacks",
       "label_suffix": "empowered_self_heal_no_stacks",
       "quote": "Empowered: Becomes instant cast and heals yourself for $680033s1% of the heal value.",
       "trigger_spell": 504085,
       "gate_spell": 681078,
-      "target": "ally",
-      "ally_arm": {
-        "allies": 1
-      },
+      "target": "caster",
       "measure_actor": "caster",
       "cast_power": 500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 0,
       "phase_auras": [
         [
           680687,
           0,
           "caster",
           "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
         ]
       ],
       "metric": "spell_heal_count",
@@ -5305,7 +5367,23 @@
       "wait_ms": 3000,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Zero-stack control for $?s681078 Empowered self-heal: with 681078 learned and 0 stacks of 680687, Sanguine Mend 504085 triggers 0 casts of 681032 self-heal. Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "health",
+            "fields": {},
+            "before_expected": 2070,
+            "expected": 2070,
+            "tolerance": 40,
+            "source": "Caster starts at 1000/10000 HP (regen off, 0 SP, -100% crit); 504085 lands 1044..1096 effective healing (HP -> 2044..2096) in both phases so !healing at AscensionBloodmageVitality.cpp:87 is false."
+          }
+        ]
+      },
+      "observe_source": "Zero-stack control for $?s681078 Empowered self-heal: matches empowered_self_heal by targeting injured caster (1000/10000 HP, regen off, 0 SP, 16255 -100% crit) so 504085 produces 1044..1096 effective healing (verified via ally_arm health 2070 +- 40) and does not short-circuit !healing at AscensionBloodmageVitality.cpp:87; with 681078 learned and 0 stacks of 680687, only the stack threshold suppresses 681032 (0 before and 0 after). Reference search 2026-11-26: coa-history (186 logs) 504085 Sanguine Mend: 22 SPELL_HEAL (7 crits) in 3 logs, 681032 Sanguine Mend (Empowered): 63 SPELL_HEAL in 9 logs; installed Spell.dbc and pending_db_world/rev_20261010_91_bloodmage_coefficients.sql govern."
     },
     {
       "spell": 680730,
@@ -5778,6 +5856,12 @@
       "expected": 0,
       "tolerance": 0,
       "wait_ms": 147900,
+      "game_time": {
+        "after": [
+          160000,
+          162000
+        ]
+      },
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "ally_arm": {
@@ -5823,7 +5907,8 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "$s2 = 15% of Spirit (Spell.dbc 704633 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT MiscValue 1792 = CR_CRIT_MELEE|RANGED|SPELL, MiscValueB 4 STAT_SPIRIT, BasePoints 14+1 = 15%). Reference Bloodmage Spirit = 114 (bloodmage.json): int32(CalculatePct(114, 15)) = int32(17.1) = +17 spell crit rating (rating 10, 0 -> 17, tol 0). Trigger 60234 (+300 Int) does not change Spirit. Paired with crit_rating_spirit (+300 Spirit -> +62). Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 15% of Spirit (Spell.dbc 704633 Effect[1] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT MiscValue 1792 = CR_CRIT_MELEE|RANGED|SPELL, MiscValueB 4 STAT_SPIRIT, BasePoints 14+1 = 15%). Reference Bloodmage Spirit = 114 (bloodmage.json): int32(CalculatePct(114, 15)) = int32(17.1) = +17 spell crit rating (rating 10, 0 -> 17, tol 0). Trigger 60234 (+300 Int) does not change Spirit. Paired with crit_rating_spirit (+309 Spirit -> +63). Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
     },
     {
       "spell": 704633,
@@ -5873,6 +5958,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
+      "void_on_cast_failure": true,
       "observe_source": "High-Spirit arm for 704633 Effect[1] (15% of Spirit -> CR_CRIT_SPELL): precondition fixture 60235 Greatness (+300 Spirit, verified by stat 4 = 423 including Human +3% racial in both phases) gives int32(CalculatePct(423, 15)) = int32(63.45) = +63 spell crit rating (0 -> 63, tol 0, excludes 0, +17 flat, +126 double, and +-10% off 15%). Paired with crit_rating_base. Reference search 2026-11-26: coa-history (186 logs) 704633/504253/504412: 0 (passive/procs); coabuildhub spells_master_index.json 704633 matches verbatim."
     }
   ],
