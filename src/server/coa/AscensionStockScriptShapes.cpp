@@ -33,6 +33,10 @@ static_assert(TARGET_UNIT_CASTER == ::TARGET_UNIT_CASTER && TARGET_UNIT_TARGET_E
 
 namespace
 {
+constexpr uint32 SPELL_SUPPRESSION_AURA = 22247;
+constexpr uint32 DURATION_PERMANENT = 21;
+constexpr uint32 DURATION_SIX_SECONDS = 32;
+
 std::unordered_map<uint32, std::vector<Restore const*>> const& RestoresBySpell()
 {
     static std::unordered_map<uint32, std::vector<Restore const*>> const bySpell = []
@@ -89,5 +93,11 @@ void ApplyAscensionStockScriptShapes(SpellInfo* spellInfo)
         if (Matches(restore->Broken, int32(effect.Effect), int32(effect.ApplyAuraName),
             int32(effect.TargetA.GetTarget())))
             Apply(effect, restore->Stock);
+    }
+    if (spellInfo->Id == SPELL_SUPPRESSION_AURA)
+    {
+        if (spellInfo->DurationEntry && spellInfo->DurationEntry->ID == DURATION_PERMANENT)
+            spellInfo->DurationEntry = sSpellDurationStore.LookupEntry(DURATION_SIX_SECONDS);
+        spellInfo->AttributesEx3 &= ~SPELL_ATTR3_DOT_STACKING_RULE;
     }
 }
