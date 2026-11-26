@@ -723,6 +723,47 @@ class spell_ascension_stormbringer_aether_current : public SpellScript
             EFFECT_1, SPELL_EFFECT_APPLY_AURA);
     }
 };
+
+class aura_ascension_stormbringer_aether_current : public AuraScript
+{
+    PrepareAuraScript(aura_ascension_stormbringer_aether_current);
+
+    static constexpr uint32 SPELL_AETHER_CURRENT_GLIDE = 531516;
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_AETHER_CURRENT_GLIDE});
+    }
+
+    void ApplyGlide(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* target = GetTarget();
+        Unit* source = GetCaster();
+        if (!source)
+            source = target;
+        if (Aura* glide = source->AddAura(SPELL_AETHER_CURRENT_GLIDE, target))
+        {
+            glide->SetMaxDuration(GetMaxDuration());
+            glide->SetDuration(GetDuration());
+        }
+    }
+
+    void RemoveGlide(AuraEffect const*, AuraEffectHandleModes)
+    {
+        Unit* target = GetTarget();
+        target->RemoveAura(SPELL_AETHER_CURRENT_GLIDE, GetCasterGUID());
+        if (!target->HasAura(GetId()))
+            target->RemoveAurasDueToSpell(SPELL_AETHER_CURRENT_GLIDE);
+    }
+
+    void Register() override
+    {
+        AfterEffectApply += AuraEffectApplyFn(aura_ascension_stormbringer_aether_current::ApplyGlide,
+            EFFECT_0, SPELL_AURA_FEATHER_FALL, AURA_EFFECT_HANDLE_REAL_OR_REAPPLY_MASK);
+        AfterEffectRemove += AuraEffectRemoveFn(aura_ascension_stormbringer_aether_current::RemoveGlide,
+            EFFECT_0, SPELL_AURA_FEATHER_FALL, AURA_EFFECT_HANDLE_REAL);
+    }
+};
 }
 
 void AddSC_AscensionStormbringerTalents()
@@ -732,7 +773,8 @@ void AddSC_AscensionStormbringerTalents()
     new stormbringer_resource_contracts();
     RegisterSpellScript(spell_ascension_stormbringer_cooldown_reduction);
     RegisterSpellScript(spell_ascension_stormbringer_waterfall);
-    RegisterSpellScript(spell_ascension_stormbringer_aether_current);
+    RegisterSpellAndAuraScriptPair(spell_ascension_stormbringer_aether_current,
+        aura_ascension_stormbringer_aether_current);
     RegisterSpellScript(aura_ascension_barometric_pressure);
     RegisterSpellScript(aura_ascension_electrical_charge);
     RegisterSpellScript(aura_ascension_thorims_gift);

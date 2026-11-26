@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Aether Current applies and removes glide aura 531516 on self and allies (#10422)",
+  "contract": "Aether Current 531512 promises directional air steering while descending slowly ('While controlling the winds, you can control your direction and will slowly descend downwards'). Spell.dbc pairs 531512 with hidden companion aura 531516 ('Aether Current', AttributesEx SPELL_ATTR1_NO_AURA_ICON, DurationIndex 4 = 2 min, AuraInterruptFlags 655363, TargetA TARGET_UNIT_CASTER, Effect[0] SPELL_AURA_311 with EffectDamageMultiplier 0.6 — the same client gliding aura used by Venomwing Form 520330). Live Ascension combat logs show 531516 applying, refreshing, and expiring 1:1 with 531512 on both self and grouped ally targets with the Stormbringer as source. spell_ascension_stormbringer_aether_current previously only suppressed EFFECT_1 HOVER and never applied 531516. Pairing it with aura_ascension_stormbringer_aether_current now adds 531516 via AddAura on self or ally (bypassing 531516's TARGET_UNIT_CASTER), keeps its slot sent to the client, and removes 531516 when 531512 ends. Rendered client steering physics cannot be exercised in this headless probe and needs manual in-game verification.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "storm", "race": 1, "class": 16, "level": 80 },
+    { "id": "ally", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and class synchronization settle", "ms": 3000 },
+    { "action": "group", "actor": "storm", "target": "ally" },
+    { "action": "learn", "actor": "storm", "spell": 531512 },
+    { "action": "assert", "label": "CONTROL: no Aether Current glide aura before casting", "actor": "storm", "metric": "aura", "spell": 531516, "equals": 0 },
+    { "action": "cast", "label": "Cast Aether Current on self", "actor": "storm", "spell": 531512, "target": "storm" },
+    { "action": "assert", "label": "Self-cast applies Aether Current 531512", "actor": "storm", "metric": "aura", "spell": 531512, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: self-cast applies companion glide aura 531516", "actor": "storm", "metric": "aura", "spell": 531516, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Companion glide aura 531516 is sent to the client", "actor": "storm", "metric": "aura_visible", "spell": 531516, "equals": 1 },
+    { "action": "assert", "label": "Companion glide aura 531516 carries the 2-minute duration", "actor": "storm", "metric": "aura_duration_ms", "spell": 531516, "min": 110000, "max": 120000 },
+    { "action": "cancel_aura", "label": "Cancel Aether Current on self", "actor": "storm", "spell": 531512 },
+    { "action": "assert", "label": "Cancelling 531512 removes companion glide aura 531516", "actor": "storm", "metric": "aura", "spell": 531516, "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "Clear global cooldown before casting on ally", "ms": 1600 },
+    { "action": "cast", "label": "Cast Aether Current on grouped ally", "actor": "storm", "spell": 531512, "target": "ally" },
+    { "action": "assert", "label": "Ally receives Aether Current 531512", "actor": "ally", "metric": "aura", "spell": 531512, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: ally receives companion glide aura 531516 despite TARGET_UNIT_CASTER", "actor": "ally", "metric": "aura", "spell": 531516, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Ally glide aura 531516 is sent to the client", "actor": "ally", "metric": "aura_visible", "spell": 531516, "equals": 1 },
+    { "action": "assert", "label": "Caster does not receive 531516 when buffing an ally", "actor": "storm", "metric": "aura", "spell": 531516, "equals": 0 },
+    { "action": "cancel_aura", "label": "Cancel Aether Current on ally", "actor": "ally", "spell": 531512 },
+    { "action": "assert", "label": "Cancelling 531512 on ally removes 531516", "actor": "ally", "metric": "aura", "spell": 531516, "equals": 0, "within_ms": 2000 }
+  ]
+}
