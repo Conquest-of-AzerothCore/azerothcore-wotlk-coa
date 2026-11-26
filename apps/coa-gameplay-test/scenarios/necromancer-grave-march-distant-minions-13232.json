@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Necromancer Grave March redirects distant melee and ranged minions (#13232)",
-  "contract": "Grave March (500991, 30 yd range from the Necromancer) commands all responding Undead minions to focus the target enemy. Previously Order() in AscensionNecromancerSummons.cpp skipped any minion further than 60 yd from or out of LOS of the new target, and DoAction() skipped any ranged minion (Skeletal Mage 50075, Skeletal Archer 50076, Banshee 50323, Frost Wyrm 50177) outside its 40 yd InReach check instead of moving it into range. In part 1, the Necromancer raises a Skeletal Mage (50075) and Ghoul (50073), puts them on enemy_a (+10 yd), relocates to +26 yd (20 yd from enemy_c at +46 yd, while the Skeletal Mage stays > 40 yd from enemy_c), and casts Grave March on enemy_c: the Skeletal Mage must drop enemy_a, move into 40 yd range without closing to melee (>= 20 yd), engage enemy_c, and cast Frost Nova (805955). In part 2, enemy_c moves +24 yd to +70 yd (pulling the Ghoul > 60 yd from enemy_b at +5 yd), the Necromancer returns to 0 yd (5 yd from enemy_b), and casts Grave March on enemy_b: the Ghoul must immediately switch victim to enemy_b and close within 10 yd.",
+  "contract": "Grave March (500991, 30 yd range from the Necromancer) commands all responding Undead minions to focus the target enemy. Previously Order() in AscensionNecromancerSummons.cpp skipped any minion further than 60 yd from or out of LOS of the new target, and DoAction() skipped any ranged minion (Skeletal Mage 50075, Skeletal Archer 50076, Banshee 50323, Frost Wyrm 50177) outside its 40 yd InReach check instead of moving it into range. In part 1, the Necromancer learns Scourge Apprentice Training (680283, +1 Life Force over the base 2 so Skeletal Mage's 2 Life Force and Ghoul's 1 Life Force fit simultaneously without Evict() despawning the mage), raises a Skeletal Mage (50075) and Ghoul (50073), puts them on enemy_a (+10 yd), relocates to +26 yd (20 yd from enemy_c at +46 yd, while the Skeletal Mage stays > 40 yd from enemy_c), and casts Grave March on enemy_c: the Skeletal Mage must drop enemy_a, move into 40 yd range without closing to melee (>= 20 yd), engage enemy_c, and cast Frost Nova (805955). In part 2, enemy_c moves +24 yd to +70 yd (pulling the Ghoul > 60 yd from enemy_b at +5 yd), the Necromancer returns to 0 yd (5 yd from enemy_b), and casts Grave March on enemy_b: the Ghoul must immediately switch victim to enemy_b and close within 10 yd.",
   "timeout_ms": 120000,
   "location": { "map": 1, "x": -2712.6, "y": 19.0, "z": 14.5, "o": 0 },
   "players": [
@@ -22,9 +22,19 @@
   ],
   "steps": [
     { "action": "wait", "label": "Let login, spawns and Life Force settle", "ms": 3000 },
+    { "action": "learn", "actor": "n", "spell": 680283 },
     { "action": "learn", "actor": "n", "spell": 500331 },
     { "action": "learn", "actor": "n", "spell": 500971 },
     { "action": "learn", "actor": "n", "spell": 500991 },
+    {
+      "action": "assert",
+      "label": "SETUP: Scourge Apprentice Training raises Life Force capacity to 3",
+      "actor": "n",
+      "metric": "aura_stacks",
+      "spell": 805011,
+      "equals": 3,
+      "within_ms": 3000
+    },
     { "action": "cast", "label": "Raise Skeletal Mage (2 s cast)", "actor": "n", "spell": 500331 },
     {
       "action": "assert",
@@ -45,6 +55,14 @@
       "entry": 50073,
       "equals": 1,
       "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Skeletal Mage remains raised alongside Ghoul",
+      "actor": "n",
+      "metric": "owned_creature_count",
+      "entry": 50075,
+      "equals": 1
     },
     { "action": "wait", "label": "Clear GCD after Ghoul", "ms": 1500 },
     { "action": "cast", "label": "Engage both minions on enemy_a", "actor": "n", "spell": 500991, "target": "enemy_a" },
