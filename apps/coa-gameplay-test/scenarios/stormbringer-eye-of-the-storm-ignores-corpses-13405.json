@@ -1,0 +1,344 @@
+{
+  "schema": 1,
+  "name": "Stormbringer: Eye of the Storm ignores corpses (#13405)",
+  "contract": "#13405: Eye of the Storm (806307, ranks 807580-807586) keeps SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD and its periodic triggers 806308 (every-1s pulse) and 806455 (4s blast + 807712 root) keep SPELL_ATTR2_ALLOW_DEAD_TARGET so the storm continues pulsing around a marked target that dies mid-duration onto living nearby enemies (proven by live Ascension combat logs). However, 806308 and 806455 must never damage or root dead units or corpses: spell_ascension_eye_of_the_storm_pulse filters non-living targets out of both TARGET_UNIT_TARGET_ENEMY and TARGET_UNIT_DEST_AREA_ENEMY (and clears any dead explicit target before launch/SendSpellGo), and 807712 clears SPELL_ATTR2_ALLOW_DEAD_TARGET. Phase 1 places Eye of the Storm on a living anchor beside a corpse and a living bystander: both living enemies take 806308 pulses, the 806455 blast, and the 807712 root while the corpse takes 0 hits and 0 root. Phase 2 drops the marked anchor to 1 HP so tick 1 kills it mid-duration: the dead anchor takes 0 further 806308 pulses, 0 806455 blasts, and 0 807712 root while the living bystander still takes subsequent 806308 pulses, the 806455 blast, and the 807712 root.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "s",
+      "race": 8,
+      "class": 16,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "corpse",
+      "owner": "s",
+      "entry": 36,
+      "health": 1,
+      "distance": 3
+    },
+    {
+      "id": "anchor",
+      "owner": "s",
+      "entry": 36,
+      "health": 10000000,
+      "distance": 4
+    },
+    {
+      "id": "bystander",
+      "owner": "s",
+      "entry": 36,
+      "health": 10000000,
+      "distance": 5
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 806307
+    },
+    {
+      "action": "learn",
+      "actor": "s",
+      "spell": 804020
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 804020,
+      "target": "corpse"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: nearby enemy is killed to leave a corpse within Eye of the Storm's 10 yd radius",
+      "actor": "corpse",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Shock's GCD clears before casting Eye of the Storm",
+      "actor": "s",
+      "metric": "global_cooldown_ms",
+      "spell": 806307,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 806307,
+      "target": "anchor"
+    },
+    {
+      "action": "wait",
+      "label": "Let Eye of the Storm run through its 4 s periodic pulses and expiry blast",
+      "ms": 4500
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: living marked anchor receives the expiry root",
+      "actor": "anchor",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: living marked anchor took periodic pulses (806308)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "anchor",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: living bystander took periodic pulses (806308)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "bystander",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: living marked anchor took the expiry blast (806455)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "anchor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: living bystander took the expiry blast (806455)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "bystander",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "BASELINE: living bystander received the expiry root (807712)",
+      "actor": "bystander",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nearby corpse took zero periodic pulse hits (806308)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "corpse",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nearby corpse took zero expiry blast hits (806455)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "corpse",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nearby corpse did not receive the expiry root (807712)",
+      "actor": "corpse",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Phase 1 root expires on bystander before Phase 2",
+      "actor": "bystander",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "s",
+      "spell": 806307
+    },
+    {
+      "action": "set_health",
+      "actor": "anchor",
+      "value": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "s",
+      "power": 0,
+      "value": 2500
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "anchor",
+      "save_as": "anchor_blast_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "bystander",
+      "save_as": "bystander_blast_before"
+    },
+    {
+      "action": "cast",
+      "actor": "s",
+      "spell": 806307,
+      "target": "anchor"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: first pulse of Eye of the Storm kills the 1 HP marked anchor mid-duration",
+      "actor": "anchor",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "anchor",
+      "save_as": "anchor_pulse_at_death"
+    },
+    {
+      "action": "snapshot",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "bystander",
+      "save_as": "bystander_pulse_at_death"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: storm continues pulsing from the dead anchor and roots the living bystander at expiry",
+      "actor": "bystander",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "wait",
+      "label": "Let the final 4 s tick finish",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dead marked anchor takes zero additional periodic pulse hits (806308)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "anchor",
+      "relative_to": "anchor_pulse_at_death",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dead marked anchor takes zero expiry blast hits (806455)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "anchor",
+      "relative_to": "anchor_blast_before",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: dead marked anchor does not receive the expiry root (807712)",
+      "actor": "anchor",
+      "metric": "aura",
+      "spell": 807712,
+      "caster": "s",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: living bystander continues taking periodic pulses (806308) after the anchor dies",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "bystander",
+      "relative_to": "bystander_pulse_at_death",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: living bystander takes the expiry blast (806455) after the anchor dies",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "bystander",
+      "relative_to": "bystander_blast_before",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nearby corpse still has zero periodic pulse hits (806308)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806308,
+      "target": "corpse",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: nearby corpse still has zero expiry blast hits (806455)",
+      "actor": "s",
+      "metric": "spell_damage_count",
+      "spell": 806455,
+      "target": "corpse",
+      "equals": 0
+    }
+  ]
+}
