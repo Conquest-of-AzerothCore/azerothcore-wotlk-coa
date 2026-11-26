@@ -1,0 +1,248 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Ruin Inner Demon DoT deals 30% of displayed damage against level-scaled creatures (#13334)",
+  "contract": [
+    "Issue #13334: level-33 Felsworn casting Ruin rank 3 (501293) in Inner Demon (804216) inside a",
+    "level-scaled dungeon (Blackfathom Deeps, map 48) observed the Inner Demon burn (805748) dealing",
+    "only a scaled-down fraction (~15%) of Ruin's displayed damage instead of 30% over 3 sec.",
+    "Destiny Weaver converts player damage from viewer-scale into the creature's real health pool",
+    "inside Unit::DealDamage via sScriptMgr->DealDamage (DamageDealtToPool = realMaxHealth / viewMaxHealth).",
+    "Unit::DealDamage previously returned that real-pool value to Unit::DealSpellDamage -> scriptDamageResult",
+    "-> OnSpellHitResult, so AscensionFelswornAbilities.cpp computed CopyDot(805748, damage * 30 / 100)",
+    "from the real-pool-scaled amount instead of the displayed hit (double-scaling the follow-up DoT).",
+    "Requires DestinyWeaver.Enable=1, DestinyWeaver.LevelScaling=1, CoA.QuestLevelScaling=1. A level-33",
+    "Felsworn with world scaling enabled views a level-1 hostile (entry 1501, real health 100000) above",
+    "level 24 with view max health well above 100000 (DamageDealtToPool << 0.5). Neutralizes partial",
+    "resists (823764 per ADR 0154) and crits (33143). Total 805748 damage over its 3 ticks must match",
+    "0.30 +/- 0.02 of Ruin 501293's displayed hit (without the fix, the ratio drops below 0.05)."
+  ],
+  "timeout_ms": 180000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 14,
+      "level": 33,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "caster",
+      "entry": 1501,
+      "level": 1,
+      "health": 100000,
+      "distance": 12
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "level_scaling_packet",
+      "actor": "caster",
+      "value": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: enemy is scaled up toward the level-33 Felsworn",
+      "actor": "caster",
+      "metric": "view_level",
+      "target": "enemy",
+      "min": 25,
+      "max": 33,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: enemy view max health exceeds real 100000 pool so DamageDealtToPool < 0.5",
+      "actor": "caster",
+      "metric": "sent_max_health",
+      "target": "enemy",
+      "min": 200000,
+      "within_ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 804216
+    },
+    {
+      "action": "learn",
+      "actor": "caster",
+      "spell": 501293
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "target": "enemy",
+      "caster": "caster",
+      "spell": 33143,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 800058,
+      "stacks": 6
+    },
+    {
+      "action": "cast",
+      "label": "Activate Inner Demon consuming 6 Felfury (30 s duration)",
+      "actor": "caster",
+      "spell": 804216
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Inner Demon is active",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 804216,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Clear GCD after activating Inner Demon",
+      "ms": 1600
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 800058,
+      "stacks": 6
+    },
+    {
+      "action": "set_aura",
+      "actor": "caster",
+      "spell": 803468,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "caster",
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 501293,
+      "target": "enemy",
+      "save_as": "ruin_dmg_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_resist_total",
+      "spell": 501293,
+      "target": "enemy",
+      "save_as": "ruin_res_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 805748,
+      "target": "enemy",
+      "save_as": "dot_dmg_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_resist_total",
+      "spell": 805748,
+      "target": "enemy",
+      "save_as": "dot_res_before"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Ruin Rank 3 (2.5 s cast + missile) in Inner Demon against the scaled enemy",
+      "actor": "caster",
+      "spell": 501293,
+      "target": "enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ruin Rank 3 lands with positive damage",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 501293,
+      "target": "enemy",
+      "relative_to": "ruin_dmg_before",
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ruin had zero partial resist",
+      "actor": "caster",
+      "metric": "spell_resist_total",
+      "spell": 501293,
+      "target": "enemy",
+      "relative_to": "ruin_res_before",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Let all 3 ticks of Inner Demon Ruin DoT (805748, 3000 ms duration) complete",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Inner Demon Ruin DoT 805748 finished ticking",
+      "actor": "enemy",
+      "metric": "aura",
+      "spell": 805748,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Inner Demon Ruin DoT had zero partial resist",
+      "actor": "caster",
+      "metric": "spell_resist_total",
+      "spell": 805748,
+      "target": "enemy",
+      "relative_to": "dot_res_before",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 501293,
+      "target": "enemy",
+      "relative_to": "ruin_dmg_before",
+      "save_as": "ruin_hit"
+    },
+    {
+      "action": "assert",
+      "label": "FIX: Inner Demon Ruin DoT 805748 deals 30% of Ruin's displayed hit on a level-scaled creature",
+      "actor": "caster",
+      "metric": "spell_damage_total",
+      "spell": 805748,
+      "target": "enemy",
+      "relative_to": "dot_dmg_before",
+      "ratio_to": "ruin_hit",
+      "min": 0.28,
+      "max": 0.32
+    }
+  ]
+}
