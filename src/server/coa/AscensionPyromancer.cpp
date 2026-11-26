@@ -429,7 +429,19 @@ void Refresh(Player* player)
             Cast(player, player, 900755);
         if (Aura* aura = player->GetAura(900755))
             if (AuraEffect* effect = aura->GetEffect(0))
-                effect->ChangeAmount(player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_SPELL));
+            {
+                int32 const desired = int32(std::min<uint32>(
+                    player->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_CRIT_SPELL),
+                    uint32(INT32_MAX)));
+                if (effect->GetAmount() != desired)
+                {
+                    uint32 const manaBefore = player->GetPower(POWER_MANA);
+                    effect->ChangeAmount(desired);
+                    uint32 const restored = std::min(manaBefore, player->GetMaxPower(POWER_MANA));
+                    if (player->GetPower(POWER_MANA) < restored)
+                        player->SetPower(POWER_MANA, restored);
+                }
+            }
     }
     else
         player->RemoveAurasDueToSpell(900755);
