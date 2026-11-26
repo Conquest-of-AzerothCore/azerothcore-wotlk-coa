@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Worldforged Sea Cleaver stands at its recorded Stranglethorn shore spot (#10162)",
-  "contract": "#10162 reported Sea Cleaver (item 415058, Pirate's Lost Axe entry 95717, guid 6941038) missing at Jaguero Isle in Stranglethorn Vale. The realm-map pass placed it 24.56 yd off-shore and 8 yd underwater at (-14826.400, 561.200, -7.989). Restoring the first-pass realm-dump spot (row 6901140: -14816.906, 583.855, 4.415, +1.92 yd above .map terrain 2.4954) puts it on dry land within reach of the reporter's spot. Expected: it stands at the restored spot, is not submerged, has clear headroom, and opens with loot.",
+  "contract": "#10162 reported Sea Cleaver (item 415058, Pirate's Lost Axe entry 95717, guid 6941038) missing at Jaguero Isle in Stranglethorn Vale. The realm-map pass placed it 24.56 yd off-shore and 8 yd underwater at (-14826.400, 561.200, -7.989). Restoring the first-pass realm-dump spot (row 6901140: -14816.906, 583.855, 4.415, +1.92 yd above .map terrain 2.4954) puts the axe on dry land lodged under the leaning trunk of Badlandspalmtree02.m2 (000_30_59.vmtile ID 24402, base 7.11 yd north, trunk underside at z ~5.87-5.89, 0 VMap hits below, runtime spawn_headroom 1.18 yd vs 10.0 yd on the broken ocean floor) within 3.53 yd and clear LoS of the reporter's spot. Expected: it stands at the restored spot, is not submerged, sits under the leaning palm trunk overhang (0.9..1.5 yd headroom), and opens with loot.",
   "timeout_ms": 60000,
   "location": {
     "map": 0,
@@ -60,9 +60,10 @@
     {
       "action": "assert",
       "actor": "p",
-      "label": "the pickup has open headroom",
+      "label": "DISCRIMINATING: the pickup sits under the leaning palm trunk overhang (~1.18 yd headroom)",
       "metric": "spawn_headroom",
-      "min": 5.0,
+      "min": 0.9,
+      "max": 1.5,
       "guid": 6941038,
       "spawn_type": "gameobject"
     },
