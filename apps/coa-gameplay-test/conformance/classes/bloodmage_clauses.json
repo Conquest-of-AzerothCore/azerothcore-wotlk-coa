@@ -1344,7 +1344,7 @@
     "spell": 520493,
     "clause": "Enrage allies within $a1 yds,",
     "labels": [
-      "520493 effect_radius e0 #0"
+      "520493 behaviour_metric_delta radius"
     ],
     "kind": "claim"
   },
@@ -1355,14 +1355,14 @@
       {
         "claim": "increasing haste by $s1%",
         "labels": [
-          "520493 effect_value e0 #1",
-          "520493 aura_amount e0 #1"
+          "520493 behaviour_metric_delta haste_ally"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "520493 aura_duration_ms #2"
+          "520493 behaviour_cast_applies_aura duration",
+          "520493 behaviour_expiry duration"
         ]
       }
     ],
@@ -1372,7 +1372,9 @@
     "spell": 520493,
     "clause": "After being affected by this spell, allies cannot benefit from similar effects for $804457d.",
     "labels": [
-      "520493 spell_duration 804457 #3"
+      "520493 behaviour_cast_applies_aura worn_out_duration",
+      "520493 behaviour_expiry worn_out_duration",
+      "520493 behaviour_metric_delta worn_out_blocks"
     ],
     "kind": "claim"
   },
@@ -1940,7 +1942,9 @@
   {
     "spell": 562228,
     "clause": "Shows the location of all nearby Humanoids, Giants, and Beasts on the minimap.",
-    "labels": [],
+    "labels": [
+      "562228 behaviour_metric_delta track_life"
+    ],
     "kind": "claim"
   },
   {
@@ -2073,7 +2077,9 @@
     "spell": 572116,
     "clause": "Bloodthorns sprout from all party and raid members for $d,",
     "labels": [
-      "572116 aura_duration_ms #0"
+      "572116 behaviour_cast_applies_aura duration",
+      "572116 behaviour_expiry duration",
+      "572116 behaviour_metric_delta raid_reach"
     ],
     "kind": "claim"
   },
@@ -2081,15 +2087,20 @@
     "spell": 572116,
     "clause": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
     "labels": [
-      "572116 effect_value e0 #1",
-      "572116 aura_amount e0 #1"
+      "572116 behaviour_metric_delta shield_hits",
+      "572116 behaviour_metric_delta shield_damage",
+      "572116 behaviour_metric_delta shield_spell",
+      "572116 behaviour_metric_delta shield_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 572116,
     "clause": "Can occur only once every half a second.",
-    "labels": [],
+    "labels": [
+      "572116 behaviour_metric_delta icd_held",
+      "572116 behaviour_metric_delta icd_reopen"
+    ],
     "kind": "claim"
   },
   {
@@ -2127,14 +2138,14 @@
       {
         "claim": "Blood magic infuses the target ally, increasing their Spirit by $s1",
         "labels": [
-          "572403 effect_value e0 #0",
-          "572403 aura_amount e0 #0"
+          "572403 behaviour_metric_delta spirit_ally"
         ]
       },
       {
         "claim": "for $d.",
         "labels": [
-          "572403 aura_duration_ms #1"
+          "572403 behaviour_cast_applies_aura duration",
+          "572403 behaviour_expiry duration"
         ]
       }
     ],
@@ -2147,14 +2158,14 @@
       {
         "claim": "Blood magic infuses all party and raid members, increasing their Spirit by $s1",
         "labels": [
-          "572404 effect_value e0 #0",
-          "572404 aura_amount e0 #0"
+          "572404 behaviour_metric_delta spirit_raid"
         ]
       },
       {
         "claim": "for $d.",
         "labels": [
-          "572404 aura_duration_ms #1"
+          "572404 behaviour_cast_applies_aura duration",
+          "572404 behaviour_expiry duration"
         ]
       }
     ],
@@ -2307,8 +2318,7 @@
     "spell": 680299,
     "clause": "Establish a sanguine pact with all nearby allies, increasing their Stamina by $s1.",
     "labels": [
-      "680299 effect_value e0 #0",
-      "680299 aura_amount e0 #0"
+      "680299 behaviour_metric_delta stamina_allies"
     ],
     "kind": "claim"
   },
@@ -2316,7 +2326,8 @@
     "spell": 680299,
     "clause": "Lasts $d.",
     "labels": [
-      "680299 aura_duration_ms #1"
+      "680299 behaviour_cast_applies_aura duration",
+      "680299 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
@@ -2365,7 +2376,8 @@
     "spell": 680679,
     "clause": "Emanate an aura for $537250d,",
     "labels": [
-      "680679 spell_duration 537250 #0"
+      "680679 behaviour_cast_applies_aura duration",
+      "680679 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
@@ -2373,7 +2385,8 @@
     "spell": 680679,
     "clause": "causing allied players to deal ${$sps*.6} additional damage as Shadow damage when they deal direct damage.",
     "labels": [
-      "680679 effect_value #1"
+      "680679 behaviour_metric_delta shadow_damage",
+      "680679 behaviour_metric_delta ally_shadow_damage"
     ],
     "kind": "claim"
   },
@@ -2381,7 +2394,9 @@
     "spell": 680679,
     "clause": "Applies Exhaustion, preventing you from benefiting from similar effects for $573255d.",
     "labels": [
-      "680679 spell_duration 573255 #2"
+      "680679 behaviour_cast_applies_aura exhaustion_duration",
+      "680679 behaviour_expiry exhaustion_duration",
+      "680679 behaviour_metric_delta exhaustion_blocks"
     ],
     "kind": "claim"
   },
@@ -3584,12 +3599,16 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "706258 aura_amplitude_ms #0"
+          "706258 behaviour_metric_delta before_tick",
+          "706258 behaviour_metric_delta dispels_one"
         ]
       },
       {
         "claim": "dispels 1 bleed effect from you",
-        "labels": []
+        "labels": [
+          "706258 behaviour_metric_delta no_shield_control",
+          "706258 behaviour_metric_delta dispels_one"
+        ]
       }
     ],
     "kind": "claim"
@@ -3707,8 +3726,7 @@
     "spell": 707339,
     "clause": "Enact a sanguinary ritual with an ally, increasing their Stamina by $s1.",
     "labels": [
-      "707339 effect_value e0 #0",
-      "707339 aura_amount e0 #0"
+      "707339 behaviour_metric_delta stamina_ally"
     ],
     "kind": "claim"
   },
@@ -3716,7 +3734,8 @@
     "spell": 707339,
     "clause": "Lasts $d.",
     "labels": [
-      "707339 aura_duration_ms #1"
+      "707339 behaviour_cast_applies_aura duration",
+      "707339 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
@@ -3902,15 +3921,19 @@
     "spell": 800175,
     "clause": "Increases your movement speed by $s1%.",
     "labels": [
-      "800175 effect_value e0 #0",
-      "800175 aura_amount e0 #0"
+      "800175 behaviour_metric_delta run_speed"
     ],
     "kind": "claim"
   },
   {
     "spell": 800175,
     "clause": "Acts like a mount.",
-    "labels": [],
+    "labels": [
+      "800175 cast_condition blocked",
+      "800175 cast_condition allowed",
+      "800175 behaviour_metric_delta mount_buffs",
+      "800175 behaviour_metric_delta mount_ignores_sprint"
+    ],
     "kind": "claim"
   },
   {
@@ -4548,7 +4571,8 @@
     "spell": 501667,
     "clause": "Bloodthorns sprout from an ally for $d,",
     "labels": [
-      "501667 aura_duration_ms #0"
+      "501667 behaviour_cast_applies_aura duration",
+      "501667 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
@@ -4556,15 +4580,20 @@
     "spell": 501667,
     "clause": "causing ${$m1+0+$sps*0.035} Shadow damage to attackers when hit.",
     "labels": [
-      "501667 effect_value e0 #1",
-      "501667 aura_amount e0 #1"
+      "501667 behaviour_metric_delta shield_hits",
+      "501667 behaviour_metric_delta shield_damage",
+      "501667 behaviour_metric_delta shield_spell",
+      "501667 behaviour_metric_delta shield_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 501667,
     "clause": "Can occur only once every half a second.",
-    "labels": [],
+    "labels": [
+      "501667 behaviour_metric_delta icd_held",
+      "501667 behaviour_metric_delta icd_reopen"
+    ],
     "kind": "claim"
   },
   {
@@ -5165,15 +5194,30 @@
   {
     "spell": 806182,
     "clause": "Envelop an ally in darkness, temporarily reducing all threat for $d.",
-    "labels": [
-      "806182 aura_duration_ms #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d.",
+        "labels": [
+          "806182 behaviour_cast_applies_aura duration",
+          "806182 behaviour_expiry duration"
+        ]
+      },
+      {
+        "claim": "Envelop an ally in darkness, temporarily reducing all threat",
+        "labels": [
+          "806182 behaviour_metric_delta ally_threat"
+        ]
+      }
+    ]
   },
   {
     "spell": 806182,
     "clause": "While active, the target's stealth detection is significantly increased.",
-    "labels": [],
+    "labels": [
+      "806182 behaviour_metric_delta ally_stealth_detect",
+      "806182 behaviour_metric_delta ally_stealth_detect_gone"
+    ],
     "kind": "claim"
   },
   {
@@ -5559,8 +5603,7 @@
     "spell": 1108493,
     "clause": "Empowers magic used against the targeted party member, increasing damage taken from spells by up to $s1",
     "labels": [
-      "1108493 effect_value e0 #0",
-      "1108493 aura_amount e0 #0"
+      "1108493 behaviour_metric_delta spell_damage_taken"
     ],
     "kind": "claim"
   },
@@ -5568,8 +5611,7 @@
     "spell": 1108493,
     "clause": "and healing spells by up to $s2.",
     "labels": [
-      "1108493 effect_value e1 #1",
-      "1108493 aura_amount e1 #1"
+      "1108493 behaviour_metric_delta healing_taken"
     ],
     "kind": "claim"
   },
@@ -5577,7 +5619,8 @@
     "spell": 1108493,
     "clause": "Lasts $d.",
     "labels": [
-      "1108493 aura_duration_ms #2"
+      "1108493 behaviour_cast_applies_aura duration",
+      "1108493 behaviour_expiry duration"
     ],
     "kind": "claim"
   },
