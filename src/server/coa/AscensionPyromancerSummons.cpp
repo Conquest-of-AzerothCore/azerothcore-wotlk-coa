@@ -15,12 +15,12 @@
 #include <set>
 namespace AscensionPyromancer
 {
-void Summon(Player* player, uint32 entry, uint32 propertiesId, Position const& position, uint32 duration, uint32 spellId)
+void Summon(Player* player, uint32 entry, uint32 propertiesId, Position const& position, uint32 duration)
 {
     auto properties = sSummonPropertiesStore.LookupEntry(propertiesId);
     if (!player || !player->IsAlive() || !properties || (entry != 50258 && entry != 50359 && entry != 52258))
         return;
-    if (TempSummon* summon = player->GetMap()->SummonCreature(entry, position, properties, duration, player, spellId))
+    if (TempSummon* summon = player->GetMap()->SummonCreature(entry, position, properties, duration, player))
         summon->SetTempSummonType(duration ? TEMPSUMMON_TIMED_DESPAWN : TEMPSUMMON_DEAD_DESPAWN);
 }
 bool CanPhoenixCommand(Player* player, Unit* target, bool dive)
