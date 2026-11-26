@@ -10,6 +10,7 @@ class Item;
 namespace NativeItemScaling
 {
 [[nodiscard]] bool Active();
+[[nodiscard]] bool RebornArmorActive();
 [[nodiscard]] bool Handles(std::uint32_t itemId);
 [[nodiscard]] std::uint8_t InstanceLevel(Item const* item);
 }

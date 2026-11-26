@@ -154,6 +154,66 @@ static void KeepsHealthShare()
     CHECK(KeptHealth(728, 728, 269) == 269);
 }
 
+static void ComputesGearBudgetsAndCatchUp()
+{
+    CHECK(GearHealthBudget(10) == 140.0f);
+    CHECK(GearHealthBudget(12) == 158.0f);
+    CHECK(GearHealthBudget(13) == 167.0f);
+    CHECK(GearHealthBudget(29) == 365.0f);
+    CHECK(GearHealthBudget(59) == 900.0f);
+    CHECK(GearHealthBudget(5) == 140.0f);
+    CHECK(GearHealthBudget(70) == 900.0f);
+
+    for (std::uint32_t level = 10; level < 59; ++level)
+    {
+        CHECK(GearHealthBudget(level) <= GearHealthBudget(level + 1));
+        CHECK(GearShieldArmorBudget(level, true) <= GearShieldArmorBudget(level + 1, true));
+        CHECK(GearShieldArmorBudget(level, false) <= GearShieldArmorBudget(level + 1, false));
+        for (ArmorTier tier : { ArmorTier::Cloth, ArmorTier::Leather, ArmorTier::Mail, ArmorTier::Plate })
+        {
+            CHECK(GearArmorBudget(tier, level, true) <= GearArmorBudget(tier, level + 1, true));
+            CHECK(GearArmorBudget(tier, level, false) <= GearArmorBudget(tier, level + 1, false));
+        }
+    }
+
+    CHECK(GearArmorBudget(ArmorTier::Plate, 15, true) == 638.0f);
+    CHECK(GearArmorBudget(ArmorTier::Plate, 59, true) == 2798.0f);
+    CHECK(GearArmorBudget(ArmorTier::Cloth, 59, false) == 1471.0f);
+
+    CHECK(GearCatchUpAmount(185.0f, 900.0f, 185.0f, 1.0f) == 715.0f);
+    CHECK(GearCatchUpAmount(185.0f, 900.0f, 0.0f, 1.0f) == 715.0f);
+    CHECK(GearCatchUpAmount(880.0f, 900.0f, 200.0f, 1.0f) == 20.0f);
+    CHECK(GearCatchUpAmount(820.0f, 900.0f, 1100.0f, 1.0f) == 0.0f);
+    CHECK(GearCatchUpAmount(185.0f, 900.0f, 185.0f, 0.0f) == 0.0f);
+    CHECK(GearCatchUpAmount(185.0f, 900.0f, 185.0f, 0.5f) == 265.0f);
+    CHECK(GearCatchUpAmount(185.0f, 900.0f, -50.0f, 1.0f) == 715.0f);
+    CHECK(GearCatchUpAmount(185.0f, 900.0f, 0.0f, -0.5f) == 0.0f);
+    CHECK(PlayerGearLift(15, 59, ArmorTier::Plate, ArmorTier::Plate, true, GearValues{}, -0.5f).Empty());
+    CHECK(GearArmorBudget(ArmorTier::Plate, 45, true) == 1512.0f);
+    CHECK(GearArmorBudget(ArmorTier::Plate, 46, true) == 2258.0f);
+
+    Lift const greenFifteen = PlayerGearLift(15, 59, ArmorTier::Cloth, ArmorTier::Cloth, true,
+        GearValues{ 185.0f, 130.0f, 0.0f, false }, 1.0f);
+    CHECK(greenFifteen.health == 715.0f && greenFifteen.armor == 264.0f);
+
+    Lift const nakedFifteen = PlayerGearLift(15, 59, ArmorTier::Cloth, ArmorTier::Cloth, true,
+        GearValues{ 0.0f, 0.0f, 0.0f, false }, 1.0f);
+    CHECK(nakedFifteen.health == 715.0f && nakedFifteen.armor == 264.0f);
+    CHECK(nakedFifteen.health < 185.0f + greenFifteen.health);
+
+    Lift const withShield = PlayerGearLift(15, 59, ArmorTier::Plate, ArmorTier::Plate, true,
+        GearValues{ 185.0f, 638.0f, 231.0f, true }, 1.0f);
+    CHECK(withShield.health == 715.0f);
+    CHECK(withShield.armor == (2798.0f - 638.0f) + (1513.0f - 231.0f));
+
+    Lift const warFifteenToFiftyNine = PlayerGearLift(15, 59, ArmorTier::Mail, ArmorTier::Plate, false,
+        GearValues{ 185.0f, 794.0f, 0.0f, false }, 1.0f);
+    CHECK(warFifteenToFiftyNine.armor == 2536.0f - 794.0f);
+
+    CHECK(PlayerGearLift(59, 59, ArmorTier::Plate, ArmorTier::Plate, true, GearValues{}, 1.0f).Empty());
+    CHECK(PlayerGearLift(15, 59, ArmorTier::Plate, ArmorTier::Plate, true, GearValues{}, 0.0f).Empty());
+}
+
 int main()
 {
     ParsesDefaultRanges();
@@ -167,5 +227,6 @@ int main()
     ComputesWarriorRatio();
     BridgesFortyNineLevels();
     KeepsHealthShare();
+    ComputesGearBudgetsAndCatchUp();
     std::cout << "Battleground wide bracket policy checks passed\n";
 }

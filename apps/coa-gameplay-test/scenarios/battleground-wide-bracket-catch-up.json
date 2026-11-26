@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Low-level battleground players are lifted to their bracket top while inside",
-  "contract": "A level 12 Human Warrior and a level 12 Human class 12 who enter a Warsong Gulch of the 10-29 bracket get a health-only lift applied directly to maximum health (UNIT_MOD_HEALTH): the difference between the level 29 and level 12 rows of player_class_stats and player_race_stats in base health plus Stamina health, leaving Stamina and every other primary stat untouched. Warrior Stamina +0 and maximum health +459 (239 base health + 22 Stamina x 10); class 12 Stamina +0 and maximum health +394 (254 base health + 14 Stamina x 10). Strength, Agility, Intellect, Spirit and mana are not lifted and are not asserted here; the output scaling scenario checks that they stay put. A level 29 Orc Warrior gets nothing; a second one completes the faction pairing for the class 12 player. Leveling to 13 inside recomputes the lift instead of stacking it: Stamina rises only by the natural level 13 gain (+1) while maximum health stays at the level 29 lifted value (+459) and current health stays at 100%. Leaving through the leave packet or by teleport removes the lift and clamps health to the restored maximum.",
+  "contract": "A level 12 Human Warrior and a level 12 Human class 12 who enter a Warsong Gulch of the 10-29 bracket get base health and defensive gear catch-up applied directly to maximum health (UNIT_MOD_HEALTH) and armor (UNIT_MOD_ARMOR): the base difference between the level 29 and level 12 rows of player_class_stats and player_race_stats in base health plus Stamina health plus the green-gear Health budget difference (365 - 158 = 207 with no Stamina gear equipped), leaving Stamina and every other primary stat untouched. Warrior Stamina +0 and maximum health +666 (239 base health + 22 Stamina x 10 + 207 gear health); class 12 Stamina +0 and maximum health +601 (254 base health + 14 Stamina x 10 + 207 gear health). Strength, Agility, Intellect, Spirit and mana are not lifted and are not asserted here; the output scaling scenario checks that they stay put. A level 29 Orc Warrior gets nothing; a second one completes the faction pairing for the class 12 player. Leveling to 13 inside recomputes both lifts instead of stacking them: Stamina rises only by the natural level 13 gain (+1) while maximum health stands at the level 29 lifted value (+657 = 459 base + 198 gear health above the pre-entry level 12 baseline) and current health stays at 100%. Leaving through the leave packet or by teleport removes both lifts and clamps health to the restored maximum.",
   "timeout_ms": 240000,
   "location": {
     "map": 0,
@@ -299,11 +299,11 @@
     },
     {
       "action": "assert",
-      "label": "Level 12 Warrior maximum health rises by 239 base health and 22 Stamina equivalent (459)",
+      "label": "Level 12 Warrior maximum health rises by 239 base health, 22 Stamina equivalent and 207 gear health (666)",
       "actor": "war",
       "metric": "max_health",
       "relative_to": "war_health",
-      "equals": 459,
+      "equals": 666,
       "within_ms": 5000
     },
     {
@@ -318,11 +318,11 @@
     },
     {
       "action": "assert",
-      "label": "Level 12 class 12 maximum health rises by 254 base health and 14 Stamina equivalent (394)",
+      "label": "Level 12 class 12 maximum health rises by 254 base health, 14 Stamina equivalent and 207 gear health (601)",
       "actor": "coa",
       "metric": "max_health",
       "relative_to": "coa_health",
-      "equals": 394,
+      "equals": 601,
       "within_ms": 5000
     },
     {
@@ -351,11 +351,11 @@
     },
     {
       "action": "assert",
-      "label": "Leveling to 13 inside keeps Warrior maximum health at the level 29 lifted value (no stacked lift)",
+      "label": "Leveling to 13 inside recomputes base and gear lifts to the level 29 target (+657)",
       "actor": "war",
       "metric": "max_health",
       "relative_to": "war_health",
-      "equals": 459,
+      "equals": 657,
       "within_ms": 5000
     },
     {

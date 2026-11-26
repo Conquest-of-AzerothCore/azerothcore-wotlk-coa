@@ -416,7 +416,7 @@ void Refresh(Player* player)
     SetHelper(player, 300364, day && extraHaste);
     SetAmount(player, 300364, 0, extraHaste);
     SetHelper(player, 301006, player->HasAura(300334));
-    SetAmount(player, 301006, 0, int32(player->GetArmor() * 3.0f / 125));
+    SetAmount(player, 301006, 0, int32(player->GetArmorWithoutBattlegroundLift() * 3.0f / 125));
     SetHelper(player, 707776, player->HasAura(704935));
     SetAmount(player, 707776, 0, int32(player->GetStat(STAT_INTELLECT)));
     SetAmount(player, 561023, 2, int32(player->GetItemArmorBySubclass(ITEM_SUBCLASS_ARMOR_SHIELD)));

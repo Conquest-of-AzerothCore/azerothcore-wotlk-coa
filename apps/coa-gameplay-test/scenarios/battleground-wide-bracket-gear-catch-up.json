@@ -1,0 +1,765 @@
+{
+  "schema": 1,
+  "name": "Widened battleground players receive defensive gear catch-up without offensive side effects",
+  "contract": "A level 12 Human Sun Cleric (cleric, class 27, Plate, RebornArmor 1) and a level 12 Human Pyromancer (pyro, class 24, Cloth, RebornArmor 1) enter a 10-29 Warsong Gulch against two level 29 Undead Necromancers (top, top2). Cleric (49 baseline armor including 13 starter gear armor, 0 Stamina) receives +207 gear Health (365 - 158) on top of its +291 bare health lift (+498 total) and +493 Reborn Plate armor (round(1046 - 552.8)); pyro (8 starter armor) receives +207 gear Health on top of +276 bare lift (+483 total) and +110 Reborn Cloth armor (round(221 - 110.8)); top receives 0 health and 0 armor lift. OutputRatio stays unchanged at 581/290 for cleric. Inside the BG at 500 current health, equipping Ironheart Chain 3166 (+4 Stamina = +40 HP, 127 Reborn armor, replacing the 8-armor starter chest for +119 net), swapping the starter two-handed mace 629944 for Worn Shortsword 25 (0 Stamina, 0 Armor) in slot 15, and equipping Dwarven Defender 6187 (+3 Stamina = +30 HP, 318 Reborn shield armor) keeps raw current health at 500 (zero free heal), raises max_health strictly (+40 then +30), and triggers the Shield armor catch-up (+326 = round(644 - 318), bringing lifted armor gain to 493 + 119 + 318 + 326 = 1256 and total armor from 49 to 1305). A +50 Stamina Fortitude buff 1243 stacks on top (+500 max_health). Sun Cleric Blessed Armor 300334->301006 grants floor(486 * 3 / 125) = 11 Spell Power and Bladed Armor 49393 grants floor(486 / 50) = 9 Attack Power, and with +30% armor Warlord's Bulwark 47975 armor rises to int32(1305 * 1.30) = 1696 (+1647) while Bladed Armor grants floor((1696 - lround(819 * 1.30)) / 50) = floor(631 / 50) = 12 AP instead of 33, proving the 819 BG armor lift is excluded under percentage multipliers too. Equipping Azuremoon Band 521111 (+2 Stamina = +20 HP, 0 armor, 0 durability -> gear.health = 90 <= 158, +588 max_health) and then casting permanent enchant 15429 (requiredLevel 0, +75 Health) onto equipped Sunlit Pants 2000063 mid-BG refreshes lift immediately without an item swap, pushing gear.health to 165 (> B_own = 158) so lift shrinks 207 -> 200 and max_health rises by +68 net (to +656) with raw health unchanged at 500. Swapping back to two-handed mace 629944 auto-unequips the shield (-30 gear.health -> 135 <= 158, growing gear health lift back to 207 for +633 max_health delta) and strips both shield armor (318) and shield lift (326) back to +612 armor. Re-equipping Worn Shortsword 25 and Dwarven Defender 6187 restores +1256 armor, after which wearing all equipment to 0 durability removes item/enchant stats on durability gear (leaving Azuremoon Band 521111 +20 HP and zero-durability Sunlit Shoes 2000064 2 armor intact) and strips the broken shield's armor catch-up (+518 max_health, +482 armor = 36 base + 2 intact shoes + 493 Plate lift - 49). Casting permanent enchant 15439 (+110 Armor, requiredLevel 0) onto pyro's equipped Kindled Pants 2000054 mid-BG refreshes Cloth armor lift immediately, pushing gear.armor to 118 (> 110.8) so lift shrinks 110 -> 103 (+213 armor instead of +220). Leaving restores +20 max_health and -11 armor delta (11 of 13 starter armor broken, 2-armor Sunlit Shoes intact) on cleric, and +0/+110 on pyro.",
+  "timeout_ms": 240000,
+  "location": {
+    "map": 0,
+    "x": -8914,
+    "y": -133,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 12,
+      "allow_regeneration": false
+    },
+    {
+      "id": "top",
+      "race": 5,
+      "class": 23,
+      "level": 29
+    },
+    {
+      "id": "pyro",
+      "race": 1,
+      "class": 24,
+      "level": 12
+    },
+    {
+      "id": "top2",
+      "race": 5,
+      "class": 23,
+      "level": 29
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "max_health",
+      "save_as": "cleric_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "armor",
+      "save_as": "cleric_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "cleric",
+      "metric": "attack_power",
+      "save_as": "cleric_ap"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "max_health",
+      "save_as": "pyro_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "pyro",
+      "metric": "armor",
+      "save_as": "pyro_armor"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "max_health",
+      "save_as": "top_health"
+    },
+    {
+      "action": "snapshot",
+      "actor": "top",
+      "metric": "armor",
+      "save_as": "top_armor"
+    },
+    {
+      "action": "client_packet",
+      "actor": "cleric",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        { "u64": 0 },
+        { "u32": 2 },
+        { "u32": 0 },
+        { "u8": 0 }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        { "u64": 0 },
+        { "u32": 2 },
+        { "u32": 0 },
+        { "u8": 0 }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "pyro",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        { "u64": 0 },
+        { "u32": 2 },
+        { "u32": 0 },
+        { "u8": 0 }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "actor": "top2",
+      "opcode": 750,
+      "consumed": false,
+      "fields": [
+        { "u64": 0 },
+        { "u32": 2 },
+        { "u32": 0 },
+        { "u8": 0 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "cleric is invited to the 10-29 bracket",
+      "actor": "cleric",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top is invited to the 10-29 bracket",
+      "actor": "top",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "pyro is invited to the 10-29 bracket",
+      "actor": "pyro",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "top2 is invited to the 10-29 bracket",
+      "actor": "top2",
+      "metric": "battleground_invited_max_level",
+      "equals": 29,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "cleric",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        { "u8": 0 },
+        { "u8": 0 },
+        { "invited_battleground_type": "cleric" },
+        { "u8": 144 },
+        { "u8": 31 },
+        { "u8": 1 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "cleric enters Warsong Gulch",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "top",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        { "u8": 0 },
+        { "u8": 0 },
+        { "invited_battleground_type": "top" },
+        { "u8": 144 },
+        { "u8": 31 },
+        { "u8": 1 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "top enters Warsong Gulch",
+      "actor": "top",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "client_packet",
+      "actor": "pyro",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        { "u8": 0 },
+        { "u8": 0 },
+        { "invited_battleground_type": "pyro" },
+        { "u8": 144 },
+        { "u8": 31 },
+        { "u8": 1 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "pyro enters Warsong Gulch",
+      "actor": "pyro",
+      "metric": "map_id",
+      "equals": 489,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "cleric OutputRatio keeps using bare health only (581 / 290)",
+      "actor": "cleric",
+      "metric": "battleground_output_ratio",
+      "min": 2.0029,
+      "max": 2.0039,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "cleric maximum health rises by +291 bare and +207 gear health (+498)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 498,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "cleric Plate armor rises by Reborn Plate gap (+493)",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": 493,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "pyro maximum health rises by +276 bare and +207 gear health (+483)",
+      "actor": "pyro",
+      "metric": "max_health",
+      "relative_to": "pyro_health",
+      "equals": 483,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "pyro Cloth armor rises by Reborn Cloth gap (+110)",
+      "actor": "pyro",
+      "metric": "armor",
+      "relative_to": "pyro_armor",
+      "equals": 110,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "top at bracket top gets zero health lift",
+      "actor": "top",
+      "metric": "max_health",
+      "relative_to": "top_health",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "top at bracket top gets zero armor lift",
+      "actor": "top",
+      "metric": "armor",
+      "relative_to": "top_armor",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Wait for Warsong Gulch to enter STATUS_IN_PROGRESS so Preparation ResetAllPowers stops firing",
+      "actor": "cleric",
+      "metric": "battleground_status",
+      "equals": 3,
+      "within_ms": 180000
+    },
+    {
+      "action": "set_health",
+      "label": "cleric is damaged to 500 health before swapping equipment",
+      "actor": "cleric",
+      "value": 500
+    },
+    {
+      "action": "add_item",
+      "actor": "cleric",
+      "item": 3166
+    },
+    {
+      "action": "equip",
+      "actor": "cleric",
+      "item": 3166,
+      "slot": 4
+    },
+    {
+      "action": "assert",
+      "label": "Equipping chest inside BG preserves raw 500 health without free heal",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Equipping Ironheart Chain (+4 Stamina) strictly raises max_health (+40)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 538
+    },
+    {
+      "action": "assert",
+      "label": "Equipping Ironheart Chain (+127 Reborn armor replacing 8-armor chest) strictly raises armor",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": 612
+    },
+    {
+      "action": "add_item",
+      "actor": "cleric",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "label": "Swap out starter 2H weapon for 1H Worn Shortsword before equipping shield",
+      "actor": "cleric",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "cleric",
+      "item": 6187
+    },
+    {
+      "action": "equip",
+      "actor": "cleric",
+      "item": 6187,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "label": "Equipping shield inside BG preserves raw 500 health without free heal",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Equipping Dwarven Defender (+3 Stamina) strictly raises max_health (+30)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 568
+    },
+    {
+      "action": "assert",
+      "label": "Equipping a shield unlocks the Shield armor catch-up (+318 item + 326 lift)",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": 1256
+    },
+    {
+      "action": "assert",
+      "label": "cleric OutputRatio stays unchanged after equipping chest and shield",
+      "actor": "cleric",
+      "metric": "battleground_output_ratio",
+      "min": 2.0029,
+      "max": 2.0039
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply +50 Stamina buff (Power Word: Fortitude 1243) on top of gear floor",
+      "actor": "cleric",
+      "spell": 1243,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 50
+    },
+    {
+      "action": "assert",
+      "label": "Stamina buff adds +500 max_health cleanly above the floor",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 1068,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "cleric",
+      "spell": 1243,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Sun Cleric Blessed Armor 300334",
+      "actor": "cleric",
+      "spell": 300334,
+      "stacks": 1
+    },
+    {
+      "action": "wait",
+      "ms": 1200
+    },
+    {
+      "action": "assert",
+      "label": "Blessed Armor 301006 excludes the BG armor lift (floor(486 * 3 / 125) = 11, not 31)",
+      "actor": "cleric",
+      "metric": "aura_amount",
+      "spell": 301006,
+      "equals": 11,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "cleric",
+      "spell": 300334,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Bladed Armor 49393 (1 AP per 50 armor)",
+      "actor": "cleric",
+      "spell": 49393,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 50
+    },
+    {
+      "action": "assert",
+      "label": "Bladed Armor excludes the BG armor lift (floor(486 / 50) = 9 AP, not 26)",
+      "actor": "cleric",
+      "metric": "attack_power",
+      "relative_to": "cleric_ap",
+      "equals": 9,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "cleric",
+      "spell": 49393,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply +30% armor Warlord's Bulwark 47975",
+      "actor": "cleric",
+      "spell": 47975,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 30
+    },
+    {
+      "action": "assert",
+      "label": "Armor scales with +30% total multiplier (int32(1305 * 1.30) = 1696; +1647)",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": 1647,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Apply Bladed Armor 49393 with +30% armor buff active",
+      "actor": "cleric",
+      "spell": 49393,
+      "stacks": 1,
+      "effect": 0,
+      "amount": 50
+    },
+    {
+      "action": "assert",
+      "label": "Bladed Armor excludes scaled BG armor lift (floor((1696 - lround(819 * 1.30)) / 50) = 12 AP, not 33)",
+      "actor": "cleric",
+      "metric": "attack_power",
+      "relative_to": "cleric_ap",
+      "equals": 12,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "actor": "cleric",
+      "spell": 49393,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "cleric",
+      "spell": 47975,
+      "stacks": 0
+    },
+    {
+      "action": "add_item",
+      "actor": "cleric",
+      "item": 521111
+    },
+    {
+      "action": "equip",
+      "label": "Equip Azuremoon Band 521111 (+2 Stamina, 0 durability -> gear.health 90 <= 158)",
+      "actor": "cleric",
+      "item": 521111,
+      "slot": 10
+    },
+    {
+      "action": "assert",
+      "label": "Equipping ring below B_own preserves raw 500 health and adds +20 max_health (+588)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 588
+    },
+    {
+      "action": "assert",
+      "label": "Equipping ring keeps raw current health at 500",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 500
+    },
+    {
+      "action": "learn",
+      "actor": "cleric",
+      "spell": 15429
+    },
+    {
+      "action": "cast",
+      "label": "Cast +75 Health permanent enchant 15429 onto equipped Sunlit Pants 2000063 mid-BG",
+      "actor": "cleric",
+      "spell": 15429,
+      "target_item": 2000063
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Enchant refreshes lift immediately above B_own (gear.health 165 > 158; lift shrinks 207 -> 200; +656 max_health)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 656,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Mid-BG permanent enchant keeps raw current health at 500 without free heal",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 500
+    },
+    {
+      "action": "equip",
+      "label": "Swap back to 2H Battered Warhammer 629944, auto-unequipping Dwarven Defender shield",
+      "actor": "cleric",
+      "item": 629944,
+      "slot": 15
+    },
+    {
+      "action": "assert",
+      "label": "Auto-unequipping shield via 2H swap keeps raw current health at 500",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Removing shield drops gear.health below B_own and restores full 207 gear health lift (+633 max_health)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 633
+    },
+    {
+      "action": "assert",
+      "label": "Auto-unequipping shield strips both shield armor (318) and shield lift (326) back to +612",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": 612
+    },
+    {
+      "action": "equip",
+      "label": "Re-equip 1H Worn Shortsword 25 before testing broken shield",
+      "actor": "cleric",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "equip",
+      "label": "Re-equip Dwarven Defender shield 6187",
+      "actor": "cleric",
+      "item": 6187,
+      "slot": 16
+    },
+    {
+      "action": "assert",
+      "label": "Re-equipping shield restores +1256 armor delta",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": 1256
+    },
+    {
+      "action": "durability_loss",
+      "label": "Wear all equipped gear down to 0 durability mid-BG",
+      "actor": "cleric",
+      "percent": 100
+    },
+    {
+      "action": "assert",
+      "label": "Breaking gear to 0 durability keeps raw current health at 500",
+      "actor": "cleric",
+      "metric": "health",
+      "equals": 500
+    },
+    {
+      "action": "assert",
+      "label": "Breaking gear removes durability item/enchant health while preserving bare, gear lift, and intact ring (+518)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 518
+    },
+    {
+      "action": "assert",
+      "label": "Breaking shield strips shield catch-up armor, leaving 36 base + 2 intact Shoes + 493 Plate lift (+482 delta)",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": 482
+    },
+    {
+      "action": "learn",
+      "actor": "pyro",
+      "spell": 15439
+    },
+    {
+      "action": "cast",
+      "label": "Cast +110 Armor permanent enchant 15439 onto equipped Kindled Pants 2000054 mid-BG",
+      "actor": "pyro",
+      "spell": 15439,
+      "target_item": 2000054
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Armor enchant refreshes Cloth lift immediately above B_own (gear.armor 118 > 110.8; lift 110 -> 103; +213 armor)",
+      "actor": "pyro",
+      "metric": "armor",
+      "relative_to": "pyro_armor",
+      "equals": 213,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "cleric",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        { "u8": 0 },
+        { "u8": 0 },
+        { "u32": 2 },
+        { "u8": 0 },
+        { "u8": 0 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "cleric leaves Warsong Gulch",
+      "actor": "cleric",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "cleric max_health restores to exact unlifted intact ring baseline (+20)",
+      "actor": "cleric",
+      "metric": "max_health",
+      "relative_to": "cleric_health",
+      "equals": 20,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "cleric armor restores to base 36 + intact 2-armor Shoes with broken 11 armor (-11 delta)",
+      "actor": "cleric",
+      "metric": "armor",
+      "relative_to": "cleric_armor",
+      "equals": -11,
+      "within_ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "actor": "pyro",
+      "opcode": 737,
+      "consumed": false,
+      "fields": [
+        { "u8": 0 },
+        { "u8": 0 },
+        { "u32": 2 },
+        { "u8": 0 },
+        { "u8": 0 }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "pyro leaves Warsong Gulch",
+      "actor": "pyro",
+      "metric": "map_id",
+      "equals": 0,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "pyro max_health restores cleanly",
+      "actor": "pyro",
+      "metric": "max_health",
+      "relative_to": "pyro_health",
+      "equals": 0,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "pyro armor restores to exact +110 permanent enchant armor above baseline",
+      "actor": "pyro",
+      "metric": "armor",
+      "relative_to": "pyro_armor",
+      "equals": 110,
+      "within_ms": 5000
+    }
+  ]
+}

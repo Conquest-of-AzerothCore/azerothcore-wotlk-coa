@@ -2023,6 +2023,8 @@ public:
     {
         return subclass < MAX_ITEM_SUBCLASS_ARMOR ? m_itemArmorBySubclass[subclass] : 0.0f;
     }
+    [[nodiscard]] int32 GetEquippedGearHealth() const { return std::max<int32>(m_ascensionGearHealth, 0); }
+    [[nodiscard]] int32 GetEquippedGearBonusArmor() const { return std::max<int32>(m_ascensionGearBonusArmor, 0); }
     void UpdateMaxHealth() override;
     void UpdateMaxPower(Powers power) override;
     void ApplyFeralAPBonus(int32 amount, bool apply);
@@ -2397,6 +2399,8 @@ public:
     bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
     void ToggleMetaGemsActive(uint8 exceptslot, bool apply);
     void CorrectMetaGemEnchants(uint8 slot, bool apply);
+    void ApplyEnchantmentInternal(Item* item, EnchantmentSlot slot, bool apply, bool apply_dur,
+        bool ignore_condition, bool notify);
     void InitDataForForm(bool reapplyMods = false);
 
     void ApplyItemEquipSpell(Item* item, bool apply, bool form_change = false);
@@ -3063,6 +3067,8 @@ protected:
     float m_auraBasePctMod[BASEMOD_END];
     int32 m_baseRatingValue[MAX_COMBAT_RATING];
     std::array<float, MAX_ITEM_SUBCLASS_ARMOR> m_itemArmorBySubclass{};
+    int32 m_ascensionGearHealth = 0;
+    int32 m_ascensionGearBonusArmor = 0;
     float m_appliedRatingHaste[CR_HASTE_SPELL - CR_HASTE_MELEE + 1] = {};
     uint32 m_baseSpellPower;
     uint32 m_baseSpellDamage;

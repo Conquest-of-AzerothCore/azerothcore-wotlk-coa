@@ -7196,6 +7196,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 HandleStatFlatModifier(UNIT_MOD_MANA, BASE_VALUE, float(val), apply);
                 break;
             case ITEM_MOD_HEALTH:                           // modify HP
+                m_ascensionGearHealth += apply ? val : -val;
                 HandleStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(val), apply);
                 break;
             case ITEM_MOD_AGILITY:                          // modify agility
@@ -7215,6 +7216,7 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
                 UpdateStatBuffMod(STAT_SPIRIT);
                 break;
             case ITEM_MOD_STAMINA:                          //modify stamina
+                m_ascensionGearHealth += apply ? val * 10 : -val * 10;
                 HandleStatFlatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
                 UpdateStatBuffMod(STAT_STAMINA);
                 break;
@@ -7385,12 +7387,17 @@ void Player::_ApplyItemBonuses(ItemTemplate const* proto, uint8 slot, bool apply
         // including heirloom scaling and durability-driven removal/reapplication.
         if (modType == BASE_VALUE && proto->SubClass < MAX_ITEM_SUBCLASS_ARMOR)
             m_itemArmorBySubclass[proto->SubClass] += apply ? float(armor) : -float(armor);
+        else
+            m_ascensionGearBonusArmor += apply ? int32(armor) : -int32(armor);
         HandleStatFlatModifier(UNIT_MOD_ARMOR, modType, float(armor), apply);
     }
 
     // Add armor bonus from ArmorDamageModifier if > 0
     if (proto->ArmorDamageModifier > 0 && sScriptMgr->OnPlayerCanArmorDamageModifier(this))
+    {
+        m_ascensionGearBonusArmor += apply ? int32(armorDamageModifierBonus) : -int32(armorDamageModifierBonus);
         HandleStatFlatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(armorDamageModifierBonus), apply);
+    }
 
     if (proto->Block)
         HandleBaseModFlatValue(SHIELD_BLOCK_VALUE, float(proto->Block), apply);
@@ -12166,7 +12173,7 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
                 {
                     // ignore item gem conditions
                     //if state changed, (dis)apply enchant
-                    ApplyEnchantment(pItem, EnchantmentSlot(enchant_slot), !wasactive, true, true);
+                    ApplyEnchantmentInternal(pItem, EnchantmentSlot(enchant_slot), !wasactive, true, true, false);
                 }
             }
         }

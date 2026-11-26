@@ -358,6 +358,10 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'high-risk-challenge-survives-battleground', 'mercenary-wintergrasp-team-faction',
                      'battleground-wide-bracket-boundary', 'battleground-wide-bracket-group-boundary',
                      'battleground-wide-bracket-catch-up', 'battleground-wide-bracket-pet-catch-up',
+                     'battleground-wide-bracket-combat-level',
+                     'battleground-wide-bracket-derived-scaling', 'battleground-wide-bracket-output-scaling',
+                     'battleground-wide-bracket-gear-catch-up',
+                     'necromancer-life-for-power-battleground-catch-up',
                      'crows-cache-mercenary-wall-12720', 'crows-cache-carrier-cannot-hide-12720',
                      'crows-cache-carrier-drops-12720'}
 UTC_EVENING = datetime(2026, 9, 24, 22, 40, tzinfo=timezone.utc)

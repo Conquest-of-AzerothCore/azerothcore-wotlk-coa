@@ -272,6 +272,7 @@ enum PlayerHook
     PLAYERHOOK_ON_AFTER_GUILD_CHAT,
     PLAYERHOOK_ON_AFTER_CHANNEL_CHAT,
     PLAYERHOOK_ON_AFTER_SEND_MAIL,
+    PLAYERHOOK_ON_AFTER_APPLY_ENCHANTMENT,
     PLAYERHOOK_END
 };
 
@@ -708,6 +709,9 @@ public:
     virtual void OnPlayerApplyItemModsBefore(Player* /*player*/, uint8 /*slot*/, bool /*apply*/, uint8 /*itemProtoStatNumber*/, uint32 /*statType*/, int32& /*val*/) { }
 
     virtual void OnPlayerAfterApplyItemMods(Player* /*player*/, Item* /*item*/, uint8 /*slot*/, bool /*apply*/) { }
+
+    virtual void OnPlayerAfterApplyEnchantment(Player* /*player*/, Item* /*item*/, EnchantmentSlot /*slot*/,
+        bool /*apply*/) { }
 
     virtual void OnPlayerApplyEnchantmentItemModsBefore(Player* /*player*/, Item* /*item*/, EnchantmentSlot /*slot*/, bool /*apply*/, uint32 /*enchant_spell_id*/, uint32& /*enchant_amount*/) { }
 

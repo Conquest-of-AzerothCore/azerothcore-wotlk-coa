@@ -32,6 +32,7 @@
 #include "UnitDefines.h"
 #include "UnitUtils.h"
 #include <boost/container/flat_map.hpp>
+#include <cmath>
 #include <functional>
 #include <optional>
 #include <utility>
@@ -2111,6 +2112,20 @@ public:
 
     [[nodiscard]] float GetBattlegroundOutputRatio() const { return m_ascensionBgOutputRatio; }
     void SetBattlegroundOutputRatio(float ratio) { m_ascensionBgOutputRatio = ratio; }
+    [[nodiscard]] float GetBattlegroundArmorLift() const { return m_ascensionBgArmorLift; }
+    void SetBattlegroundArmorLift(float armor) { m_ascensionBgArmorLift = armor; }
+    [[nodiscard]] uint32 GetArmorWithoutBattlegroundLift() const
+    {
+        uint32 const armor = GetArmor();
+        if (m_ascensionBgArmorLift <= 0.0f)
+            return armor;
+        float const effectiveLift = m_ascensionBgArmorLift *
+            GetPctModifierValue(UNIT_MOD_ARMOR, BASE_PCT) *
+            GetPctModifierValue(UNIT_MOD_ARMOR, TOTAL_PCT);
+        long const rounded = effectiveLift > 0.0f ? std::lround(effectiveLift) : 0L;
+        uint32 const remove = rounded > 0L ? static_cast<uint32>(rounded) : 0u;
+        return armor > remove ? armor - remove : 0u;
+    }
 
     void BuildHeartBeatMsg(WorldPacket* data) const;
     void BuildMovementPacket(ByteBuffer* data) const;
@@ -2311,6 +2326,7 @@ private:
     ValuesUpdateCache _valuesUpdateCache;
 
     float m_ascensionBgOutputRatio = 1.0f;
+    float m_ascensionBgArmorLift = 0.0f;
 };
 
 namespace Acore

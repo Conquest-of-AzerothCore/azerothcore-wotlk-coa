@@ -4,9 +4,12 @@
 #include "AscensionBattlegroundBracketsPolicy.h"
 #include "AscensionBattlegroundCatchUp.h"
 #include "AscensionBattlegroundCombat.h"
+#include "AscensionItemLadder.h"
+#include "AscensionNativeItemScaling.h"
 #include "Battleground.h"
 #include "Config.h"
 #include "DataMap.h"
+#include "Item.h"
 #include "Map.h"
 #include "ObjectMgr.h"
 #include "Pet.h"
@@ -24,6 +27,8 @@ namespace Policy = AscensionBattlegroundBracketsPolicy;
 
 constexpr char LiftKey[] = "AscensionBattlegroundCatchUp.Lift";
 uint32 MaxLiftLevels = 0;
+bool GearCatchUpEnabled = true;
+float GearCatchUpScale = 1.0f;
 
 struct AppliedLift final : DataMap::Base
 {
@@ -31,10 +36,18 @@ struct AppliedLift final : DataMap::Base
     float ratio = 1.0f;
 };
 
-void HandleLiftModifiers(Unit* unit, Policy::Lift const& lift, bool apply)
+void ApplyModifierDelta(Unit* unit, UnitMods mod, float delta)
 {
-    if (lift.health != 0.0f)
-        unit->HandleStatFlatModifier(UNIT_MOD_HEALTH, BASE_VALUE, lift.health, apply);
+    if (delta > 0.0f)
+        unit->HandleStatFlatModifier(mod, BASE_VALUE, delta, true);
+    else if (delta < 0.0f)
+        unit->HandleStatFlatModifier(mod, BASE_VALUE, -delta, false);
+}
+
+void ApplyArmorLiftDelta(Unit* unit, float oldArmor, float newArmor)
+{
+    unit->SetBattlegroundArmorLift(newArmor);
+    ApplyModifierDelta(unit, UNIT_MOD_ARMOR, newArmor - oldArmor);
 }
 
 void DropLift(Unit* unit)
@@ -46,7 +59,8 @@ void DropLift(Unit* unit)
     Policy::Lift const lift = applied->lift;
     unit->CustomData.Erase(LiftKey);
     unit->SetBattlegroundOutputRatio(1.0f);
-    HandleLiftModifiers(unit, lift, false);
+    ApplyModifierDelta(unit, UNIT_MOD_HEALTH, -lift.health);
+    ApplyArmorLiftDelta(unit, lift.armor, 0.0f);
 }
 
 void RemoveLift(Unit* unit)
@@ -60,25 +74,48 @@ void RemoveLift(Unit* unit)
     unit->SetHealth(Policy::KeptHealth(health, oldMax, unit->GetMaxHealth()));
 }
 
-void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio)
+void ApplyLift(Unit* unit, Policy::Lift const& lift, float ratio, bool preserveHealthPct = true)
 {
     if (lift.Empty())
     {
-        RemoveLift(unit);
+        if (preserveHealthPct)
+        {
+            RemoveLift(unit);
+            return;
+        }
+        if (!unit->CustomData.Get<AppliedLift>(LiftKey))
+            return;
+        uint32 const health = unit->GetHealth();
+        DropLift(unit);
+        uint32 const clamped = std::min(health, unit->GetMaxHealth());
+        if (unit->GetHealth() != clamped)
+            unit->SetHealth(clamped);
         return;
     }
 
+    AppliedLift* existing = unit->CustomData.Get<AppliedLift>(LiftKey);
+    if (existing && existing->lift.health == lift.health && existing->lift.armor == lift.armor &&
+        existing->ratio == ratio)
+        return;
+
+    Policy::Lift const oldLift = existing ? existing->lift : Policy::Lift{};
     uint32 const health = unit->GetHealth();
     uint32 const oldMax = unit->GetMaxHealth();
-    DropLift(unit);
-    auto* applied = new AppliedLift();
-    applied->lift = lift;
-    applied->ratio = ratio;
-    unit->CustomData.Set(LiftKey, applied);
+    if (!existing)
+    {
+        existing = new AppliedLift();
+        unit->CustomData.Set(LiftKey, existing);
+    }
+    existing->lift = lift;
+    existing->ratio = ratio;
     unit->SetBattlegroundOutputRatio(ratio);
-    HandleLiftModifiers(unit, lift, true);
+    ApplyModifierDelta(unit, UNIT_MOD_HEALTH, lift.health - oldLift.health);
+    ApplyArmorLiftDelta(unit, oldLift.armor, lift.armor);
 
-    unit->SetHealth(Policy::KeptHealth(health, oldMax, unit->GetMaxHealth()));
+    uint32 const targetHealth = preserveHealthPct ? Policy::KeptHealth(health, oldMax, unit->GetMaxHealth())
+        : std::min(health, unit->GetMaxHealth());
+    if (unit->GetHealth() != targetHealth)
+        unit->SetHealth(targetHealth);
 }
 
 uint32 LiftTargetLevel(Player const* player)
@@ -108,20 +145,75 @@ Policy::LevelValues PlayerLevelValues(Player const* player, uint8 level)
     return values;
 }
 
-void RefreshPlayerLift(Player* player)
+Policy::ArmorTier PlayerArmorTier(Player const* player, uint8 level)
+{
+    Policy::ArmorTier tier = Policy::ArmorTier::Cloth;
+    if (player->HasSkill(SKILL_PLATE_MAIL))
+        tier = Policy::ArmorTier::Plate;
+    else if (player->HasSkill(SKILL_MAIL))
+        tier = Policy::ArmorTier::Mail;
+    else if (player->HasSkill(SKILL_LEATHER))
+        tier = Policy::ArmorTier::Leather;
+
+    if (level >= 40)
+    {
+        uint8 const playerClass = player->getClass();
+        if (playerClass == CLASS_WARRIOR || playerClass == CLASS_PALADIN)
+            tier = Policy::ArmorTier::Plate;
+        else if ((playerClass == CLASS_HUNTER || playerClass == CLASS_SHAMAN) && tier < Policy::ArmorTier::Mail)
+            tier = Policy::ArmorTier::Mail;
+    }
+    return tier;
+}
+
+bool PlayerUsesRebornArmor(Player const* player)
+{
+    return NativeItemScaling::RebornArmorActive() && ItemLadder::WearsRebornArmor(player->getClass());
+}
+
+Policy::GearValues PlayerGearValues(Player const* player, bool removingOffhand = false)
+{
+    Policy::GearValues gear;
+    gear.health = float(player->GetEquippedGearHealth());
+    float const armor = player->GetItemArmorBySubclass(ITEM_SUBCLASS_ARMOR_CLOTH) +
+        player->GetItemArmorBySubclass(ITEM_SUBCLASS_ARMOR_LEATHER) +
+        player->GetItemArmorBySubclass(ITEM_SUBCLASS_ARMOR_MAIL) +
+        player->GetItemArmorBySubclass(ITEM_SUBCLASS_ARMOR_PLATE) +
+        float(player->GetEquippedGearBonusArmor());
+    gear.armor = std::max(0.0f, armor);
+    gear.shieldArmor = std::max(0.0f, player->GetItemArmorBySubclass(ITEM_SUBCLASS_ARMOR_SHIELD));
+    if (!removingOffhand)
+        if (Item const* offhand = player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            if (!offhand->IsBroken())
+                if (ItemTemplate const* proto = offhand->GetTemplate())
+                    gear.hasShield =
+                        proto->Class == ITEM_CLASS_ARMOR && proto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD;
+    return gear;
+}
+
+void RefreshPlayerLift(Player* player, bool preserveHealthPct = true, bool removingOffhand = false)
 {
     uint8 const level = player->GetLevel();
     uint32 const target = Policy::CappedLiftLevel(level, LiftTargetLevel(player), MaxLiftLevels);
     if (target <= level)
     {
-        RemoveLift(player);
+        ApplyLift(player, {}, 1.0f, preserveHealthPct);
         return;
     }
 
     Policy::LevelValues const own = PlayerLevelValues(player, level);
     Policy::LevelValues const lifted = PlayerLevelValues(player, uint8(target));
-    ApplyLift(player, Policy::PlayerLiftBetween(own, lifted),
-        Policy::OutputRatio(Policy::PlayerOutputHealth(own), Policy::PlayerOutputHealth(lifted)));
+    Policy::Lift lift = Policy::PlayerLiftBetween(own, lifted);
+    if (GearCatchUpEnabled && GearCatchUpScale > 0.0f)
+    {
+        Policy::Lift const gear = Policy::PlayerGearLift(level, target, PlayerArmorTier(player, level),
+            PlayerArmorTier(player, uint8(target)), PlayerUsesRebornArmor(player),
+            PlayerGearValues(player, removingOffhand), GearCatchUpScale);
+        lift.health += gear.health;
+        lift.armor += gear.armor;
+    }
+    ApplyLift(player, lift,
+        Policy::OutputRatio(Policy::PlayerOutputHealth(own), Policy::PlayerOutputHealth(lifted)), preserveHealthPct);
 }
 
 Policy::LevelValues PetLevelValues(PetLevelInfo const& info, bool hasMana)
@@ -453,6 +545,9 @@ public:
             sConfigMgr->GetOption<std::string>("CoA.Battleground.WideBrackets.Ranges", "10-29,30-49,50-59"));
         MaxLiftLevels = uint32(std::max<int32>(
             sConfigMgr->GetOption<int32>("CoA.Battleground.WideBrackets.MaxLiftLevels", 0), 0));
+        GearCatchUpEnabled = sConfigMgr->GetOption<bool>("CoA.Battleground.WideBrackets.GearCatchUp.Enable", true);
+        GearCatchUpScale = std::max(
+            sConfigMgr->GetOption<float>("CoA.Battleground.WideBrackets.GearCatchUp.Scale", 1.0f), 0.0f);
     }
 };
 
@@ -481,7 +576,8 @@ class ascension_battleground_catch_up_player : public PlayerScript
 public:
     ascension_battleground_catch_up_player()
         : PlayerScript("ascension_battleground_catch_up_player",
-            {PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED, PLAYERHOOK_ON_LOGOUT})
+            {PLAYERHOOK_ON_LEVEL_CHANGED, PLAYERHOOK_ON_MAP_CHANGED, PLAYERHOOK_ON_LOGOUT,
+                PLAYERHOOK_ON_AFTER_APPLY_ITEM_MODS, PLAYERHOOK_ON_AFTER_APPLY_ENCHANTMENT})
     { }
 
     void OnPlayerLevelChanged(Player* player, uint8) override
@@ -498,6 +594,18 @@ public:
     void OnPlayerLogout(Player* player) override
     {
         RemoveOwnerLifts(player);
+    }
+
+    void OnPlayerAfterApplyItemMods(Player* player, Item*, uint8 slot, bool apply) override
+    {
+        if (player->CustomData.Get<AppliedLift>(LiftKey))
+            RefreshPlayerLift(player, false, !apply && slot == EQUIPMENT_SLOT_OFFHAND);
+    }
+
+    void OnPlayerAfterApplyEnchantment(Player* player, Item*, EnchantmentSlot, bool) override
+    {
+        if (player->CustomData.Get<AppliedLift>(LiftKey))
+            RefreshPlayerLift(player, false);
     }
 };
 
@@ -517,6 +625,7 @@ public:
 
         pet->CustomData.Erase(LiftKey);
         pet->SetBattlegroundOutputRatio(1.0f);
+        pet->SetBattlegroundArmorLift(0.0f);
         if (pet->IsInWorld())
             RefreshPetLift(pet);
     }

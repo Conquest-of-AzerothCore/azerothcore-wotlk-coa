@@ -671,6 +671,11 @@ bool Active()
     return enabled.load(std::memory_order_relaxed);
 }
 
+bool RebornArmorActive()
+{
+    return rebornArmor.load(std::memory_order_relaxed);
+}
+
 bool Handles(uint32 itemId)
 {
     return enabled.load(std::memory_order_relaxed) && LadderStore::Instance().Has(itemId);
