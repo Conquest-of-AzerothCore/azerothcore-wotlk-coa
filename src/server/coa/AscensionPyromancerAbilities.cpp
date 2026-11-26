@@ -415,7 +415,7 @@ class spell_ascension_pyromancer_ability : public SpellScript
                 Position position =
                     GetExplTargetDest() ? GetExplTargetDest()->GetPosition() : player->GetNearPosition(2, 0);
                 Summon(player, GetSpellInfo()->Effects[index].MiscValue, GetSpellInfo()->Effects[index].MiscValueB,
-                       position, std::max(0, GetSpellInfo()->GetDuration()));
+                       position, std::max(0, GetSpellInfo()->GetDuration()), GetSpellInfo()->Id);
             }
         }
         if (id == 520019 && GetHitUnit())
