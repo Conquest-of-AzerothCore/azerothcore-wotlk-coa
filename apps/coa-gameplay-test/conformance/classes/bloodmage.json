@@ -223,7 +223,45 @@
   "literal_tokens": [],
   "effect_notes": [],
   "passive_targets": [],
-  "procs": [],
+  "procs": [
+    {
+      "aura": 500012,
+      "name": "Petrified Legions (Physical damage dealt)",
+      "tooltip": "Physical damage you deal or take now has a $h% chance to trigger a |cffffffffCall of the Darkwing|r.@s:801958:0@",
+      "chance_token": "$h",
+      "band": true,
+      "baseline": true,
+      "trigger": {
+        "action": "attack"
+      },
+      "trial_hand": "both",
+      "residual_target": 0.001,
+      "min_detectable": 5,
+      "trigger_text": "Physical damage you deal",
+      "event_metric": "spell_cast_count",
+      "proc_spell": 801958,
+      "events_per_proc": 1,
+      "proc_spell_source": "500012 Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL EffectTriggerSpell 801958 (Call of the Darkwing); Spell.dbc.",
+      "handler": "Native spell_proc row rev_20260920_53_bloodmage_darkwing_procs.sql:40 (SpellId 500012, SchoolMask 1 Physical, ProcFlags 60 = DONE/TAKEN MELEE_AUTO_ATTACK | DONE/TAKEN SPELL_MELEE_DMG_CLASS, SpellTypeMask 1, SpellPhaseMask 2 HIT, Chance 0 -> Spell.dbc ProcChance 10 = $h, Cooldown 0). Eternal weapon set wields dual 2534 Rondels (1600 ms each); both hands deal Physical auto-attack damage and roll independently (trial_hand: both). Reference search 2026-11-26: coa-history 500012: 0 events in 186 logs (passive; 801958 Call of the Darkwing: 334 SPELL_SUMMON in 1 log; 802358 Bat Bite: 301 SPELL_DAMAGE in 1 log); coabuildhub spells_master_index.json 500012 matches verbatim.",
+      "dbc": {
+        "500012": {
+          "ProcChance": 10,
+          "ProcFlags": 0,
+          "ProcCharges": 0
+        }
+      },
+      "spell_proc": {
+        "500012": {
+          "ProcFlags": 60,
+          "Chance": 0,
+          "ProcsPerMinute": 0,
+          "Cooldown": 0,
+          "Charges": 0
+        }
+      },
+      "internal_cooldown_ms": 0
+    }
+  ],
   "triggers": [],
   "talent_modifiers": [],
   "rotation": [],
@@ -24704,6 +24742,2524 @@
       "expire_ms": 16000,
       "void_on_cast_failure": true,
       "observe_source": "Spirit scaling arm for Crimson Terror 560073: Spirit 12177 (aura 29 misc 4, amount 5000, precondition fixture) with race 1 The Human Spirit (+3%) raises Spirit from 114 to 114 + 5000 * 1.03 = 5264 -> 50% of 5264 = 2632 Shadow SP (before without 560073: 0 SP; after with real learn of 560073 and cast of 801076: 2632 SP, proving 50% Spirit scaling). Reference search 2026-11-26: see transgression_sp_base."
+    },
+    {
+      "spell": 300260,
+      "name": "Screech of the Darkwing (triggers an additional Call of the Darkwing)",
+      "kind": "metric_delta",
+      "variant": "extra_call",
+      "label_suffix": "extra_call",
+      "quote": "Your effects that trigger Call of the Darkwing now trigger an additional Call of the Darkwing.",
+      "learn": [
+        800154,
+        501682
+      ],
+      "trigger_spell": 501682,
+      "gate_spell": 300260,
+      "target": "dummy",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 1200,
+      "expire_ms": 1500,
+      "void_on_cast_failure": true,
+      "observe_source": "300260 Screech of the Darkwing Effect[0] aura 42 triggers 801958 (Spell.dbc, ProcChance 100); rev_20260920_53_bloodmage_darkwing_procs.sql:41 sets SpellFamilyName 26, SpellFamilyMask1 268435456 (801958), ProcFlags 5120, SpellPhaseMask 6, AttributesMask 2 (PROC_ATTR_TRIGGERED_CAN_PROC), Cooldown 1000. Grim Omen 800154 + real Night Hunter's Howl 501682 (CasterAuraSpell 524861 precondition fixture, 250 Rage) triggers Call of the Darkwing 801958 once before learning 300260 (control: 1) and twice after learning 300260 (treatment: 2, phase_since isolates each arm; expire_ms 1500 clears the 1000 ms ICD). Reference search 2026-11-26: coa-history 300260: 0 events in 186 logs (passive; 801958: 334 SPELL_SUMMON in 1 log); coabuildhub spells_master_index.json 300260 matches verbatim."
+    },
+    {
+      "spell": 300260,
+      "name": "Screech of the Darkwing (1 sec ICD blocks second extra Call at ~925 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_held",
+      "label_suffix": "icd_held",
+      "quote": "Can only occur once per sec.",
+      "learn": [
+        800154,
+        804207,
+        800782
+      ],
+      "trigger_spell": 804207,
+      "gate_spell": 300260,
+      "gate_timing": "start",
+      "target": "caster",
+      "cast_in_before": true,
+      "phase_since": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800782,
+          "target": "caster",
+          "delay_ms": 925,
+          "in_before": false,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 2,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 400,
+      "expire_ms": 1500,
+      "game_time": {
+        "after": [
+          1300,
+          1450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "300260 Screech of the Darkwing spell_proc Cooldown 1000 ms (rev_20260920_53_bloodmage_darkwing_procs.sql:41). Wicked Howl 804207 (instant, 0 GCD, CasterAuraSpell 525031 precondition fixture) triggers Grim Omen 800154 -> 801958 -> Screech 300260 (+1). Before phase (1 cast of 804207 with 300260 learned): 2 casts of 801958. Wait expire_ms 1500 (>1000 ms ICD). After phase (phase_since): cast 1 of 804207 triggers 2 casts of 801958 and starts the 1000 ms ICD; cast 2 of Blood Howl 800782 (instant Howl, CasterAuraSpell 524861 precondition fixture) after delay_ms 925 (strictly past 900 ms = -10% and below 1000 ms) triggers Grim Omen (+1) while Screech is blocked (+0), totaling 3 casts of 801958. game_time after [1300, 1450] stamps cast 1 (804207) to read (925 ms delay + 400 ms settle). Reference search 2026-11-26: coa-history 300260: 0 events in 186 logs; coabuildhub 300260 matches verbatim."
+    },
+    {
+      "spell": 300260,
+      "name": "Screech of the Darkwing (1 sec ICD reopens by ~1030 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_reopen",
+      "label_suffix": "icd_reopen",
+      "quote": "Can only occur once per sec.",
+      "learn": [
+        800154,
+        804207,
+        800782
+      ],
+      "trigger_spell": 804207,
+      "gate_spell": 300260,
+      "gate_timing": "start",
+      "target": "caster",
+      "cast_in_before": true,
+      "phase_since": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 800782,
+          "target": "caster",
+          "delay_ms": 1030,
+          "in_before": false,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 2,
+      "expected": 4,
+      "tolerance": 0,
+      "wait_ms": 400,
+      "expire_ms": 1500,
+      "game_time": {
+        "after": [
+          1400,
+          1550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Companion to icd_held for 300260 Screech of the Darkwing 1000 ms ICD (rev_20260920_53_bloodmage_darkwing_procs.sql:41). Cast 2 of Blood Howl 800782 at delay_ms 1030 (past 1000 ms and below 1100 ms = +10%) triggers both Grim Omen (+1) and Screech (+1), totaling 4 casts of 801958 in the after phase against 2 in the 1-cast before phase. game_time after [1400, 1550] stamps cast 1 (804207) to read (1030 ms delay + 400 ms settle); paired with icd_held (~925 ms -> 3), this brackets the 1000 ms ICD inside +-10%. Reference search 2026-11-26: coa-history 300260: 0 events; coabuildhub 300260 matches verbatim."
+    },
+    {
+      "spell": 500012,
+      "name": "Petrified Legions (taking non-triggered Physical damage triggers Call of the Darkwing)",
+      "kind": "metric_delta",
+      "variant": "physical_taken_proc",
+      "label_suffix": "physical_taken_proc",
+      "quote": "Physical damage you deal or take now has a $h% chance to trigger a Call of the Darkwing.",
+      "trigger_spell": 60235,
+      "gate_spell": 500012,
+      "forced_roll": 500012,
+      "target": "caster",
+      "select_dummy": true,
+      "cast_in_before": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 2816,
+        "casts": 8,
+        "gap_ms": 1000,
+        "lead_ms": 0
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "same_arm_ratio": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 2816,
+          "target": "caster",
+          "caster": "dummy"
+        },
+        "ratio": 1.0,
+        "tolerance": 0.0,
+        "least": 1,
+        "source": "With forced_roll 500012 (+1000% SPELLMOD_CHANCE_OF_SUCCESS -> 110%), every landed hit of Physical melee spell 2816 triggers exactly 1 Call of the Darkwing 801958 (ratio 1.0, tolerance 0, least 1; 8 casts keep P(all avoided) < 3e-6)."
+      },
+      "wait_ms": 600,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "Taken-damage leg of 500012 Petrified Legions (rev_20260920_53_bloodmage_darkwing_procs.sql:40: SchoolMask 1 Physical, ProcFlags 60 includes PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS 0x20, AttributesMask 0). dummy_casts_at_caster casts 2816 (0 cost, SchoolMask 1 Physical, DmgClass 2 MELEE, Effect[0] SCHOOL_DAMAGE BP 99, RangeIndex 2 melee) at caster 8 times per phase with triggered=false (an ordinary cast, since AttributesMask 0 intentionally rejects triggered casts). With forced_roll 500012 (+1000% SPELLMOD_CHANCE_OF_SUCCESS mutant, removed and read 0 at end), before learning 500012 (control) triggers 0 casts of Call of the Darkwing 801958, and after learning 500012 same_arm_ratio spell_cast_count(801958) / spell_damage_count(2816) = 1.0 exact (immune to single-hit dodge/parry/miss; P(0 hits in 8 casts) < 3e-6). Note: procs.py taken_hit uses triggered=true and cannot measure the 10% taken-damage proc rate (documented as a tool gap; the 10% rate itself is proven by 500012 proc_rate 801958 attack). Reference search 2026-11-26: coa-history 801958: 334 summons in 1 log; coabuildhub 500012 matches verbatim."
+    },
+    {
+      "spell": 500012,
+      "name": "Petrified Legions (non-Physical Shadow damage does not trigger Call of the Darkwing)",
+      "kind": "metric_delta",
+      "variant": "shadow_no_proc",
+      "label_suffix": "shadow_no_proc",
+      "quote": "Physical damage you deal or take now has a $h% chance to trigger a Call of the Darkwing.",
+      "trigger_spell": 578305,
+      "gate_spell": 500012,
+      "forced_roll": 500012,
+      "target": "dummy",
+      "cast_power": 300,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "School-condition negative control for 500012 Petrified Legions (rev_20260920_53_bloodmage_darkwing_procs.sql:40 sets SchoolMask 1 Physical and ProcFlags 60 melee). Bloodbolt 578305 (SchoolMask 32 Shadow, DmgClass 1 MAGIC) with forced_roll 500012 (+1000% SPELLMOD_CHANCE_OF_SUCCESS mutant, removed and read 0 at end) and 823764 beeg spellpen deals Shadow damage and triggers 0 casts of Call of the Darkwing 801958 both before and after learning 500012. Reference search 2026-11-26: coa-history 500012: 0 events (passive; 801958: 334 SPELL_SUMMON in 1 log); coabuildhub 500012 matches verbatim."
+    },
+    {
+      "spell": 500012,
+      "name": "Petrified Legions (Call of the Darkwing spawns 1 to 2 Shadow Bats, mean ~1.5 per proc)",
+      "kind": "metric_delta",
+      "variant": "bat_count_mean",
+      "label_suffix": "bat_count_mean",
+      "quote": "trigger a Call of the Darkwing.@s:801958:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500012,
+      "forced_roll": 500012,
+      "target": "dummy",
+      "attack_swings": 50,
+      "metric": "owned_creature_damage_count",
+      "fields": {
+        "entry": 50069
+      },
+      "before_expected": 0,
+      "expected": 1.5,
+      "same_arm_ratio": {
+        "metric": "spell_cast_count",
+        "fields": {
+          "spell": 801958
+        },
+        "ratio": 1.5,
+        "tolerance": 0.25,
+        "least": 40,
+        "source": "Call of the Darkwing 801958 Effect[0] SPELL_EFFECT_SUMMON has BasePoints 0, DieSides 2 (Spell.dbc), summoning uniform 1 or 2 Shadow Bats (NPC 50069, mean 1.5, SD 0.5). Each bat casts Bat Bite 802358 once and never auto-attacks (AscensionBloodmageDarkwing.cpp:112-124), so owned_creature_damage_count(50069) / spell_cast_count(801958) measures mean spawned bats per proc: 1.5 +- 0.25 ([1.25, 1.75], disjoint from fixed 1.0 and 2.0; for N >= 80 dual-wield swings, SE <= 0.056, 4.46 sigma -> residual failure < 0.002% per pair)."
+      },
+      "wait_ms": 600,
+      "expire_ms": 1000,
+      "observe_source": "801958 Call of the Darkwing Effect[0] SPELL_EFFECT_SUMMON (MiscValue 50069, BasePoints 0, DieSides 2 -> 1 to 2 random Shadow Bats, unreadable $s1 in tooltip.py; Spell.dbc). With forced_roll 500012 (+1000% mutant -> 10% * 11 = 110%, removed and read 0 at end), 50 dual-wield attack_swings intervals (~80 s, ~95 landed swings on Eternal dual 2534 Rondels) fire >= 40 procs of 801958 after learning 500012 (0 before). Each bat casts Bat Bite 802358 exactly once on spawn and never auto-attacks (AscensionBloodmageDarkwing.cpp:104-140), so same_arm_ratio owned_creature_damage_count(50069) / spell_cast_count(801958) proves mean ~1.5 bats/proc in [1.25, 1.75], disjoint from fixed 1 and fixed 2. Reference search 2026-11-26: coa-history 801958: 334 SPELL_SUMMON, 802358: 301 SPELL_DAMAGE in 1 log; coabuildhub 500012 says 'Calls 1 to 2 Shadow Bats'."
+    },
+    {
+      "spell": 500012,
+      "name": "Petrified Legions (Shadow Bat Bat Bite base damage at reference stats)",
+      "kind": "metric_delta",
+      "variant": "bat_bite_base",
+      "label_suffix": "bat_bite_base",
+      "quote": "trigger a Call of the Darkwing.@s:801958:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500012,
+      "forced_roll": 500012,
+      "target": "dummy",
+      "attack_swings": 2,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          283935,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_damage_total",
+      "fields": {
+        "entry": 50069
+      },
+      "before_expected": 0,
+      "expected": 72,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_count",
+        "fields": {
+          "entry": 50069
+        },
+        "ratio": 72.0,
+        "tolerance": 3.5,
+        "least": 1,
+        "source": "802358 Bat Bite Spell.dbc: Effect[0] SCHOOL_DAMAGE BasePoints 4 + DieSides 1 = 5, BaseLevel 24, RealPointsPerLevel 0.65 -> level 60 base = 5 + floor(36 * 0.65) = 28; PrepareAscensionBloodmageBatBite (AscensionBloodmageDarkwing.cpp:202-212) adds int32(SP*0.4 + AP*0.2); at reference stats (SP=0, AP=223) bonus = int32(44.6) = 44 -> 72 per bite (SchoolMask 33 Physical|Shadow takes min mitigation = 0% Shadow resist with 823764). 33143 + 283935 on dummy prevent crits. Band +-3.5 ([68.5, 75.5], 5%) excludes 0 and 2x."
+      },
+      "wait_ms": 600,
+      "expire_ms": 6500,
+      "observe_source": "802358 Bat Bite formula ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} (Spell.dbc + AscensionBloodmageDarkwing.cpp:176-213). At level 60 reference stats (SP=0, AP=223), per-bite damage = 5 + 23 + 44 = 72 (SchoolMask 33 Physical|Shadow uses 0% Shadow resist under 823764; 33143 + 283935 on dummy prevent melee-spell crits, expire_ms 6500 lets them expire between phases so treatment gets fresh full-duration auras). Dividing owned_creature_damage_total(50069) by owned_creature_damage_count(50069) via same_arm_ratio isolates exact single-bite damage regardless of whether 801958 spawns 1 or 2 bats. Control (before learning 500012): 0 bites, 0 damage. Reference search 2026-11-26: coa-history 802358: 301 hits (mean 76.0) in 1 log; coabuildhub 500012 matches formula structure (older ppl 1.6 vs current Spell.dbc 0.65)."
+    },
+    {
+      "spell": 500012,
+      "name": "Petrified Legions (Shadow Bat Bat Bite SP scaling +0.4*SP)",
+      "kind": "metric_delta",
+      "variant": "bat_bite_sp",
+      "label_suffix": "bat_bite_sp",
+      "quote": "trigger a Call of the Darkwing.@s:801958:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500012,
+      "forced_roll": 500012,
+      "target": "dummy",
+      "attack_swings": 2,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          283935,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_damage_total",
+      "fields": {
+        "entry": 50069
+      },
+      "before_expected": 0,
+      "expected": 8072,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_count",
+        "fields": {
+          "entry": 50069
+        },
+        "ratio": 8072.0,
+        "tolerance": 200.0,
+        "least": 1,
+        "source": "At +20000 SP (player_spell_power fixture) and reference AP 223: 28 + int32(20000*0.4 + 223*0.2) = 8072 per Bat Bite (AscensionBloodmageDarkwing.cpp:202-212). 33143 + 283935 on dummy prevent melee-spell crits. Band +-200 (2.5%) excludes 0*SP (72) and 2x (16072)."
+      },
+      "wait_ms": 600,
+      "expire_ms": 6500,
+      "observe_source": "Spell-power scaling arm for 802358 Bat Bite (+SP*0.4, AscensionBloodmageDarkwing.cpp:202-212). With player_spell_power 20000, 33143 + 283935 (no crit; expire_ms 6500 refreshes their 6 s / 5 s durations for the after phase), and 823764 (no resist), per-bite damage via same_arm_ratio owned_creature_damage_total / owned_creature_damage_count reads ~8072 (+8000 over base 72). Reference search 2026-11-26: coa-history 802358: 301 hits in 1 log; coabuildhub 500012 shows SP*.4."
+    },
+    {
+      "spell": 500012,
+      "name": "Petrified Legions (Shadow Bat Bat Bite AP scaling +0.2*AP)",
+      "kind": "metric_delta",
+      "variant": "bat_bite_ap",
+      "label_suffix": "bat_bite_ap",
+      "quote": "trigger a Call of the Darkwing.@s:801958:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500012,
+      "forced_roll": 500012,
+      "target": "dummy",
+      "attack_swings": 2,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          283935,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_damage_total",
+      "fields": {
+        "entry": 50069
+      },
+      "before_expected": 0,
+      "expected": 4072,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_count",
+        "fields": {
+          "entry": 50069
+        },
+        "ratio": 4072.0,
+        "tolerance": 150.0,
+        "least": 1,
+        "source": "At +20000 AP (player_attack_power fixture -> total AP 20223) and SP 0: 28 + int32(20223*0.2) = 4072 per Bat Bite (AscensionBloodmageDarkwing.cpp:202-212). 33143 + 283935 on dummy prevent melee-spell crits. Band +-150 (3.7%) excludes 0*AP (72) and 2x (8072)."
+      },
+      "wait_ms": 600,
+      "expire_ms": 6500,
+      "observe_source": "Attack-power scaling arm for 802358 Bat Bite (+AP*0.2, AscensionBloodmageDarkwing.cpp:202-212). With player_attack_power 20000, 33143 + 283935 (no crit; expire_ms 6500 refreshes their 6 s / 5 s durations for the after phase), and 823764 (no resist), per-bite damage via same_arm_ratio owned_creature_damage_total / owned_creature_damage_count reads ~4072 (+4000 over base 72). Reference search 2026-11-26: coa-history 802358: 301 hits in 1 log; coabuildhub 500012 shows AP*.2."
+    },
+    {
+      "spell": 500012,
+      "name": "Petrified Legions (Shadow Bat Bat Bite heals master equal to 100% of damage dealt)",
+      "kind": "metric_delta",
+      "variant": "bat_bite_heal",
+      "label_suffix": "bat_bite_heal",
+      "quote": "trigger a Call of the Darkwing.@s:801958:0@",
+      "trigger_spell": 60235,
+      "gate_spell": 500012,
+      "forced_roll": 500012,
+      "target": "dummy",
+      "attack_swings": 2,
+      "caster_health": [
+        1000,
+        500000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_heal_total",
+      "fields": {
+        "entry": 50069
+      },
+      "before_expected": 0,
+      "expected": 1.0,
+      "same_arm_ratio": {
+        "metric": "owned_creature_damage_total",
+        "fields": {
+          "entry": 50069
+        },
+        "ratio": 1.0,
+        "tolerance": 0.02,
+        "least": 50,
+        "source": "spell_ascension_bloodmage_bat_bite::HealMaster (AscensionBloodmageDarkwing.cpp:155-167) casts 802399 with SPELLVALUE_BASE_POINT0 = GetHitDamage() -> owned_creature_heal_total(50069) / owned_creature_damage_total(50069) = 1.00 +- 0.02 (excludes 0, 0.5, and 2.0)."
+      },
+      "wait_ms": 600,
+      "expire_ms": 1000,
+      "observe_source": "Heal parity for 802358 Bat Bite -> 802399 Bat Bite heal (AscensionBloodmageDarkwing.cpp:155-167). Caster health fixtured to 1000/500000 with regeneration disabled so no overheal occurs. same_arm_ratio owned_creature_heal_total(50069) / owned_creature_damage_total(50069) proves 100% healing equal to damage dealt (ratio 1.00 +- 0.02), independent of whether 1 or 2 bats spawned. Control (before learning 500012): 0 heals. Reference search 2026-11-26: coa-history 802399: 300 SPELL_HEAL (mean 76.0, matching 802358 mean 76.0) in 1 log; coabuildhub 500012 matches verbatim."
+    },
+    {
+      "spell": 800154,
+      "name": "Grim Omen (using a Howl spell triggers Call of the Darkwing)",
+      "kind": "metric_delta",
+      "variant": "howl_trigger",
+      "label_suffix": "howl_trigger",
+      "quote": "Critical strikes with Ravenous Strike or Bloodfang Bite, or using Howl spells, now triggers Call of the Darkwing.",
+      "learn": [
+        501682
+      ],
+      "trigger_spell": 501682,
+      "gate_spell": 800154,
+      "target": "dummy",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "800154 Grim Omen (rev_20260920_48_bloodmage_grim_omen_proc.sql + AscensionBloodmageProcs.cpp:35-59): Howl family mask triggers 801958 Call of the Darkwing on PROC_SPELL_PHASE_CAST (ProcChance 100). Real Night Hunter's Howl 501682 (CasterAuraSpell 524861 precondition fixture, 250 Rage) triggers 0 casts of 801958 before learning 800154 (control) and 1 cast after learning 800154. Reference search 2026-11-26: coa-history 800154: 0 events (passive; 801958: 334 SPELL_SUMMON in 1 log); coabuildhub 800154 matches verbatim."
+    },
+    {
+      "spell": 800154,
+      "name": "Grim Omen (critical strike with Ravenous Strike triggers Call of the Darkwing)",
+      "kind": "metric_delta",
+      "variant": "ravenous_crit",
+      "label_suffix": "ravenous_crit",
+      "quote": "Critical strikes with Ravenous Strike or Bloodfang Bite, or using Howl spells, now triggers Call of the Darkwing.",
+      "learn": [
+        501679
+      ],
+      "trigger_spell": 501679,
+      "gate_spell": 800154,
+      "target": "dummy",
+      "force_crit": "melee",
+      "cast_in_before": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "800154 Grim Omen (AscensionBloodmageProcs.cpp:48-50): Ravenous Strike 501679 (SpellFamilyFlags[1] & 1, CasterAuraSpell 525031 precondition fixture) critical strike (force_crit melee) triggers 801958 Call of the Darkwing at PROC_SPELL_PHASE_HIT with PROC_HIT_CRITICAL: 0 casts before learning 800154 (control), 1 cast after. Reference search 2026-11-26: coa-history 800154: 0 events (passive; 801958: 334 SPELL_SUMMON in 1 log); coabuildhub 800154 matches verbatim."
+    },
+    {
+      "spell": 800154,
+      "name": "Grim Omen (critical strike with Bloodfang Bite triggers Call of the Darkwing)",
+      "kind": "metric_delta",
+      "variant": "bloodfang_crit",
+      "label_suffix": "bloodfang_crit",
+      "quote": "Critical strikes with Ravenous Strike or Bloodfang Bite, or using Howl spells, now triggers Call of the Darkwing.",
+      "learn": [
+        572551
+      ],
+      "trigger_spell": 572551,
+      "gate_spell": 800154,
+      "target": "dummy",
+      "cast_power": 300,
+      "force_crit": "melee",
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "800154 Grim Omen (AscensionBloodmageProcs.cpp:48-50): Bloodfang Bite 572551 (SpellFamilyFlags[1] & 8388608, CasterAuraSpell 525031 precondition fixture, 300 Rage) critical strike (force_crit melee) triggers 801958 Call of the Darkwing: 0 casts before learning 800154 (control), 1 cast after. Reference search 2026-11-26: coa-history 800154: 0 events; coabuildhub 800154 matches verbatim."
+    },
+    {
+      "spell": 800154,
+      "name": "Grim Omen (non-critical Bloodfang Bite does not trigger Call of the Darkwing)",
+      "kind": "metric_delta",
+      "variant": "bloodfang_noncrit",
+      "label_suffix": "bloodfang_noncrit",
+      "quote": "Critical strikes with Ravenous Strike or Bloodfang Bite, or using Howl spells, now triggers Call of the Darkwing.",
+      "learn": [
+        572551
+      ],
+      "trigger_spell": 572551,
+      "gate_spell": 800154,
+      "target": "dummy",
+      "cast_power": 300,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 801958
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Non-crit negative control for 800154 Grim Omen (AscensionBloodmageProcs.cpp:48-50 requires PROC_HIT_CRITICAL for Ravenous Strike and Bloodfang Bite): Bloodfang Bite 572551 against a dummy holding Blessed Resilience 33143 (-1001 attacker crit chance) never crits and triggers 0 casts of 801958 both before and after learning 800154. Reference search 2026-11-26: coa-history 800154: 0 events; coabuildhub 800154 matches verbatim."
+    },
+    {
+      "spell": 800154,
+      "name": "Grim Omen (Howl triggers Call of the Darkwing summoning 1 to 2 Shadow Bats)",
+      "kind": "metric_delta",
+      "variant": "bat_spawn",
+      "label_suffix": "bat_spawn",
+      "quote": "triggers Call of the Darkwing. @s:801958:0@",
+      "learn": [
+        501682
+      ],
+      "trigger_spell": 501682,
+      "gate_spell": 800154,
+      "target": "dummy",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 50069
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_at_least": 1,
+      "after_at_most": 2,
+      "wait_ms": 800,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "800154 Grim Omen triggers 801958 Call of the Darkwing (Effect[0] SPELL_EFFECT_SUMMON MiscValue 50069, BasePoints 0, DieSides 2 -> 1 to 2 Shadow Bats). Control (before learning 800154): 0 Shadow Bats; after learning 800154, one Night Hunter's Howl 501682 summons 1 to 2 Shadow Bats (owned_creature_count in [1, 2]; paired with 500012 bat_count_mean proving the same 801958 spell's mean 1.5 +- 0.25 over N >= 40 procs). Reference search 2026-11-26: coa-history 801958: 334 SPELL_SUMMON in 1 log; coabuildhub 800154 says 'Calls 1 to 2 Shadow Bats'."
+    },
+    {
+      "spell": 504290,
+      "name": "Packleader (Howl applies 504289 to summons; Blood Craving control does not)",
+      "kind": "metric_delta",
+      "variant": "howl_applies",
+      "label_suffix": "howl_applies",
+      "quote": "Casting Howl spell now enrages your summons, increasing their damage dealt by $504289s1% for $504289d.",
+      "learn": [
+        573357,
+        501682
+      ],
+      "setup_casts": [
+        573357
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 501682,
+      "gate_spell": 504290,
+      "target": "dummy",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301,
+        "spell": 504289
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "504290 Packleader (rev_1790166768437111175.sql + AscensionBloodmageProcs.cpp:61-78): casting a Howl spell (Night Hunter's Howl 501682, CasterAuraSpell 524861 precondition fixture) triggers 504289 (Effect[0] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, aura 79 +10% all schools, DurationIndex 31 = 8000 ms). Animated Blood 573357 summons creature 315301 in both phases: 0 minions hold 504289 before learning 504290 (control), 1 holds 504289 after. Reference search 2026-11-26: coa-history 504290/504289: 0 events in 186 logs; coabuildhub spells_master_index.json 504290 matches verbatim (10% for 8 sec)."
+    },
+    {
+      "spell": 504290,
+      "name": "Packleader (Blood Craving 800780 negative control does not trigger Packleader)",
+      "kind": "metric_delta",
+      "variant": "blood_craving_control",
+      "label_suffix": "blood_craving_control",
+      "quote": "Casting Howl spell now enrages your summons, increasing their damage dealt by $504289s1% for $504289d.",
+      "learn": [
+        573357,
+        800780
+      ],
+      "setup_casts": [
+        573357
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 800780,
+      "gate_spell": 504290,
+      "target": "caster",
+      "cast_in_before": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301,
+        "spell": 504289
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative control for 504290 Packleader (AscensionBloodmageProcs.cpp:68 explicitly rejects BLOODMAGE_BLOOD_CRAVING 800780 which shares the Howl SpellFamilyMask1 bit 4). Casting 800780 with Animated Blood 315301 active applies 0 copies of 504289 both before and after learning 504290. Reference search 2026-11-26: coa-history 504290/504289: 0 events; coabuildhub 504290 matches verbatim."
+    },
+    {
+      "spell": 504290,
+      "name": "Packleader (control: unbuffed summon Blood Strike deals 8000 without Packleader)",
+      "kind": "metric_delta",
+      "variant": "summon_damage_control",
+      "label_suffix": "summon_damage_control",
+      "quote": "increasing their damage dealt by $504289s1%",
+      "learn": [
+        573357
+      ],
+      "setup_casts": [
+        573357
+      ],
+      "setup_wait_ms": 1000,
+      "trigger_spell": 60235,
+      "gate_spell": 804207,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 2,
+      "player_spell_power": 20000,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          283935,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 589023,
+        "caster_entry": 315301
+      },
+      "before_expected": 8000,
+      "expected": 8000,
+      "same_arm_ratio": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 589023,
+          "caster_entry": 315301
+        },
+        "ratio": 8000.0,
+        "tolerance": 150.0,
+        "least": 1,
+        "source": "Without Packleader 504290 learned, Animated Blood 315301 Blood Strike 589023 at +20000 SP (AscensionBloodmageTalents.cpp:424 + AscensionScalingBase.cpp) deals 8000 per hit even after Wicked Howl 804207 (+-150, disjoint from enraged 8800)."
+      },
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Unbuffed control arm for 504290 Packleader ($504289s1 = 10%): without 504290 learned, Animated Blood 315301 summoned via 573357 deals 8000 per Blood Strike 589023 both before and after Wicked Howl 804207 (same_arm_ratio spell_damage_total / spell_damage_count = 8000 +- 150). Paired with summon_damage_bonus (8800 +- 150, +10%). Reference search 2026-11-26: coa-history 504290/504289: 0 events; coabuildhub 504290 matches verbatim."
+    },
+    {
+      "spell": 504290,
+      "name": "Packleader (enraged summon Blood Strike deals +10% damage, 8000 -> 8800)",
+      "kind": "metric_delta",
+      "variant": "summon_damage_bonus",
+      "label_suffix": "summon_damage_bonus",
+      "quote": "increasing their damage dealt by $504289s1%",
+      "learn": [
+        573357,
+        501682,
+        501679
+      ],
+      "setup_casts": [
+        573357
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 501682,
+      "gate_spell": 504290,
+      "target": "dummy",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "cast_in_before": false,
+      "player_spell_power": 20000,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          283935,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 501679,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": false,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 589023,
+        "caster_entry": 315301
+      },
+      "before_expected": 0,
+      "expected": 8800,
+      "same_arm_ratio": {
+        "metric": "spell_damage_count",
+        "fields": {
+          "spell": 589023,
+          "caster_entry": 315301
+        },
+        "ratio": 8800.0,
+        "tolerance": 150.0,
+        "least": 1,
+        "source": "$504289s1 = 10% (504289 aura 79 +10% all schools, 8000 ms duration): enraged Animated Blood 315301 Blood Strike 589023 deals 8000 * 1.10 = 8800 per hit (+-150, disjoint from unbuffed 8000 and +20% 9600)."
+      },
+      "wait_ms": 5500,
+      "expire_ms": 6500,
+      "void_on_cast_failure": true,
+      "observe_source": "$504289s1 = 10% (504289 Effect[0] 190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools, BasePoints 9 + DieSides 1 = 10%, DurationIndex 31 = 8000 ms; Spell.dbc). With 504290 learned between phases (cast_in_before false -> 0 hits in before), treatment summons Animated Blood 315301 (573357), casts real Night Hunter's Howl 501682 (applying 504289 for 8000 ms), then Ravenous Strike 501679 at 1600 ms so 315301 strikes dummy within wait_ms 5500 (total 7100 ms < 8000 ms duration of 504289). same_arm_ratio spell_damage_total / spell_damage_count reads 8800 +- 150 per hit (+10% over companion summon_damage_control 8000 +- 150; 33143+283935 with expire_ms 6500 prevent crits, 823764 prevents resist). Reference search 2026-11-26: coa-history 504290/504289: 0 events; coabuildhub 504290 matches verbatim."
+    },
+    {
+      "spell": 504290,
+      "name": "Packleader (504289 aura still held on summon at ~7500 ms, short of 8000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "for $504289d",
+      "learn": [
+        573357,
+        501682
+      ],
+      "setup_casts": [
+        573357
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 501682,
+      "gate_spell": 504290,
+      "target": "dummy",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301,
+        "spell": 504289
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 7500,
+      "expire_ms": 16000,
+      "game_time": {
+        "after": [
+          7300,
+          7900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$504289d = 8000 ms (504289 DurationIndex 31 = 8000 ms, Spell.dbc). Night Hunter's Howl 501682 triggers 504289 on Animated Blood 315301 (15000 ms lifetime, still alive at 1600 + 7500 = 9100 ms). Read at wait_ms 7500 (game_time after [7300, 7900] excludes -10% = 7200 ms): 0 in control (unlearned), 1 in treatment. Reference search 2026-11-26: coa-history 504289: 0 events; coabuildhub 504290 says 'for 8 seconds'."
+    },
+    {
+      "spell": 504290,
+      "name": "Packleader (504289 aura expired on live summon by ~8400 ms, past 8000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "for $504289d",
+      "learn": [
+        573357,
+        501682
+      ],
+      "setup_casts": [
+        573357
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 501682,
+      "gate_spell": 504290,
+      "target": "dummy",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "owned_creature_count",
+            "fields": {
+              "entry": 315301
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Animated Blood 315301 (15000 ms lifetime) is still alive at 1600 + 8400 = 10000 ms in both phases, proving 504289 expired rather than the minion despawning."
+          }
+        ]
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301,
+        "spell": 504289
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 8400,
+      "expire_ms": 16000,
+      "game_time": {
+        "after": [
+          8100,
+          8750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Companion expiry bound for $504289d = 8000 ms. Read at wait_ms 8400 (game_time after [8100, 8750] excludes +10% = 8800 ms): 504289 is gone from 315301 (0) while ally_arm proves 315301 itself is still alive (1). Paired with duration_held, brackets 8000 ms inside +-10%. Reference search 2026-11-26: coa-history 504289: 0 events; coabuildhub 504290 says 'for 8 seconds'."
+    },
+    {
+      "spell": 561196,
+      "name": "Blood Constructor (5 Thirst stacks keep Animated Blood alive past 19.6 sec)",
+      "kind": "metric_delta",
+      "variant": "five_stacks_held",
+      "label_suffix": "five_stacks_held",
+      "quote": "Increases the duration of Animated Blood by $/1000;s1 sec per stack of Thirst.",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 561196,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 19600,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          19520,
+          19950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;s1 = 1000 ms per stack (561196 Effect[0] aura 107 SPELLMOD_EFFECT1 BasePoints 999 + DieSides 1 = +1000 on 300796; AscensionBloodmageTalents.cpp:634-643 adds perStack * thirst->GetStackAmount() to 573357 Animated Blood 15000 ms base duration). With 5 stacks of Thirst 706613 (precondition fixture): control (before learning 561196) despawns at 15000 ms and reads 0 at 19600 ms; treatment extends duration to 20000 ms and still reads 1 at game_time [19520, 19950] (excludes -10% on +5 s bonus = 19500 ms and -10% on total = 18000 ms). Reference search 2026-11-26: coa-history 561196: 0 events (passive; 573357: 1601 summons in 26 logs); coabuildhub 561196 matches verbatim."
+    },
+    {
+      "spell": 561196,
+      "name": "Blood Constructor (5 Thirst stacks Animated Blood despawns by ~20.3 sec)",
+      "kind": "metric_delta",
+      "variant": "five_stacks_gone",
+      "label_suffix": "five_stacks_gone",
+      "quote": "Increases the duration of Animated Blood by $/1000;s1 sec per stack of Thirst.",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 561196,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          706613,
+          5,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 20300,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          20050,
+          20480
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper expiry bound for 561196 Blood Constructor at 5 Thirst stacks (expected 20000 ms): at wait_ms 20300 (game_time after [20050, 20480], excluding +10% on +5 s bonus = 20500 ms), Animated Blood 315301 has despawned (0). Paired with five_stacks_held, brackets 20000 ms within +-500 ms. Reference search 2026-11-26: coa-history 561196: 0 events; coabuildhub 561196 matches verbatim."
+    },
+    {
+      "spell": 561196,
+      "name": "Blood Constructor (10 Thirst stacks keep Animated Blood alive past 24.3 sec)",
+      "kind": "metric_delta",
+      "variant": "ten_stacks_held",
+      "label_suffix": "ten_stacks_held",
+      "quote": "Increases the duration of Animated Blood by $/1000;s1 sec per stack of Thirst.",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 561196,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          706613,
+          10,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 24300,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          24100,
+          24900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Per-stack scaling check for 561196 Blood Constructor at 10 stacks of Thirst 706613 (precondition fixture): expected lifetime 15000 + 10*1000 = 25000 ms. Control (before learning 561196) despawns at 15000 ms (0); treatment stays alive at game_time [24100, 24900] (excludes -10% on +10 s bonus = 24000 ms and excludes 5-stack 20000 ms). Reference search 2026-11-26: coa-history 561196: 0 events; coabuildhub 561196 matches verbatim."
+    },
+    {
+      "spell": 561196,
+      "name": "Blood Constructor (10 Thirst stacks Animated Blood despawns by ~25.5 sec)",
+      "kind": "metric_delta",
+      "variant": "ten_stacks_gone",
+      "label_suffix": "ten_stacks_gone",
+      "quote": "Increases the duration of Animated Blood by $/1000;s1 sec per stack of Thirst.",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 561196,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          706613,
+          10,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 25500,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          25100,
+          25950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper expiry bound for 561196 Blood Constructor at 10 Thirst stacks (expected 25000 ms): at wait_ms 25500 (game_time after [25100, 25950], excluding +10% on +10 s bonus = 26000 ms), Animated Blood 315301 has despawned (0). Reference search 2026-11-26: coa-history 561196: 0 events; coabuildhub 561196 matches verbatim."
+    },
+    {
+      "spell": 561196,
+      "name": "Blood Constructor (0 Thirst stacks add 0 sec to Animated Blood)",
+      "kind": "metric_delta",
+      "variant": "zero_stacks_control",
+      "label_suffix": "zero_stacks_control",
+      "quote": "Increases the duration of Animated Blood by $/1000;s1 sec per stack of Thirst.",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 561196,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 15600,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          15100,
+          15950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-stack control for 561196 Blood Constructor (AscensionBloodmageTalents.cpp:636-639 returns early with no Thirst aura): with 0 Thirst stacks, Animated Blood 315301 despawns at base 15000 ms and reads 0 at game_time [15100, 15950] both before and after learning 561196. Reference search 2026-11-26: coa-history 561196: 0 events; coabuildhub 561196 matches verbatim."
+    },
+    {
+      "spell": 804199,
+      "name": "Blood Moon (Animated Blood spawns an additional amalgam, 1 -> 2)",
+      "kind": "metric_delta",
+      "variant": "extra_amalgam",
+      "label_suffix": "extra_amalgam",
+      "quote": "Your Animated Blood now spawns an additional amalgam.",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 804199,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 315301
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "804199 Blood Moon Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 3 SPELLMOD_EFFECT1, BasePoints 0 + DieSides 1 = +1, EffectSpellClassMask[0] = 1 matching Animated Blood 573357 (SpellFamilyFlags[0] = 1, BasePoints 0 + DieSides 1 = 1 amalgam; Spell.dbc). Real cast of 573357 spawns 1 creature 315301 before learning 804199 (control) and 2 after learning 804199 (expire_ms 16000 clears the 15 s control summon). Reference search 2026-11-26: coa-history 804199: 0 events (passive; 573357: 1601 summons in 26 logs); coabuildhub spells_master_index.json 804199 matches verbatim."
+    },
+    {
+      "spell": 807345,
+      "name": "Gore Barrage (Animated Blood Rage cost reduced by 30%, 250 -> 175)",
+      "kind": "metric_delta",
+      "variant": "animated_blood_cost",
+      "label_suffix": "animated_blood_cost",
+      "quote": "Reduces the cost of spells that cost health and Animated Blood by $s1%.",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 807345,
+      "target": "caster",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "cast_in_before": true,
+      "metric": "power",
+      "fields": {
+        "power": 1
+      },
+      "before_expected": 750,
+      "expected": 825,
+      "expected_gain": 75,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 30% (807345 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 SPELLMOD_COST, BasePoints -31 + DieSides 1 = -30%, EffectSpellClassMask (3507750913, 2285969409, 2149647768) covers Animated Blood 573357 SpellFamilyFlags[0] 1; Spell.dbc). Animated Blood 573357 costs 250 internal Rage (25 displayed Rage); with disable_regeneration true (no out-of-combat Rage decay), cast from 1000 Rage leaves 750 before learning 807345 (control) and 825 after learning 807345 (-30% -> 175 Rage cost, +75 Rage saved; tolerance 0 excludes 0% and -60%). Reference search 2026-11-26: coa-history 807345: 0 events (passive); coabuildhub spells_master_index.json 807345 matches ('-30%')."
+    },
+    {
+      "spell": 807345,
+      "name": "Gore Barrage (Blood Shield health cost reduced by 30%)",
+      "kind": "metric_delta",
+      "variant": "health_cost_shield",
+      "label_suffix": "health_cost_shield",
+      "quote": "Reduces the cost of spells that cost health and Animated Blood by $s1%.",
+      "learn": [
+        504296
+      ],
+      "trigger_spell": 504296,
+      "gate_spell": 807345,
+      "target": "caster",
+      "cast_in_before": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 49850,
+      "expected": 49895,
+      "expected_gain": 45,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Health-cost leg of 807345 Gore Barrage ($s1 = 30% SPELLMOD_COST; EffectSpellClassMask[0] bit 28 = 268435456 matches Blood Shield 504296). Blood Shield 504296 has PowerType -2 (POWER_HEALTH), ManaCostPercentage 10, StartRecoveryTime 1500 ms (expire_ms 1600 clears GCD; Spell.dbc): CalcPowerCost charges 150 health without 807345 (50000 -> 49850) and 105 health with 807345 (-30%, 50000 -> 49895, +45 health saved; tolerance 1 excludes 0% = 49850 and -60% = 49940). Reference search 2026-11-26: coa-history 807345: 0 events; coabuildhub 807345 matches."
+    },
+    {
+      "spell": 807345,
+      "name": "Gore Barrage (Blood Howl health cost reduced by 30%)",
+      "kind": "metric_delta",
+      "variant": "health_cost_blood_howl",
+      "label_suffix": "health_cost_blood_howl",
+      "quote": "Reduces the cost of spells that cost health and Animated Blood by $s1%.",
+      "learn": [
+        800782
+      ],
+      "trigger_spell": 800782,
+      "gate_spell": 807345,
+      "target": "caster",
+      "cast_in_before": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "health",
+      "fields": {},
+      "before_expected": 49835,
+      "expected": 49885,
+      "expected_gain": 50,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Health-cost coverage probe for 807345 Gore Barrage ($s1 = 30% SPELLMOD_COST on spells that cost health). Blood Howl 800782 is an obtainable Bloodmage health-cost spell (PowerType -2 POWER_HEALTH, ManaCostPercentage 11, CasterAuraSpell 524861 precondition fixture, StartRecoveryTime 1500 ms, SpellFamilyFlags (0, 0, 131072); Spell.dbc): CalcPowerCost charges 165 health without 807345 (50000 -> 49835), and the tooltip promises -30% (~115 health, +50 health saved; tolerance 2 excludes 0% = 49835 and -60% = 49934). Note: 807345 EffectSpellClassMask (3507750913, 2285969409, 2149647768) currently omits 800782 (20 of 42 obtainable Bloodmage health-cost spells), so this probe truthfully alerts on the server mask omission. Reference search 2026-11-26: coa-history 807345: 0 events; coabuildhub 807345 says 'Reduces the cost of spells that cost health and Animated Blood by 30%'."
+    },
+    {
+      "spell": 706247,
+      "name": "Darkcasting (ability critical strike triggers Blood Orb spawn 707434)",
+      "kind": "metric_delta",
+      "variant": "orb_spawn_crit",
+      "label_suffix": "orb_spawn_crit",
+      "quote": "Critical strikes with abilities now spawn a Blood Orb near you for $707434d.",
+      "trigger_spell": 578305,
+      "gate_spell": 706247,
+      "target": "dummy",
+      "cast_power": 300,
+      "force_crit": "spell",
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 707434
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "706247 Darkcasting (rev_20260930_32_bloodmage_darkcasting_blood_orb.sql:24 ProcFlags 69904, HitMask 2 PROC_HIT_CRITICAL -> 707434 Blood Orb spawn, DurationIndex 8 = 15000 ms, NPC 315303). Critical Bloodbolt 578305 (force_crit spell, 823764 beeg spellpen, 300 Rage) casts 707434 0 times before learning 706247 (control) and 1 time after. Note: 15000 ms orb lifetime and run-over pickup effects (rows 342-346) are documented as a tool gap because 707434 spawns at GetRandomPoint(*player, 6.0f) and 712418 has START_PERIODIC_AT_APPLY, while conformance exposes no relocate_to_creature step. Reference search 2026-11-26: coa-history 706247/707434: 0 events; coabuildhub 706247 matches verbatim."
+    },
+    {
+      "spell": 706247,
+      "name": "Darkcasting (non-critical ability hit does not spawn a Blood Orb)",
+      "kind": "metric_delta",
+      "variant": "orb_spawn_noncrit",
+      "label_suffix": "orb_spawn_noncrit",
+      "quote": "Critical strikes with abilities now spawn a Blood Orb near you for $707434d.",
+      "trigger_spell": 578305,
+      "gate_spell": 706247,
+      "target": "dummy",
+      "cast_power": 300,
+      "cast_in_before": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 707434
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Non-crit negative control for 706247 Darkcasting (HitMask 2 PROC_HIT_CRITICAL). Bloodbolt 578305 with 16255 set to -100% crit never crits and triggers 0 casts of 707434 both before and after learning 706247. Reference search 2026-11-26: coa-history 706247/707434: 0 events; coabuildhub 706247 matches verbatim."
+    },
+    {
+      "spell": 706247,
+      "name": "Darkcasting (1 stack causes next Animated Blood to spawn 1 Blood Worm and consumes stack)",
+      "kind": "metric_delta",
+      "variant": "extra_worm_one",
+      "label_suffix": "extra_worm_one",
+      "quote": "spawn a Blood Orb near you for $707434d.@s:707434:0@",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 706247,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "after_auras": [
+        [
+          712383,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 712383
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "spell_ascension_animated_blood::HandleExtraWorms (AscensionBloodmageTalents.cpp:366-373) consumes Darkcasting 712383 upon casting 573357 (stacks read 0 after cast)."
+          }
+        ]
+      },
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 325301
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "spell_ascension_animated_blood::HandleExtraWorms (AscensionBloodmageTalents.cpp:360-373): casting Animated Blood 573357 consumes Darkcasting 712383 stacks and casts Blood Tear Spawn 712417 with SPELLVALUE_BASE_POINT0 = count, summoning count Blood Worms (NPC 325301, 20000 ms). Darkcasting 712383 set to 1 stack via after_auras precondition fixture (guide 3.4: subject is Animated Blood's worm spawn and stack consumption): control (0 stacks) spawns 0 Blood Worms 325301; treatment (1 stack) spawns 1 Blood Worm 325301 and ally_arm confirms 712383 is consumed to 0. Reference search 2026-11-26: coa-history 712383: 0 events (573357: 1601 summons in 26 logs); coabuildhub 706247 matches."
+    },
+    {
+      "spell": 706247,
+      "name": "Darkcasting (3 stacks cause next Animated Blood to spawn 3 Blood Worms)",
+      "kind": "metric_delta",
+      "variant": "extra_worm_three",
+      "label_suffix": "extra_worm_three",
+      "quote": "spawn a Blood Orb near you for $707434d.@s:707434:0@",
+      "learn": [
+        573357
+      ],
+      "trigger_spell": 573357,
+      "gate_spell": 706247,
+      "target": "caster",
+      "cast_power": 250,
+      "cast_in_before": true,
+      "after_auras": [
+        [
+          712383,
+          3,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "owned_creature_count",
+      "fields": {
+        "entry": 325301
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "Per-stack worm count check for 706247 Darkcasting (AscensionBloodmageTalents.cpp:369-372): with 3 stacks of Darkcasting 712383 (precondition fixture), Animated Blood 573357 spawns 3 Blood Worms 325301 against 0 in the 0-stack control (excludes fixed 1 worm). Reference search 2026-11-26: coa-history 712383: 0 events; coabuildhub 706247 matches."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (instantly silences enemies in pool, interrupting channel)",
+      "kind": "metric_delta",
+      "variant": "silence_stops_cast",
+      "label_suffix": "silence_stops_cast",
+      "quote": "Place a pool of blood on the ground, instantly silencing all enemies for $d",
+      "trigger_spell": 681077,
+      "cast_in_before": false,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "target_casts_before": [
+        12051
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 681077
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Arterial Bind 681077 Effect[0] aura 27 SPELL_AURA_MOD_SILENCE is applied to dummy at 3 yd (inside 8 yd RadiusIndex 14) in treatment and absent in control."
+          }
+        ]
+      },
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 5000,
+      "void_on_cast_failure": true,
+      "observe_source": "681077 Arterial Bind Effect[0] aura 27 SPELL_AURA_MOD_SILENCE (Mechanic 9, TargetA 16 TARGET_UNIT_DEST_AREA_ENEMY, RadiusIndex 14 = 8.0 yd, DurationIndex 35 = 4000 ms; Spell.dbc). Dummy at 3 yd channels Evocation 12051 (8 s) before each phase: without 681077 (control), dummy keeps channeling (casting == 1, aura 681077 == 0); after casting 681077 at caster's ground position, dummy is silenced and its channel stops (casting == 0, aura 681077 == 1). Reference search 2026-11-26: coa-history 681077: 60 SPELL_AURA_APPLIED and 60 SPELL_AURA_REMOVED in 4 logs; coabuildhub 681077 matches verbatim."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (silence still held on dummy at ~3750 ms, short of 4000 ms)",
+      "kind": "metric_delta",
+      "variant": "silence_duration_held",
+      "label_suffix": "silence_duration_held",
+      "quote": "Place a pool of blood on the ground, instantly silencing all enemies for $d",
+      "trigger_spell": 681077,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "select_dummy": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 681077
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3750,
+      "expire_ms": 5000,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 4000 ms (681077 DurationIndex 35 = 4000 ms, Spell.dbc). Dummy at 3 yd holds silence aura 681077 at wait_ms 3750 (game_time after [3650, 3950], excluding -10% = 3600 ms); 0 in uncast control. Reference search 2026-11-26: coa-history 681077: 60 applies/removals in 4 logs; coabuildhub 681077 says 'for 4 seconds'."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (silence expired on dummy by ~4200 ms, past 4000 ms)",
+      "kind": "metric_delta",
+      "variant": "silence_duration_gone",
+      "label_suffix": "silence_duration_gone",
+      "quote": "Place a pool of blood on the ground, instantly silencing all enemies for $d",
+      "trigger_spell": 681077,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "dummy",
+      "select_dummy": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 681077
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4200,
+      "expire_ms": 5000,
+      "game_time": {
+        "after": [
+          4050,
+          4380
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper expiry bound for 681077 silence ($d = 4000 ms): silence aura 681077 is gone from dummy at wait_ms 4200 (game_time after [4050, 4380], excluding +10% = 4400 ms). Paired with silence_duration_held, brackets 4000 ms inside +-10%. Reference search 2026-11-26: coa-history 681077: 60 applies/removals; coabuildhub 681077 says 'for 4 seconds'."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (healing pool ticks every 1000 ms on ally)",
+      "kind": "metric_delta",
+      "variant": "heal_period",
+      "label_suffix": "heal_period",
+      "quote": "every $681082t1 sec",
+      "trigger_spell": 681077,
+      "gate_timing": "start",
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ]
+      },
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_heal",
+        "spell": 681082,
+        "target": "ally",
+        "since_spell": 681077
+      },
+      "before_expected": 1000,
+      "expected": 1000,
+      "tolerance": 50,
+      "wait_ms": 4600,
+      "expire_ms": 5000,
+      "void_on_cast_failure": true,
+      "observe_source": "$681082t1 = 1000 ms (681082 Effect[0] aura 8 SPELL_AURA_PERIODIC_HEAL, EffectAmplitude 1000 ms, DurationIndex 35 = 4000 ms -> 4 ticks; Spell.dbc). Reads event_interval_median_ms of 681082 spell_heal events on grouped ally since 681077 cast after 4600 ms: 1000 +- 50 ms (5% band excludes 900 ms and 1100 ms, 10% off on both sides; uncast control is heal_base). Reference search 2026-11-26: coa-history 681082: 65 applies, 63 removals in 4 logs; coabuildhub 681077 says 'every 1 sec for 4 seconds'."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (ally heal aura 681082 held at ~3750 ms, short of 4000 ms)",
+      "kind": "metric_delta",
+      "variant": "heal_duration_held",
+      "label_suffix": "heal_duration_held",
+      "quote": "for $d.",
+      "trigger_spell": 681077,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "ally",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 681082
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3750,
+      "expire_ms": 5000,
+      "game_time": {
+        "after": [
+          3650,
+          3950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 4000 ms (681082 DurationIndex 35 = 4000 ms, Spell.dbc). Grouped ally inside 8 yd pool holds periodic heal aura 681082 at wait_ms 3750 (game_time after [3650, 3950], excluding -10% = 3600 ms); 0 in uncast control. Reference search 2026-11-26: coa-history 681082: 65 applies/63 removals; coabuildhub 681077 says 'for 4 seconds'."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (ally heal aura 681082 expired by ~4200 ms after 4 ticks)",
+      "kind": "metric_delta",
+      "variant": "heal_duration_gone",
+      "label_suffix": "heal_duration_gone",
+      "quote": "for $d.",
+      "trigger_spell": 681077,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "ally",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 681082,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "4000 ms duration / 1000 ms amplitude produces exactly 4 periodic heal ticks of 681082 on ally."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 681082
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4200,
+      "expire_ms": 5000,
+      "game_time": {
+        "after": [
+          4050,
+          4380
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper expiry bound for 681082 heal HoT ($d = 4000 ms): aura 681082 is gone from ally at wait_ms 4200 (game_time after [4050, 4380], excluding +10% = 4400 ms) after delivering exactly 4 ticks (ally_arm spell_heal_count == 4). Reference search 2026-11-26: coa-history 681082: 65 applies/63 removals; coabuildhub 681077 says 'for 4 seconds'."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (ally heal base total at 0 SP over 4 ticks)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "and healing allies for ${$681082m1+$681082ppl1+$BH*.33}",
+      "trigger_spell": 681077,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681082,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 840,
+      "tolerance": 30,
+      "wait_ms": 4600,
+      "expire_ms": 5000,
+      "void_on_cast_failure": true,
+      "observe_source": "681082 Arterial Bind Spell.dbc: Effect[0] aura 8 PERIODIC_HEAL BasePoints 98, DieSides 15 (roll 99..113, mean 106), BaseLevel 34, RealPointsPerLevel 4.0 -> at level 60 ppl1 = (60-34)*4 = 104, per-tick base = [203..217] (mean 210); 4 ticks = [812..868] (midpoint 840 +- 30, excludes 0 and 2x = 1680). 16255=-100 prevents crits; uncast control reads 0. Reference search 2026-11-26: coa-history 681082: 65 applies in 4 logs; coabuildhub 681077 says '203 + 33% healing every 1 sec for 4 seconds'."
+    },
+    {
+      "spell": 681077,
+      "name": "Arterial Bind (ally heal +$BH*0.33 scaling at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "and healing allies for ${$681082m1+$681082ppl1+$BH*.33}",
+      "trigger_spell": 681077,
+      "cast_in_before": false,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 681082,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 27240,
+      "tolerance": 1362,
+      "wait_ms": 4600,
+      "expire_ms": 5000,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$681082m1+$681082ppl1+$BH*.33} promises +0.33*BH per tick: at +20000 SP/BH (player_spell_power hit_arm), +6600 per tick x 4 ticks = +26400 -> expected total 840 + 26400 = 27240 +- 1362 (G-19 5% band, excludes 0*BH = 840 and 2x = 53640). Note: 681082 currently has EffectBonusMultiplier[0] 0 and no spell_bonus_data row, so this tests the tooltip truthfully and is expected to alert if server scaling is missing. Reference search 2026-11-26: coa-history 681082: 65 applies in 4 logs; coabuildhub 681077 says '203 + 33% healing'."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (transforms Blood Curse 562720 into Sanguine Essence 680692)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.",
+      "specialization": 25,
+      "unlearn_after_specialization": [
+        505188,
+        680692
+      ],
+      "learn": [
+        562720
+      ],
+      "trigger_spell": 60235,
+      "gate_spell": 505188,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "metric": "temporary_spell_replacement",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 562720,
+      "expected": 680692,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 1000,
+      "observe_source": "AscensionTalentReplacementData.h:57 ({20, 25, 505188, 562720, {{{680692, 0}}}}) + AscensionCompat.cpp:1155-1219: in Fleshweaver specialization 25 (specialization option, ADR 1102), unlearn_after_specialization [505188, 680692] (ADR 1292) clears the spec auto-grant so control reads temporary_spell_replacement(562720) == 562720, and learning 505188 between phases replaces Blood Curse 562720 with Sanguine Essence 680692 (680692). Reference search 2026-11-26: coa-history 505188/680692: 0 events (680693: 804 heals in 10 logs, 681399: 1459 dmg in 12 logs); coabuildhub 505188 matches verbatim."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (unique Cursed Form keeps Mortal Form abilities castable)",
+      "kind": "metric_delta",
+      "variant": "mortal_allowed",
+      "label_suffix": "mortal_allowed",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        562720,
+        501614
+      ],
+      "trigger_spell": 680692,
+      "gate_spell": 505188,
+      "target": "caster",
+      "select_dummy": true,
+      "cast_in_before": false,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "before_auras": [
+        [
+          562720,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 501614,
+          "target": "dummy",
+          "delay_ms": 500,
+          "in_before": false,
+          "reset_cooldown": true
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 525031
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Both Blood Curse 562720 and Sanguine Essence 680692 keep Cursed Form marker 525031 active (AscensionBloodmageTalents.cpp:276-286)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 802877
+            },
+            "before_expected": 1,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Blood Curse 562720 applies Mortal-ability lockout 802877 (1) whereas Sanguine Essence 680692 is in MortalAbilityForms[] and keeps 802877 absent (0) (AscensionBloodmageTalents.cpp:154,288-292)."
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 501614,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2800,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageTalents.cpp:153-154,276-293 + AscensionPooledVitality.h:36-40: standard Blood Curse 562720 (before_auras control, expire_ms 31000 lets 30 s form expire) applies Cursed Form marker 525031 (1) AND Mortal-ability lockout 802877 (1). After a real cast of Sanguine Essence 680692 (trigger_spell), Cursed Form marker 525031 stays active (1), Mortal lockout 802877 stays absent (0), and real Bloodmoon Blast 501614 (after_trigger_casts, ExcludeCasterAuraSpell 802877) casts cleanly and deals damage (spell_damage_count 1). Note: 'coalescing a blood orb that will float beside you' is a client visual. Reference search 2026-11-26: coa-history 681399: 1459 Bloodmoon Blast echoes in 12 logs; coabuildhub 505188 matches verbatim."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (entering Sanguine Essence grants Cursed Form 525031 without Mortal lockout 802877)",
+      "kind": "metric_delta",
+      "variant": "cursed_allowed",
+      "label_suffix": "cursed_allowed",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "trigger_spell": 680692,
+      "gate_spell": 505188,
+      "target": "caster",
+      "cast_in_before": false,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 802877
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Sanguine Essence 680692 is in MortalAbilityForms[] and never applies Mortal-ability lockout 802877 (AscensionBloodmageTalents.cpp:154,288-292)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 680692
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Real cast of Sanguine Essence 680692 applies aura 680692 (0 in uncast control, 1 in treatment)."
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 525031
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Companion Cursed-Form verification for 505188/680692 Sanguine Essence (AscensionBloodmageTalents.cpp:153,276-286): uncast Mortal Form control has Cursed Form marker 525031 == 0 and 680692 == 0; after a real cast of Sanguine Essence 680692, Cursed Form marker 525031 (CasterAuraSpell of Cursed Form abilities such as Bloodfang Bite 572551) becomes 1 while Mortal lockout 802877 stays 0. Reference search 2026-11-26: coa-history 680693/681399 present in 10-12 logs; coabuildhub 505188 matches verbatim."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (replicates 20% of Sanguine Mend healing per tick over 3 ticks = 60%)",
+      "kind": "metric_delta",
+      "variant": "mend_replicate_share",
+      "label_suffix": "mend_replicate_share",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        504085,
+        680692
+      ],
+      "trigger_spell": 504085,
+      "gate_spell": 680692,
+      "after_gate_cast": true,
+      "after_start_reads": [
+        {
+          "spell": 680692,
+          "expected": 1
+        }
+      ],
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "cast_in_before": true,
+      "phase_since": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1,
+          1000000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 680693,
+              "target": "ally"
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "680693 DurationIndex 27 (3000 ms) / EffectAmplitude 1000 ms delivers exactly 3 replicated heal ticks on ally (0 without 680692)."
+          }
+        ]
+      },
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680693,
+        "target": "ally"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_heal_total",
+        "fields": {
+          "spell": 504085,
+          "target": "ally"
+        }
+      },
+      "before_expected": 0,
+      "expected": 0.6,
+      "tolerance": 0.03,
+      "wait_ms": 6500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 20% (680692 Effect[0] aura 354 BasePoints 19 + DieSides 1 = 20%, trigger 680693; rev_20261002_01 + AscensionBloodmageTalents.cpp:1368-1424). Casting Sanguine Mend 504085 (2500 ms cast, 200 Rage; cast_power 1000 + disable_regeneration prevent Rage decay) on injured ally (1/1000000 HP) replicates floor(20% of resolved heal) per 1000 ms tick for 3000 ms (3 ticks = 60% total, echo->SetCritChance(0)). Control (before entering 680692): 0 replicated ticks (ratio 0); treatment (real after_gate_cast of 680692): 3 ticks (ally_arm) and ratio_to_metric 680693 / 504085 = 0.60 +- 0.03 (excludes 0, 0.20, 0.40, and 1.20). Reference search 2026-11-26: coa-history 680693: 804 SPELL_PERIODIC_HEAL in 10 logs; coabuildhub 505188 matches verbatim."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (replicates 20% of Bloodmoon Blast damage per tick over 3 ticks = 60%)",
+      "kind": "metric_delta",
+      "variant": "blast_replicate_share",
+      "label_suffix": "blast_replicate_share",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        501614,
+        680692
+      ],
+      "trigger_spell": 501614,
+      "gate_spell": 680692,
+      "after_gate_cast": true,
+      "after_start_reads": [
+        {
+          "spell": 680692,
+          "expected": 1
+        }
+      ],
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": true,
+      "phase_since": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 681399,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "681399 DurationIndex 27 (3000 ms) / EffectAmplitude 1000 ms delivers exactly 3 replicated damage ticks on dummy (0 without 680692)."
+          }
+        ]
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681399,
+        "target": "dummy"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 501614,
+          "target": "dummy"
+        }
+      },
+      "before_expected": 0,
+      "expected": 0.6,
+      "tolerance": 0.03,
+      "wait_ms": 6200,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Bloodmoon Blast damage leg of 505188/680692 Sanguine Essence (rev_20261007_06 + AscensionBloodmageTalents.cpp:1391-1416): casting Bloodmoon Blast 501614 (2000 ms cast + ~100 ms flight, 7% base health) while in 680692 replicates floor(20% of resolved damage) via 681399 every 1000 ms for 3000 ms (3 ticks = 60% total). Control (before entering 680692): 0 ticks (ratio 0); treatment (real after_gate_cast 680692): 3 ticks (ally_arm) and ratio_to_metric 681399 / 501614 = 0.60 +- 0.03. Reference search 2026-11-26: coa-history 681399: 1459 SPELL_PERIODIC_DAMAGE in 12 logs; coabuildhub 505188 matches verbatim."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (replicated Sanguine Mend heal ticks every 1000 ms)",
+      "kind": "metric_delta",
+      "variant": "mend_period",
+      "label_suffix": "mend_period",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        504085
+      ],
+      "setup_casts": [
+        680692
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504085,
+      "gate_spell": 505188,
+      "gate_timing": "start",
+      "target": "ally",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "disable_regeneration": true,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1,
+          1000000
+        ]
+      },
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_heal",
+        "spell": 680693,
+        "target": "ally",
+        "since_spell": 504085
+      },
+      "before_expected": 1000,
+      "expected": 1000,
+      "tolerance": 50,
+      "wait_ms": 6500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$680693t1 = 1000 ms (680693 Effect[0] aura 8 PERIODIC_HEAL EffectAmplitude 1000 ms, DurationIndex 27 = 3000 ms; Spell.dbc). Enters Sanguine Essence via a real setup cast of 680692 (no set_aura on subject aura 680692) before casting Sanguine Mend 504085 (cast_power 1000 + disable_regeneration prevent Rage decay). Reads event_interval_median_ms of 680693 spell_heal events on injured ally since 504085 cast: 1000 +- 50 ms (5% band excludes 900 ms and 1100 ms; no-form control is mend_replicate_share). Reference search 2026-11-26: coa-history 680693: 804 periodic heals across 257 applies (~3.1 ticks/apply); coabuildhub 505188 says 'every 1 sec for 3 seconds'."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (replicated Bloodmoon Blast damage ticks every 1000 ms)",
+      "kind": "metric_delta",
+      "variant": "blast_period",
+      "label_suffix": "blast_period",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        501614
+      ],
+      "setup_casts": [
+        680692
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 501614,
+      "gate_spell": 505188,
+      "gate_timing": "start",
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 681399,
+        "target": "dummy",
+        "since_spell": 501614
+      },
+      "before_expected": 1000,
+      "expected": 1000,
+      "tolerance": 50,
+      "wait_ms": 6200,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "$680693t1 = 1000 ms (681399 Effect[0] aura 3 PERIODIC_DAMAGE EffectAmplitude 1000 ms, DurationIndex 27 = 3000 ms; Spell.dbc). Enters Sanguine Essence via a real setup cast of 680692 (no set_aura on subject aura 680692) before casting Bloodmoon Blast 501614. Reads event_interval_median_ms of 681399 spell_damage events on dummy since 501614 cast: 1000 +- 50 ms (5% band excludes 900 ms and 1100 ms; no-form control is blast_replicate_share). Reference search 2026-11-26: coa-history 681399: 1459 periodic damage hits in 12 logs; coabuildhub 505188 says 'every 1 sec for 3 seconds'."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (replicated echo 681399 held short of 3000 ms)",
+      "kind": "metric_delta",
+      "variant": "echo_duration_held",
+      "label_suffix": "echo_duration_held",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        501614,
+        680692
+      ],
+      "trigger_spell": 501614,
+      "gate_spell": 680692,
+      "after_gate_cast": true,
+      "after_start_reads": [
+        {
+          "spell": 680692,
+          "expected": 1
+        }
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 681399
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4950,
+      "expire_ms": 1600,
+      "game_time": {
+        "after": [
+          4750,
+          5200
+        ]
+      },
+      "apply_stamp": {
+        "aura": 681399,
+        "window": [
+          2730,
+          2990
+        ],
+        "applied": "after_trigger",
+        "anchor": 33143,
+        "source": "681399/680693 DurationIndex 27 = 3000 ms ($680693d, SpellDuration.dbc); aura is still present on dummy in [2730, 2990] ms after apply, excluding -10% = 2700 ms."
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$680693d = 3000 ms (680693/681399 DurationIndex 27 = 3000 ms, Spell.dbc). Bloodmoon Blast 501614 (2000 ms cast + ~100 ms flight -> applies 681399 at ~2100 ms) cast before entering 680692 (control: 0) and after real after_gate_cast of 680692 (treatment: 1). apply_stamp (after_trigger, anchor 33143 on dummy) brackets the reading at [2730, 2990] ms after 681399 apply (excludes -10% = 2700 ms). Reference search 2026-11-26: coa-history 681399: 1459 hits in 12 logs; coabuildhub 505188 says 'for 3 seconds'."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (replicated echo 681399 gone past 3000 ms)",
+      "kind": "metric_delta",
+      "variant": "echo_duration_gone",
+      "label_suffix": "echo_duration_gone",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        501614,
+        680692
+      ],
+      "trigger_spell": 501614,
+      "gate_spell": 680692,
+      "after_gate_cast": true,
+      "after_start_reads": [
+        {
+          "spell": 680692,
+          "expected": 1
+        }
+      ],
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          33143,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 681399
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 5250,
+      "expire_ms": 1600,
+      "game_time": {
+        "after": [
+          5050,
+          5500
+        ]
+      },
+      "apply_stamp": {
+        "aura": 681399,
+        "window": [
+          3010,
+          3290
+        ],
+        "applied": "after_trigger",
+        "anchor": 33143,
+        "source": "681399/680693 DurationIndex 27 = 3000 ms ($680693d, SpellDuration.dbc); aura is gone from dummy in [3010, 3290] ms after apply, excluding +10% = 3300 ms."
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Companion expiry bound for $680693d = 3000 ms (681399 DurationIndex 27 = 3000 ms). apply_stamp (after_trigger, anchor 33143 on dummy) brackets the absence (0) in [3010, 3290] ms after apply, excluding +10% = 3300 ms. Paired with echo_duration_held, brackets 3000 ms inside +-10%. Reference search 2026-11-26: coa-history 681399: 1459 hits; coabuildhub 505188 says 'for 3 seconds'."
+    },
+    {
+      "spell": 505188,
+      "name": "Sanguine Essence (treated as a Demon: Exorcism 1148801 crits for 1.5x in form, non-crits out of form)",
+      "kind": "metric_delta",
+      "variant": "demon_type",
+      "label_suffix": "demon_type",
+      "quote": "Transforms your Blood Curse into Sanguine Essence.@s:680692:0@",
+      "learn": [
+        680692
+      ],
+      "trigger_spell": 60235,
+      "gate_spell": 680692,
+      "after_gate_cast": true,
+      "after_start_reads": [
+        {
+          "spell": 680692,
+          "expected": 1
+        }
+      ],
+      "target": "caster",
+      "select_dummy": true,
+      "cast_in_before": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          1153480,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 1148801,
+        "casts": 4,
+        "gap_ms": 2200,
+        "lead_ms": 200
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 1148801,
+        "target": "caster",
+        "caster": "dummy"
+      },
+      "before_expected": 3800,
+      "expected": 9500,
+      "expected_ratio": 2.5,
+      "tolerance": 0.15,
+      "wait_ms": 500,
+      "expire_ms": 13000,
+      "void_on_cast_failure": true,
+      "observe_source": "680692 Sanguine Essence Effect[1] aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 (SpellShapeshiftForm.dbc ID 57 creatureType = 3 CREATURE_TYPE_DEMON; Unit::GetCreatureType Unit.cpp:13418-13421). Hostile dummy at 3 yd casts Exorcism 1148801 4 times per phase (2200 ms apart, 200 ms lead -> 8300 ms total < 12000 ms duration of 1153480; SpellFamilyName 10, Category 19, TargetCreatureType 0 so CheckCast always passes, SchoolMask 2 Holy, 1500 ms cast, BP 1027 + Die 119 = 1028..1146; Spell.dbc) at caster via dummy_casts_at_caster while caster holds 1153480 (Aura 197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE BP -10001, DurationIndex 29 = 12000 ms; expire_ms 13000 refreshes cleanly between phases) and 50000/100000 HP (cast_in_before true with 60235 no-op trigger). In Unit::IsSpellCrit (Unit.cpp:10531-10535), Category 19 Paladin Exorcism returns 100.0f before Aura 197 if and only if GetCreatureTypeMask() & CREATURE_TYPEMASK_DEMON_OR_UNDEAD: control (Humanoid before) takes 4 non-crits (~4348), treatment (Demon after real after_gate_cast of 680692, verified active by after_start_reads) takes 4 guaranteed 1.5x crits (~6522), so cumulative damage ratio after/before = 2.50 +- 0.15 (4 casts yield ratio SD ~0.0335, 4.48 sigma -> per-pair flip risk ~1.5e-5 < 0.1% cap; excludes Humanoid non-crit 2.00). Reference search 2026-11-26: coa-history 505188/680692: 0 events; Spell.dbc 680692 Effect[1] MiscValue 57 matches SpellShapeshiftForm 57 creatureType 3."
     }
   ],
   "player_observations": [],

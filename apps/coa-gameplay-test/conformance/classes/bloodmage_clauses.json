@@ -218,13 +218,18 @@
   {
     "spell": 300260,
     "clause": "Your effects that trigger Call of the Darkwing now trigger an additional Call of the Darkwing.",
-    "labels": [],
+    "labels": [
+      "300260 behaviour_metric_delta extra_call"
+    ],
     "kind": "claim"
   },
   {
     "spell": 300260,
     "clause": "Can only occur once per sec.",
-    "labels": [],
+    "labels": [
+      "300260 behaviour_metric_delta icd_held",
+      "300260 behaviour_metric_delta icd_reopen"
+    ],
     "kind": "claim"
   },
   {
@@ -390,7 +395,9 @@
     "spell": 500012,
     "clause": "Physical damage you deal or take now has a $h% chance to trigger a Call of the Darkwing.",
     "labels": [
-      "500012 effect_value #0"
+      "500012 proc_rate",
+      "500012 behaviour_metric_delta physical_taken_proc",
+      "500012 behaviour_metric_delta shadow_no_proc"
     ],
     "kind": "claim"
   },
@@ -398,7 +405,7 @@
     "spell": 500012,
     "clause": "Calls $s1 Shadow Bats to appear from the shadows",
     "labels": [
-      "500012 effect_value #2"
+      "500012 behaviour_metric_delta bat_count_mean"
     ],
     "kind": "claim"
   },
@@ -406,7 +413,10 @@
     "spell": 500012,
     "clause": "and strike the target for ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} Physical Damage, healing you equal to the damage dealt.",
     "labels": [
-      "500012 effect_value 802358e0 #1"
+      "500012 behaviour_metric_delta bat_bite_base",
+      "500012 behaviour_metric_delta bat_bite_sp",
+      "500012 behaviour_metric_delta bat_bite_ap",
+      "500012 behaviour_metric_delta bat_bite_heal"
     ],
     "kind": "claim"
   },
@@ -921,13 +931,17 @@
       {
         "claim": "increasing their damage dealt by $504289s1%",
         "labels": [
-          "504290 effect_value 504289e0 #0"
+          "504290 behaviour_metric_delta howl_applies",
+          "504290 behaviour_metric_delta blood_craving_control",
+          "504290 behaviour_metric_delta summon_damage_control",
+          "504290 behaviour_metric_delta summon_damage_bonus"
         ]
       },
       {
         "claim": "for $504289d",
         "labels": [
-          "504290 spell_duration 504289 #1"
+          "504290 behaviour_metric_delta duration_held",
+          "504290 behaviour_metric_delta duration_gone"
         ]
       }
     ],
@@ -1306,20 +1320,26 @@
   {
     "spell": 505188,
     "clause": "Transforms your Blood Curse into Sanguine Essence.",
-    "labels": [],
+    "labels": [
+      "505188 behaviour_metric_delta transform"
+    ],
     "kind": "claim"
   },
   {
     "spell": 505188,
     "clause": "Enter a unique Cursed Form that does not disable Mortal Form abilties, coalescing a blood orb that will float beside you.",
-    "labels": [],
+    "labels": [
+      "505188 behaviour_metric_delta mortal_allowed",
+      "505188 behaviour_metric_delta cursed_allowed"
+    ],
     "kind": "claim"
   },
   {
     "spell": 505188,
     "clause": "While active, you replicate $s1% of healing or damage done by Sanguine Mend",
     "labels": [
-      "505188 effect_value 680692e0 #0"
+      "505188 behaviour_metric_delta mend_replicate_share",
+      "505188 behaviour_metric_delta blast_replicate_share"
     ],
     "kind": "claim"
   },
@@ -1330,13 +1350,15 @@
       {
         "claim": "every $680693t1 sec",
         "labels": [
-          "505188 aura_amplitude_ms #1"
+          "505188 behaviour_metric_delta mend_period",
+          "505188 behaviour_metric_delta blast_period"
         ]
       },
       {
         "claim": "for $680693d",
         "labels": [
-          "505188 spell_duration 680693 #2"
+          "505188 behaviour_metric_delta echo_duration_held",
+          "505188 behaviour_metric_delta echo_duration_gone"
         ]
       }
     ],
@@ -1346,7 +1368,7 @@
     "spell": 505188,
     "clause": "@ext:While in a Cursed Form you are treated as if you were a Demon.:ext@",
     "labels": [
-      "505188 effect_value #3"
+      "505188 behaviour_metric_delta demon_type"
     ],
     "kind": "claim"
   },
@@ -1989,7 +2011,11 @@
     "spell": 561196,
     "clause": "Increases the duration of Animated Blood by $/1000;s1 sec per stack of Thirst.",
     "labels": [
-      "561196 effect_value e0 #0"
+      "561196 behaviour_metric_delta five_stacks_held",
+      "561196 behaviour_metric_delta five_stacks_gone",
+      "561196 behaviour_metric_delta ten_stacks_held",
+      "561196 behaviour_metric_delta ten_stacks_gone",
+      "561196 behaviour_metric_delta zero_stacks_control"
     ],
     "kind": "claim"
   },
@@ -2852,7 +2878,9 @@
     "spell": 681077,
     "clause": "Place a pool of blood on the ground, instantly silencing all enemies for $d",
     "labels": [
-      "681077 aura_duration_ms #0"
+      "681077 behaviour_metric_delta silence_stops_cast",
+      "681077 behaviour_metric_delta silence_duration_held",
+      "681077 behaviour_metric_delta silence_duration_gone"
     ],
     "kind": "claim"
   },
@@ -2863,19 +2891,21 @@
       {
         "claim": "every $681082t1 sec",
         "labels": [
-          "681077 aura_amplitude_ms #1"
+          "681077 behaviour_metric_delta heal_period"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "681077 aura_duration_ms #2"
+          "681077 behaviour_metric_delta heal_duration_held",
+          "681077 behaviour_metric_delta heal_duration_gone"
         ]
       },
       {
         "claim": "and healing allies for ${$681082m1+$681082ppl1+$BH*.33}",
         "labels": [
-          "681077 effect_value #3"
+          "681077 behaviour_metric_delta heal_base",
+          "681077 behaviour_metric_delta heal_sp"
         ]
       }
     ],
@@ -3744,10 +3774,22 @@
   {
     "spell": 706247,
     "clause": "Critical strikes with abilities now spawn a Blood Orb near you for $707434d.",
-    "labels": [
-      "706247 spell_duration 707434 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $707434d",
+        "labels": [
+          "706247 spell_duration 707434 #0"
+        ]
+      },
+      {
+        "claim": "Critical strikes with abilities now spawn a Blood Orb near you",
+        "labels": [
+          "706247 behaviour_metric_delta orb_spawn_crit",
+          "706247 behaviour_metric_delta orb_spawn_noncrit"
+        ]
+      }
+    ]
   },
   {
     "spell": 706247,
@@ -3790,7 +3832,10 @@
   {
     "spell": 706247,
     "clause": "and causes your next Animated Blood to spawn 1 blood worm to attack your enemies.",
-    "labels": [],
+    "labels": [
+      "706247 behaviour_metric_delta extra_worm_one",
+      "706247 behaviour_metric_delta extra_worm_three"
+    ],
     "kind": "claim"
   },
   {
@@ -4120,14 +4165,20 @@
   {
     "spell": 800154,
     "clause": "Critical strikes with Ravenous Strike or Bloodfang Bite, or using Howl spells, now triggers Call of the Darkwing.",
-    "labels": [],
+    "labels": [
+      "800154 behaviour_metric_delta howl_trigger",
+      "800154 behaviour_metric_delta ravenous_crit",
+      "800154 behaviour_metric_delta bloodfang_crit",
+      "800154 behaviour_metric_delta bloodfang_noncrit"
+    ],
     "kind": "claim"
   },
   {
     "spell": 800154,
     "clause": "Calls $s1 Shadow Bats to appear from the shadows",
     "labels": [
-      "800154 effect_value #1"
+      "800154 behaviour_metric_delta bat_spawn",
+      "500012 behaviour_metric_delta bat_count_mean"
     ],
     "kind": "claim"
   },
@@ -4135,7 +4186,10 @@
     "spell": 800154,
     "clause": "and strike the target for ${$802358m1+$802358ppl1+$SP*.4+$AP*.2} Physical Damage, healing you equal to the damage dealt.",
     "labels": [
-      "800154 effect_value 802358e0 #0"
+      "500012 behaviour_metric_delta bat_bite_base",
+      "500012 behaviour_metric_delta bat_bite_sp",
+      "500012 behaviour_metric_delta bat_bite_ap",
+      "500012 behaviour_metric_delta bat_bite_heal"
     ],
     "kind": "claim"
   },
@@ -5006,7 +5060,9 @@
   {
     "spell": 804199,
     "clause": "Your Animated Blood now spawns an additional amalgam.",
-    "labels": [],
+    "labels": [
+      "804199 behaviour_metric_delta extra_amalgam"
+    ],
     "kind": "claim"
   },
   {
@@ -5815,7 +5871,9 @@
     "spell": 807345,
     "clause": "Reduces the cost of spells that cost health and Animated Blood by $s1%.",
     "labels": [
-      "807345 effect_value e0 #0"
+      "807345 behaviour_metric_delta animated_blood_cost",
+      "807345 behaviour_metric_delta health_cost_shield",
+      "807345 behaviour_metric_delta health_cost_blood_howl"
     ],
     "kind": "claim"
   },
