@@ -172,8 +172,11 @@ struct npc_ascension_pyromancer_summon : public ScriptedAI
     void UpdateAI(uint32 diff) override
     {
         Player* player = ObjectAccessor::GetPlayer(*me, owner);
-        if (!player || !player->IsAlive() || !me->IsWithinDistInMap(player, 100) || !me->InSamePhase(player))
+        if (!player || !player->IsAlive() || !me->IsWithinDistInMap(player, 100) || !me->InSamePhase(player) ||
+            (me->GetEntry() == 50258 && !player->HasSpell(800796)))
         {
+            if (player && me->GetEntry() == 50258 && !player->HasSpell(800796))
+                player->RemoveAurasDueToSpell(681128);
             me->DespawnOrUnsummon();
             return;
         }
