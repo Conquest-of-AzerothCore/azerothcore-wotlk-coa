@@ -1,0 +1,183 @@
+{
+  "schema": 1,
+  "name": "Tinker: Gear Grind deals damage and generates Scrap without a 1H melee weapon (#13716)",
+  "contract": "Gear Grind (680975 -> 681245 -> 504594) replaces Makeshift Dynamite (572888 rank 7) with a 1.5 s ranged channel (DmgClass 3, EquippedItemClass -1) that triggers 4 ticks of Gear Grind Damage (505160, 0/500/1000/1500 ms via SPELL_ATTR5_EXTRA_INITIAL_PERIOD), each dealing Nature damage (base + level + 0.16*RAP) and triggering Generate 1 Scrap (707476 -> +1 stack of 801816). Spell.dbc left stale 1H melee weapon requirements on 505160 (EquippedItemClass 2, EquippedItemInventoryTypeMask 2105344, SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON, DmgClass 2), so Spell::CheckItems rejected every triggered 505160 tick when the Tinker carried only a ranged weapon (or a 2H weapon), letting 504594 channel cleanly with 0 hits, 0 damage and 0 Scrap. A level 80 Tinker with its starting main-hand weapon (431911) destroyed and a level 80 gun (1061370) equipped casts 504594 while Grinding Gears (681245) is active: 504594 must succeed, land all 4 hits of 505160 for positive damage, generate 4 Scrap stacks (801816), and consume 681245.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "tinker",
+      "race": 1,
+      "class": 28,
+      "level": 80,
+      "ranged_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "tinker",
+      "entry": 36,
+      "level": 80,
+      "health": 5000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "destroy_item",
+      "label": "Remove the starting main-hand weapon",
+      "actor": "tinker",
+      "item": 431911
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no main-hand weapon",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 15,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no off-hand item",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 16,
+      "equals": 0
+    },
+    {
+      "action": "add_item",
+      "label": "Fixture: level 80 gun",
+      "actor": "tinker",
+      "item": 1061370
+    },
+    {
+      "action": "equip",
+      "label": "Equip the level 80 gun",
+      "actor": "tinker",
+      "item": 1061370,
+      "slot": 17
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: gun equipped in ranged slot",
+      "actor": "tinker",
+      "metric": "equipped_item",
+      "slot": 17,
+      "equals": 1061370
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 572888
+    },
+    {
+      "action": "learn",
+      "actor": "tinker",
+      "spell": 680975
+    },
+    {
+      "action": "set_aura",
+      "label": "Fixture: spell penetration for clean Nature damage",
+      "actor": "tinker",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Start with 0 Scrap",
+      "actor": "tinker",
+      "spell": 801816,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Grinding Gears proc is active",
+      "actor": "tinker",
+      "spell": 681245,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Makeshift Dynamite is replaced by Gear Grind",
+      "actor": "tinker",
+      "metric": "temporary_spell_replacement",
+      "spell": 572888,
+      "equals": 504594,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Gear Grind is temporarily known",
+      "actor": "tinker",
+      "metric": "knows_spell",
+      "spell": 504594,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Gear Grind on the dummy at 10 yd",
+      "actor": "tinker",
+      "spell": 504594,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Gear Grind starts channeling without cast failure",
+      "actor": "tinker",
+      "metric": "cast_failure",
+      "spell": 504594,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#13716): Gear Grind lands all 4 damage hits (505160) without a 1H melee weapon",
+      "actor": "tinker",
+      "metric": "spell_damage_count",
+      "spell": 505160,
+      "target": "dummy",
+      "equals": 4,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#13716): Gear Grind deals positive damage (505160)",
+      "actor": "tinker",
+      "metric": "spell_damage_total",
+      "spell": 505160,
+      "target": "dummy",
+      "min": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING (#13716): Gear Grind generates 1 Scrap per hit (4 total)",
+      "actor": "tinker",
+      "metric": "aura_stacks",
+      "spell": 801816,
+      "equals": 4,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Grinding Gears is consumed by Gear Grind",
+      "actor": "tinker",
+      "metric": "aura",
+      "spell": 681245,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}
