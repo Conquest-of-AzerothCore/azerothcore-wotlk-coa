@@ -1991,6 +1991,383 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "504896 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue[0] 27 SPELLMOD_VALUE_MULTIPLIER, BasePoints 39 + DieSides 1 = +40% ($s1), EffectSpellClassMask[1] 131072 matching Bloodbolt 578305 (rank 8, lvl 60, SchoolMask 32 Shadow, 300 Rage, instant, Speed 30 yd/s, Effect[0] 9 SPELL_EFFECT_HEALTH_LEECH EffectValueMultiplier[0] 1.0; /srv/coa/server-data/dbc Spell.dbc). Spell::EffectHealthLeech / Spell.cpp:2934-2954 multiplies non-overkill damage by CalcValueMultiplier (1.0 without 504896 -> 1.40 with 504896). Casts 578305 at dummy 10 yd away (travel ~333 ms, wait_ms 1500 gives >1100 ms post-flight buffer) with 823764 spellpen fixture and phase_since isolating each cast: spell_heal_total / spell_damage_total reads 1.00 +- 0.005 before learning 504896 and 1.40 +- 0.005 after (excludes 1.00 no-effect, 1.20 rank 1, and 1.80 double-applied). Reference search 2026-11-26: coa-history spell 504896 (0 events, passive), spell 578305 (3764 SPELL_DAMAGE mean 1371.0 and 3764 SPELL_HEAL mean 1362.0 across 17 logs); ~/CoaServer/reference mind_of_ascension_talent.csv lists Hematoma ranks {504758, 504896}, bindmysoul/coabuildhub show rank 1 504758 (+20%); installed Spell.dbc governs."
+    },
+    {
+      "spell": 681427,
+      "name": "Waves of Blood (10% chance per Crimson Tide periodic tick to cast 807652)",
+      "kind": "flat_chance_rate",
+      "variant": "proc_rate",
+      "label_suffix": "proc_rate",
+      "quote": "Each tick of Crimson Tide now has a $681427h% chance to heal a nearby ally for $681427s1% of the damage dealt.",
+      "chance_pct": 10,
+      "trigger_spell": 504134,
+      "trigger_target": "dummy",
+      "dummy_distance": 3,
+      "cast_power": 1000,
+      "attempt_auras": [
+        {
+          "spell": 823764,
+          "stacks": 1,
+          "source": "caster aura 823764 (target resistance -9999 on magic schools): prevents full resists on Crimson Tide 504134 periodic Shadow ticks so every tick deals damage and enters the proc check (precondition fixture; test-only aura with no player cast)"
+        }
+      ],
+      "stop_trigger_aura": true,
+      "cast_wait_ms": 15500,
+      "trial": {
+        "metric": "spell_damage_count",
+        "spell": 504134,
+        "target": "dummy",
+        "periodic": true
+      },
+      "event": {
+        "metric": "spell_cast_count",
+        "spell": 807652
+      },
+      "cycles": 120,
+      "unlearned_cycles": 2,
+      "trials_per_cycle": 5,
+      "parts": 5,
+      "streams": 3,
+      "isolation": {
+        "reach_yd": 40,
+        "source": "Crimson Tide 504134 has EffectRadiusIndex 13 (10 yd) and MaxAffectedTargets 10 around the caster; Waves of Blood heal 807652 has EffectImplicitTargetA 18 / TargetB 31 (TARGET_UNIT_DEST_AREA_ALLY), EffectRadiusIndex 23 (40 yd), MaxAffectedTargets 1; aura_ascension_waves_of_blood checks event.GetActor() == player (AscensionBloodmageSecondary.cpp:593); 3 ungrouped streams spaced 50 yd apart exceed 40 + 4 = 44 yd so neither 504134 nor 807652 can cross streams."
+      },
+      "observe_source": "Waves of Blood 681427 (passive, Spell.dbc ProcChance 10 = $681427h; Effect[0] aura 354 triggering 807652; pending_db_world/rev_20260920_90_bloodmage_waves_of_blood_proc.sql sets spell_proc SpellFamilyName 26, Mask0 16384 = Crimson Tide, ProcFlags 262144 DONE_PERIODIC, SpellTypeMask 1, SpellPhaseMask 2, Chance 10, Cooldown 0; aura_ascension_waves_of_blood at AscensionBloodmageSecondary.cpp:582-611 casts 807652). Trigger: Crimson Tide 504134 (level 60 rank, Fleshweaver weapon set 2535 War Staff, ExcludeCasterAuraSpell 802877 Mortal Form = default, instant, 1500 ms GCD, 400 internal Rage cost, cast_power 1000, DurationIndex 8 = 15000 ms, Amplitude 3000 ms -> 5 ticks per cast inside cast_wait_ms 15500 ms with 500 ms post-tick buffer). Unlearned control: 2 cycles x 5 ticks x 5 parts x 3 streams = 150 trials (>= 50), expects 0 procs. Treatment: 120 cycles x 5 ticks x 5 parts x 3 streams = 9000 trials (>= 8917 flip-proof trials for 10% with G-19 +-2 pt band over 5 parts, residual failure <= 0.1% per pair). Reference search 2026-11-26: coa-history spell 681427 0 events (passive), 807652 283 SPELL_HEAL events across 6 logs (min 0, max 723, mean 139.0), 504134 2712 SPELL_PERIODIC_DAMAGE events across 3 logs (mean 644.0); coabuildhub spells_master_index.json 681427 matches verbatim."
+    },
+    {
+      "spell": 681427,
+      "name": "Waves of Blood (807652 heals for 25% of Crimson Tide periodic tick damage)",
+      "kind": "metric_delta",
+      "variant": "heal_share",
+      "label_suffix": "heal_share",
+      "quote": "Each tick of Crimson Tide now has a $681427h% chance to heal a nearby ally for $681427s1% of the damage dealt.",
+      "trigger_spell": 504134,
+      "gate_spell": 681427,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_spell_power": 2000,
+      "grouped_ally": {
+        "dy": 5,
+        "grouped": true
+      },
+      "forced_roll": {
+        "talent": 681427,
+        "forced_percent": 1000
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984954,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807652
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 504134,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 0,
+      "expected": 0.25,
+      "tolerance": 0.01,
+      "wait_ms": 15500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Waves of Blood 681427 Effect[0] BasePoints 24 + DieSides 1 = 25% ($681427s1; Spell.dbc). aura_ascension_waves_of_blood::Proc (AscensionBloodmageSecondary.cpp:599-603) computes uint64(damage) * 25 / 100 and casts 807652 (SPELL_EFFECT_HEAL, CANT_CRIT, IGNORE_CASTER_MODIFIERS, IGNORE_DAMAGE_TAKEN_MODIFIERS, TargetA 18 / TargetB 31 TARGET_UNIT_DEST_AREA_ALLY, radius 40 yd, MaxAffectedTargets 1). Precondition fixtures: grouped_ally 5 yd away, forced_roll 681427 +1000% (10% x 11 = 110% so every tick procs via SpellAuras.cpp:2398), 823764 (no resist), 984954 (no crit), player_spell_power 2000 (each 504134 tick deals ~910 Shadow damage so integer division loss < 0.1%). Crimson Tide 504134 ticks 5 times over 15000 ms (wait_ms 15500 = 500 ms post-tick buffer). Reads incremental spell_heal_total(807652) / spell_damage_total(504134, dummy): 0 before learning 681427 (control) and 0.25 after a real learn of 681427 (tolerance 0.01 -> 0.24..0.26, excluding 0%, 20%, 30%, 50%). Reference search 2026-11-26: see proc_rate (coa-history 807652 mean 139.0 vs 504134 mean 644.0 across 6/3 logs; coabuildhub 681427 matches verbatim)."
+    },
+    {
+      "spell": 704626,
+      "name": "Thick Pelt (556233 aura still held at 9150..9550 ms after physical hit)",
+      "kind": "metric_delta",
+      "variant": "duration_held",
+      "label_suffix": "duration_held",
+      "quote": "Physical damage taken now reduces the Physical damage taken from the next attack within $556233d by ${15+$AP*0.2}.",
+      "trigger_spell": 60235,
+      "gate_spell": 704626,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 34580,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 556233
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 8200,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9250,
+          9650
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$556233d = 10000 ms (Spell.dbc 556233 DurationIndex 1 = 10000 ms; D-2 settled 704626=align_to_server, rev_20261116_01_coa_bloodmage_thick_pelt_tooltip.sql byte-identical to Spell.dbc). rev_20260920_44_bloodmage_melee_event_procs.sql sets spell_proc ProcFlags 680 (TAKEN physical melee/ranged, AttributesMask 0 -> requires untriggered strike) on 704626 triggering 556233. Precondition fixtures: 33143 on caster (no crit) and 803393 on dummy (aura 333 +100% all hit chance so the single melee-class 34580 strike never misses). In both phases, dummy_casts_at_caster casts 34580 (600 Physical DmgClass 2 melee, IMPOSSIBLE_DODGE_PARRY_BLOCK, triggered: false) at caster 100 ms after 60235 (gap_ms 1000) then waits 8200 ms: control (before learning 704626) reads 556233 aura 0; after a real learn of 704626, 556233 reads present (1) at game_time.after [9250, 9650] ms after trigger 60235 (9150..9550 ms after the 34580 strike, strictly > 9000 ms = -10%). Paired with duration_gone. Reference search 2026-11-26: coa-history spell 704626 0 events (passive), 556233 422 SPELL_AURA_APPLIED / 423 SPELL_AURA_REMOVED across 3-4 logs; coabuildhub 704626 states 10 sec (older snapshot also mentions a 5 sec ICD and -15+AP*0.2 sign bug fixed in PR #12575; server Spell.dbc and D-2 govern)."
+    },
+    {
+      "spell": 704626,
+      "name": "Thick Pelt (556233 aura expired by 10350..10750 ms after physical hit)",
+      "kind": "metric_delta",
+      "variant": "duration_gone",
+      "label_suffix": "duration_gone",
+      "quote": "Physical damage taken now reduces the Physical damage taken from the next attack within $556233d by ${15+$AP*0.2}.",
+      "trigger_spell": 60235,
+      "gate_spell": 704626,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          33143,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 34580,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 100
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura_apply_count",
+            "fields": {
+              "spell": 556233
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "704626 procs and applies 556233 once on the untriggered 34580 strike in the treatment phase (0 in control), proving the 0 aura read at expiry is genuine expiration rather than a missed strike"
+          }
+        ]
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 556233
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 9400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          10450,
+          10850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Companion to duration_held for Thick Pelt 704626 ($556233d = 10000 ms). Same precondition fixtures (33143 on caster, 803393 on dummy for +100% hit) and untriggered dummy_casts_at_caster 34580 strike at +100 ms (gap_ms 1000) then wait_ms 9400: control (before learning 704626) reads aura 556233 == 0 and aura_apply_count(556233) == 0; after a real learn of 704626, ally_arm proves aura_apply_count(556233) == 1 (applied once on the strike) while aura 556233 reads expired (0) at game_time.after [10450, 10850] ms after trigger 60235 (10350..10750 ms after the 34580 strike, strictly < 11000 ms = +10%). Together duration_held [9250, 9650] (9150..9550 ms from hit) and duration_gone [10450, 10850] (10350..10750 ms from hit) bracket 10000 ms inside +-10% on both sides. Reference search 2026-11-26: see duration_held."
+    },
+    {
+      "spell": 704626,
+      "name": "Thick Pelt (reduces next physical attack taken by 15 + 0.2 * AP)",
+      "kind": "taken_hit",
+      "variant": "reduction",
+      "label_suffix": "reduction",
+      "judge": "absorb",
+      "quote": "Physical damage taken now reduces the Physical damage taken from the next attack within $556233d by ${15+$AP*0.2}.",
+      "strike_spell": 34580,
+      "striker_untriggered": true,
+      "trials": 10,
+      "caster_health_pct": 100,
+      "caster_max_health": 20000,
+      "absorb_constant": 15,
+      "absorb_terms": [
+        {
+          "coefficient": 0.2,
+          "reads": [
+            {
+              "metric": "attack_power"
+            }
+          ]
+        }
+      ],
+      "arms": [
+        {
+          "name": "control",
+          "auras": [
+            [
+              33143,
+              1
+            ]
+          ]
+        },
+        {
+          "name": "prime",
+          "learn": [
+            704626
+          ],
+          "auras": [
+            [
+              33143,
+              1
+            ]
+          ],
+          "strikes": 1
+        },
+        {
+          "name": "thick_pelt",
+          "auras": [
+            [
+              33143,
+              1
+            ]
+          ],
+          "strikes": 1,
+          "checks": [
+            {
+              "metric": "aura",
+              "spell": 556233,
+              "equals": 1
+            }
+          ],
+          "reduction": "formula"
+        }
+      ],
+      "observe_source": "Thick Pelt 704626 (Eternal weapon set; D-2 settled align_to_server, rev_20261116_01_coa_bloodmage_thick_pelt_tooltip.sql byte-identical to Spell.dbc: ${15+$AP*0.2} = 59.6 at level-60 Bloodmage 223 AP -> int32 truncated to 59 per G-27). rev_20260920_44_bloodmage_melee_event_procs.sql sets ProcFlags 680 (AttributesMask 0 -> requires untriggered strikes) on 704626 -> triggers 556233 (ProcCharges 1, aura 14 SPELL_AURA_MOD_DAMAGE_TAKEN Physical); aura_ascension_bloodmage_thick_pelt::Calculate (AscensionBloodmageTalents.cpp:746-751) sets -(15 + int32(BASE_ATTACK * 0.2f)) = -59. Precondition fixture: 33143 (Blessed Resilience, -1000% crit taken) on all arms so control strikes read one exact mitigated value C. Control arm has no 704626; prime arm learns 704626 for real and takes untriggered 34580 strikes (600 fixed Physical DmgClass 2, IMPOSSIBLE_DODGE_PARRY_BLOCK, striker_untriggered: true) to arm 556233 via real proc; thick_pelt arm checks aura 556233 == 1 then takes 10 untriggered strikes of 34580, each reduced by 59 (600 - 59 scaled by the control armor factor, excluding 0 reduction and doubled 118 reduction) while re-arming 556233 via 704626 (556233 < 704626 in m_ownedAuras). Reference search 2026-11-26: see duration_held."
+    },
+    {
+      "spell": 681444,
+      "name": "Mucking Around (Scarlet Delirium still casting at 910 ms, excluding -1100 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_held",
+      "label_suffix": "cast_held",
+      "quote": "Reduces the cast time of Scarlet Delirium by $/1000;S2 sec,",
+      "trigger_spell": 803688,
+      "gate_spell": 681444,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 910,
+      "expire_ms": 2500,
+      "game_time": {
+        "after": [
+          905,
+          990
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Mucking Around 681444 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, EffectMiscValue 10 (SPELLMOD_CASTING_TIME), EffectBasePoints -1001 + DieSides 1 = -1000 ms ($/1000;S2 = 1 sec) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc CastingTimeIndex 5 = 2000 ms -> 1000 ms; ExcludeCasterAuraSpell 802877 Mortal Form = default). Casts 803688 in Mortal Form with caster_health [10000, 10000] and regen off; reads casting state at wait_ms 910 ms (game_time.after [905, 990] ms, strictly > 900 ms = 2000 - 1100 ms): 1 before (2000 ms cast) and 1 after a real learn of 681444 (proving cast time > 900 ms, excluding -1100 ms or instant). Paired with cast_ended. Reference search 2026-11-26: coa-history spell 681444 0 events (passive), 803688 10 SPELL_CAST_START / 17 SPELL_MISSED in 1 log; coabuildhub spells_master_index.json 681444 matches ('Reduces the cast time of Scarlet Delirium by -1 sec, but increases the health cost by 100%')."
+    },
+    {
+      "spell": 681444,
+      "name": "Mucking Around (Scarlet Delirium finished by 1020 ms, excluding -900 ms)",
+      "kind": "metric_delta",
+      "variant": "cast_ended",
+      "label_suffix": "cast_ended",
+      "quote": "Reduces the cast time of Scarlet Delirium by $/1000;S2 sec,",
+      "trigger_spell": 803688,
+      "gate_spell": 681444,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1020,
+      "expire_ms": 2500,
+      "game_time": {
+        "after": [
+          1010,
+          1095
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Companion to cast_held for Mucking Around 681444 Effect[1] (-1000 ms on Scarlet Delirium 803688 CastingTimeIndex 5 = 2000 ms -> 1000 ms). Reads casting state at wait_ms 1020 ms (game_time.after [1010, 1095] ms, strictly < 1100 ms = 2000 - 900 ms): 1 before learning 681444 (control, still casting 2000 ms cast) and 0 after a real learn of 681444 (cast finished <= 1095 ms, excluding -900 ms and no reduction). Together cast_held [905, 990] and cast_ended [1010, 1095] bracket the 1000 ms reduction inside +-10% on both sides. Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 681444,
+      "name": "Mucking Around (doubles Scarlet Delirium health cost from 310 to 620)",
+      "kind": "metric_delta",
+      "variant": "health_cost",
+      "label_suffix": "health_cost",
+      "quote": "but increases the health cost by $s1%.",
+      "trigger_spell": 803688,
+      "gate_spell": 681444,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "health",
+      "fields": {},
+      "before_expected": 9690,
+      "expected": 9380,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
     }
   ],
   "player_observations": [],
