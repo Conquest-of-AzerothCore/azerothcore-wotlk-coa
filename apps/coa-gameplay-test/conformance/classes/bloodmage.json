@@ -2368,6 +2368,1822 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 560259,
+      "name": "Vampyr Lord (+35% Animated Blood Blood Strike damage)",
+      "kind": "hit_ratio",
+      "variant": "blood_strike",
+      "label_suffix": "blood_strike",
+      "quote": "Increases the damage dealt by your Animated Blood by $s1%.",
+      "expected": 1.35,
+      "observe_spell": 589023,
+      "caster_entry": 315301,
+      "cast_spell": 578305,
+      "cast_wait_ms": 2400,
+      "learn": [
+        578305
+      ],
+      "warmup": [
+        573357
+      ],
+      "warmup_power": 250,
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_unit_auras": [
+        [
+          823764,
+          1
+        ]
+      ],
+      "owned_auras": [
+        [
+          823764,
+          1,
+          315301
+        ]
+      ],
+      "control": {},
+      "treatment": {
+        "learn": [
+          560259
+        ]
+      },
+      "critical": false,
+      "trials": 3,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 35 (560259 Effect[0]=190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools, BasePoints 34 + DieSides 1 = +35%, RadiusIndex 12 = 100 yd; Spell.dbc). Animated Blood 573357 summons 315301 in warmup (DurationIndex 8 = 15000 ms; ReplacePreviousBrood at AscensionBloodmageTalents.cpp:384 replaces prior brood on each arm's warmup); Bloodbolt 578305 engages dummy via CreatureAI::OwnerAttacked, triggering Blood Strike 589023 (Shadow, DieSides 1, zero variance) at +2000 ms then every 3000 ms (AscensionBloodmageTalents.cpp:390-435). Precondition aura 823764 on caster (Unit.cpp:2600 reads SPELL_AURA_MOD_TARGET_RESISTANCE from the summon's owner) and on 315301 removes dummy magic resist; fixture spell_power 20000 scales Blood Strike cleanly; 3 trials x 4000 ms = 12000 ms fits inside 15000 ms summon duration. Control without 560259 vs treatment with real learn of 560259 measures +35% (+-2 pt band excludes 0% and +70%). Reference search 2026-11-26: coa-history 573357 Animated Blood 799 casts / 1601 summons in 26 logs (560259 passive 0 events); bindmysoul/ascension-data lists 560259; installed Spell.dbc governs."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (Howl cast Shadow damage 536277)",
+      "kind": "metric_delta",
+      "variant": "howl_shadow_damage",
+      "label_suffix": "howl_shadow_damage",
+      "quote": "Casting Howl spells now deal ${$536277m1+$536277ppl1+$STA*.25+$AGI*.25+$AP*.1} Shadow damage to all nearby enemies",
+      "trigger_spell": 800782,
+      "gate_spell": 801960,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 536277,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 121,
+      "after_at_least": 121,
+      "after_at_most": 122,
+      "wait_ms": 1000,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$536277m1+$536277ppl1+$STA*.25+$AGI*.25+$AP*.1}: Spell.dbc 536277 BasePoints 64 + DieSides 2 = 65..66, ppl 0; Bloodmage reference_stats STA=78, AGI=60, AP=223 -> 65 + 19.5 + 15 + 22.3 = 121.8 (range 121..122). Casts Blood Howl 800782 (CasterAuraSpell 524861 precondition fixture) with dummy at 3 yd (536277 RadiusIndex 13 = 10 yd), 823764 spellpen, 16255 -100% crit. pending_db_world/rev_20260920_49_bloodmage_shadow_strength_cooldowns.sql documents 801960 has no effect slot for 536277 (expected ALERT if server deals 0). Reference search 2026-11-26: coa-history 801960/536277: 0 events in 186 logs (800782 Blood Howl 13 events in 2 logs); bindmysoul/ascension-data lists 801960; installed Spell.dbc governs."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (Call of the Darkwing cuts Shadow Howl CD by 1 sec)",
+      "kind": "cost_gate",
+      "variant": "cd_shadow_howl",
+      "label_suffix": "cd_shadow_howl",
+      "quote": "and triggering Call of the Darkwing now reduces the cooldown of all Howl spells by $/1000;556239S1 sec.",
+      "gated_spell": 806177,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "margin_ms": 90,
+      "learn": [
+        800154
+      ],
+      "target": "caster",
+      "observe_source": "$/1000;556239S1 = 1000 ms (556239 Effect[0]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN BasePoints -1001 + DieSides 1 = -1000 ms on 806177 Shadow Howl; pending_db_world/rev_20260920_49_bloodmage_shadow_strength_cooldowns.sql wires 801960 spell_proc on 801958 Call of the Darkwing). With Grim Omen 800154 (precondition), the priming Shadow Howl 806177 (60000 ms CD, 15% HP cost) itself triggers 801958 once: without 801960 refused 67 at 59090 ms, with 801960 succeeds (0) at 59090 ms and refused 67 at 58910 ms (margin 90 ms excludes +-10% = 900/1100 ms). Reference search 2026-11-26: coa-history 801958 334 summons, 806177 74 casts; bindmysoul lists 801960."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (Call of the Darkwing cuts Monstrous Howl CD by 1 sec: without)",
+      "kind": "cost_gate",
+      "variant": "cd_monstrous_howl_without",
+      "label_suffix": "cd_monstrous_howl",
+      "only_arm": "without",
+      "quote": "and triggering Call of the Darkwing now reduces the cooldown of all Howl spells by $/1000;556239S1 sec.",
+      "gated_spell": 804811,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "margin_ms": 90,
+      "learn": [
+        800154
+      ],
+      "target": "caster",
+      "observe_source": "Second effect arm for 801960: 556238 Effect[2]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on Monstrous Howl 804811 (40000 ms CD, 20% HP cost). Split via only_arm (without/with/beyond) so each arm starts at full health (cost_gate disables regeneration and sequential 20% HP casts otherwise hit Spell.cpp:7423 SPELL_FAILED_CASTER_AURASTATE 22). With Grim Omen 800154, priming 804811 triggers 801958 once: refused 67 at 39090 ms without 801960, succeeds (0) at 39090 ms with 801960, refused 67 at 38910 ms with 801960 (margin 90 ms excludes +-10%). Reference search 2026-11-26: see cd_shadow_howl."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (Call of the Darkwing cuts Monstrous Howl CD by 1 sec: with)",
+      "kind": "cost_gate",
+      "variant": "cd_monstrous_howl_with",
+      "label_suffix": "cd_monstrous_howl",
+      "only_arm": "with",
+      "quote": "and triggering Call of the Darkwing now reduces the cooldown of all Howl spells by $/1000;556239S1 sec.",
+      "gated_spell": 804811,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "margin_ms": 90,
+      "learn": [
+        800154
+      ],
+      "target": "caster",
+      "observe_source": "Second effect arm for 801960: 556238 Effect[2]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on Monstrous Howl 804811 (40000 ms CD, 20% HP cost). Split via only_arm (without/with/beyond) so each arm starts at full health (cost_gate disables regeneration and sequential 20% HP casts otherwise hit Spell.cpp:7423 SPELL_FAILED_CASTER_AURASTATE 22). With Grim Omen 800154, priming 804811 triggers 801958 once: refused 67 at 39090 ms without 801960, succeeds (0) at 39090 ms with 801960, refused 67 at 38910 ms with 801960 (margin 90 ms excludes +-10%). Reference search 2026-11-26: see cd_shadow_howl."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (Call of the Darkwing cuts Monstrous Howl CD by 1 sec: beyond)",
+      "kind": "cost_gate",
+      "variant": "cd_monstrous_howl_beyond",
+      "label_suffix": "cd_monstrous_howl",
+      "only_arm": "beyond",
+      "quote": "and triggering Call of the Darkwing now reduces the cooldown of all Howl spells by $/1000;556239S1 sec.",
+      "gated_spell": 804811,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "margin_ms": 90,
+      "learn": [
+        800154
+      ],
+      "target": "caster",
+      "observe_source": "Second effect arm for 801960: 556238 Effect[2]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on Monstrous Howl 804811 (40000 ms CD, 20% HP cost). Split via only_arm (without/with/beyond) so each arm starts at full health (cost_gate disables regeneration and sequential 20% HP casts otherwise hit Spell.cpp:7423 SPELL_FAILED_CASTER_AURASTATE 22). With Grim Omen 800154, priming 804811 triggers 801958 once: refused 67 at 39090 ms without 801960, succeeds (0) at 39090 ms with 801960, refused 67 at 38910 ms with 801960 (margin 90 ms excludes +-10%). Reference search 2026-11-26: see cd_shadow_howl."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (Call of the Darkwing cuts Night Hunter's Howl CD by 1 sec)",
+      "kind": "cost_gate",
+      "variant": "cd_night_hunters_howl",
+      "label_suffix": "cd_night_hunters_howl",
+      "quote": "and triggering Call of the Darkwing now reduces the cooldown of all Howl spells by $/1000;556239S1 sec.",
+      "gated_spell": 501682,
+      "resource": "cooldown",
+      "reduction": 1000,
+      "margin_ms": 90,
+      "learn": [
+        800154
+      ],
+      "target": "dummy",
+      "cast_power": 250,
+      "observe_source": "Rank-chain arm for 801960: 556239 Effect[1]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms MiscValue 500124 (rank 1 of Night Hunter's Howl; level-60 rank is 501682, 8000 ms CD). With Grim Omen 800154, priming Night Hunter's Howl 501682 itself triggers 801958 once: without 801960 refused 67 at 7090 ms, with 801960 succeeds (0) at 7090 ms and refused 67 at 6910 ms (margin 90 ms excludes +-10%). Reference search 2026-11-26: see cd_shadow_howl."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (1 sec ICD blocks second proc at ~940 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_held",
+      "label_suffix": "icd_held",
+      "quote": "Can only occur once per sec.",
+      "trigger_spell": 804207,
+      "gate_spell": 801960,
+      "learn": [
+        800154,
+        804811
+      ],
+      "target": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 804811,
+          "target": "caster",
+          "delay_ms": 940,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 556239
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 20,
+      "expire_ms": 2000,
+      "game_time": {
+        "after": [
+          920,
+          990
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 801958
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "both Wicked Howl 804207 and Monstrous Howl 804811 trigger Call of the Darkwing 801958 via Grim Omen 800154 in each phase (2 before, 4 cumulative after)"
+          }
+        ]
+      },
+      "observe_source": "pending_db_world/rev_20260920_49_bloodmage_shadow_strength_cooldowns.sql sets spell_proc.Cooldown = 1000 ms on 801960. Both Wicked Howl 804207 and Monstrous Howl 804811 are off-GCD (StartRecoveryTime 0) and trigger Call of the Darkwing 801958 via Grim Omen 800154 (verified by spell_cast_count(801958) = 2 before, 4 after). Control (before learning 801960): 0 casts of 556239. Treatment: 804207 fires 556239 once; 804811 at +940 ms (game_time [920, 990] ms, past -10% = 900 ms) is blocked by the 1000 ms ICD so 556239 count stays 1 (excluding a 900 ms ICD). Reference search 2026-11-26: see cd_shadow_howl."
+    },
+    {
+      "spell": 801960,
+      "name": "Shadow Strength (1 sec ICD reopens by ~1050 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_reopen",
+      "label_suffix": "icd_reopen",
+      "quote": "Can only occur once per sec.",
+      "trigger_spell": 804207,
+      "gate_spell": 801960,
+      "learn": [
+        800154,
+        804811
+      ],
+      "target": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 804811,
+          "target": "caster",
+          "delay_ms": 1050,
+          "in_before": true,
+          "reset_cooldown": true
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 556239
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 20,
+      "expire_ms": 2000,
+      "game_time": {
+        "after": [
+          1030,
+          1095
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 801958
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "both Wicked Howl 804207 and Monstrous Howl 804811 trigger Call of the Darkwing 801958 via Grim Omen 800154 in each phase (2 before, 4 cumulative after)"
+          }
+        ]
+      },
+      "observe_source": "Companion to icd_held: 804811 at +1050 ms after 804207 (game_time [1030, 1095] ms, below +10% = 1100 ms) reopens the 1000 ms ICD so 556239 count becomes 2 (excluding an 1100 ms ICD). Together icd_held and icd_reopen bracket the 1000 ms ICD within +-10%. Reference search 2026-11-26: see cd_shadow_howl."
+    },
+    {
+      "spell": 705732,
+      "name": "Rabid (-25% Night Hunter's Howl cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_night_hunters_howl",
+      "label_suffix": "cd_night_hunters_howl",
+      "quote": "Reduces the cooldown of Howl spells by $s1%.",
+      "gated_spell": 501682,
+      "resource": "cooldown",
+      "reduction": 2000,
+      "margin_ms": 150,
+      "target": "dummy",
+      "cast_power": 250,
+      "observe_source": "$s1 = 25 (705732 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN, BasePoints -26 + DieSides 1 = -25%, EffectSpellClassMask[2] = 133248 = 128 | 2048 | 131072; Spell.dbc). Night Hunter's Howl 501682 (bit 2048, 8000 ms CD, CasterAuraSpell 524861) reduced by 25% = 2000 ms -> 6000 ms (margin 150 ms < 10% of 2000 ms excludes +-10%). Representative of 3/3 Howl family-mask bits (G-23). Reference search 2026-11-26: coa-history 705732 0 events (passive), 806177/804207/800782 present; bindmysoul lists 705732; installed Spell.dbc governs."
+    },
+    {
+      "spell": 705732,
+      "name": "Rabid (-25% Monstrous Howl cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_monstrous_howl",
+      "label_suffix": "cd_monstrous_howl",
+      "quote": "Reduces the cooldown of Howl spells by $s1%.",
+      "gated_spell": 804811,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "margin_ms": 500,
+      "target": "caster",
+      "observe_source": "Bit 131072 arm of 705732 EffectSpellClassMask[2] = 133248: Monstrous Howl 804811 (40000 ms CD, CasterAuraSpell 524861) reduced by 25% = 10000 ms -> 30000 ms (margin 500 ms excludes +-10%). Reference search 2026-11-26: see cd_night_hunters_howl."
+    },
+    {
+      "spell": 705732,
+      "name": "Rabid (-25% Shadow Howl cooldown)",
+      "kind": "cost_gate",
+      "variant": "cd_shadow_howl",
+      "label_suffix": "cd_shadow_howl",
+      "quote": "Reduces the cooldown of Howl spells by $s1%.",
+      "gated_spell": 806177,
+      "resource": "cooldown",
+      "reduction": 15000,
+      "margin_ms": 500,
+      "target": "caster",
+      "observe_source": "Bit 128 arm of 705732 EffectSpellClassMask[2] = 133248: Shadow Howl 806177 (60000 ms CD, CasterAuraSpell 525031) reduced by 25% = 15000 ms -> 45000 ms (margin 500 ms excludes +-10%). Reference search 2026-11-26: see cd_night_hunters_howl."
+    },
+    {
+      "spell": 704115,
+      "name": "Clotting (54-deg 10 yd frontal cone hits inside, spares outside and behind)",
+      "kind": "metric_delta",
+      "variant": "cone_edge",
+      "label_suffix": "cone_edge",
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+      "trigger_spell": 807785,
+      "gate_spell": 704115,
+      "cast_in_before": false,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "cone": {
+          "angle": 54,
+          "radius": 10,
+          "offset": 3.0,
+          "behind": 135,
+          "source": "Clotting 806214 EffectImplicitTargetA[0]=54 (TARGET_UNIT_CONE_ENEMY_54, 54 deg at Spell.cpp:1292-1293) and EffectRadiusIndex[0]=13 (10 yd in SpellRadius.dbc)"
+        }
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806214,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "$806214a1 = 10 yd (SpellRadius.dbc 13), TARGET_UNIT_CONE_ENEMY_54 = 54 deg (Spell.cpp:1292-1293). Aortic Assault 807785 (3000 ms channel, CasterAuraSpell 524861) triggers 806214 at channel end; area_dummies.cone verifies dummy inside cone is struck once while area1 just outside half-angle and area2 behind caster take 0 hits. Reference search 2026-11-26: coa-history 806214 Clotting 6236 SPELL_DAMAGE hits across 16 logs; bindmysoul lists 704115; installed Spell.dbc governs."
+    },
+    {
+      "spell": 704115,
+      "name": "Clotting (10 yd cone radius edge with combat reach and leeway)",
+      "kind": "metric_delta",
+      "variant": "radius_edge",
+      "label_suffix": "radius_edge",
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+      "trigger_spell": 807785,
+      "gate_spell": 704115,
+      "cast_in_before": false,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "area_dummies": {
+        "placed": [
+          {
+            "dx": 12.5,
+            "dy": 0,
+            "before_expected": 0,
+            "expected": 1
+          },
+          {
+            "dx": 15.3,
+            "dy": 0,
+            "before_expected": 0,
+            "expected": 0
+          }
+        ]
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806214,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Radius edge for 806214 ($806214a1 = 10 yd, EffectRadiusIndex 13): Spell.cpp:1305 adds player GetLeewayBonusRadius() (+2.66 yd, Object.cpp:1787-1808) to TARGET_UNIT_CONE_ENEMY_54 (54) and WorldObjectSpellConeTargetCheck inherits WorldObjectSpellAreaTargetCheck (Spell.cpp:9437-9442, +1.275 yd dummy entry 36 combat_reach), giving effective edge 10 + 1.275 + 2.66 = 13.935 yd. area_dummies.edge rejects leeway=true for TargetA=54 (LEEWAY_TARGETS={15,20,56}), so area_dummies.placed brackets 13.935 yd within +-10%: area1 at (12.5, 0) (10.3% inside) is struck once while area2 at (15.3, 0) (9.8% beyond) takes 0 hits. Reference search 2026-11-26: see cone_edge."
+    },
+    {
+      "spell": 704115,
+      "name": "Clotting (gate check & Physical damage at reference AP)",
+      "kind": "metric_delta",
+      "variant": "damage_gate",
+      "label_suffix": "damage_gate",
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+      "trigger_spell": 807785,
+      "gate_spell": 704115,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806214,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 642,
+      "tolerance": 60,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Gate check: 704115 tooltip states Aortic Assault triggers 806214 for ${$806214m1*$<scalingbp>+$AP*0.5} = 703.959 Physical (~642 after dummy armor) ONLY when 704115 is learned (control before learning 704115 must deal 0). Aortic Assault 807785 Effect[2] SPELL_AURA_PERIODIC_TRIGGER_SPELL -> 806214 is not gated on 704115 in src/server/ (expected ALERT if before > 0). Reference search 2026-11-26: see cone_edge."
+    },
+    {
+      "spell": 704115,
+      "name": "Clotting (AP scaling ratio from +980 AP against tooltip $AP*0.5)",
+      "kind": "hit_ratio",
+      "variant": "ap_scaling",
+      "label_suffix": "ap_scaling",
+      "quote": "At the end of Aortic Assault's duration, all enemies in a $806214a1 yd frontal cone suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage.",
+      "expected": 1.69606,
+      "observe_spell": 806214,
+      "cast_spell": 807785,
+      "cast_wait_ms": 3500,
+      "learn": [
+        807785,
+        704115
+      ],
+      "control": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            524861,
+            1
+          ],
+          [
+            35785,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 2,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$806214m1*$<scalingbp>+$AP*0.5}: at ref AP 223 = 592.459 + 111.5 = 703.959; at AP 223 + 980 (fixture 35785 Attack Power 980) = 1203 -> 592.459 + 601.5 = 1193.959 -> ratio 1193.959 / 703.959 = 1.69606 (+69.61%; armor cancels in ratio). 806214 has DieSides=1 (zero variance), so 2 trials per arm (4 casts total, staying below the 5-cast 25% HP drain threshold of Spell.cpp:7423) give exact half-width 0. Special watch: pending_db_world/rev_20261010_91_bloodmage_coefficients.sql:28 sets 806214 ap_bonus = 0.6 (predicting ~1.8096 / +80.96%, outside G-19 +-3.48 pt band -> expected ALERT). Reference search 2026-11-26: coa-history 806214 6236 hits across 16 logs; bindmysoul lists 704115; installed Spell.dbc governs."
+    },
+    {
+      "spell": 704115,
+      "name": "Clotting (+25% damage against bleeding targets)",
+      "kind": "hit_ratio",
+      "variant": "bleeding_bonus",
+      "label_suffix": "bleeding_bonus",
+      "quote": "Damage dealt by this effect is increased by $s2% against bleeding targets.",
+      "expected": 1.25,
+      "observe_spell": 806214,
+      "cast_spell": 807785,
+      "cast_wait_ms": 3500,
+      "learn": [
+        807785,
+        704115,
+        504134
+      ],
+      "control": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 504134,
+            "target": "dummy",
+            "power": 400
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 2,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 25 (704115 Effect[1] BasePoints 24 + DieSides 1 = 25%, rewritten by ApplyBloodmageConditionalContracts at AscensionBloodmageTalents.cpp:332-334 to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE MiscValue 18 AURA_STATE_BLEEDING, EffectSpellClassMask[4] 5242880 matching 806214). 806214 has DieSides=1 (zero variance), so 2 trials per arm stay below the 25% HP drain threshold of 807785 (Spell.cpp:7423) with half-width 0. Control hits clean dummy; treatment casts Crimson Tide 504134 (Bloodmage Bleed, Mechanic 15, 400 Rage / 0% HP cost, 15000 ms duration) before Aortic Assault 807785. Expected +25% (+-2 pt band excludes 0% and +50%). Reference search 2026-11-26: see cone_edge."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (Physical crit cuts Aortic Assault CD by 1 sec: opens at 19.08s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_open",
+      "label_suffix": "cd_cut_open",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 807785,
+      "gate_spell": 704652,
+      "learn": [
+        500126,
+        572551
+      ],
+      "target": "dummy",
+      "dummy_distance": 18,
+      "relocate_before_trigger": {
+        "dx": -10
+      },
+      "phase_power": [
+        1,
+        500,
+        500
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500126,
+          "target": "dummy",
+          "delay_ms": 3500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572551,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 807785,
+          "target": "caster",
+          "delay_ms": 13980,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807785
+      },
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 100,
+      "expire_ms": 21000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 807358
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "exactly one Physical crit (Bloodfang Bite 572551) fires 807358 once in treatment (0 in control; priming Aortic Assault at 20-28 yd hits no enemy)"
+          }
+        ]
+      },
+      "observe_source": "$/1000;807358s1 = 1000 ms (807358 Effect[0]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on 806212 chain -> 807785 Aortic Assault 20000 ms CD; pending_db_world/rev_20260920_51_bloodmage_physical_crit_procs.sql links 704652 -> 807357 -> 807358 on Physical crit). Dummy at 18 yd with relocate_before_trigger -10 yd puts priming 807785 at 20-28 yd (outside its 13.9 yd cone so 0 crits during priming); Lunge 500126 (DmgClass 0, 5-30 yd) closes to dummy at +3500 ms; forced-crit Bloodfang Bite 572551 at +5100 ms lands exactly 1 Physical crit (verified by spell_cast_count(807358) = 0 before, 1 after); attempt 807785 at +19080 ms (80 ms past 19000 ms, excluding a 900 ms cut): refused 67 without 704652, succeeds (0) with 704652. Reference search 2026-11-26: coa-history 807357 Relentless 19841 refreshes / 1671 dose applies across 14 logs; bindmysoul lists 704652; installed Spell.dbc governs."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (Physical crit CD cut bounded: still refused at 18.92s)",
+      "kind": "metric_delta",
+      "variant": "cd_cut_bound",
+      "label_suffix": "cd_cut_bound",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 807785,
+      "gate_spell": 704652,
+      "learn": [
+        500126,
+        572551
+      ],
+      "target": "dummy",
+      "dummy_distance": 18,
+      "relocate_before_trigger": {
+        "dx": -10
+      },
+      "phase_power": [
+        1,
+        500,
+        500
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500126,
+          "target": "dummy",
+          "delay_ms": 3500,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 572551,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "in_before": true,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 807785,
+          "target": "caster",
+          "delay_ms": 13820,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 807785
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 100,
+      "expire_ms": 21000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 807358
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "exactly one Physical crit (Bloodfang Bite 572551) fires 807358 once in treatment (0 in control)"
+          }
+        ]
+      },
+      "observe_source": "Upper bound companion to cd_cut_open: same single-crit isolation (priming 807785 at 20-28 yd hits 0 enemies; Lunge + Bloodfang Bite fires 807358 once, verified 0 -> 1); attempt 807785 at +18920 ms (80 ms before reduced 19000 ms CD, excluding a 1100 ms cut): refused 67 in both phases. Together cd_cut_open and cd_cut_bound bracket the 1000 ms cut inside +-10%. Reference search 2026-11-26: see cd_cut_open."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (Aortic Assault channels 10% faster per stack: 1 stack = 450 ms ticks)",
+      "kind": "metric_delta",
+      "variant": "channel_speed_1stack",
+      "label_suffix": "channel_speed_1stack",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 807785,
+      "gate_spell": 704652,
+      "learn": [
+        572551
+      ],
+      "setup_casts": [
+        572551
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 806502,
+        "target": "dummy",
+        "since_spell": 807785
+      },
+      "before_expected": 500,
+      "expected": 450,
+      "tolerance": 25,
+      "wait_ms": 3400,
+      "expire_ms": 11000,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 10 (807357 Effect[0] aura 108 SPELLMOD_ACTIVATION_TIME -10%, EffectSpellClassMask[0]=2048 matching Aortic Assault 807785 EffectAmplitude[0]=500 ms; SpellAuraEffects.cpp:725). One forced melee crit of Bloodfang Bite 572551 grants 1 stack of 807357 after learning 704652: 806502 strike interval drops from 500 ms (control) to 450 ms (-10%, tolerance 25 ms excludes 500 ms and 400 ms). Reference search 2026-11-26: see cd_cut_open."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (Aortic Assault channels 50% faster at 5 stacks = 250 ms ticks)",
+      "kind": "metric_delta",
+      "variant": "channel_speed_5stacks",
+      "label_suffix": "channel_speed_5stacks",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 807785,
+      "gate_spell": 704652,
+      "learn": [
+        572551
+      ],
+      "setup_casts": [
+        572551,
+        572551,
+        572551,
+        572551,
+        572551
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "event_interval_median_ms",
+      "fields": {
+        "stream": "spell_damage",
+        "spell": 806502,
+        "target": "dummy",
+        "since_spell": 807785
+      },
+      "before_expected": 500,
+      "expected": 250,
+      "tolerance": 25,
+      "wait_ms": 3400,
+      "expire_ms": 11000,
+      "void_on_cast_failure": true,
+      "observe_source": "5-stack scaling arm for 807357 Effect[0] (-10% per stack * 5 = -50%): five forced melee crits of Bloodfang Bite 572551 grant 5 stacks of 807357 after learning 704652, cutting Aortic Assault 806502 strike interval from 500 ms (control) to 250 ms (tolerance 25 ms excludes 500 ms and 450 ms). Reference search 2026-11-26: see cd_cut_open."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (buff 807357 lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "buff_duration",
+      "label_suffix": "buff_duration",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 572551,
+      "gate_spell": 704652,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "cast_power": 300,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 807357
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9300,
+      "expiry_wait_ms": 1300,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9200,
+          9600
+        ],
+        "expired": [
+          10400,
+          10900
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$d = 10000 ms (807357 DurationIndex 1 = 10000 ms; Spell.dbc). Uncast control reads 0. After one forced melee crit of Bloodfang Bite 572551, aura 807357 reads present (1) in game_time [9200, 9600] ms (> 9000 ms = -10%) and expired (0) in game_time [10400, 10900] ms (< 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: see cd_cut_open."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (buff 807357 stacks up to 5 times)",
+      "kind": "metric_delta",
+      "variant": "max_stacks",
+      "label_suffix": "max_stacks",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 572551,
+      "gate_spell": 704652,
+      "setup_casts": [
+        572551,
+        572551,
+        572551,
+        572551,
+        572551
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 300,
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 807357
+      },
+      "before_expected": 0,
+      "expected": 5,
+      "tolerance": 0,
+      "wait_ms": 300,
+      "expire_ms": 11000,
+      "void_on_cast_failure": true,
+      "observe_source": "$u = 5 (807357 StackAmount 5; Spell.dbc). Six forced melee crits of Bloodfang Bite 572551 (5 setup + 1 trigger, 1600 ms apart, well within 10 s duration) grant 0 stacks before learning 704652 (control) and cap at exactly 5 stacks after learning 704652 (excluding 4 or 6). Reference search 2026-11-26: see cd_cut_open."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (Aortic Assault strikes extend Taldaram's Torment by 2 sec each: duration bracket)",
+      "kind": "metric_delta",
+      "variant": "torment_extend",
+      "label_suffix": "torment_extend",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 807785,
+      "gate_spell": 704652,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "learn": [
+        802580,
+        572551
+      ],
+      "setup_casts": [
+        802580,
+        572551
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 802580,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 23000,
+      "expiry_wait_ms": 1600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          22800,
+          23400
+        ],
+        "expired": [
+          24300,
+          25000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;807359s1 = 2000 ms (807359 Effect[0]=177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION +2000 ms on 800772 chain -> 802580 Taldaram's Torment, triggered from 807357 Effect[2] on 806502 strike; pending_db_world/rev_20260920_51_bloodmage_physical_crit_procs.sql). Taldaram's Torment 802580 (15000 ms base duration) cast at -3200 ms, Bloodfang Bite 572551 crit at -1600 ms grants 1 stack of 807357, Aortic Assault 807785 at t=0 delivers 6 strikes (+12000 ms -> total 27000 ms from cast = 23800 ms after 807785): present (1) in game_time [22800, 23400] ms and expired (0) in [24300, 25000] ms (within +-10% of the +12000 ms extension, excluding +10800 ms or +13200 ms). Reference search 2026-11-26: coa-history 802580 6516 refreshes in 17 logs, 807357 19841 refreshes in 14 logs."
+    },
+    {
+      "spell": 704652,
+      "name": "Relentless (Taldaram's Torment extension gated on 704652)",
+      "kind": "metric_delta",
+      "variant": "torment_extend_gate",
+      "label_suffix": "torment_extend_gate",
+      "quote": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.@s:807357:0@",
+      "trigger_spell": 807785,
+      "gate_spell": 704652,
+      "learn": [
+        802580,
+        572551
+      ],
+      "setup_casts": [
+        802580,
+        572551
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "force_crit": "melee",
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 802580,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 23000,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "With/without gate companion to torment_extend: same sequence (802580 at -3200 ms, 572551 crit at -1600 ms, 807785 at t=0), read at +23000 ms: without 704652 Taldaram's Torment expires at +11800 ms (reads 0); with 704652 learned it is extended to +23800 ms (reads 1). Reference search 2026-11-26: see torment_extend."
+    },
+    {
+      "spell": 807488,
+      "name": "Inhumane (Aortic Assault launches 1 Blood Shard per stored shard)",
+      "kind": "metric_delta",
+      "variant": "launch_count",
+      "label_suffix": "launch_count",
+      "quote": "Dealing damage with Aortic Assault will now launch 1 Blood Shard,",
+      "trigger_spell": 807785,
+      "gate_spell": 807488,
+      "learn": [
+        804849,
+        578305
+      ],
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          505366,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 4000,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageBloodShards.cpp:222-223: on Aortic Assault hit 806502, HasAura(807488) && ConsumeShard(player) calls LaunchShard(player, target, EMPOWERED_SHARD, ...). phase_auras clears Blood Shard counter 505366 before each phase's setup_casts so the unconsumed shard from control does not carry into treatment. One non-crit Bloodbolt 578305 (with 804849 Blood Shards precondition) generates 1 shard; Aortic Assault 807785 (CasterAuraSpell 524861) launches 0 Blood Shards without 807488 (control) and 1 Blood Shard 504115 with 807488. Reference search 2026-11-26: coa-history 504115 Blood Shard 65560 hits in 18 logs, 506639 43 events in 2 logs; bindmysoul lists 807488; installed Spell.dbc governs."
+    },
+    {
+      "spell": 807488,
+      "name": "Inhumane (empowered Blood Shard damage at reference stats: 51)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "dealing ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35} Spellshadow damage to your target.",
+      "trigger_spell": 807785,
+      "gate_spell": 807488,
+      "learn": [
+        804849,
+        578305
+      ],
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          505366,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 51,
+      "tolerance": 0,
+      "wait_ms": 4000,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35}: 504115 BasePoints 17 + DieSides 1 = 18, ppl 0, SchoolMask 96 Spellshadow; ref AP = 223, SP = 0 -> 18 + 223*0.15 = 51.45 -> int32 51 (G-27 truncation, AscensionBloodmageBloodShards.cpp:52,136-139). phase_auras clears 505366 before each phase's setup_casts; 1 shard from non-crit Bloodbolt 578305; Aortic Assault deals 0 without 807488 and 51 Spellshadow damage with it. Reference search 2026-11-26: see launch_count."
+    },
+    {
+      "spell": 807488,
+      "name": "Inhumane (empowered Blood Shard damage at +20000 SP: 7051)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "dealing ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35} Spellshadow damage to your target.",
+      "trigger_spell": 807785,
+      "gate_spell": 807488,
+      "learn": [
+        804849,
+        578305
+      ],
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          505366,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 7051,
+      "tolerance": 0,
+      "wait_ms": 4000,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35}: 18 + 223*0.15 + 20000*0.35 = 7051.45 -> int32 7051 (delta +7000 over base 51 proves 0.35 SP coefficient). phase_auras clears 505366 before each phase's setup_casts. Reference search 2026-11-26: see launch_count."
+    },
+    {
+      "spell": 807488,
+      "name": "Inhumane (empowered Blood Shard damage at +980 AP: 198)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "dealing ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35} Spellshadow damage to your target.",
+      "trigger_spell": 807785,
+      "gate_spell": 807488,
+      "learn": [
+        804849,
+        578305
+      ],
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "phase_auras": [
+        [
+          505366,
+          0,
+          "caster",
+          "caster"
+        ],
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          35785,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 198,
+      "tolerance": 0,
+      "wait_ms": 4000,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "AP scaling arm for ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35}: AP = 223 + 980 (fixture 35785) = 1203 -> 18 + 1203*0.15 = 198.45 -> int32 198 (delta +147 over base 51 proves 0.15 AP coefficient). phase_auras clears 505366 before each phase's setup_casts. Reference search 2026-11-26: see launch_count."
+    },
+    {
+      "spell": 704653,
+      "name": "Cruel Intent (Lunge triggers 3 auto attack strikes)",
+      "kind": "metric_delta",
+      "variant": "three_strikes",
+      "label_suffix": "three_strikes",
+      "quote": "When you Lunge at an enemy you now strike them 3 times with auto attacks.",
+      "trigger_spell": 500126,
+      "gate_spell": 704653,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_trigger": {
+        "dx": -15
+      },
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "melee_damage_count",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "704653 Effect[0] aura 42 triggers 707599 Dark Intent (Effect[0]=19 SPELL_EFFECT_ADD_EXTRA_ATTACKS BasePoints 2 + DieSides 1 = 3; pending_db_world/rev_20261004_05_bloodmage_infuse.sql spell_proc on Lunge 500126 SpellFamilyMask0 16777216, ProcFlags 4096, SpellPhaseMask 2 HIT). Lunge 500126 (RangeIndex 54 = 5-30 yd, CasterAuraSpell 525031) cast at dummy (relocate_before_trigger -15 yd restores leap distance between phases): 0 melee hits without 704653 (control), 3 melee hits with 704653. Reference search 2026-11-26: coa-history 707599 63 SPELL_EXTRA_ATTACKS events in 10 logs, 500126 Lunge 285 casts in 27 logs; bindmysoul lists 704653; installed Spell.dbc governs."
+    },
+    {
+      "spell": 706683,
+      "name": "Festering Maw (control: auto attacks without Bite Wound must not trigger 706718)",
+      "kind": "metric_delta",
+      "variant": "no_bite_wound_control",
+      "label_suffix": "no_bite_wound_control",
+      "quote": "Healing with Bite Wound now reduces the cooldown of Lunge by 1 sec.",
+      "trigger_spell": 706718,
+      "gate_spell": 706683,
+      "target": "dummy",
+      "attack_swings": 3,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 706718
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Negative gate check: tooltip requires 'Healing with Bite Wound' (706654), but 706683 Spell.dbc has ProcFlags=4 (PROC_FLAG_DONE_MELEE_AUTO_ATTACK) with no spell_proc row or AuraScript gating on Bite Wound. Without Bite Wound on dummy, 3 auto-attack swings with 706683 learned must cast 706718 0 times (server defect ALERT: fires ungated on melee auto-attacks). Reference search 2026-11-26: coa-history 706654 Bite Wound 954 applies / 2692 refreshes in 19 logs (706683/706718 0 events); bindmysoul lists 706683; installed Spell.dbc governs."
+    },
+    {
+      "spell": 706683,
+      "name": "Festering Maw (Bite Wound heal triggers 706718 Lunge CD cut)",
+      "kind": "metric_delta",
+      "variant": "bite_wound_proc",
+      "label_suffix": "bite_wound_proc",
+      "quote": "Healing with Bite Wound now reduces the cooldown of Lunge by 1 sec.",
+      "trigger_spell": 706718,
+      "gate_spell": 706683,
+      "target": "dummy",
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          706654,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "attack_swings": 1,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 706718
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "after_at_least": 1,
+      "after_at_most": 4,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 706654,
+              "target": "caster"
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 2,
+            "source": "Bite Wound 706654 (AscensionBloodmageSecondary.cpp:107-148) heals caster on each auto-attack swing in both phases (1 dual-wield interval = ~2 heals before, ~4 cumulative after)"
+          }
+        ]
+      },
+      "observe_source": "Positive arm companion to no_bite_wound_control: with Bite Wound 706654 active on dummy (aura_ascension_bloodmage_bite_wound at AscensionBloodmageSecondary.cpp:107-148 heals caster for 50% of auto-attack damage, verified via spell_heal_count(706654)), 1 Eternal dual-wield swing interval fires 706718 (Effect[0]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on Lunge 500126) 0 times without 706683 and 1..4 times with 706683 learned. Combined with no_bite_wound_control (ALERT: fires ungated without Bite Wound), proves 706718 fires on melee swings rather than gated on Bite Wound heals. Reference search 2026-11-26: see no_bite_wound_control."
+    },
+    {
+      "spell": 707622,
+      "name": "Dark Intent (Lunge heals 5% of 10000 max health = 500)",
+      "kind": "metric_delta",
+      "variant": "heal_10k",
+      "label_suffix": "heal_10k",
+      "quote": "When you Lunge at an enemy you now heal for $504831s1% of your maximum health.",
+      "trigger_spell": 500126,
+      "gate_spell": 707622,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_trigger": {
+        "dx": -15
+      },
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504831,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 500,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "$504831s1 = 5 (504831 Effect[0]=136 SPELL_EFFECT_HEAL_PCT BasePoints 4 + DieSides 1 = 5%; pending_db_world/rev_20260920_61_bloodmage_dark_intent_lunge_proc.sql spell_proc on Lunge 500126 SpellFamilyMask0 16777216, ProcFlags 4096, SpellPhaseMask 2 HIT). At caster_health [5000, 10000], 5% of 10000 max health = 500 (0 without 707622, 500 with 707622). Reference search 2026-11-26: coa-history 500126 Lunge 285 casts in 27 logs (707622/504831 0 events); bindmysoul lists 707622; installed Spell.dbc governs."
+    },
+    {
+      "spell": 707622,
+      "name": "Dark Intent (Lunge heals 5% of 20000 max health = 1000)",
+      "kind": "metric_delta",
+      "variant": "heal_20k",
+      "label_suffix": "heal_20k",
+      "quote": "When you Lunge at an enemy you now heal for $504831s1% of your maximum health.",
+      "trigger_spell": 500126,
+      "gate_spell": 707622,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_trigger": {
+        "dx": -15
+      },
+      "caster_health": [
+        10000,
+        20000
+      ],
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 504831,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1000,
+      "tolerance": 0,
+      "wait_ms": 1000,
+      "expire_ms": 2000,
+      "void_on_cast_failure": true,
+      "observe_source": "Max-health scaling arm for 707622 Dark Intent: at caster_health [10000, 20000], 5% of 20000 max health = 1000 (doubles from 500 at 10000 max health, proving percentage of maximum health rather than flat heal). Reference search 2026-11-26: see heal_10k."
+    },
+    {
+      "spell": 806423,
+      "name": "Bloodleaper (-10 sec Lunge cooldown: without)",
+      "kind": "cost_gate",
+      "variant": "lunge_cd_without",
+      "label_suffix": "lunge_cd",
+      "only_arm": "without",
+      "quote": "Reduces the cooldown of your Lunge by $/1000;s1 sec.",
+      "gated_spell": 500126,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "margin_ms": 500,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_attempt": {
+        "dx": -15
+      },
+      "observe_source": "$/1000;s1 = 10000 ms (806423 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN, BasePoints -10001 + DieSides 1 = -10000 ms, EffectSpellClassMask[0]=16777216 matching Lunge 500126 RecoveryTime 25000 ms -> 15000 ms; Spell.dbc). Split via only_arm (without/with/beyond) so each arm starts at 15 yd from dummy (Lunge leaps onto dummy, and relocate_before_attempt -15 yd restores 5-30 yd range for the judged attempt; Felsworn 705135 precedent). Refused 67 at 15500 ms without 806423, succeeds (0) at 15500 ms with 806423, refused 67 at 14500 ms with 806423 (margin 500 ms excludes +-10% = 9000/11000 ms cuts). Reference search 2026-11-26: coa-history 500126 Lunge 285 casts in 27 logs (806423 passive 0 events); bindmysoul lists 806423; installed Spell.dbc governs."
+    },
+    {
+      "spell": 806423,
+      "name": "Bloodleaper (-10 sec Lunge cooldown: with)",
+      "kind": "cost_gate",
+      "variant": "lunge_cd_with",
+      "label_suffix": "lunge_cd",
+      "only_arm": "with",
+      "quote": "Reduces the cooldown of your Lunge by $/1000;s1 sec.",
+      "gated_spell": 500126,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "margin_ms": 500,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_attempt": {
+        "dx": -15
+      },
+      "observe_source": "$/1000;s1 = 10000 ms (806423 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN, BasePoints -10001 + DieSides 1 = -10000 ms, EffectSpellClassMask[0]=16777216 matching Lunge 500126 RecoveryTime 25000 ms -> 15000 ms; Spell.dbc). Split via only_arm (without/with/beyond) so each arm starts at 15 yd from dummy (Lunge leaps onto dummy, and relocate_before_attempt -15 yd restores 5-30 yd range for the judged attempt; Felsworn 705135 precedent). Refused 67 at 15500 ms without 806423, succeeds (0) at 15500 ms with 806423, refused 67 at 14500 ms with 806423 (margin 500 ms excludes +-10% = 9000/11000 ms cuts). Reference search 2026-11-26: coa-history 500126 Lunge 285 casts in 27 logs (806423 passive 0 events); bindmysoul lists 806423; installed Spell.dbc governs."
+    },
+    {
+      "spell": 806423,
+      "name": "Bloodleaper (-10 sec Lunge cooldown: beyond)",
+      "kind": "cost_gate",
+      "variant": "lunge_cd_beyond",
+      "label_suffix": "lunge_cd",
+      "only_arm": "beyond",
+      "quote": "Reduces the cooldown of your Lunge by $/1000;s1 sec.",
+      "gated_spell": 500126,
+      "resource": "cooldown",
+      "reduction": 10000,
+      "margin_ms": 500,
+      "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_attempt": {
+        "dx": -15
+      },
+      "observe_source": "$/1000;s1 = 10000 ms (806423 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 11 SPELLMOD_COOLDOWN, BasePoints -10001 + DieSides 1 = -10000 ms, EffectSpellClassMask[0]=16777216 matching Lunge 500126 RecoveryTime 25000 ms -> 15000 ms; Spell.dbc). Split via only_arm (without/with/beyond) so each arm starts at 15 yd from dummy (Lunge leaps onto dummy, and relocate_before_attempt -15 yd restores 5-30 yd range for the judged attempt; Felsworn 705135 precedent). Refused 67 at 15500 ms without 806423, succeeds (0) at 15500 ms with 806423, refused 67 at 14500 ms with 806423 (margin 500 ms excludes +-10% = 9000/11000 ms cuts). Reference search 2026-11-26: coa-history 500126 Lunge 285 casts in 27 logs (806423 passive 0 events); bindmysoul lists 806423; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504241,
+      "name": "Rage Rank 1 (spell damage +20% of baseline AP = +44)",
+      "kind": "metric_delta",
+      "variant": "sp_from_ap_base",
+      "label_suffix": "sp_from_ap_base",
+      "quote": "Increases your spell damage by $s1% of your attack power",
+      "trigger_spell": 60235,
+      "gate_spell": 504241,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 44,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 20 (504241 Effect[0] aura 237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER MiscValue 127 all schools, BasePoints 19 + DieSides 1 = 20%; Spell.dbc; Unit.cpp:10294). Under G-13, spell damage is a spell-power stat claim. At reference AP 223, int32(223 * 20 / 100) = +44 Shadow SP (school 5) after real learn vs 0 control. Reference search 2026-11-26: coa-history 504241 0 events (passive), 802469 Reave 2038 casts in 14 logs; bindmysoul/ascension-data lists 504241; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504241,
+      "name": "Rage Rank 1 (spell damage +20% of elevated AP 1203 = +240)",
+      "kind": "metric_delta",
+      "variant": "sp_from_ap_elevated",
+      "label_suffix": "sp_from_ap_elevated",
+      "quote": "Increases your spell damage by $s1% of your attack power",
+      "trigger_spell": 60235,
+      "gate_spell": 504241,
+      "target": "caster",
+      "phase_auras": [
+        [
+          35785,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 240,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "AP-scaling arm for 504241 Effect[0] (20% of AP): with fixture 35785 Attack Power 980, AP = 223 + 980 = 1203 -> int32(1203 * 20 / 100) = +240 Shadow SP (delta +196 over baseline +44 proves 20% AP scaling, excludes Rank 2 40% = 481). Reference search 2026-11-26: see sp_from_ap_base."
+    },
+    {
+      "spell": 504241,
+      "name": "Rage Rank 1 (+10% Reave damage)",
+      "kind": "hit_ratio",
+      "variant": "reave_damage",
+      "label_suffix": "reave_damage",
+      "quote": "and the damage dealt by Reave by $s2%.",
+      "expected": 1.1,
+      "observe_spell": 802469,
+      "learn": [
+        802469
+      ],
+      "cast_power": 350,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "target_auras": [
+        [
+          802580,
+          1
+        ]
+      ],
+      "control": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          504241
+        ],
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 10 (504241 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 SPELLMOD_DAMAGE, BasePoints 9 + DieSides 1 = +10%, EffectSpellClassMask[3] = 4194304 matching Reave 802469 SpellFamilyFlags[0] = 4194304; Spell.dbc). target_auras [802580, 1] (Bleed) satisfies TargetAuraState=18 on Reave's back-strike copy 805612 (AscensionBloodmageSecondary.cpp:287,361-362) so 805612 does not emit SPELL_FAILED_DONT_REPORT (27) when casting from behind the dummy; 802469's own damage is unchanged by bleeding (802883/805612 are separate spells). Reave 802469 (CasterAuraSpell 524861, 350 Rage, Accursed 2535 War Staff) at +20000 AP measures +10% (+-2 pt band excludes 0% and +20%). Reference search 2026-11-26: coa-history 802469 Reave 2038 casts in 14 logs; bindmysoul lists 504241; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504895,
+      "name": "Rage Rank 2 (spell damage +40% of baseline AP = +89)",
+      "kind": "metric_delta",
+      "variant": "sp_from_ap_base",
+      "label_suffix": "sp_from_ap_base",
+      "quote": "Increases your spell damage by $s1% of your attack power",
+      "trigger_spell": 60235,
+      "gate_spell": 504895,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 89,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s1 = 40 (504895 Effect[0] aura 237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER MiscValue 127 all schools, BasePoints 39 + DieSides 1 = 40%; Spell.dbc; Unit.cpp:10294). At reference AP 223, int32(223 * 40 / 100) = +89 Shadow SP (school 5) after real learn vs 0 control. Reference search 2026-11-26: coa-history 504895 0 events (passive), 802469 Reave 2038 casts in 14 logs; ascension-data lists 504895; installed Spell.dbc governs."
+    },
+    {
+      "spell": 504895,
+      "name": "Rage Rank 2 (spell damage +40% of elevated AP 1203 = +481)",
+      "kind": "metric_delta",
+      "variant": "sp_from_ap_elevated",
+      "label_suffix": "sp_from_ap_elevated",
+      "quote": "Increases your spell damage by $s1% of your attack power",
+      "trigger_spell": 60235,
+      "gate_spell": 504895,
+      "target": "caster",
+      "phase_auras": [
+        [
+          35785,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 481,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "AP-scaling arm for 504895 Effect[0] (40% of AP): with fixture 35785 Attack Power 980, AP = 1203 -> int32(1203 * 40 / 100) = +481 Shadow SP (delta +392 over baseline +89 proves 40% AP scaling, excludes Rank 1 20% = 240). Reference search 2026-11-26: see sp_from_ap_base."
+    },
+    {
+      "spell": 504895,
+      "name": "Rage Rank 2 (+20% Reave damage)",
+      "kind": "hit_ratio",
+      "variant": "reave_damage",
+      "label_suffix": "reave_damage",
+      "quote": "and the damage dealt by Reave by $s2%.",
+      "expected": 1.2,
+      "observe_spell": 802469,
+      "learn": [
+        802469
+      ],
+      "cast_power": 350,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "target_auras": [
+        [
+          802580,
+          1
+        ]
+      ],
+      "control": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          504895
+        ],
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 20 (504895 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 0 SPELLMOD_DAMAGE, BasePoints 19 + DieSides 1 = +20%, EffectSpellClassMask[3] = 4194304 matching Reave 802469; Spell.dbc). target_auras [802580, 1] (Bleed) satisfies TargetAuraState=18 on Reave's back-strike copy 805612 (AscensionBloodmageSecondary.cpp:287,361-362) so 805612 does not emit SPELL_FAILED_DONT_REPORT (27). Reave 802469 (CasterAuraSpell 524861, 350 Rage, Accursed 2535 War Staff) at +20000 AP measures +20% (+-2 pt band excludes 0%, +10%, and +40%). Reference search 2026-11-26: see sp_from_ap_base."
     }
   ],
   "player_observations": [],

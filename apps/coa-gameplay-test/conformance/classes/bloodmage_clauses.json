@@ -638,7 +638,8 @@
     "spell": 504241,
     "clause": "Increases your spell damage by $s1% of your attack power",
     "labels": [
-      "504241 effect_value e0 #0"
+      "504241 behaviour_metric_delta sp_from_ap_base",
+      "504241 behaviour_metric_delta sp_from_ap_elevated"
     ],
     "kind": "claim"
   },
@@ -646,7 +647,7 @@
     "spell": 504241,
     "clause": "and the damage dealt by Reave by $s2%.",
     "labels": [
-      "504241 effect_value e1 #1"
+      "504241 behaviour_hit_ratio reave_damage"
     ],
     "kind": "claim"
   },
@@ -1110,7 +1111,8 @@
     "spell": 504895,
     "clause": "Increases your spell damage by $s1% of your attack power",
     "labels": [
-      "504895 effect_value e0 #0"
+      "504895 behaviour_metric_delta sp_from_ap_base",
+      "504895 behaviour_metric_delta sp_from_ap_elevated"
     ],
     "kind": "claim"
   },
@@ -1118,7 +1120,7 @@
     "spell": 504895,
     "clause": "and the damage dealt by Reave by $s2%.",
     "labels": [
-      "504895 effect_value e1 #1"
+      "504895 behaviour_hit_ratio reave_damage"
     ],
     "kind": "claim"
   },
@@ -1720,7 +1722,7 @@
     "spell": 560259,
     "clause": "Increases the damage dealt by your Animated Blood by $s1%.",
     "labels": [
-      "560259 effect_value e0 #0"
+      "560259 behaviour_hit_ratio blood_strike"
     ],
     "kind": "claim"
   },
@@ -2889,13 +2891,15 @@
       {
         "claim": "in a $806214a1 yd frontal cone",
         "labels": [
-          "704115 effect_radius 806214e0 #0"
+          "704115 behaviour_metric_delta cone_edge",
+          "704115 behaviour_metric_delta radius_edge"
         ]
       },
       {
         "claim": "suffer ${$806214m1*$<scalingbp>+$AP*0.5} Physical damage",
         "labels": [
-          "704115 effect_value 806214e0 #1"
+          "704115 behaviour_metric_delta damage_gate",
+          "704115 behaviour_hit_ratio ap_scaling"
         ]
       }
     ],
@@ -2905,7 +2909,7 @@
     "spell": 704115,
     "clause": "Damage dealt by this effect is increased by $s2% against bleeding targets.",
     "labels": [
-      "704115 effect_value e1 #2"
+      "704115 behaviour_hit_ratio bleeding_bonus"
     ],
     "kind": "claim"
   },
@@ -3193,7 +3197,8 @@
     "spell": 704652,
     "clause": "Physical critical strikes now reduce the cooldown of Aortic Assault by $/1000;807358s1 sec and grant you Relentless.",
     "labels": [
-      "704652 effect_value 807358e0 #0"
+      "704652 behaviour_metric_delta cd_cut_open",
+      "704652 behaviour_metric_delta cd_cut_bound"
     ],
     "kind": "claim"
   },
@@ -3204,13 +3209,14 @@
       {
         "claim": "Your Aortic Assault channels $s1% faster",
         "labels": [
-          "704652 effect_value 807357e0 #1"
+          "704652 behaviour_metric_delta channel_speed_1stack",
+          "704652 behaviour_metric_delta channel_speed_5stacks"
         ]
       },
       {
         "claim": "for $d",
         "labels": [
-          "704652 spell_duration 807357 #2"
+          "704652 behaviour_metric_delta buff_duration"
         ]
       }
     ],
@@ -3220,7 +3226,7 @@
     "spell": 704652,
     "clause": "stacking $u times,",
     "labels": [
-      "704652 max_stacks 807357 #3"
+      "704652 behaviour_metric_delta max_stacks"
     ],
     "kind": "claim"
   },
@@ -3228,14 +3234,17 @@
     "spell": 704652,
     "clause": "and each strike now extends the duration of Taldaram's Torment by $/1000;807359s1 sec.",
     "labels": [
-      "704652 effect_value 807359e0 #4"
+      "704652 behaviour_metric_delta torment_extend",
+      "704652 behaviour_metric_delta torment_extend_gate"
     ],
     "kind": "claim"
   },
   {
     "spell": 704653,
     "clause": "When you Lunge at an enemy you now strike them 3 times with auto attacks.",
-    "labels": [],
+    "labels": [
+      "704653 behaviour_metric_delta three_strikes"
+    ],
     "kind": "claim"
   },
   {
@@ -3390,7 +3399,15 @@
     "spell": 705732,
     "clause": "Reduces the cooldown of Howl spells by $s1%.",
     "labels": [
-      "705732 effect_value e0 #0"
+      "705732 cost_gate 501682 cd_night_hunters_howl without",
+      "705732 cost_gate 501682 cd_night_hunters_howl with",
+      "705732 cost_gate 501682 cd_night_hunters_howl beyond",
+      "705732 cost_gate 804811 cd_monstrous_howl without",
+      "705732 cost_gate 804811 cd_monstrous_howl with",
+      "705732 cost_gate 804811 cd_monstrous_howl beyond",
+      "705732 cost_gate 806177 cd_shadow_howl without",
+      "705732 cost_gate 806177 cd_shadow_howl with",
+      "705732 cost_gate 806177 cd_shadow_howl beyond"
     ],
     "kind": "claim"
   },
@@ -3654,7 +3671,10 @@
   {
     "spell": 706683,
     "clause": "Healing with Bite Wound now reduces the cooldown of Lunge by 1 sec.",
-    "labels": [],
+    "labels": [
+      "706683 behaviour_metric_delta no_bite_wound_control",
+      "706683 behaviour_metric_delta bite_wound_proc"
+    ],
     "kind": "claim"
   },
   {
@@ -3677,7 +3697,8 @@
     "spell": 707622,
     "clause": "When you Lunge at an enemy you now heal for $504831s1% of your maximum health.",
     "labels": [
-      "707622 effect_value 504831e0 #0"
+      "707622 behaviour_metric_delta heal_10k",
+      "707622 behaviour_metric_delta heal_20k"
     ],
     "kind": "claim"
   },
@@ -4324,7 +4345,7 @@
     "spell": 801960,
     "clause": "Casting Howl spells now deal ${$536277m1+$536277ppl1+$STA*.25+$AGI*.25+$AP*.1} Shadow damage to all nearby enemies",
     "labels": [
-      "801960 effect_value 536277e0 #0"
+      "801960 behaviour_metric_delta howl_shadow_damage"
     ],
     "kind": "claim"
   },
@@ -4332,14 +4353,25 @@
     "spell": 801960,
     "clause": "and triggering Call of the Darkwing now reduces the cooldown of all Howl spells by $/1000;556239S1 sec.",
     "labels": [
-      "801960 effect_value 556239e0 #1"
+      "801960 cost_gate 806177 cd_shadow_howl without",
+      "801960 cost_gate 806177 cd_shadow_howl with",
+      "801960 cost_gate 806177 cd_shadow_howl beyond",
+      "801960 cost_gate 804811 cd_monstrous_howl without",
+      "801960 cost_gate 804811 cd_monstrous_howl with",
+      "801960 cost_gate 804811 cd_monstrous_howl beyond",
+      "801960 cost_gate 501682 cd_night_hunters_howl without",
+      "801960 cost_gate 501682 cd_night_hunters_howl with",
+      "801960 cost_gate 501682 cd_night_hunters_howl beyond"
     ],
     "kind": "claim"
   },
   {
     "spell": 801960,
     "clause": "Can only occur once per sec.",
-    "labels": [],
+    "labels": [
+      "801960 behaviour_metric_delta icd_held",
+      "801960 behaviour_metric_delta icd_reopen"
+    ],
     "kind": "claim"
   },
   {
@@ -5242,7 +5274,9 @@
     "spell": 806423,
     "clause": "Reduces the cooldown of your Lunge by $/1000;s1 sec.",
     "labels": [
-      "806423 effect_value e0 #0"
+      "806423 cost_gate 500126 lunge_cd without",
+      "806423 cost_gate 500126 lunge_cd with",
+      "806423 cost_gate 500126 lunge_cd beyond"
     ],
     "kind": "claim"
   },
@@ -5357,14 +5391,18 @@
   {
     "spell": 807488,
     "clause": "Dealing damage with Aortic Assault will now launch 1 Blood Shard,",
-    "labels": [],
+    "labels": [
+      "807488 behaviour_metric_delta launch_count"
+    ],
     "kind": "claim"
   },
   {
     "spell": 807488,
     "clause": "dealing ${$504115m1+$504115ppl1+$AP*0.15+$SP*.35} Spellshadow damage to your target.",
     "labels": [
-      "807488 effect_value 504115e0 #0"
+      "807488 behaviour_metric_delta damage_base",
+      "807488 behaviour_metric_delta damage_sp",
+      "807488 behaviour_metric_delta damage_ap"
     ],
     "kind": "claim"
   },
