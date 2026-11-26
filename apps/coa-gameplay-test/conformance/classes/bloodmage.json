@@ -46552,6 +46552,65 @@
       "observe_source": "803585 Attributes 402653184 includes SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000, Spell.dbc); Spell::CheckCast (Spell.cpp:5954-5955) returns SPELL_FAILED_AFFECTING_COMBAT (1) when caster->IsInCombat(). Control (before, out of combat): cast of 803585 at grouped ally begins with cast_failure 0 (8 s cast \u2014 SpellCastTimes[170] = 8000 ms \u2014 clears during expire_ms 12000). Treatment (after, in combat via 802580 at dummy): cast returns 1 (SPELL_FAILED_AFFECTING_COMBAT). Note: full dead-ally resurrect peaceful_resurrect (Effect 18) waits on bm-tb1. Reference search 2026-11-26: see heal_taken_pct."
     },
     {
+      "spell": 803585,
+      "name": "Vampyr Bite (resurrects dead ally with $s1% health and mana)",
+      "kind": "peaceful_resurrect",
+      "variant": "peaceful",
+      "label_suffix": "peaceful",
+      "quote": "Brings a dead player back to life with $s1% health and mana.",
+      "ally_class": 13,
+      "claims": [
+        {
+          "claim": "health",
+          "quote": "Brings a dead player back to life with $s1% health and mana."
+        },
+        {
+          "claim": "mana",
+          "quote": "Brings a dead player back to life with $s1% health and mana."
+        }
+      ],
+      "observe_source": "G-3 alert reproduction (ADR 1323): Vampyr Bite 803585 Effect[0] = 18 (SPELL_EFFECT_RESURRECT), EffectBasePoints[0] = 819 + EffectDieSides[0] = 1 = 820 ($s1 = 820%), EffectMiscValue[0] = 1030, CastingTimeIndex 170 = 8000 ms, Attributes 402653184 includes SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000), zero C++/SQL scripts (Spell.dbc). Uses ally_class 13 (Witch Doctor, mana-using CoA class so max_power(0) > 0). Out of combat, dead ally first sends CMSG_RESURRECT_RESPONSE with no offer (alive_unoffered = 0); caster casts 803585 (cast_failure_peaceful = 0 after 8500 ms), ally accepts (alive_peaceful = 1) with regeneration off. Spell::EffectResurrect (SpellEffects.cpp:5735-5736) computes CountPctFromMaxHealth(820) and CalculatePct(maxMana, 820) and Player::ResurrectPlayer clamps health and mana to 100% of max pools, while peaceful_resurrect compares against unclamped 820% -> truthful G-3 alert on both health and mana. In-combat refusal stays on clause #422 (in_combat_refused). Reference search 2026-11-26: coa-history 803585: 3 casts / 1 apply / 1 removal in 3 logs; video t=6:48 matches verbatim."
+    },
+    {
+      "spell": 803585,
+      "name": "Vampyr Bite (aura lasts 20 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "For the next $d,",
+      "trigger_spell": 803585,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "ally",
+      "ally_arm": {
+        "allies": 1
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 803585,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 27000,
+      "expiry_wait_ms": 2000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          26500,
+          27500
+        ],
+        "expired": [
+          28500,
+          29500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "803585 DurationIndex 18 = 20000 ms ($d = 20 sec, SpellDuration.dbc), CastingTimeIndex 170 = 8000 ms (SpellCastTimes.dbc), Effect[2] = 6 SPELL_EFFECT_APPLY_AURA (aura 118 SPELL_AURA_MOD_HEALING_PCT, TargetA 21 TARGET_UNIT_TARGET_ALLY, Spell.dbc). Control (uncast before): ally aura 803585 = 0. Treatment (real cast of 803585 at grouped ally, no set_aura fixture): cast completes at t = 8000 ms (0 spell haste rating) and applies 803585 for 20000 ms (expected expiry t = 28000 ms); reads present (1) at game_time [26500, 27500] ms (18500..19500 ms after application, > 18000 ms = -10%) and expired (0) at game_time [28500, 29500] ms (20500..21500 ms after application, < 22000 ms = +10%), excluding +-10% on both sides. Reference search 2026-11-26: see heal_taken_pct."
+    },
+    {
       "spell": 504281,
       "name": "Vampyr's Kiss (bleeds enemy for 2106 Shadow damage over 30 sec)",
       "kind": "metric_delta",
