@@ -1129,6 +1129,1472 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "$s2 = 3 (704642 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + DieSides 1 = 3; Spell.dbc). StatSystem.cpp:1043 adds aura 333 into Player::m_modSpellHitChance. Reads live spell_hit_chance before and after a real learn of 704642 (expected gain +3.0 points, control is before learn). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    },
+    {
+      "spell": 504285,
+      "name": "Alacrity 504285 (strength +4%)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504285,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 63.0,
+      "expected": 65.52,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504285 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + DieSides 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 0 (strength, reference 63.0) before (control) and after a real learn of 504285: expected ratio 1.04 (tol 0.002, excludes 1.0 and 1.08). Trigger 60235 does not modify stat 0. Reference search 2026-11-26: coa-history 504285: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json 504285 matches verbatim ('Increases all primary stats by 4%.')."
+    },
+    {
+      "spell": 504285,
+      "name": "Alacrity 504285 (agility +4%)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504285,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 60.0,
+      "expected": 62.4,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504285 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + DieSides 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 1 (agility, reference 60.0) before (control) and after a real learn of 504285: expected ratio 1.04 (tol 0.002, excludes 1.0 and 1.08). Trigger 60235 does not modify stat 1. Reference search 2026-11-26: coa-history 504285: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json 504285 matches verbatim ('Increases all primary stats by 4%.')."
+    },
+    {
+      "spell": 504285,
+      "name": "Alacrity 504285 (stamina +4%)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504285,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 78.0,
+      "expected": 81.12,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504285 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + DieSides 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 2 (stamina, reference 78.0) before (control) and after a real learn of 504285: expected ratio 1.04 (tol 0.002, excludes 1.0 and 1.08). Trigger 60235 does not modify stat 2. Reference search 2026-11-26: coa-history 504285: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json 504285 matches verbatim ('Increases all primary stats by 4%.')."
+    },
+    {
+      "spell": 504285,
+      "name": "Alacrity 504285 (intellect +4%)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504285,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 3
+      },
+      "before_expected": 98.0,
+      "expected": 101.92,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504285 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + DieSides 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 3 (intellect, reference 98.0) before (control) and after a real learn of 504285: expected ratio 1.04 (tol 0.002, excludes 1.0 and 1.08). Trigger 60235 does not modify stat 3. Reference search 2026-11-26: coa-history 504285: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json 504285 matches verbatim ('Increases all primary stats by 4%.')."
+    },
+    {
+      "spell": 504285,
+      "name": "Alacrity 504285 (spirit +4%)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60229,
+      "gate_spell": 504285,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 114.0,
+      "expected": 118.56,
+      "expected_ratio": 1.04,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504285 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 3 + DieSides 1 = 4 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 4 (spirit, reference 114.0) before (control) and after a real learn of 504285: expected ratio 1.04 (tol 0.002, excludes 1.0 and 1.08). Trigger 60229 does not modify stat 4. Reference search 2026-11-26: coa-history 504285: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json 504285 matches verbatim ('Increases all primary stats by 4%.')."
+    },
+    {
+      "spell": 504893,
+      "name": "Alacrity 504893 (strength +8%)",
+      "kind": "metric_delta",
+      "variant": "strength",
+      "label_suffix": "strength",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504893,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 0
+      },
+      "before_expected": 63.0,
+      "expected": 68.04,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504893 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + DieSides 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 0 (strength, reference 63.0) before (control) and after a real learn of 504893: expected ratio 1.08 (tol 0.002, excludes 1.0 and 1.16). Trigger 60235 does not modify stat 0. Reference search 2026-11-26: coa-history 504893: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json has rank 1 504285 only; installed Spell.dbc governs rank 2 504893 (+8%)."
+    },
+    {
+      "spell": 504893,
+      "name": "Alacrity 504893 (agility +8%)",
+      "kind": "metric_delta",
+      "variant": "agility",
+      "label_suffix": "agility",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504893,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 1
+      },
+      "before_expected": 60.0,
+      "expected": 64.8,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504893 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + DieSides 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 1 (agility, reference 60.0) before (control) and after a real learn of 504893: expected ratio 1.08 (tol 0.002, excludes 1.0 and 1.16). Trigger 60235 does not modify stat 1. Reference search 2026-11-26: coa-history 504893: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json has rank 1 504285 only; installed Spell.dbc governs rank 2 504893 (+8%)."
+    },
+    {
+      "spell": 504893,
+      "name": "Alacrity 504893 (stamina +8%)",
+      "kind": "metric_delta",
+      "variant": "stamina",
+      "label_suffix": "stamina",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504893,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 78.0,
+      "expected": 84.24,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504893 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + DieSides 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 2 (stamina, reference 78.0) before (control) and after a real learn of 504893: expected ratio 1.08 (tol 0.002, excludes 1.0 and 1.16). Trigger 60235 does not modify stat 2. Reference search 2026-11-26: coa-history 504893: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json has rank 1 504285 only; installed Spell.dbc governs rank 2 504893 (+8%)."
+    },
+    {
+      "spell": 504893,
+      "name": "Alacrity 504893 (intellect +8%)",
+      "kind": "metric_delta",
+      "variant": "intellect",
+      "label_suffix": "intellect",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 504893,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 3
+      },
+      "before_expected": 98.0,
+      "expected": 105.84,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504893 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + DieSides 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 3 (intellect, reference 98.0) before (control) and after a real learn of 504893: expected ratio 1.08 (tol 0.002, excludes 1.0 and 1.16). Trigger 60235 does not modify stat 3. Reference search 2026-11-26: coa-history 504893: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json has rank 1 504285 only; installed Spell.dbc governs rank 2 504893 (+8%)."
+    },
+    {
+      "spell": 504893,
+      "name": "Alacrity 504893 (spirit +8%)",
+      "kind": "metric_delta",
+      "variant": "spirit",
+      "label_suffix": "spirit",
+      "quote": "Increases all primary stats by $s1%.",
+      "trigger_spell": 60229,
+      "gate_spell": 504893,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 4
+      },
+      "before_expected": 114.0,
+      "expected": 123.12,
+      "expected_ratio": 1.08,
+      "tolerance": 0.002,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "504893 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE, MiscValue -1 (all 5 primary stats), BasePoints 7 + DieSides 1 = 8 ($s1; Spell.dbc). Reads live unrounded stat_exact for stat 4 (spirit, reference 114.0) before (control) and after a real learn of 504893: expected ratio 1.08 (tol 0.002, excludes 1.0 and 1.16). Trigger 60229 does not modify stat 4. Reference search 2026-11-26: coa-history 504893: 0 events in 186 logs (passive; positive control 578305 Bloodbolt has 91 casts); coabuildhub spells_master_index.json has rank 1 504285 only; installed Spell.dbc governs rank 2 504893 (+8%)."
+    },
+    {
+      "spell": 706598,
+      "name": "Gift of Lana'thel 706598 (spell power at baseline Spirit 114)",
+      "kind": "metric_delta",
+      "variant": "sp_base",
+      "label_suffix": "sp_base",
+      "quote": "Become blessed by Lana'thel, increasing your spell power by $s2% of your Spirit",
+      "trigger_spell": 60229,
+      "gate_spell": 706598,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 28,
+      "expected_gain": 28,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706598 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (MiscValue 127 all schools, MiscValueB 4 Spirit, BasePoints 24 + DieSides 1 = 25, $s2) and Effect[0] aura 175 SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT (+25% Spirit; Spell.dbc; AscensionHealingStatSelectors.cpp). At reference Spirit 114 (Greatness 60229 +300 Strength leaves Spirit unchanged), int32(114 * 0.25) = +28 Shadow SP (school 5) after a real learn vs 0 control (tol 1, excludes 0 and +56). Reference search 2026-11-26: coa-history 706598: 0 events in 186 logs (passive; positive control 578305); coabuildhub spells_master_index.json 706598 matches verbatim."
+    },
+    {
+      "spell": 706598,
+      "name": "Gift of Lana'thel 706598 (spell power at elevated Spirit 423)",
+      "kind": "metric_delta",
+      "variant": "sp_spi",
+      "label_suffix": "sp_spi",
+      "quote": "Become blessed by Lana'thel, increasing your spell power by $s2% of your Spirit",
+      "trigger_spell": 60235,
+      "gate_spell": 706598,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 105,
+      "expected_gain": 105,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706598 Effect[1] aura 174 (+25% Spirit as spell power; Spell.dbc; AscensionHealingStatSelectors.cpp:46). With Greatness 60235 (+300 Spirit) scaled by Human racial The Human Spirit 20598 (aura 137 +3% Spirit, Spell.dbc), Spirit rises from 114 (int(111*1.03)) to 423 (int((111+300)*1.03) = int(423.33)): int32(423 * 0.25) = +105 Shadow SP vs 0 control (+77 SP over baseline sp_base, tol 1). Reference search 2026-11-26: coa-history 706598: 0 events; coabuildhub spells_master_index.json 706598 matches verbatim."
+    },
+    {
+      "spell": 706598,
+      "name": "Gift of Lana'thel 706598 (ranged hit rating at baseline Spirit 114)",
+      "kind": "metric_delta",
+      "variant": "hit_rating_base",
+      "label_suffix": "hit_rating_base",
+      "quote": "and your hit rating by $s3% of your Spirit.",
+      "trigger_spell": 60229,
+      "gate_spell": 706598,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 6
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706598 Effect[2] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 224 (bits 5,6,7 = CR_HIT_MELEE/RANGED/SPELL), MiscValueB 4 Spirit, BasePoints 3 + DieSides 1 = 4 ($s3; Spell.dbc). At reference Spirit 114 (Greatness 60229 leaves Spirit unchanged), int32(114 * 0.04) = +4 ranged hit rating (rating 6) vs 0 control (tol 1). Reference search 2026-11-26: coa-history 706598: 0 events; coabuildhub spells_master_index.json 706598 matches verbatim."
+    },
+    {
+      "spell": 706598,
+      "name": "Gift of Lana'thel 706598 (ranged hit rating at elevated Spirit 423)",
+      "kind": "metric_delta",
+      "variant": "hit_rating_spi",
+      "label_suffix": "hit_rating_spi",
+      "quote": "and your hit rating by $s3% of your Spirit.",
+      "trigger_spell": 60235,
+      "gate_spell": 706598,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 6
+      },
+      "before_expected": 0,
+      "expected": 16,
+      "expected_gain": 16,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706598 Effect[2] aura 220 (+4% Spirit as hit rating, MiscValue 224; Spell.dbc). With Greatness 60235 (+300 Spirit scaled by Human racial 20598 +3% Spirit -> 423), int32(423 * 0.04) = +16 ranged hit rating (rating 6) vs 0 control (+12 for +300 Spirit, tol 1). Reference search 2026-11-26: coa-history 706598: 0 events; coabuildhub spells_master_index.json 706598 matches verbatim."
+    },
+    {
+      "spell": 706598,
+      "name": "Gift of Lana'thel 706598 (spell hit rating at elevated Spirit 423)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_rating_spi",
+      "label_suffix": "spell_hit_rating_spi",
+      "quote": "and your hit rating by $s3% of your Spirit.",
+      "trigger_spell": 60235,
+      "gate_spell": 706598,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10016,
+      "expected_gain": 16,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706598 Effect[2] aura 220 (+4% Spirit as hit rating, MiscValue 224; Spell.dbc). With Greatness 60235 (+300 Spirit scaled by Human racial 20598 +3% Spirit -> 423), int32(423 * 0.04) = +16 spell hit rating (rating 7) on top of 10000 control (tol 1). Reference search 2026-11-26: coa-history 706598: 0 events; coabuildhub spells_master_index.json 706598 matches verbatim."
+    },
+    {
+      "spell": 707864,
+      "name": "Gift of Lana'thel 707864 (spell power at baseline Spirit 114)",
+      "kind": "metric_delta",
+      "variant": "sp_base",
+      "label_suffix": "sp_base",
+      "quote": "Become blessed by Lana'thel, increasing your spell power by $s2% of your Spirit",
+      "trigger_spell": 60229,
+      "gate_spell": 707864,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 57,
+      "expected_gain": 57,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707864 Effect[1] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT (MiscValue 127 all schools, MiscValueB 4 Spirit, BasePoints 49 + DieSides 1 = 50, $s2) and Effect[0] aura 175 SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT (+50% Spirit; Spell.dbc; AscensionHealingStatSelectors.cpp). At reference Spirit 114 (Greatness 60229 +300 Strength leaves Spirit unchanged), int32(114 * 0.50) = +57 Shadow SP (school 5) after a real learn vs 0 control (tol 1, excludes 0 and +114). Reference search 2026-11-26: coa-history 707864: 0 events in 186 logs (passive; positive control 578305); coabuildhub spells_master_index.json has rank 1 706598 only; installed Spell.dbc governs rank 2 707864."
+    },
+    {
+      "spell": 707864,
+      "name": "Gift of Lana'thel 707864 (spell power at elevated Spirit 423)",
+      "kind": "metric_delta",
+      "variant": "sp_spi",
+      "label_suffix": "sp_spi",
+      "quote": "Become blessed by Lana'thel, increasing your spell power by $s2% of your Spirit",
+      "trigger_spell": 60235,
+      "gate_spell": 707864,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 211,
+      "expected_gain": 211,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707864 Effect[1] aura 174 (+50% Spirit as spell power; Spell.dbc; AscensionHealingStatSelectors.cpp:50). With Greatness 60235 (+300 Spirit) scaled by Human racial The Human Spirit 20598 (+3% Spirit -> Spirit 423): int32(423 * 0.50) = +211 Shadow SP vs 0 control (+154 SP over baseline sp_base, tol 1). Reference search 2026-11-26: coa-history 707864: 0 events; coabuildhub spells_master_index.json has rank 1 706598 only; installed Spell.dbc governs rank 2 707864."
+    },
+    {
+      "spell": 707864,
+      "name": "Gift of Lana'thel 707864 (ranged hit rating at baseline Spirit 114)",
+      "kind": "metric_delta",
+      "variant": "hit_rating_base",
+      "label_suffix": "hit_rating_base",
+      "quote": "and your hit rating by $s3% of your Spirit.",
+      "trigger_spell": 60229,
+      "gate_spell": 707864,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 6
+      },
+      "before_expected": 0,
+      "expected": 9,
+      "expected_gain": 9,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707864 Effect[2] aura 220 SPELL_AURA_MOD_RATING_FROM_STAT, MiscValue 224 (bits 5,6,7 = CR_HIT_MELEE/RANGED/SPELL), MiscValueB 4 Spirit, BasePoints 7 + DieSides 1 = 8 ($s3; Spell.dbc). At reference Spirit 114 (Greatness 60229 leaves Spirit unchanged), int32(114 * 0.08) = +9 ranged hit rating (rating 6) vs 0 control (tol 1). Reference search 2026-11-26: coa-history 707864: 0 events; coabuildhub spells_master_index.json has rank 1 706598 only; installed Spell.dbc governs rank 2 707864."
+    },
+    {
+      "spell": 707864,
+      "name": "Gift of Lana'thel 707864 (ranged hit rating at elevated Spirit 423)",
+      "kind": "metric_delta",
+      "variant": "hit_rating_spi",
+      "label_suffix": "hit_rating_spi",
+      "quote": "and your hit rating by $s3% of your Spirit.",
+      "trigger_spell": 60235,
+      "gate_spell": 707864,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 6
+      },
+      "before_expected": 0,
+      "expected": 33,
+      "expected_gain": 33,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707864 Effect[2] aura 220 (+8% Spirit as hit rating, MiscValue 224; Spell.dbc). With Greatness 60235 (+300 Spirit scaled by Human racial 20598 +3% Spirit -> 423), int32(423 * 0.08) = +33 ranged hit rating (rating 6) vs 0 control (+24 for +300 Spirit, tol 1). Reference search 2026-11-26: coa-history 707864: 0 events; coabuildhub spells_master_index.json has rank 1 706598 only; installed Spell.dbc governs rank 2 707864."
+    },
+    {
+      "spell": 707864,
+      "name": "Gift of Lana'thel 707864 (spell hit rating at elevated Spirit 423)",
+      "kind": "metric_delta",
+      "variant": "spell_hit_rating_spi",
+      "label_suffix": "spell_hit_rating_spi",
+      "quote": "and your hit rating by $s3% of your Spirit.",
+      "trigger_spell": 60235,
+      "gate_spell": 707864,
+      "target": "caster",
+      "metric": "combat_rating",
+      "fields": {
+        "rating": 7
+      },
+      "before_expected": 10000,
+      "expected": 10033,
+      "expected_gain": 33,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "707864 Effect[2] aura 220 (+8% Spirit as hit rating, MiscValue 224; Spell.dbc). With Greatness 60235 (+300 Spirit scaled by Human racial 20598 +3% Spirit -> 423), int32(423 * 0.08) = +33 spell hit rating (rating 7) on top of 10000 control (tol 1). Reference search 2026-11-26: coa-history 707864: 0 events; coabuildhub spells_master_index.json has rank 1 706598 only; installed Spell.dbc governs rank 2 707864."
+    },
+    {
+      "spell": 706599,
+      "name": "Cunning of Atherann (SP at baseline Stamina 78 and Spirit 114)",
+      "kind": "metric_delta",
+      "variant": "sp_base",
+      "label_suffix": "sp_base",
+      "quote": "Increases your spell damage by $s1% of your Stamina and Spirit.",
+      "trigger_spell": 60229,
+      "gate_spell": 706599,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 47,
+      "expected_gain": 47,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706599 Effect[0] aura 174 (MiscValue 126 magic schools, MiscValueB 2 Stamina, BasePoints 24+1=25, $s1) and Effect[1] aura 174 (MiscValue 126, MiscValueB 4 Spirit, BasePoints 24+1=25; Spell.dbc). Under G-13, spell damage is a spell-power stat claim. At reference Stamina 78 and Spirit 114 (Greatness 60229 +300 Strength leaves both unchanged), int32(78*0.25) + int32(114*0.25) = 19 + 28 = +47 Shadow SP (school 5) vs 0 control (tol 1). Reference search 2026-11-26: coa-history 706599: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 706599 matches verbatim."
+    },
+    {
+      "spell": 706599,
+      "name": "Cunning of Atherann (SP at elevated Stamina +63)",
+      "kind": "metric_delta",
+      "variant": "sp_sta",
+      "label_suffix": "sp_sta",
+      "quote": "Increases your spell damage by $s1% of your Stamina and Spirit.",
+      "trigger_spell": 60229,
+      "gate_spell": 706599,
+      "target": "caster",
+      "phase_auras": [
+        [
+          48101,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 63,
+      "expected_gain": 63,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706599 Effect[0] (25% Stamina) + Effect[1] (25% Spirit) aura 174 (Spell.dbc). Precondition fixture Stamina 48101 (+63 Stamina -> 141, Spirit 114) in both phases: int32(141*0.25) + int32(114*0.25) = 35 + 28 = +63 Shadow SP vs 0 control (+16 SP over baseline sp_base, proving Stamina contributes 25%). Reference search 2026-11-26: coa-history 706599: 0 events; coabuildhub 706599 matches verbatim."
+    },
+    {
+      "spell": 706599,
+      "name": "Cunning of Atherann (SP at elevated Spirit +300)",
+      "kind": "metric_delta",
+      "variant": "sp_spi",
+      "label_suffix": "sp_spi",
+      "quote": "Increases your spell damage by $s1% of your Stamina and Spirit.",
+      "trigger_spell": 60235,
+      "gate_spell": 706599,
+      "target": "caster",
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 124,
+      "expected_gain": 124,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706599 Effect[0] (25% Stamina) + Effect[1] (25% Spirit) aura 174 (Spell.dbc). With Greatness 60235 (+300 Spirit) scaled by Human racial The Human Spirit 20598 (+3% Spirit -> Spirit 423, Stamina 78): int32(78*0.25) + int32(423*0.25) = 19 + 105 = +124 Shadow SP vs 0 control (+77 SP over baseline sp_base, proving Spirit contributes 25%). Reference search 2026-11-26: coa-history 706599: 0 events; coabuildhub 706599 matches verbatim."
+    },
+    {
+      "spell": 706603,
+      "name": "Consolidation (spell haste +5%)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 706603,
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 0.952381,
+      "tolerance": 0.0005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706603 Effect[0] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 4 + DieSides 1 = +5% ($s1; Spell.dbc). Unit::ApplyCastTimePercentMod(+5) sets cast_speed_multiplier to 1 / 1.05 = 0.952381 (tol 0.0005, excludes 1.0 and 1/1.10 = 0.909091) after a real learn vs 1.0 control. Reference search 2026-11-26: coa-history 706603: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 706603 matches verbatim."
+    },
+    {
+      "spell": 706603,
+      "name": "Consolidation (melee haste +5%)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 706603,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 3300,
+      "expected": 3142.8571,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706603 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints 4 + DieSides 1 = +5% ($s1; Spell.dbc). Accursed default weapon War Staff 2535 speed_ms 3300: main-hand attack_time_ms moves from 3300 ms (control) to 3300 / 1.05 = 3142.857 ms (tol 2 ms, excludes 3300 and 3000) after a real learn of 706603. Reference search 2026-11-26: coa-history 706603: 0 events; coabuildhub 706603 matches verbatim."
+    },
+    {
+      "spell": 706603,
+      "name": "Consolidation (ranged haste +5%)",
+      "kind": "metric_delta",
+      "variant": "ranged_haste",
+      "label_suffix": "ranged_haste",
+      "quote": "Increases your haste by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 706603,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 2
+      },
+      "before_expected": 1000,
+      "expected": 952.381,
+      "expected_ratio": 0.952381,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706603 Effect[1] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE +5% (Spell.dbc). Ranged attack_time_ms (hand 2) ratio after/before a real learn of 706603 is 1 / 1.05 = 0.952381 (tol 0.001, excludes 1.0 and 0.909). Reference search 2026-11-26: coa-history 706603: 0 events; coabuildhub 706603 matches verbatim."
+    },
+    {
+      "spell": 560074,
+      "name": "Veins of Vengeance (curse resist +15%)",
+      "kind": "taken_hit",
+      "variant": "curse_resist",
+      "label_suffix": "curse_resist",
+      "judge": "resist_rate",
+      "expected_points": 15,
+      "quote": "Increases your chance to resist curse effects by $s1%.",
+      "strike_spell": 1714,
+      "trials": 800,
+      "parts": 25,
+      "arms": [
+        {
+          "name": "control"
+        },
+        {
+          "name": "treatment",
+          "auras": [
+            [
+              560074,
+              1
+            ]
+          ]
+        }
+      ],
+      "observe_source": "560074 Veins of Vengeance Effect[0] aura 178 SPELL_AURA_MOD_DEBUFF_RESISTANCE, MiscValue 2 (DISPEL_CURSE), BasePoints 14 + DieSides 1 = +15 ($s1; Spell.dbc). Unit::MagicSpellHitResult (Unit.cpp:4075) adds the aura's amount * 100 to the resist roll of a negative magic-class spell with Dispel=2. Exact Witch Doctor 712396 Dark Mojo (curse_resist) precedent: level 60 striker (entry 36) casts Curse of Tongues 1714 (Dispel 2 curse, DmgClass 1 magic, instant, two APPLY_AURA effects) at the caster; each trial reads aura 1714 300 ms later and clears it. Sizing: 25 parts x 800 trials = 20000 per arm (control p ~ 0.04, treatment p ~ 0.19): sd of difference = sqrt((0.04*0.96 + 0.19*0.81)/20000)*100 = 0.310 pts; 99% half-width = 2.576*0.310 = 0.799 pts <= 1.0 pt half-band (G-19 band +-2 pts -> [13, 17], excludes 0 and 30); residual false-fail per run ~ 1.1e-4, ~ 2.2e-4 per pair (<= 0.1%). Precondition fixture note: taken_rate_arm_steps applies passive auras via set_aura (same documented limit as 712396). Reference search 2026-11-26: coa-history 560074: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 560074 matches verbatim."
+    },
+    {
+      "spell": 704649,
+      "name": "Dark Curse 704649 (melee critical strike chance +3%)",
+      "kind": "metric_delta",
+      "variant": "melee_crit",
+      "label_suffix": "melee_crit",
+      "quote": "Increases critical strike chance by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704649,
+      "target": "caster",
+      "metric": "melee_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "crit_field_refresh": true,
+      "observe_source": "704649 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 + DieSides 1 = 3 ($s1; Spell.dbc). Reads live melee_crit_chance (refreshed via Player::UpdateCritPercentage, crit_field_refresh ADR 0678) before (control) and after a real learn of 704649: expected gain +3.0 points (tol 0.01, excludes 0 and +6). Trigger 60235 (+300 Spirit) does not affect melee crit. Reference search 2026-11-26: coa-history 704649: 0 events; coabuildhub spells_master_index.json 704649 matches verbatim."
+    },
+    {
+      "spell": 704649,
+      "name": "Dark Curse 704649 (spell critical strike chance +3%)",
+      "kind": "metric_delta",
+      "variant": "spell_crit",
+      "label_suffix": "spell_crit",
+      "quote": "Increases critical strike chance by $s1%.",
+      "trigger_spell": 60229,
+      "gate_spell": 704649,
+      "target": "caster",
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704649 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 2 + DieSides 1 = 3 ($s1; Spell.dbc). Reads live spell_crit_chance (Shadow school 5) before (control) and after a real learn of 704649: expected gain +3.0 points (tol 0.01, excludes 0 and +6). Trigger 60229 (+300 Strength) does not affect spell crit. Reference search 2026-11-26: coa-history 704649: 0 events; coabuildhub spells_master_index.json 704649 matches verbatim."
+    },
+    {
+      "spell": 560252,
+      "name": "Dark Curse 560252 (melee critical strike chance +6%)",
+      "kind": "metric_delta",
+      "variant": "melee_crit",
+      "label_suffix": "melee_crit",
+      "quote": "Increases critical strike chance by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 560252,
+      "target": "caster",
+      "metric": "melee_crit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 6,
+      "expected_gain": 6,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "crit_field_refresh": true,
+      "observe_source": "560252 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 5 + DieSides 1 = 6 ($s1; Spell.dbc). Reads live melee_crit_chance (refreshed via Player::UpdateCritPercentage, crit_field_refresh ADR 0678) before (control) and after a real learn of 560252: expected gain +6.0 points (tol 0.01, excludes 0 and +12). Trigger 60235 (+300 Spirit) does not affect melee crit. Reference search 2026-11-26: coa-history 560252: 0 events; coabuildhub spells_master_index.json has rank 1 704649 only; installed Spell.dbc governs rank 2 560252 (+6%)."
+    },
+    {
+      "spell": 560252,
+      "name": "Dark Curse 560252 (spell critical strike chance +6%)",
+      "kind": "metric_delta",
+      "variant": "spell_crit",
+      "label_suffix": "spell_crit",
+      "quote": "Increases critical strike chance by $s1%.",
+      "trigger_spell": 60229,
+      "gate_spell": 560252,
+      "target": "caster",
+      "metric": "spell_crit_chance",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "expected_gain": 6,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "560252 Effect[0] aura 290 SPELL_AURA_MOD_CRIT_PCT, BasePoints 5 + DieSides 1 = 6 ($s1; Spell.dbc). Reads live spell_crit_chance (Shadow school 5) before (control) and after a real learn of 560252: expected gain +6.0 points (tol 0.01, excludes 0 and +12). Trigger 60229 (+300 Strength) does not affect spell crit. Reference search 2026-11-26: coa-history 560252: 0 events; coabuildhub spells_master_index.json has rank 1 704649 only; installed Spell.dbc governs rank 2 560252 (+6%)."
+    },
+    {
+      "spell": 704627,
+      "name": "Heightened Reflexes 704627 (dodge chance +4%)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "Increases your chance to dodge by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 704627,
+      "target": "caster",
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 4,
+      "expected_gain": 4,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704627 Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT, BasePoints 3 + DieSides 1 = 4 ($s1; Spell.dbc). Reads live dodge_chance before (control) and after a real learn of 704627: expected gain +4.0 points (tol 0.01). Trigger 60235 (+300 Spirit) does not affect dodge. Reference search 2026-11-26: coa-history 704627: 0 events; coabuildhub spells_master_index.json 704627 matches verbatim."
+    },
+    {
+      "spell": 704627,
+      "name": "Heightened Reflexes 704627 (expertise +5)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "and your expertise by $s2.",
+      "trigger_spell": 60235,
+      "gate_spell": 704627,
+      "target": "caster",
+      "metric": "expertise",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 5,
+      "expected_gain": 5,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704627 Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE, BasePoints 4 + DieSides 1 = 5 ($s2; Spell.dbc). Reads live expertise before (control) and after a real learn of 704627: expected gain +5 (tol 0.5, excludes 0 and +10). Reference search 2026-11-26: coa-history 704627: 0 events; coabuildhub spells_master_index.json 704627 matches verbatim."
+    },
+    {
+      "spell": 704628,
+      "name": "Heightened Reflexes 704628 (dodge chance +8%)",
+      "kind": "metric_delta",
+      "variant": "dodge",
+      "label_suffix": "dodge",
+      "quote": "Increases your chance to dodge by $s1%",
+      "trigger_spell": 60235,
+      "gate_spell": 704628,
+      "target": "caster",
+      "metric": "dodge_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 8,
+      "expected_gain": 8,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704628 Effect[0] aura 49 SPELL_AURA_MOD_DODGE_PERCENT, BasePoints 7 + DieSides 1 = 8 ($s1; Spell.dbc). Reads live dodge_chance before (control) and after a real learn of 704628: expected gain +8.0 points (tol 0.01). Trigger 60235 (+300 Spirit) does not affect dodge. Reference search 2026-11-26: coa-history 704628: 0 events; coabuildhub spells_master_index.json has rank 1 704627 only; installed Spell.dbc governs rank 2 704628."
+    },
+    {
+      "spell": 704628,
+      "name": "Heightened Reflexes 704628 (expertise +10)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "and your expertise by $s2.",
+      "trigger_spell": 60235,
+      "gate_spell": 704628,
+      "target": "caster",
+      "metric": "expertise",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "704628 Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE, BasePoints 9 + DieSides 1 = 10 ($s2; Spell.dbc). Reads live expertise before (control) and after a real learn of 704628: expected gain +10 (tol 0.5, excludes 0 and +20). Reference search 2026-11-26: coa-history 704628: 0 events; coabuildhub spells_master_index.json has rank 1 704627 only; installed Spell.dbc governs rank 2 704628."
+    },
+    {
+      "spell": 705733,
+      "name": "Dark Hunt (+10% Shadow damage against bleeding target)",
+      "kind": "hit_ratio",
+      "variant": "bleeding",
+      "label_suffix": "bleeding",
+      "quote": "Increases your Shadow damage dealt by $s1% against bleeding targets.",
+      "expected": 1.1,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "target_auras": [
+        [
+          504291,
+          1
+        ]
+      ],
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          705733
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "705733 Effect[0] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE, MiscValue 18 (AURA_STATE_BLEEDING), MiscValueB 32 (Shadow), BasePoints 9 + DieSides 1 = +10% ($s1; Spell.dbc). Precondition fixture Mortal Wounds 504291 (Mechanic 15 MECHANIC_BLEED -> SpellInfo::GetSpellSpecific/AURA_STATE_BLEEDING, SpellInfo.cpp:2358) set on dummy in both arms via target_auras alongside +20000 SP and 823764 beeg spellpen. Non-critical Bloodbolt 578305 (SchoolMask 32) hits before (control) and after real learn of 705733 measure ratio 1.10 (G-19 band [1.08, 1.12], excludes 1.00 and 1.20). Paired with not_bleeding control (ratio 1.00 without bleed). Reference search 2026-11-26: coa-history 705733: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 705733 matches +10% Shadow vs bleeding (older state omits expertise line; installed Spell.dbc governs)."
+    },
+    {
+      "spell": 705733,
+      "name": "Dark Hunt (0% Shadow damage bonus against non-bleeding target)",
+      "kind": "hit_ratio",
+      "variant": "not_bleeding",
+      "label_suffix": "not_bleeding",
+      "quote": "Increases your Shadow damage dealt by $s1% against bleeding targets.",
+      "expected": 1.0,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          705733
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Control for the bleeding gate of Dark Hunt 705733 Effect[0] (aura 303, AURA_STATE_BLEEDING): same Bloodbolt 578305 hits at +20000 SP + 823764 with NO bleed aura on the dummy -> ratio 1.00 (excludes 1.10), proving the +10% bonus requires a bleeding target. Reference search 2026-11-26: see bleeding."
+    },
+    {
+      "spell": 705733,
+      "name": "Dark Hunt (expertise +10)",
+      "kind": "metric_delta",
+      "variant": "expertise",
+      "label_suffix": "expertise",
+      "quote": "Increases your expertise by $s2.",
+      "trigger_spell": 60235,
+      "gate_spell": 705733,
+      "target": "caster",
+      "metric": "expertise",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 10,
+      "expected_gain": 10,
+      "tolerance": 0.5,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "705733 Effect[1] aura 240 SPELL_AURA_MOD_EXPERTISE, BasePoints 9 + DieSides 1 = +10 ($s2; Spell.dbc). Reads live expertise before (control) and after a real learn of 705733: expected gain +10 (tol 0.5, excludes 0 and +20). Reference search 2026-11-26: coa-history 705733: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 705742,
+      "name": "Bloody Sacrifice (+15% healing received)",
+      "kind": "hit_ratio",
+      "variant": "healing_received",
+      "label_suffix": "healing_received",
+      "quote": "Increases your healing received by $s1%.",
+      "expected": 1.15,
+      "metric": "spell_heal_total",
+      "observe_spell": 504085,
+      "learn": [
+        504085
+      ],
+      "caster": "caster",
+      "target": "caster",
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {},
+      "treatment": {
+        "learn": [
+          705742
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "705742 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 126 (all magic schools), BasePoints 14 + DieSides 1 = +15% ($s1; Spell.dbc). Non-critical Sanguine Mend 504085 (level-56 Bloodmage heal rank, SchoolMask 32 Shadow, ExcludeCasterAuraSpell 802877 satisfied in default Mortal Form, PowerType 1 cost 200 Rage) self-heals at +20000 SP (precondition fixture) before (control) and after a real learn of 705742: expected ratio 1.15 (G-19 band [1.13, 1.17], excludes 1.00 and 1.30). Reference search 2026-11-26: coa-history 705742: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 705742 matches verbatim."
+    },
+    {
+      "spell": 706617,
+      "name": "Life Scent (reveals stealthed enemy at 15 yd)",
+      "kind": "metric_delta",
+      "variant": "can_detect",
+      "label_suffix": "can_detect",
+      "quote": "Increases your stealth detection significantly.",
+      "trigger_spell": 60235,
+      "gate_spell": 706617,
+      "target": "caster",
+      "measure_actor": "caster",
+      "dummy_distance": 15,
+      "phase_auras": [
+        [
+          1787,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "metric": "can_detect",
+      "fields": {
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "706617 Effect[0] aura 17 SPELL_AURA_MOD_STEALTH_DETECT, BasePoints 399 + DieSides 1 = +400 (Spell.dbc). Enemy dummy at 15 yd holds level-60 Stealth 1787 (300 stealth, precondition fixture in both phases, exact Cultist 706188 precedent): Object.cpp:2101-2131 gives base detect range 10.275 yd < 15 yd (can_detect 0 before learning 706617) and >= 30.0 yd > 15 yd after a real learn of 706617 (can_detect 1). Reference search 2026-11-26: coa-history 706617: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 706617 matches verbatim."
+    },
+    {
+      "spell": 707865,
+      "name": "Atherann's Wickedness 707865 (Shadow damage +8%)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "Increases your Shadow damage dealt by $s1%",
+      "expected": 1.08,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          707865
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 8 (707865 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 32 Shadow, BasePoints 7 + DieSides 1 = 8; Spell.dbc). Exact rank-2 mirror of Batch-1 704642: non-critical Bloodbolt 578305 hits at +20000 SP with 823764 measure ratio 1.08 (G-19 band [1.06, 1.10], excludes 1.00 and 1.16). Reference search 2026-11-26: coa-history 707865: 0 events in 186 logs (passive); coabuildhub has rank 1 704642; installed Spell.dbc governs."
+    },
+    {
+      "spell": 707865,
+      "name": "Atherann's Wickedness 707865 (melee hit chance +6%)",
+      "kind": "metric_delta",
+      "variant": "melee_hit",
+      "label_suffix": "melee_hit",
+      "quote": "and increases your hit chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 707865,
+      "target": "caster",
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 6,
+      "expected_gain": 6,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 6 (707865 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 5 + DieSides 1 = 6; Spell.dbc). StatSystem.cpp:1031 adds aura 333 into Player::m_modMeleeHitChance. Reads live melee_hit_chance before and after a real learn of 707865 (expected gain +6.0 points, tol 0.01). Exact rank-2 mirror of Batch-1 704642. Reference search 2026-11-26: coa-history 707865: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 707865,
+      "name": "Atherann's Wickedness 707865 (spell hit chance +6%)",
+      "kind": "metric_delta",
+      "variant": "spell_hit",
+      "label_suffix": "spell_hit",
+      "quote": "and increases your hit chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 707865,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 6,
+      "expected_gain": 6,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 6 (707865 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 5 + DieSides 1 = 6; Spell.dbc). StatSystem.cpp:1043 adds aura 333 into Player::m_modSpellHitChance. Reads live spell_hit_chance before and after a real learn of 707865 (expected gain +6.0 points, tol 0.01). Exact rank-2 mirror of Batch-1 704642. Reference search 2026-11-26: coa-history 707865: 0 events; installed Spell.dbc governs."
+    },
+    {
+      "spell": 807491,
+      "name": "Uncanny Speed (melee haste +5%)",
+      "kind": "metric_delta",
+      "variant": "melee_haste",
+      "label_suffix": "melee_haste",
+      "quote": "Increases your melee haste by $s3%",
+      "trigger_spell": 60235,
+      "gate_spell": 807491,
+      "target": "caster",
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 1600,
+      "expected": 1523.8095,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807491 Effect[2] aura 138 SPELL_AURA_MOD_MELEE_HASTE, BasePoints 4 + DieSides 1 = +5% ($s3; Spell.dbc). spell_weapon_sets equips the Eternal weapon set (dual 2534 Rondels, speed_ms 1600) for 807491: main-hand attack_time_ms moves from 1600 ms (control) to 1600 / 1.05 = 1523.8095 ms (tol 1 ms, excludes 1600 and 1600/1.10 = 1454.55) after a real learn of 807491. Reference search 2026-11-26: coa-history 807491: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 807491 matches verbatim."
+    },
+    {
+      "spell": 807491,
+      "name": "Uncanny Speed (movement speed +20%)",
+      "kind": "metric_delta",
+      "variant": "run_speed",
+      "label_suffix": "run_speed",
+      "quote": "and your movement speed and mounted movement speed by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 807491,
+      "target": "caster",
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.2,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807491 Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED, BasePoints 19 + DieSides 1 = +20% ($s1; Spell.dbc). Reads caster run_speed_rate unmounted before (control 1.0) and after a real learn of 807491 (1.20 +- 0.001, excludes 1.0 and 1.40). Reference search 2026-11-26: coa-history 807491: 0 events; coabuildhub 807491 matches verbatim."
+    },
+    {
+      "spell": 807491,
+      "name": "Uncanny Speed (mounted movement speed +20%)",
+      "kind": "metric_delta",
+      "variant": "mounted_speed",
+      "label_suffix": "mounted_speed",
+      "quote": "and your movement speed and mounted movement speed by $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 807491,
+      "target": "caster",
+      "phase_auras": [
+        [
+          458,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.6,
+      "expected": 1.92,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "807491 Effect[1] aura 172 SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK, BasePoints 19 + DieSides 1 = +20% ($s1; Spell.dbc). Brown Horse 458 (Effect[1] aura 32 +60% mounted speed; Cultist 706190 / Templar 562302 precedent) set on caster in both phases: Unit::UpdateSpeed scales mounted speed by max(non_stack_bonus, stack_bonus) * 1.60 = 1.60 before learn (control) and 1.20 * 1.60 = 1.92 after a real learn of 807491 (tol 0.001, excludes 1.60 and 2.24). Reference search 2026-11-26: coa-history 807491: 0 events; coabuildhub 807491 matches verbatim."
+    },
+    {
+      "spell": 300957,
+      "name": "Dark Presence (party/raid spell haste +3%)",
+      "kind": "party_stat_ratio",
+      "variant": "party_haste",
+      "label_suffix": "party_haste",
+      "raid": true,
+      "quote": "Increases spell haste of all party and raid members by $s1%.",
+      "expected": 0.9708737864,
+      "metric": "cast_speed_multiplier",
+      "radius_reason": "300957 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = +3% ($s1), EffectRadiusIndex 12 (100 yd; no distance token in tooltip; Spell.dbc). Grouped raid ally outside caster subgroup reads cast_speed_multiplier before (1.0) and after real learn of 300957 (1 / 1.03 = 0.970874). Reference search 2026-11-26: coa-history 300957: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 300957 matches verbatim."
+    },
+    {
+      "spell": 300957,
+      "name": "Dark Presence (raid haste does not stack with Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 300957,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "measure_actor": "ally",
+      "grouped_ally": {
+        "dy": 5,
+        "grouped": true
+      },
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 0.970874,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "300957 Effect[0] (65 APPLY_AREA_AURA_RAID, aura 216 +3%) and partner Fiery Passion 560525 Effect[0] (65 APPLY_AREA_AURA_RAID, aura 216 +3%) are both in spell_group 2000182 (stack_rule 3 SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql:341,344,364). Measured on a grouped ally at dy=5 yd (which receives only Effect[0], never caster's personal Effect[1]): partner 560525 learned up front gives 1 / 1.03 = 0.970874 in control (proving partner applies, excluding 1.0); after real learn of 300957, ally cast_speed_multiplier stays 0.970874 (tol 0.0001, excluding stacked 1/(1.03*1.03)=0.942596). Paired with no_stack_aura proving 300957 reached ally. Reference search 2026-11-26: coa-history 300957: 0 events; coabuildhub 300957 matches verbatim."
+    },
+    {
+      "spell": 300957,
+      "name": "Dark Presence (aura present on grouped ally alongside Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack_aura",
+      "label_suffix": "no_stack_aura",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 300957,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "measure_actor": "ally",
+      "grouped_ally": {
+        "dy": 5,
+        "grouped": true
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 300957
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Companion to 300957 no_stack: with Fiery Passion 560525 already learned, 300957 aura on grouped ally (dy=5) reads 0 before learning 300957 and 1 after learning 300957, proving both raid haste auras coexist on the ally while cast_speed_multiplier stays capped at 0.970874. Reference search 2026-11-26: see no_stack."
+    },
+    {
+      "spell": 300957,
+      "name": "Dark Presence (personal spell haste +3% stacks with raid aura)",
+      "kind": "metric_delta",
+      "variant": "self_haste",
+      "label_suffix": "self_haste",
+      "quote": "In addition, increases your spell haste by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 300957,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 0.970874,
+      "expected": 0.942596,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "300957 Effect[1] (6 APPLY_AURA, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = +3%, $s2; Spell.dbc) is a personal self-only effect exempt from raid group 2000182 (SpellMgr::IsEffectInSameEffectStackGroup, SpellMgr.cpp:831). With partner Fiery Passion 560525 (+3% raid haste in group 2000182) learned up front, caster reads 1 / 1.03 = 0.970874 before learning 300957 (control) and 1 / (1.03 * 1.03) = 0.942596 after real learn of 300957 (Effect[0] capped by 560525, Effect[1] applies cleanly; tol 0.0001 excludes 0.970874 and 1/1.03^3 = 0.915142). Reference search 2026-11-26: coa-history 300957: 0 events; coabuildhub 300957 matches verbatim."
+    },
+    {
+      "spell": 685028,
+      "name": "Blood-Cursed Armor (party/raid armor +1140 at level 60)",
+      "kind": "party_stat_ratio",
+      "variant": "party_armor",
+      "label_suffix": "party_armor",
+      "raid": true,
+      "relation": "additive",
+      "quote": "You now emanate an aura around you, increasing the Armor of party and raid members by ${$m1}.",
+      "expected": 1140,
+      "metric": "armor",
+      "radius_reason": "685028 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 22 SPELL_AURA_MOD_RESISTANCE, MiscValue 1 (Armor), BasePoints 389 + DieSides 1 = 390, RealPointsPerLevel 25.0, BaseLevel 30, SpellLevel 30, MaxLevel 80, SkillLineAbility line 500, EffectRadiusIndex 12 (100 yd; no distance token in tooltip; Spell.dbc). At level 60: 390 + 25 * (60 - 30) = +1140 Armor on grouped raid ally outside caster subgroup (relation additive). Paired with armor_l50 at level 50 (+890). Reference search 2026-11-26: coa-history 685028: 0 events in 186 logs (passive); coabuildhub 685028 shows base 390 at rank level 30, matching Spell.dbc BasePoints 389 + 1."
+    },
+    {
+      "spell": 685028,
+      "name": "Blood-Cursed Armor (does not stack with Protector's Hand 300730)",
+      "kind": "metric_delta",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 685028,
+      "learn": [
+        300730
+      ],
+      "target": "caster",
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 1200,
+      "expected": 1200,
+      "expected_gain": 0,
+      "tolerance": 1,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "685028 and Protector's Hand 300730 (both Effect[0] 65 APPLY_AREA_AURA_RAID, aura 22 MiscValue 1 Armor, 390 + 25*(60-30) = +1140 Armor at level 60; Spell.dbc) are in spell_group 2000200 (stack_rule 3 SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; data/sql/updates/pending_db_world/rev_1789953857480777600.sql:8-9,20). Partner 300730 learned up front raises caster Armor from 120 (60 Agility * 2, StatSystem.cpp:393) to 1260 (>= 1200 floor, proving partner applies); after real learn of 685028, Armor gain is 0 (tol 1, excluding stacked +1140). Paired with no_stack_aura proving 685028 aura is present. Replaces group_stack_cap because records.single_value refuses EffectRealPointsPerLevel != 0. Reference search 2026-11-26: coa-history 685028: 0 events; coabuildhub 685028 matches."
+    },
+    {
+      "spell": 685028,
+      "name": "Blood-Cursed Armor (aura present alongside Protector's Hand 300730)",
+      "kind": "metric_delta",
+      "variant": "no_stack_aura",
+      "label_suffix": "no_stack_aura",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 685028,
+      "learn": [
+        300730
+      ],
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 685028
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Companion to 685028 no_stack: with Protector's Hand 300730 already learned, 685028 aura reads 0 before learning 685028 and 1 after learning 685028, proving both raid armor auras coexist while Armor stays capped at +1140. Reference search 2026-11-26: see no_stack."
+    },
+    {
+      "spell": 704632,
+      "name": "Invigorated Flesh (party/raid melee hit chance +1%)",
+      "kind": "party_stat_ratio",
+      "variant": "party_melee_hit",
+      "label_suffix": "party_melee_hit",
+      "raid": true,
+      "relation": "additive",
+      "quote": "Increases chance to hit with all spells and attacks by $s1% for you and party and raid members.",
+      "expected": 1,
+      "metric": "melee_hit_chance",
+      "radius_reason": "704632 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 0 + DieSides 1 = +1% ($s1), EffectRadiusIndex 12 (100 yd; no distance token in tooltip; Spell.dbc). Grouped raid ally outside caster subgroup reads melee_hit_chance before and after real learn of 704632 (additive gain +1). Reference search 2026-11-26: coa-history 704632: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704632 matches verbatim."
+    },
+    {
+      "spell": 704632,
+      "name": "Invigorated Flesh (party/raid spell hit chance +1%)",
+      "kind": "party_stat_ratio",
+      "variant": "party_spell_hit",
+      "label_suffix": "party_spell_hit",
+      "raid": true,
+      "relation": "additive",
+      "quote": "Increases chance to hit with all spells and attacks by $s1% for you and party and raid members.",
+      "expected": 1,
+      "metric": "spell_hit_chance",
+      "radius_reason": "704632 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 333 (+1% all hit; Spell.dbc). Grouped raid ally outside caster subgroup reads spell_hit_chance before and after real learn of 704632 (additive gain +1). Reference search 2026-11-26: coa-history 704632: 0 events; coabuildhub 704632 matches verbatim."
+    },
+    {
+      "spell": 704632,
+      "name": "Invigorated Flesh (self melee hit chance +1%)",
+      "kind": "metric_delta",
+      "variant": "self_melee_hit",
+      "label_suffix": "self_melee_hit",
+      "quote": "Increases chance to hit with all spells and attacks by $s1% for you and party and raid members.",
+      "trigger_spell": 60235,
+      "gate_spell": 704632,
+      "target": "caster",
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0.01,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "704632 Effect[0] 65 APPLY_AREA_AURA_RAID, aura 333 (+1% all hit; Spell.dbc). Reads caster's own melee_hit_chance before (control) and after a real learn of 704632 (expected gain +1.0, tol 0.01). Reference search 2026-11-26: coa-history 704632: 0 events; coabuildhub 704632 matches verbatim."
+    },
+    {
+      "spell": 704632,
+      "name": "Invigorated Flesh (self spell hit chance +1%)",
+      "kind": "metric_delta",
+      "variant": "self_spell_hit",
+      "label_suffix": "self_spell_hit",
+      "quote": "Increases chance to hit with all spells and attacks by $s1% for you and party and raid members.",
+      "trigger_spell": 60235,
+      "gate_spell": 704632,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0.01,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "704632 Effect[0] 65 APPLY_AREA_AURA_RAID, aura 333 (+1% all hit; Spell.dbc). Reads caster's own spell_hit_chance before (control) and after a real learn of 704632 (expected gain +1.0, tol 0.01). Reference search 2026-11-26: coa-history 704632: 0 events; coabuildhub 704632 matches verbatim."
+    },
+    {
+      "spell": 704632,
+      "name": "Invigorated Flesh (group stack cap with Clear Skies 500069)",
+      "kind": "group_stack_cap",
+      "quote": "Does not stack with similar effects.",
+      "effect": 0,
+      "partner": 500069,
+      "partner_effect": 0,
+      "relation": "additive",
+      "tolerance": 0.01,
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "observe_source": "data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql:365-377 spell_group 2000183 (stack_rule 3 SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; SpellMgr.cpp:2203 aura 333) groups 704632 (+1%, Effect[0] aura 333) with Clear Skies 500069 (+1%, Effect[0] aura 333). spell_hit_chance is read baseline, after learning 704632 alone (+1.0), and after also learning 500069 (stays +1.0, not +2.0; relation additive, tol 0.01). 500069 is learned as fixture only. Reference search 2026-11-26: coa-history 704632: 0 events; coabuildhub 704632 matches verbatim."
+    },
+    {
+      "spell": 704623,
+      "name": "Rejuvenating Shadows (healing received by a nearby ally +6%)",
+      "kind": "hit_ratio",
+      "variant": "ally_healing",
+      "label_suffix": "ally_healing",
+      "quote": "Nearby party and raid members receive $s1% more healing.",
+      "expected": 1.06,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 504085,
+      "learn": [
+        504085
+      ],
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "learn": [
+          704623
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 300,
+      "ally_distance": 5,
+      "void_on_cast_failure": true,
+      "expected_source": "704623 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 127, BasePoints 5 + DieSides 1 = +6% ($s1), EffectRadiusIndex 23 (40 yd; no distance token in tooltip; Spell.dbc). Exact Sun Cleric 560547 Sun Disc precedent: Sanguine Mend 504085 heals on grouped ally at 5 yd (50% HP, +20000 SP precondition fixture) before (control) and after a real learn of 704623 measure ratio 1.06 (G-19 band [1.04, 1.08], excludes 1.00 and 1.12). Reference search 2026-11-26: coa-history 704623: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704623 matches verbatim."
+    },
+    {
+      "spell": 704623,
+      "name": "Rejuvenating Shadows (does not stack with Tree of Life 34123, ally healing)",
+      "kind": "hit_ratio",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.0,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 504085,
+      "learn": [
+        504085
+      ],
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ],
+        "learn": [
+          704623
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 300,
+      "ally_distance": 5,
+      "void_on_cast_failure": true,
+      "expected_source": "Two positive aura 118 SPELL_AURA_MOD_HEALING_PCT raid auras reach the grouped ally: Rejuvenating Shadows 704623 (+6%) and Tree of Life 34123 (+6%, Effect[0] 65 aura 118 BasePoints 5 + 1, set on caster as harness setup only). Unit::SpellHealingBonusTaken (Unit.cpp:10985) applies GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT), so Sanguine Mend 504085 heals on ally with 704623 learned atop 34123 match 34123 alone: ratio 1.00 (excludes 1.06 stacked). Exact Sun Cleric 560547 Sun Disc precedent; paired with partner_alone proving 34123 raises ally heals by +6% alone. Reference search 2026-11-26: coa-history 704623: 0 events; coabuildhub 704623 matches verbatim."
+    },
+    {
+      "spell": 704623,
+      "name": "Rejuvenating Shadows (control: Tree of Life 34123 alone raises ally healing +6%)",
+      "kind": "hit_ratio",
+      "variant": "partner_alone",
+      "label_suffix": "partner_alone",
+      "quote": "Does not stack with similar effects.",
+      "expected": 1.06,
+      "critical": false,
+      "metric": "spell_heal_total",
+      "observe_spell": 504085,
+      "learn": [
+        504085
+      ],
+      "caster": "caster",
+      "target": "ally",
+      "target_health_pct": 50,
+      "control": {},
+      "treatment": {
+        "auras": [
+          [
+            34123,
+            1
+          ]
+        ]
+      },
+      "trials": 40,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "cast_power": 300,
+      "ally_distance": 5,
+      "void_on_cast_failure": true,
+      "expected_source": "Control for 704623 no_stack: Tree of Life 34123 alone (+6% aura 118 raid aura) raises Sanguine Mend 504085 heals on the grouped ally by 6% (ratio 1.06), proving no_stack's 1.00 reading is the aura 118 max cap and not an inert partner. Reference search 2026-11-26: see no_stack."
+    },
+    {
+      "spell": 704623,
+      "name": "Rejuvenating Shadows (Bloodbolt health leeched +50%)",
+      "kind": "metric_delta",
+      "variant": "bloodbolt_leech",
+      "label_suffix": "bloodbolt_leech",
+      "quote": "In addition, increases the health leeched by Bloodbolt by $s2%.",
+      "trigger_spell": 578305,
+      "gate_spell": 704623,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 578305,
+        "target": "caster"
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 578305,
+          "target": "dummy"
+        },
+        "increments": true
+      },
+      "before_expected": 1.0,
+      "expected": 1.59,
+      "tolerance": 0.01,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "704623 Effect[1] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, MiscValue 27 (SPELLMOD_VALUE_MULTIPLIER), BasePoints 49 + DieSides 1 = +50% ($s2), EffectSpellClassMask[4] = 131072 matching Bloodbolt 578305 SpellFamilyFlags[1] (Spell.dbc). Spell.cpp:2941-2952 computes Bloodbolt's health leech as damage * CalcValueMultiplier (1.0 -> 1.5) then applies SpellHealingBonusTaken (+6% from 704623 Effect[0] aura 118, which also applies to caster via APPLY_AREA_AURA_RAID): ratio spell_heal_total(578305, caster) / spell_damage_total(578305, dummy) moves from 1.00 (control) to 1.50 * 1.06 = 1.59 (tol 0.01, excludes 1.00, 1.06, and 2.12). 823764 beeg spellpen removes partial resists in both phases. Reference search 2026-11-26: coa-history 704623: 0 events; Bloodbolt 578305 has 91 casts / 95 damage / 98 heal events; coabuildhub 704623 matches verbatim."
     }
   ],
   "player_observations": [],
