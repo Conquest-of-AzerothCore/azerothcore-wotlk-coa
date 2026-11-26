@@ -1,0 +1,451 @@
+{
+  "schema": 1,
+  "name": "Economy log: dungeon boss rewards and the Void Portal capture write reward rows",
+  "contract": [
+    "With the economy log on, an item a CoA system hands out directly writes one reward row with the item, its count and the system as source.",
+    "The final boss of normal Scarlet Monastery - Graveyard (Bloodmage Thalnos 4543) gives a level 30 player outside the Dungeon Finder one Dungeon Spoils 2021814: source 5 (dungeon boss). Opening the spoils gives one dungeon item: one cache_open row with the spoils as source.",
+    "Outside the Dungeon Finder the Heroic final boss gives one Heroic Dungeon Spoils 1202039 (Mythic+ module): source 5. Opening them (item_coa_dungeon_spoils) gives their dungeon item: cache_open rows with the spoils as source.",
+    "A Heroic dungeon boss kill (Anub'shiah 9031, Blackrock Depths) gives one Mark of Triumph 1414502: source 5.",
+    "Capturing a Void Portal (gameobject 239828) gives Voidtalon of the Dark Star 121815: source 6 (Void Portal).",
+    "A second capture (spawn 8001309) by a player whose bags are full mails the Voidtalon: one reward row (source 6) written with the mail and the mail's own system_mail row, nothing twice."
+  ],
+  "timeout_ms": 150000,
+  "economy_log": true,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "spoils",
+      "race": 1,
+      "class": 1,
+      "level": 30
+    },
+    {
+      "id": "heroicspoils",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "heroic",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "portal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "fullportal",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "teleport",
+      "actor": "spoils",
+      "map": 189,
+      "x": 1688.99,
+      "y": 1053.48,
+      "z": 18.6775
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Bloodmage Thalnos is credited",
+      "actor": "spoils",
+      "entry": 4543
+    },
+    {
+      "action": "assert",
+      "label": "The final boss gives one Dungeon Spoils",
+      "actor": "spoils",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_item",
+      "label": "Open the spoils",
+      "actor": "spoils",
+      "item": 2021814,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "The spoils are used up",
+      "actor": "spoils",
+      "metric": "item_count",
+      "item": 2021814,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroicspoils",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroicspoils",
+      "map": 189,
+      "x": 1688.99,
+      "y": 1053.48,
+      "z": 18.6775
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Heroic Scarlet Monastery - Graveyard",
+      "actor": "heroicspoils",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "encounter_credit",
+      "label": "Bloodmage Thalnos is credited on Heroic",
+      "actor": "heroicspoils",
+      "entry": 4543
+    },
+    {
+      "action": "assert",
+      "label": "The Heroic final boss gives Heroic Dungeon Spoils",
+      "actor": "heroicspoils",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Heroic spoils",
+      "actor": "heroicspoils",
+      "item": 1202039,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "The Heroic spoils are used up",
+      "actor": "heroicspoils",
+      "metric": "item_count",
+      "item": 1202039,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_health",
+      "actor": "heroic",
+      "value": 5000000,
+      "maximum": 5000000
+    },
+    {
+      "action": "dungeon_difficulty_packet",
+      "actor": "heroic",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 250
+    },
+    {
+      "action": "teleport",
+      "actor": "heroic",
+      "map": 230,
+      "x": 730.85,
+      "y": -68.85,
+      "z": -72.0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Blackrock Depths on Heroic",
+      "actor": "heroic",
+      "metric": "map_difficulty",
+      "equals": 1
+    },
+    {
+      "action": "summon",
+      "actor": "heroic",
+      "entry": 9031,
+      "as": "anubshiah",
+      "distance": 4
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "heroic",
+      "entry": 9031,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "Anub'shiah dies",
+      "actor": "anubshiah",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The Heroic kill gives a Mark of Triumph",
+      "actor": "heroic",
+      "metric": "item_count",
+      "item": 1414502,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "set_phase",
+      "actor": "portal",
+      "value": 1
+    },
+    {
+      "action": "voidportal",
+      "actor": "portal",
+      "op": "force",
+      "group": 9000001,
+      "spawn": 8001308
+    },
+    {
+      "action": "voidportal",
+      "actor": "portal",
+      "op": "roll",
+      "success": false
+    },
+    {
+      "action": "teleport",
+      "actor": "portal",
+      "map": 0,
+      "x": 3460.597656,
+      "y": -4946.015625,
+      "z": 182.513626,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the portal stands",
+      "actor": "portal",
+      "metric": "nearby_gameobject_count",
+      "entry": 239828,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "portal",
+      "entry": 239828
+    },
+    {
+      "action": "assert",
+      "label": "The capture gives the Voidtalon",
+      "actor": "portal",
+      "metric": "item_count",
+      "item": 121815,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "set_phase",
+      "actor": "fullportal",
+      "value": 1
+    },
+    {
+      "action": "fill_bags",
+      "actor": "fullportal",
+      "slots": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "fill_bags",
+      "label": "Refill a slot freed by a filler item that vanished",
+      "actor": "fullportal",
+      "slots": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second capturer's bags are full",
+      "actor": "fullportal",
+      "metric": "free_inventory_slots",
+      "equals": 0
+    },
+    {
+      "action": "voidportal",
+      "actor": "fullportal",
+      "op": "force",
+      "group": 9000001,
+      "spawn": 8001309
+    },
+    {
+      "action": "voidportal",
+      "actor": "fullportal",
+      "op": "roll",
+      "success": false
+    },
+    {
+      "action": "teleport",
+      "actor": "fullportal",
+      "map": 0,
+      "x": 2858.920898,
+      "y": -2883.853516,
+      "z": 97.198929,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the second portal stands",
+      "actor": "fullportal",
+      "metric": "nearby_gameobject_count",
+      "entry": 239828,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "fullportal",
+      "entry": 239828
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: with full bags the Voidtalon is mailed",
+      "actor": "fullportal",
+      "metric": "mail_has_item",
+      "item": 121815,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Dungeon Spoils from the final boss",
+      "actor": "spoils",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 2021814,
+      "economy_count": 1,
+      "economy_source": 5,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the item the spoils gave",
+      "actor": "spoils",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 2021814,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Heroic Dungeon Spoils from the final boss",
+      "actor": "heroicspoils",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1202039,
+      "economy_count": 1,
+      "economy_source": 5,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the one or two items the Heroic spoils gave",
+      "actor": "heroicspoils",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 1202039,
+      "min": 1,
+      "max": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Heroic boss's Mark of Triumph",
+      "actor": "heroic",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1414502,
+      "economy_count": 1,
+      "economy_source": 5,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Void Portal's Voidtalon",
+      "actor": "portal",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 121815,
+      "economy_count": 1,
+      "economy_source": 6,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the mailed Voidtalon is one reward row",
+      "actor": "fullportal",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 121815,
+      "economy_count": 1,
+      "economy_source": 6,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: and the mail itself one system_mail row",
+      "actor": "fullportal",
+      "metric": "economy_log_rows",
+      "economy_event": "system_mail",
+      "item": 121815,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: no other reward rows for the full-bag capturer",
+      "actor": "fullportal",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -11,6 +11,7 @@
 #include "AscensionWildcardStarterData.h"
 #include "Chat.h"
 #include "ClientDBC.h"
+#include "CoAEconomyLog.h"
 #include "Config.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
@@ -1296,12 +1297,12 @@ bool SpecializationUnlocked(Player const* player, uint32 spec)
     return spec < SPECIALIZATION_COUNT && (spec == 0 || player->HasSpell(SPECIALIZATION_SWAP_SPELLS[spec]));
 }
 
-bool GiveItems(Player* player, std::span<std::pair<uint32, uint32> const> items)
+bool GiveItems(Player* player, std::span<std::pair<uint32, uint32> const> items, CoAEconomyRow const* tag = nullptr)
 {
     std::vector<AscensionCacheRewards::Reward> rewards;
     for (auto const& [itemId, count] : items)
         rewards.push_back({ itemId, 0, 0, 0, count });
-    return AscensionCacheRewards::Deliver(player, rewards, nullptr);
+    return AscensionCacheRewards::Deliver(player, rewards, nullptr, tag);
 }
 
 char const* ClaimScrollRewards(Player* player, Request const& request)
@@ -1334,10 +1335,12 @@ char const* ClaimScrollRewards(Player* player, Request const& request)
     else
         for (auto const& [itemId, count] : EndgameScrollClaimRewards(spec))
             items.emplace_back(itemId, count * request.Count);
-    if (!GiveItems(player, items))
+    uint32 const cost = leveling ? 0 : EndgameScrollClaimsCost(claimed, request.Count);
+    CoAEconomyRow const tag = CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Wildcard,
+        cost ? RUNE_OF_ASCENSION_ITEM : 0, cost);
+    if (!GiveItems(player, items, &tag))
         return "COLLECT_SCROLL_OF_FORTUNE_REWARDS_UNKNOWN";
 
-    uint32 const cost = leveling ? 0 : EndgameScrollClaimsCost(claimed, request.Count);
     if (cost)
         player->DestroyItemCount(RUNE_OF_ASCENSION_ITEM, cost, true);
     player->UpdatePlayerSetting(source, track, claimed + request.Count);
@@ -1361,9 +1364,13 @@ char const* RepurchaseScrolls(Player* player, Scroll kind, uint32 count, bool go
         return result;
 
     std::array<std::pair<uint32, uint32>, 1> const items = { { { ScrollItem(spec, kind), count } } };
-    if (!GiveItems(player, items))
-        return "REPURCHASE_WILDCARD_ROLL_UNKNOWN";
     RepurchasePrice const& price = REPURCHASE_PRICES[kind];
+    CoAEconomyRow const tag = gold
+        ? CoAEconomyLog::Tag(CoAEconomyEvent::StoreBuy, CoAGrantSource::WildcardStore, 0, 0, -int64(price.Money * count))
+        : CoAEconomyLog::Tag(CoAEconomyEvent::StoreBuy, CoAGrantSource::WildcardStore, RUNE_OF_ASCENSION_ITEM,
+            price.Runes * count);
+    if (!GiveItems(player, items, &tag))
+        return "REPURCHASE_WILDCARD_ROLL_UNKNOWN";
     if (gold)
         player->ModifyMoney(-int32(price.Money * count));
     else
@@ -1404,7 +1411,8 @@ void DropCards(Player* killer, Creature* killed)
         if (std::optional<std::uint32_t> const item = RollCardDrop(Loaded, RandomBelowBound))
         {
             std::array<std::pair<uint32, uint32>, 1> const drop = { { { *item, 1 } } };
-            GiveItems(player, drop);
+            CoAEconomyRow const tag = CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Wildcard);
+            GiveItems(player, drop, &tag);
         }
     });
 }
@@ -1418,7 +1426,10 @@ void GrantBossMarks(Player* killer, Creature* killed)
     RewardKillers(killer, killed, [&runes](Player* player)
     {
         if (IsWildcardHero(player))
-            GiveItems(player, runes);
+        {
+            CoAEconomyRow const tag = CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Wildcard);
+            GiveItems(player, runes, &tag);
+        }
     });
 }
 
@@ -1517,6 +1528,7 @@ char const* RevealPendingCards(Player* player, std::vector<uint32> const& ids)
     }
     player->SendDirectMessage(&removed);
     player->SendDirectMessage(&collected);
+    CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Wildcard));
     if (claim.Tickets)
         player->AddItem(DARKMOON_TICKET_ITEM, claim.Tickets);
     if (claim.GoldenTickets)
@@ -1537,7 +1549,9 @@ char const* PurchaseBoosterPacks(Player* player, uint32 count)
     uint32 const price = count * BOOSTER_PRICE;
     if (!player->HasEnoughMoney(price))
         return "PURCHASE_SEALED_CARD_BOOSTER_PACK_NO_MONEY";
-    if (!GiveItems(player, { { { BOOSTER_PACK_ITEMS[0], count }, { BOOSTER_PACK_ITEMS[1], count } } }))
+    CoAEconomyRow const tag = CoAEconomyLog::Tag(CoAEconomyEvent::StoreBuy, CoAGrantSource::WildcardStore, 0, 0,
+        -int64(price));
+    if (!GiveItems(player, { { { BOOSTER_PACK_ITEMS[0], count }, { BOOSTER_PACK_ITEMS[1], count } } }, &tag))
         return "PURCHASE_SEALED_CARD_BOOSTER_PACK_UNKNOWN";
 
     player->ModifyMoney(-int32(price));
@@ -2143,6 +2157,7 @@ void RevealCardItem(Player* player, uint32 item)
     WorldPacket collected(SMSG_SKILL_CARD_COLLECTED, 16);
     collected << uint32(1) << card << RankOf(Loaded, card) << uint8(1);
     player->SendDirectMessage(&collected);
+    CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Wildcard));
     for (uint32 pack : bonusPacks)
         player->AddItem(pack, 1);
     LOG_INFO("coa", "Wildcard skill card item {} revealed card {} for {}", item, card, player->GetName());
@@ -2195,7 +2210,11 @@ char const* SellStoreCard(Player* player, StoreCard const& offer, uint32 count)
     }
     player->DestroyItemCount(offer.Token, offer.Price * count, true);
     if (Item* bought = player->StoreNewItem(destination, offer.Item, true))
+    {
         player->SendNewItem(bought, count, true, false);
+        CoAEconomyLog::Gained(player, CoAEconomyLog::Tag(CoAEconomyEvent::StoreBuy, CoAGrantSource::WildcardStore,
+            offer.Token, offer.Price * count), bought, count);
+    }
     LOG_INFO("coa", "Wildcard store card {} x {} bought by {} for {} x {}", offer.Item, count, player->GetName(),
         offer.Price * count, offer.Token);
     return "PURCHASE_CUSTOM_STORE_ITEM_OK";

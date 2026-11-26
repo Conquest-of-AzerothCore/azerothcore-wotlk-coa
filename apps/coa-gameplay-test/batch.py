@@ -1210,6 +1210,7 @@ def run_batch(args, directory=catalog.DIRECTORY):
                               or 'quest_log_size' in case.scenario or 'max_player_level' in case.scenario
                               or case.scenario.get('chat_log', False)
                               or case.scenario.get('battleground_kill_xp', False)
+                              or case.scenario.get('economy_log', False)
                               or (not case.exploratory and case.key in exclusive) or case.hour is not None)
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=True)

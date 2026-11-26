@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "CoAEconomyLog.h"
 #include "Item.h"
 #include "ItemScript.h"
 #include "Player.h"
@@ -73,9 +74,11 @@ bool PayRunePouch(Player* player, Item* item)
     if (!runes || player->GetItemCount(RuneOfAscensionItem, false) <= held)
         return true;
 
+    uint32 const pouch = item->GetEntry();
     uint32 count = 1;
     player->DestroyItemCount(item, count, true);
     player->SendNewItem(runes, amount, false, false, true);
+    CoAEconomyLog::Gained(player, CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, pouch), runes, amount);
     return true;
 }
 

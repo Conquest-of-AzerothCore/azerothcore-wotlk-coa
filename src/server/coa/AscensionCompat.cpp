@@ -16,6 +16,7 @@
 #include "AscensionItemScaling.h"
 #include "AscensionPyromancer.h"
 #include "AscensionCultist.h"
+#include "AscensionVanityItems.h"
 #include "AscensionVenomancer.h"
 #include "AscensionTinker.h"
 #include "AscensionTinkerData.h"
@@ -96,6 +97,7 @@
 #include "Chat.h"
 #include "StringFormat.h"
 #include "ClientDBC.h"
+#include "CoAEconomyLog.h"
 #include "CommandScript.h"
 #include "ConfigValueCache.h"
 #include "DatabaseEnv.h"
@@ -6239,6 +6241,8 @@ public:
     return instance;
   }
 
+  [[nodiscard]] bool IsVanityItem(uint32 itemId) const { return _vanityItems.contains(itemId); }
+
   bool OwnsVanityItem(Player const* player, uint32 itemId) {
     std::shared_ptr<PlayerCollectionState> state = GetState(player);
     if (!state || !state->OwnedVanityItems.contains(itemId))
@@ -8163,8 +8167,15 @@ private:
     player->SendDirectMessage(&learned);
   }
 
+  static void LogVanityCollect(Player *player, uint32 itemId) {
+    CoAEconomyRow row;
+    row.event = CoAEconomyEvent::VanityCollect;
+    row.itemEntry = itemId;
+    CoAEconomyLog::Queue(player, row);
+  }
+
   void CollectItem(Player *player, PlayerCollectionState &state, uint32 itemId,
-                   bool notifyClient, bool bound) {
+                   bool notifyClient, bool bound, bool storePurchase = false) {
     CollectItemAppearance(player, state, itemId, notifyClient);
 
     if (bound && _vanityItems.contains(itemId))
@@ -8182,6 +8193,8 @@ private:
       stmt->SetData(0, state.AccountId);
       stmt->SetData(1, itemId);
       CharacterDatabase.Execute(stmt);
+      if (!storePurchase)
+        LogVanityCollect(player, itemId);
 
       if (notifyClient)
         SendVanityCollectionAdded(player, itemId);
@@ -8193,6 +8206,8 @@ private:
       stmt->SetData(0, state.AccountId);
       stmt->SetData(1, itemId);
       CharacterDatabase.Execute(stmt);
+      if (!storePurchase)
+        LogVanityCollect(player, itemId);
 
       if (notifyClient)
         SendVanityCollectionAdded(player, itemId);
@@ -8555,7 +8570,13 @@ private:
         }
 
         player->DestroyItemCount(VANITY_BAZAAR_TOKEN_ITEM, cost, true);
-        CollectItem(player, *state, itemId, true, true);
+        CollectItem(player, *state, itemId, true, true, true);
+        CoAEconomyRow row;
+        row.event = CoAEconomyEvent::VanityStoreBuy;
+        row.itemEntry = itemId;
+        row.itemCount = 1;
+        row.tokens = -int32(cost);
+        CoAEconomyLog::Queue(player, row);
         LOG_INFO("coa", "{} bought vanity item {} for {} Bazaar Tokens", player->GetName(), itemId, cost);
     }
 
@@ -8592,6 +8613,13 @@ private:
         {
             bought->SetBinding(true);
             player->SendNewItem(bought, 1, true, false);
+            CoAEconomyRow row;
+            row.event = CoAEconomyEvent::VanityStoreBuy;
+            row.itemEntry = itemId;
+            row.itemGuid = bought->GetGUID().GetCounter();
+            row.itemCount = 1;
+            row.tokens = -int32(cost);
+            CoAEconomyLog::Queue(player, row);
         }
 
         LOG_INFO("coa", "{} bought consumable vanity item {} for {} Bazaar Tokens", player->GetName(), itemId, cost);
@@ -12193,4 +12221,9 @@ void AddAscensionCompatScripts() {
   new AscensionCompatWorldScript();
   new AscensionCompatAllCreatureScript();
   new AscensionCompatPetScript();
+}
+
+bool IsAscensionVanityItem(uint32 itemId)
+{
+  return AscensionCollectionService::Instance().IsVanityItem(itemId);
 }

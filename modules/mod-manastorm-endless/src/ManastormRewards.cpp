@@ -3,6 +3,7 @@
 #include "ManastormExperience.h"
 
 #include "CharacterCache.h"
+#include "CoAEconomyLog.h"
 #include "Creature.h"
 #include "Field.h"
 #include "GameTime.h"
@@ -1192,6 +1193,8 @@ bool ManastormRewards::AwardCoAGreedyReward(Player* player, ManastormRun const& 
     if (!player->ModifyMoney(int32(gold)))
         return false;
     player->SaveGoldToDB(transaction);
+    CoAEconomyLog::GainedInto(transaction, guid,
+        CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Manastorm, 0, 0, int64(gold)), nullptr, 0);
     if (!CharacterDatabase.AsyncCommitTransaction(transaction).m_future.get())
     {
         player->SetMoney(previousGold);
@@ -2192,6 +2195,9 @@ bool ManastormRewards::PrepareItemDelivery(
 
             item->SaveToDB(
                 transaction);
+
+            CoAEconomyLog::GainedInto(transaction, characterGuid,
+                CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::Manastorm), item.get(), count);
 
             mail.AddItem(
                 item->GetGUID()

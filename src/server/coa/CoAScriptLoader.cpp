@@ -479,6 +479,7 @@ void AddSC_AscensionDailyLogin();
 void AddSC_AscensionClassBundleStore();
 void AddSC_AscensionHeirloomWeaponStore();
 void AddSC_AscensionRealmLevelPurchase();
+void AddSC_CoAEconomyLog();
 void AddSC_AscensionLfgObjective();
 void AddSC_AscensionBushcraft();
 void AddSC_AscensionVoidPortal();
@@ -965,6 +966,7 @@ void AddCoAScripts()
     AddSC_AscensionClassBundleStore();
     AddSC_AscensionHeirloomWeaponStore();
     AddSC_AscensionRealmLevelPurchase();
+    AddSC_CoAEconomyLog();
     AddSC_AscensionLfgObjective();
     AddSC_AscensionBushcraft();
     AddSC_AscensionVoidPortal();

@@ -272,6 +272,14 @@ enum PlayerHook
     PLAYERHOOK_ON_AFTER_GUILD_CHAT,
     PLAYERHOOK_ON_AFTER_CHANNEL_CHAT,
     PLAYERHOOK_ON_AFTER_SEND_MAIL,
+    PLAYERHOOK_ON_AFTER_DESTROY_ITEM,
+    PLAYERHOOK_ON_AFTER_SELL_ITEM,
+    PLAYERHOOK_ON_AFTER_BUY_BACK_ITEM,
+    PLAYERHOOK_ON_AFTER_PLACE_AUCTION_BID,
+    PLAYERHOOK_ON_AFTER_TAKE_MAIL_ITEM,
+    PLAYERHOOK_ON_AFTER_TAKE_MAIL_MONEY,
+    PLAYERHOOK_ON_AFTER_TRADE_ITEM,
+    PLAYERHOOK_ON_AFTER_TRADE_MONEY,
     PLAYERHOOK_END
 };
 
@@ -1113,6 +1121,22 @@ public:
      * @param itemEntry The entry of the taken item
      */
     virtual void OnPlayerTakeMailItem(Player* /*player*/, Mail const* /*mail*/, uint32 /*itemEntry*/) { }
+
+    virtual void OnPlayerAfterDestroyItem(Player* /*player*/, uint32 /*itemEntry*/, ObjectGuid::LowType /*itemGuid*/, uint32 /*count*/) { }
+
+    virtual void OnPlayerAfterSellItem(Player* /*player*/, uint32 /*itemEntry*/, ObjectGuid::LowType /*itemGuid*/, uint32 /*count*/, uint32 /*money*/, Creature* /*vendor*/) { }
+
+    virtual void OnPlayerAfterBuyBackItem(Player* /*player*/, uint32 /*itemEntry*/, ObjectGuid::LowType /*itemGuid*/, uint32 /*count*/, uint32 /*price*/, Creature* /*vendor*/) { }
+
+    virtual void OnPlayerAfterPlaceAuctionBid(Player* /*player*/, AuctionEntry const* /*auction*/, uint32 /*paid*/, bool /*buyout*/, CharacterDatabaseTransaction /*trans*/) { }
+
+    virtual void OnPlayerAfterTakeMailItem(Player* /*player*/, Mail const* /*mail*/, uint32 /*itemEntry*/, ObjectGuid::LowType /*itemGuid*/, uint32 /*count*/, CharacterDatabaseTransaction /*trans*/) { }
+
+    virtual void OnPlayerAfterTakeMailMoney(Player* /*player*/, Mail const* /*mail*/, uint32 /*money*/, CharacterDatabaseTransaction /*trans*/) { }
+
+    virtual void OnPlayerAfterTradeItem(Player* /*receiver*/, Player* /*giver*/, uint32 /*itemEntry*/, ObjectGuid::LowType /*itemGuid*/, uint32 /*count*/) { }
+
+    virtual void OnPlayerAfterTradeMoney(Player* /*receiver*/, Player* /*giver*/, uint32 /*money*/) { }
 
     /**
      * @brief This hook is called when the core checks whether the player may see or take a quest.

@@ -20,6 +20,7 @@
 #include "AscensionWildcard.h"
 #include "AscensionWildcardStarterData.h"
 #include "AsyncCallbackProcessor.h"
+#include "AuctionHouseMgr.h"
 #include "Bag.h"
 #include "BattlegroundMgr.h"
 #include "BattlegroundQueue.h"
@@ -29,6 +30,7 @@
 #include "ClientDBC.h"
 #include "CoAChatLog.h"
 #include "CoACreatureScaling.h"
+#include "CoAEconomyLog.h"
 #include "CoAPtrCharacterCopy.h"
 #include "Config.h"
 #include "Creature.h"
@@ -622,6 +624,8 @@ public:
         Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL, settings.get<bool>("mail", false));
         if (auto group = settings.get_optional<bool>("group"))
             Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP, *group);
+        if (auto auction = settings.get_optional<bool>("auction"))
+            Set(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION, *auction);
     }
 
     TwoSideConfig(TwoSideConfig const&) = delete;
@@ -690,6 +694,40 @@ public:
 
 private:
     bool _original;
+};
+
+class EconomyLogConfig
+{
+public:
+    EconomyLogConfig() : _original(CoAEconomyLog::SetEnabled(true)) { }
+
+    EconomyLogConfig(EconomyLogConfig const&) = delete;
+    EconomyLogConfig& operator=(EconomyLogConfig const&) = delete;
+
+    ~EconomyLogConfig()
+    {
+        CoAEconomyLog::SetEnabled(_original);
+    }
+
+private:
+    bool _original;
+};
+
+class EconomyLogKeepDays
+{
+public:
+    explicit EconomyLogKeepDays(uint32 original) : _original(original) { }
+
+    EconomyLogKeepDays(EconomyLogKeepDays const&) = delete;
+    EconomyLogKeepDays& operator=(EconomyLogKeepDays const&) = delete;
+
+    ~EconomyLogKeepDays()
+    {
+        CoAEconomyLog::SetKeepDays(_original, uint32(GameTime::GetGameTime().count()));
+    }
+
+private:
+    uint32 _original;
 };
 
 class QuestLogSizeConfig
@@ -2408,6 +2446,8 @@ public:
         }
         if (_scenario.get<bool>("battleground_kill_xp", false))
             _battlegroundKillXp.emplace();
+        if (_scenario.get<bool>("economy_log", false))
+            _economyLog.emplace();
         if (auto questLogSize = _scenario.get_optional<uint32>("quest_log_size"))
         {
             Require(*questLogSize >= NATIVE_QUEST_LOG_SIZE && *questLogSize <= MAX_QUEST_LOG_SIZE,
@@ -4911,7 +4951,11 @@ private:
         {
             bool const questActiveOnly = metric == "nearby_gameobject_quest_active";
             std::list<GameObject*> objects;
-            player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
+            if (auto listed = step.get_child_optional("entries"))
+                for (auto const& [key, entry] : *listed)
+                    player->GetGameObjectListWithEntryInGrid(objects, entry.get_value<uint32>(), 20.0f);
+            else
+                player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
             objects.remove_if([player, questActiveOnly](GameObject* object)
             {
                 return !object->IsInWorld() || !player->InSamePhase(object) ||
@@ -7086,6 +7130,52 @@ private:
                 player->GetSession()->GetAccountId(), player->GetGUID().GetCounter(), foreignOnly);
             return result ? double(result->Fetch()[0].Get<uint64>()) : 0.0;
         }
+        if (metric == "economy_log_queued")
+            return double(CoAEconomyLog::QueuedRows(player));
+        if (metric == "economy_log_rows")
+        {
+            std::optional<CoAEconomyEvent> const event = CoAEconomyLog::EventByName(step.get<std::string>("economy_event"));
+            Require(event.has_value(), "Unknown economy_log_rows event");
+            if (step.get<bool>("economy_save", true))
+            {
+                CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+                player->SaveToDB(trans, false, false);
+                TransactionCallback saved = CharacterDatabase.AsyncCommitTransaction(trans);
+                Require(saved.m_future.get(), "economy_log_rows save transaction failed");
+            }
+            std::string filter;
+            if (uint32 const item = step.get<uint32>("item", 0))
+                filter += Acore::StringFormat(" AND item_entry = {}", item);
+            for (auto const& [field, column] : {std::pair{"economy_count", "item_count"}, std::pair{"economy_gold", "gold"},
+                     std::pair{"economy_tokens", "tokens"}, std::pair{"economy_cost_item", "cost_item"},
+                     std::pair{"economy_cost_count", "cost_count"}, std::pair{"economy_source", "source"}})
+                if (auto const value = step.get_optional<int64>(field))
+                    filter += Acore::StringFormat(" AND {} = {}", column, *value);
+            if (auto const tokens = step.get_optional<int64>("economy_min_tokens"))
+                filter += Acore::StringFormat(" AND tokens >= {}", *tokens);
+            if (auto const other = step.get_optional<std::string>("economy_other"))
+            {
+                Player* const party = GetPlayer(*other);
+                Require(party != nullptr, "economy_other needs a player actor");
+                filter += Acore::StringFormat(" AND other_guid = {}", party->GetGUID().GetCounter());
+            }
+            if (auto const other = step.get_optional<std::string>("economy_other_account"))
+            {
+                Player* const party = GetPlayer(*other);
+                Require(party != nullptr, "economy_other_account needs a player actor");
+                filter += Acore::StringFormat(" AND other_account = {}", party->GetSession()->GetAccountId());
+            }
+            if (auto const entry = step.get_optional<uint32>("economy_item_of"))
+            {
+                Item* const held = player->GetItemByEntry(*entry);
+                Require(held != nullptr, "economy_item_of needs a carried item");
+                filter += Acore::StringFormat(" AND item_guid = {}", held->GetGUID().GetCounter());
+            }
+            QueryResult result = CharacterDatabase.Query("SELECT COUNT(*) FROM coa_economy_log WHERE guid = {} AND event = {}{}",
+                player->GetGUID().GetCounter(), uint32(*event), filter);
+            Require(result != nullptr, "economy_log_rows could not read coa_economy_log");
+            return double(result->Fetch()[0].Get<uint64>());
+        }
         if (metric == "mail_count" || metric == "mail_item_count" || metric == "mail_has_item")
         {
             uint32 mails = 0, items = 0;
@@ -7632,6 +7722,27 @@ private:
                                     }
                             Require(found != nullptr, "Packet mail field requires a mail carrying the item");
                             request << (kind == "mail_id" ? found->messageID : uint32(foundItem->item_guid));
+                        }
+                        else if (kind == "money_mail_id")
+                        {
+                            uint32 const wanted = value.get_value<uint32>();
+                            Mail const* found = nullptr;
+                            for (Mail const* mail : player->GetMails())
+                                if (!found && mail->items.empty() && mail->money == wanted)
+                                    found = mail;
+                            Require(found != nullptr, "Packet money mail id requires a mail with that money and no items");
+                            request << found->messageID;
+                        }
+                        else if (kind == "auction_id")
+                        {
+                            uint32 const wanted = value.get_value<uint32>();
+                            uint32 newest = 0;
+                            for (AuctionHouseId const house : {AuctionHouseId::Alliance, AuctionHouseId::Horde, AuctionHouseId::Neutral})
+                                for (auto const& [id, auction] : sAuctionMgr->GetAuctionsMapByHouseId(house)->GetAuctions())
+                                    if (auction->item_template == wanted)
+                                        newest = std::max(newest, id);
+                            Require(newest != 0, "Packet auction id requires an auction carrying the item");
+                            request << newest;
                         }
                         else if (kind == "gameobject_guid")
                         {
@@ -8784,7 +8895,11 @@ private:
             if (auto ownerId = step.get_optional<std::string>("owner"))
                 owner = GetPlayer(*ownerId)->GetGUID();
             std::list<GameObject*> objects;
-            player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
+            if (auto listed = step.get_child_optional("entries"))
+                for (auto const& [key, entry] : *listed)
+                    player->GetGameObjectListWithEntryInGrid(objects, entry.get_value<uint32>(), 20.0f);
+            else
+                player->GetGameObjectListWithEntryInGrid(objects, step.get<uint32>("entry"), 20.0f);
             objects.remove_if([player, owner](GameObject* object)
             {
                 return !object->IsInWorld() || !player->InSamePhase(object) ||
@@ -9073,13 +9188,14 @@ private:
         else if (action == "system_mail")
         {
             std::string const kind = step.get<std::string>("kind");
-            Require(kind == "postmaster" || kind == "reward" || kind == "server",
-                    "system_mail kind must be postmaster, reward or server");
+            Require(kind == "postmaster" || kind == "reward" || kind == "server" || kind == "self",
+                    "system_mail kind must be postmaster, reward, server or self");
             Item* item = Item::CreateItem(step.get<uint32>("item"), 1, player);
             Require(item != nullptr, "system_mail could not create the item");
             CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
             item->SaveToDB(trans);
             MailSender const sender = kind == "postmaster" ? MailSender(MAIL_CREATURE, 34337)
+                                    : kind == "self"       ? MailSender(player)
                                                            : MailSender(MAIL_NORMAL, 0, MAIL_STATIONERY_GM);
             std::string const subject = kind == "reward" ? RECRUIT_A_FRIEND_REWARD_MAIL_SUBJECT : "System mail";
             MailDraft(subject, "Sent by the gameplay test.").AddItem(item)
@@ -9098,6 +9214,16 @@ private:
             WorldPackets::Item::DestroyItem request(std::move(packet));
             request.Read();
             player->GetSession()->HandleDestroyItemOpcode(request);
+        }
+        else if (action == "economy_log_cleanup")
+            CoAEconomyLog::Cleanup(uint32(GameTime::GetGameTime().count()) + step.get<uint32>("days_ahead") * DAY,
+                !step.get<bool>("background", false));
+        else if (action == "economy_log_keep_days")
+        {
+            uint32 const previous = CoAEconomyLog::SetKeepDays(step.get<uint32>("days"),
+                uint32(GameTime::GetGameTime().count()));
+            if (!_economyLogKeepDays)
+                _economyLogKeepDays.emplace(previous);
         }
         else if (action == "start_challenge")
         {
@@ -10018,6 +10144,8 @@ private:
     std::optional<BattlegroundKillXpConfig> _battlegroundKillXp;
     std::optional<QuestLogSizeConfig> _questLogSize;
     std::optional<MaxPlayerLevelConfig> _maxPlayerLevel;
+    std::optional<EconomyLogConfig> _economyLog;
+    std::optional<EconomyLogKeepDays> _economyLogKeepDays;
     GameEventStates _gameEvents;
     ConsoleRestores _consoleRestores;
     std::optional<PlacementAuditTotals> _placementAudit;

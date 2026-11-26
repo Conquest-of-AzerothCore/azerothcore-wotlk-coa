@@ -72,6 +72,7 @@
 #include "AscensionDungeonRelease.h"
 #include "AscensionSpecLoot.h"
 #include "CoADungeonCompletion.h"
+#include "CoAEconomyLog.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
 #include "SpellScript.h"
@@ -1072,16 +1073,19 @@ namespace
             SendTimer(player, run);
             SendState(player, run, run.state);
 
-            for (uint32 i = 0; i < caches; ++i)
-                for (Reward const& r : g_rewards)
-                    if (run.level >= r.levelMin && run.level <= r.levelMax)
-                        Give(player, r.item, r.count);
-            if (caches)
-                Give(player, CacheForLevel(run.level), caches);
-            if (timed)
             {
-                SetBestLevel(player->GetGUID(), run.level);
-                GiveCoins(player, run.level, bonusPercent, run.dungeon.expansion);
+                CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::MythicPlus));
+                for (uint32 i = 0; i < caches; ++i)
+                    for (Reward const& r : g_rewards)
+                        if (run.level >= r.levelMin && run.level <= r.levelMax)
+                            Give(player, r.item, r.count);
+                if (caches)
+                    Give(player, CacheForLevel(run.level), caches);
+                if (timed)
+                {
+                    SetBestLevel(player->GetGUID(), run.level);
+                    GiveCoins(player, run.level, bonusPercent, run.dungeon.expansion);
+                }
             }
 
             if (player->GetGUID() == run.owner)
@@ -2033,8 +2037,11 @@ public:
 
         uint32 one = 1;
         player->DestroyItemCount(item, one, true);
-        for (uint32 reward : rewards)
-            Give(player, reward, 1);
+        {
+            CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, entry));
+            for (uint32 reward : rewards)
+                Give(player, reward, 1);
+        }
         if (!spoils)
         {
             AddWeekly(player->GetGUID(), 0, 1);
@@ -2071,6 +2078,7 @@ public:
         {
             if (difficulty == 2 || sLFGMgr->selectedRandomLfgDungeon(player->GetGUID()))
                 return;
+            CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::DungeonBoss));
             Give(player, ITEM_SPOILS_HEROIC, 1);
         });
         LOG_INFO("module", "Dungeon spoils: map {} difficulty {} instance {} completed (dungeon {})", map->GetId(),
@@ -2218,12 +2226,14 @@ namespace
         uint8 const bag = item->GetBagSlot();
         uint8 const slot = item->GetSlot();
         bool const equipped = item->IsEquipped();
+        CoAEconomyRow const tag = CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::MythicPlus, item->GetEntry(), 1);
         player->DestroyItem(bag, slot, true);
         if (equipped)
         {
-            player->EquipNewItem(slot, newEntry, true);
+            CoAEconomyLog::Gained(player, tag, player->EquipNewItem(slot, newEntry, true), 1);
             return;
         }
+        CoAEconomyLog::GainScope scope(player, tag);
         ItemPosCountVec dest;
         if (player->CanStoreNewItem(bag, slot, dest, newEntry, 1) == EQUIP_ERR_OK)
             player->StoreNewItem(dest, newEntry, true);
@@ -2240,6 +2250,9 @@ namespace
             return false;
         }
         player->DestroyItemCount(coinItem, coins, true);
+        if (coins)
+            CoAEconomyLog::Queue(player, CoAEconomyLog::Tag(CoAEconomyEvent::StoreBuy, CoAGrantSource::MythicPlus,
+                coinItem, coins));
         return true;
     }
 
@@ -2262,6 +2275,8 @@ namespace
             ChatHandler(player->GetSession()).PSendSysMessage("You have reached the weekly cap of {} Mythic Coins.", WeeklyCoinCap());
             return false;
         }
+        CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::MythicPlus,
+            item->GetEntry(), 1));
         player->DestroyItem(item->GetBagSlot(), item->GetSlot(), true);
         Give(player, sConfigMgr->GetOption<uint32>("MythicPlus.CoinItem", 1414500), value);
         AddWeekly(player->GetGUID(), value, 0);
@@ -2590,6 +2605,7 @@ public:
         for (Player* target : BoonTargets(player))
         {
             uint32 const boon = MYTHICAL_BOON_ITEMS[urand(0, MYTHICAL_BOON_ITEMS.size() - 1)];
+            CoAEconomyLog::GainScope scope(target, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::MythicPlus));
             target->AddItem(boon, 1);
         }
         creature->DespawnOrUnsummon(0ms, 7 * 24h);

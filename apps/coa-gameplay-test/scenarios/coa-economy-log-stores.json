@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Economy log: Vanity Store, vanity collection, Heirloom Weapon store and Call Board token spending are logged",
+  "contract": [
+    "With the economy log on, a Vanity Store purchase writes one vanity_store_buy row with the item and the Bazaar Tokens it cost, for a collection item and for a consumable alike; buying into the collection is not also a vanity_collect.",
+    "An item that enters the vanity collection any other way writes one vanity_collect row with the item.",
+    "A purchase from the Heirloom Weapon store writes one heirloom_token_buy row with the weapon and the Heirloom Weapon Token (414010) it cost; a Call Board contract completed with Bazaar Tokens writes one tokens_spent row with the tokens taken.",
+    "This server's VanityCollection.dbc sells the Dealer's Draft Deck (777910) for 500 tokens and Keeper's Scroll: Golganneth (696661, consumable) for 60; Feather of Ancients: Azeroth (134989) joins the collection when it is obtained; the Heirloom Weapon store (custom store 7) sells the Bloodied Arcanite Reaper (1642943) for one token.",
+    "Duel! (quest 80651) rewards 40 Bazaar Tokens, so its first Complete Now costs 40 x 2.0 = 80 tokens (CoA.CallboardContracts.TokenCostMultiplier 2.0, MinTokenCost 50); the completion then grants the quest's 40 tokens and the Ethereal Bazaar's random quest bonus, so the bag count alone does not show the price."
+  ],
+  "timeout_ms": 120000,
+  "economy_log": true,
+  "vanity_ownership": {"unlock_all": false},
+  "players": [
+    {"id": "shopper", "race": 1, "class": 1, "level": 60}
+  ],
+  "location": {"map": 0, "x": -8822.9, "y": 628.4, "z": 93.8, "o": 2.4},
+  "steps": [
+    {"action": "wait", "label": "Let login hooks settle", "ms": 3000},
+
+    {"action": "add_item", "label": "fixture: 500 Bazaar Tokens", "actor": "shopper", "item": 975001, "count": 500},
+    {"action": "client_packet", "label": "Buy the Dealer's Draft Deck from the Vanity Store", "actor": "shopper", "opcode": 1315, "fields": [{"u8": 3}, {"u32": 777910}]},
+    {"action": "assert", "label": "for its 500 Bazaar Tokens", "actor": "shopper", "metric": "item_count", "item": 975001, "equals": 0, "within_ms": 2000},
+    {"action": "client_packet", "label": "Deliver the deck from the collection", "actor": "shopper", "opcode": 1315, "fields": [{"u8": 2}, {"u32": 777910}]},
+    {"action": "assert", "label": "The deck is in the collection", "actor": "shopper", "metric": "item_count", "item": 777910, "equals": 1, "within_ms": 2000},
+
+    {"action": "add_item", "label": "fixture: 60 Bazaar Tokens", "actor": "shopper", "item": 975001, "count": 60},
+    {"action": "client_packet", "label": "Buy Keeper's Scroll: Golganneth from the Vanity Store", "actor": "shopper", "opcode": 1315, "fields": [{"u8": 3}, {"u32": 696661}]},
+    {"action": "assert", "label": "The scroll is bought", "actor": "shopper", "metric": "item_count", "item": 696661, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "for its 60 Bazaar Tokens", "actor": "shopper", "metric": "item_count", "item": 975001, "equals": 0},
+
+    {"action": "add_item", "label": "Obtain a Feather of Ancients: Azeroth", "actor": "shopper", "item": 134989},
+    {"action": "wait", "ms": 1000},
+
+    {"action": "add_item", "label": "fixture: one Heirloom Weapon Token", "actor": "shopper", "item": 414010},
+    {"action": "use_item", "label": "Use the token", "actor": "shopper", "item": 414010, "spell": 1},
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Open the Heirloom Weapons store", "actor": "shopper", "opcode": 1721, "fields": [{"u32": 7}]},
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "Buy the Bloodied Arcanite Reaper", "actor": "shopper", "opcode": 1723, "fields": [{"u32": 1642943}, {"u32": 1}]},
+    {"action": "assert", "label": "The weapon is bought", "actor": "shopper", "metric": "item_count", "item": 1642943, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "for the token", "actor": "shopper", "metric": "item_count", "item": 414010, "equals": 0},
+
+    {"action": "add_item", "label": "fixture: Bazaar Tokens for a Call Board contract", "actor": "shopper", "item": 975001, "count": 5000},
+    {"action": "snapshot", "actor": "shopper", "metric": "item_count", "item": 975001, "save_as": "tokens"},
+    {"action": "client_packet", "label": "Complete Now Duel! for Bazaar Tokens", "actor": "shopper", "opcode": 1371, "fields": [{"u32": 4}, {"u8": 68}, {"u8": 117}, {"u8": 101}, {"u8": 108}, {"u8": 0}, {"u32": 1}]},
+    {"action": "wait", "ms": 1000},
+    {"action": "snapshot", "label": "MEASURE: tokens left after the contract", "actor": "shopper", "metric": "item_count", "item": 975001, "save_as": "tokens_after"},
+    {"action": "assert", "label": "The contract took Bazaar Tokens", "actor": "shopper", "metric": "item_count", "item": 975001, "relative_to": "tokens", "max": -1},
+
+    {"action": "assert", "label": "THE LOG: the deck for 500 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "item": 777910, "economy_count": 1, "economy_tokens": -500, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the scroll for 60 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "item": 696661, "economy_count": 1, "economy_tokens": -60, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: two Vanity Store purchases", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_store_buy", "equals": 2, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the bought deck is not also a vanity_collect", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_collect", "item": 777910, "equals": 0},
+    {"action": "assert", "label": "THE LOG: the obtained feather is a vanity_collect", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "vanity_collect", "item": 134989, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the weapon for one Heirloom Weapon Token", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "heirloom_token_buy", "item": 1642943, "economy_count": 1, "economy_cost_item": 414010, "economy_cost_count": 1, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the contract's price of 80 tokens", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "tokens_spent", "economy_tokens": -80, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: one token spend", "actor": "shopper", "metric": "economy_log_rows", "economy_event": "tokens_spent", "equals": 1, "within_ms": 2000}
+  ]
+}

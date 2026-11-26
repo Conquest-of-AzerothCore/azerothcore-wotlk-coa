@@ -1,0 +1,258 @@
+{
+  "schema": 1,
+  "name": "Economy log: claiming and opening a Crow's Cache",
+  "contract": [
+    "With the economy log on, a level-60 High-Risk Mercenary claiming the Crow's Cache chest (gameobject 994311) writes one reward row for the Crow's Cache item 1615010 with source 1 (Crow's Cache).",
+    "Opening the cache in Gadgetzan writes one cache_open row per item with the cache as source: three Heroic Bloodforged items, three High-Risk materials (20 each of 967008, 967014, 967017), Golden Marks of War 1201003 (10) and Silver Marks of War 1201002 (5 to 10) and 400 Bazaar Tokens 975001: nine rows.",
+    "Its 400 Bazaar Tokens are counted once, in the tokens_earned row with source 5 (cache)."
+  ],
+  "timeout_ms": 150000,
+  "economy_log": true,
+  "location": {
+    "map": 1,
+    "x": -7830.0,
+    "y": -3465.0,
+    "z": 56.87,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "owner",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "owner",
+      "value": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "owner",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "owner",
+      "spell": 9930874,
+      "stacks": 1
+    },
+    {
+      "action": "pvp",
+      "actor": "owner",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "owner",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "command",
+      "label": "GM mode keeps Tanaris creatures from interrupting the 10-second claim",
+      "actor": "owner",
+      "command": ".gm on"
+    },
+    {
+      "action": "console",
+      "label": "Clear unclaimed Crow's Cache events another case left",
+      "command": "crows cancel"
+    },
+    {
+      "action": "console",
+      "command": "crows schedule 3"
+    },
+    {
+      "action": "wait",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cache chest is up",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let the warning end",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the available chest is up",
+      "actor": "owner",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "within_ms": 3000,
+      "equals": 1
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "label": "Claim the chest",
+      "actor": "owner",
+      "entry": 994311
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the claim cast starts",
+      "actor": "owner",
+      "metric": "casting",
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "wait",
+      "ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the claim is still casting halfway",
+      "actor": "owner",
+      "metric": "casting",
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "The claim gives the Crow's Cache",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1615010,
+      "within_ms": 1500,
+      "equals": 1
+    },
+    {
+      "action": "teleport",
+      "label": "Carry it to Gadgetzan",
+      "actor": "owner",
+      "map": 1,
+      "x": -7154.0,
+      "y": -3826.0,
+      "z": 44.5,
+      "o": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the carrier aura is gone in Gadgetzan",
+      "actor": "owner",
+      "metric": "aura",
+      "spell": 1005000,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "snapshot",
+      "label": "Bazaar Tokens before the cache is opened",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_before_open"
+    },
+    {
+      "action": "use_item",
+      "label": "Open the cache",
+      "actor": "owner",
+      "item": 1615010,
+      "spell": 93461
+    },
+    {
+      "action": "assert",
+      "label": "The cache is used up",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 1615010,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: twenty of the first material",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 967008,
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cache gave exactly 400 Bazaar Tokens",
+      "actor": "owner",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_before_open",
+      "equals": 400
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the claimed Crow's Cache",
+      "actor": "owner",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1615010,
+      "economy_count": 1,
+      "economy_source": 1,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: nine items from the cache, the Bazaar Tokens among them",
+      "actor": "owner",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 1615010,
+      "equals": 9,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: one of them is the twenty High-Risk materials",
+      "actor": "owner",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "item": 967008,
+      "economy_count": 20,
+      "economy_source": 1615010,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the 400 Bazaar Tokens as a cache_open row",
+      "actor": "owner",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "item": 975001,
+      "economy_count": 400,
+      "economy_source": 1615010,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the cache's 400 Bazaar Tokens counted once",
+      "actor": "owner",
+      "metric": "economy_log_rows",
+      "economy_event": "tokens_earned",
+      "economy_source": 5,
+      "equals": 1,
+      "within_ms": 2000,
+      "economy_tokens": 400
+    }
+  ]
+}

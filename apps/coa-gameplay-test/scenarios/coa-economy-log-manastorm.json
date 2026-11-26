@@ -1,0 +1,159 @@
+{
+  "schema": 1,
+  "name": "Economy log: Manastorm floor rewards, the run's currency and a Manastorm Cache",
+  "contract": [
+    "With the economy log on, every item the Manastorm module delivers (PrepareItemDelivery: a mail row first, moved into the bags of an online player) writes one reward row with source 4 (Manastorm) in the same transaction.",
+    "A level 60 non-Wildcard leader's first clear of test segment 1 (Taragaman 11520) gives the first-clear Bonus Manastorm Cache 1478051 (BONUS_CACHE_OTHER): one row.",
+    "Stopping the run settles the floor's held-back currency (Bonzo Bolts 1297308, Bedlam Bullion 1297307, Runes of Ascension 375250): exactly one row for the Bonzo Bolts (one stack; BONZO pays 336 at depth 1, at most x1.4 for the group and x2 for the segment).",
+    "A Manastorm Cache (11-24) 97877 opens through the loot window: its item is one cache_open row with the cache as source."
+  ],
+  "timeout_ms": 120000,
+  "economy_log": true,
+  "players": [
+    {
+      "id": "leader",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    },
+    {
+      "id": "opener",
+      "race": 1,
+      "class": 23,
+      "level": 17,
+      "security": 0
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Go to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the floor's first-clear Bonus Manastorm Cache reaches the bags",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 1478051,
+      "equals": 1,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the bonus cache",
+      "actor": "leader",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1478051,
+      "economy_count": 1,
+      "economy_source": 4,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "command",
+      "actor": "leader",
+      "command": ".manastorm stop"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: stopping the run pays its Bonzo Bolts, at most 336 x 1.4 group x 2 segment",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 1297308,
+      "min": 1,
+      "within_ms": 10000,
+      "max": 941
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the Bonzo Bolts are one delivery row",
+      "actor": "leader",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 1297308,
+      "economy_source": 4,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "opener",
+      "item": 97877,
+      "count": 1
+    },
+    {
+      "action": "open_item",
+      "actor": "opener",
+      "item": 97877
+    },
+    {
+      "action": "collect_loot",
+      "actor": "opener"
+    },
+    {
+      "action": "close_loot",
+      "actor": "opener"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the cache is used up",
+      "actor": "opener",
+      "metric": "item_count",
+      "item": 97877,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the cache's item",
+      "actor": "opener",
+      "metric": "economy_log_rows",
+      "economy_event": "cache_open",
+      "economy_source": 97877,
+      "equals": 1,
+      "within_ms": 2000
+    }
+  ]
+}

@@ -2,6 +2,7 @@
 
 #include "AscensionVoidPortal.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "CreatureData.h"
 #include "DBCStores.h"
 #include "DatabaseEnv.h"
@@ -362,8 +363,11 @@ public:
             return false;
         }
 
-        if (!player->AddItem(ItemEntry, 1))
-            player->SendItemRetrievalMail(ItemEntry, 1);
+        {
+            CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::VoidPortal));
+            if (!player->AddItem(ItemEntry, 1))
+                player->SendItemRetrievalMail(ItemEntry, 1);
+        }
 
         WorldPacket data;
         ChatHandler::BuildChatPacket(data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, nullptr, nullptr,

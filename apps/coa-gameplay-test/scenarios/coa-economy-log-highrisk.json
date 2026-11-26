@@ -1,0 +1,273 @@
+{
+  "schema": 1,
+  "name": "Economy log: a High-Risk death chest's losses and their recovery are logged",
+  "contract": [
+    "With the economy log on, a High-Risk death writes one highrisk_drop row per item that goes into the chest and one for the gold it holds (the lost gold plus any Fel Commutation fee), with the chest's id as source; whoever recovers the chest writes one highrisk_claim row per item taken and one for the gold, with the chest's owner as the other party.",
+    "High-Risk character v carries 20 Goretusk Liver (723, its only trade goods) and dies to High-Risk character k; with HighRisk.Losses = 1 and the gear, resource and gold chances at 100 the chest holds the 20 livers, one or more randomly chosen gear pieces (carried or equipped) and a random share of the gold, and k takes all of it. Character o, outside High-Risk, cannot open the chest.",
+    "Requires HighRisk.Losses = 1 and HighRisk.GearChance, HighRisk.ResourceChance and HighRisk.GoldChance = 100 in coa.conf (as high-risk-chest-recovery.json)."
+  ],
+  "timeout_ms": 120000,
+  "economy_log": true,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    },
+    {
+      "id": "k",
+      "race": 2,
+      "class": 1,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "o",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9617.06,
+    "y": -288.949,
+    "z": 57.3053,
+    "o": 0
+  },
+  "steps": [
+    {
+      "action": "teleport",
+      "actor": "k",
+      "map": 0,
+      "x": -9614.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "teleport",
+      "actor": "o",
+      "map": 0,
+      "x": -9615.06,
+      "y": -288.949,
+      "z": 57.3053,
+      "o": 3.14159
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "set_aura",
+      "actor": "v",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "spell": 1004019,
+      "stacks": 1
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 723,
+      "count": 20
+    },
+    {
+      "action": "add_item",
+      "actor": "v",
+      "item": 355242,
+      "count": 1
+    },
+    {
+      "action": "set_money",
+      "actor": "v",
+      "value": 200000
+    },
+    {
+      "action": "pvp",
+      "actor": "v",
+      "enabled": true
+    },
+    {
+      "action": "pvp",
+      "actor": "k",
+      "enabled": true
+    },
+    {
+      "action": "set_health",
+      "actor": "v",
+      "value": 1
+    },
+    {
+      "action": "attack",
+      "actor": "k",
+      "target": "v"
+    },
+    {
+      "action": "assert",
+      "actor": "v",
+      "metric": "alive",
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "nearby_gameobject_count",
+      "entry": 994300,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "snapshot",
+      "label": "MEASURE: Goretusk Livers left after the death",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 723,
+      "save_as": "livers_left"
+    },
+    {
+      "action": "snapshot",
+      "label": "MEASURE: gear item left after the death",
+      "actor": "v",
+      "metric": "item_count",
+      "item": 355242,
+      "save_as": "gear_left"
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "o",
+      "entry": 994300
+    },
+    {
+      "action": "assert",
+      "actor": "o",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "carried_money",
+      "save_as": "money_before"
+    },
+    {
+      "action": "use_nearby_gameobject",
+      "actor": "k",
+      "entry": 994300
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "loot_count",
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "loot_gold",
+      "min": 1
+    },
+    {
+      "action": "loot_money",
+      "actor": "k"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "carried_money",
+      "relative_to": "money_before",
+      "min": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "k",
+      "slot": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "k",
+      "slot": 1
+    },
+    {
+      "action": "loot_slot",
+      "actor": "k",
+      "slot": 2
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "loot_count",
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "ms": 1500
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "metric": "nearby_gameobject_count",
+      "entry": 994300,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: all 20 Goretusk Livers went into the chest",
+      "actor": "v",
+      "metric": "economy_log_rows",
+      "economy_event": "highrisk_drop",
+      "item": 723,
+      "economy_count": 20,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: with at least one gear piece and the gold",
+      "actor": "v",
+      "metric": "economy_log_rows",
+      "economy_event": "highrisk_drop",
+      "min": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the looter claimed the 20 livers",
+      "actor": "k",
+      "metric": "economy_log_rows",
+      "economy_event": "highrisk_claim",
+      "item": 723,
+      "economy_count": 20,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: with the gear and the gold",
+      "actor": "k",
+      "metric": "economy_log_rows",
+      "economy_event": "highrisk_claim",
+      "min": 3,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the outsider who could not open it claimed nothing",
+      "actor": "o",
+      "metric": "economy_log_rows",
+      "economy_event": "highrisk_claim",
+      "equals": 0
+    }
+  ]
+}

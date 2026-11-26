@@ -8,6 +8,7 @@
 #include "AscensionRulesets.h"
 #include "Bag.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "Errors.h"
@@ -346,9 +347,18 @@ void ClaimItem(Player* player, GameObject* object, uint8 slot)
 
     uint32 entry = item->GetEntry();
     uint32 count = item->GetCount();
+    ObjectGuid::LowType const itemGuid = item->GetGUID().GetCounter();
     item->SetState(ITEM_UNCHANGED);
     auto transaction = CharacterDatabase.BeginTransaction();
     player->MoveItemToInventory(destination, item.release(), true);
+    CoAEconomyRow claimed;
+    claimed.event = CoAEconomyEvent::HighRiskClaim;
+    claimed.itemEntry = entry;
+    claimed.itemGuid = itemGuid;
+    claimed.itemCount = count;
+    claimed.source = uint32(chest->id);
+    claimed.otherGuid = chest->owner;
+    CoAEconomyLog::Queue(player, claimed);
     player->SaveInventoryAndGoldToDB(transaction);
     transaction->Append(
         "UPDATE highrisk_chest_item SET claimant={},claimed_at=CURRENT_TIMESTAMP WHERE chest_id={} AND slot={} "
@@ -395,6 +405,12 @@ void ClaimGold(Player* player, GameObject* object)
     uint32 gold = chest->gold;
     auto transaction = CharacterDatabase.BeginTransaction();
     player->ModifyMoney(gold);
+    CoAEconomyRow claimed;
+    claimed.event = CoAEconomyEvent::HighRiskClaim;
+    claimed.gold = int64(gold);
+    claimed.source = uint32(chest->id);
+    claimed.otherGuid = chest->owner;
+    CoAEconomyLog::Queue(player, claimed);
     player->SaveInventoryAndGoldToDB(transaction);
     transaction->Append(
         "UPDATE highrisk_chest SET gold=0,gold_claimant={},gold_claimed_at=CURRENT_TIMESTAMP WHERE id={} AND gold>0",
@@ -526,8 +542,23 @@ void Drop(Player* player)
             "INSERT INTO highrisk_chest_item (chest_id,slot,item_guid,entry,count) VALUES ({},{},{},{},{})",
             chest.id, uint32(slot), stored.guid, stored.entry, stored.count);
         chest.items.emplace(slot++, stored);
+        CoAEconomyRow dropped;
+        dropped.event = CoAEconomyEvent::HighRiskDrop;
+        dropped.itemEntry = stored.entry;
+        dropped.itemGuid = stored.guid;
+        dropped.itemCount = stored.count;
+        dropped.source = uint32(chest.id);
+        CoAEconomyLog::Queue(player, dropped);
     }
     player->ModifyMoney(-int32(chest.gold));
+    if (chest.gold)
+    {
+        CoAEconomyRow dropped;
+        dropped.event = CoAEconomyEvent::HighRiskDrop;
+        dropped.gold = -int64(chest.gold);
+        dropped.source = uint32(chest.id);
+        CoAEconomyLog::Queue(player, dropped);
+    }
     player->SaveInventoryAndGoldToDB(transaction);
     Commit(transaction);
     for (Item* item : losses)

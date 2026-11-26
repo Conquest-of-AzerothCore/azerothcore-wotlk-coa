@@ -1,0 +1,212 @@
+{
+  "schema": 1,
+  "name": "Economy log: a rated solo arena win logs its Runes of Ascension",
+  "contract": [
+    "With the economy log on, a rated arena win's Runes of Ascension (375250, RatedSoloArena.Win.RunesOfAscension = 25) write one reward row with source 2 (arena).",
+    "Two players matched in the rated 1v1 solo queue: the winner gets the row, the loser none."
+  ],
+  "timeout_ms": 480000,
+  "economy_log": true,
+  "location": {
+    "map": 0,
+    "x": -8809.6,
+    "y": 625.0,
+    "z": 94.979,
+    "o": 2.1
+  },
+  "players": [
+    {
+      "id": "winner",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    },
+    {
+      "id": "loser",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the characters settle",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player joins the rated 1v1 solo queue",
+      "actor": "winner",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the join reach the world update",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "The player queues with a personal one-member team in the third slot",
+      "actor": "winner",
+      "metric": "arena_team_members",
+      "slot": 2,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player joins",
+      "actor": "loser",
+      "opcode": 1473,
+      "fields": [
+        {
+          "u32": 5
+        },
+        {
+          "u32": 8
+        }
+      ]
+    },
+    {
+      "action": "wait",
+      "label": "Let the queue match the two players",
+      "ms": 5000
+    },
+    {
+      "action": "client_packet",
+      "label": "The first player enters the arena",
+      "actor": "winner",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "winner"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "client_packet",
+      "label": "The second player enters the arena",
+      "actor": "loser",
+      "opcode": 725,
+      "consumed": false,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 14
+        },
+        {
+          "invited_battleground_type": "loser"
+        },
+        {
+          "u8": 144
+        },
+        {
+          "u8": 31
+        },
+        {
+          "u8": 1
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The first player is in the arena",
+      "actor": "winner",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "The second player is in the arena",
+      "actor": "loser",
+      "metric": "in_arena",
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "wait",
+      "label": "Wait for the arena gates to open",
+      "ms": 80000
+    },
+    {
+      "action": "die",
+      "label": "The second player falls; the match ends and the arena revives its dead",
+      "actor": "loser",
+      "revived": true
+    },
+    {
+      "action": "assert",
+      "label": "The winner's personal team records the game",
+      "actor": "winner",
+      "metric": "arena_team_season_games",
+      "slot": 2,
+      "equals": 1,
+      "within_ms": 30000
+    },
+    {
+      "action": "assert",
+      "label": "and the win",
+      "actor": "winner",
+      "metric": "arena_team_season_wins",
+      "slot": 2,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the winner holds 25 Runes of Ascension",
+      "actor": "winner",
+      "metric": "item_count",
+      "item": 375250,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the winner's runes",
+      "actor": "winner",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "item": 375250,
+      "economy_count": 25,
+      "economy_source": 2,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "THE LOG: the loser has no reward row",
+      "actor": "loser",
+      "metric": "economy_log_rows",
+      "economy_event": "reward",
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

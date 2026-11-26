@@ -38,6 +38,7 @@
 
 #include "Bag.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "DBCStores.h"
 #include "Item.h"
 #include "Log.h"
@@ -193,7 +194,11 @@ public:
 
         player->DestroyItemCount(current, 1, true);
         if (Item* given = player->StoreNewItem(dest, upgrade, true, Item::GenerateItemRandomPropertyId(upgrade)))
+        {
             player->SendNewItem(given, 1, true, false);
+            CoAEconomyLog::Gained(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::ToolDispenser,
+                current, 1), given, 1);
+        }
 
         SendNotice(player, std::string("The Dispenser takes up the rod's trade and becomes ") +
                            upgradeProto->Name1 + ".");

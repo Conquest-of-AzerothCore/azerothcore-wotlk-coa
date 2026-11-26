@@ -9,6 +9,7 @@
 
 class Item;
 class Player;
+struct CoAEconomyRow;
 
 namespace AscensionCacheRewards
 {
@@ -22,7 +23,7 @@ struct Reward
     int32 randomPropertyId = 0;
 };
 
-bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache);
+bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache, CoAEconomyRow const* tag = nullptr);
 }
 
 #endif

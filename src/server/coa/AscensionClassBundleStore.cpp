@@ -3,6 +3,7 @@
 
 #include "../../../modules/mod-worldforged-upgrades/src/WorldforgedUpgrades.h"
 
+#include "CoAEconomyLog.h"
 #include "Item.h"
 #include "ItemScript.h"
 #include "Log.h"
@@ -145,7 +146,11 @@ bool HandlePurchase(WorldSession* session, WorldPacket const& packet)
 
     if (Item* given = player->StoreNewItem(destination, key, true,
                                            Item::GenerateItemRandomPropertyId(key)))
+    {
         player->SendNewItem(given, 1, true, false);
+        CoAEconomyLog::Gained(player, CoAEconomyLog::Tag(CoAEconomyEvent::StoreBuy, CoAGrantSource::ClassBundleStore,
+            currency, 1), given, 1);
+    }
 
     SendPurchaseResult(session, Worldforged::RESULT_PURCHASE_OK);
 

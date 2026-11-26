@@ -5,6 +5,7 @@
 #include "AscensionCrowsCachePolicy.h"
 #include "AscensionMercenary.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "Config.h"
 #include "Containers.h"
 #include "Creature.h"
@@ -478,6 +479,7 @@ bool Claim(Player* player, GameObject* object, bool completedCast)
     Item* cache = player->StoreNewItem(destination, CacheItem, true);
     if (!cache)
         return false;
+    CoAEconomyLog::Gained(player, CoAEconomyLog::Tag(CoAEconomyEvent::Reward, CoAGrantSource::CrowsCache), cache, 1);
     player->SendNewItem(cache, 1, true, false);
     if (event->phase == Phase::Available)
         event->deadline = Now() + 86400;
@@ -645,11 +647,17 @@ bool Open(Player* player, Item* cache)
         stored.emplace_back(result->GetGUID(), count);
         player->SendNewItem(result, count, true, false);
     }
+    for (auto const& [storedGuid, storedCount] : stored)
+        CoAEconomyLog::Gained(player, CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, CacheItem),
+            player->GetItemByGuid(storedGuid), storedCount);
     player->DestroyItem(cache->GetBagSlot(), cache->GetSlot(), true);
     Save(found->second, player, true);
     events.erase(found);
     UpdateCarrier(player);
-    AscensionBazaarTokenCap::Give(player, bazaarTokens);
+    {
+        CoAEconomyLog::GainScope scope(player, CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, CacheItem));
+        AscensionBazaarTokenCap::Give(player, bazaarTokens);
+    }
     ChatHandler(player->GetSession()).SendSysMessage(
         "Crow's Cache opened: three Heroic Bloodforged items, one of them from the newest released tier, High-Risk materials, Marks of War and Bazaar Tokens.");
     return true;

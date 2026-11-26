@@ -512,6 +512,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
         return;
     }
 
+    uint32 const moneyBeforeBid = player->GetMoney();
     CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
 
     if (price < auction->buyout || auction->buyout == 0)
@@ -544,6 +545,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
         trans->Append(stmt);
 
         SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, ERR_AUCTION_OK, 0);
+        sScriptMgr->OnPlayerAfterPlaceAuctionBid(player, auction, moneyBeforeBid - player->GetMoney(), false, trans);
 
         if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
         {
@@ -576,6 +578,7 @@ void WorldSession::HandleAuctionPlaceBid(WorldPacket& recvData)
         sAuctionMgr->SendAuctionSuccessfulMail(auction, trans);
         sAuctionMgr->SendAuctionWonMail(auction, trans);
         sScriptMgr->OnAuctionSuccessful(auctionHouse, auction);
+        sScriptMgr->OnPlayerAfterPlaceAuctionBid(player, auction, moneyBeforeBid - player->GetMoney(), true, trans);
 
         SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, ERR_AUCTION_OK);
 

@@ -98,6 +98,7 @@ struct AchievementCriteriaEntry;
 struct AchievementEntry;
 struct AreaTrigger;
 struct AuctionEntry;
+struct StagedMail;
 struct CompletedAchievementData;
 struct Condition;
 struct ConditionSourceInfo;

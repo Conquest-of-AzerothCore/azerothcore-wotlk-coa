@@ -2,6 +2,7 @@
 #include "AscensionCallboardContractsPolicy.h"
 #include "AscensionCompatOpcodes.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "Config.h"
 #include "DatabaseEnv.h"
 #include "Item.h"
@@ -535,6 +536,14 @@ uint32 Activate(Player* player, Catalogue const& contracts, Settings const& curr
             chat.PSendSysMessage(request.payWithGold ? "You do not have enough gold to complete {}."
                 : "You do not have enough Bazaar Tokens to complete {}.", name);
             break;
+        }
+        if (!request.payWithGold)
+        {
+            CoAEconomyRow row;
+            row.event = CoAEconomyEvent::TokensSpent;
+            row.tokens = -int32(price);
+            row.source = quest->GetQuestId();
+            CoAEconomyLog::Queue(player, row);
         }
         GrantRewards(player, quest);
     }

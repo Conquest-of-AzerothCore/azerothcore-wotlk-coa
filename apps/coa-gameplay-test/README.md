@@ -396,10 +396,12 @@ runs such a case exclusively because the setting is process-global. Optional
 `CoA.StarterVanityItems` for that case in the same way, and is likewise run exclusively. Optional
 `two_side: {"trade": true, "mail": false}` sets `AllowTwoSide.Trade` and `AllowTwoSide.Interaction.Mail` for that
 case (an omitted field is disabled) and is likewise run exclusively. Its optional `group` sets
-`AllowTwoSide.Interaction.Group`, which keeps the configured value when omitted. Optional `chat_log: true`
+`AllowTwoSide.Interaction.Group` and `auction` sets `AllowTwoSide.Interaction.Auction`; each keeps the configured
+value when omitted. A summoned auctioneer has no spawn row, so an auction listing at one needs `auction: true`. Optional `chat_log: true`
 turns `CoA.ChatLog.Enable` on for that case and back to the configured state when it ends, and is likewise run
 exclusively; with it, `chat_log_max_pending` (1-1000000) sets `CoA.ChatLog.MaxPendingRows` for the case. Optional `battleground_kill_xp: true` turns `Battleground.GiveXPForKills` on for that case in the same
-way, and is likewise run exclusively. Optional `max_player_level` (1-255) sets `MaxPlayerLevel` for that case and restores it when the case ends, and is likewise run exclusively. Optional
+way, and is likewise run exclusively. Optional `max_player_level` (1-255) sets `MaxPlayerLevel` for that case and restores it when the case ends, and is likewise run exclusively. Optional `economy_log: true` turns on `CoA.EconomyLog.Enable` for that case and is
+likewise run exclusively. Optional
 `ptr_character_copy: true` makes this realm both the source and the target of `.ptr copy` for that case, with no
 cooldown, and is likewise run exclusively. Queued copies load and report within a 5-second poll, so wait after
 the command before asserting. With it, `ptr_character_copy_interruption: "before_load"` or `"after_load"` stops
@@ -464,7 +466,10 @@ checks through separate socketless character sessions and does not test simultan
 item entry (its u8 bag and slot), or `gameobject_guid` with an entry of
 exactly one owned fixture gameobject. Both write the native raw GUID and require the referenced object to exist.
 `mail_id` and `mail_item_guid` take an item entry and write the u32 id of the first held mail carrying it and that
-item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them.
+item's low GUID, as `CMSG_MAIL_TAKE_ITEM` sends them. `money_mail_id` takes an amount of copper and writes the u32 id
+of the first held mail without items carrying exactly that money, as `CMSG_MAIL_TAKE_MONEY` sends it. `auction_id`
+takes an item entry and writes the u32 id of the newest auction in any auction house carrying it, as
+`CMSG_AUCTION_PLACE_BID` and `CMSG_AUCTION_REMOVE_ITEM` send it.
 Optional `location` supplies `map`, `x`, `y`, `z`, `o` for a fixture
 teleport. `location.ignore_access` optionally bypasses entry requirements for a fixture (for example a solo
 raid test), without enabling GM mode during combat. Actors share their lane's phase (`1 << 30` with one lane) to
@@ -559,6 +564,8 @@ assert stable maximums and final levels when testing damage coefficients.
 | `binder_activate` | `actor`, innkeeper `target` (or `owner` + `entry` for a creature that actor has out): native "make this inn your home" confirmation (`CMSG_BINDER_ACTIVATE`), walking up to the innkeeper first. |
 | `destroy_item` | `actor`, `item`: native `CMSG_DESTROYITEM` of the first carried item of that entry, as the player deleting it. |
 | `forget_vanity` | Player `actor`, `item`: fixture removes that item from the account's Vanity collection (memory and `account_vanity_collection`) while every copy stays where it is, as on accounts whose copies were bound before anything collected them. While the item is collected it first waits until its `account_vanity_collection` row has reached the database, so an insert still running from an earlier store cannot bring the row back, and then deletes it synchronously. |
+| `economy_log_cleanup` | `actor`, `days_ahead` (0-3650): runs the economy log's daily cleanup as if the realm clock were `days_ahead` days later, waiting for it: every `coa_economy_log` row older than `CoA.EconomyLog.KeepDays` days at that time is deleted. With `background: true` it only starts the cleanup the worldserver runs in the background, in batches between other character database work; assert its result with `within_ms`. |
+| `economy_log_keep_days` | `actor`, `days` (0-3650): sets `CoA.EconomyLog.KeepDays` the way a config reload does: a background cleanup in progress is dropped and started again with the new value (`0` starts none). The case's end restores the configured value. Only in an `economy_log: true` case, because it changes the whole worldserver. |
 | `system_mail` | `actor`, `item`, `kind` `postmaster` (a mail from the Postmaster creature, as `Player::SendItemRetrievalMail` sends), `reward` (a Recruit-A-Friend reward mail: no sender, GM stationery and the reward subject) or `server` (the same sender-less GM-stationery mail with another subject, as boss loot and item recovery mail): post one such mail carrying one `item` to the actor. |
 | `area_trigger` | `actor`, `id`: native area-trigger packet, as the client sends on walking into one; inn triggers are what set the rested flag. |
 | `gossip_select` | `actor`, zero-based `option`: select from the current menu through the session handler. |
@@ -567,7 +574,7 @@ assert stable maximums and final levels when testing damage coefficients.
 | `fill_bags` | `actor`, optional `slots` (default 0): fill the bags with distinct non-stacking armor until that many free slots remain, so a scenario can prove what a full inventory does. Fails if the bags cannot be filled. |
 | `equip` | `actor`, `item`, `slot` (0..18 equipment, 19..22 bag slots): equip an owned item through the session handler. |
 | `use_item` | `actor`, `item`, `spell`, optional `target`, `target_item` (an owned item entry, sent as the item target instead of a unit) and `destination`: normal item-use handler. |
-| `use_nearby_gameobject` | `actor`, `entry`, optional `owner` (a player id): native use request for the single gameobject of that entry within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
+| `use_nearby_gameobject` | `actor`, `entry` or `entries` (a list, for an object whose entry is rolled), optional `owner` (a player id): native use request for the single gameobject of that entry (or of any listed entry) within 20 yards in the actor's phase; `owner` narrows the choice to the object that player owns, so one of several nearby objects can be clicked. |
 | `spell_click_nearby` | `actor`, `entry`: native `CMSG_SPELLCLICK` on the nearest living creature of that entry within 20 yards, as the client sends on right-clicking a spell-click creature. |
 | `select` | `actor`, `target` (any actor id): native `CMSG_SET_SELECTION` on that unit, as the client sends on clicking it; meeting stones summon the selected party member. |
 | `minion_kill` | Player `actor`, `minion` (creature entry), `target` (creature fixture or `summon` id): the actor's living owned creature of that entry deals the target's whole health in direct damage through `Unit::DealDamage`, so the kill credits the minion as the killer. |
@@ -662,7 +669,17 @@ number of mails the player holds and `mail_item_count` the items inside them, wh
 that the bags could not take proves it was posted rather than lost; `mail_has_item` takes `item` and
 returns whether any mail carries it. `vanity_owned` takes `item` and returns whether the account's Vanity collection
 lists it for this character, as a Vanity tab delivery checks. `mail_pool_item_count` takes `cache` (optional `table`) and
-counts only the mail items that are in that cache's own pool. `account_character_count` counts the stored
+counts only the mail items that are in that cache's own pool. `economy_log_rows` takes `economy_event` (an event
+name such as `vendor_buy`, `mail_send` or `ah_sold`) and counts the actor's `coa_economy_log` rows of that event,
+narrowed by the optional `item` and `economy_count`, `economy_gold`, `economy_tokens`, `economy_cost_item`,
+`economy_cost_count` and `economy_source` (for `reward` and `store_buy` rows the granting system: 1 Crow's Cache,
+2 arena, 3 Mythic+, 4 Manastorm, 5 dungeon boss, 6 Void Portal, 7 Call Board, 8 Wildcard, 9 tool dispenser, 10 Wildcard
+store, 11 Class Bundle store), `economy_min_tokens` (rows holding at least that many tokens), and by `economy_other` /
+`economy_other_account` (a player actor whose GUID
+or account is the row's other party) and `economy_item_of` (an item entry the actor carries; its GUID is the row's item
+GUID); it saves the actor first so queued rows are written, and `economy_save: false` counts without that save.
+`economy_log_queued` reports how many of the actor's economy log rows are still waiting in memory for a save.
+`account_character_count` counts the stored
 characters on the player's account, and `account_other_item_count` takes `item` and counts that item on the
 account's other characters, which is how a character copy proves it carried the inventory.
 `account_other_bank_item_count` (needs `item`) counts that item in those characters' own Personal Banks,
@@ -1365,6 +1382,8 @@ whose grid is not loaded is not counted.
 below the floor under them, or over no floor at all. The floor is searched downward from the higher of the
 creature's current Z and its spawn Z, so a creature that sank through the ground counts while one that walked
 down a ramp does not. Each one counted is logged with its spawn id, position and floor.
+`nearby_gameobject_count` takes `entry` (or `entries`, a list) and counts those gameobjects within 20 yards in the
+actor's phase.
 `nearby_gameobject_flags` takes `entry` and returns the `GameObjectFlags` the client gets for the nearest such
 gameobject within 20 yards (4 is `GO_FLAG_INTERACT_COND`, which keeps the client from using it), and
 `nearby_gameobject_quest` the quest a goober requires (0 for none); both return -1 when there is no such gameobject.

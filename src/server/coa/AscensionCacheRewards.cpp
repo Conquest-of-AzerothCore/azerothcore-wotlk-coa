@@ -2,12 +2,14 @@
 #include "AscensionCacheRewards.h"
 #include "Bag.h"
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "Item.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include <algorithm>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -109,7 +111,7 @@ void UndoOne(Player* player, Item* item, uint32 count)
 }
 }
 
-bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache)
+bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache, CoAEconomyRow const* tag)
 {
     if (rewards.empty())
         return false;
@@ -156,8 +158,22 @@ bool Deliver(Player* player, std::vector<Reward> const& rewards, Item* cache)
         return false;
     }
 
-    for (std::unique_ptr<Item>& item : mailItems)
-        player->SendItemRetrievalMail(item.release());
+    std::optional<CoAEconomyRow> log;
+    if (tag)
+        log = *tag;
+    else if (cache)
+        log = CoAEconomyLog::Tag(CoAEconomyEvent::CacheOpen, cache->GetEntry());
+    if (log)
+        for (auto const& given : stored)
+            CoAEconomyLog::Gained(player, CoAEconomyLog::NextRow(*log), given.first, given.second);
+
+    {
+        std::optional<CoAEconomyLog::GainScope> scope;
+        if (log)
+            scope.emplace(player, *log);
+        for (std::unique_ptr<Item>& item : mailItems)
+            player->SendItemRetrievalMail(item.release());
+    }
 
     for (auto const& given : stored)
         player->SendNewItem(given.first, given.second, true, false, false);

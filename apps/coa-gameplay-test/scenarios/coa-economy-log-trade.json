@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Economy log: a finished trade is logged on the receiving side",
+  "contract": [
+    "With the economy log on, a finished trade writes trade rows for whoever received something: one per item and one for the money, with the giver as the other party.",
+    "The giver trades a Peacebloom (2447) and 100 copper for the taker's Silverleaf (765): the taker gets two rows (the Peacebloom, +100 copper), the giver one (the Silverleaf).",
+    "The trade saves both characters itself, so its rows are written by the trade's own (asynchronous) commit."
+  ],
+  "timeout_ms": 60000,
+  "economy_log": true,
+  "players": [
+    {
+      "id": "giver",
+      "name": "Coaeltrdgv",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    },
+    {
+      "id": "taker",
+      "name": "Coaeltrdtk",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "steps": [
+    {"action": "wait", "ms": 1000},
+    {"action": "money", "label": "fixture: the money to trade", "actor": "giver", "copper": 500},
+    {"action": "add_item", "label": "fixture: the Peacebloom to trade", "actor": "giver", "item": 2447},
+    {"action": "add_item", "label": "fixture: the Silverleaf to trade", "actor": "taker", "item": 765},
+    {"action": "snapshot", "actor": "taker", "metric": "carried_money", "save_as": "taker_purse"},
+    {"action": "snapshot", "actor": "taker", "metric": "server_packets", "opcode": 288, "save_as": "taker_trade"},
+    {"action": "client_packet", "label": "Open a trade", "actor": "giver", "opcode": 278, "consumed": false, "fields": [{"actor_guid": "taker"}]},
+    {"action": "assert", "label": "The taker is asked to trade", "actor": "taker", "metric": "server_packets", "opcode": 288, "relative_to": "taker_trade", "min": 1, "within_ms": 1000},
+    {"action": "client_packet", "label": "The taker begins the trade", "actor": "taker", "opcode": 279, "consumed": false},
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "The giver offers the Peacebloom", "actor": "giver", "opcode": 285, "consumed": false, "fields": [{"u8": 0}, {"item_bag": 2447}, {"item_slot": 2447}]},
+    {"action": "client_packet", "label": "and 100 copper", "actor": "giver", "opcode": 287, "consumed": false, "fields": [{"u32": 100}]},
+    {"action": "client_packet", "label": "The taker offers the Silverleaf", "actor": "taker", "opcode": 285, "consumed": false, "fields": [{"u8": 0}, {"item_bag": 765}, {"item_slot": 765}]},
+    {"action": "wait", "ms": 500},
+    {"action": "client_packet", "label": "The giver accepts", "actor": "giver", "opcode": 282, "consumed": false, "fields": [{"u32": 0}]},
+    {"action": "client_packet", "label": "The taker accepts", "actor": "taker", "opcode": 282, "consumed": false, "fields": [{"u32": 0}]},
+    {"action": "assert", "label": "The taker has the Peacebloom", "actor": "taker", "metric": "item_count", "item": 2447, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "and the 100 copper", "actor": "taker", "metric": "carried_money", "relative_to": "taker_purse", "equals": 100},
+    {"action": "assert", "label": "The giver has the Silverleaf", "actor": "giver", "metric": "item_count", "item": 765, "equals": 1},
+    {"action": "assert", "label": "THE LOG: the taker received the Peacebloom", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "item": 2447, "economy_count": 1, "economy_gold": 0, "economy_save": false, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: and 100 copper", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "economy_gold": 100, "economy_save": false, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: two rows for the taker", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "economy_save": false, "equals": 2, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the giver received the Silverleaf", "actor": "giver", "metric": "economy_log_rows", "economy_event": "trade", "item": 765, "economy_count": 1, "economy_save": false, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: and nothing else", "actor": "giver", "metric": "economy_log_rows", "economy_event": "trade", "economy_save": false, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the taker's row names the giver and keeps the Peacebloom's GUID", "actor": "taker", "metric": "economy_log_rows", "economy_event": "trade", "item": 2447, "economy_other": "giver", "economy_other_account": "giver", "economy_item_of": 2447, "economy_save": false, "equals": 1, "within_ms": 2000},
+    {"action": "assert", "label": "THE LOG: the giver's row names the taker", "actor": "giver", "metric": "economy_log_rows", "economy_event": "trade", "item": 765, "economy_other": "taker", "economy_item_of": 765, "economy_save": false, "equals": 1, "within_ms": 2000}
+  ]
+}

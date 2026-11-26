@@ -148,8 +148,12 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                 // adjust time (depends on /played)
                 if (myItems[i]->IsBOPTradable())
                     myItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, trader->GetTotalPlayedTime() - (_player->GetTotalPlayedTime() - myItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
+                uint32 const tradedEntry = myItems[i]->GetEntry();
+                ObjectGuid::LowType const tradedGuid = myItems[i]->GetGUID().GetCounter();
+                uint32 const tradedCount = myItems[i]->GetCount();
                 // store
                 trader->MoveItemToInventory(traderDst, myItems[i], true, true);
+                sScriptMgr->OnPlayerAfterTradeItem(trader, _player, tradedEntry, tradedGuid, tradedCount);
             }
             if (hisItems[i])
             {
@@ -159,8 +163,12 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                 // adjust time (depends on /played)
                 if (hisItems[i]->IsBOPTradable())
                     hisItems[i]->SetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME, _player->GetTotalPlayedTime() - (trader->GetTotalPlayedTime() - hisItems[i]->GetUInt32Value(ITEM_FIELD_CREATE_PLAYED_TIME)));
+                uint32 const tradedEntry = hisItems[i]->GetEntry();
+                ObjectGuid::LowType const tradedGuid = hisItems[i]->GetGUID().GetCounter();
+                uint32 const tradedCount = hisItems[i]->GetCount();
                 // store
                 _player->MoveItemToInventory(playerDst, hisItems[i], true, true);
+                sScriptMgr->OnPlayerAfterTradeItem(_player, trader, tradedEntry, tradedGuid, tradedCount);
             }
         }
         else
@@ -617,6 +625,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         _player->ModifyMoney(his_trade->GetMoney());
         trader->ModifyMoney(-int32(his_trade->GetMoney()));
         trader->ModifyMoney(my_trade->GetMoney());
+        if (my_trade->GetMoney())
+            sScriptMgr->OnPlayerAfterTradeMoney(trader, _player, my_trade->GetMoney());
+        if (his_trade->GetMoney())
+            sScriptMgr->OnPlayerAfterTradeMoney(_player, trader, his_trade->GetMoney());
 
         if (HasPermission(rbac::RBAC_PERM_LOG_GM_TRADE))
         {

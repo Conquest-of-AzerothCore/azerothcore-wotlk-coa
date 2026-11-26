@@ -17,6 +17,7 @@
 #include "EtherealBazaar.h"
 
 #include "Chat.h"
+#include "CoAEconomyLog.h"
 #include "DatabaseEnv.h"
 #include "Field.h"
 #include "QueryResult.h"
@@ -131,9 +132,13 @@ public:
             return true;
         }
 
-        player->DestroyItemCount(item->GetEntry(), 1, true);
+        uint32 const cacheEntry = item->GetEntry();
+        player->DestroyItemCount(cacheEntry, 1, true);
         if (Item* given = player->StoreNewItem(dest, reward, true, Item::GenerateItemRandomPropertyId(reward)))
+        {
             player->SendNewItem(given, 1, true, false);
+            CoAEconomyLog::CacheItem(player, cacheEntry, given, 1);
+        }
 
         LOG_DEBUG("module.bazaar", "Ethereal Bazaar: {} opened cache {} and received item {}.",
                   player->GetName(), item->GetEntry(), reward);
@@ -166,9 +171,13 @@ public:
             return true;
         }
 
-        player->DestroyItemCount(item->GetEntry(), 1, true);
+        uint32 const cacheEntry = item->GetEntry();
+        player->DestroyItemCount(cacheEntry, 1, true);
         if (Item* given = player->StoreNewItem(dest, reward, true, Item::GenerateItemRandomPropertyId(reward)))
+        {
             player->SendNewItem(given, 1, true, false);
+            CoAEconomyLog::CacheItem(player, cacheEntry, given, 1);
+        }
 
         LOG_DEBUG("module.bazaar", "Ethereal Bazaar: {} opened a cache of wares and received item {}.",
                   player->GetName(), reward);

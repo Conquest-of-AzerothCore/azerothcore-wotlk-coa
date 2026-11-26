@@ -314,6 +314,8 @@ void WorldSession::HandleDestroyItemOpcode(WorldPackets::Item::DestroyItem& pack
     }
 
     uint32 const removedCount = packet.Count ? std::min<uint32>(packet.Count, pItem->GetCount()) : pItem->GetCount();
+    uint32 const destroyedEntry = pItem->GetEntry();
+    ObjectGuid::LowType const destroyedGuid = pItem->GetGUID().GetCounter();
     bool const archived = AscensionItemRecovery::Capture && AscensionItemRecovery::Capture(_player, pItem,
         removedCount, AscensionItemRecovery::Source::Deleted, 0);
     if (!archived)
@@ -328,6 +330,7 @@ void WorldSession::HandleDestroyItemOpcode(WorldPackets::Item::DestroyItem& pack
     {
         _player->DestroyItem(packet.Bag, packet.Slot, true);
     }
+    sScriptMgr->OnPlayerAfterDestroyItem(_player, destroyedEntry, destroyedGuid, removedCount);
     if (archived && AscensionItemRecovery::Persist)
         AscensionItemRecovery::Persist(_player);
     _player->SendQuestGiverStatusMultiple();
@@ -719,6 +722,7 @@ void WorldSession::HandleSellItemOpcode(WorldPackets::Item::SellItem& packet)
                     }
                 }
 
+                Item* soldItem = pItem;
                 if (packet.Count < pItem->GetCount())               // need split items
                 {
                     Item* pNewItem = pItem->CloneItem(packet.Count, _player);
@@ -729,6 +733,7 @@ void WorldSession::HandleSellItemOpcode(WorldPackets::Item::SellItem& packet)
                         return;
                     }
 
+                    soldItem = pNewItem;
                     pNewItem->SetUInt32Value(ITEM_FIELD_DURABILITY, pItem->GetUInt32Value(ITEM_FIELD_DURABILITY));
 
                     pItem->SetCount(pItem->GetCount() - packet.Count);
@@ -751,6 +756,7 @@ void WorldSession::HandleSellItemOpcode(WorldPackets::Item::SellItem& packet)
                 }
 
                 _player->ModifyMoney(money);
+                sScriptMgr->OnPlayerAfterSellItem(_player, soldItem->GetEntry(), soldItem->GetGUID().GetCounter(), packet.Count, money, creature);
                 if (AscensionItemRecovery::Persist)
                     AscensionItemRecovery::Persist(_player);
                 _player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_MONEY_FROM_VENDORS, money);
@@ -801,10 +807,14 @@ void WorldSession::HandleBuybackItem(WorldPackets::Item::BuybackItem& packet)
                 CharacterDatabase.Execute(stmt);
             }
 
+            uint32 const boughtEntry = pItem->GetEntry();
+            ObjectGuid::LowType const boughtGuid = pItem->GetGUID().GetCounter();
+            uint32 const boughtCount = pItem->GetCount();
             _player->ModifyMoney(-(int32)price);
             _player->RemoveItemFromBuyBackSlot(packet.Slot, false);
             _player->ItemAddedQuestCheck(pItem->GetEntry(), pItem->GetCount());
             _player->StoreItem(dest, pItem, true);
+            sScriptMgr->OnPlayerAfterBuyBackItem(_player, boughtEntry, boughtGuid, boughtCount, price, creature);
             if (AscensionItemRecovery::Persist)
                 AscensionItemRecovery::Persist(_player);
         }

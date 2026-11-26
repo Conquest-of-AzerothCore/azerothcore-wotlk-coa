@@ -463,6 +463,28 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(owner=owner), self.assertRaisesRegex(ValueError, 'owner needs a player'):
                 run.validate(self.scenario)
 
+    def test_nearby_gameobjects_take_one_entry_or_a_list(self):
+        use = {'action': 'use_nearby_gameobject', 'actor': 'caster', 'entries': [710014, 710015, 710016]}
+        count = {'action': 'assert', 'actor': 'caster', 'metric': 'nearby_gameobject_count',
+                 'entries': [710014, 710015], 'equals': 1}
+        self.scenario['steps'] += [use, count]
+        self.assertIs(run.validate(self.scenario), self.scenario)
+        for step in (use, count):
+            for change, error in (({'entry': 710014}, 'entry or entries'),
+                                  ({'entries': None}, 'entry or entries'),
+                                  ({'entries': []}, 'entries must be a list'),
+                                  ({'entries': [710014, 710014]}, 'duplicate'),
+                                  ({'entries': [0]}, 'entries')):
+                scenario = copy.deepcopy(self.scenario)
+                changed = scenario['steps'][-2 if step is use else -1]
+                for key, value in change.items():
+                    if value is None:
+                        changed.pop(key)
+                    else:
+                        changed[key] = value
+                with self.subTest(action=step['action'], change=change), self.assertRaisesRegex(ValueError, error):
+                    run.validate(scenario)
+
     def test_spell_cast_and_proc_counts_can_share_relative_snapshots(self):
         for measured, captured in (('spell_cast_count', 'spell_proc_count'),
                                    ('spell_proc_count', 'spell_cast_count')):
@@ -766,13 +788,14 @@ class RunnerTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
                 run.validate(scenario)
 
-    def test_two_side_accepts_boolean_trade_and_mail(self):
-        for value in ({}, {'trade': True}, {'trade': False, 'mail': True}):
+    def test_two_side_accepts_boolean_trade_mail_and_auction(self):
+        for value in ({}, {'trade': True}, {'trade': False, 'mail': True}, {'auction': True}):
             scenario = copy.deepcopy(self.scenario)
             scenario['two_side'] = value
             self.assertIs(run.validate(scenario), scenario)
         for value, error in ((True, 'two_side: expected an object'), ({'trade': 1}, 'two_side.trade must be boolean'),
-                             ({'mail': 'true'}, 'two_side.mail must be boolean'), ({'auction': True}, 'two_side')):
+                             ({'mail': 'true'}, 'two_side.mail must be boolean'),
+                             ({'auction': 1}, 'two_side.auction must be boolean'), ({'bank': True}, 'two_side')):
             scenario = copy.deepcopy(self.scenario)
             scenario['two_side'] = value
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, error):
@@ -858,6 +881,120 @@ class RunnerTests(unittest.TestCase):
             scenario = copy.deepcopy(self.scenario)
             scenario['chat_log'] = value
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, 'chat_log must be boolean'):
+                run.validate(scenario)
+
+    def test_economy_log_rows_takes_an_event_and_typed_filters(self):
+        rows = {'action': 'assert', 'actor': 'caster', 'metric': 'economy_log_rows', 'economy_event': 'vendor_buy',
+                'item': 159, 'economy_count': 5, 'economy_gold': -25, 'economy_tokens': -300, 'economy_cost_item': 1297307,
+                'economy_cost_count': 500, 'economy_source': 900008, 'economy_save': False, 'economy_other': 'caster',
+                'economy_other_account': 'caster', 'economy_item_of': 159, 'equals': 1}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['economy_log'] = True
+        scenario['steps'].insert(0, rows)
+        self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'economy_event': 'gold_farm'}, 'unknown economy_event'),
+                              ({'economy_event': None}, 'economy_event belongs to economy_log_rows'),
+                              ({'metric': 'item_count'}, 'economy_event belongs to economy_log_rows'),
+                              ({'economy_save': 1}, 'economy_save must be boolean'),
+                              ({'economy_count': -1}, 'economy_count'),
+                              ({'economy_source': 2**32}, 'economy_source'),
+                              ({'economy_gold': 2**63}, 'economy_gold'),
+                              ({'actor': 'target'}, 'economy_log_rows needs a player'),
+                              ({'economy_other': 'target'}, 'economy_other must name a player'),
+                              ({'economy_other_account': 'nobody'}, 'economy_other_account must name a player'),
+                              ({'economy_item_of': 0}, 'economy_item_of')):
+            step = {key: value for key, value in {**rows, **change}.items() if value is not None}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+        for value in ('yes', 1):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['economy_log'] = value
+            with self.subTest(economy_log=value), self.assertRaisesRegex(ValueError, 'economy_log must be boolean'):
+                run.validate(scenario)
+
+    def test_economy_log_rows_takes_store_buy_and_a_token_minimum(self):
+        rows = {'action': 'assert', 'actor': 'caster', 'metric': 'economy_log_rows', 'economy_event': 'store_buy',
+                'economy_min_tokens': 300, 'equals': 1}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['economy_log'] = True
+        scenario['steps'].insert(0, rows)
+        self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'economy_min_tokens': 2**63}, 'economy_min_tokens'),
+                              ({'economy_min_tokens': 1.5}, 'economy_min_tokens'),
+                              ({'metric': 'item_count', 'economy_event': None}, 'economy fields belong to economy_log_rows')):
+            step = {key: value for key, value in {**rows, **change}.items() if value is not None}
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, step)
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+
+    def test_economy_log_queued_counts_a_players_waiting_rows(self):
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'assert', 'actor': 'caster', 'metric': 'economy_log_queued', 'equals': 0})
+        self.assertIs(run.validate(scenario), scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'assert', 'actor': 'target', 'metric': 'economy_log_queued', 'equals': 0})
+        with self.assertRaisesRegex(ValueError, 'economy_log_queued needs a player'):
+            run.validate(scenario)
+
+    def test_economy_log_cleanup_takes_a_day_count(self):
+        step = {'action': 'economy_log_cleanup', 'actor': 'caster', 'days_ahead': 91}
+        for days in (91, 3650):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**step, 'days_ahead': days})
+            self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'days_ahead': -1}, 'days_ahead'), ({'days_ahead': 3651}, 'days_ahead'),
+                              ({'days_ahead': '91'}, 'days_ahead')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**step, **change})
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {'action': 'economy_log_cleanup', 'actor': 'caster'})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
+    def test_economy_log_keep_days_takes_a_day_count_in_an_economy_log_case(self):
+        step = {'action': 'economy_log_keep_days', 'actor': 'caster', 'days': 180}
+        for days in (0, 180, 3650):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['economy_log'] = True
+            scenario['steps'].insert(0, {**step, 'days': days})
+            self.assertIs(run.validate(scenario), scenario)
+        for change, error in (({'days': -1}, 'days'), ({'days': 3651}, 'days'), ({'days': '180'}, 'days')):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['economy_log'] = True
+            scenario['steps'].insert(0, {**step, **change})
+            with self.subTest(change=change), self.assertRaisesRegex(ValueError, error):
+                run.validate(scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, step)
+        with self.assertRaisesRegex(ValueError, 'needs "economy_log": true'):
+            run.validate(scenario)
+
+    def test_auction_id_is_a_packet_field_naming_an_item_entry(self):
+        packet = {'action': 'client_packet', 'actor': 'caster', 'opcode': 599,
+                  'fields': [{'actor_guid': 'target'}, {'auction_id': 765}]}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, packet)
+        self.assertIs(run.validate(scenario), scenario)
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, {**packet, 'fields': [{'auction_id': 2**32}]})
+        with self.assertRaises(ValueError):
+            run.validate(scenario)
+
+    def test_money_mail_id_is_a_packet_field_naming_a_copper_amount(self):
+        packet = {'action': 'client_packet', 'actor': 'caster', 'opcode': 581,
+                  'fields': [{'gameobject_guid': 142119}, {'money_mail_id': 50}]}
+        scenario = copy.deepcopy(self.scenario)
+        scenario['steps'].insert(0, packet)
+        self.assertIs(run.validate(scenario), scenario)
+        for value in (0, 2**32, '50'):
+            scenario = copy.deepcopy(self.scenario)
+            scenario['steps'].insert(0, {**packet, 'fields': [{'money_mail_id': value}]})
+            with self.subTest(value=value), self.assertRaises(ValueError):
                 run.validate(scenario)
 
     def test_quest_log_size_accepts_the_native_and_extended_range(self):
@@ -959,7 +1096,7 @@ class RunnerTests(unittest.TestCase):
                 run.validate(scenario)
 
     def test_system_mail_needs_a_known_kind_and_an_item(self):
-        for kind in ('postmaster', 'reward', 'server'):
+        for kind in ('postmaster', 'reward', 'server', 'self'):
             scenario = copy.deepcopy(self.scenario)
             scenario['steps'].insert(0, {'action': 'system_mail', 'actor': 'caster', 'item': 6948, 'kind': kind})
             self.assertIs(run.validate(scenario), scenario)

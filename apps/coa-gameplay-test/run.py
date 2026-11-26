@@ -46,7 +46,7 @@ ENCOUNTER_STATES = {'NOT_STARTED', 'IN_PROGRESS', 'FAIL', 'DONE', 'SPECIAL'}
 MAX_ENCOUNTER_RADIUS = 200
 MAX_NEAREST_CREATURE_RADIUS = 200
 RAID_ROLES = {'tank', 'healer', 'melee', 'ranged'}
-SYSTEM_MAIL_KINDS = {'postmaster', 'reward', 'server'}
+SYSTEM_MAIL_KINDS = {'postmaster', 'reward', 'server', 'self'}
 RAID_ROLE_FIELDS = {'rotation', 'heal_spell', 'taunt_spell', 'rotation_assist'}
 SPAWN_PLACEMENT_METRICS = {'spawn_placement', 'spawn_ground_gap', 'spawn_submerged', 'spawn_display_state',
                             'spawn_stand_state', 'spawn_clearance', 'spawn_headroom', 'spawn_distance'}
@@ -64,6 +64,12 @@ CHAT_LOG_FLAGS = ('chat_has_position', 'chat_has_group', 'chat_has_guild', 'chat
 MAX_SPELL_MOD_OP = 31
 MIN_MUTANT_PERCENT = -100
 MAX_MUTANT_PERCENT = 10000
+ECONOMY_EVENTS = {
+    'vanity_store_buy', 'vanity_collect', 'vendor_buy', 'vendor_sell', 'vendor_buyback', 'bazaar_rotation_buy',
+    'heirloom_token_buy', 'cache_open', 'ah_list', 'ah_cancel', 'ah_bid', 'ah_buyout', 'ah_sold', 'ah_expired', 'trade',
+    'mail_send', 'mail_take', 'system_mail', 'tokens_earned', 'tokens_spent', 'item_destroy', 'highrisk_drop',
+    'highrisk_claim', 'reward', 'store_buy',
+}
 METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'spell_power_cost', 'position_o', 'avoidance_samples', 'spell_effect_kind', 'spell_effect_misc', 'movie_exists',
     'item_random_property', 'item_suffix_factor', 'item_enchantment', 'item_guid', 'item_soulbound', 'item_duration',
@@ -112,6 +118,7 @@ METRICS = TIMELINE_METRICS | EVENT_TIME_METRICS | {
     'pool_variant_count', 'pool_retired_item_count', 'pool_row_count', 'pool_item_present',
     'cache_token_count', 'cache_token_stage', 'cache_token_present',
     'free_inventory_slots', 'mail_count', 'mail_item_count', 'mail_has_item', 'chat_log_rows', 'chat_log_dropped',
+    'economy_log_rows', 'economy_log_queued',
     'account_character_count', 'account_other_item_count', 'account_other_bank_item_count',
     'account_other_mail_count', 'account_other_foreign_mail_count', 'account_other_at_login_flag',
     'mail_pool_item_count', 'notifications', 'notification_contains',
@@ -292,6 +299,10 @@ METRIC_FIELDS = {'actor', 'metric', 'spell', 'power', 'field', 'mask', 'caster',
                  'min_level', 'max_level', 'min_home_distance', 'spawn', 'entries', 'dead', 'radius',
                  'chat_type', 'chat_text', 'chat_target', 'chat_channel', 'chat_subject', 'chat_emote', 'chat_name',
                  'chat_target_name', *CHAT_LOG_FLAGS,
+                 'economy_event',
+                 'economy_save', 'economy_count', 'economy_gold', 'economy_tokens', 'economy_cost_item',
+                 'economy_cost_count', 'economy_source', 'economy_min_tokens', 'economy_other', 'economy_other_account',
+                 'economy_item_of',
                   'guid', 'spawn_type', 'tolerance', 'map', 'z', 'glancing', 'blocked', 'resisted', 'victim_state',
                   'school_mask', 'rolls', 'stacks', 'target_entry', 'owned_entry', 'triggered', 'cumulative',
                   'block_kind'} \
@@ -374,6 +385,8 @@ ACTIONS = {
     'binder_activate': ({'actor'}, {'actor', 'target', 'owner', 'entry'}),
     'destroy_item': ({'actor', 'item'}, {'actor', 'item'}),
     'forget_vanity': ({'actor', 'item'}, {'actor', 'item'}),
+    'economy_log_cleanup': ({'actor', 'days_ahead'}, {'actor', 'days_ahead', 'background'}),
+    'economy_log_keep_days': ({'actor', 'days'}, {'actor', 'days'}),
     'system_mail': ({'actor', 'item', 'kind'}, {'actor', 'item', 'kind'}),
     'start_challenge': ({'actor', 'challenge', 'level'}, {'actor', 'challenge', 'level'}),
     'stop_challenge': ({'actor', 'challenge'}, {'actor', 'challenge'}),
@@ -390,7 +403,7 @@ ACTIONS = {
     'add_at_login_flag': ({'actor', 'id'}, {'actor', 'id'}),
     'set_player_setting': ({'actor', 'source', 'index', 'value'}, {'actor', 'source', 'index', 'value'}),
     'set_phase': ({'actor'}, {'actor', 'value'}),
-    'use_nearby_gameobject': ({'actor', 'entry'}, {'actor', 'entry', 'owner'}),
+    'use_nearby_gameobject': ({'actor'}, {'actor', 'entry', 'entries', 'owner'}),
     'voidportal': ({'actor', 'op'}, {'actor', 'op', 'group', 'spawn', 'success'}),
     'spell_click_nearby': ({'actor', 'entry'}, {'actor', 'entry'}),
     'attack_owned_creature': ({'actor', 'target', 'entry'}, {'actor', 'target', 'entry'}),
@@ -629,7 +642,7 @@ def validate(scenario, clock=REAL_CLOCK):
          {'schema', 'name', 'players', 'creatures', 'steps', 'timeout_ms', 'location', 'contract', 'hour',
           'creature_scaling', 'ptr_character_copy', 'ptr_character_copy_interruption', 'vanity_ownership',
           'two_side', 'quest_log_size', 'max_player_level', 'chat_log', 'chat_log_max_pending',
-          'battleground_kill_xp'},
+          'battleground_kill_xp', 'economy_log'},
          'scenario')
     schema = scenario['schema']
     require(type(schema) is int and schema in MAX_PLAYERS, 'Unsupported scenario schema')
@@ -643,6 +656,7 @@ def validate(scenario, clock=REAL_CLOCK):
         require(scenario.get('chat_log') is True, 'chat_log_max_pending needs chat_log')
         number(scenario['chat_log_max_pending'], 'chat_log_max_pending', 1, 1000000, True)
     require(type(scenario.get('battleground_kill_xp', False)) is bool, 'battleground_kill_xp must be boolean')
+    require(type(scenario.get('economy_log', False)) is bool, 'economy_log must be boolean')
     require(type(scenario.get('ptr_character_copy', False)) is bool, 'ptr_character_copy must be boolean')
     if 'ptr_character_copy_interruption' in scenario:
         require(scenario.get('ptr_character_copy') is True,
@@ -659,7 +673,7 @@ def validate(scenario, clock=REAL_CLOCK):
             number(item, 'vanity_ownership.starter_items', 1, 2**32 - 1, True)
     if 'two_side' in scenario:
         two_side = scenario['two_side']
-        keys(two_side, set(), {'trade', 'mail', 'group'}, 'two_side')
+        keys(two_side, set(), {'trade', 'mail', 'group', 'auction'}, 'two_side')
         for name, value in two_side.items():
             require(type(value) is bool, f'two_side.{name} must be boolean')
     if 'quest_log_size' in scenario:
@@ -801,6 +815,13 @@ def validate(scenario, clock=REAL_CLOCK):
         if action == 'addon_message':
             require(isinstance(step['prefix'], str) and step['prefix'].strip() and '\t' not in step['prefix']
                     and isinstance(step['text'], str), f'{where}: addon_message needs a prefix without tabs and text')
+        if action == 'economy_log_cleanup':
+            number(step['days_ahead'], f'{where}.days_ahead', 0, 3650, True)
+            require(type(step.get('background', False)) is bool, f'{where}: background must be boolean')
+        if action == 'economy_log_keep_days':
+            number(step['days'], f'{where}.days', 0, 3650, True)
+            require(scenario.get('economy_log') is True,
+                    f'{where}: economy_log_keep_days changes the whole worldserver and needs "economy_log": true')
         if action == 'system_mail':
             require(step['kind'] in SYSTEM_MAIL_KINDS,
                     f'{where}: system_mail kind must be one of {sorted(SYSTEM_MAIL_KINDS)}')
@@ -950,8 +971,16 @@ def validate(scenario, clock=REAL_CLOCK):
             if 'owner' in step:
                 require(step['owner'] in player_ids, f'{where}: binder owner needs a player')
                 number(step['entry'], f'{where}.entry', 1, 2**32 - 1, True)
-        if action == 'use_nearby_gameobject' and 'owner' in step:
-            require(step['owner'] in player_ids, f'{where}: nearby gameobject owner needs a player')
+        if action == 'use_nearby_gameobject':
+            require(('entry' in step) != ('entries' in step), f'{where}: use_nearby_gameobject needs entry or entries')
+            if 'entries' in step:
+                require(type(step['entries']) is list and 0 < len(step['entries']) <= 50,
+                        f'{where}.entries must be a list of 1 to 50 entries')
+                for index, entry in enumerate(step['entries']):
+                    number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
+                require(len(set(step['entries'])) == len(step['entries']), f'{where}.entries has a duplicate entry')
+            if 'owner' in step:
+                require(step['owner'] in player_ids, f'{where}: nearby gameobject owner needs a player')
         if action == 'voidportal':
             require(step['op'] in {'force', 'roll'}, f'{where}: unknown voidportal op')
             if step['op'] == 'force':
@@ -1167,7 +1196,7 @@ def validate(scenario, clock=REAL_CLOCK):
                 require(isinstance(field, dict) and len(field) == 1, f'{where}.fields[{index}]: expected one typed value')
                 (kind, value), = field.items()
                 require(kind in {'u8', 'u32', 'u64', 'string', 'buyback_guid', 'item_guid', 'item_bag', 'item_slot', 'gameobject_guid',
-                                 'vendor_slot', 'mail_id', 'mail_item_guid', 'equipment_set_guid',
+                                 'vendor_slot', 'mail_id', 'mail_item_guid', 'money_mail_id', 'auction_id', 'equipment_set_guid',
                                  'packed_equipment_set_guid',
                                  'actor_guid', 'packed_actor_guid', 'nearest_creature_guid',
                                  'pet_guid', 'stabled_pet', 'duel_arbiter', 'invited_battleground_type',
@@ -1179,10 +1208,13 @@ def validate(scenario, clock=REAL_CLOCK):
                     require(value in actor_ids, f'{where}.fields[{index}]: expected a player or creature id')
                 elif kind in {'pet_guid', 'duel_arbiter', 'invited_battleground_type'}:
                     require(value in player_ids, f'{where}.fields[{index}]: expected a player id')
+                elif kind == 'money_mail_id':
+                    number(value, f'{where}.fields[{index}]', 1, 2**32 - 1, True)
                 else:
                     maximum = {'u8': 255, 'u32': 2**32 - 1, 'u64': 2**64 - 1, 'buyback_guid': 2**31 - 1,
                                'item_guid': 2**32 - 1, 'item_bag': 2**32 - 1, 'item_slot': 2**32 - 1, 'gameobject_guid': 2**32 - 1,
-                               'vendor_slot': 2**32 - 1, 'mail_id': 2**32 - 1, 'mail_item_guid': 2**32 - 1, 'nearest_creature_guid': 2**32 - 1,
+                               'vendor_slot': 2**32 - 1, 'mail_id': 2**32 - 1, 'mail_item_guid': 2**32 - 1,
+                               'auction_id': 2**32 - 1, 'nearest_creature_guid': 2**32 - 1,
                                'equipment_set_guid': 9, 'packed_equipment_set_guid': 9,
                                'stabled_pet': 3, 'wildcard_entry': 255, 'wildcard_pending_cards': 1000,
                                'wildcard_lowest_card': 7}[kind]
@@ -1236,6 +1268,29 @@ def validate(scenario, clock=REAL_CLOCK):
             else:
                 require(not EVENT_TIME_FIELDS & step.keys(),
                         f'{where}: stream and since_spell only apply to event time metrics')
+            require(('economy_event' in step) == (metric == 'economy_log_rows'), f'{where}: economy_event belongs to economy_log_rows')
+            require(metric == 'economy_log_rows' or not {f for f in step if f.startswith('economy_')},
+                    f'{where}: economy fields belong to economy_log_rows')
+            if metric == 'economy_log_queued':
+                require(step['actor'] in player_ids, f'{where}: economy_log_queued needs a player')
+            if metric == 'economy_log_rows':
+                require(step['actor'] in player_ids, f'{where}: economy_log_rows needs a player')
+                require(step['economy_event'] in ECONOMY_EVENTS, f'{where}: unknown economy_event')
+                if 'item' in step:
+                    number(step['item'], f'{where}.item', 1, 2**31 - 1, True)
+                if 'economy_save' in step:
+                    require(type(step['economy_save']) is bool, f'{where}: economy_save must be boolean')
+                for field in ('economy_other', 'economy_other_account'):
+                    if field in step:
+                        require(step[field] in player_ids, f'{where}: {field} must name a player')
+                if 'economy_item_of' in step:
+                    number(step['economy_item_of'], f'{where}.economy_item_of', 1, 2**31 - 1, True)
+                for field in ('economy_count', 'economy_cost_item', 'economy_cost_count', 'economy_source'):
+                    if field in step:
+                        number(step[field], f'{where}.{field}', 0, 2**32 - 1, True)
+                for field in ('economy_gold', 'economy_tokens', 'economy_min_tokens'):
+                    if field in step:
+                        number(step[field], f'{where}.{field}', -2**62, 2**62, True)
             if 'creator_only' in step:
                 require(metric == 'owned_creature_count', f'{where}: creator_only needs owned_creature_count')
                 require(type(step['creator_only']) is bool, f'{where}: creator_only must be boolean')
@@ -1348,8 +1403,16 @@ def validate(scenario, clock=REAL_CLOCK):
             validate_placement_metric(step, where, player_ids)
             require(metric not in PLACEMENT_AUDIT_METRICS or placement_audited,
                     f'{where}: placement audit metric needs an earlier placement_audit')
-            require('entries' not in step or metric == 'map_creature_count',
-                    f'{where}: entries only applies to map creature counts')
+            require('entries' not in step or metric in {'map_creature_count', 'nearby_gameobject_count'},
+                    f'{where}: entries only applies to map creature and nearby gameobject counts')
+            if metric == 'nearby_gameobject_count':
+                require(('entry' in step) != ('entries' in step), f'{where}: give entry or entries, not both')
+                if 'entries' in step:
+                    require(type(step['entries']) is list and 0 < len(step['entries']) <= 50,
+                            f'{where}.entries must be a list of 1 to 50 entries')
+                    for index, entry in enumerate(step['entries']):
+                        number(entry, f'{where}.entries[{index}]', 1, 2**32 - 1, True)
+                    require(len(set(step['entries'])) == len(step['entries']), f'{where}.entries has a duplicate entry')
             if metric == 'map_creature_count':
                 require(step['actor'] in player_ids, f'{where}: creature count needs a player')
                 if 'entry' in step:

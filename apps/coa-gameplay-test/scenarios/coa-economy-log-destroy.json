@@ -1,0 +1,34 @@
+{
+  "schema": 1,
+  "name": "Economy log records a destroyed rare item once the character saves",
+  "contract": "With the economy log on, a player who destroys an item of rare quality or better gets one item_destroy row in coa_economy_log with that item, written when the character is saved. Destroying a common item writes nothing. Destroying a vanity item writes the row whatever its quality: Arclight Spanner (6219, common) is in this server's VanityCollection.dbc. A destroyed item that item recovery archives is saved at once, and that save writes its row.",
+  "economy_log": true,
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "keeper",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {"action": "wait", "ms": 3000},
+    {"action": "add_item", "actor": "keeper", "item": 12584},
+    {"action": "destroy_item", "label": "keeper destroys Grand Marshal's Longsword (epic)", "actor": "keeper", "item": 12584},
+    {"action": "assert", "label": "the destroy's own save wrote the row, nothing waits", "actor": "keeper", "metric": "economy_log_queued", "equals": 0},
+    {"action": "assert", "label": "one item_destroy row for the sword", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 12584, "equals": 1, "within_ms": 2000},
+    {"action": "add_item", "actor": "keeper", "item": 2589},
+    {"action": "destroy_item", "label": "keeper destroys Linen Cloth (common)", "actor": "keeper", "item": 2589},
+    {"action": "assert", "label": "no row for the common cloth", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 2589, "equals": 0},
+    {"action": "add_item", "actor": "keeper", "item": 6219},
+    {"action": "destroy_item", "label": "keeper destroys Arclight Spanner (common, vanity)", "actor": "keeper", "item": 6219},
+    {"action": "assert", "label": "one item_destroy row for the vanity spanner", "actor": "keeper", "metric": "economy_log_rows", "economy_event": "item_destroy", "item": 6219, "equals": 1, "within_ms": 2000}
+  ]
+}
