@@ -1487,6 +1487,7 @@
       "fields": {
         "opcode": 591
       },
+      "void_on_cast_failure": true,
       "observe_source": "501667 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD, BasePoints 21 + DieSides 1 = 22 ($m1), SchoolMask 32 Shadow (Spell.dbc); Unit::DealDamageShieldDamage (Unit.cpp:2341-2393) sends SMSG_SPELLDAMAGESHIELD (opcode 591, spell at u32 index 4, damage at index 5; Necromancer Razorice 501965 precedent). Hostile striker casts Strike 11976 8 times 300 ms apart in both phases, 823764 prevents partial resist: 0 packets before (control), >= 1 after real cast of 501667. Reference search 2026-11-26: coa-history 501667: 0 events (572116: 5932 DAMAGE_SHIELD, mean 46.0); sidekick data.js & skill_line_ability.csv checked; installed server Spell.dbc governs."
     },
     {
@@ -1528,6 +1529,7 @@
         "opcode": 591,
         "index": 5
       },
+      "void_on_cast_failure": true,
       "observe_source": "501667 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD BasePoints 21 + DieSides 1 = 22 ($m1 at 0 Shadow SP; Spell.dbc). SMSG_SPELLDAMAGESHIELD (opcode 591) damage word (index 5): -1 before (no packet), 22 after real cast of 501667 with 823764 preventing partial resist. Reference search 2026-11-26: see shield_hits."
     },
     {
@@ -1569,6 +1571,7 @@
         "opcode": 591,
         "index": 4
       },
+      "void_on_cast_failure": true,
       "observe_source": "501667 SMSG_SPELLDAMAGESHIELD (opcode 591) spell word (index 4): -1 before (no packet), 501667 after real cast of 501667. Reference search 2026-11-26: see shield_hits."
     },
     {
@@ -1613,14 +1616,15 @@
         "opcode": 591,
         "index": 5
       },
+      "void_on_cast_failure": true,
       "observe_source": "Tooltip formula ${$m1+0+$sps*0.035} at Shadow SP = 1000 expects 22 + 35 = 57 Shadow damage (band [55, 59], excluding 22 [0% SP scaling] and 92 [2x]). Spell.dbc EffectBonusMultiplier[0]=0.0 and no spell_bonus_data row exists for 802313/501667. Reference search 2026-11-26: see shield_hits."
     },
     {
       "spell": 501667,
-      "name": "Bloodthorns (0.5 sec internal cooldown gate)",
+      "name": "Bloodthorns (0.5 sec ICD held below 450 ms)",
       "kind": "metric_delta",
-      "variant": "icd_gate",
-      "label_suffix": "icd_gate",
+      "variant": "icd_held",
+      "label_suffix": "icd_held",
       "quote": "Can occur only once every half a second.",
       "trigger_spell": 60235,
       "target": "caster",
@@ -1631,11 +1635,22 @@
       "setup_only_after": true,
       "setup_wait_ms": 1600,
       "strike": {
-        "spell": 11976,
+        "spell": 34580,
         "health": 100000,
         "max_health": 100000,
-        "count": 6,
-        "wait_ms": 60
+        "count": 1,
+        "wait_ms": 340,
+        "after_trigger_ms": 10,
+        "reaction": 0
+      },
+      "second_strike": {
+        "spell": 23583,
+        "present": 1,
+        "wait_ms": 20
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
       },
       "phase_auras": [
         [
@@ -1643,19 +1658,150 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          803393,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "striker",
+          "striker"
         ]
       ],
-      "wait_ms": 100,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 34580,
+              "caster": "striker",
+              "target": "caster",
+              "blocked": false
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms Strike #1 (34580, SPELL_ATTR0_NO_ACTIVE_DEFENSE) landed unblocked once in control (1) and once in treatment (cumulative 2)."
+          }
+        ]
+      },
+      "wait_ms": 10,
       "expire_ms": 500,
+      "game_time": {
+        "after": [
+          360,
+          449
+        ]
+      },
       "before_expected": 0,
       "expected": 1,
-      "after_at_least": 1,
-      "after_at_most": 2,
+      "tolerance": 0,
       "metric": "server_packets",
       "fields": {
         "opcode": 591
       },
-      "observe_source": "Tooltip states Can occur only once every half a second (500 ms ICD). Striker casts 6 Strikes 11976 spaced 60 ms apart (total 300 ms span + 100 ms read = 400 ms < 500 ms) in both phases: 0 packets in control, at most 1-2 packets if a 500 ms ICD is enforced (alerts if DealDamageShieldDamage fires on every landed strike with no ICD). Reference search 2026-11-26: see shield_hits."
+      "void_on_cast_failure": true,
+      "observe_source": "Lower bracket of 500 ms ICD ('Can occur only once every half a second.'): passive striker (reaction 0, no auto-attacks) casts two instant DmgClass=2 Physical SPELL_ATTR0_NO_ACTIVE_DEFENSE strikes (34580 then 23583) with striker & caster hit fixture 803393 (+100% hit) and caster_avoidance dodge/parry 0% plus 823764 on caster; ally_arm checks 34580 landed unblocked (1 before, 2 cumulative after) and second_strike checks present==1 packet before 23583 plus 1 landed 23583 log per phase. Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 340 + second_strike.wait_ms 20 + wait_ms 10 = 380 ms, guarded by game_time [360, 449] ms (< 450 ms = -10% of 500 ms). Expected: 0 packets in control, exactly 1 (tolerance 0) in treatment — rejects 0 ms (current unfixed server fires 2) and 250 ms ICDs (340 ms inter-strike gap > 250 ms fires 2). Paired with icd_reopen. Reference search 2026-11-26: see shield_hits."
+    },
+    {
+      "spell": 501667,
+      "name": "Bloodthorns (0.5 sec ICD reopens above 550 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_reopen",
+      "label_suffix": "icd_reopen",
+      "quote": "Can occur only once every half a second.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        501667
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 34580,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 560,
+        "after_trigger_ms": 10,
+        "reaction": 0
+      },
+      "second_strike": {
+        "spell": 23583,
+        "present": 1,
+        "wait_ms": 20
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 34580,
+              "caster": "striker",
+              "target": "caster",
+              "blocked": false
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms Strike #1 (34580, SPELL_ATTR0_NO_ACTIVE_DEFENSE) landed unblocked once in control (1) and once in treatment (cumulative 2)."
+          }
+        ]
+      },
+      "wait_ms": 10,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          560,
+          680
+        ]
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 591
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket of 500 ms ICD ('Can occur only once every half a second.'): same passive-striker guaranteed-hit two-strike setup as icd_held (reaction 0, 34580 then 23583, 803393 on caster & striker, 823764 on caster, dodge/parry 0%, ally_arm 34580 unblocked count 1/2, second_strike present==1 & 23583 log count 1/1). Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 560 + second_strike.wait_ms 20 + wait_ms 10 = 600 ms, guarded by game_time [560, 680] ms (> 550 ms = +10% of 500 ms and < 700 ms). Expected: 0 packets in control, exactly 2 (tolerance 0) in treatment — rejects >= 700 ms, 1000 ms, and one-shot ICDs. Together with icd_held, brackets the 500 ms ICD inside +-10%. Reference search 2026-11-26: see shield_hits."
     },
     {
       "spell": 572116,
@@ -1751,6 +1897,7 @@
       "fields": {
         "opcode": 591
       },
+      "void_on_cast_failure": true,
       "observe_source": "572116 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD, BasePoints 21 + DieSides 1 = 22 ($m1), SchoolMask 32 Shadow (Spell.dbc); Necromancer Greater Razorice 572214 precedent. 8 Strikes 11976 300 ms apart with 823764 preventing partial resist: 0 SMSG_SPELLDAMAGESHIELD packets before (control), >= 1 after real cast of 572116. Reference search 2026-11-26: see duration."
     },
     {
@@ -1792,6 +1939,7 @@
         "opcode": 591,
         "index": 5
       },
+      "void_on_cast_failure": true,
       "observe_source": "572116 Effect[0] aura 15 SPELL_AURA_DAMAGE_SHIELD BasePoints 21 + DieSides 1 = 22 ($m1 at 0 Shadow SP; Spell.dbc). SMSG_SPELLDAMAGESHIELD (opcode 591) damage word (index 5): -1 before, 22 after real cast of 572116 with 823764. Reference search 2026-11-26: see duration."
     },
     {
@@ -1833,6 +1981,7 @@
         "opcode": 591,
         "index": 4
       },
+      "void_on_cast_failure": true,
       "observe_source": "572116 SMSG_SPELLDAMAGESHIELD (opcode 591) spell word (index 4): -1 before, 572116 after real cast of 572116. Reference search 2026-11-26: see duration."
     },
     {
@@ -1877,14 +2026,15 @@
         "opcode": 591,
         "index": 5
       },
+      "void_on_cast_failure": true,
       "observe_source": "Tooltip formula ${$m1+0+$sps*0.035} at Shadow SP = 1000 expects 22 + 35 = 57 Shadow damage (band [55, 59], excluding 22 [0% SP scaling] and 92 [2x]). Spell.dbc EffectBonusMultiplier[0]=0.0 and no spell_bonus_data row exists for 572116. Reference search 2026-11-26: see duration."
     },
     {
       "spell": 572116,
-      "name": "Greater Bloodthorns (0.5 sec internal cooldown gate)",
+      "name": "Greater Bloodthorns (0.5 sec ICD held below 450 ms)",
       "kind": "metric_delta",
-      "variant": "icd_gate",
-      "label_suffix": "icd_gate",
+      "variant": "icd_held",
+      "label_suffix": "icd_held",
       "quote": "Can occur only once every half a second.",
       "trigger_spell": 60235,
       "target": "caster",
@@ -1895,11 +2045,22 @@
       "setup_only_after": true,
       "setup_wait_ms": 1600,
       "strike": {
-        "spell": 11976,
+        "spell": 34580,
         "health": 100000,
         "max_health": 100000,
-        "count": 6,
-        "wait_ms": 60
+        "count": 1,
+        "wait_ms": 340,
+        "after_trigger_ms": 10,
+        "reaction": 0
+      },
+      "second_strike": {
+        "spell": 23583,
+        "present": 1,
+        "wait_ms": 20
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
       },
       "phase_auras": [
         [
@@ -1907,19 +2068,150 @@
           1,
           "caster",
           "caster"
+        ],
+        [
+          803393,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "striker",
+          "striker"
         ]
       ],
-      "wait_ms": 100,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 34580,
+              "caster": "striker",
+              "target": "caster",
+              "blocked": false
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms Strike #1 (34580, SPELL_ATTR0_NO_ACTIVE_DEFENSE) landed unblocked once in control (1) and once in treatment (cumulative 2)."
+          }
+        ]
+      },
+      "wait_ms": 10,
       "expire_ms": 500,
+      "game_time": {
+        "after": [
+          360,
+          449
+        ]
+      },
       "before_expected": 0,
       "expected": 1,
-      "after_at_least": 1,
-      "after_at_most": 2,
+      "tolerance": 0,
       "metric": "server_packets",
       "fields": {
         "opcode": 591
       },
-      "observe_source": "Tooltip states Can occur only once every half a second (500 ms ICD). Striker casts 6 Strikes 11976 spaced 60 ms apart (total 300 ms span + 100 ms read = 400 ms < 500 ms) in both phases: 0 packets in control, at most 1-2 packets if a 500 ms ICD is enforced (alerts if DealDamageShieldDamage fires on every landed strike with no ICD). Reference search 2026-11-26: see duration."
+      "void_on_cast_failure": true,
+      "observe_source": "Lower bracket of 500 ms ICD ('Can occur only once every half a second.'): passive striker (reaction 0, no auto-attacks) casts two instant DmgClass=2 Physical SPELL_ATTR0_NO_ACTIVE_DEFENSE strikes (34580 then 23583) with striker & caster hit fixture 803393 (+100% hit) and caster_avoidance dodge/parry 0% plus 823764 on caster; ally_arm checks 34580 landed unblocked (1 before, 2 cumulative after) and second_strike checks present==1 packet before 23583 plus 1 landed 23583 log per phase. Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 340 + second_strike.wait_ms 20 + wait_ms 10 = 380 ms, guarded by game_time [360, 449] ms (< 450 ms = -10% of 500 ms). Expected: 0 packets in control, exactly 1 (tolerance 0) in treatment — rejects 0 ms (current unfixed server fires 2) and 250 ms ICDs (340 ms inter-strike gap > 250 ms fires 2). Paired with icd_reopen. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 572116,
+      "name": "Greater Bloodthorns (0.5 sec ICD reopens above 550 ms)",
+      "kind": "metric_delta",
+      "variant": "icd_reopen",
+      "label_suffix": "icd_reopen",
+      "quote": "Can occur only once every half a second.",
+      "trigger_spell": 60235,
+      "target": "caster",
+      "setup_casts": [
+        572116
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "strike": {
+        "spell": 34580,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 560,
+        "after_trigger_ms": 10,
+        "reaction": 0
+      },
+      "second_strike": {
+        "spell": 23583,
+        "present": 1,
+        "wait_ms": 20
+      },
+      "caster_avoidance": {
+        "dodge": 0,
+        "parry": 0
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          803393,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 34580,
+              "caster": "striker",
+              "target": "caster",
+              "blocked": false
+            },
+            "before_expected": 1,
+            "expected": 2,
+            "tolerance": 0,
+            "source": "Confirms Strike #1 (34580, SPELL_ATTR0_NO_ACTIVE_DEFENSE) landed unblocked once in control (1) and once in treatment (cumulative 2)."
+          }
+        ]
+      },
+      "wait_ms": 10,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          560,
+          680
+        ]
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "metric": "server_packets",
+      "fields": {
+        "opcode": 591
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper bracket of 500 ms ICD ('Can occur only once every half a second.'): same passive-striker guaranteed-hit two-strike setup as icd_held (reaction 0, 34580 then 23583, 803393 on caster & striker, 823764 on caster, dodge/parry 0%, ally_arm 34580 unblocked count 1/2, second_strike present==1 & 23583 log count 1/1). Nominal waits after 60235: after_trigger_ms 10 + strike.wait_ms 560 + second_strike.wait_ms 20 + wait_ms 10 = 600 ms, guarded by game_time [560, 680] ms (> 550 ms = +10% of 500 ms and < 700 ms). Expected: 0 packets in control, exactly 2 (tolerance 0) in treatment — rejects >= 700 ms, 1000 ms, and one-shot ICDs. Together with icd_held, brackets the 500 ms ICD inside +-10%. Reference search 2026-11-26: see duration."
     },
     {
       "spell": 806182,
@@ -2338,14 +2630,14 @@
       "fields": {
         "hand": 0
       },
-      "before_expected": 1000,
-      "expected": 769,
+      "before_expected": 2600,
+      "expected": 2000,
       "expected_ratio": 0.769231,
       "tolerance": 0.005,
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 30 (520493 Effect[0] aura 65 casting speed +30% and Effect[1] aura 192 melee/ranged haste +30%, BasePoints 29 + DieSides 1 = 30; Spell.dbc). Real cast of 520493 scales grouped ally attack_time_ms (hand 0) and cast_speed_multiplier by 1 / 1.3 = 0.769231 vs uncast control (band excludes 1.0 [0%] and 0.625 [+60%]). Reference search 2026-11-26: see radius."
+      "observe_source": "$s1 = 30 (520493 Effect[0] aura 65 casting speed +30% and Effect[1] aura 192 melee/ranged haste +30%, BasePoints 29 + DieSides 1 = 30; Spell.dbc). Real cast of 520493 scales grouped level-60 ally attack_time_ms (hand 0: 2600 -> 2000) and cast_speed_multiplier (1.0 -> 0.769231) by 1 / 1.3 = 0.769231 vs uncast control (band excludes 1.0 [0%] and 0.625 [+60%]). Reference search 2026-11-26: see radius."
     },
     {
       "spell": 520493,
@@ -2666,6 +2958,7 @@
       "expected": 1,
       "wait_ms": 6000,
       "expire_ms": 500,
+      "void_on_cast_failure": true,
       "observe_source": "706258 aura_ascension_bloodmage_coagulation (AscensionBloodmageTalents.cpp:937-953, rev_20260920_81) prevents periodic dispel 504102 unless Blood Shield 504296 is active. With 706258 learned and no Blood Shield, both bleed fixtures (10044, 13318, Mechanic 15) survive 6000 ms (>5000 ms period). Reference search 2026-11-26: coa-history 706258: 0 events in 186 logs (passive); bindmysoul, sidekick, coabuildhub & skill_line_ability.csv checked; installed server Spell.dbc governs."
     },
     {

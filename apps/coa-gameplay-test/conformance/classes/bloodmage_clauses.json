@@ -1984,7 +1984,8 @@
     "spell": 572116,
     "clause": "Can occur only once every half a second.",
     "labels": [
-      "572116 behaviour_metric_delta icd_gate"
+      "572116 behaviour_metric_delta icd_held",
+      "572116 behaviour_metric_delta icd_reopen"
     ],
     "kind": "claim"
   },
@@ -4377,7 +4378,8 @@
     "spell": 501667,
     "clause": "Can occur only once every half a second.",
     "labels": [
-      "501667 behaviour_metric_delta icd_gate"
+      "501667 behaviour_metric_delta icd_held",
+      "501667 behaviour_metric_delta icd_reopen"
     ],
     "kind": "claim"
   },
