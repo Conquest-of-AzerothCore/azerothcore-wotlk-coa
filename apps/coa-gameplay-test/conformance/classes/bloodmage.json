@@ -2484,21 +2484,30 @@
       "variant": "silence_held",
       "label_suffix": "silence_held",
       "quote": "and reducing the duration of interrupt and silence effects by $s2%.",
-      "trigger_spell": 562228,
+      "trigger_spell": 800786,
       "setup_casts": [
         504897
       ],
       "setup_target": "caster",
       "setup_only_after": true,
       "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
       "target": "caster",
       "measure_actor": "caster",
+      "cast_power": 1000,
       "strike": {
         "spell": 23207,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
-        "wait_ms": 100
+        "wait_ms": 100,
+        "after_trigger_ms": 0
       },
       "metric": "aura",
       "fields": {
@@ -2510,7 +2519,14 @@
       "tolerance": 0,
       "wait_ms": 6500,
       "expire_ms": 22000,
-      "observe_source": "504897 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 9 (MECHANIC_SILENCE) bp -31+1=-30% ($s2; Spell.dbc). Striker casts Silence 23207 (DmgClass 0, Mechanic 9, DurationIndex 1 = 10000 ms) at caster: 10000 ms without 504897, 7000 ms with real cast of 504897; expire_ms 22000 lets the 10000 ms silence plus 15000 ms DIMINISHING_SILENCE DR timer fully reset before treatment. Read 6600 ms after strike (> 0.9*7000=6300 ms): still active (1) in both phases. Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+      "game_time": {
+        "after": [
+          6450,
+          6750
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504897 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 9 (MECHANIC_SILENCE) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1) and void_on_cast_failure. Instant Sacrificial Rite 800786 (0 Rage, target caster) serves as the game_time anchor immediately before striker casts Silence 23207 (DmgClass 0, cannot miss via Unit.cpp:4234-4249, Mechanic 9, DurationIndex 1 = 10000 ms): 10000 ms without 504897, 7000 ms with 504897; expire_ms 22000 lets the 10000 ms silence plus 15000 ms DIMINISHING_SILENCE DR timer fully reset before treatment. Read at game_time [6450, 6750] ms (~6600 ms after strike, > 0.9*7000=6300 ms): still active (1) in both phases. Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
     },
     {
       "spell": 504897,
@@ -2519,21 +2535,30 @@
       "variant": "silence_ends",
       "label_suffix": "silence_ends",
       "quote": "and reducing the duration of interrupt and silence effects by $s2%.",
-      "trigger_spell": 562228,
+      "trigger_spell": 800786,
       "setup_casts": [
         504897
       ],
       "setup_target": "caster",
       "setup_only_after": true,
       "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
       "target": "caster",
       "measure_actor": "caster",
+      "cast_power": 1000,
       "strike": {
         "spell": 23207,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
-        "wait_ms": 100
+        "wait_ms": 100,
+        "after_trigger_ms": 0
       },
       "metric": "aura",
       "fields": {
@@ -2545,7 +2570,14 @@
       "tolerance": 0,
       "wait_ms": 7300,
       "expire_ms": 22000,
-      "observe_source": "504897 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 9 (MECHANIC_SILENCE) bp -31+1=-30% ($s2; Spell.dbc). Striker casts Silence 23207 (10000 ms -> 7000 ms with 504897; expire_ms 22000 clears DIMINISHING_SILENCE DR between phases). Read 7400 ms after strike (< 1.1*7000=7700 ms): still active (1) in control, expired (0) in treatment. Paired with silence_held (6600 ms), brackets reduced silence duration in (6600, 7400] ms (excluding +-10%). Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+      "game_time": {
+        "after": [
+          7250,
+          7550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "504897 Effect[1] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 9 (MECHANIC_SILENCE) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1) and void_on_cast_failure. Striker casts Silence 23207 (DmgClass 0, 10000 ms -> 7000 ms with 504897; expire_ms 22000 clears DIMINISHING_SILENCE DR between phases) immediately after clock cast 800786. Read at game_time [7250, 7550] ms (~7400 ms after strike, < 1.1*7000=7700 ms): still active (1) in control, expired (0) in treatment. Paired with silence_held (6600 ms), brackets reduced silence duration in (6600, 7400] ms (excluding +-10%). Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
     },
     {
       "spell": 504897,
@@ -2564,12 +2596,27 @@
       "setup_target": "caster",
       "setup_only_after": true,
       "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
       "target": "dummy",
       "measure_actor": "caster",
       "cast_power": 1000,
       "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
       "strike": {
-        "spell": 2139,
+        "spell": 29961,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
@@ -2585,6 +2632,25 @@
           "reset_cooldown": false
         }
       ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 504819,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Counterspell 29961 (SPELL_ATTR3_ALWAYS_HIT) interrupted Veinburst 504819 in both phases (0 damage hits on dummy; a missed interrupt lets 504819 finish and hit dummy)"
+          }
+        ]
+      },
       "metric": "cast_failure",
       "fields": {
         "spell": 578305
@@ -2594,7 +2660,13 @@
       "tolerance": 0,
       "wait_ms": 200,
       "expire_ms": 10000,
-      "observe_source": "504897 Effect[2] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 26 (MECHANIC_INTERRUPT) bp -31+1=-30% ($s2; Spell.dbc). Spell::EffectInterruptCast (SpellEffects.cpp:4843-4845) calls ModSpellDuration on Counterspell 2139 (Mechanic 26, Effect 68, DurationIndex 31 = 8000 ms) interrupting Veinburst 504819 (Shadow school 32, 2000 ms cast) at 500 ms: 8000 ms Shadow lockout without 504897, 5600 ms with real cast of 504897 (Player::ProhibitSpellSchool sets school cooldowns -> SPELL_FAILED_NOT_READY = 67, Spell.cpp:5840-5845). Probe Bloodbolt 578305 (Shadow school 32, reset_cooldown false) 5250 ms after interrupt (> 0.9*5600=5040 ms): refused with 67 in both phases. Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+      "game_time": {
+        "after": [
+          5800,
+          6100
+        ]
+      },
+      "observe_source": "504897 Effect[2] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 26 (MECHANIC_INTERRUPT) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1). Spell::EffectInterruptCast (SpellEffects.cpp:4843-4845) calls ModSpellDuration on Counterspell 29961 (Mechanic 26, Effect 68, DurationIndex 31 = 8000 ms, AttributesEx3 0x40100 SPELL_ATTR3_ALWAYS_HIT -> 0% miss, plus 823764 on striker) interrupting Veinburst 504819 (Shadow school 32, 2000 ms cast) at 500 ms: 8000 ms Shadow lockout without 504897, 5600 ms with 504897 (Player::ProhibitSpellSchool -> SPELL_FAILED_NOT_READY = 67, Spell.cpp:5840-5845). Precondition ally_arm confirms 0 Veinburst damage hits on dummy in both phases (ruling out any missed interrupt). Probe Bloodbolt 578305 (Shadow 32, reset_cooldown false) 5250 ms after interrupt (game_time [5800, 6100] ms after trigger, > 0.9*5600=5040 ms): refused with 67 in both phases. Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
     },
     {
       "spell": 504897,
@@ -2613,12 +2685,27 @@
       "setup_target": "caster",
       "setup_only_after": true,
       "setup_wait_ms": 1600,
+      "after_setup_stacks": [
+        {
+          "spell": 504897,
+          "actor": "caster",
+          "stacks": 1
+        }
+      ],
       "target": "dummy",
       "measure_actor": "caster",
       "cast_power": 1000,
       "disable_regeneration": true,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
       "strike": {
-        "spell": 2139,
+        "spell": 29961,
         "health": 100000,
         "max_health": 100000,
         "count": 1,
@@ -2634,6 +2721,25 @@
           "reset_cooldown": false
         }
       ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 504819,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Counterspell 29961 (SPELL_ATTR3_ALWAYS_HIT) interrupted Veinburst 504819 in both phases (0 damage hits on dummy; a missed interrupt lets 504819 finish and hit dummy)"
+          }
+        ]
+      },
       "metric": "cast_failure",
       "fields": {
         "spell": 578305
@@ -2643,7 +2749,13 @@
       "tolerance": 0,
       "wait_ms": 200,
       "expire_ms": 10000,
-      "observe_source": "504897 Effect[2] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 26 (MECHANIC_INTERRUPT) bp -31+1=-30% ($s2; Spell.dbc). Counterspell 2139 interrupts Veinburst 504819 (Shadow 32): 8000 ms lockout without 504897, 5600 ms with real cast of 504897. Probe Bloodbolt 578305 (Shadow 32, reset_cooldown false) 5950 ms after interrupt (< 1.1*5600=6160 ms): still refused (67) in control, accepted (0) in treatment. Paired with interrupt_held (5250 ms), brackets reduced lockout in (5250, 5950] ms (excluding +-10%). Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
+      "game_time": {
+        "after": [
+          6500,
+          6800
+        ]
+      },
+      "observe_source": "504897 Effect[2] aura 232 SPELL_AURA_MECHANIC_DURATION_MOD MiscValue 26 (MECHANIC_INTERRUPT) bp -31+1=-30% ($s2; Spell.dbc). Real cast of 504897 in treatment verified active by after_setup_stacks (504897 == 1). Counterspell 29961 (AttributesEx3 0x40100 SPELL_ATTR3_ALWAYS_HIT -> 0% miss, plus 823764 on striker) interrupts Veinburst 504819 (Shadow 32): 8000 ms lockout without 504897, 5600 ms with 504897. Precondition ally_arm confirms 0 Veinburst damage hits on dummy in both phases (preventing any missed-interrupt false pass). Probe Bloodbolt 578305 (Shadow 32, reset_cooldown false) 5950 ms after interrupt (game_time [6500, 6800] ms after trigger, < 1.1*5600=6160 ms): still refused (67) in control, accepted (0) in treatment. Paired with interrupt_held (5250 ms), brackets reduced lockout in (5250, 5950] ms (excluding +-10%). Reference search 2026-11-26: coa-history 504897 has 15 casts across 7 logs; coabuildhub absent; installed Spell.dbc governs."
     },
     {
       "spell": 504897,
@@ -2835,7 +2947,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Unit::CanDefendDuringCast (Unit.cpp:5136-5141) exempts Bloodmage with aura 801955 from the casting dodge suppression in Unit::RollMeleeOutcomeAgainst (Unit.cpp:3395-3397). Follows Felsworn Carve 800206 precedent: striker casts Speed Slash 2118233 (melee, SPELL_ATTR7_NO_ATTACK_MISS) 3 times 800 ms into Sanguine Mend 504085 (2500 ms cast) with dodge forced to 100% (set_combat_avoidance precondition fixture). Control (no 801955): all 3 strikes land (3); treatment (real cast of 801955): all 3 strikes dodged (0), isolated per phase via phase_since. Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc and Unit.cpp govern."
+      "observe_source": "Unit::CanDefendDuringCast (Unit.cpp:5136-5141) exempts Bloodmage with aura 801955 from the casting dodge suppression in Unit::MeleeSpellHitResult (Unit.cpp:3898-3901) for melee spell Speed Slash 2118233 (DmgClass 2, SPELL_ATTR7_NO_ATTACK_MISS; also Unit::RollMeleeOutcomeAgainst Unit.cpp:3395-3397 for white melee). Follows Felsworn Carve 800206 precedent: striker casts Speed Slash 2118233 3 times 800 ms into Sanguine Mend 504085 (2500 ms cast) with dodge forced to 100% (set_combat_avoidance precondition fixture). Control (no 801955): all 3 strikes land (3); treatment (real cast of 801955): all 3 strikes dodged (0), isolated per phase via phase_since. Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc and Unit.cpp govern."
     },
     {
       "spell": 801955,
@@ -2845,9 +2957,6 @@
       "label_suffix": "cast_parry",
       "quote": "While active you can dodge or parry while casting.",
       "trigger_spell": 504085,
-      "learn": [
-        3127
-      ],
       "setup_casts": [
         801955
       ],
@@ -2881,7 +2990,7 @@
       "wait_ms": 1500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Unit::CanDefendDuringCast (Unit.cpp:5136-5141) exempts Bloodmage with aura 801955 from the casting parry suppression in Unit::RollMeleeOutcomeAgainst (Unit.cpp:3429-3431). Parry 3127 (SPELL_EFFECT_PARRY -> Player::SetCanParry(true)) is learned as a named precondition in both phases alongside set_combat_avoidance(parry=100) because Bloodmage does not start with Parry (AscensionCustomClassData.h) and Unit::GetUnitParryChance (Unit.cpp:4327) checks CanParry(). Striker casts Speed Slash 2118233 3 times 800 ms into Sanguine Mend 504085 (2500 ms cast): control (no 801955) lands all 3 strikes (3); treatment (real cast of 801955) parries all 3 strikes (0), isolated per phase via phase_since. Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc and Unit.cpp govern."
+      "observe_source": "Unit::CanDefendDuringCast (Unit.cpp:5136-5141) exempts Bloodmage with aura 801955 from the casting parry suppression in Unit::MeleeSpellHitResult (Unit.cpp:3921-3924) for melee spell Speed Slash 2118233 (DmgClass 2, SPELL_ATTR7_NO_ATTACK_MISS; also Unit::RollMeleeOutcomeAgainst Unit.cpp:3429-3431 for white melee). Striker casts Speed Slash 2118233 3 times 800 ms into Sanguine Mend 504085 (2500 ms cast) with parry forced to 100% (set_combat_avoidance precondition fixture) on a real Bloodmage (no foreign Parry spell injected). Control (no 801955): all 3 strikes land (3); treatment (real cast of 801955): expected 0 hits (all 3 parried). Confirmed G-3 server defect: Bloodmage currently has CanParry() == false everywhere in server/DBC (Player.cpp:311, AscensionCustomClassData.h:337-375, AscensionLiveBaselineData.h:141-155, trainer 900020, SkillLineAbility.dbc, Spell.dbc), so Unit::GetUnitParryChance (Unit.cpp:4325-4335) returns 0 and all 3 strikes land (3 -> 3 alert) despite live Ascension Bloodmages parrying natively during 801955 (coa-history: Redfury 25 parries incl. 2 during 801955, Fairgraves 15, Graf 2). Reference search 2026-11-26: coa-history 801955 has 47 casts across 13 logs; coabuildhub lists 801955; installed Spell.dbc and Unit.cpp govern."
     },
     {
       "spell": 300986,
@@ -3235,21 +3344,47 @@
     {
       "spell": 804858,
       "name": "Blood Trails (Trail of Blood 804859 lasts 6 sec from last refresh)",
-      "kind": "last_application_expiry",
+      "kind": "metric_delta",
       "variant": "trail_duration",
       "label_suffix": "trail_duration",
       "quote": "Allies in a Cursed Form who move through the pools of blood gain Trail of Blood for $804859d.",
-      "gate_spell": 804858,
       "trigger_spell": 800786,
-      "caster": true,
-      "aura": 804859,
-      "expected_ms": 6000,
-      "control_window_ms": 4000,
-      "window_ms": 54000,
-      "poll_ms": 100,
-      "observe_source": "804859 DurationIndex 32 = 6000 ms ($804859d; SpellDuration.dbc). Sacrificial Rite 800786 (15000 ms HoT, 1500 ms amp, PowerType 1 Rage) ticks on caster -> spawns Blood Trail 804857 (radius 5 yd, dur 30000 ms) -> applies/refreshes Trail of Blood 804859 on caster; after the last pool expires at ~45000 ms, 804859 expires 6000 ms later (~51000 ms). last_application_expiry brackets (expiry - last refresh) against 6000 ms +- G-19 band (5700..6300 ms) with 0 applications in control. Reference search 2026-11-26: coa-history 804859 has 430 applies / 430 removals across 7 logs; coabuildhub lists 804858; installed Spell.dbc governs.",
-      "trigger_target": "caster",
-      "trigger_power": 1000
+      "gate_spell": 804858,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804859
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 50550,
+      "expiry_wait_ms": 950,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          50350,
+          50750
+        ],
+        "expired": [
+          51300,
+          51700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804859 DurationIndex 32 = 6000 ms ($804859d; SpellDuration.dbc). Caster holds Blood Trails 804858 from start plus Cursed Form 525031 (precondition fixture in both phases so the test remains valid once the 804858 Cursed Form gate server defect is fixed): before phase (no Sacrificial Rite 800786 cast) reads 0; after phase casts Sacrificial Rite 800786 (15000 ms HoT, 1500 ms amp, 0 Rage) on caster whose ticks through t=15000 ms spawn Blood Trail 804857 pools (dur 30000 ms, 1000 ms amp), whose last refresh of 804859 lands at t~45085 ms and expires 6000 ms later at t~51020 ms: aura 804859 reads 1 at game_time [50350, 50750] ms (~5465 ms after last refresh, > 0.9*6000=5400 ms) and 0 at game_time [51300, 51700] ms (~6415 ms after last refresh, < 1.1*6000=6600 ms), excluding +-10% on both sides. Reference search 2026-11-26: coa-history 804859 has 430 applies / 430 removals across 7 logs; coabuildhub lists 804858; installed Spell.dbc governs."
     },
     {
       "spell": 804858,
@@ -3444,7 +3579,7 @@
       "control": {
         "auras": [
           [
-            40258,
+            43926,
             1
           ],
           [
@@ -3453,11 +3588,6 @@
           ]
         ],
         "aura_amounts": [
-          [
-            40258,
-            0,
-            200
-          ],
           [
             16255,
             0,
@@ -3478,7 +3608,7 @@
         ],
         "auras": [
           [
-            40258,
+            43926,
             1
           ],
           [
@@ -3487,11 +3617,6 @@
           ]
         ],
         "aura_amounts": [
-          [
-            40258,
-            0,
-            200
-          ],
           [
             16255,
             0,
@@ -3510,7 +3635,7 @@
       "trials": 120,
       "parts": 15,
       "void_on_cast_failure": true,
-      "observe_source": "500445 Effect[2] periodic 3000 ms triggers 500447 (aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE MiscValue 124, script aura_ascension_bloodmage_forbidden_power AscensionBloodmageTalents.cpp:987-1007 / rev_20260920_82 sets amount = -CR_ARMOR_PENETRATION). Dummy holds Shadow Protection 25433 (DurationIndex 30 = 1800000 ms, pure aura 143 MOD_RESISTANCE_EXCLUSIVE Shadow, zero proc) set to 200 Shadow resistance; caster holds permanent Armor Penetration 40258 (DurationIndex 21 = -1, aura 189 CR_ARMOR_PENETRATION) set to 200 rating plus permanent Thundering Strikes 16255 at -100 (zero crits); 2 warmup Veinburst 504819 casts (~7000 ms > 3000 ms tick) ensure 500447 ticks before trial 1. CoA.MonsterResistance.Enable=true (WorldConfig.cpp:387-395: PerLevel=1.0, PerPercent=5.0; Unit.cpp:2569-2607, 2668-2691): control resistance 200 + 60 level = 260 -> averageResist 260/500 = 0.52 (0.48 kept); treatment 260 - 200 = 60 -> averageResist 60/500 = 0.12 (0.88 kept); exact expected ratio 0.88/0.48 = 1.8333 (+83.33%, G-19 band +-4.17 pp; 15 parts x 162 = 2430 hits/arm, 99% half-width ~1.88 pp <= 2.08 pp half-band, excluding 0x=1.00 and 2x=2.08). Reference search 2026-11-26: coa-history 500445/500447 have 0 events (passive/hidden); coabuildhub lists 500445; installed Spell.dbc and C++ govern.",
+      "observe_source": "500445 Effect[2] periodic 3000 ms triggers 500447 (aura 123 SPELL_AURA_MOD_TARGET_RESISTANCE MiscValue 124, script aura_ascension_bloodmage_forbidden_power AscensionBloodmageTalents.cpp:987-1007 / rev_20260920_82 sets amount = -CR_ARMOR_PENETRATION). Dummy holds Shadow Protection 25433 (DurationIndex 30 = 1800000 ms, pure aura 143 MOD_RESISTANCE_EXCLUSIVE Shadow, zero proc) set to 200 Shadow resistance; caster holds native permanent Armor Penetration 43926 (DurationIndex 21 = -1, single-effect aura 189 CR_ARMOR_PENETRATION, native EffectBasePoints 199 + DieSides 1 = 200, applied in arm.auras BEFORE warmup with zero aura_amounts override) plus permanent Thundering Strikes 16255 at -100 (zero crits); 2 warmup Veinburst 504819 casts (~7200 ms > 3000 ms tick) guarantee 500447 snapshots full -200 Spell Penetration BEFORE Trial 1 of every part. CoA.MonsterResistance.Enable=true (WorldConfig.cpp:387-395: PerLevel=1.0, PerPercent=5.0; Unit.cpp:2569-2607, 2668-2691): control resistance 200 + 60 level = 260 -> averageResist 260/500 = 0.52 (0.48 kept); treatment 260 - 200 = 60 -> averageResist 60/500 = 0.12 (0.88 kept); exact expected ratio 0.88/0.48 = 1.8333 (+83.33%, G-19 band +-4.17 pp; 15 parts x 162 = 2430 hits/arm, 99% half-width ~1.88 pp <= 2.08 pp half-band, excluding 0x=1.00 and 2x=2.08). Reference search 2026-11-26: coa-history 500445/500447 have 0 events (passive/hidden); coabuildhub lists 500445; installed Spell.dbc and C++ govern.",
       "warmup": [
         504819,
         504819
