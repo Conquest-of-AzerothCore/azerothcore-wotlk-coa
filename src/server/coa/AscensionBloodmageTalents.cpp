@@ -2177,7 +2177,7 @@ public:
         if (info->Id == SPELL_SANGUINE_RUPTURE_ENERGIZE &&
             info->Effects[EFFECT_2].IsAura(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE))
         {
-            info->Effects[EFFECT_2].Effect = SPELL_EFFECT_NONE;
+            info->Effects[EFFECT_2].Effect = 0;
             info->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
         }
 
@@ -2218,7 +2218,7 @@ public:
 
         if (info->Id == SPELL_ACCURSED_FORM_AGILITY)
         {
-            info->Effects[EFFECT_0].Effect = SPELL_EFFECT_NONE;
+            info->Effects[EFFECT_0].Effect = 0;
             info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_NONE;
             info->Effects[EFFECT_0].Amplitude = 0;
         }

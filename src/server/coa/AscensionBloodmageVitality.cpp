@@ -67,8 +67,8 @@ public:
         if (info->Id == FleshcraftSpell)
         {
             info->ExcludeTargetAuraSpell = FleshcraftSated;
-            info->Effects[EFFECT_1].Effect = SPELL_EFFECT_NONE;
-            info->Effects[EFFECT_2].Effect = SPELL_EFFECT_NONE;
+            info->Effects[EFFECT_1].Effect = 0;
+            info->Effects[EFFECT_2].Effect = 0;
             info->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
             Ascension::ClientSpellPatches::Instance().Register(info->Id);
         }
@@ -230,7 +230,7 @@ public:
             ((info->SpellFamilyFlags[1] & BloodmoonStrengthMask1) ||
              (info->SpellFamilyFlags[2] & BloodmoonStrengthMask2)))
         {
-            bonus += 0.25 * double(caster->ToPlayer()->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_DODGE));
+            bonus += 0.25 * double(caster->ToPlayer()->GetUInt32Value(uint32(PLAYER_FIELD_COMBAT_RATING_1) + uint32(CR_DODGE)));
             matched = true;
         }
 
