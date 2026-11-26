@@ -260,6 +260,8 @@ namespace
                 return other ? "ENTER_MANASTORM_GROUP_COOLDOWN" : "ENTER_MANASTORM_COOLDOWN";
             if (!sScriptMgr->OnPlayerCanEnterManastorm(member))
                 return other ? "ENTER_MANASTORM_GROUP_NO_MANASTORM_CHALLENGE" : "ENTER_MANASTORM_NO_MANASTORM_CHALLENGE";
+            if (other)
+                return nullptr;
             ManastormProgressionSnapshot snapshot;
             std::string error;
             auto const mode =
