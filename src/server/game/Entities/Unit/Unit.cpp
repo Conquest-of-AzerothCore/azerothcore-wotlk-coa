@@ -1119,14 +1119,9 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
                         Spell const* damageSpell /*= nullptr*/,
                         std::optional<uint32>* scriptHealthLeechDamage)
 {
-    uint32 const shownInput = damage;
-    double const poolFactor = (shownInput && victim->IsAlive() &&
-        (!victim->IsCreature() || !victim->ToCreature()->IsEvadingAttacks()))
-        ? PoolFactor(attacker, victim->ToCreature()) : 0.0;
     std::optional<uint32> resolvedScriptHealthLeechDamage;
     damage = sScriptMgr->DealDamage(attacker, victim, damage, damagetype,
                                     scriptHealthLeechDamage ? &resolvedScriptHealthLeechDamage : nullptr);
-    uint32 const poolInput = damage;
     // Xinef: initialize damage done for rage calculations
     // Xinef: its rare to modify damage in hooks, however training dummy's sets damage to 0
     uint32 rage_damage = damage + ((cleanDamage != nullptr) ? cleanDamage->absorbed_damage : 0);
@@ -1502,20 +1497,6 @@ uint32 Unit::DealDamage(Unit* attacker, Unit* victim, uint32 damage, CleanDamage
 
     if (scriptHealthLeechDamage)
         *scriptHealthLeechDamage = resolvedScriptHealthLeechDamage.value_or(damage);
-
-    // Return viewer-scale damage when Destiny Weaver mapped the hit into the
-    // creature's real health pool, so downstream hooks (e.g. OnSpellHitResult
-    // copy/DoT effects like Ruin's Inner Demon burn 805748) derive their share
-    // from displayed damage instead of double-scaling against real pool units.
-    if (poolFactor > 0.0 && poolInput > 0)
-    {
-        if (!damage)
-            return 0;
-        if (damage == poolInput)
-            return shownInput;
-        return uint32(std::min<uint64>((uint64(shownInput) * damage + poolInput / 2) / poolInput,
-            std::numeric_limits<uint32>::max()));
-    }
 
     return damage;
 }
