@@ -11,6 +11,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include "Unit.h"
+#include "WorldPacket.h"
 #include <algorithm>
 namespace
 {
@@ -69,7 +70,6 @@ bool Useful(SpellInfo const* info)
 constexpr uint32 ScorchMarks = 807059;
 constexpr uint32 BurnTheHeretics = 560857;
 constexpr uint32 BurnTheHereticsMagicDamage = 560856;
-constexpr uint32 SunStride = 680700;
 constexpr uint32 SunStrideVisual = 681434;
 constexpr uint32 RadiantFlame = 806060;
 constexpr uint32 RadiantFlameTick = 807058;
@@ -239,12 +239,20 @@ public:
             return;
         uint32 id = info->Id;
         if (id == SunStride)
+        {
             if (Aura* stride = player->GetAura(SunStride, player->GetGUID()))
                 if (Aura* visual = player->AddAura(SunStrideVisual, player))
                 {
                     visual->SetMaxDuration(stride->GetMaxDuration());
                     visual->SetDuration(stride->GetDuration());
                 }
+            if (uint32 const remaining = player->GetSpellCooldownDelay(SunStride))
+            {
+                WorldPacket cooldown;
+                player->BuildCooldownPacket(cooldown, SPELL_COOLDOWN_FLAG_NONE, SunStride, remaining);
+                player->SendDirectMessage(&cooldown);
+            }
+        }
         if (id == HammerOfKings && player->HasAura(ChosenKing, player->GetGUID()))
             Cast(player, player, Anointed);
         if (Invocation(info))

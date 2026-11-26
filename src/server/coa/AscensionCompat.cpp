@@ -5773,6 +5773,12 @@ private:
     }
     if (info->Id == AscensionSunCleric::Dawn)
       row.Values[4] = info->Attributes;
+    if (info->Id == AscensionSunCleric::SunStride)
+    {
+      row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
+      row.Values[SPELL_ATTRIBUTES_FIELD + 1] = info->AttributesEx;
+      row.Values[SPELL_ATTRIBUTES_FIELD + 5] = info->AttributesEx5;
+    }
     if (info->Id == AscensionStormbringer::SPELL_ATMOSPHERIC_PRESSURE)
     {
       row.Values[SPELL_ATTRIBUTES_FIELD] = info->Attributes;
