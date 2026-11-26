@@ -235,6 +235,7 @@ enum PlayerHook
     PLAYERHOOK_ON_TEMPORARY_SPELL_REMOVE_NOTICE,
     PLAYERHOOK_ON_SPELL_CHARGE_CONSUMED,
     PLAYERHOOK_ON_SPELL_COOLDOWN_CALCULATED,
+    PLAYERHOOK_ON_SPELL_COOLDOWNS_CLEARED,
     PLAYERHOOK_CAN_ENTER_MANASTORM,
     PLAYERHOOK_CAN_RELEASE_SPIRIT,
     PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE,
@@ -484,6 +485,7 @@ public:
     // Append charge displays backed by module-owned state after the core's full client reset.
     virtual void OnPlayerSendSpellChargeStates(Player const* /*player*/) { }
     virtual void OnPlayerSpellCooldownCalculated(Player* /*player*/, SpellInfo const* /*spellInfo*/, Spell* /*spell*/, uint32 /*recoveryMs*/) { }
+    virtual void OnPlayerSpellCooldownsCleared(Player* /*player*/, uint32 /*spellId*/, uint32 /*maxRecoveryMs*/) { }
 
     // Called when a player is bound to an instance
     virtual void OnPlayerBindToInstance(Player* /*player*/, Difficulty /*difficulty*/, uint32 /*mapId*/, bool /*permanent*/) { }
