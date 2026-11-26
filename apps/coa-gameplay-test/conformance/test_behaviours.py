@@ -24,9 +24,10 @@ from behaviours import (AFTER, AGGRO_REDIRECT_REACTION, BEFORE, BEHAVIOUR_ABSORB
                         BEHAVIOUR_PARTY_STAT_RATIO, BEHAVIOUR_RATIO, BEHAVIOUR_SINGLE_TARGET,
                         BEHAVIOUR_EVENT_DELAY, BEHAVIOUR_THREAT_SLOPE, BEHAVIOUR_TRIGGER, IMMUNITY_CASTS,
                         MECHANIC_LAND_ATTEMPTS,
-                        NO_CAST_FAILURE, SPELL_FAILED_ONLY_MOUNTED,
+                        NO_CAST_FAILURE, RESURRECT_EFFECTS, SPELL_FAILED_AFFECTING_COMBAT,
+                        SPELL_FAILED_ONLY_MOUNTED,
                         SPELL_FAILED_ONLY_OUTDOORS, SPELL_FAILED_TARGET_AURASTATE, STRIKER, TAKEN_HIT_PVP_LOCATION,
-                        BEHAVIOUR_HIT_RATIO, NotModelled, sized_behaviour,
+                        BEHAVIOUR_HIT_RATIO, CAST_CONDITION_OUT_OF_COMBAT, NotModelled, sized_behaviour,
                         AuraGrantSpec, CritGuaranteeSpec, HealingRatioTarget, IcdGateSpec, OathConsumptionSpec,
                         OathConsumptionRemovalSpec,
                         absorb_pierce_ratio_scenario, absorb_pierce_ratio_spec,
@@ -6108,6 +6109,92 @@ class CastConditionScenarioTests(unittest.TestCase):
         for expectation in expectations:
             self.assertIn(expectation.label, measured_labels)
 
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_out_of_combat_runs_allowed_before_attack_and_verifies_combat_preconditions(self):
+        entry = {'spell': 562723, 'name': 'Moon Gaze', 'kind': 'cast_condition', 'quote': 'Cannot be used in combat.',
+                 'condition': CAST_CONDITION_OUT_OF_COMBAT, 'blocked_result': SPELL_FAILED_AFFECTING_COMBAT}
+        scenario, expectations = cast_condition_scenario(load_class_file(20), cast_condition_spec(entry))
+        steps = run.validate(scenario)['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast' and step['spell'] == 562723]
+        cancel = next(index for index, step in enumerate(steps)
+                      if step['action'] == 'cancel_aura' and step['spell'] == 562723)
+        attack = next(index for index, step in enumerate(steps) if step['action'] == 'attack')
+        stop = next(index for index, step in enumerate(steps) if step['action'] == 'stop_attack')
+        self.assertEqual(len(casts), 2)
+        self.assertLess(casts[0], cancel)
+        self.assertLess(cancel, attack)
+        self.assertLess(attack, casts[1])
+        self.assertLess(casts[1], stop)
+        blocked, allowed = expectations
+        self.assertEqual(blocked.displayed, str(SPELL_FAILED_AFFECTING_COMBAT))
+        self.assertEqual(allowed.displayed, str(NO_CAST_FAILURE))
+        self.assertEqual(blocked.model['priming_void'], {'562723 cast_condition combat_blocked': 1})
+        self.assertEqual(allowed.model['priming_void'], {'562723 cast_condition combat_allowed': 0})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_out_of_combat_corpse_fixture_spawns_and_kills_corpse_before_allowed_arm(self):
+        entry = {'spell': 706605, 'name': 'Blood Feast', 'kind': 'cast_condition',
+                 'quote': 'Cannot be used in combat.', 'condition': CAST_CONDITION_OUT_OF_COMBAT,
+                 'blocked_result': SPELL_FAILED_AFFECTING_COMBAT,
+                 'corpse': {'entry': 6, 'health': 100, 'distance': 5, 'kill_spell': 92559}}
+        scenario, _ = cast_condition_scenario(load_class_file(20), cast_condition_spec(entry))
+        steps = run.validate(scenario)['steps']
+        self.assertTrue(any(creature['id'] == 'corpse' and creature['entry'] == 6
+                            for creature in scenario['creatures']))
+        kill_cast = next(index for index, step in enumerate(steps)
+                         if step['action'] == 'cast' and step['spell'] == 92559 and step['target'] == 'corpse')
+        first_attempt = next(index for index, step in enumerate(steps)
+                             if step['action'] == 'cast' and step['spell'] == 706605)
+        self.assertLess(kill_cast, first_attempt)
+        cancel = next(index for index, step in enumerate(steps)
+                      if step['action'] == 'cancel_aura' and step['spell'] == 706605)
+        self.assertEqual(steps[cancel + 1], {'action': 'wait', 'ms': 5500})
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_out_of_combat_rejects_non_peaceful_spell_and_bad_options(self):
+        entry = {'spell': DIVINE_CHARGE, 'name': 'Divine Charge', 'kind': 'cast_condition',
+                 'quote': 'Can only be used outdoors.', 'condition': CAST_CONDITION_OUT_OF_COMBAT,
+                 'blocked_result': SPELL_FAILED_AFFECTING_COMBAT}
+        with self.assertRaisesRegex(ValueError, 'SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL'):
+            cast_condition_scenario(CLASS_FILE, cast_condition_spec(entry))
+        for bad in (
+            {**entry, 'blocked_result': SPELL_FAILED_ONLY_OUTDOORS},
+            {**entry, 'target': 'ally'},
+            {**entry, 'corpse': {'entry': 6, 'health': 0, 'distance': 5, 'kill_spell': 92559}},
+            {**divine_charge_cast_condition_entry(), 'target': 'dummy'},
+            {**divine_charge_cast_condition_entry(),
+             'corpse': {'entry': 6, 'health': 100, 'distance': 5, 'kill_spell': 92559}},
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                cast_condition_spec(bad)
+        self.assertEqual(RESURRECT_EFFECTS, frozenset({18, 113}))
+
+    @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+    def test_peaceful_gate_cast_attack_swings_runs_treatment_before_cancel_and_control(self):
+        entry = {'spell': 562723, 'name': 'Moon Gaze', 'kind': 'metric_delta', 'variant': 'no_attack',
+                 'label_suffix': 'no_attack',
+                 'quote': 'While active, you are unable to move, attack, or cast spells or abilities.',
+                 'trigger_spell': 562723, 'gate_spell': 562723, 'gate_cast': True, 'target': 'dummy',
+                 'attack_swings': 1, 'metric': 'melee_attack_count', 'fields': {}, 'before_expected': 2,
+                 'expected': 0, 'tolerance': 0, 'wait_ms': 500, 'expire_ms': 500, 'void_on_cast_failure': True}
+        scenario, _ = metric_delta_scenario(load_class_file(20), metric_delta_spec(entry))
+        steps = run.validate(scenario)['steps']
+        gate_cast = next(index for index, step in enumerate(steps)
+                         if step['action'] == 'cast' and step['spell'] == 562723)
+        after_read = next(index for index, step in enumerate(steps)
+                          if step.get('label') == '562723 melee_attack_count after')
+        cancel = next(index for index, step in enumerate(steps)
+                      if step['action'] == 'cancel_aura' and step['spell'] == 562723)
+        before_read = next(index for index, step in enumerate(steps)
+                           if step.get('label') == '562723 melee_attack_count before')
+        attacks = [index for index, step in enumerate(steps) if step['action'] == 'attack']
+        self.assertEqual(len(attacks), 2)
+        self.assertLess(gate_cast, attacks[0])
+        self.assertLess(attacks[0], after_read)
+        self.assertLess(after_read, cancel)
+        self.assertLess(cancel, attacks[1])
+        self.assertLess(attacks[1], before_read)
+
 
 class JudgeCastConditionTests(unittest.TestCase):
     def blocked_expectation(self):
@@ -6144,6 +6231,32 @@ class JudgeCastConditionTests(unittest.TestCase):
         run = FakeRun({expectation.label: float(SPELL_FAILED_ONLY_OUTDOORS)})
         verdict = judge_behaviour(base_verdict(expectation), run, expectation)
         self.assertEqual(verdict.status, 'alert')
+
+    def test_out_of_combat_checks_combat_precondition_and_alerts_on_mutants(self):
+        blocked = Expectation('562723 cast_condition blocked', BEHAVIOUR_CAST_CONDITION, 562723, 562723, None,
+                              str(SPELL_FAILED_AFFECTING_COMBAT), 'prose: "Cannot be used in combat." (562723)',
+                              {'kind': 'cast_condition', 'quote': 'Cannot be used in combat.',
+                               'priming_void': {'562723 cast_condition combat_blocked': 1}})
+        allowed = Expectation('562723 cast_condition allowed', BEHAVIOUR_CAST_CONDITION, 562723, 562723, None,
+                              str(NO_CAST_FAILURE), 'prose: "Cannot be used in combat." (562723)',
+                              {'kind': 'cast_condition', 'quote': 'Cannot be used in combat.',
+                               'priming_void': {'562723 cast_condition combat_allowed': 0}})
+        ok_values = {'562723 cast_condition combat_allowed': 0.0, '562723 cast_condition allowed': 0.0,
+                     '562723 cast_condition combat_blocked': 1.0, '562723 cast_condition blocked': 1.0}
+        self.assertEqual(judge_behaviour(base_verdict(allowed), FakeRun(ok_values), allowed).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(blocked), FakeRun(ok_values), blocked).status, 'ok')
+        self.assertEqual(judge_behaviour(base_verdict(allowed),
+                                         FakeRun({**ok_values, '562723 cast_condition combat_allowed': 1.0}),
+                                         allowed).status, 'unmeasured')
+        self.assertEqual(judge_behaviour(base_verdict(blocked),
+                                         FakeRun({**ok_values, '562723 cast_condition combat_blocked': 0.0}),
+                                         blocked).status, 'unmeasured')
+        self.assertEqual(judge_behaviour(base_verdict(blocked),
+                                         FakeRun({**ok_values, '562723 cast_condition blocked': 0.0}),
+                                         blocked).status, 'alert')
+        self.assertEqual(judge_behaviour(base_verdict(allowed),
+                                         FakeRun({**ok_values, '562723 cast_condition allowed': 1.0}),
+                                         allowed).status, 'alert')
 
 
 @unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')

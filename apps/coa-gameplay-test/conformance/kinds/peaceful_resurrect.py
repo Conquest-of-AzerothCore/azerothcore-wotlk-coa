@@ -1,5 +1,6 @@
 from dataclasses import dataclass, replace
 from pathlib import Path
+import struct
 
 from behaviours import (BEHAVIOUR_CAST_COMBAT, CAST_COMBAT_RESURRECT_RESPONSE_OPCODE, CAST_COMBAT_RESURRECT_SETTLE_MS,
                         CAST_COMBAT_SETTLE_MS, CAST_GATE_WAIT_MS, RESURRECT_EFFECTS, behaviour_entry, prose_rule,
@@ -12,15 +13,22 @@ from values import ALLY, CAST_MARGIN_MS, TARGET, Expectation, dataset, facts_of
 KIND = 'peaceful_resurrect'
 ORDER = 47
 
+EFFECT_RESURRECT = 18
+EFFECT_RESURRECT_NEW = 113
+MIN_COA_CLASS = 12
+MAX_COA_CLASS = 32
 NOT_IN_COMBAT_ONLY_PEACEFUL = 0x10000000
 SPELL_FAILED_AFFECTING_COMBAT = 1
 NO_CAST_FAILURE = 0
 READINGS = ('alive_unoffered', 'combat_peaceful', 'cast_failure_peaceful', 'alive_peaceful', 'health_peaceful',
             'mana_peaceful', 'combat_fighting', 'cast_failure_fighting', 'alive_fighting')
+PERCENT_READINGS = ('max_health_peaceful', 'max_power_peaceful')
 CLAIM_READINGS = {'health': ('alive_unoffered', 'cast_failure_peaceful', 'alive_peaceful', 'health_peaceful'),
                   'mana': ('alive_unoffered', 'cast_failure_peaceful', 'alive_peaceful', 'mana_peaceful'),
                   'refusal': ('combat_peaceful', 'cast_failure_peaceful', 'alive_peaceful', 'combat_fighting',
                               'alive_fighting', 'cast_failure_fighting')}
+PERCENT_MAX_READING = {'health': ('health_peaceful', 'max_health_peaceful'),
+                       'mana': ('mana_peaceful', 'max_power_peaceful')}
 PRECONDITIONS = {'combat_peaceful': 0, 'combat_fighting': 1}
 
 
@@ -32,12 +40,17 @@ class PeacefulResurrectSpec:
     claims: tuple[tuple[str, str], ...]
     label_suffix: str
     combat_cast: int | None = None
+    ally_class: int | None = None
 
 
 def peaceful_resurrect_spec(entry: dict) -> PeacefulResurrectSpec:
     claims = tuple((raw['claim'], raw.get('quote', entry['quote'])) for raw in entry['claims'])
+    ally_class = entry.get('ally_class')
+    if ally_class is not None and (type(ally_class) is not int or not MIN_COA_CLASS <= ally_class <= MAX_COA_CLASS):
+        raise ValueError(f'{entry["spell"]} {KIND} ally_class must be a CoA class ({MIN_COA_CLASS}..{MAX_COA_CLASS}), '
+                         f'not {ally_class!r}')
     spec = PeacefulResurrectSpec(entry['spell'], entry['name'], entry['quote'], claims,
-                                 entry.get('label_suffix', 'peaceful'), entry.get('combat_cast'))
+                                 entry.get('label_suffix', 'peaceful'), entry.get('combat_cast'), ally_class)
     names = [claim for claim, _ in spec.claims]
     if not names or len(set(names)) != len(names) or not set(names) <= set(CLAIM_READINGS):
         raise ValueError(f'{spec.spell} {KIND} needs distinct claims from {sorted(CLAIM_READINGS)}')
@@ -48,14 +61,28 @@ def claim_label(spell: int, label_suffix: str, claim: str) -> str:
     return f'{spell} {BEHAVIOUR_CAST_COMBAT} {label_suffix} {claim}'
 
 
-def resurrect_amounts(records: Records, spell: int) -> tuple[int, int]:
+def resurrect_effect(records: Records, spell: int) -> tuple[int, int, int]:
     effect = next((index for index in range(3)
                    if records.field('Spell', spell, f'Effect[{index}]') in RESURRECT_EFFECTS), None)
     if effect is None:
         raise ValueError(f'{spell} {KIND} needs a SPELL_EFFECT_RESURRECT effect')
-    health = (int(records.field('Spell', spell, f'EffectBasePoints[{effect}]'))
+    effect_id = int(records.field('Spell', spell, f'Effect[{effect}]'))
+    points = (int(records.field('Spell', spell, f'EffectBasePoints[{effect}]'))
               + int(records.field('Spell', spell, f'EffectDieSides[{effect}]') or 0))
-    return health, int(records.field('Spell', spell, f'EffectMiscValue[{effect}]'))
+    return effect_id, points, int(records.field('Spell', spell, f'EffectMiscValue[{effect}]'))
+
+
+def resurrect_amounts(records: Records, spell: int) -> tuple[int, int]:
+    _, health, mana = resurrect_effect(records, spell)
+    return health, mana
+
+
+def float32(value: float) -> float:
+    return struct.unpack('<f', struct.pack('<f', value))[0]
+
+
+def pct_expected(maximum: float, percent: int) -> int:
+    return int(float32(float32(float32(maximum) * float32(float(percent))) / float32(100.0)))
 
 
 def reading_label(spec: PeacefulResurrectSpec, reading: str) -> str:
@@ -75,8 +102,10 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
     if not int(records.field('Spell', spec.spell, 'Attributes')) & NOT_IN_COMBAT_ONLY_PEACEFUL:
         raise ValueError(f'{spec.spell} {KIND} needs SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL')
     facts = facts_of(records, spec.spell)
-    health, mana = resurrect_amounts(records, spec.spell)
-    label = {reading: reading_label(spec, reading) for reading in READINGS}
+    effect_id, health, mana = resurrect_effect(records, spec.spell)
+    is_percent = effect_id == EFFECT_RESURRECT
+    all_readings = READINGS + (PERCENT_READINGS if is_percent else ())
+    label = {reading: reading_label(spec, reading) for reading in all_readings}
 
     def attempt() -> list[dict]:
         power = base_mana_steps(class_file, facts)
@@ -100,6 +129,9 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
                                                 engage_facts.cast_time_ms + recovery + CAST_MARGIN_MS)}])
 
     learned = [spec.spell] + ([spec.combat_cast] if spec.combat_cast is not None else [])
+    max_reads = ([measurement(label['max_health_peaceful'], ALLY, 'max_health'),
+                  measurement(label['max_power_peaceful'], ALLY, 'max_power', power=0)]
+                 if is_percent else [])
     steps = (base_steps(class_file)
              + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
              + [{'action': 'die', 'actor': ALLY}]
@@ -112,8 +144,9 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
              + accept('accept the resurrection out of combat')
              + [measurement(label['alive_peaceful'], ALLY, 'alive'),
                 measurement(label['health_peaceful'], ALLY, 'health'),
-                measurement(label['mana_peaceful'], ALLY, 'power', power=0),
-                {'action': 'die', 'actor': ALLY}]
+                measurement(label['mana_peaceful'], ALLY, 'power', power=0)]
+             + max_reads
+             + [{'action': 'die', 'actor': ALLY}]
              + engage()
              + [measurement(label['combat_fighting'], CASTER, 'combat')]
              + attempt()
@@ -122,6 +155,11 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
                 {'action': 'stop_attack', 'actor': CASTER}]
              + accept('accept after the refused cast in combat')
              + [measurement(label['alive_fighting'], ALLY, 'alive')])
+    amount_text = (f'{health}% of max_health and {health}% of max_power (unclamped)' if is_percent
+                   else f'{health} health and {mana} mana')
+    ally = {**player_fixture(class_file), 'id': ALLY, 'allow_regeneration': False}
+    if spec.ally_class is not None:
+        ally['class'] = spec.ally_class
     scenario = {
         'schema': 1,
         'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour peaceful resurrect',
@@ -129,32 +167,45 @@ def peaceful_resurrect_scenario(class_file: dict, spec: PeacefulResurrectSpec) -
                      f'SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL). The dead ally first sends the resurrection response '
                      f'with no offer (it stays dead). Out of combat (combat 0) the cast completes (cast_failure '
                      f'{NO_CAST_FAILURE} after its {facts.cast_time_ms} ms cast), the ally accepts and is alive with '
-                     f'{health} health and {mana} mana (regeneration off). The ally dies again, the caster '
+                     f'{amount_text} (regeneration off). The ally dies again, the caster '
                      + (f'casts {spec.combat_cast} at the dummy and waits past its global cooldown'
                         if spec.combat_cast is not None else 'attacks the dummy')
                      + f' (combat 1), and the same cast is refused with '
                      f'{SPELL_FAILED_AFFECTING_COMBAT} (SPELL_FAILED_AFFECTING_COMBAT); the ally\'s response finds no '
                      f'offer and it stays dead.'),
-        'players': [player_fixture(class_file), {**player_fixture(class_file), 'id': ALLY,
-                                                 'allow_regeneration': False}],
+        'players': [player_fixture(class_file), ally],
         'creatures': [creature_fixture(class_file)],
         'steps': steps}
     expected = {'alive_unoffered': 0, 'combat_peaceful': 0, 'cast_failure_peaceful': NO_CAST_FAILURE,
                 'alive_peaceful': 1, 'health_peaceful': health, 'mana_peaceful': mana, 'combat_fighting': 1,
                 'cast_failure_fighting': SPELL_FAILED_AFFECTING_COMBAT, 'alive_fighting': 0}
-    expectations = [
-        Expectation(claim_label(spec.spell, spec.label_suffix, claim), BEHAVIOUR_CAST_COMBAT, spec.spell, spec.spell,
-                    None, str(expected[CLAIM_READINGS[claim][-1]]), prose_rule(quote, spec.spell),
-                    {'kind': KIND, 'quote': quote, 'claim': claim,
-                     'readings': {reading: [label[reading], expected[reading]] for reading in CLAIM_READINGS[claim]}})
-        for claim, quote in spec.claims]
+    expectations = []
+    for claim, quote in spec.claims:
+        if is_percent and claim in PERCENT_MAX_READING:
+            value_reading, max_reading = PERCENT_MAX_READING[claim]
+            fixed_readings = {reading: [label[reading], expected[reading]]
+                              for reading in CLAIM_READINGS[claim][:-1]}
+            model = {'kind': KIND, 'quote': quote, 'claim': claim, 'readings': fixed_readings,
+                     'percent_check': {'reading': value_reading, 'label': label[value_reading],
+                                       'max_label': label[max_reading], 'percent': health}}
+            displayed = f'{health}%'
+        else:
+            model = {'kind': KIND, 'quote': quote, 'claim': claim,
+                     'readings': {reading: [label[reading], expected[reading]] for reading in CLAIM_READINGS[claim]}}
+            displayed = str(expected[CLAIM_READINGS[claim][-1]])
+        expectations.append(Expectation(claim_label(spec.spell, spec.label_suffix, claim), BEHAVIOUR_CAST_COMBAT,
+                                        spec.spell, spec.spell, None, displayed, prose_rule(quote, spec.spell), model))
     return timed(scenario, waited_ms(steps)), expectations
 
 
 def peaceful_resurrect_verdict(base, run, model: dict):
     from compare import missing_measurement
     readings = model['readings']
-    missing = next((label for label, _ in readings.values() if run.values.get(label) is None), None)
+    percent_check = model.get('percent_check')
+    required_labels = [label for label, _ in readings.values()]
+    if percent_check is not None:
+        required_labels += [percent_check['label'], percent_check['max_label']]
+    missing = next((label for label in required_labels if run.values.get(label) is None), None)
     if missing is not None:
         return replace(base, explanation=missing_measurement(run, missing))
     wrong = {reading: run.values[label] for reading, (label, expected) in readings.items()
@@ -165,6 +216,25 @@ def peaceful_resurrect_verdict(base, run, model: dict):
                          for reading in unmet)
         return replace(base, status='unmeasured', explanation=f'{read}: the arm did not reach its combat state, so '
                                                               f'the claim is not read')
+    if percent_check is not None:
+        maximum = float(run.values[percent_check['max_label']])
+        percent = int(percent_check['percent'])
+        measured = float(run.values[percent_check['label']])
+        if maximum <= 0:
+            return replace(base, status='unmeasured', measured=measured,
+                           explanation=f'{percent_check["reading"]} cannot judge {percent}% against max {maximum:g}')
+        expected_value = float(pct_expected(maximum, percent))
+        if abs(measured - expected_value) > 1e-9:
+            wrong[percent_check['reading']] = measured
+        status = 'ok' if not wrong else 'alert'
+        parts = [f'{reading} {float(run.values[label]):g} (expected {expected:g})'
+                 for reading, (label, expected) in readings.items()]
+        parts.append(f'{percent_check["reading"]} {measured:g} (expected {expected_value:g} = {percent}% of '
+                     f'{maximum:g})')
+        return replace(base, status=status, measured=measured, expected=expected_value, low=expected_value,
+                       high=expected_value,
+                       explanation=f'{", ".join(parts)}; every reading is compared exactly'
+                                   + (f'; wrong: {sorted(wrong)}' if wrong else ''))
     final_label, final_expected = list(readings.values())[-1]
     measured = float(run.values[final_label])
     status = 'ok' if not wrong else 'alert'

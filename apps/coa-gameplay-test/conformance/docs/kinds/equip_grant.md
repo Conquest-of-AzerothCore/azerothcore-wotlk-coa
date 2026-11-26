@@ -13,3 +13,12 @@ grant and holds it with the grant; any other reading alerts and a missing read i
 
 Sun Cleric: Valkyr's Grip 707072, pairs 2524 / 30754 (dual wield), 2529 (two-hand sword), 1197 (two-hand mace) and
 11864 (polearm), each two-hander in both hands.
+
+Optional fields for specialization-taught grants (ADR 1320): `specialization` (1..65535) gives 1000000 copper and
+switches the caster to that specialization before the unlearned arm; `unlearn_after_specialization` (non-empty list of
+distinct positive spell ids, requiring `specialization`) replaces the single `unlearn spec.spell` with unlearning each
+listed spell so auto-learned passive and taught spells (such as Dual Wield 674) are cleared before the refused off-hand
+equip. Omitting both produces a byte-identical scenario.
+
+Bloodmage: Eternal Curse 92114 (`specialization: 99`, `unlearn_after_specialization: [92114, 800157, 674]`, pair
+2534 / 2534 Rondel, skill line 173 Daggers).

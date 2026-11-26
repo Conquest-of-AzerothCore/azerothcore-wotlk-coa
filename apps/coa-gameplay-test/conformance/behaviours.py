@@ -2129,10 +2129,31 @@ def metric_delta_scenario(class_file: dict, spec: MetricDeltaSpec) -> tuple[dict
         if spec.phase_auras:
             contract += (f' Each phase sets the auras {[list(aura) for aura in spec.phase_auras]} (spell, stacks, on, '
                          f'by) and waits {spec.wait_ms} ms before it starts attacking.')
-        steps = (base_steps(class_file) + setup_steps + attack_phase(False)
-                 + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] + gate_steps
-                 + [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}]
-                 + attack_phase(True) + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
+        peaceful_gate = spec.gate_cast and bool(
+            int(records.field('Spell', gate_spell, 'Attributes') or 0) & NOT_IN_COMBAT_ONLY_PEACEFUL)
+        if peaceful_gate:
+            swings = [{'action': 'attack', 'actor': CASTER, 'target': TARGET},
+                      {'action': 'wait', 'label': 'swings',
+                       'ms': spec.attack_swings * swing_interval(class_file) + 500},
+                      {'action': 'stop_attack', 'actor': CASTER}]
+            contract = (f'Peaceful gate-cast attack check: {gate_spell} requires out of combat, so the treatment '
+                        f'phase casts {gate_spell} first while peaceful, attempts {spec.attack_swings} auto-attack '
+                        f'swing interval(s) plus 500 ms at the dummy and reads {spec.metric} {spec.fields} (after), '
+                        f'then cancels {gate_spell}, waits {spec.expire_ms} ms and swings at the dummy without it '
+                        f'(before).')
+            steps = (base_steps(class_file) + setup_steps + gate_steps
+                     + [{'action': 'wait', 'label': 'let the gate cast settle', 'ms': spec.expire_ms}]
+                     + attack_phase(True)
+                     + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields),
+                        {'action': 'cancel_aura', 'actor': CASTER, 'spell': gate_spell},
+                        {'action': 'wait', 'label': 'let the cancelled aura clear', 'ms': spec.expire_ms}]
+                     + attack_phase(False)
+                     + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)])
+        else:
+            steps = (base_steps(class_file) + setup_steps + attack_phase(False)
+                     + [measurement(before_label, spec.measure_actor, spec.metric, **spec.fields)] + gate_steps
+                     + [{'action': 'wait', 'label': 'let the first effect fully expire', 'ms': spec.expire_ms}]
+                     + attack_phase(True) + [measurement(after_label, spec.measure_actor, spec.metric, **spec.fields)])
     else:
         contract = (f'No-combat with/without check: {spec.metric} {spec.fields} around a cast of '
                     f'{spec.trigger_spell}, measured before and after {gate_spell} is learned, waiting '
@@ -5079,10 +5100,14 @@ def cast_gate_spec(entry: dict) -> CastGateSpec:
 
 SPELL_FAILED_ONLY_OUTDOORS = 93
 SPELL_FAILED_ONLY_MOUNTED = 91
+SPELL_FAILED_AFFECTING_COMBAT = 1
+NOT_IN_COMBAT_ONLY_PEACEFUL = 0x10000000
 CAST_CONDITION_OUTDOORS = 'outdoors'
 CAST_CONDITION_MOUNTED = 'mounted'
 CAST_CONDITION_AVOIDED = 'avoided'
-CAST_CONDITIONS = (CAST_CONDITION_OUTDOORS, CAST_CONDITION_MOUNTED, CAST_CONDITION_AVOIDED)
+CAST_CONDITION_OUT_OF_COMBAT = 'out_of_combat'
+CAST_CONDITIONS = (CAST_CONDITION_OUTDOORS, CAST_CONDITION_MOUNTED, CAST_CONDITION_AVOIDED,
+                   CAST_CONDITION_OUT_OF_COMBAT)
 AVOIDING_ATTACKER = 'attacker'
 AVOIDING_ROOT = 42716
 AVOIDING_DODGE = 26669
@@ -5091,6 +5116,7 @@ AVOIDING_SWINGS_MS = 6000
 GENERIC_GROUND_MOUNT_SPELL = 458
 OUTDOOR_LOCATION = {'map': 0, 'x': -9617.06, 'y': -288.949, 'z': 57.3053}
 INDOOR_LOCATION = {'map': 0, 'x': -4840.67, 'y': -857.094, 'z': 501.997}
+CAST_CONDITION_CORPSE_KEYS = frozenset({'entry', 'health', 'distance', 'kill_spell'})
 
 
 @dataclass(frozen=True)
@@ -5101,6 +5127,16 @@ class CastConditionSpec:
     condition: str
     blocked_result: int
     learn: tuple[int, ...] = ()
+    target: str = CASTER
+    corpse: tuple[int, int, float, int] | None = None
+
+
+def cast_condition_corpse(raw) -> tuple[int, int, float, int]:
+    if not isinstance(raw, dict) or set(raw) != CAST_CONDITION_CORPSE_KEYS \
+            or not all(type(raw[key]) is int and raw[key] > 0 for key in ('entry', 'health', 'kill_spell')) \
+            or type(raw['distance']) not in (int, float) or float(raw['distance']) <= 0:
+        raise ValueError(f'cast_condition corpse needs positive entry, health, distance and kill_spell, not {raw!r}')
+    return raw['entry'], raw['health'], float(raw['distance']), raw['kill_spell']
 
 
 def avoided_setup(spell: int) -> list[dict]:
@@ -5116,10 +5152,10 @@ def cast_condition_label(spell: int, moment: str) -> str:
     return f'{spell} cast_condition {moment}'
 
 
-def cast_condition_attempt(spell: int, facts, moment: str) -> list[dict]:
+def cast_condition_attempt(spell: int, facts, moment: str, target: str = CASTER) -> list[dict]:
     label = cast_condition_label(spell, moment)
     return ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell}] + cast_gate_power_step(facts)
-            + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': CASTER},
+            + [{'action': 'cast', 'actor': CASTER, 'spell': spell, 'target': target},
                {'action': 'wait', 'ms': CAST_GATE_WAIT_MS},
                measurement(label, CASTER, 'cast_failure', spell=spell)])
 
@@ -5132,6 +5168,67 @@ def cast_condition_scenario(class_file: dict, spec: CastConditionSpec) -> tuple[
     facts = facts_of(records, spec.spell)
     blocked_label = cast_condition_label(spec.spell, 'blocked')
     allowed_label = cast_condition_label(spec.spell, 'allowed')
+    if spec.condition == CAST_CONDITION_OUT_OF_COMBAT:
+        if not int(records.field('Spell', spec.spell, 'Attributes')) & NOT_IN_COMBAT_ONLY_PEACEFUL:
+            raise ValueError(f'{spec.spell} cast_condition {CAST_CONDITION_OUT_OF_COMBAT} needs '
+                             f'SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL')
+        combat_allowed = cast_condition_label(spec.spell, 'combat_allowed')
+        combat_blocked = cast_condition_label(spec.spell, 'combat_blocked')
+        learned = list(dict.fromkeys((spec.spell, *spec.learn)))
+        creatures = [creature_fixture(class_file)]
+        corpse_steps = []
+        corpse_note = ''
+        if spec.corpse is not None:
+            corpse_entry, corpse_health, corpse_distance, kill_spell = spec.corpse
+            if kill_spell not in learned:
+                learned.append(kill_spell)
+            kill_facts = facts_of(records, kill_spell)
+            creatures.append({'id': CORPSE, 'owner': CASTER, 'entry': corpse_entry, 'level': class_file['level'],
+                              'health': corpse_health, 'distance': corpse_distance, 'stationary': True})
+            corpse_steps = ([{'action': 'reset_cooldown', 'actor': CASTER, 'spell': kill_spell}]
+                            + cast_gate_power_step(kill_facts)
+                            + [{'action': 'cast', 'actor': CASTER, 'spell': kill_spell, 'target': CORPSE},
+                               {'action': 'wait', 'ms': kill_facts.cast_time_ms + GCD_WAIT_MS}])
+            corpse_note = (f' Creature {corpse_entry} ({corpse_health} health, {corpse_distance:g} yd) is killed by '
+                           f'{kill_spell} beforehand so an enemy corpse is nearby.')
+        channeled = bool(int(records.field('Spell', spec.spell, 'AttributesEx') or 0) & 0x44)
+        clear_wait = (max(GCD_WAIT_MS, int(records.duration_ms(spec.spell)) + CAST_MARGIN_MS)
+                      if channeled else GCD_WAIT_MS)
+        steps = (base_steps(class_file)
+                 + [{'action': 'learn', 'actor': CASTER, 'spell': spell} for spell in learned]
+                 + corpse_steps
+                 + [measurement(combat_allowed, CASTER, 'combat')]
+                 + required_aura_steps(facts)
+                 + cast_condition_attempt(spec.spell, facts, 'allowed', target=spec.target)
+                 + [{'action': 'cancel_aura', 'actor': CASTER, 'spell': spec.spell},
+                    {'action': 'wait', 'ms': clear_wait},
+                    {'action': 'attack', 'actor': CASTER, 'target': TARGET},
+                    {'action': 'wait', 'ms': CAST_COMBAT_SETTLE_MS},
+                    measurement(combat_blocked, CASTER, 'combat')]
+                 + required_aura_steps(facts)
+                 + cast_condition_attempt(spec.spell, facts, 'blocked', target=spec.target)
+                 + [{'action': 'stop_attack', 'actor': CASTER}])
+        scenario = {
+            'schema': 1,
+            'name': f'Conformance {class_file["name"]} {spec.name} {spec.spell} behaviour cast condition',
+            'contract': (f'Out-of-combat and in-combat cast-attempt check of {spec.spell}\'s own "{spec.quote}" clause '
+                         f'(SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL): out of combat (combat 0) the spell is attempted '
+                         f'on {spec.target}, expecting {NO_CAST_FAILURE} (no failure), then its aura is cancelled and '
+                         f'the caster attacks the dummy (combat 1) and attempts {spec.spell} again, expecting refusal '
+                         f'with code {spec.blocked_result} (SPELL_FAILED_AFFECTING_COMBAT). Each arm verifies its '
+                         f'combat precondition and is unmeasured if combat state was not reached.' + corpse_note),
+            'players': [player_fixture(class_file)],
+            'creatures': creatures,
+            'steps': steps}
+        blocked_model = {'kind': 'cast_condition', 'quote': entry.quote, 'priming_void': {combat_blocked: 1}}
+        allowed_model = {'kind': 'cast_condition', 'quote': entry.quote, 'priming_void': {combat_allowed: 0}}
+        expectations = [
+            Expectation(blocked_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None,
+                        str(spec.blocked_result), prose_rule(entry.quote, spec.spell), blocked_model),
+            Expectation(allowed_label, BEHAVIOUR_CAST_CONDITION, spec.spell, spec.spell, None, str(NO_CAST_FAILURE),
+                        prose_rule(entry.quote, spec.spell), allowed_model),
+        ]
+        return timed(scenario, waited_ms(steps)), expectations
     if spec.condition == CAST_CONDITION_OUTDOORS:
         setup_blocked = [{'action': 'teleport', 'actor': CASTER, **INDOOR_LOCATION},
                          {'action': 'wait', 'ms': 2000}]
@@ -5189,8 +5286,28 @@ def cast_condition_scenario(class_file: dict, spec: CastConditionSpec) -> tuple[
 
 
 def cast_condition_spec(entry: dict) -> CastConditionSpec:
-    return CastConditionSpec(entry['spell'], entry['name'], entry['quote'], entry['condition'],
-                             entry['blocked_result'], tuple(entry.get('learn', ())))
+    condition = entry['condition']
+    blocked_result = entry.get('blocked_result', SPELL_FAILED_AFFECTING_COMBAT
+                               if condition == CAST_CONDITION_OUT_OF_COMBAT else None)
+    if condition == CAST_CONDITION_OUT_OF_COMBAT and blocked_result != SPELL_FAILED_AFFECTING_COMBAT:
+        raise ValueError(f'{entry["spell"]} cast_condition {CAST_CONDITION_OUT_OF_COMBAT} expects '
+                         f'blocked_result {SPELL_FAILED_AFFECTING_COMBAT}, not {blocked_result!r}')
+    if blocked_result is None:
+        raise KeyError('blocked_result')
+    target = entry.get('target', CASTER)
+    if target not in (CASTER, TARGET):
+        raise ValueError(f'{entry["spell"]} cast_condition target must be {CASTER!r} or {TARGET!r}, not {target!r}')
+    if target != CASTER and condition != CAST_CONDITION_OUT_OF_COMBAT:
+        raise ValueError(f'{entry["spell"]} cast_condition target {target!r} is only supported for '
+                         f'{CAST_CONDITION_OUT_OF_COMBAT}')
+    corpse = entry.get('corpse')
+    if corpse is not None:
+        if condition != CAST_CONDITION_OUT_OF_COMBAT:
+            raise ValueError(f'{entry["spell"]} cast_condition corpse is only supported for '
+                             f'{CAST_CONDITION_OUT_OF_COMBAT}')
+        corpse = cast_condition_corpse(corpse)
+    return CastConditionSpec(entry['spell'], entry['name'], entry['quote'], condition,
+                             blocked_result, tuple(entry.get('learn', ())), target, corpse)
 
 
 CAST_COMBAT_SETTLE_MS = CAST_MARGIN_MS
@@ -5312,7 +5429,7 @@ def cast_combat_spec(entry: dict) -> CastCombatSpec:
 
 STATE_PRESENT = 1
 STATE_ABSENT = 0
-RESURRECT_EFFECTS = frozenset({113})
+RESURRECT_EFFECTS = frozenset({18, 113})
 
 
 @dataclass(frozen=True)

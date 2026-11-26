@@ -2368,6 +2368,1111 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (teaches active spell 800157)",
+      "kind": "metric_delta",
+      "variant": "teaches_eternal_curse",
+      "label_suffix": "teaches_eternal_curse",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.",
+      "trigger_spell": 60235,
+      "gate_spell": 92114,
+      "target": "caster",
+      "cast_in_before": false,
+      "specialization": 99,
+      "unlearn_after_specialization": [
+        92114,
+        800157,
+        674
+      ],
+      "metric": "knows_spell",
+      "fields": {
+        "spell": 800157
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "expected_gain": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Eternal Curse 92114 (level-10 automatic passive of specialization 99 Eternal, AscensionTaughtAbilityData.h:32 {20, 99, 10, 92114, 800157}): SynchronizeTaughtAbilities (AscensionCompat.cpp:1082-1104) teaches active spell Eternal Curse 800157 when 92114 is learned in specialization 99. Switches to spec 99 (specialization 99, ADR 1102), unlearns auto-learned [92114, 800157, 674] via unlearn_after_specialization (ADR 1292) so control reads knows_spell(800157) == 0; real learn of 92114 between phases teaches 800157 (after == 1). Reference search 2026-11-26: coa-history 92114/804320/807736 0 events (passive/hidden), 800157 5 SPELL_CAST_SUCCESS / 7 SPELL_AURA_APPLIED / 9 SPELL_AURA_REMOVED across 2 logs; coabuildhub spells_master_index.json 92114 matches structure (older snapshot states 80% threat vs installed server Spell.dbc 807736e1 95%, installed Spell.dbc governs per G-9)."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (allows dual wield)",
+      "kind": "equip_grant",
+      "label_suffix": "dual_wield",
+      "quote": "allows you to dual wield.",
+      "specialization": 99,
+      "unlearn_after_specialization": [
+        92114,
+        800157,
+        674
+      ],
+      "pairs": [
+        {
+          "main_hand": 2534,
+          "off_hand": 2534,
+          "skill_line": 173,
+          "source": "Worn Dagger 2534 (item_template class 2 subclass 15 dagger, InventoryType 13 one-hand, skill_line 173 Daggers, bloodmage.json Eternal weapon set): off-hand slot 16 refuses before 92114 is learned in specialization 99 and accepts 2534 after 92114 teaches Dual Wield 674 (AscensionTaughtAbilityData.h:33, AscensionCompat.cpp:1132-1141)"
+        }
+      ],
+      "observe_source": "Eternal Curse 92114 (specialization 99 Eternal, AscensionTaughtAbilityData.h:33 {20, 99, 10, 92114, 674}): SynchronizeTaughtAbilities teaches Dual Wield 674 and AscensionCompat.cpp:1132-1141 sets SetCanDualWield(HasSpell(674)). Uses equip_grant with specialization 99 and unlearn_after_specialization [92114, 800157, 674] (ADR 1320): off-hand Worn Dagger 2534 (slot 16) is rejected before learning 92114 and accepted after a real learn of 92114. Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (enters Cursed Form 802877 / 800157 / 525031)",
+      "kind": "metric_delta",
+      "variant": "cursed_form_enter",
+      "label_suffix": "cursed_form_enter",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 800157,
+      "gate_spell": 92114,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "aura",
+      "fields": {
+        "spell": 802877
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800157
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Eternal Curse 800157 shapeshift form 57 aura active on caster after real cast of 800157"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 525031
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Cursed Form caster requirement aura 525031 applied by aura_ascension_bloodmage_cursed_form::OnApply (AscensionBloodmageTalents.cpp:504-508)"
+          }
+        ]
+      },
+      "observe_source": "Casting Eternal Curse 800157 applies shapeshift form 57 (800157 Effect[1] SPELL_AURA_MOD_SHAPESHIFT MiscValue 57), Cursed Form marker 802877, and Cursed Form requirement 525031 (AscensionBloodmageTalents.cpp:487-538). Uncast before phase reads 0 for 802877, 800157, and 525031; real cast of 800157 in after phase reads 1 for all three. Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (-10% damage dealt under Tank Stance Aura 807736)",
+      "kind": "hit_ratio",
+      "variant": "damage_reduction",
+      "label_suffix": "damage_reduction",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "expected": 0.9,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          800157
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            800157,
+            0
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 800157,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Curse 800157 OnAuraApply casts Tank Stance Aura 807736 (AscensionBloodmageTalents.cpp:487-491): Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools, BasePoints -11 + DieSides 1 = -10% ($807736s1; /srv/coa/server-data/dbc Spell.dbc). Casts Bloodbolt 578305 (Rage 300, castable in both Mortal Form and Eternal Curse) at +20000 SP with 823764 spellpen (precondition fixture) across 20 non-crit trials: control without 800157 vs treatment clearing any prior 800157 so each trial performs a fresh real cast of 800157 (preventing shapeshift toggle-off). Expected ratio 0.90 (-10%, +-2 pt band excludes 1.00 and 0.80). Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (+95% threat multiplier via Tank Stance Aura 807736)",
+      "kind": "metric_delta",
+      "variant": "threat_mult",
+      "label_suffix": "threat_mult",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 800157,
+      "gate_spell": 92114,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "threat_multiplier",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1.95,
+      "tolerance": 0.0001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Curse 800157 OnAuraApply casts Tank Stance Aura 807736 (AscensionBloodmageTalents.cpp:487-491): Effect[1] aura 10 SPELL_AURA_MOD_THREAT MiscValue 127 all schools, BasePoints 94 + DieSides 1 = +95% ($807736s2; /srv/coa/server-data/dbc Spell.dbc). Uncast before phase reads threat_multiplier == 1.0; real cast of 800157 reads 1.95 +- 0.0001. Paired with threat_bloodbolt_control and threat_bloodbolt_stance measuring real threat_per_damage on dummy. Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (control: Bloodbolt threat_per_damage without stance is 1.0)",
+      "kind": "metric_delta",
+      "variant": "threat_bloodbolt_control",
+      "label_suffix": "threat_bloodbolt_control",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 578305,
+      "gate_spell": 92114,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Baseline threat_per_damage control for Eternal Curse 92114: casts non-health-cost Bloodbolt 578305 (PowerType 1 Rage) at dummy without Eternal Curse 800157 (+20000 SP, 823764 spellpen, 16255 -100% crit suppression precondition fixtures). Dummy threat_per_damage reads 0 before cast and 1.00 +- 0.05 after 1 hit. Paired with threat_bloodbolt_stance. Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (Bloodbolt threat_per_damage under real 800157 stance)",
+      "kind": "metric_delta",
+      "variant": "threat_bloodbolt_stance",
+      "label_suffix": "threat_bloodbolt_stance",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 578305,
+      "gate_spell": 92114,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800157
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "cast_power": 300,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 3.9,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807736
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tank Stance Aura 807736 applied by real cast of Eternal Curse 800157 (AscensionBloodmageTalents.cpp:487-491)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 578305,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exactly 1 landed Bloodbolt 578305 hit drives dummy threat_per_damage"
+          }
+        ]
+      },
+      "observe_source": "Real threat_per_damage of Bloodbolt 578305 (PowerType 1 Rage, non-health-cost) after a real cast of Eternal Curse 800157: 807736e1 SPELL_AURA_MOD_THREAT +95% (1.95x) multiplied by Rate.Threat.TankStance 2.0f (worldserver.conf.dist:2225, ThreatManager.cpp:757-758, AscensionTankStances.h:10-17) yields 1.95 * 2.0 = 3.90 +- 0.05 (compared against 1.00 in threat_bloodbolt_control). Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (+50% extra health-cost threat on Ravenous Strike 501679)",
+      "kind": "metric_delta",
+      "variant": "health_cost_threat_matched",
+      "label_suffix": "health_cost_threat_matched",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 501679,
+      "gate_spell": 92114,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800157
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5.85,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807736
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tank Stance Aura 807736 applied by real cast of Eternal Curse 800157"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 501679,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exactly 1 landed Ravenous Strike 501679 hit drives dummy threat_per_damage"
+          }
+        ]
+      },
+      "observe_source": "Tank Stance Aura 807736 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 2 (SPELLMOD_THREAT) BasePoints 49 + DieSides 1 = +50% ($807736s3; Spell.dbc) matches Ravenous Strike 501679 (PowerType -2 Health) via EffectSpellClassMask. Under real Eternal Curse 800157 (+20000 AP, 16255 -100% crit precondition fixtures), dummy threat_per_damage reads 1.50 * 1.95 * 2.0 = 5.85 +- 0.05 (50% above Bloodbolt's 3.90). Paired with health_cost_threat_unmatched testing Hematoma 803392. Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (+50% extra health-cost threat on Hematoma 803392)",
+      "kind": "metric_delta",
+      "variant": "health_cost_threat_unmatched",
+      "label_suffix": "health_cost_threat_unmatched",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 803392,
+      "gate_spell": 92114,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "setup_casts": [
+        800157
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "threat_per_damage",
+      "fields": {
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5.85,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 807736
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Tank Stance Aura 807736 applied by real cast of Eternal Curse 800157"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 803392,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Exactly 1 landed Hematoma 803392 hit drives dummy threat_per_damage"
+          }
+        ]
+      },
+      "observe_source": "Truthful coverage of 'from damage dealt by spells that cost health' ($807736s3 = +50%): Hematoma 803392 is PowerType -2 (Health), family 26, castable inside Eternal Curse 800157 (same representative audited by scenarios/tank-threat-audit-bloodmage.json), so the tooltip promises 1.50 * 1.95 * 2.0 = 5.85 threat_per_damage. Tank Stance Aura 807736 Effect[2] EffectSpellClassMask omits 803392, so 803392 is expected to alert honestly near 3.90 rather than hiding the classmask gap. Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (+400% item armor contribution via 804320)",
+      "kind": "metric_delta",
+      "variant": "item_armor",
+      "label_suffix": "item_armor",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 800157,
+      "gate_spell": 92114,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "shield_after_learn": {
+        "item": 14175,
+        "slot": 4,
+        "rejected_before": false
+      },
+      "metric": "armor",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 152,
+      "expected_gain": 152,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Curse 800157 OnAuraApply casts 804320 (AscensionBloodmageTalents.cpp:487-491): Effect[0] aura 142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT MiscValue 1 (armor), MiscValueB 0 (all item subclasses), BasePoints 399 + DieSides 1 = +400% ($804320s1; /srv/coa/server-data/dbc Spell.dbc). Equips Buccaneer's Vest 14175 (item_template class 4 subclass 1 cloth chest, slot 4, RequiredLevel 18, 0 stats, armor 37, replacing starter Crimson Vest 2000033; Bloodmage starter Crimson Footpads 494334 in rev_20260911_01_live_starter_templates.sql add 1 armor -> 38 total item armor + 120 from 60 Agility = 158 baseline) via shield_after_learn (rejected_before false) in both phases; casting 800157 increases item armor by +400% (38 * 4 = +152 -> 310 total, within 1). Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (+25% total Stamina)",
+      "kind": "metric_delta",
+      "variant": "stamina_pct",
+      "label_suffix": "stamina_pct",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 800157,
+      "gate_spell": 92114,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "metric": "stat",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 78,
+      "expected": 97.5,
+      "expected_ratio": 1.25,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Curse 800157 Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue 2 (Stamina), BasePoints 24 + DieSides 1 = +25% ($s1; /srv/coa/server-data/dbc Spell.dbc). Reads caster Stamina (stat 2) before (baseline 78) and after a real cast of 800157: ratio 1.25 +- 0.02 (78 -> 97 or 98, excluding 0% = 1.00 and +-10% of the +25% gain). Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 92114,
+      "name": "Eternal Curse (treated as a Demon while in Cursed Form)",
+      "kind": "metric_delta",
+      "variant": "treated_as_demon",
+      "label_suffix": "treated_as_demon",
+      "quote": "Teaches you Eternal Curse and allows you to dual wield.@s:800157:0@",
+      "trigger_spell": 800157,
+      "gate_spell": 92114,
+      "target": "caster",
+      "select_dummy": true,
+      "target_entry": 29153,
+      "dummy_distance": 5,
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "dummy",
+          "dummy"
+        ]
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 28269,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 500
+      },
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 28269,
+        "caster": "dummy",
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Eternal Curse 800157 Effect[1] aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 (SpellShapeshiftForm.dbc ID 57 field 20 creatureType = 3 = CREATURE_TYPE_DEMON); Unit::GetCreatureType (Unit.cpp:13418-13421) returns CREATURE_TYPE_DEMON while shapeshifted. Dummy Animated Bones 29153 (creature_template faction 14, unit_class 8 Mage with Mana pool, empty AIName) at 5 yd with 823764 spellpen precondition fixture casts Runestone Ward 28269 (AttributesEx3 0, instant, 20 yd AoE tA=22/tB=15, TargetCreatureType 36 = Demon|Undead, excluding Humanoid): SPELL_CAST_OK in both phases, hitting caster 0 times in Mortal Form (Humanoid) and 1 time after a real cast of 800157 (Demon). Reference search 2026-11-26: see teaches_eternal_curse."
+    },
+    {
+      "spell": 562723,
+      "name": "Moon Gaze (duration)",
+      "kind": "cast_applies_aura",
+      "label_suffix": "duration",
+      "quote": "Allow your blood curse to take control and embrace your inner self for $d, allowing you to access your Cursed Form ability bar.",
+      "expected_ms": 300000,
+      "applied_aura": 562723,
+      "target": "caster",
+      "cast_spell": 562723,
+      "cast_target": "caster",
+      "observe_source": "Moon Gaze 562723 DurationIndex 5 = 300000 ms ($d, 5 min; /srv/coa/server-data/dbc SpellDuration.dbc), instant self-cast aura applying shapeshift form 57 (Cursed Form ability bar, Effect[0] SPELL_AURA_MOD_SHAPESHIFT MiscValue 57) and stun (Effect[2] SPELL_AURA_MOD_STUN). Real cast of 562723 reads aura_duration_ms absent before cast and ~300000 ms after cast, and proves expiry around 300000 ms via behaviour_expiry (accelerated clock ADR 0139). Reference search 2026-11-26: coa-history spell 562723 has 5 SPELL_CAST_SUCCESS / 5 SPELL_AURA_APPLIED / 5 SPELL_AURA_REMOVED across 5 logs; not present in coabuildhub spells_master_index.json; installed Spell.dbc governs."
+    },
+    {
+      "spell": 562723,
+      "name": "Moon Gaze (unable to attack while active)",
+      "kind": "metric_delta",
+      "variant": "no_attack",
+      "label_suffix": "no_attack",
+      "quote": "While active, you are unable to move, attack, or cast spells or abilities.",
+      "trigger_spell": 562723,
+      "gate_spell": 562723,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 1,
+      "metric": "melee_attack_count",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Moon Gaze 562723 Effect[2] aura 12 SPELL_AURA_MOD_STUN with SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (/srv/coa/server-data/dbc Spell.dbc). Peaceful gate-cast attack check (ADR 1321) casts 562723 first while out of combat, attempts auto-attacks against dummy for 1 swing interval + 500 ms (3800 ms -> 0 swings), then cancels 562723 and swings for 3800 ms without it (1 swing on 3300 ms staff 2535: 500 ms past swing 1 and 2800 ms before swing 2). Paired with no_attack_applied. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 562723,
+      "name": "Moon Gaze (aura held during no-attack phase)",
+      "kind": "metric_delta",
+      "variant": "no_attack_applied",
+      "label_suffix": "no_attack_applied",
+      "quote": "While active, you are unable to move, attack, or cast spells or abilities.",
+      "trigger_spell": 562723,
+      "gate_spell": 562723,
+      "gate_cast": true,
+      "target": "dummy",
+      "attack_swings": 1,
+      "metric": "aura",
+      "fields": {
+        "spell": 562723
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Witness for 562723 no_attack: confirms Moon Gaze 562723 aura is held (1) during the stunned attack phase and absent (0) during the post-cancel control swing phase. Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 562723,
+      "name": "Moon Gaze (unable to cast spells or abilities while active)",
+      "kind": "metric_delta",
+      "variant": "no_cast",
+      "label_suffix": "no_cast",
+      "quote": "While active, you are unable to move, attack, or cast spells or abilities.",
+      "trigger_spell": 504296,
+      "gate_spell": 562723,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "setup_casts": [
+        562723
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504296
+      },
+      "before_expected": 0,
+      "expected": 108,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Moon Gaze 562723 Effect[2] aura 12 SPELL_AURA_MOD_STUN (/srv/coa/server-data/dbc Spell.dbc). Attempts peaceful self-cast Blood Shield 504296 (caster_health [10000, 10000]): succeeds (0) without 562723 while remaining out of combat, and is refused with SPELL_FAILED_STUNNED (108, SharedDefines.h:1158) after a real cast of 562723 (setup_only_after, setup_wait_ms 1600 past GCD). Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 562723,
+      "name": "Moon Gaze (cannot be used in combat)",
+      "kind": "cast_condition",
+      "quote": "Cannot be used in combat.",
+      "condition": "out_of_combat",
+      "blocked_result": 1,
+      "observe_source": "Moon Gaze 562723 carries SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000; /srv/coa/server-data/dbc Spell.dbc). cast_condition out_of_combat (ADR 1321) casts 562723 while out of combat (combat == 0, cast_failure == 0), cancels 562723 and waits GCD, engages dummy (combat == 1), and attempts 562723 expecting SPELL_FAILED_AFFECTING_COMBAT (1). Reference search 2026-11-26: see duration."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (requires Mortal Form)",
+      "kind": "metric_delta",
+      "variant": "mortal_form",
+      "label_suffix": "mortal_form",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 706605
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "observe_source": "Blood Feast 706605 ExcludeCasterAuraSpell = 802877 (Cursed Form marker; /srv/coa/server-data/dbc Spell.dbc, Spell.cpp:5951-5952). Attempts 706605 in Mortal Form (before, cast_failure == 0), waits 6000 ms for the 5000 ms channel to finish, casts Blood Curse 562720 for real (applying 802877), and attempts 706605 expecting SPELL_FAILED_CASTER_AURASTATE (22, SharedDefines.h:1072). Reference search 2026-11-26: coa-history spell 706605 has 4 casts / 4 applies / 4 removals across 3 logs, 706608 has 26 SPELL_ENERGIZE (all 6) and 26 SPELL_HEAL (4 crits, 402-628); coabuildhub spells_master_index.json 706605 matches core text (older snapshot omits $?s681077 burst and shows 1 min CD vs server DBC 90 s; installed Spell.dbc governs per G-9)."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (drains up to 3 nearby enemy corpses, 30 ticks from 4 corpses)",
+      "kind": "metric_delta",
+      "variant": "corpse_drain_cap",
+      "label_suffix": "corpse_drain_cap",
+      "quote": "Drains the essence from up to $706607i nearby enemy corpses over $d to quickly regain $706608s1% maximum health",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "target": "caster",
+      "measure_actor": "caster",
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "extra_corpses": [
+        {
+          "entry": 6,
+          "health": 100,
+          "distance": 5
+        },
+        {
+          "entry": 6,
+          "health": 100,
+          "distance": 6
+        },
+        {
+          "entry": 6,
+          "health": 100,
+          "distance": 7
+        }
+      ],
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 706608,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 30,
+      "tolerance": 0,
+      "wait_ms": 5600,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "observe_source": "Blood Feast 706605 (DurationIndex 28 = 5000 ms, Effect[0] PERIODIC_TRIGGER_SPELL 706607 every 500 ms = 10 ticks) triggers 706607 (MaxAffectedTargets 3, RadiusIndex 14, spell_ascension_blood_feast_corpses) -> 706606 (spell_ascension_blood_feast_drain, AscensionBloodmageSecondary.cpp:509-549) -> 706608. Places 4 nearby enemy creatures (entry 6 at 5, 5, 6, 7 yd): before phase casts 706605 while all 4 are alive (0 corpses -> 0 heals of 706608); after phase kills all 4 with 92559 and casts 706605 -> exactly 30 heals (3 capped corpses x 10 ticks, excluding 40 uncapped and 27 if amplitude were >= 550 ms). Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (5 sec duration bracket)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Drains the essence from up to $706607i nearby enemy corpses over $d to quickly regain $706608s1% maximum health",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 706605
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "tolerance": 0,
+      "wait_ms": 4600,
+      "expiry_wait_ms": 700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4850
+        ],
+        "expired": [
+          5200,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Blood Feast 706605 DurationIndex 28 = 5000 ms ($d; /srv/coa/server-data/dbc SpellDuration.dbc). Reads aura 706605 == 0 before cast, == 1 at game_time [4550, 4850] ms (> 4500 ms = 5000 - 10%), and == 0 at game_time [5200, 5450] ms (< 5500 ms = 5000 + 10%), bracketing 5000 ms inside +-10% on both sides. Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (regains 5% max health per tick from 1 corpse)",
+      "kind": "metric_delta",
+      "variant": "health_regain",
+      "label_suffix": "health_regain",
+      "quote": "Drains the essence from up to $706607i nearby enemy corpses over $d to quickly regain $706608s1% maximum health",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "target": "caster",
+      "measure_actor": "caster",
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 706608,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 5000,
+      "tolerance": 25,
+      "wait_ms": 5600,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "observe_source": "Blood Feast 706605 triggers 706608 every 500 ms over 5000 ms (10 ticks per corpse). 706608 Effect[0] SPELL_EFFECT_HEAL_PCT BasePoints 4 + DieSides 1 = 5% max health ($706608s1; /srv/coa/server-data/dbc Spell.dbc) plus Effect[2] SPELL_EFFECT_HEAL BasePoints 1 + DieSides 1 = 2 flat HP. With caster_health [1000, 10000], regen off, and 16255 -100% crit suppression (precondition fixture; coa-history showed 4/26 706608 heals crit), 1 corpse over 10 ticks restores 0 before (living creature) and ~5000 (5000 from E0 + 20 from E2 = 5020, within 25 = 0.5%, excluding 4500 and 5500 at +-10%). Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (regains 5% max Rage per tick from 1 corpse)",
+      "kind": "metric_delta",
+      "variant": "rage_regain",
+      "label_suffix": "rage_regain",
+      "quote": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "target": "caster",
+      "measure_actor": "caster",
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "cast_power": 0,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 706608,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 500,
+      "tolerance": 0,
+      "wait_ms": 5600,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "observe_source": "Blood Feast 706605 triggers 706608 every 500 ms over 5000 ms (10 ticks per corpse). 706608 Effect[1] SPELL_EFFECT_ENERGIZE_PCT MiscValue 1 (Rage), BasePoints 5, DieSides 0 -> SpellEffectInfo::CalcValue returns 5% (SpellInfo.cpp:501-504; stock Spell::EffectEnergizePct SpellEffects.cpp:3017-3048; MissingRage in AscensionBloodmageSecondary.cpp:555-572 is bound only to 805985 Blood Craving). At level-60 Bloodmage max Rage 1000 (100 display), 10 ticks x 50 internal Rage = 500 exact (0 before with living creature; cast_power 0). Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (no tick before 445 ms, excluding 450 ms amplitude)",
+      "kind": "metric_delta",
+      "variant": "tick_before",
+      "label_suffix": "tick_before",
+      "quote": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "target": "caster",
+      "measure_actor": "caster",
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 706608,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 380,
+      "expire_ms": 5600,
+      "game_time": {
+        "after": [
+          300,
+          445
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Lower-edge amplitude check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; /srv/coa/server-data/dbc Spell.dbc). Reads spell_heal_count(706608) at wait_ms 380 (game_time [300, 445] ms, strictly < 450 ms = 500 - 10%): 0 heals before and 0 heals after, proving tick 1 has not fired early. Paired with tick_first, tick_second, and corpse_drain_cap (10 ticks over 5000 ms). Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (first tick by 600 ms)",
+      "kind": "metric_delta",
+      "variant": "tick_first",
+      "label_suffix": "tick_first",
+      "quote": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "target": "caster",
+      "measure_actor": "caster",
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 706608,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 620,
+      "expire_ms": 5600,
+      "game_time": {
+        "after": [
+          550,
+          880
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "First-tick amplitude check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; Spell.dbc). Reads spell_heal_count(706608) at wait_ms 620 (game_time [550, 880] ms, between tick 1 at 500 ms and tick 2 at 1000 ms): 0 before and 1 after. Paired with tick_before, tick_second, and corpse_drain_cap. Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (second tick by 1150 ms)",
+      "kind": "metric_delta",
+      "variant": "tick_second",
+      "label_suffix": "tick_second",
+      "quote": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
+      "trigger_spell": 706605,
+      "gate_spell": 706605,
+      "target": "caster",
+      "measure_actor": "caster",
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "caster_health": [
+        1000,
+        10000
+      ],
+      "disable_regeneration": true,
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 706608,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 1150,
+      "expire_ms": 5600,
+      "game_time": {
+        "after": [
+          1100,
+          1400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Second-tick amplitude check for Blood Feast 706605 Effect[0] EffectAmplitude[0] = 500 ms ($t1 = 0.5 sec; Spell.dbc). Reads spell_heal_count(706608) at wait_ms 1150 (game_time [1100, 1400] ms, between tick 2 at 1000 ms and tick 3 at 1500 ms): 0 before and 2 after. Combined with tick_before (< 450 ms -> 0), tick_first (-> 1), and corpse_drain_cap (10 ticks/corpse over 5000 ms -> excludes >= 550 ms), brackets 500 ms inside +-10% on both sides. Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (Arterial Bind 681077 end-of-channel burst 520312 heals ally)",
+      "kind": "metric_delta",
+      "variant": "arterial_bind_burst",
+      "label_suffix": "arterial_bind_burst",
+      "quote": "and Rage every $t1 sec$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][].",
+      "trigger_spell": 706605,
+      "gate_spell": 681077,
+      "target": "caster",
+      "measure_actor": "caster",
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5
+      },
+      "setup_casts": [
+        92559
+      ],
+      "setup_target": "corpse",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          2000,
+          20000
+        ]
+      },
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 520312,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 6000,
+      "expire_ms": 5600,
+      "void_on_cast_failure": true,
+      "observe_source": "Truthful test of Blood Feast 706605 conditional tooltip clause '$?s681077[, and then causes you to burst, healing party and raid members within $520312a1 yds for ${$520312m1+$520312ppl1+$SP*0.7525}][]' (/srv/coa/server-data/dbc Spell.dbc). Learns Arterial Bind 681077 (gate_spell), groups an injured ally (2000/20000 HP) beside the caster, drains a nearby corpse for the full 5000 ms channel (wait_ms 6000), and reads spell_heal_count of Life's Essence 520312 on ally (expected 1). Because 520312 has zero references in src/, this check is expected to alert truthfully at 0 rather than hiding the missing server implementation. Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 706605,
+      "name": "Blood Feast (cannot be used in combat)",
+      "kind": "cast_condition",
+      "quote": "Cannot be used in combat.",
+      "condition": "out_of_combat",
+      "blocked_result": 1,
+      "corpse": {
+        "entry": 6,
+        "health": 100,
+        "distance": 5,
+        "kill_spell": 92559
+      },
+      "observe_source": "Blood Feast 706605 carries SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL (0x10000000; /srv/coa/server-data/dbc Spell.dbc). cast_condition out_of_combat with corpse fixture (ADR 1321) kills a nearby creature 6 with 92559, casts 706605 while out of combat (combat == 0, cast_failure == 0), cancels 706605 and waits GCD, engages dummy (combat == 1), and attempts 706605 expecting SPELL_FAILED_AFFECTING_COMBAT (1). Reference search 2026-11-26: see mortal_form."
+    },
+    {
+      "spell": 704660,
+      "name": "No Mercy (Thick Pelt affects 2 hits instead of 1)",
+      "kind": "block_charge_strikes",
+      "label_suffix": "thick_pelt_hits",
+      "quote": "Allows your Thick Pelt to affect an additional hit.",
+      "aura": 556233,
+      "effect": 0,
+      "require_block": false,
+      "strike_spell": 34580,
+      "striker_untriggered": true,
+      "striker_auras": [
+        803393
+      ],
+      "cast_power": 0,
+      "observe_source": "No Mercy 704660 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 24 (SPELLMOD_CHARGES) BasePoints 0 + DieSides 1 = +1 on EffectSpellClassMask[2] matching Thick Pelt 556233 (ProcCharges 1, ProcFlags 0x2a8 physical hits taken, PowerType 0, ManaCost 0; /srv/coa/server-data/dbc Spell.dbc). Uses block_charge_strikes with require_block: false, striker_untriggered: true (556233 default spell_proc AttributesMask 0 ignores triggered creature casts), striker_auras: [803393] (+100% hit), cast_power: 0 (ADR 1322), striking with Impale 34580 (5 yd, IMPOSSIBLE_DODGE_PARRY_BLOCK, instant, 0 CD): control (without 704660) consumes 556233 on hit 1; treatment (after real learn of 704660) keeps 556233 through hit 1 and consumes it on hit 2. Reference search 2026-11-26: coa-history 704660 0 events (passive), 556233 422 applies / 423 removals; coabuildhub spells_master_index.json 704660 matches verbatim ('Allows your Thick Pelt to affect an additional hit.')."
     }
   ],
   "player_observations": [],

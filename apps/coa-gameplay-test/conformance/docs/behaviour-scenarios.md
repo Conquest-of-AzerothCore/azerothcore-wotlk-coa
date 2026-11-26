@@ -2067,6 +2067,16 @@ the one 3 yd behind never.
   blocked attempt comes before any attack; the allowed one after Evasion 26669, one engaging swing interval and 6000 ms
   of the attacker's swings (the dodges are read). The attempts set no caster aura. Sacred Swing 572769 with Keeping the
   Oath 92109: 22 before, 0 after.
+- `cast_condition` `condition: "out_of_combat"` (ADR 1321; optional `target` `'caster'`/`'dummy'` and optional `corpse`
+  `{entry, health, distance, kill_spell}`) verifies `SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL` (`0x10000000`) on non-resurrect
+  spells ("Cannot be used in combat."). The out-of-combat arm runs first (`combat == 0`, `cast_failure == 0`), cancels
+  `spell`'s aura and waits a GCD, then attacks the dummy (`combat == 1`) and attempts `spell` again expecting
+  `SPELL_FAILED_AFFECTING_COMBAT` (`1`) before `stop_attack`. Each expectation carries `priming_void` on its `combat`
+  measurement so an arm that never reached the expected combat state is judged `unmeasured` rather than `ok` or `alert`.
+  Likewise, `metric_delta` `attack_swings` with `gate_cast: true` on a `SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL`
+  `gate_spell` casts `gate_spell` first while out of combat (`after`), cancels its aura, and then swings without it
+  (`before`) using a symmetric `swing_interval + 500 ms` window.
+  Bloodmage: Moon Gaze 562723 and Blood Feast 706605.
 - `script_hit` `receiver: "caster"` reads a heal the script casts on the caster (a damage hit on the caster is refused);
   `model_auras` names auras the treatment casts put on the caster, which the hit model then counts among its modifiers
   (they must be cast by the entry), and `unresisted: true` drops the resistance mitigation for a hit that ignores it.
