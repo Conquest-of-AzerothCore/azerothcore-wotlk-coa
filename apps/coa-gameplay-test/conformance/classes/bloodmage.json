@@ -19601,6 +19601,2434 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "Bloodbolt 578305 (SpellFamilyFlags[1] 131072 added to 807292 Effect[0] by AscensionBloodmageTalents.cpp:1721-1724) SpellDoneCritChance before (control) and after a real learn of 807292: gain +10.0 pts. Reference search 2026-11-26: coa-history 578305: 3764 hits in 17 logs; coabuildhub 807292 matches verbatim."
+    },
+    {
+      "spell": 500126,
+      "name": "Lunge (leap behind enemy from 15 yd)",
+      "kind": "metric_delta",
+      "variant": "leap",
+      "label_suffix": "leap",
+      "quote": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+      "trigger_spell": 500126,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {
+        "bearing": 0
+      },
+      "before_expected": 0,
+      "expected": 13.0,
+      "after_at_least": 10.0,
+      "after_at_most": 16.0,
+      "tolerance": 0.5,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 15.0,
+            "expected": 2.0,
+            "tolerance": 2.0,
+            "source": "500126 Effect[0] SPELL_EFFECT_JUMP_DEST (42) TARGET_DEST_TARGET_BACK (65), SpellRadius 7 (2.0 yd); RangeIndex 54 (5-30 yd). Caster starts 15 yd from dummy (facing +x) and lands ~2 yd behind it."
+          }
+        ]
+      },
+      "observe_source": "500126 Lunge Effect[0] SPELL_EFFECT_JUMP_DEST (42), TargetA 65 TARGET_DEST_TARGET_BACK, EffectRadiusIndex 7 (2 yd), RangeIndex 54 (5-30 yd), CasterAuraSpell 525031 (precondition fixture), AscensionBloodmageTalents.cpp:1461-1478 (FaceTarget). Dummy stands at 15 yd facing +x (back at x=13); caster leaps forward (bearing 0) 10..16 yd and closes distance_2d from 15 yd to ~2 yd. Reference search 2026-11-26: coa-history 500126: 285 SPELL_CAST_SUCCESS, 283 SPELL_DAMAGE across 27 logs; coabuildhub 500126 matches verbatim."
+    },
+    {
+      "spell": 500126,
+      "name": "Lunge (Physical damage at reference AP)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+      "trigger_spell": 500126,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500126,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 146.5,
+      "after_at_least": 140,
+      "after_at_most": 153,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$804866m2+$804866ppl2+$AP*0.2}: Spell.dbc 804866 Effect[1] BasePoints 6 + DieSides 2 (7..8, mean 7.5), BaseLevel 1, RealPointsPerLevel 1.6 -> +94.4 at level 60; reference AP 223 * 0.2 = 44.6 -> 146..147 Physical damage (band 140..153 excludes 0, unscaled ~111, and 2x). Precondition fixtures: 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 525031 (CasterAuraSpell). Reference search 2026-11-26: coa-history 500126: 283 hits (min 32, max 119, mean 90.0) in 27 logs; 804866: 0 events; coabuildhub 500126 states '7+3.6 Points Per Level+AP*0.2' (older state)."
+    },
+    {
+      "spell": 500126,
+      "name": "Lunge (Physical damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Leap behind an enemy, dealing ${$804866m2+$804866ppl2+$AP*0.2} Physical Damage,",
+      "trigger_spell": 500126,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 500126,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 4146.5,
+      "after_at_least": 4135,
+      "after_at_most": 4158,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip AP term $AP*0.2 at +20000 AP (total 20223): 7.5 + 94.4 + 20223*0.2 = 4146.5 Physical damage (band 4135..4158 excludes unscaled damage and wrong AP coefficient). Precondition fixtures: 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 525031 (CasterAuraSpell). Reference search 2026-11-26: coa-history 500126: 283 hits (min 32, max 119, mean 90.0) across 27 logs; coabuildhub 500126 includes AP*0.2."
+    },
+    {
+      "spell": 500126,
+      "name": "Lunge (dazes target for 3 sec)",
+      "kind": "metric_delta",
+      "variant": "daze_duration",
+      "label_suffix": "daze_duration",
+      "quote": "dazing them for $/1000;s3 sec,",
+      "trigger_spell": 500126,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "dummy_distance": 15.0,
+      "metric": "aura",
+      "fields": {
+        "spell": 50259
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 2800,
+      "expiry_wait_ms": 400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2750,
+          2950
+        ],
+        "expired": [
+          3150,
+          3290
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "run_speed_rate",
+            "fields": {},
+            "before_expected": 1.1428571429,
+            "expected": 0.5714285714,
+            "tolerance": 0.01,
+            "source": "50259 Dazed Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED BasePoints -51 + 1 = -50% (1.142857 * 0.5 = 0.571429)."
+          }
+        ]
+      },
+      "observe_source": "500126 Effect[2] SPELL_EFFECT_ASCENSION_TRIGGER_SPELL_DURATION (178), BasePoints 2999 + DieSides 1 = 3000 ms ($/1000;s3 = 3 sec), triggers 50259 Dazed (DurationIndex 27 = 3000 ms, -50% speed). Present at 2800 ms (game_time [2750, 2950], excludes -10% 2700 ms) with dummy run_speed_rate halved (1.142857 -> 0.571429), absent at 3200 ms (game_time [3150, 3290], excludes +10% 3300 ms). Reference search 2026-11-26: coa-history 500126: 285 casts in 27 logs; coabuildhub 500126 states 'dazing them for 3 sec'."
+    },
+    {
+      "spell": 500126,
+      "name": "Lunge (generates 15 Rage via 804864)",
+      "kind": "metric_delta",
+      "variant": "rage",
+      "label_suffix": "rage",
+      "quote": "and generating $/10;804864s1 Rage.",
+      "trigger_spell": 500126,
+      "target": "dummy",
+      "dummy_distance": 15.0,
+      "cast_in_before": false,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 804864,
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 150,
+      "tolerance": 0,
+      "wait_ms": 2000,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "500126 hits trigger 804864 Lunge energize (AscensionBloodmageSecondary.cpp:332-335): Spell.dbc 804864 Effect[0] SPELL_EFFECT_ENERGIZE (30) PowerType 1 (Rage), BasePoints 149 + DieSides 1 = 150 internal = 15 displayed Rage ($/10;804864s1). Exact match 0 before, 150 after. Reference search 2026-11-26: coa-history 804864: 285 SPELL_ENERGIZE events across 27 logs, min=15 max=15 mean=15.0; coabuildhub 500126 states 'generating 15 Rage'."
+    },
+    {
+      "spell": 501682,
+      "name": "Night Hunter's Howl (Shadow damage at reference AP)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Howl into the souls of nearby enemies, dealing ${$m1+0+$AP*0.285} Shadow damage",
+      "trigger_spell": 501682,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501682,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 278,
+      "after_at_least": 255,
+      "after_at_most": 301,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "501682 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Shadow (SchoolMask 32, DmgClass 2 Melee), BasePoints 190 + DieSides 44 (191..234), BaseLevel 58, RealPointsPerLevel 0.9875 -> +1.975 at level 60; spell_bonus_data 500124 ap_bonus 0.285 (rev_20261010_91) at reference AP 223 adds 63.555 -> roll 256..299 (band 255..301 excludes 0 and 2x). Precondition fixtures: 524861 (CasterAuraSpell), 823764 (beeg spellpen), 984948 (hit/exp), 64481 (-1000% melee crit for DmgClass 2). Reference search 2026-11-26: coa-history 500124: 210 SPELL_DAMAGE hits in 1 log (501682: 0 events); coabuildhub 500124 matches formula."
+    },
+    {
+      "spell": 501682,
+      "name": "Night Hunter's Howl (Shadow damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Howl into the souls of nearby enemies, dealing ${$m1+0+$AP*0.285} Shadow damage",
+      "trigger_spell": 501682,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 501682,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 5978,
+      "after_at_least": 5955,
+      "after_at_most": 6001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "501682 AP scaling $AP*0.285 (rev_20261010_91 entry 500124 ap_bonus 0.285) at +20000 AP (total 20223): 191..234 + 1.975 + 20223*0.285 (5763.555) = 5956..5999 (band 5955..6001 excludes unscaled ~278 and wrong AP coefficient). Precondition fixtures: 524861, 823764, 984948, 64481. Reference search 2026-11-26: coa-history 500124: 210 hits in 1 log; coabuildhub 500124 states AP*0.285."
+    },
+    {
+      "spell": 501682,
+      "name": "Night Hunter's Howl (slows movement speed by 60%)",
+      "kind": "metric_delta",
+      "variant": "slow",
+      "label_suffix": "slow",
+      "quote": "and slowing their movement speed by $s2%",
+      "trigger_spell": 501682,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.1428571429,
+      "expected": 0.4571428571,
+      "tolerance": 0.001,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "501682 Effect[1] SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE (142) BasePoints -61 + 1 = -60 ($s2 = 60%) triggers 520459 (Effect[0] aura 33 SPELL_AURA_MOD_DECREASE_SPEED). Dummy baseline run_speed_rate 8/7 = 1.1428571429; slowed by 60% -> 1.1428571429 * 0.4 = 0.4571428571 (tolerance 0.001 excludes 0% and -50%). Reference search 2026-11-26: coa-history 520459: 189 SPELL_AURA_APPLIED in 1 log; coabuildhub 500124 states 'slowing their movement speed by 60% for 6 sec'."
+    },
+    {
+      "spell": 501682,
+      "name": "Night Hunter's Howl (slow lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $d.",
+      "trigger_spell": 501682,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "cast_power": 300,
+      "metric": "aura",
+      "fields": {
+        "spell": 520459
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 5600,
+      "expiry_wait_ms": 800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5500,
+          5800
+        ],
+        "expired": [
+          6300,
+          6550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "501682 / 520459 DurationIndex 32 = 6000 ms ($d; Spell.dbc). Aura 520459 on dummy present at 5600 ms (game_time [5500, 5800], excludes -10% 5400 ms) and absent at 6400 ms (game_time [6300, 6550], excludes +10% 6600 ms). Reference search 2026-11-26: coa-history 520459: 189 APPLIED / 185 REMOVED in 1 log; coabuildhub 500124 states 'for 6 sec'."
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (2 charges: 2 casts succeed, 3rd refused inside recharge)",
+      "kind": "metric_delta",
+      "variant": "charges_2",
+      "label_suffix": "charges_2",
+      "quote": "2 Charges,",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "after_trigger_casts": [
+        {
+          "spell": 503484,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 503484,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 503484,
+        "target": "dummy",
+        "periodic": false
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "SpellCharges.dbc row 503484 -> SpellChargesCategory.dbc row 157 (MaxCharges 2, RecoveryTime 6000 ms; AscensionClassMechanics.cpp:1085-1100; charge_recharge refuses because 3 x 2000 ms > 6000 * 0.95). Three real casts at t=0, 1600, 3200 ms (all inside 6000 ms recharge, cooldown not reset between attempts; precondition fixtures: CasterAuraSpell 524861 and 984948 hit/expertise so melee-class AoE 503484 cannot miss/dodge/parry): exactly 2 hits land on dummy (spell_damage_count (periodic: false, excluding 503484's 1s bleed ticks) 0 before, 2 after) and the 3rd attempt fails SPELL_FAILED_NOT_READY (67), excluding 1 charge and >=3 charges. Reference search 2026-11-26: coa-history 503479/804197: 301 casts in 3 logs (503484: 0 events); coabuildhub 804197 states '2 Charges, 6 sec recharge'.",
+      "phase_auras": [
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 503484
+            },
+            "before_expected": 0,
+            "expected": 67,
+            "tolerance": 0,
+            "source": "3rd attempt of 503484 at t=3200 ms (after 2 charges spent at 0/1600 ms, inside 6000 ms recharge) fails SPELL_FAILED_NOT_READY (67)."
+          }
+        ]
+      }
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (6 sec recharge: 3rd cast still refused at 5650 ms)",
+      "kind": "metric_delta",
+      "variant": "recharge_early",
+      "label_suffix": "recharge_early",
+      "quote": "6 sec recharge",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "after_trigger_casts": [
+        {
+          "spell": 503484,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 503484,
+          "target": "dummy",
+          "delay_ms": 4050,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 503484,
+        "target": "dummy",
+        "periodic": false
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "observe_source": "Lower-bound bracket of SpellChargesCategory 157 RecoveryTime 6000 ms: casts at t=0, t=1600 ms, and attempt 3 at t=5650 ms (strictly > 5400 ms = -10% and < 6000 ms; precondition fixtures: 524861 and 984948 hit/expertise). 3rd attempt is still refused (spell_damage_count (periodic: false, excluding 503484's 1s bleed ticks) == 2 on dummy, cast_failure == 67 SPELL_FAILED_NOT_READY), excluding any recharge <= 5400 ms (-10%). Reference search 2026-11-26: coa-history 503479: 301 casts in 3 logs; coabuildhub 804197 states '6 sec recharge'.",
+      "phase_auras": [
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 503484
+            },
+            "before_expected": 0,
+            "expected": 67,
+            "tolerance": 0,
+            "source": "3rd attempt of 503484 at t=5650 ms (strictly > 5400 ms = -10% and < 6000 ms) fails SPELL_FAILED_NOT_READY (67)."
+          }
+        ]
+      }
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (6 sec recharge: 3rd cast succeeds at 6350 ms)",
+      "kind": "metric_delta",
+      "variant": "recharge_late",
+      "label_suffix": "recharge_late",
+      "quote": "6 sec recharge",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "after_trigger_casts": [
+        {
+          "spell": 503484,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": false
+        },
+        {
+          "spell": 503484,
+          "target": "dummy",
+          "delay_ms": 4750,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 503484,
+        "target": "dummy",
+        "periodic": false
+      },
+      "before_expected": 0,
+      "expected": 3,
+      "tolerance": 0,
+      "wait_ms": 200,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Upper-bound bracket of SpellChargesCategory 157 RecoveryTime 6000 ms: casts at t=0, t=1600 ms, and attempt 3 at t=6350 ms (strictly > 6000 ms and < 6600 ms = +10%; precondition fixtures: 524861 and 984948 hit/expertise). 3rd attempt succeeds (spell_damage_count (periodic: false, excluding 503484's 1s bleed ticks) == 3 on dummy, cast_failure == 0), excluding any recharge >= 6600 ms (+10%). Paired with recharge_early (5650 ms refused), excludes 10% off on both sides. Reference search 2026-11-26: coa-history 503479: 301 casts in 3 logs; coabuildhub 804197 states '6 sec recharge'.",
+      "phase_auras": [
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "cast_failure",
+            "fields": {
+              "spell": 503484
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "3rd attempt of 503484 at t=6350 ms (strictly > 6000 ms and < 6600 ms = +10%) succeeds with NO_CAST_FAILURE (0)."
+          }
+        ]
+      }
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (direct Shadow damage at reference AP)",
+      "kind": "metric_delta",
+      "variant": "direct_base",
+      "label_suffix": "direct_base",
+      "quote": "Ravage all nearby enemies, dealing ${$m1+$AP*0.11} Shadow damage,",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 503484,
+        "target": "dummy",
+        "critical": false,
+        "periodic": false
+      },
+      "before_expected": 0,
+      "expected": 254,
+      "after_at_least": 243,
+      "after_at_most": 265,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "503484 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Shadow (SchoolMask 32, DmgClass 2 Melee), BasePoints 219 + DieSides 20 (220..239), BaseLevel 58, RealPointsPerLevel 0.025 -> +0.05 at level 60; spell_bonus_data 804197 ap_bonus 0.11 (rev_20261010_90) at reference AP 223 adds 24.53 -> roll 244..264 (band 243..265 excludes 0 and 2x). Precondition fixtures: 524861, 823764, 984948, 64481 (-1000% melee crit for DmgClass 2). Reference search 2026-11-26: coa-history 503479/804197: 1382 SPELL_DAMAGE hits across 4 logs (503484: 0 events); coabuildhub 804197 lists older AP coeff 10%."
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (direct Shadow damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "direct_ap",
+      "label_suffix": "direct_ap",
+      "quote": "Ravage all nearby enemies, dealing ${$m1+$AP*0.11} Shadow damage,",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 503484,
+        "target": "dummy",
+        "critical": false,
+        "periodic": false
+      },
+      "before_expected": 0,
+      "expected": 2454,
+      "after_at_least": 2443,
+      "after_at_most": 2465,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "503484 Effect[0] AP scaling $AP*0.11 (rev_20261010_90 entry 804197 ap_bonus 0.11) at +20000 AP (total 20223): 220..239 + 0.05 + 20223*0.11 (2224.53) = 2444..2464 (band 2443..2465 excludes unscaled ~254 and wrong coeff). Precondition fixtures: 524861, 823764, 984948, 64481. Reference search 2026-11-26: coa-history 503479/804197: 1382 direct hits in 4 logs; coabuildhub 804197 older state 10%."
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (periodic Shadow bleed total at reference AP)",
+      "kind": "metric_delta",
+      "variant": "bleed_base",
+      "label_suffix": "bleed_base",
+      "quote": "causing them to bleed for ${($d*1000/$t2)*($m2+$AP*0.04)} Shadow damage",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 503484,
+        "target": "dummy",
+        "periodic": true
+      },
+      "before_expected": 0,
+      "expected": 584,
+      "after_at_least": 576,
+      "after_at_most": 592,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 503484,
+              "target": "dummy",
+              "periodic": true
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "503484 DurationIndex 35 (4000 ms) / EffectAmplitude[1] 1000 ms = exactly 4 periodic bleed ticks."
+          }
+        ]
+      },
+      "observe_source": "503484 Effect[1] aura 3 SPELL_AURA_PERIODIC_DAMAGE Shadow, BasePoints 136 + DieSides 1 = 137, BaseLevel 58, ppl 0.025 -> +0.05 at lvl 60, Amplitude 1000 ms, DurationIndex 35 = 4000 ms (4 ticks); spell_bonus_data 804197 ap_dot_bonus 0.04 (rev_20261010_90) at reference AP 223 adds 8.92/tick -> 145.97/tick x 4 = 580..584 (band 576..592 excludes 0, 3 ticks, 5 ticks, and 2x). Reference search 2026-11-26: coa-history 503479/804197: 4824 SPELL_PERIODIC_DAMAGE ticks in 4 logs; coabuildhub 804197 older state."
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (periodic Shadow bleed total at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "bleed_ap",
+      "label_suffix": "bleed_ap",
+      "quote": "causing them to bleed for ${($d*1000/$t2)*($m2+$AP*0.04)} Shadow damage",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 503484,
+        "target": "dummy",
+        "periodic": true
+      },
+      "before_expected": 0,
+      "expected": 3784,
+      "after_at_least": 3772,
+      "after_at_most": 3796,
+      "wait_ms": 4600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "503484 Effect[1] AP scaling $AP*0.04/tick (rev_20261010_90 entry 804197 ap_dot_bonus 0.04) at +20000 AP (total 20223): (137.05 + 20223*0.04 = 945.97) x 4 ticks = 3780..3784 (band 3772..3796 excludes unscaled ~584 and wrong AP dot coeff). Precondition fixtures: 524861, 823764, 984948, 64481. Reference search 2026-11-26: coa-history 503479/804197: 4824 periodic ticks in 4 logs; coabuildhub 804197 older state."
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (bleed lasts 4 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "over $d.",
+      "trigger_spell": 503484,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 503484
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 3700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          3650,
+          3900
+        ],
+        "expired": [
+          4200,
+          4390
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "503484 DurationIndex 35 = 4000 ms ($d; Spell.dbc). Aura 503484 on dummy present at 3700 ms (game_time [3650, 3900], excludes -10% 3600 ms) and absent at 4300 ms (game_time [4200, 4390], excludes +10% 4400 ms). Reference search 2026-11-26: coa-history 503479/804197: 1232 APPLIED/REMOVED in 4 logs; coabuildhub 804197 states 'over 4 seconds'."
+    },
+    {
+      "spell": 503484,
+      "name": "Rotclaw (generates Rage via 805352)",
+      "kind": "metric_delta",
+      "variant": "rage",
+      "label_suffix": "rage",
+      "quote": "generating Rage",
+      "trigger_spell": 503484,
+      "target": "dummy",
+      "cast_in_before": false,
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 805352,
+        "power": 1
+      },
+      "before_expected": 0,
+      "expected": 50,
+      "after_at_least": 30,
+      "after_at_most": 70,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "503484 hits trigger 805352 energize (AscensionBloodmageSecondary.cpp:327-331): Spell.dbc 805352 Effect[0] SPELL_EFFECT_ENERGIZE PowerType 1 (Rage), BasePoints 29 + DieSides 41 = 30..70 internal (3..7 displayed Rage). Reads 0 before and 30..70 after. Reference search 2026-11-26: coa-history 805352: 2479 SPELL_ENERGIZE events (min 5, max 9, mean 7.0) across 27 logs; coabuildhub 804197 states 'generating Rage'."
+    },
+    {
+      "spell": 572551,
+      "name": "Bloodfang Bite (Physical damage at reference stats + applies Bite Wound)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Bite an enemy, dealing ${$m1+0+$AP*0.265+$SP*.265} Physical damage",
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 685,
+      "after_at_least": 665,
+      "after_at_most": 705,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 706654
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "AscensionBloodmageSecondary.cpp:94-99: Bloodfang Bite hit applies Bite Wound 706654 to target."
+          }
+        ]
+      },
+      "observe_source": "572551 Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE Physical (SchoolMask 1), BasePoints 607 + DieSides 36 (608..643), ppl 0; spell_bonus_data 800156 (rev_20261010_90) direct_bonus 0.265, ap_bonus 0.265 -> at reference AP 223, SP 0: 608..643 + 59.095 = 667..702 (band 665..705 excludes 0 and 2x). Precondition fixtures: 525031 (CasterAuraSpell), 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit). Also verifies Bite Wound 706654 applied to dummy (0 -> 1). Reference search 2026-11-26: coa-history 572551: 2776 SPELL_DAMAGE hits in 14 logs; 706654: 954 APPLIED / 2692 REFRESH in 19 logs; coabuildhub 800156 matches verbatim."
+    },
+    {
+      "spell": 572551,
+      "name": "Bloodfang Bite (Physical damage at +20000 AP)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Bite an enemy, dealing ${$m1+0+$AP*0.265+$SP*.265} Physical damage",
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 5985,
+      "after_at_least": 5965,
+      "after_at_most": 6005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572551 AP scaling $AP*0.265 (rev_20261010_90 entry 800156 ap_bonus 0.265) at +20000 AP (total 20223): 608..643 + 20223*0.265 (5359.095) = 5967..6002 (band 5965..6005 excludes unscaled ~685 and wrong AP coeff). Precondition fixtures: 525031, 985345, 984948, 64481. Reference search 2026-11-26: coa-history 572551: 2776 hits in 14 logs; coabuildhub 800156 states AP*0.265."
+    },
+    {
+      "spell": 572551,
+      "name": "Bloodfang Bite (Physical damage at +20000 SP)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Bite an enemy, dealing ${$m1+0+$AP*0.265+$SP*.265} Physical damage",
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 300,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 5985,
+      "after_at_least": 5965,
+      "after_at_most": 6005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "572551 SP scaling $SP*.265 (rev_20261010_90 entry 800156 direct_bonus 0.265) at +20000 SP, reference AP 223: 608..643 + 59.095 + 20000*0.265 (5300) = 5967..6002 (band 5965..6005 excludes 0 SP scaling ~685 and wrong SP coeff). Precondition fixtures: 525031, 985345, 984948, 64481. Reference search 2026-11-26: coa-history 572551: 2776 hits in 14 logs; coabuildhub 800156 states SP*.265."
+    },
+    {
+      "spell": 800782,
+      "name": "Blood Howl (AoE taunt inside 10 yd range)",
+      "kind": "aggro_redirect",
+      "variant": "range",
+      "label_suffix": "range",
+      "quote": "Taunts nearby enemies within $a1 yds,",
+      "self_cast": true,
+      "rooted": true,
+      "geometry": true,
+      "targets": [
+        {
+          "distance": 3.0,
+          "expected_redirect": true
+        },
+        {
+          "distance": 9.5,
+          "expected_redirect": true
+        }
+      ],
+      "observe_source": "800782 Blood Howl Effect[0]/[1] aura 11 SPELL_AURA_MOD_TAUNT on TARGET_SRC_CASTER / TARGET_UNIT_SRC_AREA_ENEMY, EffectRadiusIndex 13 (SpellRadius.dbc RadiusMin/Max 10.0 yd = $a1), CasterAuraSpell 524861 (precondition fixture), 11% base health cost. Two rooted REACT_DEFENSIVE dummies engaged by ally at 3.0 yd and 9.5 yd (both strictly inside stated 10 yd radius; split to 2 dummies so every dummy has before == 1 verified). Both must redirect victim to caster. Reference search 2026-11-26: coa-history 800782: 3 casts, 13 APPLIED/REMOVED in 2 logs; coabuildhub 800782 matches verbatim."
+    },
+    {
+      "spell": 800782,
+      "name": "Blood Howl (AoE taunt 10 yd effective edge)",
+      "kind": "aggro_redirect",
+      "variant": "edge",
+      "label_suffix": "edge",
+      "quote": "Taunts nearby enemies within $a1 yds,",
+      "self_cast": true,
+      "rooted": true,
+      "geometry": true,
+      "targets": [
+        {
+          "distance": 13.6,
+          "expected_redirect": true
+        },
+        {
+          "distance": 14.2,
+          "expected_redirect": false
+        }
+      ],
+      "observe_source": "800782 Blood Howl effective area edge (Q-rad-1): 10.0 ($a1) + 2.66 (GetLeewayBonusRadius) + 1.275 (dummy combat reach) = ~13.935 yd. Two rooted REACT_DEFENSIVE dummies engaged by ally at 13.6 yd (inside effective edge, must redirect) and 14.2 yd (outside effective edge, must stay on ally), with before == 1 verified on both targets. Reference search 2026-11-26: coa-history 800782: 3 casts, 13 APPLIED/REMOVED in 2 logs; coabuildhub 800782 matches verbatim."
+    },
+    {
+      "spell": 800782,
+      "name": "Blood Howl (taunt aura lasts 5 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "forcing them to attack you for $d.",
+      "trigger_spell": 800782,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 800782
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 4700,
+      "expiry_wait_ms": 600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4600,
+          4900
+        ],
+        "expired": [
+          5200,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "800782 DurationIndex 28 = 5000 ms ($d; Spell.dbc). Aura 800782 on dummy present at 4700 ms (game_time [4600, 4900], excludes -10% 4500 ms) and absent at 5300 ms (game_time [5200, 5450], excludes +10% 5500 ms). Reference search 2026-11-26: coa-history 800782: 13 APPLIED/REMOVED in 2 logs; coabuildhub 800782 states 'for 5 sec'."
+    },
+    {
+      "spell": 801957,
+      "name": "Bare Fangs (single-target taunt redirects target only)",
+      "kind": "aggro_redirect",
+      "quote": "Taunts an enemy to attack you for $d.",
+      "self_cast": false,
+      "rooted": true,
+      "targets": [
+        {
+          "distance": 3.0,
+          "expected_redirect": true
+        },
+        {
+          "distance": 6.0,
+          "expected_redirect": false
+        }
+      ],
+      "observe_source": "801957 Bare Fangs Effect[0] SPELL_EFFECT_ATTACK_ME (114), Effect[1] aura 11 SPELL_AURA_MOD_TAUNT, TargetA 6 (TARGET_UNIT_TARGET_ENEMY), RangeIndex 4 (30 yd), CasterAuraSpell 525031 (precondition fixture). Two rooted REACT_DEFENSIVE dummies engaged by ally: dummy0 (cast target at 3 yd) redirects to caster; dummy1 (untargeted control at 6 yd) stays on ally. Reference search 2026-11-26: coa-history 801957: 5 casts, 5 APPLIED/REMOVED in 2 logs; coabuildhub 801957 matches verbatim."
+    },
+    {
+      "spell": 801957,
+      "name": "Bare Fangs (taunt aura lasts 3 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Taunts an enemy to attack you for $d.",
+      "trigger_spell": 801957,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "metric": "aura",
+      "fields": {
+        "spell": 801957
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 2800,
+      "expiry_wait_ms": 400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          2750,
+          2950
+        ],
+        "expired": [
+          3150,
+          3290
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "801957 DurationIndex 27 = 3000 ms ($d; Spell.dbc). Aura 801957 on dummy present at 2800 ms (game_time [2750, 2950], excludes -10% 2700 ms) and absent at 3200 ms (game_time [3150, 3290], excludes +10% 3300 ms). Reference search 2026-11-26: coa-history 801957: 5 APPLIED/REMOVED in 2 logs; coabuildhub 801957 states 'for 3 sec'."
+    },
+    {
+      "spell": 801962,
+      "name": "Eternal Resolve (buff lasts 30 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Activate your eternal resolve for $d,",
+      "trigger_spell": 801962,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 801962
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 28000,
+      "expiry_wait_ms": 4000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          27500,
+          29000
+        ],
+        "expired": [
+          31000,
+          32500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "801962 Eternal Resolve DurationIndex 9 = 30000 ms ($d; Spell.dbc), CasterAuraSpell 524861 (precondition fixture), 22% base health cost. Aura 801962 on caster present at 28000 ms (game_time [27500, 29000], excludes -10% 27000 ms) and absent at 32000 ms (game_time [31000, 32500], excludes +10% 33000 ms). Reference search 2026-11-26: coa-history 801962: 27 casts, 13 APPLIED/REMOVED in 2 logs; coabuildhub 801962 matches verbatim."
+    },
+    {
+      "spell": 801962,
+      "name": "Eternal Resolve (+50% melee attack speed)",
+      "kind": "metric_delta",
+      "variant": "attack_speed",
+      "label_suffix": "attack_speed",
+      "quote": "increasing your melee attack speed, maximum health, and healing received by $s3%.",
+      "trigger_spell": 801962,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 1600,
+      "expected": 1066.6667,
+      "tolerance": 1.0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "801962 Effect[0] aura 138 SPELL_AURA_MOD_MELEE_HASTE, BasePoints 49 + DieSides 1 = +50% ($s3; Spell.dbc). Eternal weapon set main hand is 2534 Rondel (1600 ms base speed): 1600 / 1.5 = 1066.6667 ms (tolerance 1 ms excludes 0% 1600 ms, +40% 1143 ms, +60% 1000 ms, +100% 800 ms). Reference search 2026-11-26: coa-history 801962: 27 casts in 2 logs; coabuildhub 801962 states 'increasing your melee attack speed, maximum health, and healing received by 50%'."
+    },
+    {
+      "spell": 801962,
+      "name": "Eternal Resolve (+50% maximum health)",
+      "kind": "metric_delta",
+      "variant": "max_health",
+      "label_suffix": "max_health",
+      "quote": "increasing your melee attack speed, maximum health, and healing received by $s3%.",
+      "trigger_spell": 801962,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1000,
+      "expected": 1500,
+      "expected_ratio": 1.5,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "801962 Effect[1] aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT, BasePoints 49 + DieSides 1 = +50% ($s3; Spell.dbc). Live Unit::GetMaxHealth ratio before (control, no cast) vs after real cast of 801962 (CasterAuraSpell 524861 precondition fixture) must equal 1.500 +- 0.005 (excludes 1.0 and 2.0). Reference search 2026-11-26: coa-history 801962: 27 casts in 2 logs; coabuildhub 801962 states 'maximum health ... by 50%'."
+    },
+    {
+      "spell": 801962,
+      "name": "Eternal Resolve (+50% healing received)",
+      "kind": "hit_ratio",
+      "variant": "healing_received",
+      "label_suffix": "healing_received",
+      "quote": "increasing your melee attack speed, maximum health, and healing received by $s3%.",
+      "expected": 1.5,
+      "observe_spell": 504085,
+      "metric": "spell_heal_total",
+      "target": "caster",
+      "learn": [
+        801962,
+        504085
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            524861,
+            1
+          ]
+        ],
+        "casts": [
+          {
+            "spell": 801962,
+            "target": "caster"
+          }
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "801962 Effect[2] aura 118 SPELL_AURA_MOD_HEALING_PCT, MiscValue 127 (all schools), BasePoints 49 + DieSides 1 = +50% ($s3; Spell.dbc). Sanguine Mend 504085 (self-heal, 200 Rage, ExcludeCasterAuraSpell 802877 unaffected by 524861 precondition fixture) at +20000 SP measures non-crit heal ratio 1.50 (+50% received, +-2.5 pt band excludes 0% and +100%). Reference search 2026-11-26: coa-history 801962: 27 casts in 2 logs; coabuildhub 801962 states 'healing received by 50%'."
+    },
+    {
+      "spell": 804207,
+      "name": "Wicked Howl (+30% maximum health)",
+      "kind": "metric_delta",
+      "variant": "max_health",
+      "label_suffix": "max_health",
+      "quote": "increasing your maximum health by $s1% for $d.",
+      "trigger_spell": 804207,
+      "target": "caster",
+      "cast_in_before": false,
+      "metric": "max_health",
+      "fields": {},
+      "before_expected": 1000,
+      "expected": 1300,
+      "expected_ratio": 1.3,
+      "tolerance": 0.005,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "804207 Wicked Howl Effect[0] aura 133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT, BasePoints 29 + DieSides 1 = +30% ($s1; Spell.dbc), CasterAuraSpell 525031 (precondition fixture), 17% base health cost. Live Unit::GetMaxHealth ratio before (control) vs after real cast of 804207 equals 1.300 +- 0.005 (excludes 1.0 and 1.6). Reference search 2026-11-26: coa-history 804207: 16 casts, 16 APPLIED/REMOVED in 8 logs; coabuildhub 804207 states '+30% for 20 sec' (older duration)."
+    },
+    {
+      "spell": 804207,
+      "name": "Wicked Howl (buff lasts 15 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "increasing your maximum health by $s1% for $d.",
+      "trigger_spell": 804207,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 804207
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 14000,
+      "expiry_wait_ms": 2000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          13700,
+          14500
+        ],
+        "expired": [
+          15500,
+          16350
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "804207 DurationIndex 8 = 15000 ms ($d; Spell.dbc). Aura 804207 on caster present at 14000 ms (game_time [13700, 14500], excludes -10% 13500 ms) and absent at 16000 ms (game_time [15500, 16350], excludes +10% 16500 ms). Reference search 2026-11-26: coa-history 804207: 16 APPLIED/REMOVED in 8 logs; coabuildhub 804207 lists older 20 sec duration (G-9: server DBC 15 sec wins)."
+    },
+    {
+      "spell": 806177,
+      "name": "Shadow Howl (movement-impairing immunity on caster with expiry control)",
+      "kind": "immunity",
+      "target": "caster",
+      "caster_auras": [
+        525031
+      ],
+      "quote": "granting immunity to movement impairing effects to all allies for $d.",
+      "effects": [
+        {
+          "spell": 38767,
+          "words": "movement impairing"
+        },
+        {
+          "spell": 47021,
+          "words": "movement impairing"
+        }
+      ],
+      "observe_source": "806177 Shadow Howl Effect[0] aura 77 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 11 (MECHANIC_SNARE), Effect[1] aura 77 MiscValue 7 (MECHANIC_ROOT), TARGET_SRC_CASTER / TARGET_UNIT_CASTER_AREA_RAID (SpellRadius 10 = 30 yd), DurationIndex 32 = 6000 ms ($d), CasterAuraSpell 525031 (precondition fixture), 15% base health cost. Fixtures landed by real dummy casts at caster inside the 6000 ms window (2 x 3 x 500 ms = 3000 ms): Daze 38767 (Mechanic 11 snare) and Net 47021 (Mechanic 7 root); both blocked under 806177 and land again after expiry (control). Ally immunity is also proven in ally_snare_immune and ally_root_immune. Reference search 2026-11-26: coa-history 806177: 5 casts, 74 APPLIED / 63 REMOVED across 2 logs; coabuildhub 806177 matches verbatim."
+    },
+    {
+      "spell": 806177,
+      "name": "Shadow Howl (grouped ally immune to snare 38767)",
+      "kind": "metric_delta",
+      "variant": "ally_snare_immune",
+      "label_suffix": "ally_snare_immune",
+      "quote": "granting immunity to movement impairing effects to all allies for $d.",
+      "trigger_spell": 806177,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "ally",
+      "grouped_ally": {
+        "dy": 3.0,
+        "grouped": true
+      },
+      "cast_in_before": false,
+      "dummy_casts_at_caster": {
+        "spell": 38767,
+        "target": "ally",
+        "casts": 2,
+        "gap_ms": 1000,
+        "lead_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 38767
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 7000,
+      "void_on_cast_failure": true,
+      "observe_source": "806177 Effect[0] aura 77 MiscValue 11 (MECHANIC_SNARE) on TARGET_UNIT_CASTER_AREA_RAID (30 yd). Dummy casts Daze 38767 (Mechanic 11 snare, 6000 ms) at grouped ally (dy=3 yd): lands in control phase without 806177 (aura=1), waits 7000 ms to expire, then blocked after real cast of 806177 (aura=0). Reference search 2026-11-26: coa-history 806177: 74 APPLIED in 2 logs; coabuildhub 806177 matches verbatim."
+    },
+    {
+      "spell": 806177,
+      "name": "Shadow Howl (grouped ally immune to root 47021)",
+      "kind": "metric_delta",
+      "variant": "ally_root_immune",
+      "label_suffix": "ally_root_immune",
+      "quote": "granting immunity to movement impairing effects to all allies for $d.",
+      "trigger_spell": 806177,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "ally",
+      "grouped_ally": {
+        "dy": 3.0,
+        "grouped": true
+      },
+      "cast_in_before": false,
+      "dummy_casts_at_caster": {
+        "spell": 47021,
+        "target": "ally",
+        "casts": 2,
+        "gap_ms": 1000,
+        "lead_ms": 300
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 47021
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 21000,
+      "void_on_cast_failure": true,
+      "observe_source": "806177 Effect[1] aura 77 MiscValue 7 (MECHANIC_ROOT) on TARGET_UNIT_CASTER_AREA_RAID (30 yd). Dummy casts Net 47021 (Mechanic 7 root, 20000 ms) at grouped ally (dy=3 yd): lands in control phase without 806177 (aura=1), waits 21000 ms to expire, then blocked after real cast of 806177 (aura=0). Reference search 2026-11-26: coa-history 806177: 74 APPLIED in 2 logs; coabuildhub 806177 matches verbatim."
+    },
+    {
+      "spell": 806177,
+      "name": "Shadow Howl (ally immunity aura lasts 6 sec)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "granting immunity to movement impairing effects to all allies for $d.",
+      "trigger_spell": 806177,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "ally",
+      "grouped_ally": {
+        "dy": 3.0,
+        "grouped": true
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 806177
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 5600,
+      "expiry_wait_ms": 800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5500,
+          5800
+        ],
+        "expired": [
+          6300,
+          6550
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "806177 DurationIndex 32 = 6000 ms ($d; Spell.dbc). Grouped ally at dy=3 yd receives aura 806177 from caster's real cast (CasterAuraSpell 525031 precondition fixture): present at 5600 ms (game_time [5500, 5800], excludes -10% 5400 ms) and absent at 6400 ms (game_time [6300, 6550], excludes +10% 6600 ms). Reference search 2026-11-26: coa-history 806177: 74 APPLIED / 63 REMOVED in 2 logs; coabuildhub 806177 states 'for 6 sec'."
+    },
+    {
+      "spell": 704166,
+      "name": "Vitality (+10% additional Stamina while in Eternal Curse)",
+      "kind": "metric_delta",
+      "variant": "stamina_in_form",
+      "label_suffix": "stamina_in_form",
+      "quote": "Increases your Stamina while in Eternal Curse by an additional $s1%.",
+      "trigger_spell": 800157,
+      "gate_spell": 704166,
+      "target": "caster",
+      "phase_auras": [
+        [
+          800157,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 97.5,
+      "expected": 105.3,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "704166 Vitality Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 3 (SPELLMOD_EFFECT1), BasePoints 9 + DieSides 1 = +10% ($s1) on Eternal Curse 800157 (Effect[0] aura 137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE MiscValue 2 Stamina, BasePoints 24 + 1 = +25% -> +35%; Spell.dbc). Reference Stamina (stat 2) = 78.0: in 800157 without 704166 = 78 * 1.25 = 97.5 (before); after learning 704166 and recasting 800157 past 1500 ms GCD (cleared at phase start so shapeshift toggles fresh) = 78 * 1.35 = 105.3 (after; tolerance 0.05 excludes 0% 97.5 and +20% 113.1). Reference search 2026-11-26: coa-history 704166: 0 events (passive), 800157: 7 APPLIED in 6 logs; coabuildhub 704166 matches verbatim."
+    },
+    {
+      "spell": 704166,
+      "name": "Vitality (no Stamina gain outside Eternal Curse)",
+      "kind": "metric_delta",
+      "variant": "stamina_outside_form",
+      "label_suffix": "stamina_outside_form",
+      "quote": "Increases your Stamina while in Eternal Curse by an additional $s1%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704166,
+      "target": "caster",
+      "metric": "stat_exact",
+      "fields": {
+        "stat": 2
+      },
+      "before_expected": 78.0,
+      "expected": 78.0,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Condition control for 704166 Vitality ('while in Eternal Curse'): outside Eternal Curse 800157 (around neutral trigger 60235 Greatness +Spirit), learning 704166 leaves reference Stamina (stat 2) unchanged at 78.0 -> 78.0. Reference search 2026-11-26: coa-history 704166: 0 events (passive); coabuildhub 704166 matches verbatim.",
+      "void_on_cast_failure": true
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (125% weapon damage + flat at reference AP, 4-hit sum)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Lacerate an enemy, dealing $s2% Weapon Damage plus ${$m1+0}.",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          29131,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802469,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 2210.7,
+      "after_at_least": 2016,
+      "after_at_most": 2404,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula '125% Weapon Damage plus ${$m1+0}': 802469 Effect[0] SPELL_EFFECT_NORMALIZED_WEAPON_DMG (121) BasePoints 333 + DieSides 52 (334..385, mean 359.5); Effect[1] SPELL_EFFECT_WEAPON_PERCENT_DAMAGE (31) BasePoints 124 + 1 = 125% ($s2). Accursed main hand 2535 War Staff (84.53..119.41, norm speed 3.3); at reference AP 223, AP/14*3.3 = 52.564 -> weapon roll 137.09..171.97; per hit 1.25*weapon + flat = 505..600 (mean 552.66); 4-hit sum (cast_power 1000 + periodic Rage refill fixture 29131 amount 500/s, 3 after_trigger_casts spaced 1600 ms past 1500 ms GCD) = 2020..2400 (mean 2210.7; band 2016..2404 excludes flat=0 684..860, flat*2 3356..3940, and unfixed 1.25*(weapon+flat) mean 2570.2 with paired-run flip risk ~0.004% << 0.1%). Precondition fixtures: 524861, 29131 (Rage refill only, no damage modifier), 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 772 Rend on dummy (neutral to 802469 Physical damage, avoids unrelated 805612 TargetAuraState=18 cast failure). Reference search 2026-11-26: coa-history 802469: 2034 SPELL_DAMAGE hits in 14 logs; coabuildhub 800490 matches verbatim.",
+      "after_trigger_casts": [
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy",
+              "critical": false
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Confirm all 4 non-crit casts of 802469 landed on dummy."
+          }
+        ]
+      },
+      "phase_aura_amounts": [
+        [
+          29131,
+          0,
+          500
+        ]
+      ]
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (125% weapon damage + flat at +20000 AP, 4-hit sum)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Lacerate an enemy, dealing $s2% Weapon Damage plus ${$m1+0}.",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 1000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          29131,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802469,
+        "target": "dummy",
+        "critical": false
+      },
+      "before_expected": 0,
+      "expected": 25782.1,
+      "after_at_least": 25588,
+      "after_at_most": 25976,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip '125% Weapon Damage plus ${$m1+0}' at +20000 AP (total 20223): 2535 War Staff norm 3.3 -> AP/14*3.3 = 4766.85 -> weapon roll 4851.38..4886.26; per hit 1.25*weapon + (334..385) = 6398..6493 (mean 6445.52); 4-hit sum (cast_power 1000 + periodic Rage refill fixture 29131 amount 500/s, 3 after_trigger_casts spaced 1600 ms past 1500 ms GCD) = 25592..25972 (mean 25782.1; band 25588..25976 excludes 100% weapon ~20912, 150% weapon ~30652, and unfixed 1.25*(weapon+flat) mean 26141.6 with paired-run flip risk ~0.004% << 0.1%). Precondition fixtures: 524861, 29131 (Rage refill only), 985345, 984948, 64481, 772. Reference search 2026-11-26: coa-history 802469: 2034 hits in 14 logs; coabuildhub 800490 states '125% Weapon Damage'.",
+      "after_trigger_casts": [
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        },
+        {
+          "spell": 802469,
+          "target": "dummy",
+          "delay_ms": 1600,
+          "reset_cooldown": true
+        }
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy",
+              "critical": false
+            },
+            "before_expected": 0,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Confirm all 4 non-crit casts of 802469 landed on dummy."
+          }
+        ]
+      },
+      "phase_aura_amounts": [
+        [
+          29131,
+          0,
+          500
+        ]
+      ]
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (non-bleeding above 35% HP: neither bleed 802883 nor execute 802884 fires)",
+      "kind": "metric_delta",
+      "variant": "cond_no_bleed_no_exec",
+      "label_suffix": "cond_no_bleed_no_exec",
+      "quote": "If the enemy is bleeding, below 35% health,",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 350,
+      "phase_target_health_pct": [
+        99,
+        36
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 802883,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "fields": {
+              "spell": 802884,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Dummy at 36% HP (just above 35% execute threshold, after 1600 ms settle): 802884 stays 0."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirm Reave 802469 itself landed on dummy (1 hit)."
+          }
+        ]
+      },
+      "observe_source": "Negative control for bleeding and <35% health conditions on 802469 Reave (AscensionBloodmageSecondary.cpp:284-286,357-360): dummy not bleeding and at 36% HP (settled 1600 ms via neutral 60235 cast). Reave lands (count=1) while both 802883 (bleed copy) and 802884 (execute copy) deal 0. Reference search 2026-11-26: coa-history 802883/802884: 1833/936 hits in 19 logs; coabuildhub 800490 matches verbatim."
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (bleeding condition adds 100% Shadow damage via 802883)",
+      "kind": "metric_delta",
+      "variant": "cond_bleed",
+      "label_suffix": "cond_bleed",
+      "quote": "If the enemy is bleeding, below 35% health,",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 350,
+      "phase_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802883,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy"
+            },
+            "source": "Base Reave 802469 Physical hit (denominator)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802883,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "source": "Bleed Shadow copy 802883 (100% of 802469 damage)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "fields": {
+              "spell": 802884,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Dummy at 100% HP: execute copy 802884 stays 0."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 0,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "source": "802883 Shadow damage equals 100% ($572280s1%) of 802469 damage when target is bleeding."
+          }
+        ]
+      },
+      "observe_source": "802469 Reave bleeding condition ($572280s1 = 100%, Spell.dbc 572280 Effect[0] BasePoints 99 + 1 = 100; AscensionBloodmageSecondary.cpp:284,357-358 casts 802883 Shadow CopyDamage for 100% of dealt damage). Dummy carries bleed 772 Rend (Mechanic 15, precondition fixture), at 100% HP: 802883 fires (count=1, school_mask 32 Shadow) with ratio 802883/802469 == 1.00 +- 0.01 while 802884 stays 0. Reference search 2026-11-26: coa-history 802883: 1833 hits (max 23389 = 100% of 802469 max 23389) in 19 logs; coabuildhub 800490 matches verbatim."
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (below 35% health condition adds 100% Shadow damage via 802884)",
+      "kind": "metric_delta",
+      "variant": "cond_execute",
+      "label_suffix": "cond_execute",
+      "quote": "If the enemy is bleeding, below 35% health,",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 350,
+      "phase_target_health_pct": [
+        99,
+        34
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802884,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy"
+            },
+            "source": "Base Reave 802469 Physical hit (denominator)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802884,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "source": "Execute Shadow copy 802884 (100% of 802469 damage)."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 0,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "source": "802884 Shadow damage equals 100% ($572280s1%) of 802469 damage when target is below 35% health."
+          }
+        ]
+      },
+      "observe_source": "802469 Reave below 35% health condition ($572280s1 = 100%; AscensionBloodmageSecondary.cpp:285-286,359-360 casts 802884 Shadow CopyDamage for 100% of dealt damage). Dummy set to 34% HP (settled 1600 ms via neutral 60235 cast so Unit::Update sets AURA_STATE_HEALTHLESS_35_PERCENT; cond_no_bleed_no_exec tests 36% = 0): 802884 fires (count=1, school_mask 32 Shadow) with ratio 802884/802469 == 1.00 +- 0.01. Precondition fixtures: 524861, 985345 (100% ArP), 984948 (hit/exp), 64481 (-100% melee crit), 823764 (-100% spell crit), and 772 Rend on dummy (neutral to 802884 execute copy; satisfies unrelated 805612 TargetAuraState=18 so behind copy does not fail cast). Reference search 2026-11-26: coa-history 802884: 936 hits in 19 logs; coabuildhub 800490 matches verbatim."
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (behind non-bleeding target should add 100% Shadow damage via 805612)",
+      "kind": "metric_delta",
+      "variant": "cond_behind",
+      "label_suffix": "cond_behind",
+      "quote": "or if you are behind them, deal $572280s1% additional Shadow damage for each condition met.",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 350,
+      "phase_auras": [
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805612,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirm Reave 802469 itself landed on dummy (1 hit)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "fields": {
+              "spell": 802883,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Dummy not bleeding: bleed copy 802883 stays 0."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "fields": {
+              "spell": 802884,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Dummy at 100% HP: execute copy 802884 stays 0."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "position_x",
+            "before_expected": -8949.95,
+            "expected": -8949.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster stays at spawn x=-8949.95 (behind +x-facing dummy at x=-8946.95)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "position_x",
+            "before_expected": -8946.95,
+            "expected": -8946.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify dummy stands at x=-8946.95 (3.0 yd ahead of caster along +x)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify 2D separation between caster and dummy is 3.0 yd (caster behind dummy)."
+          }
+        ]
+      },
+      "observe_source": "802469 Reave behind-target condition alone (not bleeding, 100% HP): caster at x=0 behind +x-facing dummy at x=3 (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). Tooltip promises +100% ($572280s1%) Shadow damage via 805612 independently of bleeding; Spell.dbc 805612 carries TargetAuraState=18 (AURA_STATE_BLEEDING) which blocks 805612 on non-bleeding targets (SPELL_FAILED_TARGET_AURASTATE -> SPELL_FAILED_DONT_REPORT 27). Reference search 2026-11-26: coa-history 805612: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (in front of bleeding target does not trigger behind Shadow copy 805612)",
+      "kind": "metric_delta",
+      "variant": "cond_front",
+      "label_suffix": "cond_front",
+      "quote": "or if you are behind them, deal $572280s1% additional Shadow damage for each condition met.",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 350,
+      "relocate_before_trigger": {
+        "dx": 3.2
+      },
+      "phase_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 805612,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirm Reave 802469 landed on dummy from in front (within boundary radius so FacingCasterFlags=1 passes)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_count",
+            "fields": {
+              "spell": 802883,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dummy carries 772 Rend bleed: bleed copy 802883 fires (1 hit), proving TargetAuraState=18 was met and only front-facing suppressed 805612."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "position_x",
+            "before_expected": -8949.95,
+            "expected": -8946.75,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster relocated +3.2 yd from x=-8949.95 to x=-8946.75 (0.2 yd in front of +x-facing dummy at x=-8946.95)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "position_x",
+            "before_expected": -8946.95,
+            "expected": -8946.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify dummy remained at x=-8946.95 (caster stands +0.2 yd ahead in dummy's front arc)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 3.0,
+            "expected": 0.2,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster-dummy separation moved from 3.0 yd behind to 0.2 yd in front (inside IsWithinBoundaryRadius)."
+          }
+        ]
+      },
+      "observe_source": "Front-facing negative control for 802469 Reave behind-target condition (!target->HasInArc(M_PI, player), AscensionBloodmageSecondary.cpp:287-288,361-362). relocate_before_trigger dx=+3.2 moves caster from x=-8949.95 to x=-8946.75, placing caster 0.2 yd in front of the +x-facing dummy at x=-8946.95 (verified by caster/dummy position_x and distance_2d preconditions; 0.2 yd stays within IsWithinBoundaryRadius in Spell.cpp:7363 so 802469 FacingCasterFlags=1 casts cleanly while dummy->HasInArc(M_PI, caster) is true; note dx=+6 exceeds boundary radius and fails SPELL_FAILED_UNIT_NOT_INFRONT 134 because relocate preserves caster orientation o=0). Dummy carries 772 Rend bleed so bleed copy 802883 fires (count=1) while behind copy 805612 stays 0 (and Reave 802469 lands 1 hit). Reference search 2026-11-26: coa-history 805612: 2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
+    },
+    {
+      "spell": 802469,
+      "name": "Reave (all 3 conditions met: +100% Shadow damage per condition, 3 copies)",
+      "kind": "metric_delta",
+      "variant": "cond_all_three",
+      "label_suffix": "cond_all_three",
+      "quote": "or if you are behind them, deal $572280s1% additional Shadow damage for each condition met.",
+      "trigger_spell": 802469,
+      "target": "dummy",
+      "cast_in_before": false,
+      "cast_power": 350,
+      "phase_target_health_pct": [
+        99,
+        34
+      ],
+      "setup_casts": [
+        60235
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ],
+        [
+          985345,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          984948,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          64481,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 802469,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802469,
+              "target": "dummy"
+            },
+            "source": "Base Reave 802469 Physical hit (denominator for all three Shadow copies)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802883,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "source": "Bleed Shadow copy 802883 (100% of 802469 damage)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 802884,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "source": "Execute Shadow copy 802884 (100% of 802469 damage)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_damage_total",
+            "count_metric": "spell_damage_count",
+            "fields": {
+              "spell": 805612,
+              "target": "dummy",
+              "school_mask": 32
+            },
+            "source": "Behind Shadow copy 805612 (100% of 802469 damage)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "position_x",
+            "before_expected": -8949.95,
+            "expected": -8949.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify caster stays at spawn x=-8949.95 (behind +x-facing dummy at x=-8946.95)."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "position_x",
+            "before_expected": -8946.95,
+            "expected": -8946.95,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify dummy stands at x=-8946.95 (3.0 yd ahead of caster along +x)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "distance_2d",
+            "fields": {
+              "target": "dummy"
+            },
+            "before_expected": 3.0,
+            "expected": 3.0,
+            "tolerance": 0.1,
+            "precondition": true,
+            "source": "Verify 2D separation between caster and dummy is 3.0 yd (caster behind dummy)."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 0,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "source": "Bleed copy 802883 equals 100% ($572280s1%) of 802469 damage."
+          },
+          {
+            "numerator": 2,
+            "denominator": 0,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "source": "Execute copy 802884 equals 100% ($572280s1%) of 802469 damage."
+          },
+          {
+            "numerator": 3,
+            "denominator": 0,
+            "expected": 1.0,
+            "tolerance": 0.01,
+            "source": "Behind copy 805612 equals 100% ($572280s1%) of 802469 damage."
+          }
+        ]
+      },
+      "observe_source": "Stacking proof for 802469 Reave 'for each condition met' (AscensionBloodmageSecondary.cpp:353-363): dummy bleeding (772 Rend), at 34% HP (settled 1600 ms via neutral 60235 cast), caster behind dummy (x=0 vs +x-facing dummy at x=3). All three Shadow copies fire simultaneously for 100% of 802469 damage each (802883, 802884, 805612 ratios all == 1.00 +- 0.01 -> +300% total Shadow damage). Reference search 2026-11-26: coa-history 802883/802884/805612: 1833/936/2057 hits in 19 logs; coabuildhub 800490 matches verbatim."
     }
   ],
   "player_observations": [],
