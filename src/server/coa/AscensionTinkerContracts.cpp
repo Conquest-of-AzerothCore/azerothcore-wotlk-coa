@@ -41,7 +41,8 @@ void ApplyContracts(SpellInfo* info)
         info->SpellFamilyFlags = flag96();
         info->StackAmount = 1;
         info->DurationEntry = sSpellDurationStore.LookupEntry(21);
-        info->Attributes |= SPELL_ATTR0_DO_NOT_DISPLAY;
+        info->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_DO_NOT_DISPLAY;
+        info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
     }
     auto dummy = [info](uint8 slot)
     {
