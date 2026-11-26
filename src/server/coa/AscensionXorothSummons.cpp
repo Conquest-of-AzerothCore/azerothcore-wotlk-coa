@@ -191,6 +191,12 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
         if (!me->GetVictim())
         {
             Unit* target = player->GetVictim();
+            if (!target || !player->IsValidAttackTarget(target))
+                target = player->getAttackerForHelper();
+            if (!target || !player->IsValidAttackTarget(target))
+                target = me->getAttackerForHelper();
+            if (!target || !player->IsValidAttackTarget(target))
+                target = player->GetCombatManager().GetAnyTarget();
             if (target && player->IsValidAttackTarget(target))
                 AttackStart(target);
             else if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
@@ -204,8 +210,12 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
                                                   me->GetEntry() != 50301);
             }
         }
-        bool engaged = UpdateVictim();
-        if ((engaged && me->GetEntry() == 50375) || (me->GetEntry() == 50301 && me->GetVictim()))
+        if (me->GetEntry() == 50301)
+        {
+            if (me->GetVictim())
+                DoMeleeAttackIfReady();
+        }
+        else if (UpdateVictim() && me->GetEntry() == 50375)
             DoMeleeAttackIfReady();
     }
 };

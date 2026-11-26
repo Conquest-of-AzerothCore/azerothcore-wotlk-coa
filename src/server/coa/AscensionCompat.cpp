@@ -4565,6 +4565,7 @@ private:
   static constexpr uint32 SPELL_CASTER_AURA_SPELL_FIELD = 24;
   static constexpr uint32 SPELL_EXCLUDE_CASTER_AURA_SPELL_FIELD = 26;
   static constexpr uint32 SPELL_CAST_TIME_INDEX_FIELD = 28;
+  static constexpr uint32 SPELL_RECOVERY_TIME_FIELD = 29;
   static constexpr uint32 SPELL_CATEGORY_RECOVERY_TIME_FIELD = 30;
   static constexpr uint32 SPELL_INTERRUPT_FLAGS_FIELD = 31;
   static constexpr uint32 SPELL_EFFECTS_FIELD = 71;
@@ -4576,6 +4577,7 @@ private:
       504582, 572343, 572344, 572345, 572383, 680902, 680903, 680904, 680905, 806288,
       572614, 804136, 806876, 806877, 806878, 806879, 806880, 806881, 524870};
   static constexpr uint32 SPELL_LEVEL_FIELD = 39;
+  static constexpr uint32 SPELL_RANGE_INDEX_FIELD = 46;
   static constexpr uint32 SPELL_VISUAL_FIELD = 131;
   static constexpr uint32 VAULT_CLIENT_SPELL = 500085;
   static constexpr uint32 GUARDIAN_STANDARD_OF_RECOVERY_AURA = 500266;
@@ -5788,8 +5790,17 @@ private:
       row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_FIELD)] = 0;
       row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_RECOVERY_TIME_FIELD)] = 0;
     }
+    if (info->Id == 520292 || info->Id == 520857)
+    {
+      row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_FIELD)] = info->GetCategory();
+      row.Values[SPELL_WIRE_SLOT(SPELL_RECOVERY_TIME_FIELD)] = info->RecoveryTime;
+      row.Values[SPELL_WIRE_SLOT(SPELL_CATEGORY_RECOVERY_TIME_FIELD)] = info->CategoryRecoveryTime;
+    }
     if (IsChromaticShardRank(info->Id))
       row.Values[SPELL_WIRE_SLOT(SPELL_INTERRUPT_FLAGS_FIELD)] &= ~uint32(SPELL_INTERRUPT_FLAG_MOVEMENT);
+    if (info->SpellFamilyName == 27 &&
+        (info->Id == 500074 || (info->Id >= 572727 && info->Id <= 572732)) && info->RangeEntry)
+      row.Values[SPELL_WIRE_SLOT(SPELL_RANGE_INDEX_FIELD)] = info->RangeEntry->ID;
     if (info->Id == VAULT_CLIENT_SPELL)
       row.Values[SPELL_WIRE_SLOT(SPELL_VISUAL_FIELD)] = CHARGE_SPELL_VISUAL;
     if (info->Id == GUARDIAN_STANDARD_OF_RECOVERY_AURA)

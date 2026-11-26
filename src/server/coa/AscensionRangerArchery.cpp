@@ -1,4 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionClientSpellPatches.h"
+#include "DBCStores.h"
 #include "Log.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -43,6 +45,10 @@ enum RangerArcheryChains : uint32
 };
 
 constexpr uint32 RANGER_FAMILY = 27;
+constexpr uint32 SPELL_RANGE_HUNTER_30YD = 113;
+constexpr uint32 SPELL_QUICK_SHOT_RANK_1 = 500074;
+constexpr uint32 SPELL_QUICK_SHOT_RANK_2 = 572727;
+constexpr uint32 SPELL_QUICK_SHOT_RANK_7 = 572732;
 constexpr uint32 PRECISION_SHOT_FLAG = 8388608;
 constexpr uint32 BRUTAL_SHOT_FLAG = 128;
 constexpr int32 PIERCED_LINGERING_PCT = 35;
@@ -60,6 +66,11 @@ int32 ClampedPct(uint64 value, int32 pct)
 bool IsRangerSpell(SpellInfo const* info)
 {
     return info && info->SpellFamilyName == RANGER_FAMILY;
+}
+
+bool IsQuickShot(uint32 id)
+{
+    return id == SPELL_QUICK_SHOT_RANK_1 || (id >= SPELL_QUICK_SHOT_RANK_2 && id <= SPELL_QUICK_SHOT_RANK_7);
 }
 
 bool IsPiercingShot(SpellInfo const* info)
@@ -309,6 +320,17 @@ void ApplySkirmishCriticalStrikeScope(SpellInfo* info)
         LOG_ERROR("coa", "Skipped unexpected Skirmish critical strike record {}", info->Id);
 }
 
+void ApplyQuickShotRange(SpellInfo* info)
+{
+    if (!IsRangerSpell(info) || !IsQuickShot(info->Id))
+        return;
+    if (SpellRangeEntry const* range = sSpellRangeStore.LookupEntry(SPELL_RANGE_HUNTER_30YD))
+    {
+        info->RangeEntry = range;
+        Ascension::ClientSpellPatches::Instance().Register(info->Id);
+    }
+}
+
 class ranger_archery_contracts : public GlobalScript
 {
 public:
@@ -323,6 +345,7 @@ public:
         ApplyIncendiaryArrowsCharges(info);
         ApplyBrutalShotAttributes(info);
         ApplySkirmishCriticalStrikeScope(info);
+        ApplyQuickShotRange(info);
     }
 };
 }

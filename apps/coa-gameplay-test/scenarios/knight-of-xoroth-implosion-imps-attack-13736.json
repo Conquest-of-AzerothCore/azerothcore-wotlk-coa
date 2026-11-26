@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "name": "Hellfire Imps summoned by Implosion attack combat enemies without owner auto-attack (#13736)",
+  "contract": "Implosion 524897 is an AoE Demonfire spender that damages enemies within 10 yd and summons 1 + consumed Demonfire Hellfire Imps (50301). Casting Implosion puts hit enemies into combat with the knight without turning on the knight's melee auto-attack (player->GetVictim() stays null). Previously npc_ascension_xoroth_summon::UpdateAI only inspected player->GetVictim() and ran CreatureAI::UpdateVictim() on 50301, so imps summoned by Implosion stood behind the knight in follow formation instead of attacking enemies engaged with the knight. Now UpdateAI falls back to player->getAttackerForHelper(), me->getAttackerForHelper() and player->GetCombatManager().GetAnyTarget() and skips CreatureAI::UpdateVictim() for 50301. A level-43 knight casts Implosion with 2 Demonfire near a level-43 enemy without starting auto-attack, verifies 3 imps spawn and the knight records 0 melee hits, and verifies the imps alone reduce the enemy's health after the initial Implosion blast.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 43,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "enemy",
+      "owner": "knight",
+      "entry": 36,
+      "level": 43,
+      "health": 1000000,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "knight", "spell": 524897 },
+    { "action": "set_aura", "actor": "knight", "spell": 500906, "stacks": 2, "label": "Two Demonfire stacks so Implosion summons 3 Hellfire Imps" },
+    { "action": "cast", "label": "Cast Implosion without starting auto-attack", "actor": "knight", "spell": 524897 },
+    { "action": "assert", "label": "SETUP: Implosion hit the nearby enemy", "actor": "knight", "metric": "spell_damage_count", "spell": 524897, "target": "enemy", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "SETUP: Implosion summoned 3 Hellfire Imps", "actor": "knight", "metric": "owned_creature_count", "entry": 50301, "equals": 3, "within_ms": 1000 },
+    { "action": "wait", "ms": 500 },
+    { "action": "snapshot", "actor": "enemy", "metric": "health", "save_as": "enemy_hp_after_implosion" },
+    { "action": "wait", "label": "Let the Implosion imps attack without any knight auto-attack", "ms": 6000 },
+    { "action": "assert", "label": "SETUP: knight never swung a melee auto-attack", "actor": "knight", "metric": "melee_damage_count", "target": "enemy", "equals": 0 },
+    { "action": "assert", "label": "CONTRACT: Implosion Hellfire Imps attack and damage the enemy", "actor": "enemy", "metric": "health", "ratio_to": "enemy_hp_after_implosion", "max": 0.9999 }
+  ]
+}
