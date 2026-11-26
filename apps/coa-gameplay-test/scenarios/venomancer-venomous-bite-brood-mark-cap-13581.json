@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Brood Mark spenders consume at most 5 marks when Venomous Bite raises the cap to 7 (#13581)",
+  "contract": "Venomous Bite (630900) applies SPELLMOD_MAX_AURA_STACKS +2 to Brood Mark (804972, base StackAmount 5), raising its stack limit to 7. The three Brood Mark spenders - Widowmaker (804961 chain, level-60 rank 573342), Rotfang (804977 chain, level-60 rank 807605) and Facemelter (800871 chain, level-60 rank 572901) - state scaling only for 1 through 5 marks (1.25x to 3.50x) and BroodMultiplier clamps at 5 marks. Casting a spender with 6 or 7 marks must consume 5 marks and leave 1 or 2 marks banked, while casting with 5 or fewer marks consumes all remaining marks.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "v",
+      "race": 1,
+      "class": 29,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "v",
+      "entry": 36,
+      "distance": 3,
+      "level": 60,
+      "health": 1000000,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "v", "spell": 800841 },
+    { "action": "learn", "actor": "v", "spell": 630900 },
+    { "action": "learn", "actor": "v", "spell": 573342 },
+    { "action": "learn", "actor": "v", "spell": 807605 },
+    { "action": "learn", "actor": "v", "spell": 572901 },
+    { "action": "cast", "actor": "v", "spell": 800841, "label": "Enter Spider Form for Energy resource" },
+    { "action": "assert", "label": "SETUP: Spider Form is active", "actor": "v", "metric": "aura", "spell": 800841, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Wait past Spider Form GCD", "ms": 1600 },
+    { "action": "assert", "label": "SETUP: Venomous Bite raises Brood Mark cap to 7", "actor": "v", "metric": "spell_max_stacks", "spell": 804972, "equals": 7 },
+
+    { "action": "set_power", "actor": "v", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "v", "spell": 804972, "stacks": 7 },
+    { "action": "assert", "label": "SETUP: 7 Brood Marks held before Widowmaker", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 7 },
+    { "action": "snapshot", "actor": "v", "metric": "spell_damage_count", "spell": 573342, "target": "dummy", "save_as": "wm_hits_before" },
+    { "action": "cast", "actor": "v", "spell": 573342, "target": "dummy", "label": "Cast Widowmaker at 7 Brood Marks" },
+    { "action": "assert", "label": "SETUP: Widowmaker cast succeeded", "actor": "v", "metric": "cast_failure", "spell": 573342, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Widowmaker damaged the dummy", "actor": "v", "metric": "spell_damage_count", "spell": 573342, "target": "dummy", "relative_to": "wm_hits_before", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Widowmaker consumes 5 of 7 Brood Marks, leaving 2", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 2 },
+    { "action": "wait", "label": "GCD after Widowmaker", "ms": 1600 },
+
+    { "action": "set_power", "actor": "v", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "v", "spell": 804972, "stacks": 6 },
+    { "action": "assert", "label": "SETUP: 6 Brood Marks held before Rotfang", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 6 },
+    { "action": "cast", "actor": "v", "spell": 807605, "target": "dummy", "label": "Cast Rotfang at 6 Brood Marks" },
+    { "action": "assert", "label": "SETUP: Rotfang cast succeeded", "actor": "v", "metric": "cast_failure", "spell": 807605, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Rotfang aura applied to dummy", "actor": "dummy", "metric": "aura", "spell": 807605, "caster": "v", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Rotfang consumes 5 of 6 Brood Marks, leaving 1", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 1 },
+    { "action": "wait", "label": "GCD after Rotfang", "ms": 1600 },
+
+    { "action": "set_power", "actor": "v", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "v", "spell": 804972, "stacks": 7 },
+    { "action": "assert", "label": "SETUP: 7 Brood Marks held before Facemelter", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 7 },
+    { "action": "cast", "actor": "v", "spell": 572901, "target": "dummy", "label": "Cast Facemelter at 7 Brood Marks" },
+    { "action": "assert", "label": "SETUP: Facemelter cast succeeded", "actor": "v", "metric": "cast_failure", "spell": 572901, "equals": 0 },
+    { "action": "assert", "label": "SETUP: Facemelter aura applied to dummy", "actor": "dummy", "metric": "aura", "spell": 572901, "caster": "v", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Facemelter consumes 5 of 7 Brood Marks, leaving 2", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 2 },
+    { "action": "wait", "label": "GCD after Facemelter", "ms": 1600 },
+
+    { "action": "set_power", "actor": "v", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "v", "spell": 804972, "stacks": 5 },
+    { "action": "cast", "actor": "v", "spell": 573342, "target": "dummy", "label": "Control: Widowmaker at 5 Brood Marks" },
+    { "action": "assert", "label": "CONTROL: Widowmaker cast at 5 marks succeeded", "actor": "v", "metric": "cast_failure", "spell": 573342, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: Widowmaker at 5 marks consumes all 5", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 0, "within_ms": 2000 },
+    { "action": "wait", "label": "GCD after 5-mark control", "ms": 1600 },
+
+    { "action": "set_power", "actor": "v", "power": 3, "value": 100 },
+    { "action": "set_aura", "actor": "v", "spell": 804972, "stacks": 3 },
+    { "action": "cast", "actor": "v", "spell": 573342, "target": "dummy", "label": "Control: Widowmaker at 3 Brood Marks" },
+    { "action": "assert", "label": "CONTROL: Widowmaker cast at 3 marks succeeded", "actor": "v", "metric": "cast_failure", "spell": 573342, "equals": 0 },
+    { "action": "assert", "label": "CONTROL: Widowmaker at 3 marks consumes all 3", "actor": "v", "metric": "aura_stacks", "spell": 804972, "equals": 0, "within_ms": 2000 }
+  ]
+}
