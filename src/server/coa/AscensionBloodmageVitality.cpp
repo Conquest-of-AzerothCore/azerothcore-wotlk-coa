@@ -1,4 +1,5 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
+#include "AscensionClientSpellPatches.h"
 #include "AscensionPooledVitality.h"
 #include "Player.h"
 #include "ScriptMgr.h"
@@ -18,6 +19,22 @@ constexpr uint32 VitalityCost = 10;
 constexpr uint32 Hemopulse = 524906;
 constexpr uint32 DarkfallenLamentLeech = 630874;
 constexpr uint32 DarkLiturgy = 800781;
+constexpr uint32 BloodCovenant = 1200012;
+constexpr uint32 VitalShield = 504849;
+constexpr uint32 Torture = 504071;
+constexpr uint32 VampiricFeast = 804934;
+constexpr uint32 SovereigntyBuff = 504272;
+constexpr uint32 FleshcraftSpell = 801952;
+constexpr uint32 FleshcraftSated = 532125;
+constexpr uint32 BloodRitualsHeal = 704119;
+constexpr uint32 HeartbreakAllyHeal = 520315;
+constexpr uint32 EnragingWound = 560589;
+constexpr uint32 ShadowStrengthDamage = 536277;
+constexpr uint32 BloodmoonStrength = 578120;
+constexpr uint32 Bloodthorns = 802313;
+constexpr uint32 GreaterBloodthorns = 572116;
+constexpr uint32 BloodmoonStrengthMask1 = 0x820000;
+constexpr uint32 BloodmoonStrengthMask2 = 0x4000;
 
 bool IsBloodmage(Player const* player)
 {
@@ -31,6 +48,34 @@ bool CanEmpower(Player* player)
     Aura const* pool = player->GetAura(PooledVitality, player->GetGUID());
     return pool && uint32(pool->GetStackAmount()) >= VitalityCost;
 }
+
+class bloodmage_vitality_contracts : public GlobalScript
+{
+public:
+    bloodmage_vitality_contracts() : GlobalScript("bloodmage_vitality_contracts",
+        {GLOBALHOOK_ON_LOAD_SPELL_CUSTOM_ATTR}) { }
+
+    void OnLoadSpellCustomAttr(SpellInfo* info) override
+    {
+        if (!info)
+            return;
+        if (info->Id == BloodCovenant)
+            info->UsesMaxHealthForCost = true;
+        if (info->Id == VitalShield &&
+            info->Effects[EFFECT_0].ApplyAuraName == SPELL_AURA_ASCENSION_MOD_HEALING_RECEIVED_PCT)
+            info->Effects[EFFECT_0].ApplyAuraName = SPELL_AURA_DUMMY;
+        if (info->Id == FleshcraftSpell)
+        {
+            info->ExcludeTargetAuraSpell = FleshcraftSated;
+            info->Effects[EFFECT_1].Effect = SPELL_EFFECT_NONE;
+            info->Effects[EFFECT_2].Effect = SPELL_EFFECT_NONE;
+            info->Effects[EFFECT_2].ApplyAuraName = SPELL_AURA_NONE;
+            Ascension::ClientSpellPatches::Instance().Register(info->Id);
+        }
+        if (info->Id == FleshcraftSated)
+            info->AttributesCu |= SPELL_ATTR0_CU_NEGATIVE;
+    }
+};
 
 class bloodmage_vitality_casts : public AllSpellScript
 {
@@ -68,8 +113,11 @@ public:
     void OnSpellCast(Spell* spell, Unit* caster, SpellInfo const* info, bool) override
     {
         Player* player = caster->ToPlayer();
-        if (!IsBloodmage(player) || spell->IsTriggered() || info->SpellFamilyName != 26 ||
-            !spell->GetScriptValue(PooledVitality) || spell->GetScriptValue(VitalityForLater))
+        if (!IsBloodmage(player) || spell->IsTriggered() || info->SpellFamilyName != 26)
+            return;
+        if (GetEmpowerment(info->Id) == Bloodbolt)
+            player->RemoveAurasDueToSpell(SovereigntyBuff);
+        if (!spell->GetScriptValue(PooledVitality) || spell->GetScriptValue(VitalityForLater))
             return;
         spell->SetScriptValue(VitalityForLater, 1);
         if (spell->GetScriptValue(PooledVitalityTalent))
@@ -99,46 +147,135 @@ class bloodmage_vitality_scaling : public UnitScript
 {
 public:
     bloodmage_vitality_scaling() : UnitScript("bloodmage_vitality_scaling", true,
-        {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE}) { }
+        {UNITHOOK_MODIFY_SPELL_EFFECT_BASE_VALUE, UNITHOOK_MODIFY_HEAL_RECEIVED,
+            UNITHOOK_ON_AFTER_AURA_EFFECT_CALCULATE_AMOUNT}) { }
 
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
         if (!caster || !caster->IsPlayer() || caster->getClass() != CLASS_SON_OF_ARUGAL ||
-            info->SpellFamilyName != 26 || index != EFFECT_0 ||
-            (info->Effects[EFFECT_0].Effect != SPELL_EFFECT_HEAL &&
-             info->Effects[EFFECT_0].Effect != SPELL_EFFECT_HEALTH_LEECH))
+            info->SpellFamilyName != 26 || index != EFFECT_0)
             return;
 
-        double bonus;
-        if (info->Id == VitalityHeal)
-            bonus = caster->GetStat(STAT_SPIRIT) * 0.5;
-        else if (info->Id == Hemopulse)
-            bonus = caster->GetStat(STAT_SPIRIT) * 0.45 + caster->GetStat(STAT_STAMINA) * 0.35;
-        else if (GetEmpowerment(info->Id) == Heartbreak)
-            bonus = std::max(0, const_cast<Unit*>(caster)->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW)) * 0.5 +
-                caster->GetStat(STAT_SPIRIT);
-        else if (GetEmpowerment(info->Id) == Mend || sSpellMgr->GetFirstSpellInChain(info->Id) == DarkLiturgy)
-            bonus = caster->GetStat(STAT_SPIRIT) * 0.25;
-        else if (info->Id == DarkfallenLamentLeech &&
-            info->Effects[EFFECT_0].Effect == SPELL_EFFECT_HEALTH_LEECH &&
-            info->Effects[EFFECT_0].BonusMultiplier == 0)
+        uint32 const effect = info->Effects[EFFECT_0].Effect;
+        if (effect != SPELL_EFFECT_HEAL && effect != SPELL_EFFECT_HEALTH_LEECH &&
+            effect != SPELL_EFFECT_SCHOOL_DAMAGE)
+            return;
+
+        double bonus = 0.0;
+        bool matched = false;
+        if (effect == SPELL_EFFECT_HEAL || effect == SPELL_EFFECT_HEALTH_LEECH)
         {
-            if (SpellBonusEntry const* native = sSpellMgr->GetSpellBonusData(info->Id))
-                if (native->direct_damage != 0 || native->ap_bonus != 0)
-                    return;
-            float coefficient = 100.0f;
-            if (Player* owner = caster->GetSpellModOwner())
-                owner->ApplySpellMod(info->Id, SPELLMOD_BONUS_MULTIPLIER, coefficient);
-            bonus = std::max(0, const_cast<Unit*>(caster)->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW)) *
-                coefficient / 100.0f;
+            if (info->Id == VitalityHeal)
+            {
+                bonus += caster->GetStat(STAT_SPIRIT) * 0.5;
+                matched = true;
+            }
+            else if (info->Id == Hemopulse)
+            {
+                bonus += caster->GetStat(STAT_SPIRIT) * 0.45 + caster->GetStat(STAT_STAMINA) * 0.35;
+                matched = true;
+            }
+            else if (GetEmpowerment(info->Id) == Heartbreak)
+            {
+                int32 shadowPower = std::max(0,
+                    const_cast<Unit*>(caster)->SpellBaseDamageBonusDone(SPELL_SCHOOL_MASK_SHADOW));
+                bonus += shadowPower * 0.5 + caster->GetStat(STAT_SPIRIT);
+                matched = true;
+            }
+            else if (GetEmpowerment(info->Id) == Mend || sSpellMgr->GetFirstSpellInChain(info->Id) == DarkLiturgy)
+            {
+                bonus += caster->GetStat(STAT_SPIRIT) * 0.25;
+                matched = true;
+            }
+            else if (info->Id == DarkfallenLamentLeech &&
+                effect == SPELL_EFFECT_HEALTH_LEECH &&
+                info->Effects[EFFECT_0].BonusMultiplier == 0)
+            {
+                SpellBonusEntry const* native = sSpellMgr->GetSpellBonusData(info->Id);
+                if (!native || (native->direct_damage == 0 && native->ap_bonus == 0))
+                {
+                    float coefficient = 100.0f;
+                    if (Player* owner = caster->GetSpellModOwner())
+                        owner->ApplySpellMod(info->Id, SPELLMOD_BONUS_MULTIPLIER, coefficient);
+                    int32 healingPower = std::max(0,
+                        const_cast<Unit*>(caster)->SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW));
+                    bonus += healingPower * coefficient / 100.0f;
+                    matched = true;
+                }
+            }
+            else if (info->Id == BloodRitualsHeal)
+            {
+                bonus += caster->GetStat(STAT_STAMINA) * 0.085;
+                matched = true;
+            }
+            else if (info->Id == HeartbreakAllyHeal)
+            {
+                bonus += caster->GetStat(STAT_SPIRIT);
+                matched = true;
+            }
+            else if (info->Id == EnragingWound)
+            {
+                bonus += caster->GetStat(STAT_STAMINA) * 0.3;
+                matched = true;
+            }
         }
-        else
+
+        if (effect == SPELL_EFFECT_SCHOOL_DAMAGE && info->Id == ShadowStrengthDamage)
+        {
+            bonus += caster->GetStat(STAT_STAMINA) * 0.25 + caster->GetStat(STAT_AGILITY) * 0.25;
+            matched = true;
+        }
+
+        if (caster->HasAura(BloodmoonStrength) &&
+            ((info->SpellFamilyFlags[1] & BloodmoonStrengthMask1) ||
+             (info->SpellFamilyFlags[2] & BloodmoonStrengthMask2)))
+        {
+            bonus += 0.25 * double(caster->ToPlayer()->GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + CR_DODGE));
+            matched = true;
+        }
+
+        if (!matched)
             return;
 
         double amount = double(value) + bonus;
         if (std::isfinite(amount) && amount >= 0 &&
             double(float(amount)) <= std::numeric_limits<int32>::max())
             value = float(amount);
+    }
+
+    void ModifyHealReceived(Unit* first, Unit* second, uint32& heal, SpellInfo const* spellInfo) override
+    {
+        if (!spellInfo || !heal)
+            return;
+
+        bool const periodicOnly = spellInfo->HasAura(SPELL_AURA_PERIODIC_HEAL) &&
+            !spellInfo->HasEffect(SPELL_EFFECT_HEAL) &&
+            !spellInfo->HasEffect(SPELL_EFFECT_HEAL_PCT) &&
+            !spellInfo->HasEffect(SPELL_EFFECT_HEAL_MAX_HEALTH) &&
+            !spellInfo->HasEffect(SPELL_EFFECT_HEAL_MECHANICAL) &&
+            !spellInfo->HasEffect(SPELL_EFFECT_HEALTH_LEECH);
+        Unit* recipient = (first == second || periodicOnly) ? first : second;
+
+        if (recipient)
+            if (AuraEffect const* vital = recipient->GetAuraEffect(VitalShield, EFFECT_0))
+                if (uint32(spellInfo->GetSchoolMask()) & uint32(vital->GetMiscValue()))
+                    AddPct(heal, vital->GetAmount());
+
+        if (spellInfo->Id == VampiricFeast && first == second && first)
+            if (AuraEffect const* torture = first->GetAuraEffect(Torture, EFFECT_0))
+                AddPct(heal, torture->GetAmount());
+    }
+
+    void OnAfterAuraEffectCalculateAmount(AuraEffect const* effect, Unit*, int32& amount) override
+    {
+        if (!effect || effect->GetAuraType() != SPELL_AURA_DAMAGE_SHIELD)
+            return;
+        SpellInfo const* info = effect->GetSpellInfo();
+        if (!info || info->SpellFamilyName != 26)
+            return;
+        if (info->Id == Bloodthorns || info->Id == GreaterBloodthorns ||
+            sSpellMgr->GetFirstSpellInChain(info->Id) == Bloodthorns)
+            amount = effect->GetOldAmount();
     }
 };
 
@@ -237,6 +374,9 @@ class spell_ascension_bloodmage_empowered : public SpellScript
             bonus = target->SpellHealingBonusTaken(caster, GetSpellInfo(), bonus, HEAL);
             SetHitHeal(int32(std::min<int64>(int64(GetHitHeal()) + bonus, std::numeric_limits<int32>::max())));
         }
+        if (GetSpellInfo()->Id == FleshcraftSpell)
+            if (Unit* target = GetHitUnit(); target && target->IsAlive() && !target->HasAura(FleshcraftSated))
+                GetCaster()->CastSpell(target, FleshcraftSated, TRIGGERED_FULL_MASK);
     }
 
     void Register() override
@@ -351,6 +491,7 @@ class aura_ascension_endure_the_curse : public AuraScript
 
 void AddSC_AscensionBloodmageVitality()
 {
+    new bloodmage_vitality_contracts();
     new bloodmage_vitality_casts();
     new bloodmage_vitality_scaling();
     RegisterSpellScript(spell_ascension_bloodmage_transfusion);

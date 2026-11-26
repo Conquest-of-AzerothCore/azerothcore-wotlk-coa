@@ -359,6 +359,7 @@ public:
     // Override only the stat source of native damage AP coefficients.
     bool UseRangedAttackPowerForDamage = false;
     bool UsesMaxManaForCost = false;
+    bool UsesMaxHealthForCost = false;
     bool AscensionIgnoreAbsorbAndResistance = false;
     bool AscensionIgnoreAbsorb = false;
     bool AscensionTargetAuraStateOnlyPrimary = false;
