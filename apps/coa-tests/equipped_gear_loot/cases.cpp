@@ -13,6 +13,7 @@ ItemTemplate Gear(uint32 display, uint32 stat, uint32 type = INVTYPE_CHEST, uint
 void Reset()
 {
     objectMgr.items.clear();
+    itemDisplayInfos.clear();
     sCreatureDisplayInfoStore.rows.clear();
     sCreatureDisplayInfoExtraStore.rows.clear();
     presets.rows.clear();
@@ -288,4 +289,40 @@ int main()
     auto const firstAliases = mappings;
     AscensionItemAppearanceAliases::AddAliases(mappings, sources);
     assert(mappings == firstAliases);
+
+    Reset();
+    auto chestVisual = [](uint32 id, std::string const& torso, std::string const& icon)
+    {
+        ItemDisplayInfoRow row;
+        row.ints[0] = id;
+        row.strings[5] = icon;
+        row.strings[18] = torso;
+        return row;
+    };
+    itemDisplayInfos.push_back(chestVisual(3511, "Plate_B_03Sentinel_Chest_TU", "INV_Chest_Plate08"));
+    itemDisplayInfos.push_back(chestVisual(147451, "Plate_B_03Sentinel_Chest_TU", "INV_Chest_Plate08"));
+    itemDisplayInfos.push_back(chestVisual(148534, "Plate_B_03Sentinel_Chest_TU", "INV_Chest_Plate08"));
+    itemDisplayInfos.push_back(chestVisual(9999, "Other_Chest_TU", "INV_Chest_Plate08"));
+    itemDisplayInfos.push_back(chestVisual(8881, "", "INV_Misc_QuestionMark"));
+    itemDisplayInfos.push_back(chestVisual(8882, "", "INV_Misc_QuestionMark"));
+    Outfit(12270, 3511);
+    objectMgr.items[2062669] = Gear(147451, ITEM_MOD_STRENGTH, INVTYPE_CHEST, 56);
+    objectMgr.items[2063780] = Gear(148534, ITEM_MOD_STRENGTH, INVTYPE_CHEST, 58);
+    objectMgr.items[99999] = Gear(9999, ITEM_MOD_STRENGTH, INVTYPE_CHEST, 56);
+    objectMgr.items[88888] = Gear(8882, ITEM_MOD_STRENGTH, INVTYPE_CHEST, 56);
+    Index();
+    assert(SameAppearance(3511, 147451));
+    assert(!SameAppearance(3511, 9999));
+    assert(!SameAppearance(8881, 8882));
+    Creature sentinel;
+    sentinel.display = 12270;
+    sentinel.level = 56;
+    Loot sentinelLoot;
+    sentinelLoot.lootOwnerGUID = owner.guid;
+    assert(AddLoot(&sentinel, sentinelLoot, 1) && sentinelLoot.items.front().itemid == 2062669);
+    objectMgr.items[11111] = Gear(3511, ITEM_MOD_STRENGTH, INVTYPE_CHEST, 40);
+    Index();
+    Loot exactWins;
+    exactWins.lootOwnerGUID = owner.guid;
+    assert(AddLoot(&sentinel, exactWins, 1) && exactWins.items.front().itemid == 11111);
 }
