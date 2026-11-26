@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Hull Wood Hunk in Tanaris rests on the cave tunnel floor instead of the mountain above (#13434)",
+  "contract": "#13434 reported Hull Wood Plank (Hull Wood Hunk, Wooden Plank gameobject entry 515827, guid 6941843, drops item 515827) missing in the narrow Tanaris cave tunnel. 2026_09_23_05_worldforged_map.sql placed guid 6941843 at (-7808.400, -5001.100, 46.525) on the .map mountain surface 40.72 yd above the Md_Warmcavetunnel01.wmo tunnel floor (5.804). rev_20261126_13434 lowers guid 6941843 onto the cave tunnel floor at z 5.804. Expected: the pickup stands at (-7808.400, -5001.100, 5.804) flush on the cave floor, is not under water, has open headroom under the tunnel ceiling (16.549), and opens with loot from the reporter's spot 2.86 yd away.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7807.434,
+    "y": -4998.426,
+    "z": 5.505,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 515827,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests on the cave tunnel floor (-7808.400, -5001.100, 5.804) instead of 40.72 yd above on the mountain",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -7808.4,
+      "y": -5001.1,
+      "z": 5.804,
+      "max": 0.3,
+      "guid": 6941843,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup rests flush on the cave tunnel floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.2,
+      "guid": 6941843,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6941843,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941843,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the cave tunnel ceiling leaves clear headroom above the pickup",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6941843,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 515827
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup is within reach in the cave and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}
