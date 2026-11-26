@@ -1129,6 +1129,2617 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "observe_source": "$s2 = 3 (704642 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + DieSides 1 = 3; Spell.dbc). StatSystem.cpp:1043 adds aura 333 into Player::m_modSpellHitChance. Reads live spell_hit_chance before and after a real learn of 704642 (expected gain +3.0 points, control is before learn). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    },
+    {
+      "spell": 562720,
+      "name": "Blood Curse (Cursed Form lasts $d = 30000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Ascend into a Cursed Form for $d, enabling the use of unique abilities, causing you to generate health and Rage over time.",
+      "trigger_spell": 562720,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 28000,
+      "expiry_wait_ms": 4000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          27500,
+          29000
+        ],
+        "expired": [
+          31000,
+          32500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 563124
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Worgen Form Visual 563124 (rev_20260927_63 spell_linked_spell type 2) applies with Blood Curse 562720."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 525031
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Cursed Form requirement marker 525031 (AscensionBloodmageTalents.cpp:276-286) is active during Blood Curse 562720."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 802877
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Mortal-Form restriction marker 802877 (AscensionBloodmageTalents.cpp:288-292) is active during Blood Curse 562720."
+          }
+        ]
+      },
+      "observe_source": "$d = 30000 ms (562720 DurationIndex 9 = 30000 ms, Effect[0] aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 Cursed Form; Spell.dbc; rev_20260927_63_bloodmage_blood_curse_worgen_model.sql links 563124; AscensionBloodmageTalents.cpp:153,276-293). Uncast control reads aura 562720 = 0; after real cast of 562720, aura 562720 reads 1 at 28000 ms (game_time [27500, 29000] > 27000 ms = -10%) and 0 at 32000 ms (game_time [31000, 32500] < 33000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562720 1 SPELL_PERIODIC_ENERGIZE (10) + 1 SPELL_PERIODIC_HEAL (12) in 1 log; server Spell.dbc governs."
+    },
+    {
+      "spell": 562720,
+      "name": "Blood Curse (generates 10 Rage every 3 sec = 300 internal over 3 ticks)",
+      "kind": "metric_delta",
+      "variant": "periodic_rage",
+      "label_suffix": "periodic_rage",
+      "quote": "Ascend into a Cursed Form for $d, enabling the use of unique abilities, causing you to generate health and Rage over time.",
+      "trigger_spell": 562720,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_power": [
+        1,
+        0,
+        0
+      ],
+      "metric": "spell_energize_total",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 300,
+      "tolerance": 0,
+      "wait_ms": 9800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_energize_count",
+            "fields": {
+              "spell": 562720
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Confirms exactly 3 periodic ticks fired in 9800 ms (3000 ms period)."
+          }
+        ]
+      },
+      "observe_source": "562720 Effect[1] aura 24 SPELL_AURA_PERIODIC_ENERGIZE MiscValue 1 (POWER_RAGE), EffectAmplitude 3000 ms, BasePoints 99 + DieSides 1 = 100 internal Rage (10 displayed Rage) per tick (Spell.dbc). Uncast control reads 0; after real cast of 562720 from 0 Rage, at 9800 ms exactly 3 ticks land (spell_energize_count = 3, spell_energize_total = 300 internal Rage, tolerance 0, excluding 0 and 2x = 600). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562720 SPELL_PERIODIC_ENERGIZE = 10 displayed Rage (100 internal) in 1 log; server Spell.dbc governs."
+    },
+    {
+      "spell": 562720,
+      "name": "Blood Curse (generates health every 3 sec over 3 ticks)",
+      "kind": "metric_delta",
+      "variant": "periodic_heal",
+      "label_suffix": "periodic_heal",
+      "quote": "Ascend into a Cursed Form for $d, enabling the use of unique abilities, causing you to generate health and Rage over time.",
+      "trigger_spell": 562720,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 192,
+      "tolerance": 5,
+      "wait_ms": 9800,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 562720
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Confirms exactly 3 periodic heal ticks fired in 9800 ms (3000 ms period)."
+          }
+        ]
+      },
+      "observe_source": "562720 Effect[2] aura 8 SPELL_AURA_PERIODIC_HEAL, EffectAmplitude 3000 ms, BasePoints 9 + DieSides 1 = 10, RealPointsPerLevel 1.0, BaseLevel 6 (at level 60: 10 + (60 - 6) * 1.0 = 64 HP per tick at 0 SP; Spell.dbc). With non-crit fixture (16255 = -100) and regeneration disabled at 50000/100000 HP, uncast control reads 0; after real cast of 562720, at 9800 ms exactly 3 ticks land (spell_heal_count = 3, spell_heal_total = 192, tolerance 5, excluding 0 and 2x = 384). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562720 SPELL_PERIODIC_HEAL observed in 1 log; server Spell.dbc governs."
+    },
+    {
+      "spell": 562720,
+      "name": "Blood Curse (cooldown starts on return to Mortal Form: blocked 27.5s after expiry)",
+      "kind": "metric_delta",
+      "variant": "cooldown_after_expiry_blocked",
+      "label_suffix": "cooldown_after_expiry_blocked",
+      "quote": "This ability goes on cooldown upon returning to Mortal Form.",
+      "trigger_spell": 562720,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 562720,
+          "target": "caster",
+          "delay_ms": 57500,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "562720 carries SPELL_ATTR0_COOLDOWN_ON_EVENT (0x02000000), DurationIndex 9 = 30000 ms, RecoveryTime 30000 ms (Spell.dbc; SpellInfo.cpp:1368). The 30000 ms cooldown starts only when Blood Curse expires at t = 30000 ms (returning to Mortal Form), not at cast time t = 0 ms. A second cast attempt at delay_ms 57500 (27500 ms after expiry, > 27000 ms = -10% of 30000 ms) with reset_cooldown=false is still refused: spell_cast_count reads 0 in uncast control and 1 in treatment (would read 2 if cooldown started on cast or lasted <= 27000 ms). Paired with cooldown_after_expiry_ready (delay_ms 62500 -> count 2). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562720 2 periodic events in 1 log; server Spell.dbc governs."
+    },
+    {
+      "spell": 562720,
+      "name": "Blood Curse (cooldown clears 32.5s after return to Mortal Form)",
+      "kind": "metric_delta",
+      "variant": "cooldown_after_expiry_ready",
+      "label_suffix": "cooldown_after_expiry_ready",
+      "quote": "This ability goes on cooldown upon returning to Mortal Form.",
+      "trigger_spell": 562720,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 562720,
+          "target": "caster",
+          "delay_ms": 62500,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Companion to 562720 cooldown_after_expiry_blocked: 562720 DurationIndex 9 = 30000 ms + SPELL_ATTR0_COOLDOWN_ON_EVENT RecoveryTime 30000 ms (Spell.dbc). Attempting a second cast at delay_ms 62500 (32500 ms after expiry, < 33000 ms = +10% of 30000 ms) with reset_cooldown=false succeeds (spell_cast_count = 2 vs 0 in uncast control, void_on_cast_failure=true), bracketing the 30000 ms post-exit cooldown between 27500 ms and 32500 ms. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562720 2 periodic events in 1 log; server Spell.dbc governs."
+    },
+    {
+      "spell": 562720,
+      "name": "Blood Curse (treated as a Demon: Undead/Demon AoE 289266 lands only in Cursed Form)",
+      "kind": "metric_delta",
+      "variant": "demon_type",
+      "label_suffix": "demon_type",
+      "quote": "@ext:While in a Cursed Form you are treated as if you were a Demon.:ext@",
+      "learn": [
+        562720
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 60235,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 562720,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 289266
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 289266,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562720
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Blood Curse 562720 is absent in control and active in treatment."
+          }
+        ]
+      },
+      "observe_source": "562720 Effect[0] aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 (SpellShapeshiftForm.dbc ID 57 'Cursed Form': creatureType = 3 CREATURE_TYPE_DEMON; Unit::GetCreatureType Unit.cpp:13418-13421). Hostile striker (reaction 0, spell_hit_bonus 100, 5 yd) casts instant AoE Holy Water Tonic 289266 (TargetCreatureType = 36 Undead|Demon, TargetA 22 / TargetB 15 AoE enemy 8 yd, aura 12 Stun, DurationIndex 32 = 6000 ms; Spell.dbc): AoE target filter skips Humanoid control (aura 289266 = 0) without cast failure, and lands on Demon in Blood Curse 562720 (aura 289266 = 1). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562720 2 periodic events in 1 log; server Spell.dbc & SpellShapeshiftForm.dbc govern."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (transforms Blood Curse 562720 into Accursed Form 562572)",
+      "kind": "metric_delta",
+      "variant": "transform",
+      "label_suffix": "transform",
+      "quote": "Transforms your Blood Curse into Accursed Form.",
+      "specialization": 27,
+      "unlearn_after_specialization": [
+        504710
+      ],
+      "learn": [
+        562720
+      ],
+      "trigger_spell": 60235,
+      "gate_spell": 504710,
+      "target": "caster",
+      "measure_actor": "caster",
+      "metric": "temporary_spell_replacement",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 562720,
+      "expected": 562572,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionTalentReplacementData.h:59 {20, 27, 504710, 562720, {{562572, 0}}} + AscensionCompat.cpp:1155-1235 SynchronizeTalentReplacements: in Accursed specialization (27) with Blood Curse 562720 known, unlearn_after_specialization removes auto-learned 504710 for control (reads 562720); treatment learns 504710 and sets temporary_spell_replacement(562720) = 562572. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504710 0 events (passive), 562572 529 applies in 19 logs; coabuildhub spells_master_index.json 504710 matches verbatim."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (562572 lasts $d = 30000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562572
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 28000,
+      "expiry_wait_ms": 4000,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          27500,
+          29000
+        ],
+        "expired": [
+          31000,
+          32500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562722
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Linked gargoyle transform / Polymorph immunity helper 562722 (rev_20260916_10) applies with Accursed Form 562572."
+          }
+        ]
+      },
+      "observe_source": "$d = 30000 ms (562572 DurationIndex 9 = 30000 ms; Spell.dbc; rev_20260916_10_bloodmage_accursed_form_appearance.sql links 562722). Uncast control reads aura 562572 = 0; after real cast of 562572, aura 562572 reads 1 at 28000 ms (game_time [27500, 29000] > 27000 ms = -10%) and 0 at 32000 ms (game_time [31000, 32500] < 33000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562572 529 applies in 19 logs; coabuildhub 504710/562572 match."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (increases attack power by $804699s2% = 50% of Agility)",
+      "kind": "metric_delta",
+      "variant": "agility_ap",
+      "label_suffix": "agility_ap",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 223,
+      "expected": 253,
+      "expected_gain": 30,
+      "tolerance": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562572
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Accursed Form 562572 is absent in control and active in treatment."
+          }
+        ]
+      },
+      "observe_source": "$804699s2 = 50% (804699 Effect[1] aura 268 SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT, MiscValue 1 Agility, BasePoints 49 + DieSides 1 = 50%; Spell.dbc). At Bloodmage reference_stats (stat 1 Agility = 60.0, baseline attack_power = 223.0), activating 562572 should raise attack_power by +30.0 (223 -> 253, expected_gain 30, tolerance 1, excluding 0 and +60). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804699 0 events in 186 logs, 562572 529 applies in 19 logs; coabuildhub 504710/562572 match."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (melee attacks apply Marrowbite 504553, reducing enemy healing received by 20%)",
+      "kind": "metric_delta",
+      "variant": "marrowbite_heal_cut",
+      "label_suffix": "marrowbite_heal_cut",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "target": "enemy",
+      "measure_actor": "enemy",
+      "enemy_player_race": 2,
+      "enemy_casts": [
+        9840
+      ],
+      "enemy_cast_wait_ms": 7500,
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 9840,
+        "target": "enemy"
+      },
+      "before_expected": 156,
+      "expected": 124.8,
+      "expected_ratio": 0.8,
+      "tolerance": 0.02,
+      "wait_ms": 500,
+      "expire_ms": 11000,
+      "observe_source": "$504553s1 = 20% (562572 Effect[2] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL -> 504553 Marrowbite; 504553 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT BasePoints -21 + DieSides 1 = -20%, DurationIndex 1 = 10000 ms; Spell.dbc). Bloodfang Bite 572551 (DmgClass 2 melee) hits hostile enemy player (race 2), who casts Rejuvenation 9840 on itself: control (without 562572) heals full; treatment (after real 562572 cast) expects 0.80 ratio (-20%, tolerance 0.02). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504553 Marrowbite 1315 applies in 19 logs; coabuildhub 504710/562572 match."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (Marrowbite 504553 lasts $504553d = 10000 ms)",
+      "kind": "metric_delta",
+      "variant": "marrowbite_duration",
+      "label_suffix": "marrowbite_duration",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 562572,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 504553,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 9200,
+      "expiry_wait_ms": 1600,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9050,
+          9600
+        ],
+        "expired": [
+          10400,
+          10950
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$504553d = 10000 ms (504553 DurationIndex 1 = 10000 ms; Spell.dbc). Under real Accursed Form 562572 (after_setup_reads 562572 == 1), melee ability 572551 hits dummy: Marrowbite 504553 should read 0 in uncast control, 1 at 9200 ms (game_time [9050, 9600] > 9000 ms = -10%), and 0 at 10800 ms (game_time [10400, 10950] < 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504553 Marrowbite 1315 applies in 19 logs; coabuildhub 504710/562572 match."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (Marrowbite 504553 stacks up to $504553u = 2 times on melee swings)",
+      "kind": "metric_delta",
+      "variant": "marrowbite_stacks",
+      "label_suffix": "marrowbite_stacks",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "gate_spell": 562572,
+      "gate_cast": true,
+      "attack_swings": 4,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 504553,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$504553u = 2 (504553 StackAmount 2, DurationIndex 1 = 10000 ms; 562572 Effect[2] aura 42 -> 504553; Spell.dbc). Caster makes 4 auto-attack swings at dummy before casting 562572 (control: 0 stacks) and 4 swings after casting 562572 (treatment: capped at 2 stacks, tolerance 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 504553 Marrowbite 1315 applies in 19 logs; coabuildhub 504710/562572 match."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (treated as a Demon: Undead/Demon AoE 289266 lands only in Accursed Form)",
+      "kind": "metric_delta",
+      "variant": "demon_type",
+      "label_suffix": "demon_type",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 60235,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 562572,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 289266
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 289266,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562572
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Accursed Form 562572 is absent in control and active in treatment."
+          }
+        ]
+      },
+      "observe_source": "562572 Effect[0] aura 36 SPELL_AURA_MOD_SHAPESHIFT MiscValue 57 (SpellShapeshiftForm.dbc ID 57: creatureType = 3 CREATURE_TYPE_DEMON; Unit::GetCreatureType Unit.cpp:13418-13421). Hostile striker (reaction 0, spell_hit_bonus 100, 5 yd) casts instant AoE Holy Water Tonic 289266 (TargetCreatureType = 36 Undead|Demon, TargetA 22 / TargetB 15 AoE enemy 8 yd, aura 12 Stun, DurationIndex 32 = 6000 ms; Spell.dbc): skips Humanoid control (0) without cast failure, lands on Demon in Accursed Form 562572 (1). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562572 529 applies in 19 logs; server Spell.dbc & SpellShapeshiftForm.dbc govern."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (protected from Polymorph-mechanic Hex 17172 while active)",
+      "kind": "metric_delta",
+      "variant": "immune_polymorph",
+      "label_suffix": "immune_polymorph",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 60235,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 562572,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 17172
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "strike": {
+        "spell": 17172,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500,
+        "after_trigger_ms": 500,
+        "reaction": 0
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562572
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Accursed Form 562572 is absent in control and active in treatment."
+          }
+        ]
+      },
+      "observe_source": "rev_20260916_10_bloodmage_accursed_form_appearance.sql links 562722 to 562572 (type 2); 562722 Effect[2] aura 77 SPELL_AURA_MECHANIC_IMMUNITY MiscValue 17 (MECHANIC_POLYMORPH; Spell.dbc). Hostile striker (reaction 0, spell_hit_bonus 100) casts instant Hex 17172 (Mechanic = 17 MECHANIC_POLYMORPH, TargetCreatureType = 0 so CheckTarget never fails 117 on Demon, DurationIndex 28 = 5000 ms; Spell.dbc): lands in Mortal Form control (1), blocked by mechanic immunity in Accursed Form 562572 (0); expire_ms 6000 clears control Hex. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562572 529 applies in 19 logs; coabuildhub 504710/562572 match."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (cooldown starts on return to Mortal Form: blocked 27.5s after expiry)",
+      "kind": "metric_delta",
+      "variant": "cooldown_after_expiry_blocked",
+      "label_suffix": "cooldown_after_expiry_blocked",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 562572,
+          "target": "caster",
+          "delay_ms": 57500,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 562572
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "562572 carries SPELL_ATTR0_COOLDOWN_ON_EVENT (0x02000000), DurationIndex 9 = 30000 ms, RecoveryTime 30000 ms (Spell.dbc). Attempting a second cast at delay_ms 57500 (27500 ms after expiry, > 27000 ms = -10%) with reset_cooldown=false is still refused (spell_cast_count = 1 vs 0 in uncast control; would read 2 if cooldown started on cast). Paired with cooldown_after_expiry_ready (delay_ms 62500 -> 2). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562572 529 applies in 19 logs; server Spell.dbc governs."
+    },
+    {
+      "spell": 504710,
+      "name": "Accursed Form (cooldown clears 32.5s after return to Mortal Form)",
+      "kind": "metric_delta",
+      "variant": "cooldown_after_expiry_ready",
+      "label_suffix": "cooldown_after_expiry_ready",
+      "quote": "Transforms your Blood Curse into Accursed Form.@s:562572:0@",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 562572,
+          "target": "caster",
+          "delay_ms": 62500,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 562572
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Companion to 504710 cooldown_after_expiry_blocked: 562572 DurationIndex 9 = 30000 ms + SPELL_ATTR0_COOLDOWN_ON_EVENT RecoveryTime 30000 ms (Spell.dbc). Attempting a second cast at delay_ms 62500 (32500 ms after expiry, < 33000 ms = +10%) with reset_cooldown=false succeeds (spell_cast_count = 2 vs 0 in control). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 562572 529 applies in 19 logs; server Spell.dbc governs."
+    },
+    {
+      "spell": 680661,
+      "name": "One Man's Curse... (removes Accursed Form 25% health cost: castable at 50 HP)",
+      "kind": "metric_delta",
+      "variant": "cost_removed",
+      "label_suffix": "cost_removed",
+      "quote": "Removes the health cost of Accursed Form and entering it now instantly restores $680662s1% of your maximum health.",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "gate_spell": 680661,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        50,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_since": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 562572
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "680661 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 14 (SPELLMOD_COST), BasePoints -101 + DieSides 1 = -100%, EffectSpellClassMask[1] 0x80000000 matching Accursed Form 562572 (PowerType -2 Health, ManaCostPercentage 25 = 25% base health > 50 HP; Spell.dbc). At 50/100000 HP with regeneration disabled, casting 562572 before learning 680661 is refused for insufficient health (phase_since spell_cast_count = 0), whereas after learning 680661 its health cost is 0 and the cast succeeds (phase_since spell_cast_count = 1), proving the cost is truly removed before 680662 heals. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 680661/680662 0 events in 186 logs; coabuildhub spells_master_index.json 680661 matches verbatim."
+    },
+    {
+      "spell": 680661,
+      "name": "One Man's Curse... (entering Accursed Form restores $680662s1% = 15% max health)",
+      "kind": "metric_delta",
+      "variant": "heal_pct",
+      "label_suffix": "heal_pct",
+      "quote": "Removes the health cost of Accursed Form and entering it now instantly restores $680662s1% of your maximum health.",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "gate_spell": 680661,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 680662
+      },
+      "before_expected": 0,
+      "expected": 15000,
+      "tolerance": 10,
+      "wait_ms": 500,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562572
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms real Accursed Form 562572 activated in both control and treatment."
+          }
+        ]
+      },
+      "observe_source": "$680662s1 = 15% (680662 Effect[0] 136 SPELL_EFFECT_HEAL_PCT BasePoints 14 + DieSides 1 = 15%; Spell.dbc; AscensionBloodmageTalents.cpp:510-512 casts 680662 on 562572 apply when 680661 is active). At 50000/100000 HP with regeneration disabled and non-crit (16255 = -100): control (without 680661) heals 0 from 680662; treatment (after real learn of 680661) heals 15000 (15% of 100000, tolerance 10, excluding 0 and 2x = 30000); expire_ms 31000 clears 30s Accursed Form between phases. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 680661/680662 0 events in 186 logs; coabuildhub 680661 matches verbatim."
+    },
+    {
+      "spell": 804851,
+      "name": "Sanguine Scripture (exiting Accursed Form grants +70% movement speed)",
+      "kind": "metric_delta",
+      "variant": "move_speed",
+      "label_suffix": "move_speed",
+      "quote": "Upon exiting Accursed Form, you gain $504264s1% movement speed",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "gate_spell": 804851,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "run_speed_rate",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 1.7,
+      "expected_gain": 0.7,
+      "tolerance": 0.01,
+      "wait_ms": 30800,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562572
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Accursed Form 562572 has expired before the 504264 speed read."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504264
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Sanguine Scripture buff 504264 is absent in control and present in treatment."
+          }
+        ]
+      },
+      "observe_source": "$504264s1 = 70% (504264 Effect[0] aura 31 SPELL_AURA_MOD_INCREASE_SPEED BasePoints 69 + DieSides 1 = +70%, DurationIndex 28 = 5000 ms; Spell.dbc; AscensionBloodmageTalents.cpp:562-564 casts 504264 on 562572 removal). Caster activates 562572 and waits 30800 ms (800 ms after 30000 ms expiry): run_speed_rate reads 1.0 before learning 804851 (control) and 1.7 after learning 804851 (treatment, expected_gain 0.7, tolerance 0.01, excluding 1.0 and 2.4). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804851/504264 0 events in 186 logs; coabuildhub spells_master_index.json 804851 matches verbatim."
+    },
+    {
+      "spell": 804851,
+      "name": "Sanguine Scripture (exiting Accursed Form grants +70% spell haste)",
+      "kind": "metric_delta",
+      "variant": "spell_haste",
+      "label_suffix": "spell_haste",
+      "quote": "and spell haste for $504264d.",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "gate_spell": 804851,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 1.0,
+      "expected": 0.588235,
+      "tolerance": 0.001,
+      "wait_ms": 30800,
+      "expire_ms": 6000,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 504264
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Sanguine Scripture buff 504264 is absent in control and active in treatment."
+          }
+        ]
+      },
+      "observe_source": "$504264s1 = 70% (504264 Effect[1] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 69 + DieSides 1 = +70%; Spell.dbc; AscensionBloodmageTalents.cpp:562-564). Unit::ApplyCastTimePercentMod multiplies cast_speed_multiplier by 100 / (100 + 70) = 0.588235. Read 30800 ms after 562572 cast (800 ms after 30000 ms expiry): 1.0 in control, 0.588235 in treatment (tolerance 0.001, excluding 1.0 and 1/2.4 = 0.4167). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804851/504264 0 events in 186 logs; coabuildhub 804851 matches verbatim."
+    },
+    {
+      "spell": 804851,
+      "name": "Sanguine Scripture (504264 lasts $504264d = 5000 ms after Accursed Form expires)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "and spell haste for $504264d.",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "gate_spell": 804851,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 504264
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 34650,
+      "expiry_wait_ms": 700,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          34550,
+          34900
+        ],
+        "expired": [
+          35150,
+          35450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$504264d = 5000 ms (504264 DurationIndex 28 = 5000 ms; Spell.dbc; applied at 562572 expiry t = 30000 ms, AscensionBloodmageTalents.cpp:562-564). Uncast control reads 0; after 562572 cast with 804851 learned, aura 504264 reads 1 at 34650 ms (4650 ms post-expiry, game_time [34550, 34900] > 34500 = 30s + 4.5s = -10%) and 0 at 35350 ms (5350 ms post-expiry, game_time [35150, 35450] < 35500 = 30s + 5.5s = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804851/504264 0 events in 186 logs; coabuildhub 804851 matches verbatim."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (charges target within $804854R = 20 yd at 18.5 yd)",
+      "kind": "metric_delta",
+      "variant": "charge_in_range",
+      "label_suffix": "charge_in_range",
+      "quote": "When you activate a Cursed Form you now charge to your target if they are within $804854R yds.",
+      "learn": [
+        562720
+      ],
+      "trigger_spell": 562720,
+      "gate_spell": 807487,
+      "target": "caster",
+      "select_dummy": true,
+      "dummy_distance": 18.5,
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {
+        "bearing": 0
+      },
+      "before_expected": 0,
+      "expected": 16.5,
+      "tolerance": 2.5,
+      "wait_ms": 1500,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "$804854R = 20 yd (804854 Dark Embrace RangeIndex 3 = SpellRange.dbc ID 3 'Twenty yards' RangeMax 20.0 yd, Effect[0] 96 SPELL_EFFECT_CHARGE; Spell.dbc; AscensionBloodmageTalents.cpp:437-450,504-509 casts 804854 when Cursed Form activates if target within GetMaxRange()). Dummy placed at 18.5 yd (> 18.0 yd = -10% of 20 yd) and selected via select_dummy; caster activates Blood Curse 562720: control (before 807487) displacement = 0 yd; treatment (after 807487) charges forward along bearing 0 toward dummy (displacement ~16.5 yd, tolerance 2.5, excluding 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804854 Dark Embrace 446 applies in 14 logs; coabuildhub spells_master_index.json 807487 matches."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (does not charge beyond $804854R = 20 yd at 21.5 yd)",
+      "kind": "metric_delta",
+      "variant": "charge_out_of_range",
+      "label_suffix": "charge_out_of_range",
+      "quote": "When you activate a Cursed Form you now charge to your target if they are within $804854R yds.",
+      "learn": [
+        562720
+      ],
+      "trigger_spell": 562720,
+      "gate_spell": 807487,
+      "target": "caster",
+      "select_dummy": true,
+      "dummy_distance": 21.5,
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {},
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0.5,
+      "wait_ms": 1500,
+      "expire_ms": 31000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 562720
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Blood Curse 562720 itself succeeded in both phases."
+          },
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804854
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Confirms Dark Embrace 804854 did not land on out-of-range dummy at 21.5 yd."
+          }
+        ]
+      },
+      "observe_source": "Upper range boundary for $804854R = 20 yd (SpellRange.dbc ID 3 RangeMax 20.0 yd; AscensionBloodmageTalents.cpp:447 IsWithinDistInMap(target, 20.0f) plus Spell::CheckRange refusing 804854 beyond 20 yd). Dummy placed at 21.5 yd (< 22.0 yd = +10% of 20 yd) and selected via select_dummy: activating 562720 (confirmed active via ally_arm) with 807487 learned produces 0 yd displacement (tolerance 0.5) and 0 Dark Embrace 804854 aura on dummy, bracketing 20 yd between 18.5 yd (charges) and 21.5 yd (does not charge). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804854 Dark Embrace 446 applies in 14 logs; coabuildhub 807487 matches."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (roots enemy target for $804854d = 2000 ms)",
+      "kind": "metric_delta",
+      "variant": "root_duration",
+      "label_suffix": "root_duration",
+      "quote": "If they're an enemy you root them for $804854d.",
+      "learn": [
+        562720
+      ],
+      "trigger_spell": 562720,
+      "gate_spell": 807487,
+      "target": "caster",
+      "select_dummy": true,
+      "dummy_distance": 15.0,
+      "measure_actor": "dummy",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 804854,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 1850,
+      "expiry_wait_ms": 300,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          1810,
+          1960
+        ],
+        "expired": [
+          2040,
+          2190
+        ]
+      },
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "rooted",
+            "fields": {},
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms dummy is actually rooted (UNIT_STATE_ROOT) by Dark Embrace 804854 Effect[1] aura 26."
+          }
+        ]
+      },
+      "observe_source": "$804854d = 2000 ms (804854 Dark Embrace DurationIndex 39 = 2000 ms, Effect[1] aura 26 SPELL_AURA_MOD_ROOT; Spell.dbc; AscensionBloodmageTalents.cpp:449). Dummy at 15 yd selected via select_dummy: uncast control reads 0 (and rooted = 0); after casting 562720 with 807487 learned, dummy carries 804854 (and rooted = 1) at 1850 ms (game_time [1810, 1960] > 1800 ms = -10%) and 0 at 2150 ms (game_time [2040, 2190] < 2200 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804854 Dark Embrace 446 applies in 14 logs; coabuildhub 807487 matches."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (Accursed Form expiry arms Bloodgale 681310 reactivation)",
+      "kind": "metric_delta",
+      "variant": "bloodgale_arm",
+      "label_suffix": "bloodgale_arm",
+      "quote": "Upon expiration, your Accursed Form can be reactivated to cause you to erupt in a burst of blood magic, leeching ${$681310m1+0+$sps*.33+$AP*.125} health from nearby enemies and teleporting you backwards.",
+      "learn": [
+        562572
+      ],
+      "trigger_spell": 562572,
+      "gate_spell": 807487,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "temporary_spell_replacement",
+      "fields": {
+        "spell": 562572
+      },
+      "before_expected": 562572,
+      "expected": 681310,
+      "tolerance": 0,
+      "wait_ms": 30800,
+      "expire_ms": 1000,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageTalents.cpp:452-459,565-567 calls SetTemporarySpellReplacement(562572, 681310) when Accursed Form 562572 expires naturally while 807487 is known. Control (without 807487): temporary_spell_replacement(562572) stays 562572 after 30800 ms; treatment (with 807487): switches to 681310 (Bloodgale). Paired with bloodgale_leech_sp, bloodgale_leech_ap, and bloodgale_teleport_back. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 681310 Bloodgale 152 casts/hits in 11 logs; coabuildhub 807487 matches."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (Bloodgale 681310 leech with SP scaling)",
+      "kind": "metric_delta",
+      "variant": "bloodgale_leech_sp",
+      "label_suffix": "bloodgale_leech_sp",
+      "quote": "Upon expiration, your Accursed Form can be reactivated to cause you to erupt in a burst of blood magic, leeching ${$681310m1+0+$sps*.33+$AP*.125} health from nearby enemies and teleporting you backwards.",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 30800,
+      "trigger_spell": 681310,
+      "gate_spell": 807487,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "dummy_distance": 3.0,
+      "measure_actor": "caster",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681310,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 7269,
+      "tolerance": 150,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 681310
+            },
+            "before_expected": 0,
+            "expected": 7269,
+            "tolerance": 150,
+            "source": "Bloodgale 681310 Effect[0] SPELL_EFFECT_HEALTH_LEECH heals caster for 100% of damage dealt."
+          }
+        ]
+      },
+      "observe_source": "681310 Effect[0] 9 SPELL_EFFECT_HEALTH_LEECH, BasePoints 363, DieSides 21, RealPointsPerLevel 5.35, BaseLevel 10, RadiusIndex 8 (5 yd; Spell.dbc): at level 60 base = 363 + (60-10)*5.35 + [1..21] = [631.5..651.5] (mean 641.5); tooltip formula +$sps*0.33+$AP*0.125 at +20000 SP & 223 AP = 641.5 + 6600 + 27.875 = 7269.4 (non-crit 16255=-100, spellpen 823764, dummy at 3 yd, tolerance 150, excluding 0 and unscaled 641.5). Paired with bloodgale_arm proving 807487 arms 681310 on 562572 expiry. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 681310 Bloodgale 152 SPELL_DAMAGE + 152 SPELL_HEAL (mean 1612/1442) in 11 logs; coabuildhub 807487 matches."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (Bloodgale 681310 leech with AP scaling)",
+      "kind": "metric_delta",
+      "variant": "bloodgale_leech_ap",
+      "label_suffix": "bloodgale_leech_ap",
+      "quote": "Upon expiration, your Accursed Form can be reactivated to cause you to erupt in a burst of blood magic, leeching ${$681310m1+0+$sps*.33+$AP*.125} health from nearby enemies and teleporting you backwards.",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 30800,
+      "trigger_spell": 681310,
+      "gate_spell": 807487,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "dummy_distance": 3.0,
+      "measure_actor": "caster",
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 681310,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3169,
+      "tolerance": 150,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP-scaling arm for Bloodgale 681310 (${$681310m1+0+$sps*.33+$AP*.125}): at +20000 AP (total 20223 AP, 0 SP) with non-crit (16255=-100) and 823764, expected = 641.5 + 20223 * 0.125 = 3169.4 (tolerance 150, excluding unscaled 641.5 and 2x). Uncast control reads 0. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 681310 Bloodgale 152 hits in 11 logs; coabuildhub 807487 matches."
+    },
+    {
+      "spell": 807487,
+      "name": "The Hunter and the Hunted (Bloodgale 681310 teleports caster backwards)",
+      "kind": "metric_delta",
+      "variant": "bloodgale_teleport_back",
+      "label_suffix": "bloodgale_teleport_back",
+      "quote": "Upon expiration, your Accursed Form can be reactivated to cause you to erupt in a burst of blood magic, leeching ${$681310m1+0+$sps*.33+$AP*.125} health from nearby enemies and teleporting you backwards.",
+      "learn": [
+        562572
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 30800,
+      "trigger_spell": 681310,
+      "gate_spell": 807487,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "position_x",
+      "fields": {},
+      "displacement": {
+        "bearing": 180
+      },
+      "before_expected": 0,
+      "expected": 20.0,
+      "tolerance": 2.0,
+      "wait_ms": 600,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Bloodgale 681310 Effect[1] 5 SPELL_EFFECT_TELEPORT_UNITS TARGET_UNIT_CASTER -> TARGET_DEST_DEST_BACK (79), RadiusIndex 9 = 20 yd (Spell.dbc; armed on 562572 expiry by AscensionBloodmageTalents.cpp:565-567, proved in bloodgale_arm). Uncast control: 0 yd displacement; treatment (casting armed 681310 after 562572 expiry): teleports caster 20 yd backwards (bearing 180, tolerance 2.0, excluding 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 681310 Bloodgale 152 casts/hits in 11 logs; coabuildhub 807487 matches."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (Requires Mortal Form: blocked in Cursed Form 562720)",
+      "kind": "metric_delta",
+      "variant": "mortal_form_gate",
+      "label_suffix": "mortal_form_gate",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "learn": [
+        562720,
+        572855
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572855,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 562720,
+          "expected": 1
+        },
+        {
+          "spell": 802877,
+          "expected": 1
+        }
+      ],
+      "phase_since": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 572855
+      },
+      "before_expected": 1,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2000,
+      "expire_ms": 10500,
+      "observe_source": "572855 ExcludeCasterAuraSpell = 802877 (Spell.dbc; AscensionBloodmageTalents.cpp:288-292 applies 802877 during Blood Curse 562720). Control (Mortal Form, cast_power 1000 to prevent out-of-combat Rage decay during 1500 ms cast): real cast of 572855 succeeds (phase_since spell_cast_count = 1); treatment (after real 562720 cast; after_setup_reads confirms 562720 == 1 and 802877 == 1): cast of 572855 is refused (phase_since spell_cast_count = 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572855 28 casts in 2 logs; coabuildhub spells_master_index.json 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (Shadow damage base + AP*0.65)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Unleash a powerful burst of blood at an enemy, dealing ${$m1+0+$AP*.65+$SP*.5} Shadow damage.",
+      "trigger_spell": 572855,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1000,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572855,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 14719,
+      "tolerance": 250,
+      "wait_ms": 2200,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "572855 Effect[0] 2 SPELL_EFFECT_SCHOOL_DAMAGE (Shadow), BasePoints 1479, DieSides 180, RealPointsPerLevel 4.4, BaseLevel 59, MaxLevel 60 (at level 60: 1479 + 4.4 + [1..180] = [1484.4..1663.4], mean 1573.9; Spell.dbc); spell_bonus_data rev_20260919_10: direct_bonus 0.5 SP, ap_bonus 0.65 AP. At +20000 AP (total 20223 AP, 0 SP) with non-crit (16255=-100) and spellpen 823764: 1573.9 + 20223 * 0.65 = 14718.9 (tolerance 250 covers +-90 die roll, excluding unscaled 1574 and 2x = 29438). Uncast control reads 0. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572855 28 hits (26 crits, 1935..8103) in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (Shadow damage base + SP*0.5)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Unleash a powerful burst of blood at an enemy, dealing ${$m1+0+$AP*.65+$SP*.5} Shadow damage.",
+      "trigger_spell": 572855,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "cast_power": 1000,
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572855,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 11719,
+      "tolerance": 250,
+      "wait_ms": 2200,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP-scaling arm for 572855 Hemoburst (rev_20260919_10 direct_bonus 0.5 SP, ap_bonus 0.65 AP): at +20000 SP & 223 AP with non-crit (16255=-100) and 823764, expected = 1573.9 + 223 * 0.65 + 20000 * 0.5 = 11718.9 (tolerance 250 covers +-90 die roll, excluding unscaled 1719 and 2x). Uncast control reads 0. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572855 28 hits in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (guaranteed critical strike against bleeding target)",
+      "kind": "metric_delta",
+      "variant": "bleed_crit",
+      "label_suffix": "bleed_crit",
+      "quote": "This ability is guaranteed to critically strike against bleeding targets.",
+      "trigger_spell": 572855,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_auras": [
+        [
+          772,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572855,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 10500,
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageSecondary.cpp:262-264 OnSpellCritChance: if target->HasAuraState(AURA_STATE_BLEEDING) for Hemoburst 572855, sets chance = 100. With -100% crit fixture (16255 = -100) and 823764 in both phases: control (non-bleeding dummy) reads 0 crits; treatment (dummy carries Rend 772 bleed precondition fixture via after_auras) reads 1 crit (phase_since spell_damage_count critical=true, tolerance 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572855 26/28 crits in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (1 stack of Hemoturgy 572856 extends next Cursed Form by 5 sec: held at 34.55s)",
+      "kind": "metric_delta",
+      "variant": "extend_1stack_held",
+      "label_suffix": "extend_1stack_held",
+      "quote": "Extends the duration of your next Cursed Form by $/1000;572856s1 sec for $572856d,",
+      "learn": [
+        562720,
+        572855,
+        572907
+      ],
+      "setup_casts": [
+        572907,
+        572855
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2200,
+      "trigger_spell": 562720,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "phase_power": [
+        1,
+        1000,
+        1000
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 572856,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 34550,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          34500,
+          34850
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$/1000;572856s1 = 5 sec (572856 Hemoturgy Effect[0] aura 107 SPELLMOD_DURATION MiscValue 1, BasePoints 4999 + DieSides 1 = +5000 ms, EffectSpellClassMask[1] 0x88000000 matching Blood Curse 562720; Spell.dbc; AscensionBloodmageSecondary.cpp:318-326 grants 572856 on 572855 hit and consumes it on 562720 cast). Setup casts instant Sanguine Rupture 572907 first to enter combat so Rage does not decay during 572855's 1500 ms cast. Control (no Hemoburst setup): 30000 ms Blood Curse is already expired at 34550 ms (reads 0). Treatment (1 Hemoburst setup; after_setup_reads 572856 == 1): 35000 ms Blood Curse reads 1 at 34550 ms (game_time [34500, 34850] > 34500 ms = 30s + 4.5s). Paired with extend_1stack_gone (0 at 35450 ms). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572856 Hemoturgy 10 applies in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (1 stack of Hemoturgy 572856 extends next Cursed Form by 5 sec: gone at 35.45s)",
+      "kind": "metric_delta",
+      "variant": "extend_1stack_gone",
+      "label_suffix": "extend_1stack_gone",
+      "quote": "Extends the duration of your next Cursed Form by $/1000;572856s1 sec for $572856d,",
+      "learn": [
+        562720,
+        572855,
+        572907
+      ],
+      "setup_casts": [
+        572907,
+        572855
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2200,
+      "trigger_spell": 562720,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "phase_power": [
+        1,
+        1000,
+        1000
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 572856,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 35450,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          35150,
+          35500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper-bound companion to 572855 extend_1stack_held: 1 Hemoturgy 572856 stack extends Blood Curse 562720 to 35000 ms (not 40000 ms). Setup casts 572907 first to enter combat before 572855. Both control (30000 ms) and treatment (35000 ms) read aura 562720 = 0 at 35450 ms (game_time [35150, 35500] < 35500 ms = 30s + 5.5s). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572856 Hemoturgy 10 applies in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (Hemoturgy 572856 lasts $572856d = 30000 ms)",
+      "kind": "metric_delta",
+      "variant": "hemoturgy_duration",
+      "label_suffix": "hemoturgy_duration",
+      "quote": "Extends the duration of your next Cursed Form by $/1000;572856s1 sec for $572856d,",
+      "trigger_spell": 572855,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "cast_power": 1000,
+      "metric": "aura",
+      "fields": {
+        "spell": 572856
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 29500,
+      "expiry_wait_ms": 3500,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          29000,
+          30500
+        ],
+        "expired": [
+          32500,
+          34000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$572856d = 30000 ms (572856 DurationIndex 9 = 30000 ms; Spell.dbc; applied on 572855 hit after 1500 ms cast time, AscensionBloodmageSecondary.cpp:322-326). Uncast control reads 0; after 572855 cast (cast_power 1000, lands at ~1500 ms), aura 572856 reads 1 at 29500 ms (28000 ms post-hit, game_time [29000, 30500] > 1500 + 27000) and 0 at 33000 ms (31500 ms post-hit, game_time [32500, 34000] < 1500 + 33000), excluding 10% off on both sides. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572856 Hemoturgy 10 applies in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (Hemoturgy 572856 caps at $572856u = 2 stacks after 3 casts)",
+      "kind": "metric_delta",
+      "variant": "hemoturgy_stack_cap",
+      "label_suffix": "hemoturgy_stack_cap",
+      "quote": "stacking $572856u times.",
+      "learn": [
+        572855,
+        572907
+      ],
+      "setup_casts": [
+        572907,
+        572855,
+        572855
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2200,
+      "trigger_reset_after_setup": true,
+      "trigger_spell": 572855,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 572856
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 2200,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "$572856u = 2 (572856 StackAmount 2; Spell.dbc). Control casts Hemoburst 572855 once (1 stack); after expire_ms 31000 clears control 572856, treatment enters combat with 572907 and casts Hemoburst 572855 three times (2 setup casts + 1 trigger cast, trigger_reset_after_setup=true), reading aura_stacks(572856) = 2 (tolerance 0, proving cap at 2 rather than 3). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572856 Hemoturgy 10 applies + 10 refreshes in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (2 stacks of Hemoturgy 572856 extend next Cursed Form by 10 sec: held at 39.4s)",
+      "kind": "metric_delta",
+      "variant": "extend_2stacks_held",
+      "label_suffix": "extend_2stacks_held",
+      "quote": "stacking $572856u times.",
+      "learn": [
+        562720,
+        572855,
+        572907
+      ],
+      "setup_casts": [
+        572907,
+        572855,
+        572855
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2200,
+      "trigger_spell": 562720,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "phase_power": [
+        1,
+        1000,
+        1000
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 572856,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 39400,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          39200,
+          39700
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "2 stacks of Hemoturgy 572856 (2 * +5000 ms = +10000 ms) extend Blood Curse 562720 from 30000 ms to 40000 ms. Setup casts 572907 first to enter combat so Rage does not decay during the two 572855 casts. Control (no Hemoburst): 30000 ms Blood Curse is gone at 39400 ms (0). Treatment (2 Hemoburst setup casts): 40000 ms Blood Curse reads 1 at 39400 ms (game_time [39200, 39700] > 39000 ms = 30s + 9s = -10% of +10s). Paired with extend_2stacks_gone (0 at 40600 ms). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572856 Hemoturgy 10 applies + 10 refreshes in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 572855,
+      "name": "Hemoburst (2 stacks of Hemoturgy 572856 extend next Cursed Form by 10 sec: gone at 40.6s)",
+      "kind": "metric_delta",
+      "variant": "extend_2stacks_gone",
+      "label_suffix": "extend_2stacks_gone",
+      "quote": "stacking $572856u times.",
+      "learn": [
+        562720,
+        572855,
+        572907
+      ],
+      "setup_casts": [
+        572907,
+        572855,
+        572855
+      ],
+      "setup_target": "dummy",
+      "setup_only_after": true,
+      "setup_wait_ms": 2200,
+      "trigger_spell": 562720,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "phase_power": [
+        1,
+        1000,
+        1000
+      ],
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 572856,
+          "expected": 1
+        }
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 562720
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 40600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          40300,
+          40800
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper-bound companion to 572855 extend_2stacks_held: 2 stacks of Hemoturgy 572856 extend Blood Curse 562720 to 40000 ms (not 45000 ms). Setup casts 572907 first to enter combat before the two 572855 casts. Both control and treatment read aura 562720 = 0 at 40600 ms (game_time [40300, 40800] < 41000 ms = 30s + 11s = +10% of +10s). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 572856 Hemoturgy 10 applies + 10 refreshes in 2 logs; coabuildhub 572855 matches verbatim."
+    },
+    {
+      "spell": 704644,
+      "name": "Dark Frenzy (party/raid spell haste +3%)",
+      "kind": "party_stat_ratio",
+      "variant": "party_haste",
+      "label_suffix": "party_haste",
+      "raid": true,
+      "quote": "Increases spell haste of all party and raid members by $s1%.",
+      "expected": 0.9708737864,
+      "metric": "cast_speed_multiplier",
+      "radius_reason": "$s1 = 3 (704644 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = 3, EffectRadiusIndex 12 = 100 yd; no distance token in tooltip; Spell.dbc). Grouped raid ally outside caster subgroup reads cast_speed_multiplier before (1.0) and after real learn of 704644 (1 / 1.03 = 0.970874). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 704644 0 events (passive), 804845 136 applies in 6 logs; coabuildhub spells_master_index.json 704644 matches verbatim."
+    },
+    {
+      "spell": 704644,
+      "name": "Dark Frenzy (does not stack with Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack",
+      "label_suffix": "no_stack",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 704644,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "metric": "cast_speed_multiplier",
+      "fields": {},
+      "before_expected": 0.970874,
+      "expected": 0.970874,
+      "tolerance": 0.0001,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Dark Frenzy 704644 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 216 SPELL_AURA_HASTE_SPELLS, BasePoints 2 + DieSides 1 = +3% ($s1; Spell.dbc) and partner Fiery Passion 560525 Effect[0] 65, aura 216, BasePoints 2 + DieSides 1 = +3% (Spell.dbc); both are in spell_group 2000182 (stack_rule 3, SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; data/sql/updates/pending_db_world/rev_20260908_05_guardian_completion.sql:344,355,364). Partner 560525 is learned up front (before_expected 0.970874 = 1/1.03), then 704644 is learned between phases (expected 0.970874, tolerance 0.0001, excluding stacked 1/(1.03*1.03) = 0.942596 and no-op 1.0). Paired with no_stack_aura and party_haste. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 704644 0 events (passive); coabuildhub 704644 matches verbatim."
+    },
+    {
+      "spell": 704644,
+      "name": "Dark Frenzy (aura present alongside Fiery Passion 560525)",
+      "kind": "metric_delta",
+      "variant": "no_stack_aura",
+      "label_suffix": "no_stack_aura",
+      "quote": "Does not stack with similar effects.",
+      "trigger_spell": 60235,
+      "gate_spell": 704644,
+      "learn": [
+        560525
+      ],
+      "target": "caster",
+      "metric": "aura",
+      "fields": {
+        "spell": 704644
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 1500,
+      "expire_ms": 1500,
+      "observe_source": "Companion to 704644 no_stack: with partner Fiery Passion 560525 (spell_group 2000182, +3% aura 216) already learned, Dark Frenzy 704644 aura is absent before learning 704644 (0) and present after learning 704644 (1), proving both raid haste auras coexist while cast_speed_multiplier stays capped at 1/1.03. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 704644 0 events (passive); coabuildhub 704644 matches verbatim."
+    },
+    {
+      "spell": 704644,
+      "name": "Dark Frenzy (while Cursed Form active, -25% GCD allows 2nd Blood Shield 504296 at 1180 ms)",
+      "kind": "metric_delta",
+      "variant": "gcd_reduced_ready",
+      "label_suffix": "gcd_reduced_ready",
+      "quote": "In addition, while a Cursed Form is active, your global cooldowns are reduced by $804845s3%.",
+      "learn": [
+        562720,
+        504296
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504296,
+      "gate_spell": 704644,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 504296,
+          "target": "caster",
+          "delay_ms": 1180,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "phase_since": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 504296
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "tolerance": 0,
+      "wait_ms": 50,
+      "expire_ms": 31000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804845
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "SyncDarkFrenzy (AscensionBloodmageTalents.cpp:126-138) applies 804845 while Cursed Form 562720 is active."
+          }
+        ]
+      },
+      "observe_source": "$804845s3 = 25% (804845 Effect[2] aura 108 SPELLMOD_GLOBAL_COOLDOWN MiscValue 21, BasePoints -26 + DieSides 1 = -25%; Spell.dbc; AscensionBloodmageTalents.cpp:126-138 applies 804845 during Cursed Form; Player.cpp:10534-10555 AuraAlsoModifiesCastingTime). Blood Shield 504296 (instant, Health cost 10%, RecoveryTime 0, StartRecoveryTime 1500 ms, StartRecoveryCategory 133, DmgClass 1 magic): base GCD is 1500 ms in control; in treatment with 804845 (-25%) and 704644 (+3% spell haste), GCD = 1500 * 0.75 / 1.03 = 1092 ms. Second cast attempted at delay_ms 1180 (1092 ms < 1180 ms < 1350 ms = -10% of 1500 ms) with reset_cooldown=false and read after wait_ms 50 (t = 1230 ms < 1500 ms, before any SpellQueueWindow fire): control reads 1, treatment fires immediately and reads 2 (phase_since spell_cast_count). Paired with gcd_reduced_early_blocked (delay_ms 1010, wait_ms 40 -> 1) and gcd_mortal_control (Mortal Form -> 1). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804845 136 applies in 6 logs; coabuildhub 704644 matches verbatim."
+    },
+    {
+      "spell": 704644,
+      "name": "Dark Frenzy (while Cursed Form active, 2nd Blood Shield 504296 at 1010 ms is still blocked by 1092 ms GCD)",
+      "kind": "metric_delta",
+      "variant": "gcd_reduced_early_blocked",
+      "label_suffix": "gcd_reduced_early_blocked",
+      "quote": "In addition, while a Cursed Form is active, your global cooldowns are reduced by $804845s3%.",
+      "learn": [
+        562720,
+        504296
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 504296,
+      "gate_spell": 704644,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 504296,
+          "target": "caster",
+          "delay_ms": 1010,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "phase_since": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 504296
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 40,
+      "expire_ms": 31000,
+      "observe_source": "Lower-bound companion to 704644 gcd_reduced_ready: at -25% GCD + 3% spell haste, Blood Shield 504296's 1500 ms GCD becomes 1092 ms (above MIN_GCD 1000 ms in Spell.cpp:9246). Attempting the second cast at delay_ms 1010 (> 983 ms = -10% of 1092 ms) and reading after wait_ms 40 (t = 1050 ms < 1092 ms, before any SpellQueueWindow fire) reads 1 in both control and treatment (phase_since spell_cast_count), bracketing the reduced GCD between 1050 ms and 1180 ms (within +-10% of 1092 ms). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804845 136 applies in 6 logs; coabuildhub 704644 matches verbatim."
+    },
+    {
+      "spell": 704644,
+      "name": "Dark Frenzy (Mortal Form control: 804845 absent and 504296 GCD stays > 1180 ms)",
+      "kind": "metric_delta",
+      "variant": "gcd_mortal_control",
+      "label_suffix": "gcd_mortal_control",
+      "quote": "In addition, while a Cursed Form is active, your global cooldowns are reduced by $804845s3%.",
+      "learn": [
+        504296
+      ],
+      "trigger_spell": 504296,
+      "gate_spell": 704644,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 504296,
+          "target": "caster",
+          "delay_ms": 1180,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "phase_since": true,
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 504296
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 50,
+      "expire_ms": 2000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 804845
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "SyncDarkFrenzy keeps 804845 absent outside Cursed Form."
+          }
+        ]
+      },
+      "observe_source": "Form-gate control for 704644 Dark Frenzy: in Mortal Form (no Cursed Form active), SyncDarkFrenzy does not apply 804845 (aura 804845 = 0 in both phases). Blood Shield 504296 (StartRecoveryTime 1500 ms -> +3% spell haste gives 1456 ms GCD) attempted a second time at delay_ms 1180 and read after wait_ms 50 (t = 1230 ms < 1456 ms, before SpellQueueWindow fire) reads 1 in both control and treatment (phase_since spell_cast_count). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804845 136 applies in 6 logs; coabuildhub 704644 matches verbatim."
+    },
+    {
+      "spell": 804223,
+      "name": "Blood Scent (in Accursed Form, +15% damage to targets below 35% HP)",
+      "kind": "metric_delta",
+      "variant": "damage_below_35",
+      "label_suffix": "damage_below_35",
+      "quote": "While in Accursed Form, you now deal $s1% increased damage to targets below 35% maximum health.",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "gate_spell": 804223,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_target_health_pct": [
+        32,
+        28
+      ],
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy"
+      },
+      "before_expected": 3000,
+      "expected": 3450,
+      "expected_ratio": 1.15,
+      "tolerance": 0.02,
+      "wait_ms": 600,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 15% (804223 Effect[0] aura 107 SPELLMOD_EFFECT2 +15 on 562572 Effect[1] aura 303 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE MiscValue 13 AURA_STATE_HEALTHLESS_35_PERCENT, plus bloodmage_blood_scent_damage UnitScript AscensionBloodmageTalents.cpp:176-221; Spell.dbc). Both phases cast real Accursed Form 562572 and strike dummy below 35% HP (phase_target_health_pct [32, 28]) with Bloodfang Bite 572551 at +20000 AP (non-crit 16255=-100); treatment learns 804223 between phases (expire_ms 31000 clears control 562572). Expected ratio 1.15 (tolerance 0.02 -> [1.13, 1.17], excluding 1.00 and double-dip 1.3225). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 804223 0 events (passive), 807300 4240 hits/heals in 3 logs; coabuildhub spells_master_index.json 804223 matches verbatim."
+    },
+    {
+      "spell": 804223,
+      "name": "Blood Scent (control above 35% HP: no damage bonus at 55%/50% HP)",
+      "kind": "metric_delta",
+      "variant": "damage_above_35_control",
+      "label_suffix": "damage_above_35_control",
+      "quote": "While in Accursed Form, you now deal $s1% increased damage to targets below 35% maximum health.",
+      "learn": [
+        562572,
+        572551
+      ],
+      "setup_casts": [
+        562572
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "gate_spell": 804223,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_target_health_pct": [
+        55,
+        50
+      ],
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy"
+      },
+      "before_expected": 3000,
+      "expected": 3000,
+      "expected_ratio": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 600,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "Health-threshold control for 804223 Blood Scent: same real Accursed Form 562572 and Bloodfang Bite 572551 at +20000 AP (non-crit 16255=-100), with dummy above 35% HP (phase_target_health_pct [55, 50]): expected ratio 1.0 (tolerance 0.02, excluding +15%). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 807300 4240 events in 3 logs; coabuildhub 804223 matches verbatim."
+    },
+    {
+      "spell": 804223,
+      "name": "Blood Scent (control outside Accursed Form: no damage bonus in Blood Curse 562720 below 35% HP)",
+      "kind": "metric_delta",
+      "variant": "damage_no_accursed_control",
+      "label_suffix": "damage_no_accursed_control",
+      "quote": "While in Accursed Form, you now deal $s1% increased damage to targets below 35% maximum health.",
+      "learn": [
+        562720,
+        572551
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "gate_spell": 804223,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_target_health_pct": [
+        32,
+        28
+      ],
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy"
+      },
+      "before_expected": 3000,
+      "expected": 3000,
+      "expected_ratio": 1.0,
+      "tolerance": 0.02,
+      "wait_ms": 600,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "Form-gate control for 804223 Blood Scent: dummy held below 35% HP (phase_target_health_pct [32, 28]), but caster activates Blood Curse 562720 instead of Accursed Form 562572 (AscensionBloodmageTalents.cpp:186 checks HasAura(SPELL_ACCURSED_FORM)): expected ratio 1.0 (tolerance 0.02, excluding +15%). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 807300 4240 events in 3 logs; coabuildhub 804223 matches verbatim."
+    },
+    {
+      "spell": 804223,
+      "name": "Blood Scent (direct damage below 35% HP leeches $s2% = 10% via 807300)",
+      "kind": "metric_delta",
+      "variant": "leech_below_35",
+      "label_suffix": "leech_below_35",
+      "quote": "Dealing direct damage to enemies below 35% maximum health now leeches health equal to $s2% of the damage dealt.",
+      "learn": [
+        562720,
+        572551
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "gate_spell": 804223,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_target_health_pct": [
+        32,
+        28
+      ],
+      "cast_power": 1000,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "player_attack_power": 20000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807300
+      },
+      "ratio_to_metric": {
+        "metric": "spell_damage_total",
+        "fields": {
+          "spell": 572551,
+          "target": "dummy"
+        }
+      },
+      "before_expected": 0.0,
+      "expected": 0.1,
+      "tolerance": 0.005,
+      "wait_ms": 600,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 10% (804223 Effect[1] aura 354 BasePoints 9 + DieSides 1 = 10%, EffectTriggerSpell 807300 SPELL_EFFECT_HEALTH_LEECH Shadow; Spell.dbc; rev_20260930_99_bloodmage_blood_scent.sql; AscensionBloodmageTalents.cpp:689-716). Bloodfang Bite 572551 at +20000 AP (non-crit 16255=-100, spellpen 823764 to prevent partial Shadow resist on 807300) hits dummy below 35% HP (phase_target_health_pct [32, 28]) with Blood Curse 562720 active: phase_since spell_heal_total(807300) / spell_damage_total(572551) reads 0.0 before learning 804223 and 0.10 after learning 804223 (tolerance 0.005, excluding 0 and 0.20). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 807300 4240 SPELL_DAMAGE + 4240 SPELL_HEAL (equal mean 136.0) in 3 logs; coabuildhub 804223 matches verbatim."
+    },
+    {
+      "spell": 804223,
+      "name": "Blood Scent (control above 35% HP: no 807300 leech at 55%/50% HP)",
+      "kind": "metric_delta",
+      "variant": "leech_above_35_control",
+      "label_suffix": "leech_above_35_control",
+      "quote": "Dealing direct damage to enemies below 35% maximum health now leeches health equal to $s2% of the damage dealt.",
+      "learn": [
+        562720,
+        572551
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "gate_spell": 804223,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "phase_target_health_pct": [
+        55,
+        50
+      ],
+      "cast_power": 1000,
+      "caster_health": [
+        50000,
+        100000
+      ],
+      "disable_regeneration": true,
+      "player_attack_power": 20000,
+      "phase_since": true,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 807300
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 600,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "Health-threshold control for 804223 Blood Scent leech: Bloodfang Bite 572551 hits dummy above 35% HP (phase_target_health_pct [55, 50]) in both arms -> spell_heal_total(807300) reads 0 before and 0 after learning 804223 (tolerance 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 807300 4240 hits/heals in 3 logs; coabuildhub 804223 matches verbatim."
+    },
+    {
+      "spell": 807788,
+      "name": "Gore Tome (window aura 808014 lasts 5000 ms after activating Cursed Form)",
+      "kind": "metric_delta",
+      "variant": "window_duration",
+      "label_suffix": "window_duration",
+      "quote": "For the first 5 sec after activating a Cursed Form, your Bloodfang Bite is now guaranteed to critically strike.",
+      "learn": [
+        562720
+      ],
+      "trigger_spell": 562720,
+      "gate_spell": 807788,
+      "target": "caster",
+      "measure_actor": "caster",
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 808014
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 4650,
+      "expiry_wait_ms": 700,
+      "after_expiry_expected": 0,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          4550,
+          4900
+        ],
+        "expired": [
+          5150,
+          5450
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "AscensionBloodmageTalents.cpp:501-503 casts 808014 Gore Tome window (DurationIndex 28 = 5000 ms, Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE +100% on EffectSpellClassMask[1] 0x800000 matching Bloodfang Bite 572551; Spell.dbc) on Cursed Form activation. Uncast control reads 0; after casting 562720 with 807788 learned, aura 808014 reads 1 at 4650 ms (game_time [4550, 4900] > 4500 ms = -10%) and 0 at 5350 ms (game_time [5150, 5450] < 5500 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 808014 25 applies in 2 logs; coabuildhub spells_master_index.json 807788 matches verbatim."
+    },
+    {
+      "spell": 807788,
+      "name": "Gore Tome (Bloodfang Bite guaranteed to crit inside first 5 sec of Cursed Form)",
+      "kind": "metric_delta",
+      "variant": "crit_in_window",
+      "label_suffix": "crit_in_window",
+      "quote": "For the first 5 sec after activating a Cursed Form, your Bloodfang Bite is now guaranteed to critically strike.",
+      "learn": [
+        562720,
+        572551
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 1600,
+      "trigger_spell": 572551,
+      "gate_spell": 807788,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "808014 Effect[0] aura 107 SPELLMOD_CRITICAL_CHANCE +100% on 572551 (Spell.dbc; AscensionBloodmageTalents.cpp:501-503). StatSystem.cpp:848 clamps PLAYER_CRIT_PERCENTAGE to 0.0f under 16255 (-100% crit fixture), and Unit.cpp:10410 adds +100% SPELLMOD_CRITICAL_CHANCE on top: casting 572551 at t = 1600 ms (inside the 5000 ms window) produces 0 crits without 807788 (control) and 1 crit with 807788 (treatment, tolerance 0). Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 808014 25 applies in 2 logs; coabuildhub 807788 matches verbatim."
+    },
+    {
+      "spell": 807788,
+      "name": "Gore Tome (after 5 sec window expires, Bloodfang Bite no longer guaranteed to crit)",
+      "kind": "metric_delta",
+      "variant": "crit_after_window",
+      "label_suffix": "crit_after_window",
+      "quote": "For the first 5 sec after activating a Cursed Form, your Bloodfang Bite is now guaranteed to critically strike.",
+      "learn": [
+        562720,
+        572551
+      ],
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_wait_ms": 5600,
+      "trigger_spell": 572551,
+      "gate_spell": 807788,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "after_setup_reads": [
+        {
+          "spell": 562720,
+          "expected": 1
+        },
+        {
+          "spell": 808014,
+          "expected": 0
+        }
+      ],
+      "phase_since": true,
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy",
+        "critical": true
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 500,
+      "expire_ms": 31000,
+      "void_on_cast_failure": true,
+      "observe_source": "Post-window control for 807788 Gore Tome: setup_wait_ms 5600 waits past the 5000 ms window of 808014 while 562720 remains active (after_setup_reads confirms 562720 == 1 and 808014 == 0). Under 16255 (-100% crit fixture), 572551 produces 0 crits in both control and treatment. Reference search 2026-11-26: coa-history (186 indexed logs, positive control 562572 Accursed Form 529 applies / 572855 Hemoburst 28 casts): 808014 25 applies in 2 logs; coabuildhub 807788 matches verbatim."
     }
   ],
   "player_observations": [],
