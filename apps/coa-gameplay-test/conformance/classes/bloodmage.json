@@ -2686,7 +2686,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "500444 AP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500169): at AP 20000, raw 147..175 + 4000 = 4147..4175 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 500444: 4892 hits across 16 logs."
+      "observe_source": "500444 AP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500169): player_attack_power +20000 is additive on base AP 223 (total AP 20223), giving raw 147..175 + 4044.6 = 4191.6..4219.6 -> post-armor 3824.5..3850.0 (dummy factor 0.912409, non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 500444: 4892 hits across 16 logs."
     },
     {
       "spell": 500444,
@@ -2835,7 +2835,7 @@
       "wait_ms": 500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "501679 AP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500123): at AP 20000, raw 249..274 + 4000 = 4249..4274 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 501679: 1462 hits across 16 logs."
+      "observe_source": "501679 AP coefficient 0.2 (rev_20261010_90_bloodmage_eternal_coefficients.sql on rank-1 500123): player_attack_power +20000 is additive on base AP 223 (total AP 20223), giving raw 249..274 + 4044.6 = 4293.6..4318.6 -> post-armor 3917.5..3940.3 (dummy factor 0.912409, non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 501679: 1462 hits across 16 logs."
     },
     {
       "spell": 501679,
@@ -3672,7 +3672,7 @@
       "wait_ms": 1500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "504115 EMPOWERED_SHARD AP term (0.15 * AP, AscensionBloodmageBloodShards.cpp:52,137): at AP 10000, SP 0 -> 18 + 1500 = 1518 Shadow damage (non-crit). Reference search 2026-11-26: coa-history 504115: 65560 hits across 18 logs."
+      "observe_source": "504115 EMPOWERED_SHARD AP term (0.15 * AP, AscensionBloodmageBloodShards.cpp:52,137): player_attack_power +10000 is additive on base AP 223 (total AP 10223), SP 0 -> 18 + 10223 * 0.15 = 1551.45 Spellshadow damage (non-crit). Reference search 2026-11-26: coa-history 504115: 65560 hits across 18 logs."
     },
     {
       "spell": 553267,
@@ -4228,7 +4228,49 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "807785 Effect[0] aura 227 PERIODIC_TRIGGER_SPELL_WITH_VALUE EffectAmplitude 500 ms ($t1 = 0.5 sec, Spell.dbc), triggering 806502 on dummy (524861 Cursed Form precondition fixture). Median interval between 806502 damage events is 500 +- 45 ms (excluding +-10%: 450 and 550 ms); uncast control reads 0. Reference search 2026-11-26: coa-history 806502: 53642 hits in 19 logs; coabuildhub 806212 says every 0.5 sec."
+      "observe_source": "807785 Effect[0] aura 227 PERIODIC_TRIGGER_SPELL_WITH_VALUE EffectAmplitude 500 ms ($t1 = 0.5 sec, Spell.dbc), triggering 806502 on dummy (524861 Cursed Form precondition fixture). Both phases cast 807785 as replicates (event_interval_median_ms returns quiet_NaN with <2 events, CoAGameplayTest.cpp:3525-3526) and read median interval 500 +- 45 ms (excluding +-10%: 450 and 550 ms); the paired uncast control arm proving 0 -> 6 strikes is 807785 tick_count (same pattern as felsworn.json 572617 tick_period + tick_count). Reference search 2026-11-26: coa-history 806502: 53642 hits in 19 logs; coabuildhub 806212 says every 0.5 sec."
+    },
+    {
+      "spell": 807785,
+      "name": "Aortic Assault (strikes only after cast: 6 hits in 3 sec)",
+      "kind": "metric_delta",
+      "variant": "tick_count",
+      "label_suffix": "tick_count",
+      "quote": "and strike nearby enemies every $t1 sec for $d,",
+      "trigger_spell": 807785,
+      "cast_in_before": false,
+      "target": "dummy",
+      "select_dummy": true,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          524861,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          807785,
+          0,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 806502,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 6,
+      "tolerance": 0,
+      "wait_ms": 3500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Uncast control arm paired with 807785 tick_period (same pattern as felsworn.json 572617 tick_count): 807785 Effect[0] aura 227 EffectAmplitude 500 ms ($t1 = 0.5 sec) over DurationIndex 39 = 3000 ms ($d, Spell.dbc) triggers 806502 0 times before the cast (cast_in_before: false) and exactly 6 times over 3000 ms after a real cast of 807785 (524861 Cursed Form precondition fixture). Reference search 2026-11-26: coa-history 806502: 53642 hits in 19 logs; coabuildhub 806212 says every 0.5 sec for 3 sec."
     },
     {
       "spell": 807785,
@@ -4413,7 +4455,7 @@
           }
         ]
       },
-      "observe_source": "806502 AP scaling 0.12 (rev_20261010_91): at AP 10000, per-strike raw 1316..1326 -> 6 strikes raw 7896..7956 before dummy armor (non-crit). Reference search 2026-11-26: coa-history 806502: 53642 hits."
+      "observe_source": "806502 AP scaling 0.12 (rev_20261010_91): player_attack_power +10000 is additive on base AP 223 (total AP 10223), giving per-strike raw 116..126 + 1226.76 = 1342.76..1352.76 -> 6 strikes raw 8056.56..8116.56 -> post-armor 7350.9..7405.6 (dummy factor 0.912409, non-crit). Reference search 2026-11-26: coa-history 806502: 53642 hits."
     },
     {
       "spell": 807785,
@@ -4546,7 +4588,7 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "806214 Clotting Effect[0] BasePoints 599 DieSides 1 (600), ppl 0, ap_bonus 0.6 (rev_20261010_91): at AP 223, raw 600 + 133.8 = 733.8 before dummy armor (non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 806214: 6236 hits in 16 logs."
+      "observe_source": "806214 Clotting Effect[0] BasePoints 599 DieSides 1 (600) scaled by AscensionScalingBaseData.h:215 {806214, 1} * ScalingBase(60) 0.987431 = 592.46 (AscensionScalingBase.cpp:13-16, 52), ap_bonus 0.6 (rev_20261010_91): at base AP 223, raw 592.46 + 133.8 = 726.26 -> post-armor 662.6 (dummy factor 0.912409, non-crit via 16255 -100%). Reference search 2026-11-26: coa-history 806214: 6236 hits in 16 logs."
     },
     {
       "spell": 807785,
@@ -4600,7 +4642,7 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "806214 Clotting AP scaling 0.6 (rev_20261010_91): at AP 10000, raw 600 + 6000 = 6600 before dummy armor (non-crit). Reference search 2026-11-26: coa-history 806214: 6236 hits in 16 logs."
+      "observe_source": "806214 Clotting AP scaling 0.6 (rev_20261010_91) with AscensionScalingBaseData.h:215 {806214, 1} base 592.46 (AscensionScalingBase.cpp:13-16, 52): player_attack_power +10000 is additive on base AP 223 (total AP 10223), giving raw 592.46 + 6133.8 = 6726.26 -> post-armor 6137.1 (dummy factor 0.912409, non-crit). Reference search 2026-11-26: coa-history 806214: 6236 hits in 16 logs."
     },
     {
       "spell": 806310,
@@ -4768,7 +4810,39 @@
       "expected": 2,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "806310 Effect[1] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 127 (all schools, Spell.dbc). Striker casts 92559 (Physical) 2x in control (count 2) and 2x under real Liquify 806310 (0 new hits -> cumulative 2). Reference search 2026-11-26: coa-history 806310: 14 casts; coabuildhub 806310 matches verbatim."
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806310
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Liquify 806310 is absent in control (0) and active during treatment strikes (1)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 92559,
+              "caster": "striker"
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Confirms striker cast 92559 twice in control (2) and twice more in treatment (4 cumulative)"
+          }
+        ]
+      },
+      "observe_source": "806310 Effect[1] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 127 (all schools, Spell.dbc). Striker casts 92559 (Physical) 2x in control (count 2) and 2x under real Liquify 806310 (0 new hits -> cumulative 2; ally_arm confirms aura 806310 == 1 and striker spell_go_count 2 -> 4). Reference search 2026-11-26: coa-history 806310: 14 casts; coabuildhub 806310 matches verbatim."
     },
     {
       "spell": 806310,
@@ -4802,7 +4876,39 @@
       "expected": 2,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "806310 Effect[1] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 127 (all schools, Spell.dbc). Striker casts 41394 (Holy spell) 2x in control (count 2) and 2x under real Liquify 806310 (0 new hits -> cumulative 2). Reference search 2026-11-26: coa-history 806310: 14 casts; coabuildhub 806310 matches verbatim."
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 806310
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Liquify 806310 is absent in control (0) and active during treatment strikes (1)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_go_count",
+            "fields": {
+              "spell": 41394,
+              "caster": "striker"
+            },
+            "before_expected": 2,
+            "expected": 4,
+            "tolerance": 0,
+            "source": "Confirms striker cast 41394 twice in control (2) and twice more in treatment (4 cumulative)"
+          }
+        ]
+      },
+      "observe_source": "806310 Effect[1] aura 40 SPELL_AURA_DAMAGE_IMMUNITY MiscValue 127 (all schools, Spell.dbc). Striker casts 41394 (Holy spell) 2x in control (count 2) and 2x under real Liquify 806310 (0 new hits -> cumulative 2; ally_arm confirms aura 806310 == 1 and striker spell_go_count 2 -> 4). Reference search 2026-11-26: coa-history 806310: 14 casts; coabuildhub 806310 matches verbatim."
     },
     {
       "spell": 806310,
@@ -4860,6 +4966,7 @@
       "tolerance": 0,
       "wait_ms": 200,
       "expire_ms": 300,
+      "void_on_cast_failure": true,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -4879,32 +4986,6 @@
         ]
       },
       "observe_source": "806310 tooltip states 'preventing you from attacking or casting spells'. gate_cast casts 806310 (6000 ms) between phases: control lands melee swings (>=1), then while 806310 is still active (aura 806310 == 1) 0 additional swings should land (expected_gain 0). Reference search 2026-11-26: coabuildhub 806310 matches verbatim."
-    },
-    {
-      "spell": 806310,
-      "name": "Liquify (can_attack disabled while active)",
-      "kind": "metric_delta",
-      "variant": "no_attack_can_attack",
-      "label_suffix": "no_attack_can_attack",
-      "quote": "Dissipate into a pool of blood, making you immune to damage from spells and attacks, but preventing you from attacking or casting spells and slowing your movement speed by $s3% for $d.",
-      "trigger_spell": 806310,
-      "cast_in_before": false,
-      "target": "caster",
-      "select_dummy": true,
-      "caster_health": [
-        10000,
-        10000
-      ],
-      "metric": "can_attack",
-      "fields": {
-        "target": "dummy"
-      },
-      "before_expected": 1,
-      "expected": 0,
-      "wait_ms": 500,
-      "expire_ms": 500,
-      "void_on_cast_failure": true,
-      "observe_source": "806310 tooltip states 'preventing you from attacking or casting spells'. Reads Unit::IsValidAttackTarget (can_attack) on the dummy before (1) and 500 ms after casting 806310 (expected 0). Reference search 2026-11-26: coabuildhub 806310 matches verbatim."
     },
     {
       "spell": 806310,

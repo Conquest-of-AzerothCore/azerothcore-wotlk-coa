@@ -5146,7 +5146,8 @@
       {
         "claim": "every $t1 sec",
         "labels": [
-          "807785 behaviour_metric_delta tick_period"
+          "807785 behaviour_metric_delta tick_period",
+          "807785 behaviour_metric_delta tick_count"
         ]
       },
       {
@@ -5224,8 +5225,7 @@
       {
         "claim": "preventing you from attacking",
         "labels": [
-          "806310 behaviour_metric_delta no_attack",
-          "806310 behaviour_metric_delta no_attack_can_attack"
+          "806310 behaviour_metric_delta no_attack"
         ]
       }
     ],
@@ -5500,10 +5500,23 @@
   {
     "spell": 807774,
     "clause": "All damage and healing done is increased by $808013s1% at night, while indoors, or in a dungeon.",
-    "labels": [
-      "807774 behaviour_metric_delta night_damage",
-      "807774 behaviour_metric_delta night_healing",
-      "807774 behaviour_metric_delta day_control"
+    "claims": [
+      {
+        "claim": "All damage and healing done is increased by $808013s1% at night",
+        "labels": [
+          "807774 behaviour_metric_delta night_damage",
+          "807774 behaviour_metric_delta night_healing",
+          "807774 behaviour_metric_delta day_control"
+        ]
+      },
+      {
+        "claim": "while indoors",
+        "labels": []
+      },
+      {
+        "claim": "or in a dungeon",
+        "labels": []
+      }
     ],
     "kind": "claim"
   },
