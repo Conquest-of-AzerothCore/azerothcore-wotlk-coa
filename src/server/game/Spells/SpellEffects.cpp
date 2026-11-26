@@ -855,7 +855,9 @@ void Spell::EffectAscensionRefreshAura(SpellEffIndex effIndex)
     if (!target || !effect.MiscValue)
         return;
 
-    Aura* aura = target->GetAura(effect.MiscValue);
+    Aura* aura = target->GetAuraOfRankedSpell(effect.MiscValue, m_caster->GetGUID());
+    if (!aura)
+        aura = target->GetAuraOfRankedSpell(effect.MiscValue);
     if (!aura)
         return;
 
