@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Mortal Wounds procs from triggered direct harmful critical strikes on the tank training dummy (#13062)",
+  "contract": [
+    "Mortal Wounds 504292 ('Your direct harmful critical strikes with spells and abilities now cause the target to bleed')",
+    "had AttributesMask 0 in spell_proc (rev_20260920_50_bloodmage_crit_procs.sql) and lacks SPELL_ATTR3_CAN_PROC_FROM_PROCS.",
+    "Aura::GetProcEffectMask therefore rejected every triggered direct harmful spell that lacks SPELL_ATTR3_NOT_A_PROC,",
+    "including Blood Shard 504115, Hematoma 803392 (triggered every 1000 ms by Final Embrace 524865), Clotting 806214 and",
+    "Purify Blood 573273. Setting AttributesMask 2 (PROC_ATTR_TRIGGERED_CAN_PROC) allows triggered direct harmful crits",
+    "to apply Mortal Wounds 504291 while keeping ProcFlags 69904 (direct spells/abilities, excluding white swings and DoTs).",
+    "This scenario uses a level-60 Bloodmage against Dynamic Tank Training Dummy 967182 with Crit Test Buff 503747 (+100%",
+    "crit chance). Bloodbolt 578305 engages the neutral dummy before 504292 is learned, Final Embrace 524865 triggers",
+    "Hematoma 803392 (AttributesEx3 = 0, no SPELL_ATTR3_NOT_A_PROC) with no 504291 bleed before learning 504292, and once",
+    "504292 is learned while Final Embrace is still ticking, the next triggered Hematoma crit must apply 504291."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 967182,
+      "distance": 3
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    {
+      "action": "set_health",
+      "actor": "bloodmage",
+      "value": 100000,
+      "maximum": 100000,
+      "label": "Keep the tank dummy's swings well above 1 HP so MaintainSession never resets the dummy"
+    },
+    { "action": "learn", "actor": "bloodmage", "spell": 578305 },
+    { "action": "learn", "actor": "bloodmage", "spell": 524865 },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+    {
+      "action": "set_aura",
+      "actor": "bloodmage",
+      "spell": 503747,
+      "stacks": 1,
+      "label": "Crit Test Buff 503747 (+100% crit chance) forces every strike to crit"
+    },
+    {
+      "action": "assert",
+      "label": "The crit fixture is active",
+      "actor": "bloodmage",
+      "metric": "spell_crit_chance",
+      "min": 100
+    },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 578305,
+      "target": "dummy",
+      "label": "Engage the neutral Dynamic Tank Training Dummy before learning Mortal Wounds"
+    },
+    { "action": "wait", "label": "Allow Bloodbolt hit and 1500 ms GCD to clear before Final Embrace", "ms": 2000 },
+    {
+      "action": "cast",
+      "actor": "bloodmage",
+      "spell": 524865,
+      "label": "Cast Final Embrace to trigger Hematoma 803392 every 1000 ms"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: triggered Hematoma 803392 hits the engaged tank dummy",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 803392,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Mortal Wounds, triggered Hematoma crits apply no bleed",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 504291,
+      "caster": "bloodmage",
+      "equals": 0
+    },
+    {
+      "action": "learn",
+      "actor": "bloodmage",
+      "spell": 504292,
+      "label": "Learn Mortal Wounds while Final Embrace continues triggering Hematoma"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: triggered Hematoma 803392 critical strike applies Mortal Wounds 504291",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 504291,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 4000
+    }
+  ]
+}
