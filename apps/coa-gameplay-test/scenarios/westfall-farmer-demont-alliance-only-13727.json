@@ -1,0 +1,155 @@
+{
+  "schema": 1,
+  "name": "Westfall: Farmer Demont offers Riverpaw Genocide to Alliance only (#13727)",
+  "contract": [
+    "#13727 reported Farmer Demont (157002) at Demont's Place in Westfall offering",
+    "Riverpaw Genocide (17011, follow-up 17012) to Horde players. Farmer Demont was",
+    "authored with neutral-friendly faction 35 and both quests had AllowableRaces = 0",
+    "despite being Westfall Stormwind quests (QuestSortID 40, RewardFactionID1 72).",
+    "With faction 12 (Stormwind, hostile to Horde) and AllowableRaces 1101 (Alliance):",
+    "a level 11 Horde character next to spawn 9950108 cannot take 17011, sees dialog",
+    "status 0, and fails to accept 17011; a level 11 Alliance character sees dialog",
+    "status 8, accepts and turns in 17011, and unlocks follow-up 17012."
+  ],
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -11137.8,
+    "y": 1817.78,
+    "z": 38.96,
+    "o": 5.05
+  },
+  "players": [
+    { "id": "horde", "race": 2, "class": 1, "level": 11 },
+    { "id": "alliance", "race": 1, "class": 1, "level": 11 }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "label": "Horde player joins world phase 1 where Farmer Demont spawns",
+      "actor": "horde",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Alliance player joins world phase 1 where Farmer Demont spawns",
+      "actor": "alliance",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "label": "Let login and world spawns settle",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Farmer Demont (157002) is spawned at Demont's Place",
+      "actor": "alliance",
+      "metric": "nearby_creature_count",
+      "entry": 157002,
+      "min": 1,
+      "within_ms": 10000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Horde character cannot take Riverpaw Genocide (17011)",
+      "actor": "horde",
+      "metric": "quest_takeable",
+      "quest": 17011,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Farmer Demont shows no quest dialog status to Horde",
+      "actor": "horde",
+      "metric": "dialog_status",
+      "entry": 157002,
+      "equals": 0
+    },
+    {
+      "action": "quest_accept",
+      "label": "Horde character attempts to accept Riverpaw Genocide (17011) from Farmer Demont",
+      "actor": "horde",
+      "entry": 157002,
+      "quest": 17011
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Horde quest acceptance is rejected (quest status stays NONE)",
+      "actor": "horde",
+      "metric": "quest_status",
+      "quest": 17011,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Control: Alliance character can take Riverpaw Genocide (17011)",
+      "actor": "alliance",
+      "metric": "quest_takeable",
+      "quest": 17011,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: Farmer Demont shows DIALOG_STATUS_AVAILABLE (8) to Alliance",
+      "actor": "alliance",
+      "metric": "dialog_status",
+      "entry": 157002,
+      "equals": 8
+    },
+    {
+      "action": "quest_accept",
+      "label": "Control: Alliance character accepts Riverpaw Genocide (17011)",
+      "actor": "alliance",
+      "entry": 157002,
+      "quest": 17011
+    },
+    {
+      "action": "assert",
+      "label": "Control: 17011 is now active (QUEST_STATUS_INCOMPLETE = 3) for Alliance",
+      "actor": "alliance",
+      "metric": "quest_status",
+      "quest": 17011,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_complete",
+      "label": "Control: mark 17011 objectives complete for Alliance",
+      "actor": "alliance",
+      "quest": 17011
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Control: Alliance character turns in 17011 to Farmer Demont",
+      "actor": "alliance",
+      "entry": 157002,
+      "quest": 17011
+    },
+    {
+      "action": "assert",
+      "label": "Control: 17011 is rewarded for Alliance",
+      "actor": "alliance",
+      "metric": "quest_rewarded",
+      "quest": 17011,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "Control: follow-up Riverpaw Genocide (17012) is takeable for Alliance",
+      "actor": "alliance",
+      "metric": "quest_takeable",
+      "quest": 17012,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: Farmer Demont offers follow-up 17012 (DIALOG_STATUS_AVAILABLE = 8) to Alliance",
+      "actor": "alliance",
+      "metric": "dialog_status",
+      "entry": 157002,
+      "equals": 8
+    }
+  ]
+}
