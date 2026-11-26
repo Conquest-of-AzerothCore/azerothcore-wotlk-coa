@@ -1,0 +1,213 @@
+{
+  "schema": 1,
+  "name": "Callboard Cache gives body armor of the opener's best armor class (#12200)",
+  "contract": "Ascension (CoA changelog 2025-03-31): 'Caches/Spoils Armor Type acquisition based on proficiencies of classes improved.' #12200 reported a Mail-wearing Witch Hunter tank receiving Leather from Callboard Caches. AscensionCallboardCache::PickReward checked CanUseItem and spec primary stats without excluding lower body-armor classes; in cache 1615001, 65 of ~100 Agility-primary items wearable by a Mail class are Leather (plus 11 Cloth), so 10 opens without filtering yield lower armor >99.9% of the time. Expected: a level 60 Witch Hunter (class 15, Mail proficiency) in Witchknight spec (ChrSpecs 97, Agility/Stamina) opening ten Heroic Dungeon Callboard Caches (1615001) receives ten pool items and zero Cloth or Leather body armor (below_armor_class: 3).",
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -8914.0,
+    "y": -133.0,
+    "z": 80.6
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks and level scaling settle",
+      "ms": 3000
+    },
+    {
+      "action": "specialization",
+      "actor": "p",
+      "id": 97,
+      "label": "p picks Witchknight (ChrSpecs 97, Agility and Stamina)"
+    },
+    {
+      "action": "add_item",
+      "label": "An 18-slot bag so all ten cache rewards fit in bags",
+      "actor": "p",
+      "item": 14156
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 14156,
+      "slot": 19
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 1615001,
+      "count": 10
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: p holds ten Heroic Dungeon Callboard Caches",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 10,
+      "within_ms": 2000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 9,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 8,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 7,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 6,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 5,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 4,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 2,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "open_item",
+      "actor": "p",
+      "item": 1615001
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 1615001,
+      "equals": 0,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The ten caches put ten pool items in p's bags",
+      "actor": "p",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "equals": 10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: none is cloth or leather body armor (below Mail = 3)",
+      "actor": "p",
+      "metric": "carried_pool_item_count",
+      "cache": 1615001,
+      "table": "callboard",
+      "below_armor_class": 3,
+      "equals": 0
+    }
+  ]
+}

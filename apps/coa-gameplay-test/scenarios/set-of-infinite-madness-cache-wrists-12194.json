@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Armor Cache for Set of Infinite Madness grants its wrists piece too (#12194)",
+  "contract": "ItemSet.dbc 61889 (Set of Infinite Madness) has nine pieces: 774033-774041, where 774041 is the wrists piece (InventoryType 9). VanityCollection.dbc row 68366 for cache 774042 listed only 774033-774040, so 06_ethereal_bazaar_set_caches.sql omitted 774041. rev_20261126_12194 adds (774042, 774041, 8, 1) to ethereal_bazaar_set_cache. Expected: opening cache 774042 hands out all nine pieces including wrists 774041 and consumes the cache.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 774042
+    },
+    {
+      "action": "add_item",
+      "label": "An 18-slot bag for the nine pieces",
+      "actor": "p",
+      "item": 14156
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 14156,
+      "slot": 19
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: at least nine slots are free",
+      "actor": "p",
+      "metric": "free_inventory_slots",
+      "min": 9
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Set of Infinite Madness cache",
+      "actor": "p",
+      "item": 774042,
+      "spell": 60034
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "the cache opens without being refused",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 60034,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: wrists piece 774041 is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 774041,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "head piece 774033 is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 774033,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "shoulders piece 774040 is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 774040,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the cache itself is consumed",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 774042,
+      "equals": 0
+    }
+  ]
+}

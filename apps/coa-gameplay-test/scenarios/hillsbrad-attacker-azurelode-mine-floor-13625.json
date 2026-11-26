@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Hillsbrad Attacker in Azurelode Mine stands on the mine floor instead of underground (#13625)",
+  "contract": "#13625 reported a hostile Hillsbrad Attacker (entry 41756, guid 9950759) spawning underground in Azurelode Mine near (-845.471, 106.090, 5.307). At (-847.8, 102.6), the Md_Goldmine_Variantb.wmo tunnel floor is at z 6.0199 while rev_20261027_84_coa_hillsbrad_restore.sql placed guid 9950759 at z 4.02 (2.00 yd below the floor). rev_20261126_13625 lifts it to z 6.020. Expected: guid 9950759 loads at (-847.8, 102.6, 6.020), stands on the mine floor with headroom to the tunnel ceiling.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -845.471,
+    "y": 106.09,
+    "z": 5.307,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hillsbrad Attacker 9950759 stands on the mine floor at z 6.020 instead of 4.02",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -847.8,
+      "y": 102.6,
+      "z": 6.02,
+      "max": 0.3,
+      "guid": 9950759,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Hillsbrad Attacker 9950759 rests on the WMO floor instead of 2 yd below it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.3,
+      "guid": 9950759,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "Hillsbrad Attacker 9950759 is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 9950759,
+      "spawn_type": "creature"
+    },
+    {
+      "action": "assert",
+      "label": "tunnel ceiling sits above Hillsbrad Attacker 9950759",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 3.0,
+      "guid": 9950759,
+      "spawn_type": "creature"
+    }
+  ]
+}

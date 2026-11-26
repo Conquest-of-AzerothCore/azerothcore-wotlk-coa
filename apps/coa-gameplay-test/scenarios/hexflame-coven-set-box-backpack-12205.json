@@ -1,0 +1,100 @@
+{
+  "schema": 1,
+  "name": "Eldritch Rites of the Hexflame Coven set box includes Eldritch Embrace backpack (#12205)",
+  "contract": "VanityCollection.dbc row 64805 for Eldritch Embrace of the Hexflame Coven (298156) states it is part of the Eldritch Rites of the Hexflame Coven set (box 298084), and rev_20261024_01 zeroed its individual Vanity Store price, but 06_ethereal_bazaar_set_caches.sql listed only the nine armor pieces (idx 0-8). rev_20261126_12205 adds (298084, 298156, 9, 1) to ethereal_bazaar_set_cache. Expected: opening box 298084 hands out the armor pieces and backpack 298156, and consumes the box.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "add_item",
+      "actor": "p",
+      "item": 298084
+    },
+    {
+      "action": "add_item",
+      "label": "An 18-slot bag for the ten pieces",
+      "actor": "p",
+      "item": 14156
+    },
+    {
+      "action": "equip",
+      "actor": "p",
+      "item": 14156,
+      "slot": 19
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: at least ten slots are free",
+      "actor": "p",
+      "metric": "free_inventory_slots",
+      "min": 10
+    },
+    {
+      "action": "use_item",
+      "label": "Open the Eldritch Rites of the Hexflame Coven set box",
+      "actor": "p",
+      "item": 298084,
+      "spell": 60034
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "the set box opens without being refused",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 60034,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Eldritch Embrace backpack 298156 is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 298156,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "head piece 298090 is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 298090,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "wrists piece 298144 is handed out",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 298144,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "the set box itself is consumed",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 298084,
+      "equals": 0
+    }
+  ]
+}
