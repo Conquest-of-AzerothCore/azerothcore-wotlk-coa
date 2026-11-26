@@ -2368,6 +2368,2681 @@
       "expire_ms": 500,
       "void_on_cast_failure": true,
       "observe_source": "Mucking Around 681444 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER, EffectMiscValue 14 (SPELLMOD_COST), EffectBasePoints 99 + DieSides 1 = +100% ($s1) on EffectSpellClassMask[2] 256 = Scarlet Delirium 803688 (Spell.dbc PowerType -2 POWER_HEALTH, ManaCost 10, ManaCostPercentage 20, CastingTimeIndex 5 = 2000 ms). Bloodmage (class 20, fallback_class 11 Druid, CoA.ClassLevelSixtyStats.Enable 0) level-60 BaseHP = 65 (rev_20260903_01_live_class_baseline.sql:928) + 1483 (player_class_stats.sql:769) - 44 (player_class_stats.sql:710) = 1504 via rev_20260912_00_custom_class_stat_progression.sql. SpellInfo::CalcPowerCost (SpellInfo.cpp:3205-3214) computes 10 + int32(CalculatePct(1504, 20)) = 10 + 300 = 310 health before 681444, and 310 * 2 = 620 health after SPELLMOD_COST +100%. With caster_health [10000, 10000], regen off, target caster (no enemies in range so 803688 deals no leech), wait_ms 2500 (500 ms buffer past the 2000 ms before cast): health reads 9690 before (control) and 9380 after a real learn of 681444 (exact integer match, excluding 0% = 9690 and doubled +200% = 9070). Reference search 2026-11-26: see cast_held."
+    },
+    {
+      "spell": 504819,
+      "name": "Veinburst (Requires Mortal Form: allowed in Mortal Form, refused in Blood Curse 562720)",
+      "kind": "metric_delta",
+      "variant": "mortal_form_gate",
+      "label_suffix": "mortal_form_gate",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "trigger_spell": 504819,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "cast_power": 1000,
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504819
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Veinburst 504819 (Spell.dbc ExcludeCasterAuraSpell 802877; CastingTimeIndex 5 = 2000 ms, PowerType 1 Rage cost 300, CategoryRecoveryTime 15000 ms). AscensionBloodmageTalents.cpp:276-293 SyncCursedFormRequirement applies 802877 while in restricting Cursed Form (Blood Curse 562720, DurationIndex 9 = 30000 ms). Before phase (Mortal Form, no 562720): 504819 cast succeeds (cast_failure = 0). After phase (real cast of 562720 at caster): 504819 is refused with SPELL_FAILED_CASTER_AURASTATE (22; Spell.cpp:5951). Reference search 2026-11-26: coa-history 504819: 961 SPELL_CAST_START / 909 SPELL_DAMAGE across 14 logs; ~/CoaServer/reference skill_line_ability.csv lists 504819 under skill 74."
+    },
+    {
+      "spell": 504819,
+      "name": "Veinburst (Shadow damage at reference stats: 992-1146)",
+      "kind": "metric_delta",
+      "variant": "damage_base",
+      "label_suffix": "damage_base",
+      "quote": "Blast an enemy, dealing ${$m1+0+$AP*.25+$sps*0.85)} Shadow damage.",
+      "trigger_spell": 504819,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504819,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 1069,
+      "after_at_least": 992,
+      "after_at_most": 1146,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Veinburst 504819 (level 58/60 rank of 504260, Spell.dbc Effect[0] SPELL_EFFECT_SCHOOL_DAMAGE, SchoolMask 32 Shadow, BasePoints 895, DieSides 155, RealPointsPerLevel 20.725, BaseLevel 58, MaxLevel 62; CastingTimeIndex 5 = 2000 ms). Level 60 ppl = int32(2 * 20.725) = 41 -> base roll 937..1091. pending_db_world/rev_20261010_91_bloodmage_coefficients.sql sets spell_bonus_data (504260, direct_bonus=0.85, ap_bonus=0.25). At reference stats AP = 223, Shadow SP = 0: 937..1091 + 223 * 0.25 (55.75) = 992.75..1146.75 -> int32 [992, 1146]. Precondition fixtures: 823764 beeg spellpen (no partial resists), 16255 -100% crit (non-crit hit). Control: uncast before phase reads 0. Paired with damage_sp and damage_ap. Reference search 2026-11-26: coa-history 504819: 909 SPELL_DAMAGE across 14 logs (min 1476, max 35258); ~/CoaServer/reference skill_line_ability.csv lists 504819."
+    },
+    {
+      "spell": 504819,
+      "name": "Veinburst (Shadow damage at +20000 SP: 17992-18146)",
+      "kind": "metric_delta",
+      "variant": "damage_sp",
+      "label_suffix": "damage_sp",
+      "quote": "Blast an enemy, dealing ${$m1+0+$AP*.25+$sps*0.85)} Shadow damage.",
+      "trigger_spell": 504819,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "cast_power": 1000,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504819,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 18069,
+      "after_at_least": 17992,
+      "after_at_most": 18146,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Shadow SP scaling arm for Veinburst 504819 (${$m1+0+$AP*.25+$sps*0.85)}): base roll 937..1091 + 223 * 0.25 (55.75) + 20000 * 0.85 (17000) = 17992.75..18146.75 -> int32 [17992, 18146] (+17000 over base proves 0.85 Shadow SP coefficient; player_spell_power hit_arm reads Shadow SP for spell_bonus_data). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 504819,
+      "name": "Veinburst (Shadow damage at +980 AP: 1237-1391)",
+      "kind": "metric_delta",
+      "variant": "damage_ap",
+      "label_suffix": "damage_ap",
+      "quote": "Blast an enemy, dealing ${$m1+0+$AP*.25+$sps*0.85)} Shadow damage.",
+      "trigger_spell": 504819,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          35785,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504819,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 1314,
+      "after_at_least": 1237,
+      "after_at_most": 1391,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP scaling arm for Veinburst 504819 (${$m1+0+$AP*.25+$sps*0.85)}): Attack Power 980 (35785, aura 99 +980 AP, precondition fixture) raises AP from 223 to 1203 -> 937..1091 + 1203 * 0.25 (300.75) = 1237.75..1391.75 -> int32 [1237, 1391], completely disjoint from base [992, 1146] (+245 proves 0.25 AP coefficient). Reference search 2026-11-26: see damage_base."
+    },
+    {
+      "spell": 504819,
+      "name": "Veinburst (+25% damage to bleeding targets)",
+      "kind": "hit_ratio",
+      "variant": "bleeding_bonus",
+      "label_suffix": "bleeding_bonus",
+      "quote": "Deals $707706s1% increased damage to bleeding targets.",
+      "expected": 1.25,
+      "observe_spell": 504819,
+      "learn": [
+        504819,
+        504291
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ],
+        "casts": [
+          504291
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$707706s1 = 25 (707706 Effect[0] BasePoints 24 + DieSides 1 = 25, Spell.dbc; AscensionBloodmageSecondary.cpp:277-281 multiplies Veinburst hit.damage by 1.25f when target->HasAuraState(AURA_STATE_BLEEDING)). Control casts Veinburst 504819 at unbleeding dummy with 823764 spellpen and +20000 SP (non-crit). Treatment casts Mortal Wounds 504291 (instant, 0 cost, Mechanic 15 bleed, DurationIndex 32 = 6000 ms) on dummy before each Veinburst cast. Expected ratio 1.25 (+25%; G-19 band 23% to 27% excludes 0% and 50%). Reference search 2026-11-26: coa-history 504819: 909 SPELL_DAMAGE across 14 logs; 707706: 0 events (passive)."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (Requires Mortal Form: allowed in Mortal Form, refused in Blood Curse 562720)",
+      "kind": "metric_delta",
+      "variant": "mortal_form_gate",
+      "label_suffix": "mortal_form_gate",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "trigger_spell": 572575,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 572575
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "observe_source": "Dark Liturgy 572575 (Spell.dbc ExcludeCasterAuraSpell 802877; CastingTimeIndex 5 = 2000 ms, 15% health cost). Before phase (Mortal Form, no 562720): cast succeeds (cast_failure = 0). After phase (real cast of Blood Curse 562720 applying 802877): refused with SPELL_FAILED_CASTER_AURASTATE (22; Spell.cpp:5951). Reference search 2026-11-26: coa-history 572575: 652 SPELL_CAST_START / 5714 SPELL_HEAL across 4 logs; ~/CoaServer/reference skill_line_ability.csv lists 572575 under skill 500."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (base heal at reference stats: 430-452)",
+      "kind": "metric_delta",
+      "variant": "heal_base",
+      "label_suffix": "heal_base",
+      "quote": "Form a blood bond, healing a friendly target for ${$m1+0+$SP*0.35+$SPI*0.25}",
+      "trigger_spell": 572575,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 572575,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 441,
+      "after_at_least": 430,
+      "after_at_most": 452,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Liturgy 572575 (rank 5 level 56/60 of 800781, Spell.dbc Effect[0] SPELL_EFFECT_HEAL, BasePoints 378, DieSides 23, RealPointsPerLevel 5.88, BaseLevel 56, MaxLevel 64; CastingTimeIndex 5 = 2000 ms). Level 60 ppl = int32(4 * 5.88) = 23 -> base roll 402..424. rev_20261010_91_bloodmage_coefficients.sql sets spell_bonus_data (800781, direct_bonus=0.35); AscensionBloodmageVitality.cpp:120-121 adds Spirit * 0.25. At reference stats SP = 0, Spirit = 114: 402..424 + 114 * 0.25 (28.5) = 430.5..452.5 -> int32 [430, 452]. Fixture 16255 -100% crit ensures non-crit heal. Control: uncast before phase reads 0. Paired with heal_sp and heal_spirit. Reference search 2026-11-26: coa-history 572575: 5714 SPELL_HEAL (mean 684)."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (heal at +20000 SP: 7430-7452)",
+      "kind": "metric_delta",
+      "variant": "heal_sp",
+      "label_suffix": "heal_sp",
+      "quote": "Form a blood bond, healing a friendly target for ${$m1+0+$SP*0.35+$SPI*0.25}",
+      "trigger_spell": 572575,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 572575,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 7441,
+      "after_at_least": 7430,
+      "after_at_most": 7452,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for Dark Liturgy 572575 (${$m1+0+$SP*0.35+$SPI*0.25}): base roll 402..424 + 114 * 0.25 (28.5) + 20000 * 0.35 (7000) = 7430.5..7452.5 -> int32 [7430, 7452] (+7000 over base proves 0.35 SP coefficient; player_spell_power hit_arm satisfies spell_bonus_data check). Reference search 2026-11-26: see heal_base."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (heal at +5000 Spirit fixture: 1718-1740)",
+      "kind": "metric_delta",
+      "variant": "heal_spirit",
+      "label_suffix": "heal_spirit",
+      "quote": "Form a blood bond, healing a friendly target for ${$m1+0+$SP*0.35+$SPI*0.25}",
+      "trigger_spell": 572575,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          12177,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          12177,
+          0,
+          5000
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 572575,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1729,
+      "after_at_least": 1718,
+      "after_at_most": 1740,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Spirit scaling arm for Dark Liturgy 572575 (${$m1+0+$SP*0.35+$SPI*0.25}): Spirit 12177 (aura 29 misc 4, amount set to 5000, precondition fixture) with race 1 The Human Spirit (+3%) raises Spirit from 114 to 114 + 5000 * 1.03 = 5264 (Witch Doctor 567736 precedent). 402..424 + 5264 * 0.25 (1316) = 1718..1740 (disjoint from base [430, 452]; proves 0.25 Spirit coefficient in AscensionBloodmageVitality.cpp:120-121). Reference search 2026-11-26: see heal_base."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (bounces up to 10 nearby allies, capped at 10 of 16 candidates)",
+      "kind": "heal_sum",
+      "variant": "bounce_cap",
+      "label_suffix": "bounce_cap",
+      "quote": "bouncing to up to $i nearby allies",
+      "learn": [
+        572575
+      ],
+      "allies": [
+        {
+          "id": "ally1",
+          "dx": 2,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 100000
+        },
+        {
+          "id": "ally2",
+          "dx": 3,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 100000
+        },
+        {
+          "id": "ally3",
+          "dx": 4,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 100000
+        },
+        {
+          "id": "ally4",
+          "dx": 5,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 100000
+        },
+        {
+          "id": "ally5",
+          "dx": 6,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 100000
+        },
+        {
+          "id": "ally6",
+          "dx": 7,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 100000
+        },
+        {
+          "id": "ally7",
+          "dx": 8,
+          "dy": 0,
+          "grouped": true,
+          "health": 1000,
+          "maximum": 100000
+        }
+      ],
+      "creatures": [
+        {
+          "id": "c1",
+          "entry": 631,
+          "distance": 9,
+          "faction": 35
+        },
+        {
+          "id": "c2",
+          "entry": 631,
+          "distance": 10,
+          "faction": 35
+        },
+        {
+          "id": "c3",
+          "entry": 631,
+          "distance": 11,
+          "faction": 35
+        },
+        {
+          "id": "c4",
+          "entry": 631,
+          "distance": 12,
+          "faction": 35
+        },
+        {
+          "id": "c5",
+          "entry": 631,
+          "distance": 13,
+          "faction": 35
+        },
+        {
+          "id": "c6",
+          "entry": 631,
+          "distance": 14,
+          "faction": 35
+        },
+        {
+          "id": "c7",
+          "entry": 631,
+          "distance": 15,
+          "faction": 35
+        },
+        {
+          "id": "c8",
+          "entry": 631,
+          "distance": 16,
+          "faction": 35
+        }
+      ],
+      "casts": [
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        },
+        {
+          "spell": 572575,
+          "target": "caster",
+          "watch_ms": 2500
+        }
+      ],
+      "checks": [
+        {
+          "name": "bounce_cap",
+          "judge": "cap",
+          "spell": 572575,
+          "expected": 180,
+          "witness": "treatment"
+        }
+      ],
+      "observe_source": "Dark Liturgy 572575 MaxAffectedTargets = 10 ($i = 10; Effect[0] TargetA 21 + TargetB 31 TARGET_UNIT_DEST_AREA_ALLY, RadiusIndex 20 = 25 yd; Spell.dbc). 16 eligible friendly units (caster + 7 grouped allies at 2-8 yd + 8 assistable faction-35 creatures entry 631 type_flags 0x1000 at 9-16 yd, all well inside 25 yd). 18 real casts at caster expect 180 heals (10/cast), against 288 if uncapped. Witness: every unit takes at least one heal (probability a unit is skipped across 18 random draws of 10 of 16 is (6/16)^18 = 2.2e-8 per unit). Note: TargetA 21 adds caster unconditionally while TargetB 31 calls RandomResize(targets, 10) over all 16 units before deduplication (Spell.cpp:1419-1425), so each cast heals 11 targets with probability 6/16 (expected ~186.75 heals; probability of rolling exact 180 = (10/16)^18 = 2.1e-4 per run, < 0.05% flip risk per pair) and this entry truthfully alerts on the TargetA+TargetB cap overrun. Reference search 2026-11-26: coa-history 572575: 5714 heals across 652 casts (~8.8 heals/cast)."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (applies Blood Rituals 706623 to primary and nearby allies)",
+      "kind": "metric_delta",
+      "variant": "blood_rituals_apply",
+      "label_suffix": "blood_rituals_apply",
+      "quote": "and applying Blood Rituals to them",
+      "trigger_spell": 572575,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "ally",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 706623,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "ally2"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 706623,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Dark Liturgy 572575 Effect[1] triggers Blood Rituals 706623 (TargetB 31, 25 yd) on nearby ally2 too."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Liturgy 572575 Effect[1] SPELL_EFFECT_TRIGGER_SPELL 706623 (Blood Rituals, DurationIndex 18 = 20000 ms, TargetA 21 + TargetB 31, RadiusIndex 20 = 25 yd; Spell.dbc). Uncast before phase: both ally and ally2 lack 706623 (0). After real cast of 572575 at ally: both ally and nearby ally2 carry Blood Rituals 706623 (1). Reference search 2026-11-26: coa-history 706623: 0 events (SPELL_ATTR0_DO_NOT_LOG); 704119 Blood Rituals heal: 2742 SPELL_HEAL across 11 logs."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (healing for less for each target struck: 0.95x EffectDamageMultiplier)",
+      "kind": "metric_delta",
+      "variant": "bounce_decay",
+      "label_suffix": "bounce_decay",
+      "quote": "healing for less for each target struck.",
+      "trigger_spell": 572575,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "ally",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_count",
+      "fields": {
+        "spell": 572575,
+        "target": "ally2"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 572575,
+              "target": "ally"
+            },
+            "source": "Primary target ally heal of Dark Liturgy 572575 at +20000 SP (non-crit)."
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "count_metric": "spell_heal_count",
+            "fields": {
+              "spell": 572575,
+              "target": "ally2"
+            },
+            "source": "Second target ally2 heal of Dark Liturgy 572575 at +20000 SP (non-crit); Spell.dbc EffectDamageMultiplier[0] = 0.95."
+          }
+        ],
+        "ratios": [
+          {
+            "numerator": 1,
+            "denominator": 0,
+            "expected": 0.95,
+            "tolerance": 0.02,
+            "source": "Spell.dbc 572575 EffectDamageMultiplier[0] = 0.95 (-5% per bounce, tooltip 'healing for less for each target struck'); excludes 1.00 (no decay)."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Dark Liturgy 572575 EffectDamageMultiplier[0] = 0.95 (Spell.dbc) corresponds to tooltip 'healing for less for each target struck'. Casts 572575 at ally with nearby ally2 at +20000 SP and 16255 -100% crit (each base heal ~7441, die spread 22 = 0.3%). Checks ally2/ally heal ratio against 0.95 +- 0.02 (0.93..0.97, strictly excluding 1.00 flat/no-decay). Note: EffectChainTarget[0] = 0 and Spell::EffectHeal never multiplies by m_damageMultipliers, so if the server heals all targets equally (ratio ~1.00) this entry truthfully alerts. Reference search 2026-11-26: coa-history 572575: 5714 heals across 4 logs."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (Bloodmoon Blast heals marked ally for base formula 183, unmarked 0)",
+      "kind": "metric_delta",
+      "variant": "blood_rituals_heal_base",
+      "label_suffix": "blood_rituals_heal_base",
+      "quote": "@s:706624:0@",
+      "trigger_spell": 500125,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704119,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 183,
+      "after_at_least": 182,
+      "after_at_most": 184,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 2,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ],
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 704119,
+              "target": "ally2"
+            },
+            "before_expected": 0,
+            "expected": 0,
+            "tolerance": 0,
+            "source": "Unmarked ally2 (no Blood Rituals 706623) must receive 0 heals from 704119 (AscensionBloodmageSecondary.cpp:493-500)."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Embedded 706624 tooltip: 'Causes Bloodmoon Blast to heal marked allies for ${$704119m1+$704119ppl1+$BH*0.07+$STA*0.085}'. Spell.dbc 704119 Effect[0] SPELL_EFFECT_HEAL BasePoints 3, DieSides 1, RealPointsPerLevel 3.7, BaseLevel 13, MaxLevel 0 -> level 60 base = 4 + int32(47 * 3.7) = 177. At reference stats BH = 0, Stamina = 78: 177 + 78 * 0.085 = 183.63 -> int32 183 (band [182, 184] excludes 177 without Stamina term). Precondition fixture: Blood Rituals 706623 set on ally only (ally2 left unmarked, verified 0 heals). Casts real Bloodmoon Blast 500125 (1500 ms cast) at dummy; AscensionBloodmageSecondary.cpp:243-244 casts 704119. Paired with blood_rituals_heal_sp and blood_rituals_heal_sta. Reference search 2026-11-26: coa-history 704119: 2742 SPELL_HEAL across 11 logs (min 17, max 610, mean 212)."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (Bloodmoon Blast 704119 heal at +20000 SP: 1583)",
+      "kind": "metric_delta",
+      "variant": "blood_rituals_heal_sp",
+      "label_suffix": "blood_rituals_heal_sp",
+      "quote": "@s:706624:0@",
+      "trigger_spell": 500125,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704119,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 1583,
+      "after_at_least": 1582,
+      "after_at_most": 1585,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "BH scaling arm for 704119 (${$704119m1+$704119ppl1+$BH*0.07+$STA*0.085}): base 177 + 20000 * 0.07 (1400) + 78 * 0.085 (6.63) = 1583.63 -> int32 [1582, 1585] (truthfully alerts if 704119 lacks a 0.07 spell_bonus_data row). Reference search 2026-11-26: see blood_rituals_heal_base."
+    },
+    {
+      "spell": 572575,
+      "name": "Dark Liturgy (Bloodmoon Blast 704119 heal at +5000 Stamina: 608)",
+      "kind": "metric_delta",
+      "variant": "blood_rituals_heal_sta",
+      "label_suffix": "blood_rituals_heal_sta",
+      "quote": "@s:706624:0@",
+      "trigger_spell": 500125,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          706305,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          706305,
+          0,
+          5000
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 704119,
+        "target": "ally"
+      },
+      "before_expected": 0,
+      "expected": 608,
+      "after_at_least": 607,
+      "after_at_most": 610,
+      "wait_ms": 2200,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 1,
+        "ally_health": [
+          1000,
+          100000
+        ],
+        "ally_auras": [
+          [
+            706623,
+            1,
+            "ally",
+            "caster"
+          ]
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Stamina scaling arm for 704119 (${$704119m1+$704119ppl1+$BH*0.07+$STA*0.085}): QA Test Stamina 706305 (amount 5000, precondition fixture) raises Stamina from 78 to 5078 -> 177 + 5078 * 0.085 (431.63) = 608.63 -> int32 [607, 610] (truthfully alerts if 704119 lacks Stamina scaling). Reference search 2026-11-26: see blood_rituals_heal_base."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (Requires Mortal Form: allowed in Mortal Form, refused in Blood Curse 562720)",
+      "kind": "metric_delta",
+      "variant": "mortal_form_gate",
+      "label_suffix": "mortal_form_gate",
+      "quote": "$?a802877[][]Requires Mortal Form",
+      "trigger_spell": 800785,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        562720
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 800785
+      },
+      "before_expected": 0,
+      "expected": 22,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "observe_source": "Sacrificial Rite 800785 (Spell.dbc ExcludeCasterAuraSpell 802877, Attributes 65536 SPELL_ATTR0_NOT_SHAPESHIFTED, CastingTimeIndex 4 = 1000 ms, ManaCost 250 health). Before phase (Mortal Form): cast succeeds (cast_failure = 0). After phase (real cast of Blood Curse 562720 applying shapeshift form 57 and 802877): refused with SPELL_FAILED_CASTER_AURASTATE (22; Spell.cpp:5951 checks ExcludeCasterAuraSpell before CheckShapeshift). Reference search 2026-11-26: coa-history 800785/800786/573250/806163: 0 events in 186 logs; bindmysoul & advancement.tsv list 800785 Sacrificial Rite (Blood tree)."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (melee haste +20%: 3300 ms -> 2750 ms)",
+      "kind": "metric_delta",
+      "variant": "haste_melee",
+      "label_suffix": "haste_melee",
+      "quote": "increasing your haste by $s1% for $d.",
+      "trigger_spell": 800785,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "attack_time_ms",
+      "fields": {
+        "hand": 0
+      },
+      "before_expected": 3300,
+      "expected": 2750,
+      "tolerance": 2,
+      "wait_ms": 1500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Sacrificial Rite 800785 Effect[0] aura 192 SPELL_AURA_MOD_MELEE_RANGED_HASTE BasePoints 19 + 1 = +20% ($s1 = 20; Spell.dbc). Sanguine weapon set equips War Staff 2535 (speed_ms 3300). Before cast: attack_time_ms = 3300. After real cast of 800785 (1000 ms cast + 500 ms wait): 3300 / 1.20 = 2750 ms (tolerance 2 excludes 0% = 3300, 18% = 2796, 22% = 2705, 40% = 2357). Paired with haste_spell_held and haste_spell_ended. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (spell haste +20%: 2000 ms Dark Liturgy still casting at 1550 ms)",
+      "kind": "metric_delta",
+      "variant": "haste_spell_held",
+      "label_suffix": "haste_spell_held",
+      "quote": "increasing your haste by $s1% for $d.",
+      "trigger_spell": 572575,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        800785
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 1550,
+      "expire_ms": 2500,
+      "game_time": {
+        "after": [
+          1520,
+          1620
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Sacrificial Rite 800785 Effect[2] aura 216 SPELL_AURA_HASTE_SPELLS BasePoints 19 + 1 = +20% ($s1 = 20; Spell.dbc). Dark Liturgy 572575 has 2000 ms base cast time -> 2000 / 1.20 = 1666.7 ms with +20% spell haste (10% band on 333 ms cut: [1633, 1700] ms; 10% band on 1667 ms: [1500, 1833] ms). At game_time [1520, 1620] ms, still casting (1) in both arms, excluding excessive haste (> +25% or instant). Paired with haste_spell_ended. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (spell haste +20%: 2000 ms Dark Liturgy finished by 1780 ms)",
+      "kind": "metric_delta",
+      "variant": "haste_spell_ended",
+      "label_suffix": "haste_spell_ended",
+      "quote": "increasing your haste by $s1% for $d.",
+      "trigger_spell": 572575,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        800785
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1700,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "casting",
+      "fields": {},
+      "before_expected": 1,
+      "expected": 0,
+      "wait_ms": 1780,
+      "expire_ms": 2500,
+      "game_time": {
+        "after": [
+          1730,
+          1830
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Upper cast-time bracket for Sacrificial Rite 800785 Effect[2] (+20% spell haste) on 2000 ms Dark Liturgy 572575 (reduced to 1666.7 ms). At game_time [1730, 1830] ms (< 1833 ms = 1667 * 1.1), control without 800785 is still casting (1) while treatment with real 800785 has finished (0). Paired with haste_spell_held. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (haste aura lasts 15000 ms: held at 15100 ms, gone at 16900 ms)",
+      "kind": "metric_delta",
+      "variant": "ritual_duration",
+      "label_suffix": "ritual_duration",
+      "quote": "increasing your haste by $s1% for $d.",
+      "trigger_spell": 800785,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800785
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 15100,
+      "expiry_wait_ms": 1800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          15000,
+          15500
+        ],
+        "expired": [
+          16700,
+          17300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Sacrificial Rite 800785 DurationIndex 8 = 15000 ms ($d), CastingTimeIndex 4 = 1000 ms (aura applies at t=1000 ms, expires at t=16000 ms; Spell.dbc). Reads aura 800785 = 0 before cast, 1 at game_time [15000, 15500] ms (14000-14500 ms elapsed > 13500 ms = 90% of 15000 ms), and 0 at game_time [16700, 17300] ms (15700-16300 ms elapsed < 16500 ms = 110% of 15000 ms). Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (while active, attacker is afflicted with Cursed Blood 573250)",
+      "kind": "metric_delta",
+      "variant": "cursed_blood_applied",
+      "label_suffix": "cursed_blood_applied",
+      "quote": "While active, attackers are afflicted with Cursed Blood.",
+      "trigger_spell": 800785,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "dummy",
+      "cast_in_before": false,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 2653,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 1500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 573250,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Sacrificial Rite 800785 Effect[1] aura 42 PROC_TRIGGER_SPELL 573250 (Cursed Blood; pending_db_world/rev_20260920_44_bloodmage_melee_event_procs.sql sets spell_proc ProcFlags 139944, Chance 100, Cooldown 1000). Dummy casts untriggered Damage 100 (TEST) 2653 at caster in both phases (1500 ms after cast start, 500 ms into 800785). Control (no 800785): dummy reads aura 573250 = 0. Treatment (real 800785): dummy reads aura 573250 = 1. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (end of duration increases healing done by 15% via 800786)",
+      "kind": "metric_delta",
+      "variant": "expiry_healing_done",
+      "label_suffix": "expiry_healing_done",
+      "quote": "At the end of the duration, your healing done is increased by $800786s1%",
+      "trigger_spell": 572575,
+      "target": "caster",
+      "measure_actor": "caster",
+      "setup_casts": [
+        800785
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 17000,
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": 20000,
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 572575,
+        "target": "caster"
+      },
+      "before_expected": 7430,
+      "expected": 15980,
+      "expected_ratio": 2.15,
+      "tolerance": 0.015,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 800786
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "800785 expiry (AscensionBloodmageSecondary.cpp:161-171) casts 800786 at t=16000 ms (present at t=17000+2500 ms)."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$800786s1 = 15 (800786 Effect[0] aura 136 SPELL_AURA_MOD_HEALING_DONE_PERCENT MiscValue 127, BasePoints 14 + DieSides 1 = +15%, DurationIndex 8 = 15000 ms; Spell.dbc). AscensionBloodmageSecondary.cpp:161-171 casts 800786 when 800785 expires naturally (AURA_REMOVE_BY_EXPIRE, 1000 ms cast + 15000 ms duration = 16000 ms). Casts Dark Liturgy 572575 at caster with +20000 SP and 16255 -100% crit: before (no 800785, 800786 absent) 7430..7452; after (800785 cast and waited 17000 ms for natural expiry, ally_arm verifies 800786 == 1) cumulative spell_heal_total = before + 1.15 * before = 2.15 * before (~15980), judged as after / before = 2.15 +- 0.015 (exact +-10% of the +15% bonus; strictly excludes 0% = 2.00 and +30% = 2.30). Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (end-of-duration HoT 800786 base heal over 15s: 1060..1219)",
+      "kind": "metric_delta",
+      "variant": "expiry_hot_base",
+      "label_suffix": "expiry_hot_base",
+      "quote": "and you are healed for ${($800786d*1000/$800786t2)*($800786m2+$800786ppl2+$SP*.2)} over $800786d.",
+      "trigger_spell": 800785,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800786,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1219,
+      "after_at_least": 1060,
+      "after_at_most": 1220,
+      "wait_ms": 32500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Sacrificial Rite 800786 (cast on 800785 expiry at t=16000 ms; DurationIndex 8 = 15000 ms, Effect[1] SPELL_AURA_PERIODIC_HEAL Amplitude 1500 ms -> 10 ticks, BasePoints 101, DieSides 1, RealPointsPerLevel 2.0, BaseLevel 58, MaxLevel 0 -> level 60 tick = 102 + 4 = 106, 10 ticks = 1060; with 800786's own Effect[0] +15% healing done = 10 * floor(106 * 1.15) = 1210..1219). Wait 32500 ms covers 1s cast + 15s ritual + 15s HoT + 1.5s margin; 16255 -100% crit ensures non-crit ticks. Paired with expiry_hot_sp. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (end-of-duration HoT 800786 at +20000 SP: tooltip +0.2/tick)",
+      "kind": "metric_delta",
+      "variant": "expiry_hot_sp",
+      "label_suffix": "expiry_hot_sp",
+      "quote": "and you are healed for ${($800786d*1000/$800786t2)*($800786m2+$800786ppl2+$SP*.2)} over $800786d.",
+      "trigger_spell": 800785,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 800786,
+        "target": "caster"
+      },
+      "before_expected": 0,
+      "expected": 47219,
+      "after_at_least": 41050,
+      "after_at_most": 47230,
+      "wait_ms": 32500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for 800786 (${($800786d*1000/$800786t2)*($800786m2+$800786ppl2+$SP*.2)}): 10 ticks * (106 + 20000 * 0.2) = 41060 unbuffed, or * 1.15 (800786 Effect[0] +15% healing done) = 47219 (band [41050, 47230] strictly excludes stock default 0.1/tick = 21060..24219 and 0 SP = 1060..1219). Truthfully alerts if 800786 lacks a 0.2 dot_bonus spell_bonus_data row. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (800786 buff lasts 15000 ms after 800785 expires)",
+      "kind": "metric_delta",
+      "variant": "expiry_hot_duration",
+      "label_suffix": "expiry_hot_duration",
+      "quote": "and you are healed for ${($800786d*1000/$800786t2)*($800786m2+$800786ppl2+$SP*.2)} over $800786d.",
+      "trigger_spell": 800785,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 800786
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 30100,
+      "expiry_wait_ms": 1800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          30000,
+          30500
+        ],
+        "expired": [
+          31700,
+          32300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Sacrificial Rite 800786 DurationIndex 8 = 15000 ms ($800786d; applied on 800785 expiry at t=16000 ms -> expires at t=31000 ms). Reads aura 800786 = 0 before cast, 1 at game_time [30000, 30500] ms (14000-14500 ms into 800786 > 13500 ms = 90%), and 0 at game_time [31700, 32300] ms (15700-16300 ms < 16500 ms = 110%). Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (Cursed Blood 573250 reduces attacker healing received by 40%)",
+      "kind": "metric_delta",
+      "variant": "cursed_blood_heal_reduction",
+      "label_suffix": "cursed_blood_heal_reduction",
+      "quote": "@ext:@s:573250:0@:ext@",
+      "trigger_spell": 572412,
+      "target": "dummy",
+      "target_entry": 299,
+      "measure_actor": "caster",
+      "setup_casts": [
+        800785
+      ],
+      "setup_target": "caster",
+      "setup_only_after": true,
+      "setup_wait_ms": 1500,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 2653,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 200
+      },
+      "target_casts": [
+        23783
+      ],
+      "enemy_cast_wait_ms": 500,
+      "metric": "spell_heal_total",
+      "fields": {
+        "spell": 23783,
+        "target": "dummy",
+        "caster_entry": 299
+      },
+      "before_expected": 1500,
+      "expected": 2400,
+      "expected_gain": 900,
+      "tolerance": 2,
+      "wait_ms": 500,
+      "expire_ms": 6000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura",
+            "fields": {
+              "spell": 573250,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Verifies Cursed Blood 573250 is absent in control and present on dummy (entry 299) when 23783 is cast in treatment."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Embedded Cursed Blood 573250 Effect[0] aura 118 SPELL_AURA_MOD_HEALING_PCT MiscValue 127, BasePoints -41 + DieSides 1 = -40% ($s1 = 40; Spell.dbc). Both phases cast zero-damage 572412 at Young Wolf 299 (non-mechanical Beast, bloodmage 681304 precedent), have dummy cast untriggered 2653 at caster, then have dummy self-cast fixed 1500 heal Gift of Life 23783 (DmgClass 0, no crit). Reads spell_heal_total of 23783 (caster_entry 299 -> dummy). Control (no 800785, ally_arm confirms 573250 == 0): 1500. Treatment (real 800785 -> 573250 == 1): 1500 * 0.60 = 900 (cumulative 2400, expected_gain 900 +- 2; excludes 0% = 1500 and -80% = 300). Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (Cursed Blood 573250 triggers 806163 Shadow damage when attacker deals damage)",
+      "kind": "metric_delta",
+      "variant": "cursed_blood_damage",
+      "label_suffix": "cursed_blood_damage",
+      "quote": "@ext:@s:573250:0@:ext@",
+      "trigger_spell": 800785,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "caster",
+      "cast_in_before": false,
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 2653,
+        "casts": 2,
+        "gap_ms": 1500,
+        "lead_ms": 1500
+      },
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 806163,
+        "target": "dummy",
+        "school_mask": 32
+      },
+      "before_expected": 0,
+      "expected": 93,
+      "after_at_least": 92,
+      "after_at_most": 95,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Embedded Cursed Blood 573250 Effect[1] aura 42 PROC_TRIGGER_SPELL 806163: tooltip 'dealing damage now causes you to take ${$806163m1+$806163ppl1+$sps*.5+$AP*.1} Shadow Damage'. Spell.dbc 806163 BasePoints 70, DieSides 1, RealPointsPerLevel 0.25, BaseLevel 58 -> level 60 base = 71 + int32(2 * 0.25) = 71; + 223 * 0.1 (22.3) = 93.3 -> [92, 95]. Dummy casts 2653 twice 1500 ms apart (cast 1 applies 573250; cast 2 deals damage while 573250 is active). Truthfully alerts if 573250 lacks a spell_proc row (ProcFlags 0 in DBC) and 806163 never fires. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 800785,
+      "name": "Sacrificial Rite (Cursed Blood 573250 lasts 5000 ms: held at 4600 ms, gone at 5500 ms)",
+      "kind": "metric_delta",
+      "variant": "cursed_blood_duration",
+      "label_suffix": "cursed_blood_duration",
+      "quote": "@ext:@s:573250:0@:ext@",
+      "trigger_spell": 800785,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "select_dummy": true,
+      "measure_actor": "dummy",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "dummy_casts_at_caster": {
+        "spell": 2653,
+        "casts": 1,
+        "gap_ms": 1000,
+        "lead_ms": 1500
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 573250,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 3600,
+      "expiry_wait_ms": 700,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          6050,
+          6450
+        ],
+        "expired": [
+          6700,
+          6980
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Embedded Cursed Blood 573250 DurationIndex 28 = 5000 ms ($d; Spell.dbc). Applied when dummy casts 2653 at t=1500 ms after 800785 cast start (followed by 1000 ms gap_ms + 3600 ms wait_ms = 4600 ms after application) -> expires at t=6500 ms. Reads aura 573250 on dummy = 0 before, 1 at game_time [6050, 6450] ms (4550-4950 ms elapsed > 4500 ms = 90%), and 0 at game_time [6700, 6980] ms (5200-5480 ms elapsed < 5500 ms = 110%), excluding 10% off on both sides. Reference search 2026-11-26: see mortal_form_gate."
+    },
+    {
+      "spell": 300982,
+      "name": "Cursed Strikes (Rotclaw unlearned vs learned at 5850 ms)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_contrast",
+      "label_suffix": "rotclaw_contrast",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 503484,
+      "gate_spell": 300982,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5850,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          5810,
+          5990
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "300982 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 1 SPELLMOD_DURATION BasePoints 49 + DieSides 1 = +50% ($s1 = 50), EffectSpellClassMask[1] 512 = Rotclaw 503484 (DurationIndex 35 = 4000 ms -> 6000 ms with 300982; CasterAuraSpell 524861 set via required_aura_steps precondition fixture; Spell.dbc). Armed with Eternal weapon set via spell_weapon_sets. At game_time [5810, 5990] ms (> 5800 ms = 4000 + 0.9*2000), control without 300982 reads aura 503484 = 0 (expired at 4000 ms) while treatment with real learn of 300982 reads 1. Paired with rotclaw_duration. Reference search 2026-11-26: coa-history 300982: 0 events (passive); bindmysoul & advancement.tsv list 300982 Cursed Strikes (Rank 1, 50%)."
+    },
+    {
+      "spell": 300982,
+      "name": "Cursed Strikes (Rotclaw lasts 6000 ms with Cursed Strikes)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_duration",
+      "label_suffix": "rotclaw_duration",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 503484,
+      "gate_spell": 300982,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 5850,
+      "expiry_wait_ms": 270,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5810,
+          5990
+        ],
+        "expired": [
+          6020,
+          6190
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for 300982 (+50% SPELLMOD_DURATION) on Rotclaw 503484 (4000 ms -> 6000 ms; CasterAuraSpell 524861 precondition fixture; Spell.dbc). With 300982 learned (gate_timing start), reads aura 503484 = 0 before cast, 1 at game_time [5810, 5990] ms (> 5800 ms = 4000 + 0.9*2000), and 0 at game_time [6020, 6190] ms (< 6200 ms = 4000 + 1.1*2000), excluding 10% off on both sides of both the +2000 ms increase and 6000 ms total. Paired with rotclaw_contrast. Reference search 2026-11-26: see rotclaw_contrast."
+    },
+    {
+      "spell": 300982,
+      "name": "Cursed Strikes (Hypovolemic Shock unlearned vs learned at 21900 ms)",
+      "kind": "metric_delta",
+      "variant": "hypovolemic_shock_contrast",
+      "label_suffix": "hypovolemic_shock_contrast",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 572412,
+      "gate_spell": 300982,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 572412,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 21900,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          21800,
+          22400
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "300982 Effect[0] (+50% SPELLMOD_DURATION), EffectSpellClassMask[0] 1048576 = Hypovolemic Shock 572412 (DurationIndex 8 = 15000 ms -> 22500 ms with 300982; Spell.dbc). At game_time [21800, 22400] ms (> 21750 ms = 15000 + 0.9*7500), control without 300982 reads aura 572412 = 0 (expired at 15000 ms) while treatment with real learn of 300982 reads 1. Paired with hypovolemic_shock_duration. Reference search 2026-11-26: coa-history 572412: 72 casts across 4 logs."
+    },
+    {
+      "spell": 300982,
+      "name": "Cursed Strikes (Hypovolemic Shock lasts 22500 ms with Cursed Strikes)",
+      "kind": "metric_delta",
+      "variant": "hypovolemic_shock_duration",
+      "label_suffix": "hypovolemic_shock_duration",
+      "quote": "Increases the duration of Rotclaw and Hypovolemic Shock by $s1%.",
+      "trigger_spell": 572412,
+      "gate_spell": 300982,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 572412,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 21900,
+      "expiry_wait_ms": 1000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          21800,
+          22400
+        ],
+        "expired": [
+          22600,
+          23200
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for 300982 (+50% SPELLMOD_DURATION) on Hypovolemic Shock 572412 (15000 ms -> 22500 ms; Spell.dbc). With 300982 learned (gate_timing start), reads aura 572412 = 0 before cast, 1 at game_time [21800, 22400] ms (> 21750 ms = 15000 + 0.9*7500), and 0 at game_time [22600, 23200] ms (< 23250 ms = 15000 + 1.1*7500), excluding 10% off on both sides. Paired with hypovolemic_shock_contrast. Reference search 2026-11-26: see hypovolemic_shock_contrast."
+    },
+    {
+      "spell": 572783,
+      "name": "Iron Claws (Rotclaw stacks to 2 on 2 casts inside 4s, vs 1 without)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_stacks_two",
+      "label_suffix": "rotclaw_stacks_two",
+      "quote": "Allows Rotclaw's periodic effect to stack up $s1 additional times",
+      "trigger_spell": 503484,
+      "gate_spell": 572783,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        503484
+      ],
+      "setup_wait_ms": 1600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 13000,
+      "void_on_cast_failure": true,
+      "observe_source": "572783 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 31 (SPELLMOD_MAX_AURA_STACKS) BasePoints 1 + DieSides 1 = +2 ($s1 = 2) on Rotclaw 503484 (StackAmount 1 -> 3, 2 charges / 6000 ms recharge; Eternal Curse 800157 precondition fixture keeps CasterAuraSpell 524861 active; Spell.dbc, SpellInfo.cpp:1483). Two real casts of 503484 1600 ms apart (both inside base 4000 ms duration; expire_ms 13000 lets both charges recharge between phases): control without 572783 stays at 1 stack, treatment with real learn of 572783 reaches 2 stacks. Paired with rotclaw_stacks_cap (proving cap = 3). Reference search 2026-11-26: coa-history 572783: 0 events (passive); bindmysoul & advancement.tsv list 572783 Iron Claws."
+    },
+    {
+      "spell": 572783,
+      "name": "Iron Claws (Rotclaw stacks cap at 3 after 4 casts, vs 1 without)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_stacks_cap",
+      "label_suffix": "rotclaw_stacks_cap",
+      "quote": "Allows Rotclaw's periodic effect to stack up $s1 additional times",
+      "trigger_spell": 503484,
+      "gate_spell": 572783,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "setup_casts": [
+        503484,
+        503484,
+        503484
+      ],
+      "setup_wait_ms": 4600,
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 1,
+      "expected": 3,
+      "wait_ms": 500,
+      "expire_ms": 13000,
+      "void_on_cast_failure": true,
+      "observe_source": "Cap check for 572783 Effect[0] (+2 max stacks on Rotclaw 503484: 1 -> 3 stacks, 2 charges / 6000 ms recharge; Eternal Curse 800157 precondition fixture keeps 524861 active; Spell.dbc). Four real casts of 503484 spaced 4600 ms apart (t = 0, 4600, 9200, 13800 ms: charges recharge at 6000 and 12000 ms so all 4 casts succeed, and every gap < 6000 ms Iron Claws duration; expire_ms 13000 recharges both charges between phases): control without 572783 reads 1 stack; treatment with real learn of 572783 caps at 3 stacks (excluding 2 and 4). Paired with rotclaw_stacks_two. Reference search 2026-11-26: see rotclaw_stacks_two."
+    },
+    {
+      "spell": 572783,
+      "name": "Iron Claws (Rotclaw unlearned vs learned at 5850 ms)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_duration_contrast",
+      "label_suffix": "rotclaw_duration_contrast",
+      "quote": "for $s3% longer duration",
+      "trigger_spell": 503484,
+      "gate_spell": 572783,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 5850,
+      "expire_ms": 1000,
+      "game_time": {
+        "after": [
+          5810,
+          5990
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "572783 Effect[2] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 1 SPELLMOD_DURATION BasePoints 49 + DieSides 1 = +50% ($s3 = 50) on Rotclaw 503484 (4000 ms -> 6000 ms; CasterAuraSpell 524861 precondition fixture; Spell.dbc). At game_time [5810, 5990] ms (> 5800 ms = 4000 + 0.9*2000), control reads 0 while treatment with 572783 reads 1. Paired with rotclaw_duration. Reference search 2026-11-26: see rotclaw_stacks_two."
+    },
+    {
+      "spell": 572783,
+      "name": "Iron Claws (Rotclaw lasts 6000 ms with Iron Claws)",
+      "kind": "metric_delta",
+      "variant": "rotclaw_duration",
+      "label_suffix": "rotclaw_duration",
+      "quote": "for $s3% longer duration",
+      "trigger_spell": 503484,
+      "gate_spell": 572783,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "measure_actor": "dummy",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 503484,
+        "caster": "caster"
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 5850,
+      "expiry_wait_ms": 270,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          5810,
+          5990
+        ],
+        "expired": [
+          6020,
+          6190
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for 572783 Effect[2] (+50% SPELLMOD_DURATION) on Rotclaw 503484 (4000 ms -> 6000 ms; Spell.dbc). Reads 0 before cast, 1 at game_time [5810, 5990] ms (> 5800 ms), and 0 at game_time [6020, 6190] ms (< 6200 ms), excluding 10% off on both sides. Paired with rotclaw_duration_contrast. Reference search 2026-11-26: see rotclaw_stacks_two."
+    },
+    {
+      "spell": 572783,
+      "name": "Iron Claws (3 stacks of Rotclaw ignore 9% of enemy armor: +7.12% at 15528 armor)",
+      "kind": "metric_delta",
+      "variant": "armor_ignore_three_stacks",
+      "label_suffix": "armor_ignore_three_stacks",
+      "quote": "and cause you to ignore $s2% of the target's armor per stack.",
+      "trigger_spell": 572551,
+      "gate_spell": 572783,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_attack_power": 40000,
+      "setup_casts": [
+        503484,
+        503484,
+        503484
+      ],
+      "setup_wait_ms": 4600,
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          673,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          673,
+          0,
+          15000
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy"
+      },
+      "before_expected": 2000,
+      "expected": 4142,
+      "expected_ratio": 2.07119,
+      "tolerance": 0.015,
+      "wait_ms": 500,
+      "expire_ms": 13000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 503484,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Verifies 503484 (4s base duration) has 0 stacks in control after 4600 ms setup wait and 3 stacks in treatment (6s duration) when 572551 lands."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 3 (572783 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 23 SPELLMOD_EFFECT3, BasePoints 2 + 1 = +3 on Rotclaw 503484 Effect[2] aura 338 SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, BasePoints -1 + 1 = 0% base -> 3%/stack; Unit.cpp:2463-2468,2487-2488). At 3 stacks = 9% armor ignored. Three setup casts of 503484 spaced 4600 ms apart (respecting 2 charges / 6s recharge; Eternal Curse 800157 precondition fixture keeps 524861/525031 active in both arms; expire_ms 13000 recharges charges between phases); ally_arm verifies 503484 stacks = 0 before (4s base expired after 4600 ms wait, 0% armor ignore) and 3 after (6s duration). Lesser Armor 673 set on dummy to +15000 (total armor = 528 + 15000 = 15528, below 75% cap 16500). Level 60 Classic K = 5500: control kept = 5500 / 21028 = 0.261556; treatment armor = floor(15528 * 0.91) = 14130, kept = 5500 / 19630 = 0.280183; single-hit ratio = 21028 / 19630 = 1.07119 (+7.12%). Cumulative spell_damage_total of non-crit Bloodfang Bite 572551 (SPELL_EFFECT_SCHOOL_DAMAGE, die spread 35 at +40000 AP < 0.35%) reads after / before = 2.07119 +- 0.015 (2.056..2.086, strictly excluding 0% = 2.000, 1 stack 3% = 2.023, 2 stacks 6% = 2.046, and 6 stacks 18% = 2.153). Paired with armor_ignore_one_stack and armor_ignore_unarmored. Reference search 2026-11-26: see rotclaw_stacks_two."
+    },
+    {
+      "spell": 572783,
+      "name": "Iron Claws (1 stack of Rotclaw ignores 3% of enemy armor: +2.27% at 15528 armor)",
+      "kind": "metric_delta",
+      "variant": "armor_ignore_one_stack",
+      "label_suffix": "armor_ignore_one_stack",
+      "quote": "and cause you to ignore $s2% of the target's armor per stack.",
+      "trigger_spell": 572551,
+      "gate_spell": 572783,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_attack_power": 40000,
+      "setup_casts": [
+        503484
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          673,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          673,
+          0,
+          15000
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy"
+      },
+      "before_expected": 2000,
+      "expected": 4045,
+      "expected_ratio": 2.02265,
+      "tolerance": 0.008,
+      "wait_ms": 500,
+      "expire_ms": 7000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 503484,
+              "caster": "caster"
+            },
+            "before_expected": 1,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Verifies 503484 is active at 1 stack in both control (0% armor ignore) and treatment (3% armor ignore) when 572551 lands."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Per-stack linearity check for 572783 Effect[1] (3% armor ignore per stack of Rotclaw 503484): single setup cast of 503484 1600 ms before Bloodfang Bite 572551 (inside 4s base duration; ally_arm confirms 1 stack in both control and treatment; expire_ms 7000 lets charge recharge and base aura expire between phases). At 1 stack (3% ignored) and 15528 dummy armor (K = 5500), eff_armor = floor(15528 * 0.97) = 15062, single-hit ratio = 21028 / 20562 = 1.02266 (+2.27%). Cumulative spell_damage_total at +40000 AP (die spread < 0.35%) reads after / before = 2.02265 +- 0.008 (2.01465..2.03065, strictly excluding 0% = 2.000 and 2 stacks = 2.0464), proving per-stack scaling together with armor_ignore_three_stacks. Reference search 2026-11-26: see rotclaw_stacks_two."
+    },
+    {
+      "spell": 572783,
+      "name": "Iron Claws (zero-armor control: no damage gain at 0 dummy armor)",
+      "kind": "metric_delta",
+      "variant": "armor_ignore_unarmored",
+      "label_suffix": "armor_ignore_unarmored",
+      "quote": "and cause you to ignore $s2% of the target's armor per stack.",
+      "trigger_spell": 572551,
+      "gate_spell": 572783,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "player_attack_power": 40000,
+      "setup_casts": [
+        503484,
+        503484,
+        503484
+      ],
+      "setup_wait_ms": 4600,
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          673,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ],
+        [
+          673,
+          0,
+          -528
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 572551,
+        "target": "dummy"
+      },
+      "before_expected": 5000,
+      "expected": 10000,
+      "expected_ratio": 2.0,
+      "tolerance": 0.015,
+      "wait_ms": 500,
+      "expire_ms": 13000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "aura_stacks",
+            "fields": {
+              "spell": 503484,
+              "caster": "caster"
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Verifies 503484 is at 0 stacks in control after 4600 ms wait and 3 stacks in treatment at 0 dummy armor."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Zero-armor control for 572783 Iron Claws (Felsworn 803903 precedent): Lesser Armor 673 set to -528 on dummy removes all 528 armor -> cumulative spell_damage_total at +40000 AP reads after / before = 2.00 +- 0.015 (single-hit ratio 1.00; excludes +7.12% = 2.071), proving bonus acts through enemy armor mitigation rather than a flat damage buff. Reference search 2026-11-26: see rotclaw_stacks_two."
+    },
+    {
+      "spell": 578120,
+      "name": "Bloodmoon Strength (control: Rotclaw periodic damage ticks every 1000 ms)",
+      "kind": "hit_period",
+      "variant": "rotclaw_period_control",
+      "label_suffix": "rotclaw_period_control",
+      "quote": "Periodic damage dealt by Rotclaw now hits $s1% more often",
+      "trigger_spell": 503484,
+      "hit_spell": 503484,
+      "read_at_cast": true,
+      "expected_ms": 1000,
+      "window": [
+        0,
+        2500
+      ],
+      "fixtures": [
+        [
+          800157,
+          "caster"
+        ],
+        [
+          524861,
+          "caster"
+        ],
+        [
+          823764,
+          "caster"
+        ]
+      ],
+      "poll_ms": 10,
+      "observe_source": "Control arm for Bloodmoon Strength 578120 Effect[0] aura 108 SPELL_AURA_ADD_PCT_MODIFIER MiscValue 19 SPELLMOD_ACTIVATION_TIME BasePoints -51 + 1 = -50% ($s1 = 50; Spell.dbc) on Rotclaw 503484 (Effect[0] direct hit at t=0 + Effect[1] SPELL_AURA_PERIODIC_DAMAGE Amplitude 1000 ms, Duration 4000 ms; Eternal Curse 800157 + CasterAuraSpell 524861 precondition fixtures). read_at_cast (ADR 1282) captures 3 hits (t=0, 1000, 2000 ms) inside window [0, 2500] (between 2050 and 2900 ms) -> mean period 1000 ms. Paired with rotclaw_period. Reference search 2026-11-26: coa-history 578120/560480: 0 events; bindmysoul & advancement.tsv list 578120 Bloodmoon Strength (Level 50 Passive)."
+    },
+    {
+      "spell": 578120,
+      "name": "Bloodmoon Strength (Rotclaw periodic damage ticks every 500 ms with 578120)",
+      "kind": "hit_period",
+      "variant": "rotclaw_period",
+      "label_suffix": "rotclaw_period",
+      "quote": "Periodic damage dealt by Rotclaw now hits $s1% more often",
+      "trigger_spell": 503484,
+      "hit_spell": 503484,
+      "learn": [
+        578120
+      ],
+      "read_at_cast": true,
+      "expected_ms": 500,
+      "window": [
+        0,
+        1250
+      ],
+      "fixtures": [
+        [
+          800157,
+          "caster"
+        ],
+        [
+          524861,
+          "caster"
+        ],
+        [
+          823764,
+          "caster"
+        ]
+      ],
+      "poll_ms": 10,
+      "observe_source": "Bloodmoon Strength 578120 Effect[0] SPELLMOD_ACTIVATION_TIME -50% ($s1 = 50; Spell.dbc) on Rotclaw 503484 (1000 ms * 0.50 = 500 ms; Eternal Curse 800157 + 524861 precondition fixtures; Cultist 301317 & Witch Doctor 560545 precedent). read_at_cast (ADR 1282) captures 3 hits (t=0, 500, 1000 ms) inside window [0, 1250] (between 1025 and 1450 ms) -> mean period 500 ms (G-19 band +-25 ms excludes 1000 ms and 667 ms). Paired with rotclaw_period_control. Reference search 2026-11-26: see rotclaw_period_control."
+    },
+    {
+      "spell": 560479,
+      "name": "Appetite for Blood (Bloodfang Bite +20% damage vs Humanoids)",
+      "kind": "hit_ratio",
+      "variant": "bite_humanoid",
+      "label_suffix": "bite_humanoid",
+      "quote": "Increases the damage dealt by Bloodfang Bite and Claw Sweep by $s1% against Humanoids and Beasts.",
+      "expected": 1.2,
+      "observe_spell": 572551,
+      "learn": [
+        572551
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "target_entry": 6,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560479
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 20 (560479 Effect[0] rewritten by AscensionBloodmageTalents.cpp:335-337 to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS 168, MiscValue 65 = Beast 1 | Humanoid 64, BasePoints 19+1 = +20%, EffectSpellClassMask[1] 8388608 = Bloodfang Bite 572551; Spell.dbc). Bloodfang Bite 572551 (CasterAuraSpell 525031 precondition fixture) on Kobold Vermin 6 (Humanoid, type 7; Necromancer 301325 precedent) at +20000 AP (non-crit). Expected ratio 1.20 (+20%). Paired with bite_beast, sweep_humanoid, sweep_beast, and bite_undead_control. Reference search 2026-11-26: coa-history 560479: 0 events (passive); bindmysoul & advancement.tsv match verbatim."
+    },
+    {
+      "spell": 560479,
+      "name": "Appetite for Blood (Bloodfang Bite +20% damage vs Beasts)",
+      "kind": "hit_ratio",
+      "variant": "bite_beast",
+      "label_suffix": "bite_beast",
+      "quote": "Increases the damage dealt by Bloodfang Bite and Claw Sweep by $s1% against Humanoids and Beasts.",
+      "expected": 1.2,
+      "observe_spell": 572551,
+      "learn": [
+        572551
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "target_entry": 69,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560479
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Beast arm for 560479 Appetite for Blood (+20%): Bloodfang Bite 572551 (CasterAuraSpell 525031 precondition fixture) on Timber Wolf 69 (Beast, type 1; Necromancer 301325 precedent) at +20000 AP (non-crit). Expected ratio 1.20 (+20%). Reference search 2026-11-26: see bite_humanoid."
+    },
+    {
+      "spell": 560479,
+      "name": "Appetite for Blood (Claw Sweep +20% damage vs Humanoids)",
+      "kind": "hit_ratio",
+      "variant": "sweep_humanoid",
+      "label_suffix": "sweep_humanoid",
+      "quote": "Increases the damage dealt by Bloodfang Bite and Claw Sweep by $s1% against Humanoids and Beasts.",
+      "expected": 1.2,
+      "observe_spell": 500444,
+      "learn": [
+        500444
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "target_entry": 6,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560479
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Claw Sweep Humanoid arm for 560479 Appetite for Blood (EffectSpellClassMask[2] 16384 = Claw Sweep 500444, CasterAuraSpell 525031 precondition fixture, 8 yd area): Kobold Vermin 6 (Humanoid, type 7) at +20000 AP (non-crit). Expected ratio 1.20 (+20%). Reference search 2026-11-26: see bite_humanoid."
+    },
+    {
+      "spell": 560479,
+      "name": "Appetite for Blood (Claw Sweep +20% damage vs Beasts)",
+      "kind": "hit_ratio",
+      "variant": "sweep_beast",
+      "label_suffix": "sweep_beast",
+      "quote": "Increases the damage dealt by Bloodfang Bite and Claw Sweep by $s1% against Humanoids and Beasts.",
+      "expected": 1.2,
+      "observe_spell": 500444,
+      "learn": [
+        500444
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "target_entry": 69,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560479
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Claw Sweep Beast arm for 560479 Appetite for Blood: Claw Sweep 500444 (CasterAuraSpell 525031 precondition fixture) on Timber Wolf 69 (Beast, type 1) at +20000 AP (non-crit). Expected ratio 1.20 (+20%). Reference search 2026-11-26: see bite_humanoid."
+    },
+    {
+      "spell": 560479,
+      "name": "Appetite for Blood (type control: no bonus vs Undead)",
+      "kind": "hit_ratio",
+      "variant": "bite_undead_control",
+      "label_suffix": "bite_undead_control",
+      "quote": "Increases the damage dealt by Bloodfang Bite and Claw Sweep by $s1% against Humanoids and Beasts.",
+      "expected": 1.0,
+      "observe_spell": 572551,
+      "learn": [
+        572551
+      ],
+      "cast_power": 1000,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "target_entry": 1501,
+      "control": {},
+      "treatment": {
+        "learn": [
+          560479
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Negative creature-type control for 560479 Appetite for Blood (MiscValue 65 = Beast | Humanoid only): Bloodfang Bite 572551 on Mindless Zombie 1501 (Undead, type 6; Templar 706323 precedent) at +20000 AP (non-crit). Expected ratio 1.00 (no bonus outside Humanoid/Beast). Reference search 2026-11-26: see bite_humanoid."
+    },
+    {
+      "spell": 300978,
+      "name": "Enraging Wounds (non-critical melee hit does not trigger 560589)",
+      "kind": "metric_delta",
+      "variant": "leech_noncrit_control",
+      "label_suffix": "leech_noncrit_control",
+      "quote": "Melee critical strikes now leech ${$560589m1*$<scalingbp>+$STA*0.3} health from the target, scaling with your Stamina.",
+      "trigger_spell": 572551,
+      "gate_spell": 300978,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 560589,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Crit-gate control for Enraging Wounds 300978 (rev_20260920_51_bloodmage_physical_crit_procs.sql: ProcFlags 20, HitMask 2 PROC_HIT_CRITICAL -> triggers 560589 requiring CasterAuraSpell 800157 Eternal Curse). Precondition fixtures: 800157 Eternal Curse, 823764 spellpen, 16255 -100% crit. Non-critical Bloodfang Bite 572551 (DmgClass 2 melee, 1500 ms GCD cleared by wait_ms + expire_ms = 2100 ms) triggers 0 damage of 560589 both before and after learning 300978. Paired with leech_damage_base and leech_damage_stamina. Reference search 2026-11-26: coa-history 300978/560589: 0 events; bindmysoul & advancement.tsv match."
+    },
+    {
+      "spell": 300978,
+      "name": "Enraging Wounds (melee crit leeches base+0.3*STA health: 223 on 2x DmgClass-2 crit under Eternal Curse -10% dmg)",
+      "kind": "metric_delta",
+      "variant": "leech_damage_base",
+      "label_suffix": "leech_damage_base",
+      "quote": "Melee critical strikes now leech ${$560589m1*$<scalingbp>+$STA*0.3} health from the target, scaling with your Stamina.",
+      "trigger_spell": 572551,
+      "gate_spell": 300978,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "melee",
+      "cast_power": 1000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 560589,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 223,
+      "after_at_least": 220,
+      "after_at_most": 226,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_total",
+            "fields": {
+              "spell": 560589,
+              "target": "caster"
+            },
+            "before_expected": 0,
+            "expected": 223,
+            "tolerance": 3,
+            "source": "560589 Effect[0] SPELL_EFFECT_HEALTH_LEECH (EffectValueMultiplier 1.0) heals caster equal to damage dealt."
+          }
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Enraging Wounds 300978 -> 560589 Enraging Wound (SPELL_EFFECT_HEALTH_LEECH, DmgClass 2 melee, BasePoints 95 + 1 = 96, AscensionScalingBaseData.h:149 ScalingBase(60) = 0.987431 -> 94.793; CasterAuraSpell 800157 Eternal Curse +25% STA -> STA = floor(78*1.25) = 97, and 807736 Tank Stance -10% damage dealt). Because force_crit 'melee' crits both 572551 and DmgClass-2 560589 (2x melee crit), tooltip formula ${$560589m1*$<scalingbp>+$STA*0.3} yields (94.793 + 97 * 0.3) * 0.90 * 2 = 223.0 -> [220, 226] (strictly excludes 168 = floor(94 * 0.9) * 2 without Stamina scaling). 0 before learning 300978; truthfully alerts if 560589 lacks $STA*0.3 scaling. Reference search 2026-11-26: see leech_noncrit_control."
+    },
+    {
+      "spell": 300978,
+      "name": "Enraging Wounds (melee crit leech at +5000 Stamina: 3598 on 2x DmgClass-2 crit under Eternal Curse -10% dmg)",
+      "kind": "metric_delta",
+      "variant": "leech_damage_stamina",
+      "label_suffix": "leech_damage_stamina",
+      "quote": "Melee critical strikes now leech ${$560589m1*$<scalingbp>+$STA*0.3} health from the target, scaling with your Stamina.",
+      "trigger_spell": 572551,
+      "gate_spell": 300978,
+      "target": "dummy",
+      "measure_actor": "caster",
+      "force_crit": "melee",
+      "cast_power": 1000,
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          800157,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          706305,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          706305,
+          0,
+          5000
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 560589,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 3598,
+      "after_at_least": 3592,
+      "after_at_most": 3604,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "Stamina scaling arm for Enraging Wounds 300978 -> 560589 (DmgClass 2, 2x melee crit under force_crit 'melee'): QA Test Stamina 706305 (amount 5000, precondition fixture) under Eternal Curse 800157 (+25% STA) raises STA to floor((78 + 5000) * 1.25) = 6347 -> (94.793 + 6347 * 0.3) * 0.90 * 2 = 3598.0 -> [3592, 3604] (truthfully alerts if $STA*0.3 is missing and damage stays flat at 168). Reference search 2026-11-26: see leech_noncrit_control."
+    },
+    {
+      "spell": 560073,
+      "name": "Crimson Terror (Transgression grants 50% of Spirit as spell damage: 0 vs 57 SP)",
+      "kind": "metric_delta",
+      "variant": "transgression_sp_base",
+      "label_suffix": "transgression_sp_base",
+      "quote": "Your Transgression now grants spell damage equal to $s2% of your Spirit for the duration.",
+      "trigger_spell": 801076,
+      "gate_spell": 560073,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 57,
+      "wait_ms": 14100,
+      "expire_ms": 16000,
+      "game_time": {
+        "after": [
+          14050,
+          14500
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$s2 = 50 (560073 Effect[1] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER MiscValue 3 SPELLMOD_EFFECT1, BasePoints 49 + 1 = +50 on 801102 Effect[0] aura 174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT MiscValue 126 MiscValueB 4 Spirit; Spell.dbc). AscensionBloodmageTalents.cpp:494-500,541-542 adds 801102 matching Transgression 801076 duration (15000 ms) while 560073 is known and removes it when 801076 ends. Reference stats: Spirit = 114, Shadow SP = 0 -> 50% of 114 = 57 SP. Before (no 560073): 0 SP. After (real learn of 560073 + real cast of 801076): 57 SP at game_time [14050, 14500] ms (> 13500 ms = 90% of 15000 ms). Paired with transgression_sp_duration and transgression_sp_spirit. Reference search 2026-11-26: coa-history 560073: 0 events (passive), 801102: 6 SPELL_AURA_APPLIED / 6 REMOVED across 3 logs; bindmysoul & advancement.tsv list 560073."
+    },
+    {
+      "spell": 560073,
+      "name": "Crimson Terror (spell damage bonus lasts full 15s duration of Transgression, then ends)",
+      "kind": "metric_delta",
+      "variant": "transgression_sp_duration",
+      "label_suffix": "transgression_sp_duration",
+      "quote": "Your Transgression now grants spell damage equal to $s2% of your Spirit for the duration.",
+      "trigger_spell": 801076,
+      "gate_spell": 560073,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 57,
+      "after_expiry_expected": 0,
+      "wait_ms": 14100,
+      "expiry_wait_ms": 1800,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          14050,
+          14500
+        ],
+        "expired": [
+          15800,
+          16300
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "Duration bracket for Crimson Terror 560073 on Transgression 801076 (15000 ms; AscensionBloodmageTalents.cpp:494-500,541-542). With 560073 learned at start: 0 SP before cast, 57 SP at game_time [14050, 14500] ms (> 13500 ms = 90%), and 0 SP at game_time [15800, 16300] ms (< 16500 ms = 110%). Paired with transgression_sp_base. Reference search 2026-11-26: see transgression_sp_base."
+    },
+    {
+      "spell": 560073,
+      "name": "Crimson Terror (Transgression grants 50% of +5000 Spirit fixture as spell damage: 2632 SP)",
+      "kind": "metric_delta",
+      "variant": "transgression_sp_spirit",
+      "label_suffix": "transgression_sp_spirit",
+      "quote": "Your Transgression now grants spell damage equal to $s2% of your Spirit for the duration.",
+      "trigger_spell": 801076,
+      "gate_spell": 560073,
+      "target": "caster",
+      "measure_actor": "caster",
+      "cast_power": 1000,
+      "phase_auras": [
+        [
+          12177,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          12177,
+          0,
+          5000
+        ]
+      ],
+      "metric": "spell_power",
+      "fields": {
+        "school": 5
+      },
+      "before_expected": 0,
+      "expected": 2632,
+      "wait_ms": 500,
+      "expire_ms": 16000,
+      "void_on_cast_failure": true,
+      "observe_source": "Spirit scaling arm for Crimson Terror 560073: Spirit 12177 (aura 29 misc 4, amount 5000, precondition fixture) with race 1 The Human Spirit (+3%) raises Spirit from 114 to 114 + 5000 * 1.03 = 5264 -> 50% of 5264 = 2632 Shadow SP (before without 560073: 0 SP; after with real learn of 560073 and cast of 801076: 2632 SP, proving 50% Spirit scaling). Reference search 2026-11-26: see transgression_sp_base."
     }
   ],
   "player_observations": [],
