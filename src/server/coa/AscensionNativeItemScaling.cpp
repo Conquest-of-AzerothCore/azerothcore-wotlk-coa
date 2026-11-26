@@ -223,7 +223,6 @@ bool IsScalingItem(ItemTemplate const* proto)
     return proto && !ZoneScaling::OwnsItem(proto->ItemId) && ItemLadder::ScalableItem(*proto) &&
         ItemScaling::NativeScalableEntry(proto->ItemId) &&
         LadderStore::Instance().Has(proto->ItemId);
-        LadderStore::Instance().Has(proto->ItemId);
 }
 
 uint32 ClientLevel(Item const* item)
