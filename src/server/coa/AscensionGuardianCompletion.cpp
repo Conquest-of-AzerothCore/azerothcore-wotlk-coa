@@ -330,6 +330,7 @@ void AscensionGuardian::ApplyContracts(SpellInfo* info)
 
 void AddAscensionGuardianCompletionScripts()
 {
+    Ascension::ClientSpellPatches::Instance().Register(500266);
     Ascension::ClientSpellPatches::Instance().Register(500673);
     new guardian_scaling();
     RegisterSpellScript(aura_ascension_guardian_lifecycle);

@@ -726,7 +726,7 @@ class witch_doctor_magnet : public UnitScript
 {
   public:
     witch_doctor_magnet() : UnitScript("witch_doctor_magnet", true, {UNITHOOK_SPELL_MAGNET_TARGET}) {}
-    Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* info) override
+    Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* info, bool&) override
     {
         if (!attacker || !victim || !info || info->IsPositive())
             return nullptr;

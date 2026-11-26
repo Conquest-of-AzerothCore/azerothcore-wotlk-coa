@@ -574,7 +574,11 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 `SpellEffectInfo::CalcValue` calls.
 
 - Deterministic values (`effect_value`, `aura_amount`, `power_cost`, `spell_duration`):
-  `|measured - expected| <= max(1, 0.5 % of expected)`. A `power_cost` is divided by the display divisor of its
+  `|measured - expected| <= max(1, 0.5 % of expected)`. A `power_cost` (plain `ManaCost` or opt-in
+  `base_mana_power_cost` `ManaCostPercentage` against the class file's server create mana/health for mana spells and
+  `POWER_HEALTH` spells with `base_health`, ADR 1318 — checking that `SpellInfo::CalcPowerCost` applies the
+  tooltip/DBC percentage to the server's `GetCreateMana()`/`GetCreateHealth()`, not that the server base mana/health
+  table value itself is right or that power was actually spent during a cast) is divided by the display divisor of its
   rule. A `$/N;` token expects N times the value it shows, except a `$/1000;sN sec` token of kind `duration_ms`,
   which the reader already gives in ms. A token of another spell reads its points, sign and rolls from that
   spell's effect (`model`).
@@ -663,12 +667,19 @@ from the expectation. A token's value includes its caster stat terms: Argent Bla
 - Time (`cooldown_ms`, `aura_duration_ms`, ruling R8): `expected - W <= measured <= expected`. W bounds the game
   time elapsed between the cast step and the measuring step: for every step after the cast up to the measurement,
   its `elapsed_ms` plus the run's `max_step_ms`; the `cast time` wait of a cast-time spell counts only its 500 ms
-  margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes. `CoAGameplayTest::Tick`
-  runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is the game time from its
-  start to its completion, and `max_step_ms` is the largest update diff of the run (`docs/coa/verification.md`, fidelity
-  limits: at most 25 ms in a wait, 10 ms while polling). Measured on 2026-11-05 (stamp `20261105-181206`): cooldowns 6,
-  12 and 18 ms below the record two, four and six steps after the cast, durations 12 and 15 ms below; W was 50 to 150
-  ms.
+  margin plus `max_step_ms`, because the cooldown or aura starts when the cast completes. When a class file opts in
+  with `"aura_duration_map_update_carry_in": true` (ADR 1317), `aura_duration_ms` checks (never `cooldown_ms`, which
+  reads `GameTime::GetSystemTime()` rather than `MapMgr::i_timer[3]`) add a `9 ms` (`MAP_UPDATE_INTERVAL_MS - 1`)
+  map-update carry-in when `max_step_ms < 10`, at least one step follows the cast (`position > cast`), and
+  `W_step + 9 < 0.01 * expected` (`MapMgr::i_timer[3]` accumulates world ticks up to `CONFIG_INTERVAL_MAPUPDATE =
+  10 ms` before calling `map->Update`, so a pre-cast carry-in of up to `9 ms` can flush a map update on the first
+  post-cast tick when `max_step_ms < 10`; the `1%` cap ensures carry-in never allows a duration short by `1%` or by
+  one tick period to pass). With the key absent or `false`, judging is unchanged for every check.
+  `CoAGameplayTest::Tick` runs one step per world update (`Progress` calls `RunStep` once), a step's `elapsed_ms` is
+  the game time from its start to its completion, and `max_step_ms` is the largest update diff of the run
+  (`docs/coa/verification.md`, fidelity limits: at most 25 ms in a wait, 10 ms while polling). Measured on
+  2026-11-05 (stamp `20261105-181206`): cooldowns 6, 12 and 18 ms below the record two, four and six steps after the
+  cast, durations 12 and 15 ms below; W was 50 to 150 ms.
 - Hit means (`hit_mean`, `melee_mean`): `measured_hit_model` recomputes the model from the run's stats, known auras
   and target; the measured mean of the non-critical, non-blocked hits must lie in `mean ± 2.576 x sigma / sqrt(n)`,
   n the usable hits. `tooltip_mean` is shown in the explanation only. The parts of a hit (same label) give one

@@ -549,9 +549,9 @@ class xoroth_casts : public AllSpellScript
                 }
                 if (player->HasAura(705001))
                     Cast(player, player, 705002);
+                if (id == 520292)
+                    Reduce(player, id, std::abs(Amount(704195, EFFECT_2, player)) * fire);
             }
-            if (id == 520292)
-                Reduce(player, id, 3000 * fire);
             if (Named(info, 801059))
                 Cast(player, player, SPELL_FLAMES_OF_XOROTH_VISUAL);
             if (id == 802342)

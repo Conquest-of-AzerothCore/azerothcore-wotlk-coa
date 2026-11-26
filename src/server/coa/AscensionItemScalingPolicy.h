@@ -38,6 +38,15 @@ inline bool EligibleItem(std::uint32_t quality, std::uint32_t itemClass, std::ui
         && itemLevel != 0 && scalingStatDistribution == 0 && startQuest == 0;
 }
 
+inline bool NativeEligibleItem(std::uint32_t quality, std::uint32_t itemClass, std::uint32_t inventoryType,
+    std::uint32_t itemLevel, std::uint32_t scalingStatDistribution, std::uint32_t startQuest)
+{
+    return quality >= MinimumQuality && quality <= MaximumQuality
+        && (itemClass == ItemClassWeapon || itemClass == ItemClassArmor)
+        && inventoryType != 0 && inventoryType != InventoryTypeTabard
+        && itemLevel != 0 && scalingStatDistribution == 0 && startQuest == 0;
+}
+
 inline bool IsWorldforgedDescription(std::string_view description)
 {
     return description.compare(0, WorldforgedMarker.size(), WorldforgedMarker) == 0;

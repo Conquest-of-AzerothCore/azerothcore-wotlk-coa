@@ -12003,11 +12003,21 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
     if (itr == m_spellCooldowns.end())
         return;
 
+    uint32 const now = GameTime::GetGameTimeMS().count();
+    if (cooldown < 0)
+    {
+        uint64 const reduction = uint64(-int64(cooldown));
+        if (itr->second.end <= now || uint64(itr->second.end - now) <= reduction)
+        {
+            RemoveSpellCooldown(spellId, true);
+            return;
+        }
+    }
+
     itr->second.end += cooldown;
 
     if (cooldown > 0)
     {
-        uint32 const now = GameTime::GetGameTimeMS().count();
         WorldPacket data;
         BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, itr->second.end > now ? itr->second.end - now : 0);
         SendDirectMessage(&data);

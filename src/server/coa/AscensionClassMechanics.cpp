@@ -1233,6 +1233,15 @@ void ApplyAscensionClassMechanics(SpellInfo* spellInfo)
         }
     }
 
+    if (spellInfo->Id == 704624 || spellInfo->Id == 707867)
+    {
+        if (spellInfo->SpellFamilyName == uint32(CLASS_SON_OF_ARUGAL) + 6)
+        {
+            spellInfo->Stances = 0;
+            spellInfo->Attributes &= ~SPELL_ATTR0_NOT_SHAPESHIFTED;
+        }
+    }
+
     spellInfo->IsDeprecatedForPlayers =
         HasDeprecatedWord(spellInfo->SpellName[0]) || HasDeprecatedWord(spellInfo->Rank[0]);
     ApplyClientSpellCharges(spellInfo);

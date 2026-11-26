@@ -1,0 +1,5459 @@
+[
+  {
+    "spell": 92129,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92129,
+    "clause": "Your Gaze of C'Thun now gains an additional ${$m1+0} base damage and healing.",
+    "labels": [
+      "92129 behaviour_metric_delta damage",
+      "92129 behaviour_metric_delta healing"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92130,
+    "clause": "Damage dealt has a $805606h% chance to grant you Corrupting Whispers.",
+    "labels": [
+      "92130 behaviour_metric_delta proc_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92130,
+    "clause": "Increases your Magic Damage dealt by $s1%",
+    "labels": [
+      "92130 behaviour_hit_ratio magic_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92130,
+    "clause": "and reduces your mana costs by $s3% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reduces your mana costs by $s3%",
+        "labels": [
+          "92130 behaviour_metric_delta mana_cost_through",
+          "92130 behaviour_metric_delta mana_cost_refused"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "92130 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 92131,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 92131,
+    "clause": "Reaching 100 Insanity no longer causes Total Madness.",
+    "labels": [
+      "92131 behaviour_metric_delta madness_suppressed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "Teaches you Herald of the Depths.",
+    "labels": [
+      "92131 behaviour_metric_delta teaches_herald"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "Transform into a Herald of the Depths for $d,",
+    "labels": [
+      "92131 behaviour_metric_delta transform",
+      "92131 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 92131,
+    "clause": "increasing damage and healing done by $s3%",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing damage ... by $s3%",
+        "labels": [
+          "92131 behaviour_metric_delta damage_shadow",
+          "92131 behaviour_metric_delta damage_melee"
+        ]
+      },
+      {
+        "claim": "and healing done by $s3%",
+        "labels": [
+          "92131 behaviour_metric_delta healing_done"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 92131,
+    "clause": "and the base duration of absorption and healing over time effects by $s2%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and the base duration of absorption ... by $s2%.",
+        "labels": [
+          "92131 behaviour_metric_delta absorb_duration_contrast",
+          "92131 behaviour_metric_delta absorb_duration_expiry"
+        ]
+      },
+      {
+        "claim": "and healing over time effects by $s2%.",
+        "labels": [
+          "92131 behaviour_metric_delta hot_duration_contrast",
+          "92131 behaviour_metric_delta hot_duration_expiry"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 92131,
+    "clause": "At the end of the duration, your Insanity is reduced to 0.",
+    "labels": [
+      "92131 behaviour_metric_delta insanity_zero"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 255275,
+    "clause": "Channel for $d,",
+    "labels": [
+      "255275 behaviour_metric_delta channel_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 255275,
+    "clause": "heralding the end of the world on all nearby enemies, instantly removing all beneficial magic effects from them and reducing your damage taken and their haste and movement speed by $255276s1% while channeling.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "instantly removing all beneficial magic effects from them",
+        "labels": [
+          "255275 behaviour_metric_delta dispel_magic"
+        ]
+      },
+      {
+        "claim": "reducing your damage taken",
+        "labels": [
+          "255275 behaviour_metric_delta damage_taken"
+        ]
+      },
+      {
+        "claim": "and their haste",
+        "labels": [
+          "255275 behaviour_metric_delta enemy_melee_haste",
+          "255275 behaviour_metric_delta enemy_spell_haste"
+        ]
+      },
+      {
+        "claim": "and movement speed by $255276s1% while channeling.",
+        "labels": [
+          "255275 behaviour_metric_delta enemy_slow"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 255275,
+    "clause": "While channeling, nearby enemies will also be struck with Apocalyptic Skies.",
+    "labels": [
+      "255275 behaviour_metric_delta apocalyptic_skies"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 255275,
+    "clause": "At the end of the duration you unleash a terrifying scream, applying Corrupt Mind on nearby enemies.",
+    "labels": [
+      "255275 behaviour_metric_delta corrupt_mind_end",
+      "255275 behaviour_metric_delta corrupt_mind_end_group_duration",
+      "255275 behaviour_metric_delta corrupt_mind_end_group_applies",
+      "255275 behaviour_metric_delta corrupt_mind_end_outside_none",
+      "255275 behaviour_metric_delta corrupt_mind_early_cancel"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300264,
+    "clause": "While Black Blood is active on an ally, healing done to them by your Gaze of C'Thun has a $s1% increased chance to critically strike.",
+    "labels": [
+      "300264 behaviour_metric_delta with_black_blood",
+      "300264 behaviour_metric_delta without_black_blood"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300265,
+    "clause": "Your Devour Magic now affects $s1 nearby allies.",
+    "labels": [
+      "300265 behaviour_metric_delta chain_targets"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300268,
+    "clause": "Increases your parry chance by $s1%",
+    "labels": [
+      "300268 behaviour_metric_delta parry"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300268,
+    "clause": "and dodge chance by $s2%.",
+    "labels": [
+      "300268 behaviour_metric_delta dodge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300270,
+    "clause": "While above 60 Insanity,",
+    "labels": [
+      "300270 behaviour_hit_ratio above_60",
+      "300270 behaviour_hit_ratio at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300270,
+    "clause": "you gain $681256s1% reduced damage taken.",
+    "labels": [
+      "300270 behaviour_hit_ratio above_60",
+      "300270 behaviour_hit_ratio at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300272,
+    "clause": "Increases the chance to trigger Presences by $s1%.",
+    "labels": [
+      "300272 behaviour_metric_delta presence_proc"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300275,
+    "clause": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1% for $300274d,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Damage dealt by Blade of the Empire increases your melee haste by $300274s1%",
+        "labels": [
+          "300275 behaviour_metric_delta haste"
+        ]
+      },
+      {
+        "claim": "for $300274d",
+        "labels": [
+          "300275 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 300275,
+    "clause": "stacking $300274u times.",
+    "labels": [
+      "300275 behaviour_metric_delta stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300278,
+    "clause": "Avoiding an attack now has a $h% chance to refresh a charge of Blade of the Empire.",
+    "labels": [
+      "300278 behaviour_metric_delta avoided_charge_restore"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300280,
+    "clause": "Your melee critical strikes reduce the cooldown of Rift and Gaze of C'Thun by $/1000;505168s1 sec.",
+    "labels": [
+      "300280 behaviour_metric_delta gaze_through",
+      "300280 behaviour_metric_delta gaze_still_cd",
+      "300280 behaviour_metric_delta gaze_noncrit",
+      "300280 behaviour_metric_delta rift_through",
+      "300280 behaviour_metric_delta rift_still_cd"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300284,
+    "clause": "Increases the bonus healing power scaling of Eldritch Mending and Eldritch Shock by $s1%.",
+    "labels": [
+      "300284 behaviour_hit_ratio mending_sp",
+      "300284 behaviour_hit_ratio shock_sp",
+      "300284 behaviour_hit_ratio mending_sp0",
+      "300284 behaviour_hit_ratio shock_sp0"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 300286,
+    "clause": "Direct healing done now applies Void-Touched.",
+    "labels": [
+      "300286 behaviour_metric_delta apply"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "Marks the ally for $d,",
+    "labels": [
+      "300286 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "stacking $301982u times.",
+    "labels": [
+      "300286 behaviour_metric_delta max_stacks_ten",
+      "300286 behaviour_metric_delta max_stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300286,
+    "clause": "When you cast Gaze of C'Thun, all stacks are consumed to heal all allies affected by Void-Touched for ${$301983m1+$301983ppl1+$BH*0.35}, increased based on how many stacks were on them.",
+    "labels": [
+      "300286 behaviour_metric_delta gaze_consume_base",
+      "300286 behaviour_metric_delta gaze_consume_sp",
+      "300286 behaviour_metric_delta gaze_consume_5stacks"
+    ],
+    "kind": "claim",
+    "reason": "Heal formula behaviour proven (owner ruling O-15 / Q-cu-11, Cultist ADR 0018: 364/365 base, 1204/1205 at +2000 SP, 608/609 at 5 stacks). Stack-retention part is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-17 (Q-cu-12, 2026-11-25, Cultist ADR 0031): server keeps re-applying 1 stack of Void-Touched 301982 via MarkVoidTouched immediately after Gaze of C'Thun consumes stacks, matching archived live logs (4,452 immediate re-applications of 5,095 in 29 logs, 10+ players), with client tooltip text unchanged (kept deviation from literal \"all stacks are consumed\"); gaze_consume_base ally_arm guards the ruled 1-stack retention."
+  },
+  {
+    "spell": 300287,
+    "clause": "While Herald of the Depths is active, you now take $s2% less damage",
+    "labels": [
+      "300287 behaviour_hit_ratio damage_taken",
+      "300287 behaviour_hit_ratio herald_gate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300287,
+    "clause": "and have a $s1% increased chance to resist dispel effects.",
+    "labels": [
+      "300287 behaviour_metric_delta dispel_resist",
+      "300287 behaviour_metric_delta dispel_resist_gate_off"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300290,
+    "clause": "While Herald of the Depths is active, your movement speed cannot be reduced below $s2% of normal value.",
+    "labels": [
+      "300290 behaviour_metric_delta min_speed",
+      "300290 behaviour_metric_delta herald_gate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300291,
+    "clause": "Casting Herald of the Depths now increases the absorption of your next Void Shield within $301259d by $301259s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $301259d",
+        "labels": [
+          "300291 behaviour_metric_delta window_duration",
+          "300291 behaviour_metric_delta window_control"
+        ]
+      },
+      {
+        "claim": "increases the absorption of your next Void Shield ... by $301259s1%",
+        "labels": [
+          "300291 behaviour_metric_delta absorb_doubled",
+          "300291 behaviour_metric_delta absorb_control",
+          "300291 behaviour_metric_delta consumed_next"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 300296,
+    "clause": "Casting Gaze of C'thun now always triggers your Presence of C'Thun while it is active.",
+    "labels": [
+      "300296 behaviour_metric_delta trigger",
+      "300296 behaviour_metric_delta no_presence"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300296,
+    "clause": "Increases your haste by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your haste by $s1%",
+        "labels": [
+          "300296 behaviour_metric_delta melee_haste",
+          "300296 behaviour_metric_delta spell_haste"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "300296 behaviour_metric_delta duration"
+        ]
+      }
+    ],
+    "labels": []
+  },
+  {
+    "spell": 300298,
+    "clause": "Casting Gaze of C'Thun now reduces the cooldown of Psychic Suppression by $/1000;300297s2 sec",
+    "labels": [
+      "300298 behaviour_metric_delta ps_through",
+      "300298 behaviour_metric_delta ps_still_cd"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300298,
+    "clause": "and Grasp of Zek'voz by $/1000;300297s1 sec.",
+    "labels": [
+      "300298 behaviour_metric_delta grasp_through",
+      "300298 behaviour_metric_delta grasp_still_cd"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300300,
+    "clause": "Periodic or channeled damage dealt now has a $h% chance to afflict your target with Mind Rot.",
+    "labels": [
+      "300300 behaviour_metric_delta periodic",
+      "300300 behaviour_metric_delta channeled",
+      "300300 behaviour_metric_delta dispel_crit"
+    ],
+    "kind": "claim",
+    "reason": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic) on the server, and rev_20261125_01_cultist_client_texts.sql updates the streamed Description to 'to afflict your target with Mind Rot.'; application is behaviour-proven by periodic/channeled and Magic dispel by dispel_crit (Dispel Magic 988, also linked on r43).",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic); client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.'.",
+      "spell": 300300,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Periodic or channeled damage dealt now has a $h% chance to curse your target, applying Mind Rot."
+  },
+  {
+    "spell": 300300,
+    "clause": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1% for $560943d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
+        "labels": [
+          "300300 behaviour_metric_delta mind_rot_hit"
+        ]
+      },
+      {
+        "claim": "for $560943d",
+        "labels": [
+          "300300 behaviour_metric_delta mind_rot_duration"
+        ]
+      }
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic); client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.'.",
+      "spell": 300300,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 300300,
+    "clause": "If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your critical strike chance is increased by $560947s1%",
+        "labels": [
+          "300300 behaviour_metric_delta dispel_crit",
+          "300300 behaviour_metric_delta dispel_expire_control"
+        ]
+      },
+      {
+        "claim": "for $560947d",
+        "labels": [
+          "300300 behaviour_metric_delta dispel_crit",
+          "300300 behaviour_metric_delta dispel_crit_duration"
+        ]
+      }
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-3 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Mind Rot 560943 keeps Dispel=1 (Magic); client text updates 'to curse your target, applying Mind Rot.' -> 'to afflict your target with Mind Rot.'.",
+      "spell": 300300,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 300302,
+    "clause": "Increases the range of your Corruption spells by $s1 yds",
+    "labels": [
+      "300302 behaviour_metric_delta range_extended",
+      "300302 behaviour_metric_delta range_capped"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300302,
+    "clause": "and their chance to critically strike by $s2%.",
+    "labels": [
+      "300302 behaviour_metric_delta crit_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300304,
+    "clause": "Increases the spell damage bonus of Horrorbolt and Eldritch Shock by $s2%",
+    "labels": [
+      "300304 behaviour_hit_ratio horrorbolt_sp",
+      "300304 behaviour_hit_ratio eldritch_shock_sp"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300304,
+    "clause": "and Wrath of the Empire by $s1%.",
+    "labels": [
+      "300304 behaviour_hit_ratio wrath_sp"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300305,
+    "clause": "Increases the critical strike chance of Wrath of the Black Empire by $s1%.",
+    "labels": [
+      "300305 behaviour_metric_delta crit_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300306,
+    "clause": "Increases the duration of Darkwither by $/1000;s1 sec.",
+    "labels": [
+      "300306 behaviour_metric_delta duration_held",
+      "300306 behaviour_metric_delta duration_gone"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300307,
+    "clause": "Reaching 60 Insanity increases your Magic damage dealt by $573285s1% for $573285d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your Magic damage dealt by $573285s1%",
+        "labels": [
+          "300307 behaviour_hit_ratio shadow_damage",
+          "300307 behaviour_hit_ratio melee_damage"
+        ]
+      },
+      {
+        "claim": "for $573285d",
+        "labels": [
+          "300307 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "Reaching 60 Insanity",
+        "labels": [
+          "300307 behaviour_metric_delta reach_60",
+          "300307 behaviour_metric_delta below_60"
+        ]
+      }
+    ],
+    "reason": "Owner ruling O-15 Q-cu-21 (2026-11-25, magic_only) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps Magic-only +10% (573285 EffectMiscValue[0]=126, matching live log Devzou Log 141 Shadow 1.095-1.106x vs melee 1.020x), rev_20261125_01_cultist_client_texts.sql updates the streamed Description to 'Magic damage dealt', and 300307 shadow_damage (+10%) + melee_damage (+0%, expected 1.0) prove both halves in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-21 (2026-11-25, magic_only) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Embrace the Void 573285 keeps Magic-only +10% (EffectMiscValue[0]=126); client text updates 'your damage dealt' -> 'your Magic damage dealt'.",
+      "spell": 300307,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Reaching 60 Insanity increases your damage dealt by $573285s1% for $573285d."
+  },
+  {
+    "spell": 300308,
+    "clause": "Periodic or channeled damage dealt now generates 2 Insanity,",
+    "labels": [
+      "300308 behaviour_metric_delta insanity_periodic",
+      "300308 behaviour_metric_delta insanity_channeled"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "reduces the cooldown of your Obliteration Beam by $/1000;300605s2 sec,",
+    "labels": [
+      "300308 behaviour_metric_delta cd_cut_early",
+      "300308 behaviour_metric_delta cd_cut_late"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "and grants 1 stack of Abyssal Destruction.",
+    "labels": [
+      "300308 behaviour_metric_delta grants_stack"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "Increases the damage dealt of your next Obliteration Beam by $s1%,",
+    "labels": [
+      "300308 behaviour_metric_delta oblit_damage_1stack",
+      "300308 behaviour_metric_delta oblit_damage_10stacks",
+      "300308 behaviour_metric_delta oblit_consumes",
+      "300308 behaviour_metric_delta oblit_consumes_10stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "stacking $u times,",
+    "labels": [
+      "300308 behaviour_metric_delta stacks_cap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300308,
+    "clause": "for $d.",
+    "labels": [
+      "300308 behaviour_metric_delta duration",
+      "300308 behaviour_metric_delta duration_contrast"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300309,
+    "clause": "Reduces the cast time of Horrorbolt and Wrath of the Black Empire by 0.3 sec.",
+    "labels": [
+      "300309 behaviour_metric_delta horrorbolt_held",
+      "300309 behaviour_metric_delta horrorbolt_done",
+      "300309 behaviour_metric_delta wrath_held",
+      "300309 behaviour_metric_delta wrath_done"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300313,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 300313,
+    "clause": "Grants all periodic damage and damage dealt a $h% chance to reset the cooldown of Gaze of C'Thun",
+    "labels": [
+      "300313 behaviour_metric_delta reset_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300313,
+    "clause": "and generate 5 Insanity.",
+    "labels": [
+      "300313 proc_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 300753,
+    "clause": "While Herald of the Depths is active, your Forbidden Ritual will cooldown faster.",
+    "labels": [
+      "300753 behaviour_metric_delta cd_faster",
+      "300753 behaviour_metric_delta herald_gate"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof (no rate invented). Forbidden Ritual 502273 (3 s cast, 60 s CategoryRecoveryTime) attempted again 55 s after 1st cast finishes with Herald of the Depths 520326 active: refused SPELL_FAILED_NOT_READY (67) without 300753 and succeeds (0, 2nd cast lands) with 300753. Condition-off arm (herald_gate, Herald absent): refused (67) in both phases."
+  },
+  {
+    "spell": 301008,
+    "clause": "Increases the duration of Psychic Suppression by $/1000;s1 sec",
+    "labels": [
+      "301008 behaviour_metric_delta ps_contrast",
+      "301008 behaviour_metric_delta ps_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301008,
+    "clause": "and Eldritch Devastation by $/1000;s2 sec.",
+    "labels": [
+      "301008 behaviour_metric_delta ed_contrast",
+      "301008 behaviour_metric_delta ed_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301010,
+    "clause": "Your Devour Magic is now instant cast.",
+    "labels": [
+      "301010 behaviour_metric_delta instant_cast"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301068,
+    "clause": "Casting Wrath of the Black Empire now causes your subsequent Wraths of the Black Empire, within $301067d,",
+    "labels": [
+      "301068 behaviour_metric_delta buff_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301068,
+    "clause": "to deal $301067s2% more damage each and unleash Apocalyptic Skies upon the enemy.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "to deal $301067s2% more damage each",
+        "labels": [
+          "301068 behaviour_metric_delta wrath_damage_1stack",
+          "301068 behaviour_metric_delta wrath_damage_2stacks"
+        ]
+      },
+      {
+        "claim": "and unleash Apocalyptic Skies upon the enemy.",
+        "labels": [
+          "301068 behaviour_metric_delta portal_spawn",
+          "301068 behaviour_metric_delta portal_cast_gaze",
+          "301068 behaviour_metric_delta portal_cast_horrorbolt",
+          "301068 behaviour_metric_delta portal_cast_beam",
+          "301068 behaviour_metric_delta portal_only_three",
+          "301068 behaviour_metric_delta portal_single_cast"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 301068,
+    "clause": "Spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Spawns a void portal",
+        "labels": [
+          "301068 behaviour_metric_delta portal_spawn"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "301068 behaviour_metric_delta portal_cast_gaze",
+          "301068 behaviour_metric_delta portal_cast_horrorbolt",
+          "301068 behaviour_metric_delta portal_cast_beam",
+          "301068 behaviour_metric_delta portal_only_three",
+          "301068 behaviour_metric_delta portal_single_cast"
+        ]
+      },
+      {
+        "claim": "before disappearing.",
+        "labels": [
+          "301068 behaviour_metric_delta portal_single_cast"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 301180,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 301180,
+    "clause": "Critical strikes with Hammer of Twilight now refund 10 Insanity.",
+    "labels": [
+      "301180 behaviour_metric_delta crit",
+      "301180 behaviour_metric_delta noncrit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301181,
+    "clause": "While above 60 Insanity,",
+    "labels": [
+      "301181 behaviour_metric_delta aura_above_60",
+      "301181 behaviour_metric_delta aura_at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301181,
+    "clause": "you gain $572859s1% increased haste.",
+    "labels": [
+      "301181 behaviour_metric_delta melee_above_60",
+      "301181 behaviour_metric_delta spell_above_60",
+      "301181 behaviour_metric_delta at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301182,
+    "clause": "While above 80 Insanity,",
+    "labels": [
+      "301182 behaviour_metric_delta above_80",
+      "301182 behaviour_metric_delta at_80"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301182,
+    "clause": "your Void Shield has $572758s2% increased value.",
+    "labels": [
+      "301182 behaviour_metric_delta above_80",
+      "301182 behaviour_metric_delta control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301183,
+    "clause": "Every 3rd melee ability you cast now causes your next Eldritch Mending to become instant cast and cost $301186s2% less mana.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "cost $301186s2% less mana",
+        "labels": [
+          "301183 behaviour_metric_delta mana_cost"
+        ]
+      },
+      {
+        "claim": "Every 3rd melee ability",
+        "labels": [
+          "301183 behaviour_metric_delta two_casts",
+          "301183 behaviour_metric_delta third_cast"
+        ]
+      },
+      {
+        "claim": "become instant cast",
+        "labels": [
+          "301183 behaviour_metric_delta instant",
+          "301183 behaviour_metric_delta consumed"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 301200,
+    "clause": "Casting Wrath of the Black Empire now spawns a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Casting Wrath of the Black Empire now spawns a void portal",
+        "labels": [
+          "301200 behaviour_metric_delta portal_spawn"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "301200 behaviour_metric_delta portal_cast_gaze",
+          "301200 behaviour_metric_delta portal_cast_horrorbolt",
+          "301200 behaviour_metric_delta portal_cast_beam",
+          "301200 behaviour_metric_delta portal_only_three",
+          "301200 behaviour_metric_delta portal_single_cast"
+        ]
+      },
+      {
+        "claim": "before disappearing.",
+        "labels": [
+          "301200 behaviour_metric_delta portal_single_cast"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 301209,
+    "clause": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies and healing done by Black Blood can now critically strike.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Healing done by Abyssal Covenant now heals 2 of the lowest health nearby allies",
+        "labels": [
+          "301209 behaviour_metric_delta covenant_2_lowest_allies",
+          "301209 behaviour_metric_delta covenant_2_lowest_caster"
+        ]
+      },
+      {
+        "claim": "and healing done by Black Blood can now critically strike.",
+        "labels": [
+          "301209 behaviour_metric_delta black_blood_crit"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 301209,
+    "clause": "@ext:Healing done in this way can affect the original target.:ext@",
+    "labels": [
+      "301209 behaviour_metric_delta covenant_2_lowest_allies"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301241,
+    "clause": "Reduces the duration of curse effects on you by $s1%.",
+    "labels": [
+      "301241 behaviour_duration_ratio",
+      "301241 behaviour_expiry"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301255,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 301255,
+    "clause": "Your Darkwither can now critically strike and your spell hit rating is increased by $s2% of your Intellect.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your spell hit rating is increased by $s2% of your Intellect.",
+        "labels": [
+          "301255 behaviour_metric_delta spell_hit_rating",
+          "301255 behaviour_metric_delta spell_hit_rating_int"
+        ]
+      },
+      {
+        "claim": "Your Darkwither can now critically strike",
+        "labels": [
+          "301255 behaviour_metric_delta darkwither_crit"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 301258,
+    "clause": "While Herald of the Depths is active, the critical strike chance of Blade of the Empire is increased by $s1%.",
+    "labels": [
+      "301258 behaviour_metric_delta with_herald",
+      "301258 behaviour_metric_delta without_herald"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "Melee critical strikes now apply Saronite Blessing to you.",
+    "labels": [
+      "301262 trigger_count",
+      "301262 behaviour_metric_delta noncrit_control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "Your melee attack speed is increased by $s2%",
+    "labels": [
+      "301262 behaviour_metric_delta attack_speed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "and your melee auto attacks heal the lowest health ally for an additional $s1% of the damage dealt.",
+    "labels": [
+      "301262 behaviour_metric_delta ally_lowest",
+      "301262 behaviour_metric_delta caster_lowest",
+      "301262 trigger_magnitude_ratio"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301262,
+    "clause": "Lasts for $d or $n attacks.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $d",
+        "labels": [
+          "301262 behaviour_metric_delta duration",
+          "301262 behaviour_metric_delta duration_contrast"
+        ]
+      },
+      {
+        "claim": "$n attacks",
+        "labels": [
+          "301262 behaviour_metric_delta initial_charges",
+          "301262 behaviour_metric_delta swing_charges"
+        ]
+      },
+      {
+        "claim": "or $n attacks",
+        "labels": [
+          "301262 behaviour_metric_delta swing_charges"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 301315,
+    "clause": "Increases the damage of Darkwither by $s1%",
+    "labels": [
+      "301315 behaviour_hit_ratio darkwither_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301315,
+    "clause": "and Eldritch Shock by $s2%.",
+    "labels": [
+      "301315 behaviour_hit_ratio eldritch_shock_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301317,
+    "clause": "Your Darkwither's healing reduction now stacks $s1 additional times",
+    "labels": [
+      "301317 behaviour_metric_delta withered_stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301317,
+    "clause": "and its tick rate is increased by $s2%.",
+    "labels": [
+      "301317 behaviour_metric_delta tick_period_control",
+      "301317 behaviour_metric_delta tick_period"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301347,
+    "clause": "Increases the range of your Corruption spells by $s1 yds",
+    "labels": [
+      "301347 behaviour_metric_delta range_extended",
+      "301347 behaviour_metric_delta range_capped"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301347,
+    "clause": "and their chance to critically strike by $s2%.",
+    "labels": [
+      "301347 behaviour_metric_delta crit_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301348,
+    "clause": "Increases your parry chance by $s1%",
+    "labels": [
+      "301348 behaviour_metric_delta parry"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301348,
+    "clause": "and dodge chance by $s2%.",
+    "labels": [
+      "301348 behaviour_metric_delta dodge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 301984,
+    "clause": "Increases your attack power and your maximum mana by $s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your attack power",
+        "labels": [
+          "301984 behaviour_metric_delta attack_power"
+        ]
+      },
+      {
+        "claim": "and your maximum mana by $s1%.",
+        "labels": [
+          "301984 behaviour_metric_delta max_mana"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 302015,
+    "clause": "Casting Gaze of C'thun now has a $h% chance to cause your Tentacles to blast the enemy with eldritch energy,",
+    "labels": [
+      "302015 behaviour_metric_delta blast_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 302015,
+    "clause": "dealing ${$573311m1+$573311ppl1+$sps*0.225+$AP*0.1} Shadow damage.",
+    "labels": [
+      "302015 script_hit 573311 blast_damage"
+    ],
+    "kind": "claim",
+    "reason": "Proved under ADR 0011 R4 (Q-cu-31, no server change): Cultist class tuning aura 887013 (+12% PvE damage done) listed in cultist.json known_auras folds into the expected value (floor(118 * 1.12) = 132 vs tooltip 118.6). Counted pair 20261125-100023 / 20261125-100220 (build 3744367126f6, 0 flips): 302015 script_hit 573311 blast_damage 132.0 / 132.0 (15 / 11 usable hits, control 0 hits) and blast_rate 0.2992 / 0.3018 both ok/ok."
+  },
+  {
+    "spell": 302072,
+    "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration",
+        "labels": [
+          "302072 behaviour_metric_delta void_shield_held",
+          "302072 behaviour_metric_delta void_shield_gone",
+          "302072 behaviour_metric_delta forbidden_ritual_held",
+          "302072 behaviour_metric_delta forbidden_ritual_gone"
+        ]
+      },
+      {
+        "claim": "and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+        "labels": [
+          "302072 behaviour_metric_delta void_shield_absorb",
+          "302072 behaviour_metric_delta forbidden_ritual_absorb"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 302919,
+    "clause": "Increases the duration and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the duration",
+        "labels": [
+          "302919 behaviour_metric_delta void_shield_held",
+          "302919 behaviour_metric_delta void_shield_gone",
+          "302919 behaviour_metric_delta forbidden_ritual_held",
+          "302919 behaviour_metric_delta forbidden_ritual_gone"
+        ]
+      },
+      {
+        "claim": "and absorption amount of Void Shield and Forbidden Ritual by $s1%.",
+        "labels": [
+          "302919 behaviour_metric_delta void_shield_absorb",
+          "302919 behaviour_metric_delta forbidden_ritual_absorb"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 500704,
+    "clause": "Teleport an enemy to your position and slow their movement speed by $804533s1% for $804533d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "slow their movement speed by $804533s1%",
+        "labels": [
+          "500704 behaviour_metric_delta slow"
+        ]
+      },
+      {
+        "claim": "for $804533d",
+        "labels": [
+          "500704 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "Teleport an enemy to your position",
+        "labels": [
+          "500704 behaviour_metric_delta teleport"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 500712,
+    "clause": "Generates 20 Insanity",
+    "labels": [
+      "500712 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500712,
+    "clause": "Curse an enemy, dealing ${$m1+0+$sp*1.5} Shadow damage instantly plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage after $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$sp*1.5} Shadow damage instantly",
+        "labels": [
+          "500712 behaviour_metric_delta instant_base",
+          "500712 behaviour_metric_delta instant_sp"
+        ]
+      },
+      {
+        "claim": "plus an additional ${$354191m1+$354191ppl1+$sps*1} Shadow damage",
+        "labels": [
+          "500712 behaviour_metric_delta delayed_base",
+          "500712 behaviour_metric_delta delayed_sp"
+        ]
+      },
+      {
+        "claim": "after $d",
+        "labels": [
+          "500712 behaviour_event_delay"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 502241,
+    "clause": "Generates 10 Insanity",
+    "labels": [
+      "502241 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "Smash an enemy with eldritch force, dealing ${$m1+0+$AP*0.1+$SP*.52} Shadow damage",
+    "labels": [
+      "502241 behaviour_metric_delta damage_base",
+      "502241 behaviour_metric_delta damage_sp",
+      "502241 behaviour_metric_delta damage_ap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "and applying Black Blood to $804113i nearby allies,",
+    "labels": [
+      "502241 behaviour_metric_delta black_blood_targets"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "healing them for ${$m2+0+$AP*0.1},",
+    "labels": [
+      "502241 behaviour_metric_delta black_blood_heal_base",
+      "502241 behaviour_metric_delta black_blood_heal_ap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502241,
+    "clause": "repeating every $804153t1 sec for $804153D.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "every $804153t1 sec",
+        "labels": [
+          "502241 behaviour_metric_delta black_blood_period",
+          "502241 behaviour_metric_delta black_blood_heal_base"
+        ]
+      },
+      {
+        "claim": "for $804153D",
+        "labels": [
+          "502241 behaviour_metric_delta black_blood_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 502241,
+    "clause": "Usable while moving.",
+    "labels": [
+      "502241 behaviour_metric_delta moving_cast",
+      "502241 behaviour_metric_delta moving_cast_control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578115,
+    "clause": "Shields an ally, absorbing ${$m1+$SP*2} damage for $d and applying Wracked Mind.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "absorbing ${$m1+$SP*2} damage",
+        "labels": [
+          "578115 behaviour_metric_delta absorb_base",
+          "578115 behaviour_metric_delta absorb_sp"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "578115 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 578115,
+    "clause": "Cannot be affected by Void Shield.",
+    "labels": [
+      "578115 behaviour_metric_delta wracked_mind_gate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578115,
+    "clause": "Lasts for $d.",
+    "labels": [
+      "578115 behaviour_metric_delta wracked_mind_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500719,
+    "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Obliteration Beam by $s2%",
+        "labels": [
+          "500719 cost_gate 806897 cooldown without",
+          "500719 cost_gate 806897 cooldown with",
+          "500719 cost_gate 806897 cooldown beyond"
+        ]
+      },
+      {
+        "claim": "and it now applies Madness to all targets struck.",
+        "labels": [
+          "500719 behaviour_metric_delta applies_madness_all"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 500719,
+    "clause": "Your Gaze of C'thun or Obliteration Beam causes $s1% increased damage,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Gaze of C'thun",
+        "labels": [
+          "500719 behaviour_metric_delta gaze_damage"
+        ]
+      },
+      {
+        "claim": "or Obliteration Beam causes $s1% increased damage,",
+        "labels": [
+          "500719 behaviour_metric_delta beam_damage_with_805606",
+          "500719 behaviour_metric_delta beam_damage_without_805606"
+        ]
+      }
+    ],
+    "reason": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), rev_20261125_01_cultist_client_texts.sql removes the $?s805606 conditional guard on 804369 (embedded via @s:804369:0@), and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,"
+  },
+  {
+    "spell": 500719,
+    "clause": "stacks up to $u times.",
+    "labels": [
+      "500719 behaviour_metric_delta max_stacks"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 502122,
+    "clause": "3 Charge,",
+    "labels": [
+      "502122 behaviour_metric_delta charges_before_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502122,
+    "clause": "6 sec recharge",
+    "labels": [
+      "502122 behaviour_metric_delta charges_before_recharge",
+      "502122 behaviour_metric_delta charges_after_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502122,
+    "clause": "Generates 20 Insanity",
+    "labels": [
+      "502122 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502122,
+    "clause": "Strike an enemy, dealing $?a803339[${$m1+0+$sps*.3+$AP*.25}][${$m1+0+$sps*.15+$AP*.25}] Shadow damage.",
+    "labels": [
+      "502122 behaviour_metric_delta damage_base",
+      "502122 behaviour_metric_delta damage_ap",
+      "502122 behaviour_metric_delta damage_sp",
+      "502122 behaviour_metric_delta damage_sp_cthun"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "3 Charges,",
+    "labels": [
+      "570249 behaviour_charge_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "30 sec recharge",
+    "labels": [
+      "570249 behaviour_charge_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "Infuse an ally with dark energy, healing them for $s1 the next time they take damage.",
+    "labels": [
+      "570249 behaviour_metric_delta trigger_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "When the heal occurs, Dark Infusion is consumed and expands to the two lowest-health nearby party or raid members.",
+    "labels": [
+      "570249 behaviour_metric_delta expand_two"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 570249,
+    "clause": "Each secondary infusion heals when triggered, then expands to three nearby allies.",
+    "labels": [
+      "570249 behaviour_metric_delta secondary_expand_three"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500751,
+    "clause": "Link yourself to an ally for $d,",
+    "labels": [
+      "500751 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500751,
+    "clause": "transfering $s3% of all damage taken by them to you and causing $300295s1% of all damage you deal to be converted into healing for them.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "transfering $s3% of all damage taken by them to you",
+        "labels": [
+          "500751 behaviour_metric_delta damage_transfer"
+        ]
+      },
+      {
+        "claim": "causing $300295s1% of all damage you deal to be converted into healing for them",
+        "labels": [
+          "500751 behaviour_metric_delta damage_to_heal",
+          "500751 behaviour_metric_delta damage_to_heal_control"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 500751,
+    "clause": "Can only be applied to 1 ally at a time.",
+    "labels": [
+      "500751 behaviour_single_target"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 500767,
+    "clause": "Reduces the cooldown of Obliteration Beam by $s2% and it now applies Madness to all targets struck.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Reduces the cooldown of Obliteration Beam by $s2%",
+        "labels": [
+          "500767 cost_gate 806897 cooldown without",
+          "500767 cost_gate 806897 cooldown with",
+          "500767 cost_gate 806897 cooldown beyond"
+        ]
+      },
+      {
+        "claim": "and it now applies Madness to all targets struck.",
+        "labels": [
+          "500767 behaviour_metric_delta applies_madness_all"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 500767,
+    "clause": "Your Gaze of C'thun or Obliteration Beam causes $s1% increased damage,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Your Gaze of C'thun",
+        "labels": [
+          "500767 behaviour_metric_delta gaze_damage"
+        ]
+      },
+      {
+        "claim": "or Obliteration Beam causes $s1% increased damage,",
+        "labels": [
+          "500767 behaviour_metric_delta beam_damage_with_805606",
+          "500767 behaviour_metric_delta beam_damage_without_805606"
+        ]
+      }
+    ],
+    "reason": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps unconditional +3%/stack Obliteration Beam bonus on Madness 804369 (EffectSpellClassMask[0]=131072, matching archived live logs: 4 logs, 3 players, 16 same-cast checks +2.82% to +3.11%/stack with 0 805606/706725 events), rev_20261125_01_cultist_client_texts.sql removes the $?s805606 conditional guard on 804369 (embedded via @s:804369:0@), and beam_damage_with_805606 + beam_damage_without_805606 prove +3% in both states.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Your Gaze of C'thun$?s805606[ or Obliteration Beam][] causes $s1% increased damage,"
+  },
+  {
+    "spell": 500767,
+    "clause": "stacks up to $u times.",
+    "labels": [
+      "500767 behaviour_metric_delta max_stacks"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-25 (2026-11-25, always_edit_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Madness 804369 keeps unconditional +3%/stack Obliteration Beam bonus; client text removes the $?s805606 conditional guard (embedded in 500719, 500767 and 500732).",
+      "spell": 804369,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 504642,
+    "clause": "Melee critical strikes now refresh a charge of Blade of the Empire and restore $505172s2% of your base mana.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "refresh a charge of Blade of the Empire",
+        "labels": [
+          "504642 behaviour_metric_delta charge_refresh",
+          "504642 behaviour_metric_delta charge_noncrit"
+        ]
+      },
+      {
+        "claim": "restore $505172s2% of your base mana",
+        "labels": [
+          "504642 behaviour_metric_delta mana_restore",
+          "504642 behaviour_metric_delta mana_noncrit"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 520345,
+    "clause": "Channel a shield of void energies upon an ally, causing both you and them to absorb ${$520346m1+$520346ppl1+$bh*1+$AP*.25} damage,",
+    "labels": [
+      "520345 behaviour_metric_delta absorb_caster_base",
+      "520345 behaviour_metric_delta absorb_caster_sp",
+      "520345 behaviour_metric_delta absorb_caster_ap",
+      "520345 behaviour_metric_delta absorb_ally_base"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "stacking $520346u times,",
+    "labels": [
+      "520345 behaviour_metric_delta stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "every $t1 sec for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "520345 behaviour_metric_delta period_early",
+          "520345 behaviour_metric_delta period_late"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "520345 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 520345,
+    "clause": "At the end of the duration, if the shield holds, you teleport to them.",
+    "labels": [
+      "520345 behaviour_metric_delta teleport_holds",
+      "520345 behaviour_metric_delta teleport_broken_control"
+    ],
+    "kind": "claim",
+    "reason": "Proved after server fix (Cultist ADR 0025): on the final tick of Dark Veil 520345, aura_ascension_cultist_lifecycle::Tick skips re-applying 520346 if either shield is already broken. teleport_holds passes (ok/ok: 15.0 yd displacement, distance_2d 15 -> 0, 520346 at 5 stacks) and teleport_broken_control passes (ok/ok: 0.0 yd displacement, distance_2d 15 -> 15, 520346 at 0 stacks)."
+  },
+  {
+    "spell": 520345,
+    "clause": "While channeling you are immune to stuns and silences.",
+    "labels": [
+      "520345 behaviour_metric_delta immune_stun",
+      "520345 behaviour_metric_delta immune_silence"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520345,
+    "clause": "Not usable on yourself.",
+    "labels": [
+      "520345 behaviour_metric_delta no_self_cast",
+      "520345 behaviour_metric_delta ally_cast_allowed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "Behold a vision of doom, causing direct damage or healing done to apply Vision of Doom to nearby targets for $520450d.",
+    "labels": [
+      "520388 behaviour_metric_delta apply_enemy_duration",
+      "520388 behaviour_metric_delta apply_ally_duration",
+      "520388 behaviour_metric_delta damage_100pct"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "Can only occur once every 3 sec.",
+    "labels": [
+      "520388 behaviour_metric_delta icd_closed",
+      "520388 behaviour_metric_delta icd_open"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "At the end of the duration, they are damaged or healed for $s1% of the damage or healing that doomed them.",
+    "labels": [
+      "520388 behaviour_metric_delta damage_100pct",
+      "520388 behaviour_metric_delta heal_100pct"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520388,
+    "clause": "Lasts for $d or $n instances of damage or healing.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Lasts for $d",
+        "labels": [
+          "520388 behaviour_metric_delta buff_duration"
+        ]
+      },
+      {
+        "claim": "$n instances of damage or healing",
+        "labels": [
+          "520388 behaviour_metric_delta four_instances_hold",
+          "520388 behaviour_metric_delta five_instances_consume"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 520388,
+    "clause": "Doomed enemies are unable to be healed and the damage or healing done by this effect can critically strike.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Doomed enemies are unable to be healed",
+        "labels": [
+          "520388 behaviour_metric_delta heal_block"
+        ]
+      },
+      {
+        "claim": "and the damage or healing done by this effect can critically strike.",
+        "labels": [
+          "520388 behaviour_metric_delta damage_can_crit",
+          "520388 behaviour_metric_delta heal_can_crit"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 520405,
+    "clause": "Damage dealt by your Tentacles reduces the cooldown of Eldritch Obelisk by $/1000;520872s1 sec.",
+    "labels": [
+      "520405 behaviour_metric_delta obelisk_cd",
+      "520405 behaviour_metric_delta obelisk_cd_held",
+      "520405 behaviour_metric_delta obelisk_cd_gaze",
+      "520405 behaviour_metric_delta obelisk_cd_gaze_held",
+      "520405 behaviour_metric_delta obelisk_cd_thoughtseize"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520405,
+    "clause": "In addition, increases the effectiveness of Eldritch Obelisk by $s1%.",
+    "labels": [
+      "520405 behaviour_metric_delta obelisk_effectiveness"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520682,
+    "clause": "Your Dark Veil now performs its effect $s1% faster.",
+    "labels": [
+      "520682 behaviour_metric_delta faster_period_early",
+      "520682 behaviour_metric_delta faster_period_late",
+      "520682 behaviour_metric_delta faster_duration",
+      "520682 behaviour_metric_delta duration_contrast"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 520810,
+    "clause": "Reduces the cooldown of Dark Veil by $/1000;s1 sec.",
+    "labels": [
+      "520810 cost_gate 520345 without",
+      "520810 cost_gate 520345 with",
+      "520810 cost_gate 520345 beyond"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524804,
+    "clause": "Reduces the cooldown of Empire's Grasp by $/1000;s1 sec.",
+    "labels": [
+      "524804 cost_gate 500704 without",
+      "524804 cost_gate 500704 with",
+      "524804 cost_gate 500704 beyond"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572141,
+    "clause": "Hurl a cursed shield, dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage to up to $x1 enemies,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+$AP*0.09+$SP*0.23} Shadow damage",
+        "labels": [
+          "572141 behaviour_metric_delta damage_base",
+          "572141 behaviour_metric_delta damage_sp",
+          "572141 behaviour_metric_delta damage_ap",
+          "572141 behaviour_metric_delta no_shield"
+        ]
+      },
+      {
+        "claim": "to up to $x1 enemies",
+        "labels": [
+          "572141 behaviour_metric_delta target_cap"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 572141,
+    "clause": "reduced by ${($f1-1)*100* -1}% with each jump.",
+    "labels": [
+      "572141 behaviour_metric_delta bounce_2",
+      "572141 behaviour_metric_delta bounce_3"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572141,
+    "clause": "Damage increased by $500706s1% for each stack of Insanity.",
+    "labels": [
+      "572141 behaviour_metric_delta insanity_20",
+      "572141 behaviour_metric_delta insanity_50"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "Every 1 sec while Hand of Yogg-Saron is active,",
+    "labels": [
+      "524877 behaviour_metric_delta period_early",
+      "524877 behaviour_metric_delta period_late"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "you now trigger a Horrific Revelation on the target and generate 5 Insanity.",
+    "labels": [
+      "524877 behaviour_metric_delta trigger_and_insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 524877,
+    "clause": "Heals a friendly target for ${$m1+0+$SP*0.678496}",
+    "labels": [
+      "524877 behaviour_metric_delta heal_base",
+      "524877 behaviour_metric_delta heal_sp"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Heals a friendly target for ${$m1+0+$SP*0.678496},"
+  },
+  {
+    "spell": 524877,
+    "clause": "and increases their critical strike chance by $s2%,",
+    "kind": "claim",
+    "reason": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 0% Insanity scaling on Horrific Revelation 704473 (matching archived live logs: 2 logs, 1 player, flat non-crit heals across 60-100 Insanity) and rev_20261125_01_cultist_client_texts.sql drops ', scaling with Insanity,' from 704473 (embedded in 524877 and 704476); the removed sub-claim is retired while 524877 no_insanity_scaling remains linked alongside crit_buff to guard 1.00 +- 0.02 across 0 vs 80 Insanity.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "scaling with Insanity, and increases their critical strike chance by $s2%,",
+    "labels": [
+      "524877 behaviour_metric_delta crit_buff",
+      "524877 behaviour_metric_delta no_insanity_scaling"
+    ]
+  },
+  {
+    "spell": 524877,
+    "clause": "stacking $u times,",
+    "labels": [
+      "524877 behaviour_metric_delta max_stacks"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 524877,
+    "clause": "for $d.",
+    "labels": [
+      "524877 behaviour_metric_delta duration"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-20 (2026-11-25, remove_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Horrific Revelation 704473 keeps 0% Insanity scaling; client text drops ', scaling with Insanity,' (embedded in 524877 and 704476).",
+      "spell": 704473,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 524879,
+    "clause": "Satiate now also regenerates an additional $s1% mana per tick and no longer increases damage taken during the channel.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Satiate now also regenerates an additional $s1% mana per tick",
+        "labels": [
+          "524879 behaviour_metric_delta mana_per_tick",
+          "524879 behaviour_metric_delta mana_ticks",
+          "524879 behaviour_metric_delta max_mana"
+        ]
+      },
+      {
+        "claim": "and no longer increases damage taken during the channel.",
+        "labels": [
+          "524879 behaviour_hit_ratio taken_removed",
+          "524879 behaviour_hit_ratio taken_baseline"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 524887,
+    "clause": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "heals the lowest health ally for $s1% of the damage dealt",
+        "labels": [
+          "524887 behaviour_metric_delta heal_base",
+          "524887 behaviour_metric_delta heal_sp",
+          "524887 behaviour_metric_delta heal_ap"
+        ]
+      },
+      {
+        "claim": "plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}",
+        "labels": [
+          "524887 behaviour_metric_delta heal_base",
+          "524887 behaviour_metric_delta heal_sp",
+          "524887 behaviour_metric_delta heal_ap"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 525019,
+    "clause": "Removes the cast time of your Corrupt Mind.",
+    "labels": [
+      "525019 behaviour_metric_delta instant_cast"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525049,
+    "clause": "Your Corrupt Mind now also applies Mind Rot to nearby enemies.",
+    "labels": [
+      "525049 behaviour_metric_delta applies_nearby"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525049,
+    "clause": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1% for $560943d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the chance for allies to hit with all spells against the afflicted enemy by $560943s1%",
+        "labels": [
+          "525049 behaviour_metric_delta mind_rot_hit_shadow",
+          "525049 behaviour_metric_delta mind_rot_hit_fire",
+          "525049 behaviour_metric_delta mind_rot_hit_nature"
+        ]
+      },
+      {
+        "claim": "for $560943d",
+        "labels": [
+          "525049 behaviour_metric_delta mind_rot_duration",
+          "525049 behaviour_metric_delta mind_rot_duration_contrast"
+        ]
+      }
+    ],
+    "reason": "Claim 0 fixed by Cultist ADR 0006 (owner ruling O-12 Q-cu-1: AscensionCultist::ApplyContracts sets Mind Rot 560943 Effect[0].MiscValue = SPELL_SCHOOL_MASK_ALL). Proven in runs 20261125-085103 and 20261125-085359 (build 2d9c7b8bee7d, 0 flips; 560943 aura 0 -> 1 confirmed on Kobold Vermin 6): spell_hit_bonus_taken Shadow 502182 = +3/+3, Fire 2136 = +3/+3, Nature 5176 = +3/+3 vs +3 expected (ok/ok across all three schools; ADR 1290)."
+  },
+  {
+    "spell": 525049,
+    "clause": "If this effect is dispelled, your critical strike chance is increased by $560947s1% for $560947d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "your critical strike chance is increased by $560947s1%",
+        "labels": [
+          "525049 behaviour_metric_delta dispel_crit",
+          "525049 behaviour_metric_delta dispel_crit_pct",
+          "525049 behaviour_metric_delta dispel_expire_control"
+        ]
+      },
+      {
+        "claim": "for $560947d",
+        "labels": [
+          "525049 behaviour_metric_delta dispel_crit",
+          "525049 behaviour_metric_delta dispel_crit_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 525060,
+    "clause": "Increases the chance for Void Shield to resist dispel effects on allies by $s2%",
+    "labels": [
+      "525060 behaviour_metric_delta dispel_resist"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525060,
+    "clause": "and it now also reflects $s1% of the damage absorbed.",
+    "labels": [
+      "525060 behaviour_metric_delta reflect_absorbed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 525065,
+    "clause": "Create a warped sigil that bends hostile force away from you, deflecting all spells and abilities for $d, but making you unable to attack or cast spells.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deflecting all spells and abilities",
+        "labels": [
+          "525065 behaviour_metric_delta deflect_magic",
+          "525065 behaviour_metric_delta deflect_melee_ability"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "525065 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "making you unable to attack or cast spells.",
+        "labels": [
+          "525065 behaviour_metric_delta no_cast",
+          "525065 behaviour_metric_delta no_attack",
+          "525065 behaviour_metric_delta no_attack_applied"
+        ]
+      }
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-16 and O-18 (2026-11-25, Cultist ADR 0020, ADR 0035): Twisted Seal 525065 buff ToolTip updates 'Deflecting spells.' -> 'Deflecting spells and abilities.'; Description kept verbatim.",
+      "spell": 525065,
+      "dbc_differs": "ToolTip differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 525065,
+    "clause": "Casters whose magic is deflected are silenced for $525066d.",
+    "labels": [
+      "525065 behaviour_metric_delta silence_on_deflect",
+      "525065 behaviour_metric_delta no_silence_on_melee_deflect"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-16 and O-18 (2026-11-25, Cultist ADR 0020, ADR 0035): Twisted Seal 525065 buff ToolTip updates 'Deflecting spells.' -> 'Deflecting spells and abilities.'; Description kept verbatim.",
+      "spell": 525065,
+      "dbc_differs": "ToolTip differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 525078,
+    "clause": "Damage dealt by Blade of the Empire now heals the lowest health ally for $s1% of the damage dealt plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "heals the lowest health ally for $s1% of the damage dealt",
+        "labels": [
+          "525078 behaviour_metric_delta heal_base",
+          "525078 behaviour_metric_delta heal_sp",
+          "525078 behaviour_metric_delta heal_ap"
+        ]
+      },
+      {
+        "claim": "plus ${($500748m1+$500748ppl1+$BH*0.4+$AP*.1)*0.5}",
+        "labels": [
+          "525078 behaviour_metric_delta heal_base",
+          "525078 behaviour_metric_delta heal_sp",
+          "525078 behaviour_metric_delta heal_ap"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 525307,
+    "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "affected by Black Blood for $s1% of your auto attack damage.",
+        "labels": [
+          "525307 behaviour_metric_delta auto_heal"
+        ]
+      },
+      {
+        "claim": "heal the lowest health ally affected by Black Blood",
+        "labels": [
+          "525307 behaviour_metric_delta lowest_ally_a",
+          "525307 behaviour_metric_delta lowest_ally_b"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 527268,
+    "clause": "While above 60 Insanity,",
+    "labels": [
+      "527268 behaviour_metric_delta aura_above_60",
+      "527268 behaviour_metric_delta aura_at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 527268,
+    "clause": "your Netherstrike, Gaze of C'Thun, and Eldritch Shock now gain $573272s1% increased critical strike chance.",
+    "labels": [
+      "527268 behaviour_metric_delta netherstrike_above_60",
+      "527268 behaviour_metric_delta gaze_above_60",
+      "527268 behaviour_metric_delta shock_above_60",
+      "527268 behaviour_metric_delta at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560002,
+    "clause": "Reduces damage taken by party and raid members by $s1%.",
+    "labels": [
+      "560002 behaviour_hit_ratio damage_taken",
+      "560002 behaviour_metric_delta ally_aura"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560002,
+    "clause": "Does not stack with similar effects.",
+    "labels": [
+      "560002 behaviour_hit_ratio no_stack",
+      "560002 behaviour_hit_ratio partner_alone"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560002,
+    "clause": "In addition, increases all of your resistances by ${$floor($m2)}, scaling with level.",
+    "labels": [
+      "560002 behaviour_metric_delta res_holy",
+      "560002 behaviour_metric_delta res_fire",
+      "560002 behaviour_metric_delta res_nature",
+      "560002 behaviour_metric_delta res_frost",
+      "560002 behaviour_metric_delta res_shadow",
+      "560002 behaviour_metric_delta res_arcane",
+      "560002 behaviour_metric_delta res_holy_l50",
+      "560002 behaviour_metric_delta res_fire_l50",
+      "560002 behaviour_metric_delta res_nature_l50",
+      "560002 behaviour_metric_delta res_frost_l50",
+      "560002 behaviour_metric_delta res_shadow_l50",
+      "560002 behaviour_metric_delta res_arcane_l50"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560080,
+    "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the amount of mana",
+        "labels": [
+          "560080 behaviour_metric_delta mana_base",
+          "560080 behaviour_metric_delta mana_int"
+        ]
+      },
+      {
+        "claim": "and now health per point of Intellect by $s1%.",
+        "labels": [
+          "560080 behaviour_metric_delta health_base",
+          "560080 behaviour_metric_delta health_int"
+        ]
+      }
+    ],
+    "reason": "Proven per owner ruling Cultist Q-cu-24 / O-16 (2026-11-25) and Cultist ADR 0021: 560080 applies +200% to Cultist mana from Intellect (15->45/Int above 20, 1->3/Int for first 20; +1570 at 71 Int, +10570 at 371 Int) and 0.25 * 3 = 0.75 health per Intellect (+53 at 71 Int, +278 at 371 Int) with 0 health from Intellect without the talent."
+  },
+  {
+    "spell": 560091,
+    "clause": "Increases your Armor contribution from your shield by $s1%",
+    "labels": [
+      "560091 behaviour_metric_delta shield_armor",
+      "560091 behaviour_metric_delta no_shield_armor"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560091,
+    "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+    "labels": [
+      "560091 behaviour_metric_delta reset_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560109,
+    "clause": "Generates 10 Insanity",
+    "labels": [
+      "560109 behaviour_metric_delta insanity_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560109,
+    "clause": "Corrupt the mind of an enemy and spread madness, fearing them in place for $d (8 sec vs players),",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d",
+        "labels": [
+          "560109 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "8 sec vs players",
+        "labels": [
+          "560109 behaviour_metric_delta player_duration"
+        ]
+      }
+    ],
+    "reason": "Proved after server fix (owner ruling O-15 Q-cu-28, Cultist ADR 0024): cultist_spells::OnCalcMaxDuration clamps 560109 max duration to 8000 ms for player targets (preserving 40000 ms on PvE creatures); player_duration reads 0 before cast, 1 at 9109 ms (~7.48 s post-apply), and 0 at 10118 ms (~8.49 s post-apply) in both counted runs."
+  },
+  {
+    "spell": 560109,
+    "clause": "bouncing to up to 2 nearby enemies$?s525049[ and applying Mind Rot to them][].",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "bouncing to up to 2 nearby enemies",
+        "labels": [
+          "560109 behaviour_metric_delta bounce_cap"
+        ]
+      },
+      {
+        "claim": "and applying Mind Rot to them",
+        "labels": [
+          "560109 behaviour_metric_delta mind_rot_branch"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 560109,
+    "clause": "Damage dealt may end this effect.",
+    "labels": [
+      "560109 behaviour_metric_delta damage_breaks",
+      "560109 behaviour_metric_delta damage_holds"
+    ],
+    "kind": "claim",
+    "reason": "Orchestrator decision D-38 and Necromancer ADR 0082 / 800706 precedent (stock deterministic HandleBreakableCCAuraProc cumulative damage cap BaseHealth(60)/4.75 = 1048 at SpellAuraEffects.cpp:548-562,7245-7253, no break probability asserted): both entries read aura 560109 PRESENT == 1 on dummy before the damage hit (after_setup_stacks + before_expected 1); damage_holds proves a ~620 Shadow hit leaves 560109 active (1 -> 1) and damage_breaks proves a ~31000 Shadow hit ends 560109 (1 -> 0)."
+  },
+  {
+    "spell": 560301,
+    "clause": "Create 3 copies of yourself that run in a random direction for $706932d and may briefly trick enemies into ignoring you.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $706932d",
+        "labels": [
+          "560301 behaviour_metric_delta copies_duration"
+        ]
+      },
+      {
+        "claim": "Create 3 copies of yourself",
+        "labels": [
+          "560301 behaviour_metric_delta copies_duration"
+        ]
+      },
+      {
+        "claim": "that run in a random direction",
+        "labels": [
+          "560301 behaviour_metric_delta copies_random_run"
+        ]
+      },
+      {
+        "claim": "and may briefly trick enemies into ignoring you.",
+        "labels": [
+          "560301 behaviour_metric_delta threat_reduce",
+          "560301 behaviour_metric_delta threat_reduce_control"
+        ]
+      }
+    ],
+    "reason": "Claim 3 ('and may briefly trick enemies into ignoring you.') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-15 Q-cu-35 (2026-11-25, covered_by_threat, Cultist ADR 0032): Hallucination 560301's threat wipe (player->GetThreatMgr().RemoveMeFromThreatLists(), AscensionCultistAbilities.cpp:448; proved by 560301 threat_reduce and threat_reduce_control) covers 'and may briefly trick enemies into ignoring you.' with no server or client text change."
+  },
+  {
+    "spell": 560301,
+    "clause": "Significantly reduces your threat and removes all movement impairing effects from you.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Significantly reduces your threat",
+        "labels": [
+          "560301 behaviour_metric_delta threat_reduce",
+          "560301 behaviour_metric_delta threat_reduce_control"
+        ]
+      },
+      {
+        "claim": "and removes all movement impairing effects from you.",
+        "labels": [
+          "560301 behaviour_metric_delta removes_movement_impairing"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 560320,
+    "clause": "Melee attacks now have a $h% chance to reset the cooldown of your Netherstrike,",
+    "labels": [
+      "560320 behaviour_metric_delta reset_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560320,
+    "clause": "allowing the next use regardless of the target's health for $561288d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "allowing the next use regardless of the target's health",
+        "labels": [
+          "561288 cast_gate bypassed",
+          "560320 behaviour_metric_delta bypass_next_use"
+        ]
+      },
+      {
+        "claim": "for $561288d",
+        "labels": [
+          "560320 behaviour_metric_delta voidseeker_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 560321,
+    "clause": "Create an Eldritch Obelisk beneath you for $560322d,",
+    "labels": [
+      "560321 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560321,
+    "clause": "increasing the damage of your Tentacles by $560322s1%",
+    "labels": [
+      "560321 behaviour_hit_ratio tentacle_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560321,
+    "clause": "and the movement speed of allies by $560322s3% while near it.",
+    "labels": [
+      "560321 behaviour_metric_delta ally_speed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560502,
+    "clause": "While above 60 Insanity,",
+    "labels": [
+      "560502 behaviour_metric_delta shieldtoss_at_60",
+      "560502 behaviour_metric_delta gaze_at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560502,
+    "clause": "the cooldown of your Twilight Shieldtoss and Gaze of C'thun is reduced by $630891s1%.",
+    "labels": [
+      "560502 behaviour_metric_delta shieldtoss_late",
+      "560502 behaviour_metric_delta shieldtoss_early",
+      "560502 behaviour_metric_delta gaze_late",
+      "560502 behaviour_metric_delta gaze_early"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560526,
+    "clause": "Increases the spell haste of all party and raid members by $s1%.",
+    "labels": [
+      "560526 behaviour_party_stat_ratio party_haste"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560526,
+    "clause": "Does not stack with similar effects.",
+    "labels": [
+      "560526 behaviour_metric_delta no_stack",
+      "560526 behaviour_metric_delta no_stack_aura",
+      "560526 behaviour_party_stat_ratio party_haste"
+    ],
+    "kind": "claim",
+    "promise_of": "Increases the spell haste of all party and raid members by $s1%."
+  },
+  {
+    "spell": 560526,
+    "clause": "In addition, your Shadow damage is increased by $s2%.",
+    "labels": [
+      "560526 behaviour_hit_ratio shadow_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560715,
+    "clause": "Taking damage while below 35% health now summons 3 Manifestations of Y'shaarj for 10 sec,",
+    "labels": [
+      "560715 behaviour_metric_delta summon_duration",
+      "560715 behaviour_metric_delta no_talent",
+      "560715 behaviour_metric_delta threshold_above_35"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560715,
+    "clause": "which will attack enemies and heal you for 5% of your base health.",
+    "labels": [
+      "560715 behaviour_metric_delta attack_and_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560715,
+    "clause": "Can ony occur once every 2 minutes.",
+    "labels": [
+      "560715 behaviour_metric_delta icd_blocked",
+      "560715 behaviour_metric_delta icd_reopened"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 560977,
+    "clause": "Removes the cooldown of Eldritch Shock and guarantees it to critically strike when used with at least 60 Insanity.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Removes the cooldown of Eldritch Shock",
+        "labels": [
+          "560977 behaviour_metric_delta no_cooldown"
+        ]
+      },
+      {
+        "claim": "and guarantees it to critically strike when used with at least 60 Insanity.",
+        "labels": [
+          "560977 behaviour_crit_rate crit_at_60",
+          "560977 behaviour_crit_rate crit_below_60",
+          "560977 behaviour_hit_ratio crit_shock_at_60",
+          "560977 behaviour_hit_ratio crit_heal_at_60"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 560977,
+    "clause": "Eldritch Shock can now be cast while channeling.",
+    "labels": [
+      "560977 behaviour_metric_delta cast_while_channeling"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561035,
+    "clause": "Increases the duration of Presence of N'Zoth and Presence of Y'Shaarj by $s1%.",
+    "labels": [
+      "561035 behaviour_metric_delta nzoth_duration",
+      "561035 behaviour_metric_delta yshaarj_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561335,
+    "clause": "Increases the amount of mana and now health per point of Intellect by $s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the amount of mana",
+        "labels": [
+          "561335 behaviour_metric_delta mana_base",
+          "561335 behaviour_metric_delta mana_int"
+        ]
+      },
+      {
+        "claim": "and now health per point of Intellect by $s1%.",
+        "labels": [
+          "561335 behaviour_metric_delta health_base",
+          "561335 behaviour_metric_delta health_int"
+        ]
+      }
+    ],
+    "reason": "Proven per owner ruling Cultist Q-cu-24 / O-16 (2026-11-25) and Cultist ADR 0021: 561335 applies +400% to Cultist mana from Intellect (15->75/Int above 20, 1->5/Int for first 20; +3140 at 71 Int, +21140 at 371 Int) and 0.25 * 5 = 1.25 health per Intellect (+88 at 71 Int, +463 at 371 Int) with 0 health from Intellect without the talent."
+  },
+  {
+    "spell": 561336,
+    "clause": "Increases your Armor contribution from your shield by $s1%",
+    "labels": [
+      "561336 behaviour_metric_delta shield_armor",
+      "561336 behaviour_metric_delta no_shield_armor"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 561336,
+    "clause": "and gives you a $h% chance on Shadow Damage dealt to reset the cooldown of Twilight Shieldtoss.",
+    "labels": [
+      "561336 behaviour_metric_delta reset_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 563123,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 563123,
+    "clause": "Increases your critical damage dealt by $s1%",
+    "labels": [
+      "563123 behaviour_hit_ratio crit_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 563123,
+    "clause": "and your spell power by $s2% of your Intellect.",
+    "labels": [
+      "563123 behaviour_metric_delta sp_base",
+      "563123 behaviour_metric_delta sp_int"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572064,
+    "clause": "Void Shield now applies to an additional nearby ally but its duration is reduced by $s3%.",
+    "labels": [
+      "572064 behaviour_metric_delta extra_ally",
+      "572064 behaviour_metric_delta duration_reduced",
+      "572064 behaviour_metric_delta duration_bracket"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572064,
+    "clause": "Killing an opponent that yields experience or honor removes Wracked Mind from you.",
+    "labels": [
+      "572064 behaviour_metric_delta kill_removes",
+      "572064 behaviour_metric_delta kill_no_talent",
+      "572064 behaviour_metric_delta kill_non_xp_critter"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "Target an enemy and summon a Tentacle of N'Zoth on the ground near them that will silence them and deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage every $806596t2 sec for $806596d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "deal ${$806596m2+$806596ppl2+$SP*.75} Shadow damage",
+        "labels": [
+          "572103 behaviour_metric_delta damage_base",
+          "572103 behaviour_metric_delta damage_sp",
+          "572103 behaviour_metric_delta silence"
+        ]
+      },
+      {
+        "claim": "every $806596t2 sec",
+        "labels": [
+          "572103 behaviour_metric_delta tick_period"
+        ]
+      },
+      {
+        "claim": "for $806596d",
+        "labels": [
+          "572103 behaviour_metric_delta duration",
+          "572103 behaviour_metric_delta duration_contrast",
+          "572103 behaviour_metric_delta presence_eternal_grasp_expiry"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 572103,
+    "clause": "If your target runs out of range, the tentacle will seek a new target.",
+    "labels": [
+      "572103 behaviour_metric_delta retarget_out_of_range",
+      "572103 behaviour_metric_delta retarget_short_delay",
+      "572103 behaviour_metric_delta search_inside_15yd",
+      "572103 behaviour_metric_delta search_beyond_15yd"
+    ],
+    "kind": "claim",
+    "reason": "Proved after server fixes (owner rulings O-20 and O-22, 2026-11-25, Cultist ADRs 0034 and 0036): npc_ascension_cultist_summon reads Thoughtseize (806596, RangeIndex 11 = 15.0 yd) via GetMaxRange(false, me) for target retention and replacement search on entry 501464 (17.025 yd c2c against Harvest Golem 36), removes owner's Thoughtseize immediately on UpdateAI when an afflicted target leaves range before seeking a replacement, and enforces single-target exclusivity. Counted pair 20261125-144748 / 20261125-144817 (build 539312883947, 15/15 ok, 0 flips): retarget_out_of_range (end 6800 ms) and retarget_short_delay (end 3300 ms, before 6000 ms pulse) kept dummy in control (area1 = 0, raw dummy = 1) and retargeted area1 in near and far out-of-range arms (area1 = 1, raw dummy = 0); search_inside_15yd (0 -> 1) and search_beyond_15yd (0 -> 0) pinned the 15 yd search radius. Supporting gameplay scenario evidence (counted pair 20261125-142643 / 20261125-142712, build 539312883947, VERIFY ALL: PASSED, 3/3 passed in both runs): apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-retarget-clears-primary.json (primary removal, zero simultaneous dual-target carry, 4/0 control ticks vs 0/3 treatment ticks), apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-no-other-target.json (out-of-range removal with no other target while 501464 stays alive), and apps/coa-gameplay-test/scenarios/cultist-tentacle-of-nzoth-o22-two-cultists-owner-isolation.json (owner-keyed isolation between two Cultists on a shared target)."
+  },
+  {
+    "spell": 572103,
+    "clause": "The tentacle gains health based on your Stamina.",
+    "labels": [
+      "572103 behaviour_metric_delta stamina_health_arms"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "If the tentacle dies, the silence effect will end.",
+    "labels": [
+      "572103 behaviour_metric_delta tentacle_death_ends_silence"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 572103,
+    "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+    "labels": [
+      "572103 behaviour_metric_delta max_one",
+      "572103 behaviour_metric_delta replaces_yshaarj"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 573028,
+    "clause": "Hinder an enemies momentum with void chains, slowing their movement speed by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "slowing their movement speed by $s1%",
+        "labels": [
+          "573028 behaviour_metric_delta slow"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "573028 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 574147,
+    "clause": "Your healing power is increased based on your main-hand weapon damage.",
+    "labels": [
+      "574147 behaviour_metric_delta healing_weapon_arms"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574318,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 574318,
+    "clause": "While above 40 Insanity, melee attacks and abilities trigger Shadow of the Void.",
+    "labels": [
+      "574318 trigger_count",
+      "574318 behaviour_metric_delta ability_trigger",
+      "574318 behaviour_metric_delta insanity_gate_40"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574318,
+    "clause": "Restores $s2% of your maximum mana",
+    "labels": [
+      "574318 behaviour_metric_delta mana_restore",
+      "574318 behaviour_metric_delta max_mana"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 574318,
+    "clause": "and increases your Shadow Damage dealt by $s1% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and increases your Shadow Damage dealt by $s1%",
+        "labels": [
+          "574318 behaviour_hit_ratio shadow_damage"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "574318 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 582307,
+    "clause": "Each point of Insanity now reduces mana costs of your instant cast spells and abilities by $s1%.",
+    "labels": [
+      "582307 behaviour_metric_delta at_20",
+      "582307 behaviour_metric_delta at_50",
+      "582307 behaviour_metric_delta at_0",
+      "582307 behaviour_metric_delta casted_control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582308,
+    "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
+    "labels": [
+      "582308 behaviour_metric_delta absorb"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582589,
+    "clause": "Reduces the cooldown of Hallucination by $/1000;s1 sec",
+    "labels": [
+      "582589 cost_gate 560301 cooldown without",
+      "582589 cost_gate 560301 cooldown with",
+      "582589 cost_gate 560301 cooldown beyond"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582589,
+    "clause": "and reduces its mana cost by $s2%.",
+    "labels": [
+      "582589 behaviour_metric_delta mana_cost"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582591,
+    "clause": "Become one with the void, preventing you from dying for $d,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "preventing you from dying",
+        "labels": [
+          "582591 behaviour_metric_delta survive_control",
+          "582591 behaviour_metric_delta survive_treatment"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "582591 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 582591,
+    "clause": "or until you take damage equal to a maximum of 100% of your total health.",
+    "labels": [
+      "582591 behaviour_metric_delta cap_2000_holds",
+      "582591 behaviour_metric_delta cap_1900_breaks",
+      "582591 behaviour_metric_delta cap_3000_holds",
+      "582591 behaviour_metric_delta cap_2850_breaks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582591,
+    "clause": "When the effect ends you instantly regenerate health equal to $s1% of the damage taken while active.",
+    "labels": [
+      "582591 behaviour_metric_delta end_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582836,
+    "clause": "Increases the critical strike chance of Blade of the Empire by $s1%",
+    "labels": [
+      "582836 behaviour_metric_delta crit_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582836,
+    "clause": "and reduces its mana cost by $s2%.",
+    "labels": [
+      "582836 behaviour_metric_delta mana_cost"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582856,
+    "clause": "Increases the critical strike chance of Blade of the Empire by $s1%",
+    "labels": [
+      "582856 behaviour_metric_delta crit_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 582856,
+    "clause": "and reduces its mana cost by $s2%.",
+    "labels": [
+      "582856 behaviour_metric_delta mana_cost"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680377,
+    "clause": "Your Rift now guarantees your next Hammer of Twilight to critically strike.",
+    "labels": [
+      "680377 behaviour_metric_delta crit_guarantee",
+      "680377 behaviour_metric_delta second_hammer"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680487,
+    "clause": "Reduces the cooldown of your Voidborne by $/1000;s1 sec",
+    "labels": [
+      "680487 cost_gate 681104 cooldown_without without",
+      "680487 cost_gate 681104 cooldown_with with",
+      "680487 cost_gate 681104 cooldown_beyond beyond"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680487,
+    "clause": "and increases its duration by $/1000;s2 sec.",
+    "labels": [
+      "680487 behaviour_metric_delta duration_contrast",
+      "680487 behaviour_metric_delta duration_expiry"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680500,
+    "clause": "Increases the critical damage of your Hammer of Twilight and Eldritch Shock by $s2%.",
+    "labels": [
+      "680500 behaviour_hit_ratio hammer_crit",
+      "680500 behaviour_hit_ratio shock_crit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680508,
+    "clause": "Increases your Magic damage dealt by $s1%",
+    "labels": [
+      "680508 behaviour_hit_ratio magic_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680508,
+    "clause": "and Hammer of Twilight now increases the target's spell damage taken by $572046s1% for $572046d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the target's spell damage taken by $572046s1%",
+        "labels": [
+          "680508 behaviour_metric_delta applies_debuff",
+          "680508 behaviour_hit_ratio debuff_damage"
+        ]
+      },
+      {
+        "claim": "for $572046d",
+        "labels": [
+          "680508 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 680555,
+    "clause": "Increases your block value by $s1%.",
+    "labels": [
+      "680555 behaviour_metric_delta block_value_base"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680555,
+    "clause": "While above 60 Insanity, the value of this effect is doubled.",
+    "labels": [
+      "680555 behaviour_metric_delta block_value_at_60",
+      "680555 behaviour_metric_delta block_value_above_60"
+    ],
+    "kind": "claim",
+    "promise_of": "Increases your block value by $s1%."
+  },
+  {
+    "spell": 680557,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 680557,
+    "clause": "Dreadnought now sheds your mortal form, transforming you into a void monstrosity, reducing your damage taken by $680556s3%",
+    "labels": [
+      "680557 behaviour_metric_delta transform",
+      "680557 behaviour_metric_delta damage_taken",
+      "680557 behaviour_metric_delta damage_taken_control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680558,
+    "clause": "Increases your block chance by $s2%,",
+    "labels": [
+      "680558 behaviour_metric_delta block_base"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680558,
+    "clause": "plus an additional $680608s1% while above 40 Insanity.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "plus an additional $680608s1%",
+        "labels": [
+          "680558 behaviour_metric_delta block_above_40"
+        ]
+      },
+      {
+        "claim": "while above 40 Insanity",
+        "labels": [
+          "680558 behaviour_metric_delta block_at_40",
+          "680558 behaviour_metric_delta block_above_40"
+        ]
+      }
+    ],
+    "promise_of": "Increases your block chance by $s2%,"
+  },
+  {
+    "spell": 680569,
+    "clause": "Increases your attack power by 2 for every 100 armor value you have.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for every 100 armor value you have",
+        "labels": [
+          "680569 behaviour_metric_delta ap_base",
+          "680569 behaviour_metric_delta ap_armor"
+        ],
+        "reason": "Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 1 AP per 50 armor (proved in play by ap_base +3 AP at 182 armor and ap_armor +103 AP at 5182 armor), and rev_20261125_01_cultist_client_texts.sql updates '${($m1*$m2)*2}' -> '100' ('2 for every 100 armor'); coverage.py still audits claims[0] as data because STATE_PROMISES['attack_power'] matches 'attack power' on claims[1] only."
+      },
+      {
+        "claim": "Increases your attack power by 2",
+        "labels": [
+          "680569 behaviour_metric_delta ap_base",
+          "680569 behaviour_metric_delta ap_armor"
+        ],
+        "reason": "Behaviour-proven against the O-18 streamed text '2 for every 100 armor' under owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 1 AP per 50 armor (proved at armor 182 -> +3 AP and armor 5182 -> +103 AP)."
+      }
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-4 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Malignant Armor 680569 keeps 1 AP per 50 armor; client text updates '${($m1*$m2)*2}' -> '100' ('2 for every 100 armor').",
+      "spell": 680569,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Increases your attack power by 2 for every ${($m1*$m2)*2} armor value you have."
+  },
+  {
+    "spell": 680570,
+    "clause": "Increases your chance to block by $s2%",
+    "labels": [
+      "680570 behaviour_metric_delta block_chance"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680570,
+    "clause": "and casting Abyssal Ward now increases your chance to critically block by $680571s1% for $680571d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your chance to critically block by $680571s1%",
+        "labels": [
+          "680570 behaviour_metric_delta crit_block_damage",
+          "680570 behaviour_metric_delta crit_block_no_ward"
+        ]
+      },
+      {
+        "claim": "for $680571d",
+        "labels": [
+          "680570 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 680574,
+    "clause": "Your successful blocks now have a $s2% chance to critically block for twice the normal amount.",
+    "labels": [
+      "680574 behaviour_metric_delta crit_block_rate_base",
+      "680574 behaviour_metric_delta crit_block_base"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680574,
+    "clause": "This effect is doubled while above 60 Insanity.",
+    "labels": [
+      "680574 behaviour_metric_delta crit_block_at_59",
+      "680574 behaviour_metric_delta crit_block_at_60",
+      "680574 behaviour_metric_delta crit_block_above_60",
+      "680574 behaviour_metric_delta crit_block_rate_at_60",
+      "680574 behaviour_metric_delta crit_block_rate_above_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680575,
+    "clause": "While Dreadnought is active, your Twilight Shieldtoss has a $/1000;s1 sec reduced cooldown.",
+    "labels": [
+      "680575 behaviour_metric_delta cd_late",
+      "680575 behaviour_metric_delta cd_early",
+      "680575 behaviour_metric_delta cd_no_dreadnought"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261007_58_void_augmentation_tooltip.sql",
+      "commit": "1e3bf86d71",
+      "pr": "#6807",
+      "basis": "align_to_server",
+      "ruling": null,
+      "spell": 680575,
+      "dbc_differs": "no field differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 680575,
+    "clause": "In addition, your Eldritch Shock now strikes 2 additional enemies near the primary target.",
+    "labels": [
+      "680575 behaviour_metric_delta shock_cleave"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261007_58_void_augmentation_tooltip.sql",
+      "commit": "1e3bf86d71",
+      "pr": "#6807",
+      "basis": "align_to_server",
+      "ruling": null,
+      "spell": 680575,
+      "dbc_differs": "no field differs from Spell.dbc"
+    },
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-5 (2026-11-24, Cultist ADR 0032): keep 'Eldritch Shock' (matching server Spell.dbc and rev_20261007_58_void_augmentation_tooltip.sql; 2026-09-01 archive video 'Twilight Shock' recorded as observation only), behaviour-proven by 680575 shock_cleave."
+  },
+  {
+    "spell": 680579,
+    "clause": "Increases your critical strike rating based on your parry and dodge rating.",
+    "labels": [
+      "680579 behaviour_metric_delta crit_rating_zero",
+      "680579 behaviour_metric_delta crit_rating_dodge",
+      "680579 behaviour_metric_delta crit_rating_parry",
+      "680579 behaviour_metric_delta crit_parry_arms",
+      "680579 behaviour_metric_delta crit_dodge_arms"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): direction-only proof (Templar Improved Benediction precedent, no coefficient invented). At 0 dodge & 0 parry rating: crit rating 0 -> 0 (rules out flat bonus); with +96 dodge rating fixture 18062: 0 -> 96 (>= 1); with +60 parry rating fixture 13668: 0 -> 60 (>= 1)."
+  },
+  {
+    "spell": 680579,
+    "clause": "In addition, critical strikes now reduce the cooldown of Dreadfall and Dreadnought by $/1000;681475s1 sec.",
+    "labels": [
+      "680579 behaviour_metric_delta dreadnought_cd_held",
+      "680579 behaviour_metric_delta dreadnought_cd_ready",
+      "680579 behaviour_metric_delta dreadfall_cd_held",
+      "680579 behaviour_metric_delta dreadfall_cd_ready"
+    ],
+    "kind": "claim",
+    "reason": "cu-t2 batch-a5 (20261125-054009 / -054038, build 0f5bf1570cd2, 0 flips): $/1000;681475s1 = 2 sec per crit. 5 forced crits cut 10 s (10% off 10 s = +-1 s): Dreadnought 567524 (45 s -> 35 s) refused (67) at 34.4 s in both phases and succeeds (0) at 35.6 s in treatment only; Dreadfall 806175 (25 s -> 15 s; 1 dash 807815 crit + 4 Horrorbolt 800416 crits) refused (67) at 14.4 s in both phases and succeeds (0) at 15.6 s in treatment only."
+  },
+  {
+    "spell": 680581,
+    "clause": "Dealing damage with Twilight Shieldtoss now heals you for $680581s1% of the damage dealt.",
+    "labels": [
+      "680581 behaviour_metric_delta heal_ratio_base",
+      "680581 behaviour_metric_delta heal_ratio_sp"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680600,
+    "clause": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1% and they now generates a large amount of threat.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage of Hammer of Twilight and Entropic Slam by $s1%",
+        "labels": [
+          "680600 behaviour_hit_ratio hammer_damage",
+          "680600 behaviour_hit_ratio slam_damage"
+        ]
+      },
+      {
+        "claim": "and they now generates a large amount of threat.",
+        "labels": [
+          "680600 behaviour_metric_delta hammer_threat",
+          "680600 behaviour_metric_delta hammer_threat_control",
+          "680600 behaviour_metric_delta slam_threat",
+          "680600 behaviour_metric_delta slam_threat_control"
+        ]
+      }
+    ],
+    "reason": "Proved after Cultist ADR 0030 (owner ruling O-15 Q-cu-34, 2026-11-25: threat x2, keeping existing Bulwark Tab 88 talent gate CharacterAdvancement 29273): Effect[1] SPELLMOD_THREAT BasePoints set to 99 (+100%). Counted pair 20261125-092328 / 20261125-092359 (build 3744367126f6, 0 flips): hammer_threat 2.00844 / 2.00849 vs control 1.01057 / 1.01058; slam_threat 2.01105 / 2.01103 vs control 1.01384 / 1.01379."
+  },
+  {
+    "spell": 680607,
+    "clause": "Your Twilight Shieldtoss now hits an additional enemy for every 20 Insanity you have.",
+    "labels": [
+      "680607 behaviour_metric_delta control",
+      "680607 behaviour_metric_delta insanity_19",
+      "680607 behaviour_metric_delta insanity_20",
+      "680607 behaviour_metric_delta insanity_40",
+      "680607 behaviour_metric_delta insanity_60",
+      "680607 behaviour_metric_delta insanity_80",
+      "680607 behaviour_metric_delta insanity_100"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680609,
+    "clause": "Damage dealt by Blade of the Empire and Entropic Slam is now increased based on your defense rating.",
+    "labels": [
+      "680609 behaviour_metric_delta blade_defense_direction",
+      "680609 behaviour_metric_delta slam_defense_direction"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Level 10 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 680750,
+    "clause": "Reaching 100 Insanity no longer causes Total Madness.",
+    "labels": [
+      "680750 behaviour_metric_delta madness_suppressed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Teaches you Dreadnought.",
+    "labels": [
+      "680750 behaviour_metric_delta teaches_dreadnought"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Absorbs ${$m2+0+$STA*3+$INT*3} damage, scaling with Intellect and Stamina.",
+    "labels": [
+      "680750 behaviour_metric_delta absorb_base",
+      "680750 behaviour_metric_delta absorb_sta",
+      "680750 behaviour_metric_delta absorb_int"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 680750,
+    "clause": "Protects movement speed from going below $567525s2% of normal speed.",
+    "labels": [
+      "680750 behaviour_metric_delta min_speed",
+      "680750 behaviour_metric_delta min_speed_late"
+    ],
+    "kind": "claim",
+    "reason": "Proved after Cultist ADR 0028 (owner ruling O-15 Q-cu-27, 2026-11-25): companion aura 567525 uses DurationIndex 18 (20000 ms) matching Dreadnought 567524. Counted pair 20261125-091709 / 20261125-091744 (build 0189984a6fb8, 0 flips): min_speed (14.2 s) and min_speed_late (19.2 s / 20.8 s) both ok/ok (run_speed_rate 0.70 -> 0.80 -> 0.70, 567525 == 1 at 19.2 s)."
+  },
+  {
+    "spell": 680750,
+    "clause": "Lasts $d.",
+    "labels": [
+      "680750 behaviour_metric_delta duration",
+      "680750 behaviour_metric_delta min_speed_late"
+    ],
+    "kind": "claim",
+    "reason": "Proved after Cultist ADR 0028 (owner ruling O-15 Q-cu-27, 2026-11-25): companion aura 567525 uses DurationIndex 18 (20000 ms) matching Dreadnought 567524. Counted pair 20261125-091709 / 20261125-091744 (build 0189984a6fb8, 0 flips): duration and min_speed_late both ok/ok (567524 == 1 and 567525 == 1 at 19.2 s, both expired by 20.8 s)."
+  },
+  {
+    "spell": 680750,
+    "clause": "Depletes all Insanity upon expiration.",
+    "labels": [
+      "680750 behaviour_metric_delta insanity_zero"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681087,
+    "clause": "Damage dealt by Twilight Shieldtoss now generates 3 Insanity.",
+    "labels": [
+      "681087 behaviour_metric_delta insanity_gain"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681088,
+    "clause": "Increases the base amount that Void Shield absorbs by $s1%",
+    "labels": [
+      "681088 behaviour_metric_delta void_shield_base_sp0",
+      "681088 behaviour_metric_delta void_shield_base_control",
+      "681088 behaviour_metric_delta void_shield_base_sp2000"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681088,
+    "clause": "and causes your Dreadnought ability to ignore 25% of all damage taken.",
+    "labels": [
+      "681088 behaviour_metric_delta dreadnought_ignore_25",
+      "681088 behaviour_metric_delta dreadnought_ignore_control"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681088,
+    "clause": "Absorbing damage grants you $s2% of the absorbed value as attack power for $681067d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Absorbing damage grants you $s2% of the absorbed value as attack power",
+        "labels": [
+          "681088 behaviour_metric_delta absorb_ap",
+          "681088 behaviour_metric_delta absorb_ap_two_strikes",
+          "681088 behaviour_metric_delta absorb_ap_control"
+        ]
+      },
+      {
+        "claim": "for $681067d",
+        "labels": [
+          "681088 behaviour_metric_delta absorb_ap_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 681102,
+    "clause": "Increases the Shadow damage increased through Shadow of the Void by $s1%.",
+    "labels": [
+      "681102 behaviour_hit_ratio shadow_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681104,
+    "clause": "Tap into your inner voidborne rage, increasing your damage dealt and critical strike chance by $s1%,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing your damage dealt by $s1%",
+        "labels": [
+          "681104 behaviour_metric_delta damage_dealt"
+        ]
+      },
+      {
+        "claim": "and critical strike chance by $s1%",
+        "labels": [
+          "681104 behaviour_metric_delta crit_chance"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 681104,
+    "clause": "and granting you immunity to stun effects for $d.",
+    "labels": [
+      "681104 immunity stun 681104 cast",
+      "681104 immunity stun 681104 applied",
+      "681104 immunity stun 56 without",
+      "681104 immunity stun 56 with",
+      "681104 immunity stun 56 control",
+      "681104 immunity stun 681104 expired",
+      "681104 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681104,
+    "clause": "Generates 1 Insanity every $T3 sec.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "every $T3 sec",
+        "labels": [
+          "681104 behaviour_metric_delta insanity_period"
+        ]
+      },
+      {
+        "claim": "Generates 1 Insanity",
+        "labels": [
+          "681104 behaviour_metric_delta insanity_tick1"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 681106,
+    "clause": "Each stack of Insanity increases the critical damage of your Netherstrike by $s1%.",
+    "labels": [
+      "681106 behaviour_metric_delta crit_20",
+      "681106 behaviour_metric_delta crit_50",
+      "681106 behaviour_metric_delta crit_0",
+      "681106 behaviour_metric_delta mod_50"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681107,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 681107,
+    "clause": "Increases your attack power by $s1% of your Intellect.",
+    "labels": [
+      "681107 behaviour_metric_delta ap_base",
+      "681107 behaviour_metric_delta ap_int"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681326,
+    "clause": "While Shadow of the Void is active, you now take $s1% reduced damage.",
+    "labels": [
+      "681326 behaviour_hit_ratio damage_taken"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681389,
+    "clause": "Doubles the duration of Shadow of the Void.",
+    "labels": [
+      "681389 behaviour_metric_delta contrast",
+      "681389 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681425,
+    "clause": "Critical strikes with abilities now summon a Manifestation of Y'shaarj for $680573d,",
+    "labels": [
+      "681425 behaviour_metric_delta duration",
+      "681425 behaviour_metric_delta no_talent",
+      "681425 behaviour_metric_delta non_crit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681425,
+    "clause": "which will attack enemies and heal you for $681275s1% of your base health.",
+    "labels": [
+      "681425 behaviour_metric_delta attack_and_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681474,
+    "clause": "Every 5th critical strike with abilities now transforms your next Gaze of C'Thun into Eldritch Force.",
+    "labels": [
+      "681474 behaviour_metric_delta transform_5th",
+      "681474 behaviour_metric_delta transform_4th"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681474,
+    "clause": "Generates 30 Insanity",
+    "labels": [
+      "681474 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 681474,
+    "clause": "Send out a wave of force, dealing ${$m1+0+$SP*0.76255+$AP*.125} Shadow damage to enemies in front of you and reducing their movement speed by $s2% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$SP*0.76255+$AP*.125} Shadow damage",
+        "labels": [
+          "681474 behaviour_metric_delta damage_base",
+          "681474 behaviour_metric_delta damage_sp",
+          "681474 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "reducing their movement speed by $s2%",
+        "labels": [
+          "681474 behaviour_metric_delta slow"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "681474 behaviour_metric_delta slow_duration"
+        ]
+      },
+      {
+        "claim": "to enemies in front of you",
+        "labels": [
+          "681474 behaviour_metric_delta cone_edge"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 704434,
+    "clause": "Reduces all damage taken by party and raid members by $s1%.",
+    "labels": [
+      "704434 behaviour_hit_ratio damage_taken",
+      "704434 behaviour_metric_delta ally_aura"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704434,
+    "clause": "In addition, your Holy damage taken is reduced by $s2%.",
+    "labels": [
+      "704434 behaviour_hit_ratio holy_taken"
+    ],
+    "kind": "claim",
+    "reason": "Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-12 Q-cu-8 (2026-11-24, Cultist ADR 0032): 'In addition' starts a new sentence stating a distinct -10% Holy effect rather than numeric stacking onto the -3% party/raid reduction; server behaviour (-10% Holy, 0.90) kept with no client text change and proved by 704434 taken_hit holy_taken (expected 0.90)."
+  },
+  {
+    "spell": 704476,
+    "clause": "Tether yourself to an ally for $d,",
+    "labels": [
+      "704476 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704476,
+    "clause": "increasing all damage they deal and reducing all damage they take by $s3%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increasing all damage they deal",
+        "labels": [
+          "704476 behaviour_metric_delta ally_damage_dealt"
+        ]
+      },
+      {
+        "claim": "and reducing all damage they take by $s3%.",
+        "labels": [
+          "704476 behaviour_metric_delta ally_damage_taken"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 704476,
+    "clause": "$?s524877[\n\nEvery $t1 sec while active, you trigger a Horrific Revelation on the target and generate 5 Insanity.][]",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Every $t1 sec while active, you trigger a Horrific Revelation on the target",
+        "labels": [
+          "704476 behaviour_metric_delta without_524877",
+          "704476 behaviour_metric_delta with_524877_period_early",
+          "704476 behaviour_metric_delta with_524877_period_late"
+        ]
+      },
+      {
+        "claim": "and generate 5 Insanity.",
+        "labels": [
+          "704476 behaviour_metric_delta with_524877_insanity"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 704527,
+    "clause": "Periodic or channeled damage now increases the damage the enemy takes from you by $706908s1% for $706908d,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases the damage the enemy takes from you by $706908s1%",
+        "labels": [
+          "704527 behaviour_metric_delta damage_1stack",
+          "704527 behaviour_metric_delta damage_10stacks"
+        ]
+      },
+      {
+        "claim": "for $706908d",
+        "labels": [
+          "704527 behaviour_metric_delta duration",
+          "704527 behaviour_metric_delta duration_contrast"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 704527,
+    "clause": "stacking $706908u times.",
+    "labels": [
+      "704527 behaviour_metric_delta stacks_mid",
+      "704527 behaviour_metric_delta stacks_cap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704869,
+    "clause": "Your Hammer of Twilight, Entropic Slam, and Gaze of C'Thun now refreshes a charge of Blade of the Empire.",
+    "labels": [
+      "704869 behaviour_metric_delta hammer",
+      "704869 behaviour_metric_delta slam",
+      "704869 behaviour_metric_delta gaze"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704871,
+    "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+    "labels": [
+      "704871 behaviour_metric_delta ratio"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704878,
+    "clause": "Increases the duration of your Tentacles by $s1%.",
+    "labels": [
+      "704878 behaviour_metric_delta tentacle_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704879,
+    "clause": "Increases the duration of your Tentacles by $s1%.",
+    "labels": [
+      "704879 behaviour_metric_delta tentacle_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704880,
+    "clause": "Damage dealt by Eldritch Shock now increases the amount healed by your next Eldritch Shock by 100%.",
+    "labels": [
+      "704880 behaviour_hit_ratio dmg_to_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704880,
+    "clause": "Healing with Eldritch Shock now increases the damage dealt by your next Eldritch Shock by 100%.",
+    "labels": [
+      "704880 behaviour_hit_ratio heal_to_dmg_overheal",
+      "704880 behaviour_metric_delta heal_to_dmg"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704881,
+    "clause": "Increases the duration of Embrace the Void by $/1000;s3 sec",
+    "labels": [
+      "704881 behaviour_metric_delta duration_contrast",
+      "704881 behaviour_metric_delta duration_expiry"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704881,
+    "clause": "and it now heals you for an additional $s1% of the damage taken while active",
+    "labels": [
+      "704881 behaviour_metric_delta heal_bonus"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704881,
+    "clause": "and its cooldown is reduced by $/1000;s2 sec.",
+    "labels": [
+      "704881 cost_gate 582591 without",
+      "704881 cost_gate 582591 with",
+      "704881 cost_gate 582591 beyond"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704884,
+    "clause": "$s1% of all healing done to allies through Abyssal Covenant is now replicated to you.",
+    "labels": [
+      "704884 behaviour_metric_delta replicated_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704885,
+    "clause": "Increases the movement speed slowed by Grasp of Zek'voz by $s1%.",
+    "labels": [
+      "704885 behaviour_metric_delta slow"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704887,
+    "clause": "Increases all primary attributes by $s1%.",
+    "labels": [
+      "704887 behaviour_metric_delta strength",
+      "704887 behaviour_metric_delta agility",
+      "704887 behaviour_metric_delta stamina",
+      "704887 behaviour_metric_delta intellect",
+      "704887 behaviour_metric_delta spirit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704889,
+    "clause": "Damage dealt by Twilight Shieldtoss shields you for $s1% of the damage dealt for $850002d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "shields you for $s1% of the damage dealt",
+        "labels": [
+          "704889 behaviour_metric_delta shield_ratio_base",
+          "704889 behaviour_metric_delta shield_ratio_sp"
+        ]
+      },
+      {
+        "claim": "for $850002d",
+        "labels": [
+          "704889 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 704889,
+    "clause": "Additional shields add to the remaining absorb amount and refresh its duration.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Additional shields add to the remaining absorb amount",
+        "labels": [
+          "704889 behaviour_metric_delta stack_sum"
+        ]
+      },
+      {
+        "claim": "and refresh its duration.",
+        "labels": [
+          "704889 behaviour_metric_delta stack_refresh"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 704895,
+    "clause": "Reduces the mana cost of Void Shield by $s1%.",
+    "labels": [
+      "704895 behaviour_metric_delta mana_cost"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 704897,
+    "clause": "Allies affected by Abyssal Covenant now also take $s1% increased healing from you.",
+    "labels": [
+      "704897 behaviour_hit_ratio healing_taken"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706177,
+    "clause": "Increases the effectiveness of Sermon of Dread by $s1%.",
+    "labels": [
+      "706177 behaviour_metric_delta sermon_attack_power"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706179,
+    "clause": "Reduces spell pushback suffered from damaging attacks by $s1%",
+    "labels": [
+      "706179 behaviour_metric_delta pushback"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706179,
+    "clause": "and increases mana generated by Sanity Tap by $s2%.",
+    "labels": [
+      "706179 behaviour_metric_delta sanity_tap_mana"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706181,
+    "clause": "Increases the effectiveness of your damage absorption effects by $s1%.",
+    "labels": [
+      "706181 behaviour_metric_delta absorb",
+      "706181 behaviour_metric_delta absorb_ritual",
+      "706181 behaviour_metric_delta absorb_dark_veil",
+      "706181 behaviour_metric_delta absorb_dark_veil_ally",
+      "706181 behaviour_metric_delta absorb_dreadnought",
+      "704889 behaviour_metric_delta darkward_absorb"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 706182,
+    "clause": "Avoiding an attack now generates $520773q2 Insanity.",
+    "labels": [
+      "706182 behaviour_metric_delta avoid_insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "In addition, transforms Abyssal Ward into Black Ward, granting it an additional charge and reducing its cooldown by 30 sec.",
+    "labels": [
+      "706182 behaviour_metric_delta transform",
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "2 Charges,",
+    "labels": [
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "60 sec recharge",
+    "labels": [
+      "706182 behaviour_metric_delta charges_before_recharge",
+      "706182 behaviour_metric_delta charges_after_recharge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Coalesce a Black Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing your damage taken by ${-($u*$m2)}%",
+        "labels": [
+          "706182 behaviour_metric_delta damage_reduction"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "706182 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "$u attacks",
+        "labels": [
+          "706182 behaviour_metric_delta four_attacks_hold",
+          "706182 behaviour_metric_delta five_attacks_remove"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 706182,
+    "clause": "For the duration, each attack received will decrease the value by $s2%.",
+    "labels": [
+      "706182 behaviour_metric_delta decay_step"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Usable while stunned.",
+    "labels": [
+      "706182 behaviour_metric_delta usable_while_stunned"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706182,
+    "clause": "Scales with modifiers to Abyssal Ward.",
+    "labels": [
+      "706182 behaviour_metric_delta scales_shroud_of_pride",
+      "706182 behaviour_metric_delta scales_void_tolerance"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706187,
+    "clause": "Allies affected by your Black Blood are now healed for $s1% of the damage dealt by your Tentacles.",
+    "labels": [
+      "706187 behaviour_metric_delta black_blood_heal",
+      "706187 behaviour_metric_delta without_black_blood"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706188,
+    "clause": "Healing an ally with Gaze of C'Thun now additionally reveals nearby stealthed enemies for $807344d.",
+    "labels": [
+      "706188 behaviour_metric_delta held",
+      "706188 behaviour_metric_delta gone"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706189,
+    "clause": "Increases your Shadow damage dealt by $s1%",
+    "labels": [
+      "706189 behaviour_hit_ratio shadow_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706189,
+    "clause": "and healing done by $s2%.",
+    "labels": [
+      "706189 behaviour_hit_ratio healing_done"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706190,
+    "clause": "Increases your maximum mana, your movement speed, and mounted movement speed by $s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases your maximum mana,",
+        "labels": [
+          "706190 behaviour_metric_delta max_mana"
+        ]
+      },
+      {
+        "claim": "your movement speed,",
+        "labels": [
+          "706190 behaviour_metric_delta run_speed"
+        ]
+      },
+      {
+        "claim": "and mounted movement speed by $s1%.",
+        "labels": [
+          "706190 behaviour_metric_delta mounted_speed"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 706245,
+    "clause": "Grants your Horrorbolt and Wrath of the Black Empire a $h% chance to reset the cooldown of Gaze of C'thun.",
+    "labels": [
+      "706245 behaviour_metric_delta wrath_reset_rate",
+      "706245 behaviour_metric_delta horrorbolt_reset_rate"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706722,
+    "clause": "Increases the damage of Wrath of the Black Empire by $s1%.",
+    "labels": [
+      "706722 behaviour_hit_ratio wrath_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706909,
+    "clause": "Every 3rd Horrorbolt cast causes your next successful Horrorbolt to deal an additional 50% of the initial damage to the target over $706910d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "over $706910d",
+        "labels": [
+          "706909 behaviour_metric_delta dot_held",
+          "706909 behaviour_metric_delta dot_gone"
+        ]
+      },
+      {
+        "claim": "Every 3rd Horrorbolt cast",
+        "labels": [
+          "706909 behaviour_metric_delta third_cast_ready",
+          "706909 behaviour_metric_delta fourth_cast_triggers"
+        ]
+      },
+      {
+        "claim": "deal an additional 50% of the initial damage",
+        "labels": [
+          "706909 behaviour_metric_delta bonus_damage_ratio"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 706911,
+    "clause": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam before disappearing.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Damage dealt by Gaze of C'Thun now has a $h% to chance to spawn a void portal",
+        "labels": [
+          "706911 behaviour_metric_delta portal_rate"
+        ]
+      },
+      {
+        "claim": "that casts either Gaze of C'thun, Horrorbolt, or Obliteration Beam",
+        "labels": [
+          "706911 behaviour_metric_delta portal_cast_gaze",
+          "706911 behaviour_metric_delta portal_cast_horrorbolt",
+          "706911 behaviour_metric_delta portal_cast_beam",
+          "706911 behaviour_metric_delta portal_casts",
+          "706911 behaviour_metric_delta portal_single_cast"
+        ]
+      },
+      {
+        "claim": "before disappearing",
+        "labels": [
+          "706911 behaviour_metric_delta portal_single_cast"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 706915,
+    "clause": "Increases your chance to hit by $s1%",
+    "labels": [
+      "706915 behaviour_metric_delta melee_hit",
+      "706915 behaviour_metric_delta spell_hit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706915,
+    "clause": "and reduces threat generated by Shadow damage spells by $s2%.",
+    "labels": [
+      "706915 behaviour_threat_slope 502182 control",
+      "706915 behaviour_threat_slope 502182 threat"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706917,
+    "clause": "Increases your spell haste by $s2%",
+    "labels": [
+      "706917 behaviour_metric_delta spell_haste"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706917,
+    "clause": "and causes you to regenerate mana equal to $504829s1% of your missing mana every $t1 sec.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "regenerate mana equal to $504829s1% of your missing mana",
+        "labels": [
+          "706917 behaviour_metric_delta missing_mana"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "706917 behaviour_metric_delta period_before",
+          "706917 behaviour_metric_delta period_after"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 706921,
+    "clause": "Increases the damage bonus provided by your Corrupting Whispers by $s1%.",
+    "labels": [
+      "706921 behaviour_hit_ratio damage_bonus"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 706926,
+    "clause": "You now heal the lowest health ally affected by Black Blood for $s1% of your auto attack damage.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "affected by Black Blood for $s1% of your auto attack damage.",
+        "labels": [
+          "706926 behaviour_metric_delta auto_heal"
+        ]
+      },
+      {
+        "claim": "heal the lowest health ally affected by Black Blood",
+        "labels": [
+          "706926 behaviour_metric_delta lowest_ally_a",
+          "706926 behaviour_metric_delta lowest_ally_b"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 706928,
+    "clause": "Increases the effectiveness of your Whispers by $s1%.",
+    "labels": [
+      "706928 behaviour_metric_delta whispers_sp"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707429,
+    "clause": "Your Mass Nightmare now triggers a 60 sec reduced cooldown when used at or above 80 Insanity.",
+    "labels": [
+      "707429 behaviour_metric_delta at_80_ready",
+      "707429 behaviour_metric_delta at_80_still_cd",
+      "707429 behaviour_metric_delta at_79"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707604,
+    "clause": "Your Gaze of C'Thun now strikes 1 additional nearby enemy.",
+    "labels": [
+      "707604 behaviour_metric_delta extra_target"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707640,
+    "clause": "Blade of the Empire now has a $h% chance to cause your next auto attack to hit twice.",
+    "labels": [
+      "707640 behaviour_metric_delta rate",
+      "707640 behaviour_metric_delta extra_attack"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707747,
+    "clause": "Removes the cooldown of Grasp of Zek'voz, but increases its mana cost by $s2%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases its mana cost by $s2%",
+        "labels": [
+          "707747 behaviour_metric_delta mana_cost"
+        ]
+      },
+      {
+        "claim": "Removes the cooldown of Grasp of Zek'voz",
+        "labels": [
+          "707747 cost_gate 573028 cooldown without",
+          "707747 cost_gate 573028 cooldown with",
+          "707747 cost_gate 573028 cooldown with cooldown"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 707748,
+    "clause": "Your Gaze of C'Thun now strikes $s1 additional nearby enemies.",
+    "labels": [
+      "707748 behaviour_metric_delta extra_target"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707749,
+    "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+    "labels": [
+      "707749 behaviour_metric_delta ratio"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707753,
+    "clause": "While above 40 Insanity,",
+    "labels": [
+      "707753 behaviour_metric_delta threshold_40"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707753,
+    "clause": "your chance to trigger Dark Revelation is now increased by $s1%.",
+    "labels": [
+      "707753 behaviour_metric_delta above_40_learned"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707781,
+    "clause": "Increases all primary attributes by $s1%.",
+    "labels": [
+      "707781 behaviour_metric_delta strength",
+      "707781 behaviour_metric_delta agility",
+      "707781 behaviour_metric_delta stamina",
+      "707781 behaviour_metric_delta intellect",
+      "707781 behaviour_metric_delta spirit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707783,
+    "clause": "Reduces spell pushback suffered from damaging attacks by $s1%",
+    "labels": [
+      "707783 behaviour_metric_delta pushback"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707783,
+    "clause": "and increases mana generated by Sanity Tap by $s2%.",
+    "labels": [
+      "707783 behaviour_metric_delta sanity_tap_mana"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707784,
+    "clause": "Increases your chance to hit by $s1%",
+    "labels": [
+      "707784 behaviour_metric_delta melee_hit",
+      "707784 behaviour_metric_delta spell_hit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707784,
+    "clause": "and reduces threat generated by Shadow damage spells by $s2%.",
+    "labels": [
+      "707784 behaviour_threat_slope 502182 control",
+      "707784 behaviour_threat_slope 502182 threat"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 707785,
+    "clause": "Your auto attacks now deal an additional $s1% of the damage dealt as Shadow damage.",
+    "labels": [
+      "707785 behaviour_metric_delta ratio"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712470,
+    "clause": "Increases all primary attributes by $s1%.",
+    "labels": [
+      "712470 behaviour_metric_delta strength",
+      "712470 behaviour_metric_delta agility",
+      "712470 behaviour_metric_delta stamina",
+      "712470 behaviour_metric_delta intellect",
+      "712470 behaviour_metric_delta spirit"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712471,
+    "clause": "Reduces the cast time of Forbidden Ritual by 1 sec",
+    "labels": [
+      "712471 behaviour_metric_delta cast_held",
+      "712471 behaviour_metric_delta cast_done"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 712471,
+    "clause": "and allows Black Blood to stack up to 2 times.",
+    "labels": [
+      "712471 behaviour_metric_delta black_blood_stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 502273,
+    "clause": "Chant a forbidden ritual that places a shield on all nearby party and raid members that absorbs ${$m1+0+$BH*.5} damage for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "for $d",
+        "labels": [
+          "502273 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "absorbs ${$m1+0+$BH*.5} damage",
+        "labels": [
+          "502273 behaviour_metric_delta shield_absorb",
+          "502273 behaviour_metric_delta shield_absorb_sp",
+          "502273 behaviour_metric_delta shield_absorb_control"
+        ]
+      },
+      {
+        "claim": "places a shield on all nearby party and raid members",
+        "labels": [
+          "502273 behaviour_metric_delta raid_reach",
+          "502273 behaviour_metric_delta stranger_unshielded"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 800402,
+    "clause": "Devour dark magic on an ally, dispelling $m1 curse effects from them and healing you for ${$m2+0+$SP*.65}.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dispelling $m1 curse effects",
+        "labels": [
+          "800402 behaviour_dispel_count curse_dispel no_cast curse",
+          "800402 behaviour_dispel_count curse_dispel cast curse"
+        ]
+      },
+      {
+        "claim": "healing you for ${$m2+0+$SP*.65}",
+        "labels": [
+          "800402 behaviour_metric_delta heal_base",
+          "800402 behaviour_metric_delta heal_sp"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 800430,
+    "clause": "Create a void zone for $d at target location that slows enemies' movement speed while inside.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Create a void zone for $d at target location",
+        "labels": [
+          "800430 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "that slows enemies' movement speed while inside.",
+        "labels": [
+          "800430 behaviour_metric_delta slows_inside",
+          "800430 behaviour_metric_delta slows_outside"
+        ]
+      }
+    ],
+    "reason": "Orchestrator decision D-38 (direction-only ruling for unfigured slow): slows_inside proves dummy inside the 10 yd void zone is strictly slowed (no percentage asserted) and slows_outside proves an enemy outside the zone (13 yd from center) suffers zero slow."
+  },
+  {
+    "spell": 800430,
+    "clause": "The slow increases in intensity based on how close to the middle of the zone the enemy is.",
+    "labels": [
+      "800430 behaviour_metric_delta slow_gradient",
+      "800430 behaviour_metric_delta slow_gradient_inner",
+      "800430 behaviour_metric_delta slows_outside"
+    ],
+    "kind": "claim",
+    "reason": "Orchestrator decision D-38 (direction-only ruling for unfigured gradient): three inside distances strictly monotonic (speed at 2 yd < 5 yd < 8 yd via slow_gradient + slow_gradient_inner) plus outside-zone no-slow control (slows_outside at 13 yd), all run_speed_rate behaviour reads, no slope, ratio, or endpoint value asserted."
+  },
+  {
+    "spell": 800432,
+    "clause": "Stun an enemy, dealing ${$m1+0+$sps*.55+$AP*.1} Shadow damage every $t1 sec for $802789d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$m1+0+$sps*.55+$AP*.1} Shadow damage",
+        "labels": [
+          "800432 behaviour_metric_delta damage_base",
+          "800432 behaviour_metric_delta damage_sp",
+          "800432 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "800432 behaviour_metric_delta period",
+          "800432 behaviour_metric_delta period_setup"
+        ]
+      },
+      {
+        "claim": "for $802789d",
+        "labels": [
+          "800432 behaviour_metric_delta stun_duration"
+        ]
+      },
+      {
+        "claim": "Stun an enemy",
+        "labels": [
+          "800432 behaviour_metric_delta stun_interrupt",
+          "800432 behaviour_metric_delta stun_duration"
+        ]
+      }
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Psychic Suppression 803746 keeps all-school +15% amplification (EffectMiscValue[0]=127); client text removes 'spell ' ('more damage from all sources').",
+      "spell": 800432,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 800432,
+    "clause": "The target takes $803746s1% more damage from all sources while you are channeling this spell.",
+    "labels": [
+      "800432 behaviour_metric_delta spell_amp",
+      "800432 behaviour_metric_delta amp_aura",
+      "800432 behaviour_metric_delta phys_control"
+    ],
+    "kind": "claim",
+    "reason": "Owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps all-school +15% amplification (803746 EffectMiscValue[0]=127, matching archived live logs: 2 logs, 9 boss windows, Physical 1.142-1.164x), rev_20261125_01_cultist_client_texts.sql removes 'spell ' ('more damage from all sources'), and 800432 spell_amp + phys_control (+15% on Physical too) prove both in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-22 (2026-11-25, all_damage_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Psychic Suppression 803746 keeps all-school +15% amplification (EffectMiscValue[0]=127); client text removes 'spell ' ('more damage from all sources').",
+      "spell": 800432,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "The target takes $803746s1% more spell damage from all sources while you are channeling this spell."
+  },
+  {
+    "spell": 502220,
+    "clause": "Generates 10 Insanity",
+    "labels": [
+      "502220 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 502220,
+    "clause": "Wither an enemy, dealing $o1 Shadow damage over $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $o1 Shadow damage",
+        "labels": [
+          "502220 behaviour_metric_delta damage_base"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "502220 behaviour_metric_delta duration"
+        ]
+      }
+    ],
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 502220,
+    "clause": "Each instance of damage reduces their periodic healing taken by $706913s1%,",
+    "labels": [
+      "502220 behaviour_metric_delta hot_reduction"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 502220,
+    "clause": "stacking up to $?s301317[7][$706913u] times.",
+    "labels": [
+      "502220 behaviour_metric_delta stack_cap_base",
+      "502220 behaviour_metric_delta stack_cap_301317"
+    ],
+    "kind": "claim",
+    "reason": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps 7-stack cap with Call of C'Thun 301317 (4 base + 3 additional = 7, matching archived live logs: 5 logs, 4 players, 740 dose events, 11 at stack 7, 30 refreshes at 7, 0 at 8), rev_20261125_01_cultist_client_texts.sql updates '$?s301317[8]' -> '$?s301317[7]' on all 9 ranks, and 502220 stack_cap_base (4) + stack_cap_301317 (7) prove both caps in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-26 (2026-11-25, edit_text_7) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Darkwither keeps 7-stack cap with Call of C'Thun 301317 (4 + 3 = 7); client text updates '$?s301317[8][$706913u]' -> '$?s301317[7][$706913u]' on all 9 ranks.",
+      "spell": 502220,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "stacking up to $?s301317[8][$706913u] times."
+  },
+  {
+    "spell": 800463,
+    "clause": "Avoiding or absorbing an attack now has a $h% chance to make your next Blade of the Empire deal $502133s2% more damage and hit an additional nearby enemy and cost no mana.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$h% chance",
+        "labels": [
+          "800463 proc_rate avoided"
+        ]
+      },
+      {
+        "claim": "deal $502133s2% more damage",
+        "labels": [
+          "800463 behaviour_hit_ratio blade_damage_earned"
+        ]
+      },
+      {
+        "claim": "hit an additional nearby enemy",
+        "labels": [
+          "800463 behaviour_metric_delta cleave_earned"
+        ]
+      },
+      {
+        "claim": "cost no mana",
+        "labels": [
+          "800463 behaviour_metric_delta free_mana_earned"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 801539,
+    "clause": "Increases the critical damage of Netherstrike by $s1%.",
+    "labels": [
+      "801539 behaviour_hit_ratio crit_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801968,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 801968,
+    "clause": "Increases your maximum health by $s2%",
+    "labels": [
+      "801968 behaviour_metric_delta max_health"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 801968,
+    "clause": "and while transformed into a void monstrosity your damage dealt is now also increased by $s1%.",
+    "labels": [
+      "801968 behaviour_hit_ratio monstrosity_damage",
+      "801968 behaviour_hit_ratio without_monstrosity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802043,
+    "clause": "Avoiding an attack now increases your critical strike and dodge chance by $572613s1% for $572613d,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "increases your critical strike and dodge chance by $572613s1%",
+        "labels": [
+          "802043 behaviour_metric_delta crit_gain",
+          "802043 behaviour_metric_delta dodge_gain"
+        ]
+      },
+      {
+        "claim": "for $572613d",
+        "labels": [
+          "802043 behaviour_metric_delta duration_held",
+          "802043 behaviour_metric_delta duration_gone"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 802043,
+    "clause": "stacking up to $572613u times.",
+    "labels": [
+      "802043 behaviour_metric_delta stack_cap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802044,
+    "clause": "Summon a Tentacle of Y'shaarj near you for $d.",
+    "labels": [
+      "802044 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802044,
+    "clause": "When summoned and whenever Gaze of C'thun is used, it slams the ground dealing Physical damage, scaling with Stamina, to all enemies in a $802046a yd frontal cone.",
+    "labels": [
+      "802044 behaviour_metric_delta slam_on_summon",
+      "802044 behaviour_metric_delta slam_on_gaze",
+      "802044 behaviour_hit_ratio stamina_scaling",
+      "802044 behaviour_metric_delta cone"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802044,
+    "clause": "@ext:You may only have 1 Old God Tentacle active at a time.:ext@",
+    "labels": [
+      "802044 behaviour_metric_delta max_one",
+      "802044 behaviour_metric_delta replaces_nzoth"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802047,
+    "clause": "Increases the Weapon Damage dealt by Hammer of Twilight and Entropic Slam by $s1%.",
+    "labels": [
+      "802047 behaviour_hit_ratio hammer",
+      "802047 behaviour_hit_ratio slam"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802048,
+    "clause": "Increases the damage of your Tentacles by $s1%.",
+    "labels": [
+      "802048 behaviour_hit_ratio tentacle_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802049,
+    "clause": "Invoke the Old Gods for $d,",
+    "labels": [
+      "802049 behaviour_metric_delta duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 802049,
+    "clause": "removing the cast time of your next $n Eldritch Mendings or Malevolences and causing them to critically strike.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "removing the cast time of your next $n Eldritch Mendings or Malevolences",
+        "labels": [
+          "802049 behaviour_metric_delta mending_3rd_instant",
+          "802049 behaviour_metric_delta mending_4th_held",
+          "802049 behaviour_metric_delta malevolence_instant"
+        ]
+      },
+      {
+        "claim": "and causing them to critically strike",
+        "labels": [
+          "802049 behaviour_crit_rate malevolence_crit",
+          "802049 behaviour_hit_ratio mending_crit"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803398,
+    "clause": "Channel upon an enemy, chaining to nearby enemies, dealing ${($d*1000/$t1)*($m1+0+$sps*0.44)} Shadow damage over $d, dealing less damage with each enemy struck.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${($d*1000/$t1)*($m1+0+$sps*0.44)} Shadow damage",
+        "labels": [
+          "803398 behaviour_metric_delta damage_base",
+          "803398 behaviour_metric_delta damage_sp"
+        ]
+      },
+      {
+        "claim": "over $d",
+        "labels": [
+          "803398 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "chaining to nearby enemies",
+        "labels": [
+          "803398 behaviour_metric_delta chain_targets"
+        ]
+      },
+      {
+        "claim": "dealing less damage with each enemy struck",
+        "labels": [
+          "803398 behaviour_metric_delta chain_falloff"
+        ]
+      }
+    ],
+    "reason": "Claim 3 ('dealing less damage with each enemy struck') is Status 2 (Conformant by a recorded rule or owner ruling, docs/coa/class-conformance.md section 2) under owner ruling O-17 Q-cu-17 (2026-11-25, leave 'on colle au live', Cultist ADR 0032): server keeps full periodic damage on every chained target with no -10% falloff (matching archived live logs: 594 ratios, median 0.9830, mode 1.00 = 59.9%), client text stays unchanged (kept deviation from literal tooltip), and 803398 chain_falloff guards the ruled 1.00 +- 0.03 chain ratio."
+  },
+  {
+    "spell": 802728,
+    "clause": "Increases the critical strike chance and critical damage of your Tentacles by $s1%.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the critical strike chance",
+        "labels": [
+          "802728 behaviour_metric_delta tentacle_crit_chance"
+        ]
+      },
+      {
+        "claim": "and critical damage of your Tentacles by $s1%.",
+        "labels": [
+          "802728 behaviour_hit_ratio tentacle_crit_damage"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803236,
+    "clause": "Increases the damage dealt by your Twilight Shieldtoss by $s1% but it to no longer bounces.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases the damage dealt by your Twilight Shieldtoss by $s1%",
+        "labels": [
+          "803236 behaviour_hit_ratio damage_double"
+        ]
+      },
+      {
+        "claim": "but it to no longer bounces.",
+        "labels": [
+          "803236 behaviour_metric_delta no_bounce"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 803283,
+    "clause": "Increases the chance to trigger your Presences by $s1%",
+    "labels": [
+      "803283 behaviour_metric_delta presence_proc"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 803283,
+    "clause": "and reduces their mana costs by $s2%.",
+    "labels": [
+      "803283 behaviour_metric_delta mana_cost"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804056,
+    "clause": "Unleash a wave of maddening resonance, interrupting the current spell cast of all enemies around you and preventing any spell in that school from being cast for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "interrupting the current spell cast",
+        "labels": [
+          "804056 behaviour_metric_delta interrupt_stops_cast"
+        ]
+      },
+      {
+        "claim": "preventing any spell in that school from being cast for $d.",
+        "labels": [
+          "804056 behaviour_expiry lockout"
+        ]
+      },
+      {
+        "claim": "of all enemies around you",
+        "labels": [
+          "804056 behaviour_metric_delta interrupt_around"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 572846,
+    "clause": "Crush enemies in front of you, dealing $s2% Weapon Damage plus ${$m1+0} as Shadow damage",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing $s2% Weapon Damage plus ${$m1+0} as Shadow damage",
+        "labels": [
+          "572846 behaviour_metric_delta damage_ap_8x"
+        ]
+      },
+      {
+        "claim": "Crush enemies in front of you",
+        "labels": [
+          "572846 behaviour_metric_delta cone"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 572846,
+    "clause": "and draining 40 Insanity.",
+    "labels": [
+      "572846 behaviour_metric_delta drain_40",
+      "572846 behaviour_metric_delta drain_60_to_20",
+      "572846 behaviour_metric_delta gate_59"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804286,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 804286,
+    "clause": "Increases your spell damage by $s1% of your Strength",
+    "labels": [
+      "804286 behaviour_metric_delta sp_str",
+      "804286 behaviour_metric_delta sp_int"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804286,
+    "clause": "and Intellect and your hit rating by $s2% of your Intellect.",
+    "labels": [
+      "804286 behaviour_metric_delta hit_rating_int",
+      "804286 behaviour_metric_delta spell_hit_rating_int"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804633,
+    "clause": "Increases your chance to resist dispel effects by $s1%.",
+    "labels": [
+      "804633 behaviour_metric_delta dispel_resist"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804670,
+    "clause": "Coalesce an Abyssal Ward reducing your damage taken by ${-($u*$m2)}% for $d or $u attacks.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reducing your damage taken by ${-($u*$m2)}%",
+        "labels": [
+          "804670 behaviour_hit_ratio damage_reduction"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "804670 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "$u attacks",
+        "labels": [
+          "804670 behaviour_metric_delta four_attacks_hold",
+          "804670 behaviour_metric_delta five_attacks_remove"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 804670,
+    "clause": "For the duration, each attack received will decrease the value by $s2%.",
+    "labels": [
+      "804670 behaviour_hit_ratio decay_step"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 804670,
+    "clause": "Usable while stunned.",
+    "labels": [
+      "804670 cast_state control",
+      "804670 cast_state state",
+      "804670 cast_state allowed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805110,
+    "clause": "All direct damage dealt now has a $h% chance to unleash a Black Prayer on all enemies near the target for $806039d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$h% chance",
+        "labels": [
+          "805110 proc_rate"
+        ]
+      },
+      {
+        "claim": "for $806039d",
+        "labels": [
+          "805110 behaviour_metric_delta aoe_nearby",
+          "805110 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 805110,
+    "clause": "Deals ${$m1*$<scalingbp>+$sps*.12+$AP*.005} Shadow Damage every $t1 sec",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Deals ${$m1*$<scalingbp>+$sps*.12+$AP*.005} Shadow Damage",
+        "labels": [
+          "805110 behaviour_metric_delta damage_base",
+          "805110 behaviour_metric_delta damage_sp",
+          "805110 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "every $t1 sec",
+        "labels": [
+          "805110 behaviour_metric_delta period"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 805110,
+    "clause": "and reduces attack speed by $520418s1%.",
+    "labels": [
+      "805110 behaviour_metric_delta attack_speed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805114,
+    "clause": "Spread nightmares of the black empire to up to $i nearby enemies,",
+    "labels": [
+      "805114 targets behaviour_fixed_count"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805114,
+    "clause": "horrifying them for $d",
+    "labels": [
+      "805114 behaviour_metric_delta horrify_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805114,
+    "clause": "and interrupting non-player spellcasting for $32747d.",
+    "labels": [
+      "805114 behaviour_expiry lockout"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805115,
+    "clause": "Increases the range of Blade of the Empire, Netherstrike, and Hammer of Twilight by $s1 yds",
+    "labels": [
+      "805115 behaviour_metric_delta range_blade",
+      "805115 behaviour_metric_delta range_capped",
+      "805115 behaviour_metric_delta range_netherstrike",
+      "805115 behaviour_metric_delta range_hammer"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805115,
+    "clause": "and reduces their mana costs by $s2% for $d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "and reduces their mana costs by $s2%",
+        "labels": [
+          "805115 behaviour_metric_delta mana_blade",
+          "805115 behaviour_metric_delta mana_netherstrike"
+        ]
+      },
+      {
+        "claim": "for $d",
+        "labels": [
+          "805115 behaviour_metric_delta duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 806830,
+    "clause": "Smash an enemy for $s1% Weapon Damage plus ${$m2+0} Shadow damage,",
+    "labels": [
+      "806830 behaviour_metric_delta damage_ref",
+      "806830 behaviour_metric_delta damage_ap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806830,
+    "clause": "ignoring absorption effects and draining 40 Insanity.",
+    "labels": [
+      "806830 behaviour_metric_delta ignore_absorb",
+      "806830 behaviour_metric_delta ignore_absorb_control",
+      "806830 behaviour_metric_delta drain_40",
+      "806830 behaviour_metric_delta gate_39"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806830,
+    "clause": "$?s704869[ Refreshes a charge of Blade of the Empire.][]",
+    "labels": [
+      "806830 behaviour_metric_delta hand_of_nzoth"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805117,
+    "clause": "Your Shadow of the Void now also increases your critical damage dealt by $s1%.",
+    "labels": [
+      "805117 behaviour_hit_ratio crit_damage"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805121,
+    "clause": "Level 40 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Void Strength 805121 keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength); client text updates 'spell hit chance' -> 'spell hit rating'.",
+      "spell": 805121,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 805121,
+    "clause": "Increases your Shadow spell damage by $s3% of your Strength",
+    "labels": [
+      "805121 behaviour_metric_delta shadow_sp_base",
+      "805121 behaviour_metric_delta shadow_sp_str"
+    ],
+    "kind": "claim",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Void Strength 805121 keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength); client text updates 'spell hit chance' -> 'spell hit rating'.",
+      "spell": 805121,
+      "dbc_differs": "Description differs from Spell.dbc"
+    }
+  },
+  {
+    "spell": 805121,
+    "clause": "and your spell hit rating by $s1% of your Strength.",
+    "labels": [
+      "805121 behaviour_metric_delta spell_hit_str"
+    ],
+    "kind": "claim",
+    "reason": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength as spell hit rating, proved in game by 805121 spell_hit_str: 10000 -> 10020 at 408 Strength) and rev_20261125_01_cultist_client_texts.sql updates 'spell hit chance' -> 'spell hit rating', matching STATE_PROMISES['combat_rating'] and promoting this row from data to behaviour.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-12 Q-cu-9 (2026-11-24) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Void Strength 805121 keeps SPELL_AURA_MOD_RATING_FROM_STAT (CR_HIT_SPELL, +5% of Strength); client text updates 'spell hit chance' -> 'spell hit rating'.",
+      "spell": 805121,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "and your spell hit chance by $s1% of your Strength."
+  },
+  {
+    "spell": 805126,
+    "clause": "Your Abyssal Ward now stacks $s1 additional times.",
+    "labels": [
+      "805126 behaviour_metric_delta extra_stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "Generates 10 Insanity",
+    "labels": [
+      "806897 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "Unleash a beam of eldritch energy, dealing ${$m1+0+$sps*.65} Shadow damage to an enemy and all nearby enemies.",
+    "labels": [
+      "806897 behaviour_metric_delta damage_base",
+      "806897 behaviour_metric_delta damage_sp",
+      "806897 behaviour_metric_delta area_nearby"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "While above 60 Insanity,",
+    "labels": [
+      "806897 behaviour_metric_delta above_60",
+      "806897 behaviour_metric_delta at_60"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806897,
+    "clause": "deals $573315s2% more damage.",
+    "labels": [
+      "806897 behaviour_metric_delta above_60",
+      "806897 behaviour_metric_delta damage_base"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805607,
+    "clause": "Level 20 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 805607,
+    "clause": "Increases the healing done by Eldritch Mending by $s3%",
+    "labels": [
+      "805607 behaviour_hit_ratio mending_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805607,
+    "clause": "and Gaze of C'Thun by $807701s1%.",
+    "labels": [
+      "805607 behaviour_hit_ratio gaze_heal"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 805607,
+    "clause": "In addition, you are now unable to miss your attacks and you cannot be parried or dodged.",
+    "labels": [
+      "805607 behaviour_metric_delta outgoing_avoidance"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806175,
+    "clause": "Raise your shield and charge towards an enemy, dealing ${$AP*0.5} Shadow damage to enemies you pass through, generating additional threat.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "dealing ${$AP*0.5} Shadow damage to enemies you pass through",
+        "labels": [
+          "806175 behaviour_metric_delta damage_ref",
+          "806175 behaviour_metric_delta damage_ap",
+          "806175 behaviour_metric_delta pass_through"
+        ]
+      },
+      {
+        "claim": "generating additional threat.",
+        "labels": [
+          "806175 behaviour_metric_delta threat_above_control"
+        ]
+      },
+      {
+        "claim": "Raise your shield and charge towards an enemy",
+        "labels": [
+          "806175 behaviour_metric_delta charge_displacement"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 578263,
+    "clause": "Generates 20 Insanity",
+    "labels": [
+      "578263 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578263,
+    "clause": "Strike an enemy quickly for $s2% Weapon Damage plus ${$m1+0} Shadow damage,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "$s2% Weapon Damage",
+        "labels": [
+          "578263 behaviour_metric_delta damage_base",
+          "578263 behaviour_metric_delta damage_ap"
+        ]
+      },
+      {
+        "claim": "${$m1+0} Shadow damage",
+        "labels": [
+          "578263 behaviour_metric_delta damage_base",
+          "578263 behaviour_metric_delta damage_ap"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 578263,
+    "clause": "purging $s3 beneficial magic effect from them.",
+    "labels": [
+      "578263 behaviour_metric_delta purge"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 578263,
+    "clause": "Only usable on enemies below 35% health.",
+    "labels": [
+      "578263 cast_gate blocked",
+      "578263 cast_gate allowed"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "Apply a dark boon to yourself for $d,",
+    "labels": [
+      "806250 behaviour_metric_delta boon_duration"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "causing your next Hammer of Twilight to deal an additional $s1% of its damage dealt as Shadow damage.",
+    "labels": [
+      "806250 behaviour_metric_delta hammer_bonus"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "Creates a rift that absorbs the next ${$807854m1+$807854ppl1+$AP*1.5} healing taken by enemies that step inside",
+    "labels": [
+      "806250 behaviour_metric_delta heal_absorb_base",
+      "806250 behaviour_metric_delta heal_absorb_ap"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806250,
+    "clause": "and reduces their periodic healing received by $807216s2% for $807216d while inside.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces their periodic healing received by $807216s2%",
+        "labels": [
+          "806250 behaviour_metric_delta hot_reduction"
+        ]
+      },
+      {
+        "claim": "for $807216d",
+        "labels": [
+          "806250 behaviour_metric_delta rift_duration"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 806264,
+    "clause": "Level 50 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 806264,
+    "clause": "Increases your attack power by an amount equal to 2.5 times your spell critical strike rating.",
+    "labels": [
+      "806264 behaviour_metric_delta ap",
+      "806264 behaviour_metric_delta crit_rating_read"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806266,
+    "clause": "Your Eldritch Eye now affects 1 additional cast.",
+    "labels": [
+      "806266 behaviour_metric_delta 4th_instant",
+      "806266 behaviour_metric_delta 5th_held"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806382,
+    "clause": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $804275d.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "within $807219a1 yds",
+        "labels": [
+          "806382 behaviour_metric_delta radius",
+          "806382 behaviour_metric_delta heal_once_2_allies",
+          "806382 behaviour_metric_delta heal_once_3_allies"
+        ]
+      },
+      {
+        "claim": "every $807124T2 sec",
+        "labels": [
+          "806382 behaviour_metric_delta period"
+        ]
+      },
+      {
+        "claim": "for $804275d",
+        "labels": [
+          "806382 behaviour_metric_delta duration"
+        ]
+      },
+      {
+        "claim": "for ${$807219m1+$807219ppl1+$bh*.2}",
+        "labels": [
+          "806382 behaviour_metric_delta heal_base",
+          "806382 behaviour_metric_delta heal_sp"
+        ]
+      }
+    ],
+    "reason": "Owner ruling O-15 Q-cu-15 (2026-11-25, channel_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): server keeps Dark Matter ending with the 6 sec Satiate 804275 channel (matching archived live logs: 32 sessions, max 6.009 s / 6 ticks), rev_20261125_01_cultist_client_texts.sql updates '$807219d' (10 sec) -> '$804275d' (6 sec), and 806382 duration proves the ruled 6 sec duration in game.",
+    "text_source": {
+      "table": "coa_client_spell_description",
+      "file": "rev_20261125_01_cultist_client_texts.sql",
+      "commit": "81bd2567f2",
+      "pr": null,
+      "basis": "owner_ruling",
+      "ruling": "Owner ruling O-15 Q-cu-15 (2026-11-25, channel_text) and O-18 (2026-11-25, Cultist ADR 0033, ADR 0035): Dark Matter 806382 keeps 6 sec duration ending with Satiate 804275; client text updates '$807219d' -> '$804275d'.",
+      "spell": 806382,
+      "dbc_differs": "Description differs from Spell.dbc"
+    },
+    "dbc_clause": "Channeling Satiate now heals all allies within $807219a1 yds for ${$807219m1+$807219ppl1+$bh*.2} every $807124T2 sec for $807219d."
+  },
+  {
+    "spell": 806384,
+    "clause": "Increases the damage converted into healing through Abyssal Covenant by $s1%.",
+    "labels": [
+      "806384 behaviour_metric_delta conversion_bonus"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 806768,
+    "clause": "Your Shadow of the Void now stacks $s1 additional time.",
+    "labels": [
+      "806768 behaviour_metric_delta stacks"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807128,
+    "clause": "While Herald of the Depths is active, you now transform into a Faceless Monstrosity, increasing your critical healing and critical strike chance by $806769s2%,",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "you now transform into a Faceless Monstrosity,",
+        "labels": [
+          "807128 behaviour_metric_delta transform",
+          "807128 behaviour_metric_delta transform_form_gate"
+        ]
+      },
+      {
+        "claim": "increasing your critical healing",
+        "labels": [
+          "807128 behaviour_metric_delta crit_healing",
+          "807128 behaviour_metric_delta crit_healing_without_herald",
+          "807128 behaviour_metric_delta crit_healing_after_expiry"
+        ]
+      },
+      {
+        "claim": "and critical strike chance by $806769s2%,",
+        "labels": [
+          "807128 behaviour_metric_delta crit_chance",
+          "807128 behaviour_metric_delta crit_chance_form_gate"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 807128,
+    "clause": "but reducing its duration by $/1000;806769s1 sec.",
+    "labels": [
+      "807128 behaviour_metric_delta duration_held",
+      "807128 behaviour_metric_delta duration_gone"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807128,
+    "clause": "In addition, while active you are now immune to fear, horrify, and polymorph effects.",
+    "labels": [
+      "807128 behaviour_metric_delta immune_fear",
+      "807128 behaviour_metric_delta immune_fear_form_gate",
+      "807128 behaviour_metric_delta immune_fear_after_expiry",
+      "807128 behaviour_metric_delta immune_horrify",
+      "807128 behaviour_metric_delta immune_horrify_form_gate",
+      "807128 behaviour_metric_delta immune_horrify_after_expiry",
+      "807128 behaviour_metric_delta immune_polymorph",
+      "807128 behaviour_metric_delta immune_polymorph_form_gate",
+      "807128 behaviour_metric_delta immune_polymorph_after_expiry"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807307,
+    "clause": "Melee ability damage now reduces the duration of Wracked Mind by $/1000;807308s1 sec on all allies within $807308a1 yds.",
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "reduces the duration of Wracked Mind by $/1000;807308s1 sec",
+        "labels": [
+          "807307 behaviour_metric_delta duration_held",
+          "807307 behaviour_metric_delta duration_gone"
+        ]
+      },
+      {
+        "claim": "within $807308a1 yds",
+        "labels": [
+          "807307 behaviour_metric_delta radius_in",
+          "807307 behaviour_metric_delta radius_out"
+        ]
+      }
+    ]
+  },
+  {
+    "spell": 807512,
+    "clause": "Level 30 Passive",
+    "labels": [],
+    "kind": "no_claim",
+    "reason": "A level-availability label line, not a gameplay claim."
+  },
+  {
+    "spell": 807512,
+    "clause": "Your Gaze of C'Thun now generates 10 Insanity.",
+    "labels": [
+      "807512 behaviour_metric_delta insanity"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807877,
+    "clause": "Casting Satiate now refreshes the duration of Black Blood on all allies within $807878a1 yds.",
+    "labels": [
+      "807877 behaviour_metric_delta satiate_refresh",
+      "807877 behaviour_metric_delta satiate_refresh_radius_out"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807877,
+    "clause": "Dark Infusion bounces one additional time after its third infusion, expanding to the three lowest-health nearby party or raid members.",
+    "labels": [
+      "807877 behaviour_metric_delta dark_infusion_bounce"
+    ],
+    "kind": "claim"
+  },
+  {
+    "spell": 807879,
+    "clause": "Your Eldritch Eye now affects 2 additional casts.",
+    "labels": [
+      "807879 behaviour_metric_delta 5th_instant",
+      "807879 behaviour_metric_delta 6th_held"
+    ],
+    "kind": "claim"
+  }
+]

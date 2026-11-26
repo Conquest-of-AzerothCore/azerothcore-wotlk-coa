@@ -15,6 +15,9 @@ namespace ManastormModuleConfig
     bool Enabled();
     uint8 AffixMinimumLevel();
     double ExperienceRate();
+    bool PrestigeExperienceEnabled();
+    uint32 PrestigeExperienceBonusPercent();
+    bool ExperienceBonusControlEnabled();
     bool WeeklyCacheLockoutEnabled();
     uint32 WeeklyCacheLockoutLimit();
     bool CoALootModeEnabled();

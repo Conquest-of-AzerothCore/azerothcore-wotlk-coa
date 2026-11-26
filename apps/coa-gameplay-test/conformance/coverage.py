@@ -454,7 +454,8 @@ METRIC_EVIDENCE = {
                      'aura_amount', 'aura_duration_ms', 'aura_amplitude_ms', 'aura_charges', 'cooldown_ms',
                      'spell_cooldown_packet_ms',
                      'spell_damage_done', 'spell_healing_done', 'spell_healing_taken', 'spell_critical_damage',
-                     'spell_done_crit_chance', 'spell_taken_crit_chance', 'melee_damage_done', 'aoe_damage_taken',
+                     'spell_done_crit_chance', 'spell_taken_crit_chance', 'spell_hit_bonus_taken',
+                     'melee_damage_done', 'aoe_damage_taken',
                      'script_spell_damage_taken', 'spell_damage_taken', 'melee_damage_taken',
                      'script_heal_received', 'item_armor_by_subclass', 'spell_effect_immune', 'spell_immune',
                      'owned_aura', 'owned_creature_aura_max_duration_ms', 'armor_reduced_damage',
@@ -493,7 +494,7 @@ STATE_PROMISES = {
     'spell_hit_chance': r'hit chance|chance to hit', 'expertise': r'expertise',
     'spell_power': r'spell power|spell damage',
     'attack_power': r'attack power', 'ranged_attack_power': r'ranged attack power',
-    'max_health': r'maximum health', 'owned_creature_max_health': r'maximum health', 'max_power': POWER_WORDS,
+    'max_health': r'maximum health', 'owned_creature_max_health': r'(?:maximum )?health', 'max_power': POWER_WORDS,
     'power': rf'{POWER_WORDS}|\bcosts?', 'unit_flag_set': r'disarm\w*',
     'run_speed_rate': r'movement speed|run speed|slow\w*',
     'attack_time_ms': r'haste|attack speed', 'parry_chance': r'parry', 'dodge_chance': r'dodge',
@@ -521,6 +522,7 @@ STATE_PROMISES = {
     'spell_done_crit_chance': CRIT_WORDS,
     'spell_done_crit_chance_scripted': CRIT_WORDS,
     'spell_taken_crit_chance': CRIT_WORDS,
+    'spell_hit_bonus_taken': r'hit chance|chance (?:for allies )?to hit',
     'critical_block_chance': r'critical block',
     'owned_creature_spell_hit_chance': r'hit chance|chance to hit',
     'alive': r'\bdie\b|death|dead', 'can_attack': r'\battack',
@@ -563,6 +565,7 @@ CONTRAST_PROOF = {
     'spell_done_crit_chance': LEARNED_CONTRAST,
     'spell_done_crit_chance_scripted': LEARNED_CONTRAST,
     'spell_taken_crit_chance': LEARNED_CONTRAST,
+    'spell_hit_bonus_taken': LEARNED_CONTRAST,
     'ranged_taken_crit_chance': LEARNED_CONTRAST,
     'critical_block_chance': LEARNED_CONTRAST,
     'spell_resist_chance': LEARNED_CONTRAST,
@@ -728,9 +731,29 @@ def metric_class(verdict: Verdict) -> str:
 
 NO_STACK_WORDS = r'do(?:es)? not stack'
 CONDITION_WORDS = r'while|whenever|as long as'
+PRIMARY_ATTRIBUTES_WORDS = r'primary attributes'
+PRIMARY_STAT_IDS = frozenset({0, 1, 2, 3, 4})
 
 
-def promised_state(verdict: Verdict, clause: str, promise: str = '', promises: dict[str, str] | None = None) -> bool:
+def primary_attributes_measured(verdict: Verdict, clause: str, promise: str,
+                                claim_verdicts: tuple[Verdict, ...]) -> bool:
+    detail = verdict.detail or {}
+    if (verdict.check != BEHAVIOUR_METRIC_DELTA or detail.get(PASSIVE_METRIC) != 'stat_exact'
+            or detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST)):
+        return False
+    if re.search(rf'\b(?:{PRIMARY_ATTRIBUTES_WORDS})\b', f'{clause} {promise}', re.IGNORECASE) is None:
+        return False
+    measured = {(other.detail or {}).get('stat') for other in claim_verdicts
+                if other.status in CONFORMANT and other.status != 'closed'
+                and other.check == BEHAVIOUR_METRIC_DELTA
+                and (other.detail or {}).get(PASSIVE_METRIC) == 'stat_exact'
+                and (other.detail or {}).get(CONTRAST) in (LEARNED_CONTRAST, OWN_CAST_CONTRAST)
+                and not (other.detail or {}).get(DATA_ONLY)}
+    return PRIMARY_STAT_IDS <= measured
+
+
+def promised_state(verdict: Verdict, clause: str, promise: str = '', promises: dict[str, str] | None = None,
+                   claim_verdicts: tuple[Verdict, ...] = ()) -> bool:
     detail = verdict.detail or {}
     if verdict.check == BEHAVIOUR_GROUP_STACK_CAP:
         return (detail.get(STACKED_SAME) is True
@@ -743,7 +766,9 @@ def promised_state(verdict: Verdict, clause: str, promise: str = '', promises: d
     if verdict.check == BEHAVIOUR_METRIC_DELTA and detail.get(CONTRAST) not in (LEARNED_CONTRAST, OWN_CAST_CONTRAST):
         return False
     words = (state_promises() if promises is None else promises).get(detail[PASSIVE_METRIC])
-    return words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None
+    if words is not None and re.search(rf'\b(?:{words})\b', f'{clause} {promise}', re.IGNORECASE) is not None:
+        return True
+    return primary_attributes_measured(verdict, clause, promise, claim_verdicts)
 
 
 def conditional_text(text: str) -> bool:
@@ -801,7 +826,8 @@ def judged_sentence(clause: str, sentence: str) -> str:
 def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict],
                      seen: frozenset[str] = frozenset(), promoted: frozenset[str] = frozenset(),
                      row: str = '', promise: str = '', partners: tuple[Verdict, ...] = (),
-                     sentence: str | None = None, promises: dict[str, str] | None = None) -> str:
+                     sentence: str | None = None, promises: dict[str, str] | None = None,
+                     claim_verdicts: tuple[Verdict, ...] = ()) -> str:
     if verdict.status not in CONFORMANT:
         return UNPROVEN
     kind = evidence_classes()[verdict.check]
@@ -828,7 +854,7 @@ def verdict_evidence(verdict: Verdict, clause: str, by_label: dict[str, Verdict]
     words = EVENT_PROMISES.get((verdict.detail or {}).get(PASSIVE_METRIC))
     if words is not None and re.search(rf'\b(?:{words})\b', clause, re.IGNORECASE) is None:
         return DATA
-    if observed == EVENT or (observed == STATE and promised_state(verdict, clause, promise, promises)):
+    if observed == EVENT or (observed == STATE and promised_state(verdict, clause, promise, promises, claim_verdicts)):
         return BEHAVIOUR
     return DATA
 
@@ -872,7 +898,8 @@ def claim_evidence(claim: dict, by_label: dict[str, Verdict], statuses: dict[str
         return UNPROVEN
     partners = tuple(matched) if row_labels is None else row_verdicts(row_labels, by_label, statuses)
     found = {verdict_evidence(verdict, claim[CLAIM_WORDS], by_label, promoted=promoted, row=row, promise=promise,
-                              partners=partners, sentence=sentence, promises=claim_state_promises(claim))
+                              partners=partners, sentence=sentence, promises=claim_state_promises(claim),
+                              claim_verdicts=tuple(matched))
              for verdict in matched}
     return BEHAVIOUR if BEHAVIOUR in found else DATA
 

@@ -680,6 +680,10 @@ bool ManastormProgression::RecordStageCompletion(
                 completedUnlockId);
         }
 
+        uint32 const recordedDepth =
+            run.GetRecordedProgressDepth(
+                characterGuid);
+
         transaction->Append(
             "INSERT INTO "
             "`character_manastorm_progress` "
@@ -694,7 +698,7 @@ bool ManastormProgression::RecordStageCompletion(
             characterGuid,
             uint32(uint8(run.GetMode())),
             uint32(trackBit),
-            run.GetDepth());
+            recordedDepth);
 
         transaction->Append(
             "INSERT IGNORE INTO "
@@ -704,7 +708,7 @@ bool ManastormProgression::RecordStageCompletion(
             characterGuid,
             uint32(uint8(run.GetMode())),
             uint32(trackBit),
-            run.GetDepth());
+            recordedDepth);
 
         if (queueTriggeredUnlock)
         {

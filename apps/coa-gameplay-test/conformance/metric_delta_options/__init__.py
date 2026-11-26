@@ -19,6 +19,11 @@ def parsed_options(entry: dict) -> tuple[tuple[str, object], ...]:
                  if entry.get(module.NAME) is not None)
 
 
+def forbids_expected(entry: dict) -> bool:
+    return any(getattr(module, 'FORBIDS_EXPECTED', False) and entry.get(module.NAME) is not None
+               for module in option_modules())
+
+
 def checked_options(spec):
     present = dict(spec.options)
     for module in option_modules():
@@ -37,6 +42,12 @@ def option_phase_steps(spec, after: bool) -> list[dict]:
     present = dict(spec.options)
     return [step for module in option_modules() if module.NAME in present and hasattr(module, 'phase_steps')
             for step in module.phase_steps(spec, present[module.NAME], after)]
+
+
+def option_attack_phase_steps(spec, after: bool) -> list[dict]:
+    present = dict(spec.options)
+    return [step for module in option_modules() if module.NAME in present and hasattr(module, 'attack_phase_steps')
+            for step in module.attack_phase_steps(spec, present[module.NAME], after)]
 
 
 def option_model(spec) -> dict:

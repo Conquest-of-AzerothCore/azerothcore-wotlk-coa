@@ -513,6 +513,7 @@ public:
             true,
             {
                 UNITHOOK_ON_DAMAGE,
+                UNITHOOK_ON_HEAL,
                 UNITHOOK_ON_AURA_APPLY,
                 UNITHOOK_ON_AURA_REMOVE,
                 UNITHOOK_RESOLVE_SPELL_CAST,
@@ -539,6 +540,20 @@ public:
             attacker,
             victim,
             damage);
+    }
+
+    void OnHeal(
+        Unit* healer,
+        Unit* receiver,
+        uint32& gain) override
+    {
+        if (!ManastormModuleConfig::Enabled() || !gain)
+            return;
+
+        ManastormMgr::Instance().OnHeal(
+            healer,
+            receiver,
+            gain);
     }
 
     void OnAuraApply(Unit* unit, Aura* aura) override

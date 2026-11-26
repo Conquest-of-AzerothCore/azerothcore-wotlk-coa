@@ -1,0 +1,112 @@
+{
+  "schema": 1,
+  "name": "Worldforged Plaguebloom Spear in Eastern Plaguelands stands at its realm-dump stump (#13474)",
+  "contract": "#13474 reported Plaguebloom Spear (Encrusted Spear, gameobject entry 90532, guid 6940891, drops item 410154) missing in Eastern Plaguelands where LootCollector shows it. 2026_09_23_05_worldforged_map.sql placed guid 6940891 938.7 yd north-east at (2782.000, -4556.500, 95.589). rev_20261126_13474 restores first-pass realm-dump row 6900976 (1867.550, -4768.510, 114.497) planted in Plaguelandstump02.m2 (zbound 108.42..114.25, VMap hit 112.711 at the spear's x/y). Expected: the pickup stands at (1867.550, -4768.510, 114.497), is not under water, has open sky above, and opens with loot from 2.21 yd away on the stump.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 1869.55,
+    "y": -4768.51,
+    "z": 113.56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90532,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup stands at its realm-dump stump (1867.550, -4768.510, 114.497) instead of 938.7 yd away",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 1867.55,
+      "y": -4768.51,
+      "z": 114.497,
+      "max": 0.3,
+      "guid": 6940891,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup sits on the Plaguelandstump02.m2 rim above its VMap center (+1.786 yd)",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": 1.4,
+      "max": 2.2,
+      "guid": 6940891,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940891,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "no model surface blocks above the pickup",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6940891,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 90532
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

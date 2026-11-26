@@ -72,6 +72,8 @@ class DisplacementTests(unittest.TestCase):
         self.assertEqual(metric_evidence()['displacement_2d'], STATE)
         self.assertEqual(metric_evidence()['position_x'], STATE)
         self.assertTrue(promised_state(found, 'Increases the base range of Vault by 3 yds.'))
+        self.assertTrue(promised_state(found, 'Raise your shield and charge towards an enemy'))
+        self.assertTrue(promised_state(found, 'At the end of the duration, if the shield holds, you teleport to them.'))
         self.assertFalse(promised_state(found, 'Increases your haste by 3%.'))
         self.assertIn('displacement_2d', state_promises())
 

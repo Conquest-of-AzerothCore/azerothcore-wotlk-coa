@@ -119,9 +119,10 @@ integer steps: for Argent Blade 807268, 2.15 x ((min + max) / 2 + AP / 14 x 3.3)
 A ranged weapon attack (`DmgClass` 3 with a bow/gun/crossbow/thrown mask, the ranged-slot attribute or the hunter
 family, `hits.ranged_weapon_attack`, `SpellInfo::IsRangedWeaponSpell`) reads the ranged attack power in place of AP
 (`hits.weapon_attacker`, ADR 0680). The hit scenario's dummy stands at `values.cast_distance` of the rank: the midpoint
-of the spell's hostile range for a `SPELL_RANGE_RANGED` range (Shadowblast's range 114, 0-35 yd: 17.5 yd), the 3 yd
-melee distance otherwise; the value scenario's dummy does the same, and a missile cast from the ranged distance is
-waited for before the value scenario's aura reads (`values.missile_wait_ms`). The behaviour kinds `hit_ratio`,
+of the spell's hostile range for a `SPELL_RANGE_RANGED` range (Shadowblast's range 114, 0-35 yd: 17.5 yd) or, when the
+class file sets `"honour_min_range": true` (ADR 1316), any range with `RangeMin[0] > 0` (Cultist Dreadfall 806175,
+range 94, 8-40 yd: 24 yd), and the 3 yd melee distance otherwise; the value scenario's dummy does the same, and a
+missile cast from the ranged distance is waited for before the value scenario's aura reads (`values.missile_wait_ms`). The behaviour kinds `hit_ratio`,
 `script_hit`, `cost_gate` and `cast_applies_aura` (and its expiry pair) place their dummy by the same rule
 (`behaviours.dummy_placement`, ADR 0687): the spell cast at the dummy (the cast or observed spell of a `hit_ratio`
 that does not swing, the first `script_hit` cast at the dummy, the `cost_gate` gated spell, the `cast_applies_aura`

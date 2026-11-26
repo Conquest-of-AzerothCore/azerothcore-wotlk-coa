@@ -216,7 +216,7 @@ bool IsBot(Player const* player)
 
 bool IsScalingItem(ItemTemplate const* proto)
 {
-    return proto && ItemLadder::ScalableItem(*proto) && ItemScaling::LiftableEntry(proto->ItemId) &&
+    return proto && ItemLadder::ScalableItem(*proto) && ItemScaling::NativeScalableEntry(proto->ItemId) &&
         LadderStore::Instance().Has(proto->ItemId);
 }
 

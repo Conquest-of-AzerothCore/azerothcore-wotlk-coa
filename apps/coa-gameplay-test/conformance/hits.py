@@ -25,8 +25,8 @@ from values import (ALLY, CAST_MARGIN_MS, CHARGE_OFFSET_YD, DUMMY_DISTANCE, DUMM
                     Z_99, Expectation, RankFacts, Unmodelled, armed_for, cast_aura_steps, cast_distance,
                     closes_distance, dataset,
                     equip_requirement, weapon_requirement,
-                    facts_of, gap_closer_expectation, gap_closer_target, is_hostile, required_aura_steps,
-                    pay_power_steps, required_target_health_steps, targets_ally)
+                    facts_of, gap_closer_expectation, gap_closer_target, honour_min_range, is_hostile,
+                    required_aura_steps, pay_power_steps, required_target_health_steps, targets_ally)
 
 HIT_CHECKS = ('hit_mean', 'melee_mean', 'periodic_total', 'unmodelled', GAP_CLOSER_DISTANCE)
 UNMODELLED = 'unmodelled: '
@@ -1382,7 +1382,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
             wait_ms += gap_interval
         scenario = scenario_shell(armed_file, name, contract, steps)
         if target_kind == TARGET:
-            scenario['creatures'] = [creature_fixture(armed_file, cast_distance(records, rank_id))]
+            scenario['creatures'] = [creature_fixture(armed_file,
+                                                      cast_distance(records, rank_id, honour_min_range(armed_file)))]
         elif target_kind == ALLY:
             scenario['players'].append({**player_fixture(armed_file), 'id': ALLY})
         return [(timed(scenario, wait_ms), expectations)]
@@ -1449,7 +1450,8 @@ def hit_parts(class_file: dict, spell: ClassSpell, casts: int, rank_id: int | No
         titled = name if len(shares) == 1 else f'{name} part {part + 1} of {len(shares)}'
         scenario = scenario_shell(armed_file, titled, contract, steps)
         if hostile:
-            scenario['creatures'] = [creature_fixture(armed_file, cast_distance(records, rank_id))]
+            scenario['creatures'] = [creature_fixture(armed_file,
+                                                      cast_distance(records, rank_id, honour_min_range(armed_file)))]
         if location is not None:
             scenario['location'] = dict(location)
         if ally:

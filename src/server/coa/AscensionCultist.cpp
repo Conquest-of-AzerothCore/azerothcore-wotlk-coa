@@ -105,11 +105,13 @@ void Mana(Player* player, uint32 amount)
 bool Chance(Player* player, uint32 id, uint32 cooldown)
 {
     SpellInfo const* info = sSpellMgr->GetSpellInfo(id);
-    float chance = info ? float(info->ProcChance) : 0;
+    if (!player || !info || !player->HasAura(id) || State(player).timers.HasTimeUntilEvent(id))
+        return false;
+    float chance = float(info->ProcChance);
+    player->ApplySpellMod(id, SPELLMOD_CHANCE_OF_SUCCESS, chance);
     if ((id == 300313 || id == 706245) && Count(player, Insanity) > 40 && player->HasAura(707753))
         chance += Amount(707753);
-    if (!info || !player->HasAura(id) || State(player).timers.HasTimeUntilEvent(id) ||
-        !roll_chance_f(std::clamp(chance, 0.0f, 100.0f)))
+    if (!roll_chance_f(std::clamp(chance, 0.0f, 100.0f)))
         return false;
     if (cooldown)
         State(player).timers.ScheduleEvent(id, Milliseconds(cooldown));
@@ -349,7 +351,36 @@ namespace
 class cultist_player : public PlayerScript
 {
 public:
-    cultist_player() : PlayerScript("cultist_player", {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT}) { }
+    cultist_player() : PlayerScript("cultist_player",
+        {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT,
+         PLAYERHOOK_ON_AFTER_UPDATE_MAX_HEALTH, PLAYERHOOK_ON_AFTER_UPDATE_MAX_POWER}) { }
+    void OnPlayerAfterUpdateMaxHealth(Player* player, float& value) override
+    {
+        using namespace AscensionCultist;
+        if (Owner(player) != player)
+            return;
+        float totalPct = player->GetPctModifierValue(UNIT_MOD_HEALTH, TOTAL_PCT);
+        float intellect = player->GetStat(STAT_INTELLECT);
+        for (AuraEffect const* effect : player->GetAuraEffectsByType(SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT))
+            if ((effect->GetId() == 560080 || effect->GetId() == 561335) &&
+                effect->GetMiscValue() == POWER_HEALTH && effect->GetMiscValueB() == STAT_INTELLECT)
+                value += (intellect * 0.25f * (1.0f + effect->GetAmount() / 100.0f) -
+                    CalculatePct(intellect, effect->GetAmount())) * totalPct;
+    }
+    void OnPlayerAfterUpdateMaxPower(Player* player, Powers& power, float& value) override
+    {
+        using namespace AscensionCultist;
+        if (power != POWER_MANA || Owner(player) != player)
+            return;
+        float totalPct = player->GetPctModifierValue(UNIT_MOD_MANA, TOTAL_PCT);
+        float intellect = player->GetStat(STAT_INTELLECT);
+        float manaFromInt = player->GetCreatePowers(POWER_MANA) > 0 ? player->GetManaBonusFromIntellect() : 0.0f;
+        for (AuraEffect const* effect : player->GetAuraEffectsByType(SPELL_AURA_ASCENSION_MOD_MAX_MANA_FROM_STAT))
+            if ((effect->GetId() == 560080 || effect->GetId() == 561335) &&
+                effect->GetMiscValue() == POWER_MANA && effect->GetMiscValueB() == STAT_INTELLECT)
+                value += (CalculatePct(manaFromInt, effect->GetAmount()) -
+                    CalculatePct(intellect, effect->GetAmount())) * totalPct;
+    }
     void OnPlayerUpdate(Player* player, uint32 diff) override
     {
         using namespace AscensionCultist;

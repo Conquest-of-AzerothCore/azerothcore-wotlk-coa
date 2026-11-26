@@ -173,6 +173,10 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             consider(attacker);
         if (nearest)
             return nearest;
+        if (Unit* helper = me->getAttackerForHelper();
+            helper && helper->IsAlive() && player->IsValidAttackTarget(helper) &&
+            me->IsWithinDistInMap(helper, 40.0f) && me->IsWithinLOSInMap(helper))
+            return helper;
         for (auto const& pair : player->GetCombatManager().GetPvECombatRefs())
             consider(pair.second->GetOther(player));
         for (auto const& pair : player->GetCombatManager().GetPvPCombatRefs())
@@ -232,8 +236,12 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
                                                   me->GetEntry() != 50301);
             }
         }
-        bool engaged = UpdateVictim();
-        if ((engaged && me->GetEntry() == 50375) || (me->GetEntry() == 50301 && me->GetVictim()))
+        if (me->GetEntry() == 50301)
+        {
+            if (me->GetVictim())
+                DoMeleeAttackIfReady();
+        }
+        else if (UpdateVictim() && me->GetEntry() == 50375)
             DoMeleeAttackIfReady();
     }
 };
