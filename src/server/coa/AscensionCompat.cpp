@@ -2817,9 +2817,6 @@ public:
 
     if (Pet* pet = player->GetPet())
       player->RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
-    player->ClearAllReactives();
-    player->UnsummonAllTotems();
-    player->RemoveAllControlled();
 
     std::unordered_set<uint32> visitedSpellIds;
     uint32 removed = 0;
