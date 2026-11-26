@@ -897,7 +897,8 @@
     "spell": 504627,
     "clause": "In addition, while out of combat, you and your bonded ally have $505169s1% increased movement speed.",
     "labels": [
-      "504627 behaviour_metric_delta ooc_speed"
+      "504627 behaviour_metric_delta ooc_speed",
+      "504627 behaviour_metric_delta in_combat_speed_off"
     ],
     "kind": "claim"
   },
