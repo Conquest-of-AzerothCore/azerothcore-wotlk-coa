@@ -2224,232 +2224,7 @@
           "judge": "reach"
         }
       ],
-      "observe_source": "680828 Effect[0] aura 23 (amp 500 ms, 8000 ms = 16 ticks) triggers 524180 (TargetAuraSpell 706623 Blood Rituals, TargetA 22 / TargetB 30, EffectRadiusIndex 10 = 30 yd; Spell.dbc). Precondition fixture: with_rituals carries Blood Rituals 706623 (1 stack), no_rituals stands 2 yd away without 706623 (unwitnessed unhealed control placed adjacent to healed ally within 3 yd << 30 yd). Control (before learning 680828): 0 heals. Treatment: with_rituals receives >= 16 heals of 524180, no_rituals receives 0. Reference search 2026-11-26: coa-history 680828/524180: 0 events in 186 logs; bindmysoul names Darkfallen Lament."
-    },
-    {
-      "spell": 680828,
-      "name": "Darkfallen Lament (heal target cap 12 allies with Blood Rituals)",
-      "kind": "ally_heal_reach",
-      "variant": "ally_cap_12",
-      "quote": "Chant a sinister ritual, healing up to $524181i allies affected by Blood Rituals for ${($d*1000/$T1)*($524180m1+$524180ppl1+$bh*0.1)} over $d",
-      "allies": [
-        {
-          "id": "ritual_1",
-          "dx": 3,
-          "dy": -1,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_2",
-          "dx": 4,
-          "dy": -1,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_3",
-          "dx": 5,
-          "dy": -1,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_4",
-          "dx": 2,
-          "dy": 0,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_5",
-          "dx": 3,
-          "dy": 0,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_6",
-          "dx": 4,
-          "dy": 0,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_7",
-          "dx": 5,
-          "dy": 0,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_8",
-          "dx": 2,
-          "dy": 1,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_9",
-          "dx": 3,
-          "dy": 1,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_10",
-          "dx": 4,
-          "dy": 1,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_11",
-          "dx": 5,
-          "dy": 1,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_12",
-          "dx": 2,
-          "dy": 2,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        },
-        {
-          "id": "ritual_13",
-          "dx": 3,
-          "dy": 2,
-          "grouped": true,
-          "health": 1000,
-          "maximum": 50000,
-          "auras": [
-            [
-              706623,
-              1
-            ]
-          ]
-        }
-      ],
-      "casts": [
-        {
-          "spell": 680828,
-          "target": "caster",
-          "watch_ms": 8500
-        }
-      ],
-      "checks": [
-        {
-          "name": "ally_cap_12",
-          "spell": 524180,
-          "healed": [
-            "ritual_1",
-            "ritual_2",
-            "ritual_3",
-            "ritual_4",
-            "ritual_5",
-            "ritual_6",
-            "ritual_7",
-            "ritual_8",
-            "ritual_9",
-            "ritual_10",
-            "ritual_11",
-            "ritual_12"
-          ],
-          "unhealed": [
-            "ritual_13"
-          ],
-          "reference": "ritual_1",
-          "minimum": 16,
-          "judge": "reach"
-        }
-      ],
-      "observe_source": "Tooltip 680828 states 'healing up to $524181i allies affected by Blood Rituals' ($524181i = 12, Spell.dbc 524181 MaxAffectedTargets 12), whereas 524180 carries MaxAffectedTargets 25 (Spell.dbc). Places 13 grouped raid allies carrying precondition fixture Blood Rituals 706623 within 6 yd (<< 30 yd radius, schema 2): tests whether 524180 respects the tooltip cap of 12 allies or over-heals the 13th ally. Reference search 2026-11-26: coa-history 680828/524180: 0 events in 186 logs; bindmysoul names Darkfallen Lament."
+      "observe_source": "680828 Effect[0] aura 23 (amp 500 ms, 8000 ms = 16 ticks) triggers 524180 (TargetAuraSpell 706623 Blood Rituals, TargetA 22 / TargetB 30, EffectRadiusIndex 10 = 30 yd; Spell.dbc). Precondition fixture: with_rituals carries Blood Rituals 706623 (1 stack), while in-phase control no_rituals (same raid group, without 706623) stands 2 yd away (unwitnessed unhealed control placed adjacent to healed ally within 3 yd << 30 yd). Single treatment phase: with_rituals receives >= 16 heals of 524180, no_rituals receives 0. Reference search 2026-11-26: coa-history 680828/524180: 0 events in 186 logs; bindmysoul names Darkfallen Lament."
     },
     {
       "spell": 680828,
@@ -2565,7 +2340,7 @@
     },
     {
       "spell": 680828,
-      "name": "Darkfallen Lament (leech damage at reference stats: 0 SP -> 1368)",
+      "name": "Darkfallen Lament (leech damage at reference stats: 0 SP -> 1360)",
       "kind": "metric_delta",
       "variant": "leech_damage_base",
       "label_suffix": "leech_damage_base",
@@ -2618,7 +2393,7 @@
       "wait_ms": 8800,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Spell.dbc 680828 Effect[1] periodic 500 ms over 8000 ms (16 ticks) triggers 630895 -> 630874 (SchoolMask 1 Physical, Effect[0] SPELL_EFFECT_HEALTH_LEECH: BasePoints 60 + DieSides 1 + RealPointsPerLevel 0.5 * (60 - 11) = 85.5 -> int32(85.5) = 85 per tick x 16 = 1360 at 0 SP, after Lesser Armor 673 effect 0 = -528 zeros the dummy armor to 0, verified by armor == 0 precondition). Wait 9000 ms (> 8000 ms channel). Expected 1360 +- 1. Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs.",
+      "observe_source": "Spell.dbc 680828 Effect[1] periodic 500 ms over 8000 ms (16 ticks) triggers 630895 -> 630874 (SchoolMask 1 Physical, DmgClass 1, Effect[0] 9 SPELL_EFFECT_HEALTH_LEECH: EffectBasePoints[0] 71 + EffectDieSides[0] 1 + EffectRealPointsPerLevel[0] 4.5 * (60 - BaseLevel 57) [MaxLevel 0] = 72 + 13.5 = 85.5 -> int32(85.5) = 85 per tick x 16 = 1360 at 0 SP, after Lesser Armor 673 effect 0 = -528 zeros the dummy's pinned 528 armor, verified by armor == 0 precondition). Wait 8800 ms (> 8000 ms channel). Expected 1360 +- 1. Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs.",
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -2638,7 +2413,7 @@
     },
     {
       "spell": 680828,
-      "name": "Darkfallen Lament (leech damage at +5000 SP: +1.0 SP per tick -> 81368)",
+      "name": "Darkfallen Lament (leech damage at +5000 SP: +1.0 SP per tick -> 81360)",
       "kind": "metric_delta",
       "variant": "leech_damage_sp",
       "label_suffix": "leech_damage_sp",
@@ -2695,7 +2470,7 @@
       "wait_ms": 8800,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Spell.dbc 680828 tooltip leech formula ($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1): at +5000 SP, 630874 EffectBonusMultiplier[0] = 1.0 (DmgClass 1 SPELL_DAMAGE_CLASS_MAGIC) yields int32(85.5 + 5000) = 5085 per tick x 16 ticks = 81360 unmitigated Physical damage (Lesser Armor 673 effect 0 = -528 zeros dummy armor, verified by armor == 0 precondition). Wait 9000 ms (> 8000 ms channel). Expected 81360 +- 1 (excludes 0 SP = 1360 and 2x SP = 161360). Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs.",
+      "observe_source": "Spell.dbc 680828 tooltip leech formula ($d*1000/$t1)*($630874m1+$630874ppl1+$bh*1): Spell.dbc 630874 has EffectBasePoints[0] 71, EffectDieSides[0] 1, EffectRealPointsPerLevel[0] 4.5, BaseLevel 57, MaxLevel 0, EffectBonusMultiplier[0] 0.0; +1.0 * SP scaling is applied by bloodmage_vitality_scaling::ModifySpellEffectBaseValue (AscensionBloodmageVitality.cpp:122-134, adding 100% of SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_SHADOW)). At +5000 SP: int32(85.5 + 5000) = 5085 per tick x 16 ticks = 81360 unmitigated Physical damage (Lesser Armor 673 effect 0 = -528 zeros dummy armor, verified by armor == 0 precondition). Wait 8800 ms (> 8000 ms channel). Expected 81360 +- 1 (excludes 0 SP = 1360 and 2x SP = 161360). Reference search 2026-11-26: coa-history 680828/630874: 0 events in 186 logs.",
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -3249,7 +3024,7 @@
       "critical": false,
       "trials": 20,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 25 (806210 Effect[0] aura 112 rewritten to SPELL_AURA_MOD_DAMAGE_DONE_VERSUS_AURASTATE MiscValue 13 AURA_STATE_HEALTHLESS_35_PERCENT, BasePoints 24 + DieSides 1 = +25%, single class mask [2097152, 8388608, 16384] covering Veinburst 504819, Bloodfang Bite 572551, and Claw Sweep 500444; AscensionBloodmageTalents.cpp:50,328-331; Spell.dbc). Subset rule G-23: Veinburst 504819 (Mortal Form, 1 of 3 abilities sharing the same single unscripted Effect[0] class mask) at target_health_pct 34 measures +25% (expected 1.25, +-2 pt band [23%, 27%], excluding 0% and +50%). Paired with veinburst_above_35 at 36%. Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 806210 matches."
+      "observe_source": "806210 Terrorizer: Effect[0] aura 112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS MiscValue 20007 -> ASCENSION_CLASSMASK_AURASTATE_DAMAGE MiscValueB 13 (AURA_STATE_HEALTHLESS_35_PERCENT), BasePoints 24 + DieSides 1 = +25% (EffectSpellClassMask 2097152 / 8388608 / 16384 matching Veinburst 504819, Bloodfang Bite 572551, and Claw Sweep 500444; AscensionBloodmageTalents.cpp:50,328-331; Spell.dbc). All 3/3 tooltip-named abilities are proved (veinburst_below_35, bloodfang_below_35, claw_sweep_below_35): here Veinburst 504819 at target_health_pct 34 measures +25% (expected 1.25, +-2 pt band [23%, 27%], excluding 0% and +50%). Paired with veinburst_above_35 at 36%. Reference search 2026-11-26: coa-history 806210: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 806210 matches."
     },
     {
       "spell": 806210,

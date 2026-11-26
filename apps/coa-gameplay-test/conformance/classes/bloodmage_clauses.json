@@ -2439,7 +2439,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "All Bloodcraft checks alert in both runs: 524182 never applies (0 stacks; dummy melee deals unreduced 98900 vs expected 98922 at 1 stack / 98988 at 4 stacks) because data/sql/updates/pending_db_world/rev_20260920_41_bloodmage_damage_proc_triggers.sql:44 sets AttributesMask = 0 (missing PROC_ATTR_TRIGGERED_CAN_PROC = 2), so Darkfallen Lament's triggered leech 630874 never procs 680733."
+    "reason": "All Bloodcraft checks alert in both runs: 524182 never applies (0 stacks; striker Light of the Naaru 41394 (1100 Holy damage) leaves caster at unreduced 98900 health vs expected 98922 at 1 stack / 98988 at 4 stacks) because data/sql/updates/pending_db_world/rev_20260920_41_bloodmage_damage_proc_triggers.sql:44 sets AttributesMask = 0 (missing PROC_ATTR_TRIGGERED_CAN_PROC = 2), so Darkfallen Lament's triggered leech 630874 never procs 680733."
   },
   {
     "spell": 680733,
@@ -2485,10 +2485,7 @@
     "claims": [
       {
         "claim": "healing up to $524181i allies affected by Blood Rituals",
-        "labels": [
-          "680828 behaviour_metric_delta rituals_gate",
-          "680828 behaviour_metric_delta ally_cap_12"
-        ]
+        "labels": []
       },
       {
         "claim": "over $d",
@@ -2505,7 +2502,7 @@
       }
     ],
     "kind": "claim",
-    "reason": "rituals_gate (16 heals with Blood Rituals vs 0 without), duration (8000 ms), and heal_base (1296 exact) pass in both runs. Two confirmed server defects alert in both runs: (1) ally_cap_12 heals all 13/13 Blood Rituals allies 16x because Spell.dbc 524180 has MaxAffectedTargets = 25 vs tooltip $524181i = 12; (2) heal_sp heals 1296 at +5000 SP vs expected 9296 because Spell.dbc 524180 has DmgClass = 0, EffectBonusMultiplier[0] = 0, and no spell_bonus_data row (0 SP scaling vs tooltip $bh*0.1 per tick)."
+    "reason": "rituals_gate (680828 behaviour_metric_delta rituals_gate: 16 heals on with_rituals vs 0 on no_rituals), duration (8000 ms), and heal_base (1296 exact) pass in both runs. Claim 0 stays unproven (labels=[]) because the 'up to 12 allies' cap has both a confirmed DBC defect (Spell.dbc 524180 MaxAffectedTargets = 25 vs tooltip $524181i = 12) and a tool gap: 524180 carries SPELL_ATTR3_ONLY_ON_PLAYER (0x100), SPELL_ATTR1_EXCLUDE_CASTER (0x80000), and TargetAuraSpell 706623, and Spell::SelectImplicitAreaTargets (Spell.cpp:1414-1420) calls RandomResize independently per tick, so proving cap 12 deterministically (12*16=192 vs unfixed 13*16=208) requires summing heals across >=13 non-caster ally players carrying 706623; no existing kind supports that (heal_sum caps at MAXIMUM_ALLIES=7 and 524180 rejects entry 631 creatures; ally_arm caps at 9 allies; ally_heal_reach supports 24 raid allies + ally.auras but lacks an ungated total-count cap judge). Claim 2 alerts in both runs: heal_sp heals 1296 at +5000 SP vs expected 9296 because Spell.dbc 524180 has DmgClass = 0, EffectBonusMultiplier[0] = 0, and no spell_bonus_data."
   },
   {
     "spell": 680828,
