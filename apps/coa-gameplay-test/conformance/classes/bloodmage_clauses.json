@@ -236,21 +236,26 @@
     "spell": 300957,
     "clause": "Increases spell haste of all party and raid members by $s1%.",
     "labels": [
-      "300957 effect_value e0 #0"
+      "300957 behaviour_party_stat_ratio party_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 300957,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "300957 behaviour_metric_delta no_stack",
+      "300957 behaviour_metric_delta no_stack_aura",
+      "300957 behaviour_party_stat_ratio party_haste"
+    ],
+    "kind": "claim",
+    "promise_of": "Increases spell haste of all party and raid members by $s1%."
   },
   {
     "spell": 300957,
     "clause": "In addition, increases your spell haste by $s2%.",
     "labels": [
-      "300957 effect_value e1 #1"
+      "300957 behaviour_metric_delta self_haste"
     ],
     "kind": "claim"
   },
@@ -810,10 +815,39 @@
   {
     "spell": 504285,
     "clause": "Increases all primary stats by $s1%.",
-    "labels": [
-      "504285 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases all primary stats by $s1%: Strength",
+        "labels": [
+          "504285 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Agility",
+        "labels": [
+          "504285 behaviour_metric_delta agility"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Stamina",
+        "labels": [
+          "504285 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Intellect",
+        "labels": [
+          "504285 behaviour_metric_delta intellect"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Spirit",
+        "labels": [
+          "504285 behaviour_metric_delta spirit"
+        ]
+      }
+    ]
   },
   {
     "spell": 504290,
@@ -1084,10 +1118,39 @@
   {
     "spell": 504893,
     "clause": "Increases all primary stats by $s1%.",
-    "labels": [
-      "504893 effect_value e0 #0"
-    ],
-    "kind": "claim"
+    "kind": "claim",
+    "claims": [
+      {
+        "claim": "Increases all primary stats by $s1%: Strength",
+        "labels": [
+          "504893 behaviour_metric_delta strength"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Agility",
+        "labels": [
+          "504893 behaviour_metric_delta agility"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Stamina",
+        "labels": [
+          "504893 behaviour_metric_delta stamina"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Intellect",
+        "labels": [
+          "504893 behaviour_metric_delta intellect"
+        ]
+      },
+      {
+        "claim": "Increases all primary stats by $s1%: Spirit",
+        "labels": [
+          "504893 behaviour_metric_delta spirit"
+        ]
+      }
+    ]
   },
   {
     "spell": 504894,
@@ -1606,7 +1669,7 @@
     "spell": 560074,
     "clause": "Increases your chance to resist curse effects by $s1%.",
     "labels": [
-      "560074 effect_value e0 #0"
+      "560074 behaviour_taken_hit curse_resist"
     ],
     "kind": "claim"
   },
@@ -1644,7 +1707,8 @@
     "spell": 560252,
     "clause": "Increases critical strike chance by $s1%.",
     "labels": [
-      "560252 effect_value e0 #0"
+      "560252 behaviour_metric_delta melee_crit",
+      "560252 behaviour_metric_delta spell_crit"
     ],
     "kind": "claim"
   },
@@ -2872,15 +2936,20 @@
     "spell": 685028,
     "clause": "You now emanate an aura around you, increasing the Armor of party and raid members by ${$m1}.",
     "labels": [
-      "685028 effect_value e0 #0"
+      "685028 behaviour_party_stat_ratio party_armor"
     ],
     "kind": "claim"
   },
   {
     "spell": 685028,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "685028 behaviour_metric_delta no_stack",
+      "685028 behaviour_metric_delta no_stack_aura",
+      "685028 behaviour_party_stat_ratio party_armor"
+    ],
+    "kind": "claim",
+    "promise_of": "You now emanate an aura around you, increasing the Armor of party and raid members by ${$m1}."
   },
   {
     "spell": 704115,
@@ -2929,21 +2998,24 @@
     "spell": 704623,
     "clause": "Nearby party and raid members receive $s1% more healing.",
     "labels": [
-      "704623 effect_value e0 #0"
+      "704623 behaviour_hit_ratio ally_healing"
     ],
     "kind": "claim"
   },
   {
     "spell": 704623,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "704623 behaviour_hit_ratio no_stack",
+      "704623 behaviour_hit_ratio partner_alone"
+    ],
     "kind": "claim"
   },
   {
     "spell": 704623,
     "clause": "In addition, increases the health leeched by Bloodbolt by $s2%.",
     "labels": [
-      "704623 effect_value e1 #1"
+      "704623 behaviour_metric_delta bloodbolt_leech"
     ],
     "kind": "claim"
   },
@@ -3016,7 +3088,7 @@
     "spell": 704627,
     "clause": "Increases your chance to dodge by $s1%",
     "labels": [
-      "704627 effect_value e0 #0"
+      "704627 behaviour_metric_delta dodge"
     ],
     "kind": "claim"
   },
@@ -3024,7 +3096,7 @@
     "spell": 704627,
     "clause": "and your expertise by $s2.",
     "labels": [
-      "704627 effect_value e1 #1"
+      "704627 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
   },
@@ -3032,7 +3104,7 @@
     "spell": 704628,
     "clause": "Increases your chance to dodge by $s1%",
     "labels": [
-      "704628 effect_value e0 #0"
+      "704628 behaviour_metric_delta dodge"
     ],
     "kind": "claim"
   },
@@ -3040,7 +3112,7 @@
     "spell": 704628,
     "clause": "and your expertise by $s2.",
     "labels": [
-      "704628 effect_value e1 #1"
+      "704628 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
   },
@@ -3048,14 +3120,19 @@
     "spell": 704632,
     "clause": "Increases chance to hit with all spells and attacks by $s1% for you and party and raid members.",
     "labels": [
-      "704632 effect_value e0 #0"
+      "704632 behaviour_party_stat_ratio party_melee_hit",
+      "704632 behaviour_party_stat_ratio party_spell_hit",
+      "704632 behaviour_metric_delta self_melee_hit",
+      "704632 behaviour_metric_delta self_spell_hit"
     ],
     "kind": "claim"
   },
   {
     "spell": 704632,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "704632 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -3178,7 +3255,8 @@
     "spell": 704649,
     "clause": "Increases critical strike chance by $s1%.",
     "labels": [
-      "704649 effect_value e0 #0"
+      "704649 behaviour_metric_delta melee_crit",
+      "704649 behaviour_metric_delta spell_crit"
     ],
     "kind": "claim"
   },
@@ -3398,7 +3476,8 @@
     "spell": 705733,
     "clause": "Increases your Shadow damage dealt by $s1% against bleeding targets.",
     "labels": [
-      "705733 effect_value e0 #0"
+      "705733 behaviour_hit_ratio bleeding",
+      "705733 behaviour_hit_ratio not_bleeding"
     ],
     "kind": "claim"
   },
@@ -3406,7 +3485,7 @@
     "spell": 705733,
     "clause": "Increases your expertise by $s2.",
     "labels": [
-      "705733 effect_value e1 #1"
+      "705733 behaviour_metric_delta expertise"
     ],
     "kind": "claim"
   },
@@ -3434,7 +3513,7 @@
     "spell": 705742,
     "clause": "Increases your healing received by $s1%.",
     "labels": [
-      "705742 effect_value e0 #0"
+      "705742 behaviour_hit_ratio healing_received"
     ],
     "kind": "claim"
   },
@@ -3519,7 +3598,8 @@
     "spell": 706598,
     "clause": "Become blessed by Lana'thel, increasing your spell power by $s2% of your Spirit",
     "labels": [
-      "706598 effect_value e1 #0"
+      "706598 behaviour_metric_delta sp_base",
+      "706598 behaviour_metric_delta sp_spi"
     ],
     "kind": "claim"
   },
@@ -3527,7 +3607,9 @@
     "spell": 706598,
     "clause": "and your hit rating by $s3% of your Spirit.",
     "labels": [
-      "706598 effect_value e2 #1"
+      "706598 behaviour_metric_delta hit_rating_base",
+      "706598 behaviour_metric_delta hit_rating_spi",
+      "706598 behaviour_metric_delta spell_hit_rating_spi"
     ],
     "kind": "claim"
   },
@@ -3542,7 +3624,9 @@
     "spell": 706599,
     "clause": "Increases your spell damage by $s1% of your Stamina and Spirit.",
     "labels": [
-      "706599 effect_value e0 #0"
+      "706599 behaviour_metric_delta sp_base",
+      "706599 behaviour_metric_delta sp_sta",
+      "706599 behaviour_metric_delta sp_spi"
     ],
     "kind": "claim"
   },
@@ -3550,7 +3634,9 @@
     "spell": 706603,
     "clause": "Increases your haste by $s1%.",
     "labels": [
-      "706603 effect_value e0 #0"
+      "706603 behaviour_metric_delta spell_haste",
+      "706603 behaviour_metric_delta melee_haste",
+      "706603 behaviour_metric_delta ranged_haste"
     ],
     "kind": "claim"
   },
@@ -3604,7 +3690,9 @@
   {
     "spell": 706617,
     "clause": "Increases your stealth detection significantly.",
-    "labels": [],
+    "labels": [
+      "706617 behaviour_metric_delta can_detect"
+    ],
     "kind": "claim"
   },
   {
@@ -3726,7 +3814,8 @@
     "spell": 707864,
     "clause": "Become blessed by Lana'thel, increasing your spell power by $s2% of your Spirit",
     "labels": [
-      "707864 effect_value e1 #0"
+      "707864 behaviour_metric_delta sp_base",
+      "707864 behaviour_metric_delta sp_spi"
     ],
     "kind": "claim"
   },
@@ -3734,7 +3823,9 @@
     "spell": 707864,
     "clause": "and your hit rating by $s3% of your Spirit.",
     "labels": [
-      "707864 effect_value e2 #1"
+      "707864 behaviour_metric_delta hit_rating_base",
+      "707864 behaviour_metric_delta hit_rating_spi",
+      "707864 behaviour_metric_delta spell_hit_rating_spi"
     ],
     "kind": "claim"
   },
@@ -3742,7 +3833,7 @@
     "spell": 707865,
     "clause": "Increases your Shadow damage dealt by $s1%",
     "labels": [
-      "707865 effect_value e0 #0"
+      "707865 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -3750,7 +3841,8 @@
     "spell": 707865,
     "clause": "and increases your hit chance by $s2%.",
     "labels": [
-      "707865 effect_value e1 #1"
+      "707865 behaviour_metric_delta melee_hit",
+      "707865 behaviour_metric_delta spell_hit"
     ],
     "kind": "claim"
   },
@@ -5396,7 +5488,7 @@
     "spell": 807491,
     "clause": "Increases your melee haste by $s3%",
     "labels": [
-      "807491 effect_value e2 #0"
+      "807491 behaviour_metric_delta melee_haste"
     ],
     "kind": "claim"
   },
@@ -5404,7 +5496,8 @@
     "spell": 807491,
     "clause": "and your movement speed and mounted movement speed by $s1%.",
     "labels": [
-      "807491 effect_value e0 #1"
+      "807491 behaviour_metric_delta run_speed",
+      "807491 behaviour_metric_delta mounted_speed"
     ],
     "kind": "claim"
   },
