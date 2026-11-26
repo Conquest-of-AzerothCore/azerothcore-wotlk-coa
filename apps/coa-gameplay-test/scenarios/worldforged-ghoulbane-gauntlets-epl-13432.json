@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Ghoulbane Gauntlets in Eastern Plaguelands stands on terrain instead of underground (#13432)",
+  "contract": "#13432 reported the Ghoulbane Gauntlets pickup (Chainmail Gauntlets, gameobject entry 90508, guid 6940538, drops item 410142) missing in Eastern Plaguelands. The realm-map pass moved (x, y) 19.89 yd south to (2548.200, -4544.400) where .map terrain is 80.660 while keeping z 79.515, burying it 1.145 yd underground. rev_20261126_13432 restores first-pass realm-dump row 6900966 (2544.780, -4524.810, 79.515; -0.011 yd to .map terrain 79.526). Expected: the pickup stands at (2544.780, -4524.810, 79.515) flush on the terrain surface, is not under water, has open headroom, and opens with loot from 1.53 yd away.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 2543.28,
+    "y": -4524.81,
+    "z": 79.21,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 90508,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup stands at its realm-dump spot (2544.780, -4524.810, 79.515) instead of 19.89 yd south underground",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 2544.78,
+      "y": -4524.81,
+      "z": 79.515,
+      "max": 0.3,
+      "guid": 6940538,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup rests flush on the terrain instead of 1.145 yd underground",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": -0.2,
+      "max": 0.2,
+      "guid": 6940538,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is grounded within 0.8 yd",
+      "actor": "p",
+      "metric": "spawn_placement",
+      "tolerance": 0.8,
+      "equals": 0,
+      "guid": 6940538,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940538,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "no model surface blocks above the pickup",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6940538,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 90508
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

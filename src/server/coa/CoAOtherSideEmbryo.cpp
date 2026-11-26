@@ -2,6 +2,7 @@
  * Copyright (C) 2016+ AzerothCore <www.azerothcore.org>, released under GNU AGPL v3 license: https://github.com/azerothcore/azerothcore-wotlk/blob/master/LICENSE-AGPL3
  */
 
+#include "AscensionDungeonRelease.h"
 #include "CoAOtherSideDamage.h"
 #include "Creature.h"
 #include "GameObject.h"
@@ -239,6 +240,8 @@ struct boss_coa_chimeric_embryo : public ScriptedAI
         ShowBridge(true);
         _summons.DespawnAll();
         LiftFromPit();
+        CoASetDungeonReleaseStart(me->GetMap(), { ArenaMiddle.GetPositionX(), ArenaMiddle.GetPositionY(),
+            ArenaMiddle.GetPositionZ(), FacingPlatform });
     }
 
     void JustSummoned(Creature* summon) override

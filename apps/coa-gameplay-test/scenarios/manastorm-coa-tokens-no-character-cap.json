@@ -1,0 +1,90 @@
+{
+  "schema": 1,
+  "name": "Manastorm CoA loot mode: no per-character token cap, the account allowance decides",
+  "contract": [
+    "Requires Manastorm.CoALootMode.Enabled = 1 with the removed option Manastorm.CoALootMode.TokenCap = 5 still present in manastorm-endless.conf, and CoA.BazaarTokens.HourlyCap.Amount = 1250 in coa.conf.",
+    "Manastorm Bazaar Tokens (975001) count only toward the account allowance of CoA.BazaarTokens.HourlyCap; Manastorm has no per-character cap of its own, so the leftover TokenCap key limits nothing. A level 60 non-Wildcard leader whose account has earned no tokens clears test segment 1 (Taragaman 11520) for the first time and is paid the full first-clear reward of manastorm_coa_token_rewards (25), plus 0-12 Ethereal Bazaar boss-kill tokens and 50 per bonus cache. With the old per-character cap of 5 the clear could pay at most 5 + 12. The completion message reports the account allowance."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "leader",
+      "race": 5,
+      "class": 23,
+      "level": 60,
+      "security": 2
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "command",
+      "actor": "leader",
+      "command": ".manastorm segment test 1"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader entered a private Manastorm instance",
+      "actor": "leader",
+      "metric": "private_instance",
+      "within_ms": 10000,
+      "equals": 1
+    },
+    {
+      "action": "set_phase",
+      "label": "Match the native phase 1 Manastorm room so the boss is visible",
+      "actor": "leader",
+      "value": 1
+    },
+    {
+      "action": "teleport_to_spawn",
+      "label": "Go to Taragaman",
+      "actor": "leader",
+      "guid": 48706
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the leader left the entrance protection at the boss",
+      "actor": "leader",
+      "metric": "aura",
+      "spell": 93307,
+      "within_ms": 3000,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 975001,
+      "save_as": "tokens_before_clear"
+    },
+    {
+      "action": "attack_nearby",
+      "actor": "leader",
+      "entry": 11520,
+      "kill": true
+    },
+    {
+      "action": "assert",
+      "label": "The full first-clear reward is paid although the old per-character option is 5",
+      "actor": "leader",
+      "metric": "item_count",
+      "item": 975001,
+      "relative_to": "tokens_before_clear",
+      "min": 25,
+      "within_ms": 12000
+    },
+    {
+      "action": "assert",
+      "label": "The completion message reports the account allowance",
+      "actor": "leader",
+      "metric": "system_message_contains",
+      "text": "Bazaar Tokens earned on your account",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

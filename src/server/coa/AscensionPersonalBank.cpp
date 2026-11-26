@@ -3,6 +3,7 @@
 
 #include "AscensionItemLadder.h"
 #include "AscensionNativeItemScaling.h"
+#include "AscensionVanityOwnership.h"
 #include "Bag.h"
 #include "Chat.h"
 #include "DatabaseEnv.h"
@@ -11,6 +12,7 @@
 #include "GuildPackets.h"
 #include "Item.h"
 #include "ItemScript.h"
+#include "LocalLevelScaling.h"
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
@@ -191,14 +193,14 @@ void StoreSlot(CharacterDatabaseTransaction trans, OpenBank const& bank, uint8 t
     item->SaveToDB(trans);
 }
 
-void StoreMoney(OpenBank const& bank)
+void StoreMoney(CharacterDatabaseTransaction trans, OpenBank const& bank)
 {
-    CharacterDatabase.Execute("REPLACE INTO mod_ascension_bank_money (owner_kind, owner_id, money) "
-                              "VALUES ({}, {}, {})",
-                              bank.OwnerKind, bank.OwnerId, bank.Money);
+    trans->Append("REPLACE INTO mod_ascension_bank_money (owner_kind, owner_id, money) "
+                  "VALUES ({}, {}, {})",
+                  bank.OwnerKind, bank.OwnerId, bank.Money);
 }
 
-void StoreTab(OpenBank const& bank, uint8 tab)
+void StoreTab(CharacterDatabaseTransaction trans, OpenBank const& bank, uint8 tab)
 {
     std::string name = bank.TabName[tab];
     std::string icon = bank.TabIcon[tab];
@@ -207,9 +209,9 @@ void StoreTab(OpenBank const& bank, uint8 tab)
     CharacterDatabase.EscapeString(icon);
     CharacterDatabase.EscapeString(text);
 
-    CharacterDatabase.Execute("REPLACE INTO mod_ascension_bank_tab (owner_kind, owner_id, tab_index, name, icon, text) "
-                              "VALUES ({}, {}, {}, '{}', '{}', '{}')",
-                              bank.OwnerKind, bank.OwnerId, tab, name, icon, text);
+    trans->Append("REPLACE INTO mod_ascension_bank_tab (owner_kind, owner_id, tab_index, name, icon, text) "
+                  "VALUES ({}, {}, {}, '{}', '{}', '{}')",
+                  bank.OwnerKind, bank.OwnerId, tab, name, icon, text);
 }
 
 void LogBankEvent(OpenBank const& bank, uint8 eventType, uint8 tab, Player* player, uint32 itemOrMoney,
@@ -252,6 +254,14 @@ void SendItemLevel(Player* player, Item const* item)
 {
     if (item)
         SendItemLevel(player, item->GetGUID(), NativeItemScaling::InstanceLevel(item));
+}
+
+[[nodiscard]] int32 BankSlotFlags(Item const* item)
+{
+    if (LocalLevelScaling::ItemPreviewActive())
+        return int32(LocalLevelScaling::AuctionPreviewLevel(item->GetGUID().GetCounter(), item->GetTemplate()));
+
+    return item->GetInt32Value(ITEM_FIELD_FLAGS);
 }
 
 [[nodiscard]] bool RefuseSoulboundIntoRealmBank(Player* player, OpenBank const& bank, Item* item)
@@ -321,7 +331,7 @@ void SendTabList(Player* player, OpenBank const& bank, uint8 tab, bool sendAllSl
             info.Count = int32(item->GetCount());
             info.Charges = int32(std::abs(item->GetSpellCharges()));
             info.EnchantmentID = int32(item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));
-            info.Flags = item->GetInt32Value(ITEM_FIELD_FLAGS);
+            info.Flags = BankSlotFlags(item);
             info.RandomPropertiesID = item->GetItemRandomPropertyId();
             info.RandomPropertiesSeed = int32(item->GetItemSuffixFactor());
 
@@ -455,8 +465,14 @@ void RemoveFromInventory(CharacterDatabaseTransaction trans, Player* player, uin
 
 void MoveIntoInventory(CharacterDatabaseTransaction trans, Player* player, ItemPosCountVec const& dest, Item* item)
 {
+    ObjectGuid const guid = item->GetGUID();
+    AscensionVanityOwnership::CollectItem(player, item);
     player->MoveItemToInventory(dest, item, true);
     player->SaveInventoryAndGoldToDB(trans);
+    Item* stored = player->GetItemByGuid(guid);
+    if (!stored && !dest.empty())
+        stored = player->GetItemByPos(dest.front().pos);
+    AscensionVanityOwnership::CollectItem(player, stored);
 }
 
 void DepositToBank(Player* player, OpenBank& bank, uint8 bag, uint8 slot, uint8 tab, uint8 bankSlot,
@@ -657,10 +673,12 @@ void WithdrawToPlayer(Player* player, OpenBank& bank, uint8 tab, uint8 bankSlot,
                 uint32 const room = destItem->GetMaxStackCount() - destItem->GetCount();
                 uint32 const amount = std::min<uint32>(room, source->GetCount());
 
+                AscensionVanityOwnership::CollectItem(player, source);
                 destItem->SetCount(destItem->GetCount() + amount);
                 destItem->SetState(ITEM_CHANGED, player);
                 ReduceBankItem(trans, bank, tab, bankSlot, source, amount);
                 player->SaveInventoryAndGoldToDB(trans);
+                AscensionVanityOwnership::CollectItem(player, destItem);
                 finish(ObjectGuid::Empty, 0);
                 return;
             }
@@ -840,16 +858,25 @@ void HandleSwapItems(Player* player, OpenBank& bank, WorldPacket const& packet)
                 return;
             }
 
+            uint8 const playerBag = swap.AutoStore ? NULL_BAG : swap.ContainerSlot;
+            uint8 const playerSlot = swap.AutoStore ? NULL_SLOT : swap.ContainerItemSlot;
+            if (!Player::IsInventoryPos(playerBag, playerSlot) &&
+                !(playerBag == NULL_BAG && playerSlot == NULL_SLOT))
+            {
+                player->SendEquipError(EQUIP_ERR_NONE, nullptr);
+                return;
+            }
+
             if (swap.ToSlot || swap.AutoStore)
             {
                 WithdrawToPlayer(player, bank, uint8(swap.BankTab), uint8(swap.BankSlot),
-                                 swap.ContainerSlot, swap.ContainerItemSlot,
+                                 playerBag, playerSlot,
                                  uint32(std::max<int32>(0, swap.StackCount)), swap.AutoStore);
                 sScriptMgr->OnPlayerBankWithdraw(player, bank.OwnerKind == OWNER_REALM
                     ? AscensionPersonalBank::REALM : AscensionPersonalBank::PERSONAL);
             }
             else
-                DepositToBank(player, bank, swap.ContainerSlot, swap.ContainerItemSlot,
+                DepositToBank(player, bank, playerBag, playerSlot,
                               uint8(swap.BankTab), uint8(swap.BankSlot),
                               uint32(std::max<int32>(0, swap.StackCount)));
         });
@@ -863,9 +890,13 @@ void HandleDepositMoney(Player* player, OpenBank& bank, WorldPacket const& packe
             if (deposit.Banker != bank.Vault || !deposit.Money || !player->HasEnoughMoney(deposit.Money))
                 return;
 
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
             player->ModifyMoney(-int32(deposit.Money));
+            player->SaveGoldToDB(trans);
             bank.Money += deposit.Money;
-            StoreMoney(bank);
+            StoreMoney(trans, bank);
+            CharacterDatabase.CommitTransaction(trans);
+
             SendTabChanged(player, bank, 0);
             LogBankEvent(bank, GUILD_BANK_LOG_DEPOSIT_MONEY, 0, player, deposit.Money, 0);
         });
@@ -879,11 +910,18 @@ void HandleWithdrawMoney(Player* player, OpenBank& bank, WorldPacket const& pack
             if (withdraw.Banker != bank.Vault || !withdraw.Money || bank.Money < withdraw.Money)
                 return;
 
-            bank.Money -= withdraw.Money;
-            player->ModifyMoney(int32(withdraw.Money));
-            StoreMoney(bank);
+            uint32 const amount = std::min(withdraw.Money, uint32(MAX_MONEY_AMOUNT));
+            if (!player->ModifyMoney(int32(amount)))
+                return;
+
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            bank.Money -= amount;
+            StoreMoney(trans, bank);
+            player->SaveGoldToDB(trans);
+            CharacterDatabase.CommitTransaction(trans);
+
             SendTabChanged(player, bank, 0);
-            LogBankEvent(bank, GUILD_BANK_LOG_WITHDRAW_MONEY, 0, player, withdraw.Money, 0);
+            LogBankEvent(bank, GUILD_BANK_LOG_WITHDRAW_MONEY, 0, player, amount, 0);
             sScriptMgr->OnPlayerBankWithdraw(player, bank.OwnerKind == OWNER_REALM
                 ? AscensionPersonalBank::REALM : AscensionPersonalBank::PERSONAL);
         });
@@ -901,8 +939,11 @@ void HandleBuyTab(Player* player, OpenBank& bank, WorldPacket const& packet)
             if (!price || !player->HasEnoughMoney(price))
                 return;
 
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
             player->ModifyMoney(-int32(price));
-            StoreTab(bank, bank.Tabs);
+            player->SaveGoldToDB(trans);
+            StoreTab(trans, bank, bank.Tabs);
+            CharacterDatabase.CommitTransaction(trans);
             ++bank.Tabs;
 
             SendBankData(player, bank, bank.OwnerKind == OWNER_REALM ? AscensionPersonalBank::REALM
@@ -928,7 +969,9 @@ void HandleUpdateTab(Player* player, OpenBank& bank, WorldPacket const& packet)
 
             bank.TabName[uint8(update.BankTab)] = std::string(update.Name);
             bank.TabIcon[uint8(update.BankTab)] = std::string(update.Icon);
-            StoreTab(bank, uint8(update.BankTab));
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            StoreTab(trans, bank, uint8(update.BankTab));
+            CharacterDatabase.CommitTransaction(trans);
             SendTabList(player, bank, 0, SEND_ALL_SLOTS);
         });
 }
@@ -962,7 +1005,9 @@ void HandleSetTabText(Player* player, OpenBank& bank, WorldPacket const& packet)
                 return;
 
             bank.TabText[uint8(set.Tab)] = std::string(set.TabText);
-            StoreTab(bank, uint8(set.Tab));
+            CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+            StoreTab(trans, bank, uint8(set.Tab));
+            CharacterDatabase.CommitTransaction(trans);
 
             SendTabText(player, bank, uint8(set.Tab));
         });
@@ -1032,6 +1077,56 @@ void HandleWithdrawAllowanceQuery(Player* player, OpenBank&, WorldPacket const& 
             player->GetSession()->SendPacket(result.Write());
         });
 }
+
+bool AddTabInTransaction(CharacterDatabaseTransaction trans, Player* player, uint8 kind)
+{
+    if (!player)
+        return false;
+
+    uint8 const ownerKind = kind == AscensionPersonalBank::REALM ? OWNER_REALM : OWNER_CHARACTER;
+    uint64 const ownerId = BankOwnerId(player, kind);
+
+    auto itr = openBanks.find(player->GetGUID().GetCounter());
+    bool const isOpen = itr != openBanks.end() && itr->second.OwnerKind == ownerKind &&
+                        itr->second.OwnerId == ownerId;
+
+    uint8 tabs = 1;
+    if (isOpen)
+    {
+        tabs = itr->second.Tabs;
+    }
+    else
+    {
+        QueryResult rows = CharacterDatabase.Query(
+            "SELECT MAX(tab_index) FROM mod_ascension_bank_tab WHERE owner_kind = {} AND owner_id = {}",
+            ownerKind, ownerId);
+        if (rows)
+        {
+            Field* field = rows->Fetch();
+            if (!field[0].IsNull())
+                tabs = std::max<uint8>(tabs, field[0].Get<uint8>() + 1);
+        }
+    }
+
+    if (tabs >= BANK_TABS)
+        return false;
+
+    OpenBank owner;
+    owner.OwnerKind = ownerKind;
+    owner.OwnerId = ownerId;
+    StoreTab(trans, owner, tabs);
+
+    if (isOpen)
+    {
+        itr->second.Tabs = tabs + 1;
+        SendBankData(player, itr->second, kind, true);
+    }
+
+    LOG_INFO("coa", "{} bank: {} unlocked tab {} with a voucher (owner {} id {})",
+             kind == AscensionPersonalBank::REALM ? "Realm" : "Personal", player->GetName(), tabs,
+             uint32(ownerKind), ownerId);
+    return true;
+}
 }
 
 namespace AscensionPersonalBank
@@ -1050,6 +1145,26 @@ bool CanAccess(Player* player, uint8 kind)
         if (!guard(player, kind))
             return false;
     return true;
+}
+
+std::vector<StoredItem> StoredItems(Player const* player)
+{
+    std::vector<StoredItem> stored;
+    CharacterDatabasePreparedStatement* stmt = CharacterDatabase.GetPreparedStatement(CHAR_SEL_ASCENSION_BANK_STORED_ITEMS);
+    stmt->SetData(0, OWNER_CHARACTER);
+    stmt->SetData(1, BankOwnerId(player, PERSONAL));
+    stmt->SetData(2, OWNER_REALM);
+    stmt->SetData(3, BankOwnerId(player, REALM));
+    PreparedQueryResult result = CharacterDatabase.Query(stmt);
+    if (!result)
+        return stored;
+
+    do
+    {
+        Field* fields = result->Fetch();
+        stored.push_back({fields[0].Get<uint32>(), (fields[1].Get<uint32>() & ITEM_FIELD_FLAG_SOULBOUND) != 0});
+    } while (result->NextRow());
+    return stored;
 }
 
 void SendKindHint(Player* player, uint8 kind)
@@ -1173,50 +1288,11 @@ void Closed(Player* player)
 
 bool AddTab(Player* player, uint8 kind)
 {
-    if (!player)
+    CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+    if (!AddTabInTransaction(trans, player, kind))
         return false;
 
-    uint8 const ownerKind = kind == REALM ? OWNER_REALM : OWNER_CHARACTER;
-    uint64 const ownerId = BankOwnerId(player, kind);
-
-    auto itr = openBanks.find(player->GetGUID().GetCounter());
-    bool const isOpen = itr != openBanks.end() && itr->second.OwnerKind == ownerKind &&
-                        itr->second.OwnerId == ownerId;
-
-    uint8 tabs = 1;
-    if (isOpen)
-    {
-        tabs = itr->second.Tabs;
-    }
-    else
-    {
-        QueryResult rows = CharacterDatabase.Query(
-            "SELECT MAX(tab_index) FROM mod_ascension_bank_tab WHERE owner_kind = {} AND owner_id = {}",
-            ownerKind, ownerId);
-        if (rows)
-        {
-            Field* field = rows->Fetch();
-            if (!field[0].IsNull())
-                tabs = std::max<uint8>(tabs, field[0].Get<uint8>() + 1);
-        }
-    }
-
-    if (tabs >= BANK_TABS)
-        return false;
-
-    OpenBank owner;
-    owner.OwnerKind = ownerKind;
-    owner.OwnerId = ownerId;
-    StoreTab(owner, tabs);
-
-    if (isOpen)
-    {
-        itr->second.Tabs = tabs + 1;
-        SendBankData(player, itr->second, kind, true);
-    }
-
-    LOG_INFO("coa", "{} bank: {} unlocked tab {} with a voucher (owner {} id {})",
-             kind == REALM ? "Realm" : "Personal", player->GetName(), tabs, uint32(ownerKind), ownerId);
+    CharacterDatabase.CommitTransaction(trans);
     return true;
 }
 }
@@ -1266,18 +1342,21 @@ public:
         if (!AscensionPersonalBank::CanAccess(player, kind))
             return true;
 
-        if (!AscensionPersonalBank::AddTab(player, kind))
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        if (!AddTabInTransaction(trans, player, kind))
         {
             ChatHandler(player->GetSession())
                 .PSendSysMessage("Your {} already owns every tab.", which);
             return true;
         }
 
-        ChatHandler(player->GetSession())
-            .PSendSysMessage("A new tab has been unlocked in your {}.", which);
-
         uint32 count = 1;
         player->DestroyItemCount(item, count, true);
+        player->SaveInventoryAndGoldToDB(trans);
+        CharacterDatabase.CommitTransaction(trans);
+
+        ChatHandler(player->GetSession())
+            .PSendSysMessage("A new tab has been unlocked in your {}.", which);
         return true;
     }
 };

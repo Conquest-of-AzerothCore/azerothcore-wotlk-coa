@@ -1,0 +1,77 @@
+{
+  "schema": 1,
+  "name": "Swarm of Flies refreshes ranked Taldaram's Torment on Bloodbolt (#13499)",
+  "contract": "Swarm of Flies 704646 procs Spread Taldarams 704647 on Bloodbolt damage (rev_20260918_33). 704647 effect 1 is SPELL_EFFECT_ASCENSION_REFRESH_AURA (173) with MiscValue 800772 (Taldaram's Torment Rank 1, spell_ranks chain 800772, 802568-802573, 802580) and BasePoints 14999 + DieSides 1 = 15000 ms. Spell::EffectAscensionRefreshAura previously used exact target->GetAura(effect.MiscValue), so only Rank 1 (800772) was refreshed and Ranks 2-8 were ignored. At the reported level 38, casting Taldaram's Torment Rank 5 (802571), letting 5 s elapse, and landing Bloodbolt Rank 5 (806931) must refresh 802571 back toward 15 s (at least +4000 ms over the pre-Bloodbolt snapshot).",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "bloodmage",
+      "race": 1,
+      "class": 20,
+      "level": 38,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "bloodmage",
+      "entry": 36,
+      "level": 38,
+      "health": 500000,
+      "distance": 10,
+      "reaction": 0,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and spawn settle", "ms": 3000 },
+    { "action": "learn", "actor": "bloodmage", "spell": 704646 },
+    { "action": "learn", "actor": "bloodmage", "spell": 802571 },
+    { "action": "learn", "actor": "bloodmage", "spell": 806931 },
+    { "action": "cast", "actor": "bloodmage", "spell": 802571, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: Taldaram's Torment Rank 5 is applied",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 802571,
+      "caster": "bloodmage",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let Taldaram's Torment decay for 5 s", "ms": 5000 },
+    {
+      "action": "snapshot",
+      "label": "Taldaram's Torment Rank 5 duration before Bloodbolt",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 802571,
+      "caster": "bloodmage",
+      "save_as": "duration_before"
+    },
+    { "action": "set_power", "actor": "bloodmage", "power": 1, "value": 1000 },
+    { "action": "cast", "actor": "bloodmage", "spell": 806931, "target": "dummy" },
+    {
+      "action": "assert",
+      "label": "SETUP: Bloodbolt Rank 5 lands damage",
+      "actor": "bloodmage",
+      "metric": "spell_damage_count",
+      "spell": 806931,
+      "target": "dummy",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodbolt refreshes Taldaram's Torment Rank 5 duration",
+      "actor": "dummy",
+      "metric": "aura_duration_ms",
+      "spell": 802571,
+      "caster": "bloodmage",
+      "relative_to": "duration_before",
+      "min": 4000,
+      "within_ms": 3000
+    }
+  ]
+}

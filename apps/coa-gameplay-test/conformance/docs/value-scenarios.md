@@ -13,7 +13,7 @@ stats, since the value depends on them. The scenario learns the rank, then measu
 | `effect_value` of another spell | `spell_effect_value` of the effect of the token's first `$<id>sN`/`$<id>mN`, `model` `{'effect_spell': id, 'effect': n}` | the tooltip token, label `<rank> effect_value <id>e<n> #<ordinal>` |
 | `max_stacks` | `spell_max_stacks` of spell `<id>` of a `$<id>u` token, `model` `{'effect_spell': id}` | `StackAmount` of that spell, compared exactly |
 | `spell_duration` | `spell_duration_ms` of spell `<id>` of a `$<id>d` token, `model` `{'effect_spell': id}`, label `<rank> spell_duration <id> #<ordinal>` | the token: `Duration` of that spell, capped by `MaxDuration` |
-| `power_cost` | `spell_power_cost` before any cast | `ManaCost` divided by the client display divisor of the power type (1, 10 rage and runic power, 1000 happiness) |
+| `power_cost` | `spell_power_cost` (`SpellInfo::CalcPowerCost`, before any cast; not power actually spent in a cast) | `ManaCost` (or, under `"base_mana_power_cost": true`, ADR 1318, `ManaCost + floor(base_mana.value * ManaCostPercentage / 100)` for `PowerType == 0` and `ManaCost + floor(base_health.value * ManaCostPercentage / 100)` for `PowerType == 4294967294` `POWER_HEALTH` when `base_health` is set, where `base_mana`/`base_health` is the server's create mana/health from `player_class_stats` — proving that `ManaCostPercentage` is applied in `CalcPowerCost`, not that the base mana/health table value itself is right) divided by the client display divisor of the power type (1, 10 rage and runic power, 1000 happiness) |
 | `cooldown_ms` | `cooldown_ms` right after the cast | `max(RecoveryTime, CategoryRecoveryTime)`, as the client tooltip |
 | `aura_amount` | `aura_amount` of the effect after the cast | the same tooltip token as `effect_value`, for an effect that applies an aura |
 | `aura_duration_ms` | `aura_duration_ms` after the cast | the `$d` token of the rank, for an instant spell that applies an aura |
@@ -45,17 +45,26 @@ referenced spell, so its `$sN`, `$u` and `$d` are checked as tokens of another s
 spell's points.
 
 The cast, when a cooldown or an aura is measured, targets the fixture creature `dummy` (entry 36) when an active
-effect has an enemy target (implicit targets 2, 6, 15, 16, 24), a fixture ally player `ally` when an active effect
+effect has an enemy target (implicit targets 2, 6, 15, 16, 24) — placed at `values.cast_distance`, which defaults to
+3 yd for non-ranged ranges (`SpellRange.Flags != 2`) and uses `(RangeMin[0] + RangeMax[0]) / 2` when `RangeMin[0] > 0`
+and the class file sets `"honour_min_range": true` (ADR 1316) — a fixture ally player `ally` when an active effect
 is a resurrection (`SPELL_EFFECT_RESURRECT` 18 or `SPELL_EFFECT_RESURRECT_NEW` 113, `targets_resurrect`) — the ally
 is killed with a `die` step right before the cast, since `TARGET_FLAG_CORPSE_ALLY` needs a dead friendly unit, not
-a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — and the caster otherwise; an aura
+a living one (Templar: Spiritual Ascension 500688/500757/500758/500759/500760) — or when the rank is listed in
+`value_ally_casts` (ADR 1232, grouping `caster` and `ally` when an active effect uses `TARGET_UNIT_TARGET_RAID` 57,
+and reading ally/raid-targeted aura metrics on `ally`), and the caster otherwise; an aura
 whose target is the caster is read on the caster. A cost in a power other than mana is set to its cost before the
-cast. A rank whose
+cast. A cost paid from health (PowerType -2, read as 4294967294) writes no `set_power`: a `SETUP:` assertion checks
+that the caster's health is above the cost instead, since the server refuses the cast at health equal to or below it
+(`Spell.cpp` `CheckPower`), and every generator that pays a cost goes through `values.pay_power_steps` (ADR 1246).
+A rank whose
 record names a `CasterAuraSpell` gets that aura as a one-stack fixture (`set_aura`) right before the cast: without it
 the server refuses the cast with `SPELL_FAILED_CASTER_AURASTATE` (22, `Spell.cpp:5930`). Templar: Oath Chain 704576
 for Righteous Upheaval, Blade of Faith, Righteous Tempest and Reckoning; Recently Parried or Dodged 681170, a dummy
-aura, for Sacred Swing. Two diagnostic measurements ride along without an `Expectation`: `<rank> cast_failure` and
-`<rank> aura_present`.
+aura, for Sacred Swing. A class file's `cast_auras` (`{spell, auras, reason}`) sets additional precondition auras on
+the caster right before each cast in both value and hit scenarios; each element of `auras` is either a positive spell
+id (1 stack) or a `[spell, stacks]` pair for stack-counted backing resources (ADR 1319). Two diagnostic measurements
+ride along without an `Expectation`: `<rank> cast_failure` and `<rank> aura_present`.
 The remaining aura duration is read in the cast step's own tick: measured 12 to 15 ms below the record on instants.
 `cooldown_ms` is the remaining cooldown, measured 6 ms below the record right after the cast.
 A rank whose record names a `TargetAuraState` gets a health fixture on its hostile target before the cast
@@ -72,7 +81,8 @@ Necromancer: Glacial Impact 704355 (frozen), Death's Due 808016 (below 20%).
 A value that cannot be compared is never dropped; its `rule` starts with a stable prefix:
 `unreadable: <entry>` for a part the reader could not evaluate (the scenario measures the spell's first active effect
 beside it, which is not the token's own effect),
-`unreadable: ManaCostPercentage ...` or `unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give,
+`unreadable: ManaCostPercentage ...` (when `base_mana_power_cost` is not enabled, or when `PowerType` has no recorded base power: neither mana nor `POWER_HEALTH` with `base_health`) or
+`unreadable: ManaCostPerlevel ...` for a cost the DBC alone does not give,
 `generic: tooltip has no $ token to check (prose-only effect; see README "Tooltip reading")` for an empty readout
 (an `unreadable: tooltip without value` row before this item; never a number either way, so classified `unmodelled`
 rather than left for the reader to keep re-investigating),
@@ -82,7 +92,9 @@ rather than left for the reader to keep re-investigating),
 the hit scenario, a chance token, an aura of a passive or cast-time spell, a foreign amplitude or an amplitude of a
 passive effect, another spell's effect or radius that `Spell.dbc` does not define or that `disabled_foreign_effects`
 names, which `spell_effect_value`/`spell_effect_radius` refuse). A class file's `removed_own_effects` (ADR 0364) keeps an effect a class contract removes from being the
-rank's first effect for its unreadable tokens (Runic Harvest 562210-562213, effect 0). Only `unmeasurable` expectations may lack a
+rank's first effect for its unreadable tokens (Runic Harvest 562210-562213, effect 0); since ADR 1140 an own
+`$aN` of such an effect is `unmeasurable` and an own `$d` skips it when it picks the aura (Voodoo Cauldron 804684,
+effect 2). Only `unmeasurable` expectations may lack a
 measurement step. The rank's own radius (`$aN`), own period (`$tN`/`$TN` after an instant cast) and own stack count
 (`$u`) are measured, through `spell_effect_radius`, `aura_amplitude_ms` and `spell_max_stacks`; `$i`
 (`MaxAffectedTargets`) still has no no-combat metric.
@@ -102,6 +114,16 @@ citing the DBC trigger effect or the script that applies it) lists the pairs thi
 test player reached by its own reset-cooldown-and-recast sequence, chosen by whether the rank's own effects target
 `TARGET_UNIT_TARGET_ALLY` (`targets_ally`). Only the listed pairs get this extra check, so an uninvestigated
 `foreign_duration` match elsewhere in the class is unaffected (ADR 0051).
+A foreign effect token that totals a periodic effect over its ticks (the periodic probe of
+[tooltip-reading.md](tooltip-reading.md) re-reads the rank's whole tooltip at the token's ordinal, so a token of an
+`@s:` expansion keeps its expansion's `$d`, `$T1` and `$m1`) goes to the hit scenario as a periodic total; any other
+non-empty probe reason on a foreign token makes it `unmeasurable`, never one tick compared with the total. A class
+file's `per_tick_foreign_totals` (`{spell, effect, reason}`, ADR 1248) keeps a listed total as a no-combat
+`effect_value` instead: the step reads `spell_effect_value` (one tick), the model carries `ticks` (duration over
+amplitude) and `compare` expects the token divided by it, with the total's flat band divided by it too, so
+one point off per tick alerts. A listed effect whose points roll, or whose token is not a
+total over its ticks, stops generation. Felsworn lists Felstrike 802678 effect 0: Malice of Gul'dan 800214 and Fel
+Apprentice 92088 show `${($d*1000/$T1)*($m1+0+$SP*.05)}`, 54 over six ticks at SP 0, judged as 9 per tick.
 An aura that `SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS` (190) applies reaches the caster's summons only, never the
 caster. A class file's `summon_aura_carriers` (`{spell, entry, summon, learn, reason}`, ADR 0697) names a summon for
 such a rank: `value_scenario` learns `learn` and `summon`, casts `summon` (at the dummy when it is hostile), requires

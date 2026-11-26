@@ -15,13 +15,15 @@ namespace ManastormModuleConfig
     bool Enabled();
     uint8 AffixMinimumLevel();
     double ExperienceRate();
+    bool PrestigeExperienceEnabled();
+    uint32 PrestigeExperienceBonusPercent();
+    bool ExperienceBonusControlEnabled();
     bool WeeklyCacheLockoutEnabled();
     uint32 WeeklyCacheLockoutLimit();
     bool CoALootModeEnabled();
     bool CoAFirstClearEnabled();
     bool CoARepeatEnabled();
     bool CoAFirstClearResetsWithWindow();
-    uint32 CoATokenCap();
     uint32 CoATokenWindowSeconds();
     ManastormClientMode ClientMode();
     bool IsReconstructedClientMode();

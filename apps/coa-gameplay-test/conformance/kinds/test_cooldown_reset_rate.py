@@ -145,3 +145,215 @@ class CooldownResetRatePooledTests(unittest.TestCase):
         self.assertNotIn('yd from the caster', plain['contract'])
         with self.assertRaises(ValueError):
             behaviour_scenario(load_fixture_class_file(23), {**ENTRY, 'dummy_distance': 0})
+
+
+BASE_MANA = {'power': 0, 'value': 1500, 'source': 'seeded base mana'}
+RESIDUAL = {'residual_target': 0.001, 'min_detectable': 5}
+
+
+def with_base_mana():
+    return {**load_fixture_class_file(23), 'base_mana': BASE_MANA}
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class CooldownResetRateResidualTests(unittest.TestCase):
+    def judged(self, resets: float, entry: dict):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        reads = expectation.model['reads']
+        values = {reads['control hits']: 200.0, reads['control resets']: 0.0,
+                  reads['treatment hits']: 3500.0, reads['treatment resets']: resets}
+        return expectation, judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_the_residual_judges_at_its_confidence_and_states_its_probabilities(self):
+        expectation, verdict = self.judged(165.0, {**ENTRY, **RESIDUAL})
+        self.assertEqual(expectation.model['residual']['confidence'], 0.9995)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('Wilson 0.9995 interval', verdict.explanation)
+        self.assertIn('residual_target 0.001 per pair', verdict.explanation)
+
+    def test_a_rate_five_points_off_alerts_under_the_residual(self):
+        self.assertEqual(self.judged(330.0, {**ENTRY, **RESIDUAL})[1].status, 'alert')
+
+    def test_without_the_residual_fields_the_model_and_text_are_unchanged(self):
+        expectation, verdict = self.judged(165.0, ENTRY)
+        self.assertNotIn('residual', expectation.model)
+        self.assertIn('Wilson 99% interval', verdict.explanation)
+        scenario, _ = behaviour_scenario(load_fixture_class_file(23), ENTRY)
+        self.assertNotIn('residual_target', scenario['contract'])
+
+    def test_a_min_detectable_inside_the_band_is_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(load_fixture_class_file(23), {**ENTRY, 'residual_target': 0.001, 'min_detectable': 1})
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class CooldownResetRateFixtureResetTests(unittest.TestCase):
+    SELF_RESET = {**ENTRY, 'reset_spell': 500237, 'casts': 3200, 'control_casts': 10, 'reset_between_attempts': True,
+                  'trial_casts': True}
+    PERCENT_COST = {**ENTRY, 'trigger_spell': PERCENT_COST_TRIGGER, 'reset_spell': PERCENT_COST_TRIGGER,
+                    'casts': 1600, 'control_casts': 10, 'parts': 2, 'reset_between_attempts': True,
+                    'base_mana_per_attempt': True}
+
+    def judged(self, control_packets: float, treatment_packets: float):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.SELF_RESET)
+        reads = expectation.model['reads']
+        values = {reads['control hits']: 10.0, reads['control resets']: control_packets,
+                  reads['treatment hits']: 3210.0, reads['treatment resets']: control_packets + treatment_packets}
+        return judge_behaviour(base_verdict(expectation), FakeRun(values), expectation)
+
+    def test_each_cast_is_preceded_by_a_cooldown_reset_and_casts_are_the_trials(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.SELF_RESET)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts), 3210)
+        self.assertTrue(all(steps[index - 1] == {'action': 'reset_cooldown', 'actor': 'caster', 'spell': 500237}
+                            for index in casts))
+        trials = [step for step in steps if step.get('label', '').endswith(' hits')]
+        self.assertEqual({step['metric'] for step in trials}, {'spell_cast_count'})
+        self.assertEqual(expectation.model['fixture_resets'], {'control': 10, 'treatment': 3200})
+        self.assertIn('exactly one packet per fixture reset', scenario['contract'])
+
+    def test_base_mana_is_set_before_every_cast_of_a_percent_cost_trigger(self):
+        scenario, _ = behaviour_scenario(with_base_mana(), self.PERCENT_COST)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        casts = [index for index, step in enumerate(steps) if step['action'] == 'cast']
+        self.assertEqual(len(casts), 1610)
+        self.assertTrue(all(steps[index - 2] == {'action': 'set_power', 'actor': 'caster', 'power': 0, 'value': 1500}
+                            and steps[index - 1]['action'] == 'reset_cooldown' for index in casts))
+        self.assertIn('set to the base mana before each cast', scenario['contract'])
+
+    def test_the_fixture_packets_are_subtracted_from_the_resets(self):
+        verdict = self.judged(10.0, 3200.0 + 160.0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual((verdict.detail['resets'], verdict.detail['hits']), (160.0, 3200.0))
+
+    def test_mutant_a_reset_rate_off_the_band_alerts(self):
+        self.assertEqual(self.judged(10.0, 3200.0 + 640.0).status, 'alert')
+
+    def test_a_control_without_one_packet_per_fixture_alerts(self):
+        for control in (0.0, 9.0, 11.0):
+            with self.subTest(control=control):
+                verdict = self.judged(control, 3200.0 + 160.0)
+                self.assertEqual(verdict.status, 'alert')
+                self.assertIn('not 1:1', verdict.explanation)
+
+    def test_base_mana_is_refused_on_a_trigger_without_a_percent_cost(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(with_base_mana(), {**ENTRY, 'base_mana_per_attempt': True})
+
+    def test_a_percent_cost_trigger_without_base_mana_stays_refused(self):
+        with self.assertRaises(ValueError):
+            behaviour_scenario(with_base_mana(), {**self.PERCENT_COST, 'base_mana_per_attempt': False})
+
+    def test_a_reset_of_another_spell_than_the_counted_row_is_no_offset(self):
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), {**self.SELF_RESET, 'reset_spell': 533236})
+        self.assertNotIn('fixture_resets', expectation.model)
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'server DBC set not found at {DBC_DIR}')
+class CooldownResetRateTwoRateTests(unittest.TestCase):
+    BASE_PASSIVE = 300313
+    TWO_RATE = {**ENTRY, 'base_learn': [BASE_PASSIVE], 'control_chance_pct': 6, 'chance_pct': 16,
+                'control_casts': 1000, 'casts': 2200, 'parts': 9, 'residual_target': 0.001, 'min_detectable': 4}
+    COND_AURAS_CTRL = [{'spell': 500706, 'stacks': 40, 'source': 'seeded at threshold'}]
+    COND_AURAS_TREAT = [{'spell': 500706, 'stacks': 41, 'source': 'seeded above threshold'}]
+    CONDITION = {**TWO_RATE, 'base_learn': [BASE_PASSIVE, ENTRY['talent']],
+                 'control_attempt_auras': COND_AURAS_CTRL, 'attempt_auras': COND_AURAS_TREAT}
+
+    def pooled(self, entry: dict, ctrl_resets: float, treat_resets: float,
+               ctrl_hits: float = 1000.0, treat_hits: float = 2200.0):
+        from kinds.cooldown_reset_rate import POOLED_JUDGE
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), entry)
+        reads = expectation.model['reads']
+        runs = [FakeRun({reads['control hits']: ctrl_hits, reads['control resets']: ctrl_resets,
+                         reads['treatment hits']: ctrl_hits + treat_hits,
+                         reads['treatment resets']: ctrl_resets + treat_resets})
+                for _ in range(entry['parts'])]
+        return expectation, POOLED_JUDGE(base_verdict(expectation), runs, expectation.model)
+
+    def test_two_rate_learned_contrast_learns_base_before_control_and_judges_both_arms(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.TWO_RATE)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        learns = [(index, step['spell']) for index, step in enumerate(steps) if step['action'] == 'learn']
+        ctrl_read = next(index for index, step in enumerate(steps)
+                         if step.get('label') == expectation.model['reads']['control resets'])
+        base_idx = next(index for index, spell in learns if spell == self.BASE_PASSIVE)
+        talent_idx = next(index for index, spell in learns if spell == ENTRY['talent'])
+        self.assertLess(base_idx, ctrl_read)
+        self.assertLess(ctrl_read, talent_idx)
+        self.assertEqual(expectation.model['control_chance_pct'], 6.0)
+        self.assertAlmostEqual(expectation.model['residual']['confidence'], 0.99975)
+        self.assertAlmostEqual(expectation.model['pair_residual_target'], 0.001)
+        self.assertIn('Combined residual_target 0.001 per pair across both arms', scenario['contract'])
+        _, verdict = self.pooled(self.TWO_RATE, 60.0, 352.0)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertAlmostEqual(verdict.detail['control_rate'], 0.06, places=4)
+        self.assertAlmostEqual(verdict.detail['delta'], 0.10, places=4)
+
+    def test_two_rate_condition_contrast_learns_talent_before_control_and_swaps_auras(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.CONDITION)
+        run.validate(scenario, run.SIMULATED_CLOCK)
+        steps = scenario['steps']
+        talent_learns = [index for index, step in enumerate(steps)
+                         if step['action'] == 'learn' and step['spell'] == ENTRY['talent']]
+        ctrl_read = next(index for index, step in enumerate(steps)
+                         if step.get('label') == expectation.model['reads']['control resets'])
+        self.assertEqual(len(talent_learns), 1)
+        self.assertLess(talent_learns[0], ctrl_read)
+        ctrl_stacks = {step['stacks'] for step in steps[:ctrl_read]
+                       if step['action'] == 'set_aura' and step['spell'] == 500706}
+        treat_stacks = {step['stacks'] for step in steps[ctrl_read:]
+                        if step['action'] == 'set_aura' and step['spell'] == 500706}
+        self.assertEqual((ctrl_stacks, treat_stacks), ({40}, {41}))
+        _, verdict = self.pooled(self.CONDITION, 60.0, 352.0)
+        self.assertEqual(verdict.status, 'ok')
+
+    def test_mutant_control_or_treatment_rate_off_band_alerts(self):
+        for label, ctrl, treat in (('no_bonus_mutant', 60.0, 132.0), ('control_leaked_mutant', 160.0, 352.0),
+                                   ('zero_control_mutant', 0.0, 352.0), ('both_high_mutant', 160.0, 132.0)):
+            with self.subTest(case=label):
+                _, verdict = self.pooled(self.TWO_RATE, ctrl, treat)
+                self.assertEqual(verdict.status, 'alert')
+
+    def test_missing_read_is_unmeasured_and_short_control_or_treatment_is_insufficient(self):
+        from kinds.cooldown_reset_rate import POOLED_JUDGE
+        _, [expectation] = behaviour_scenario(load_fixture_class_file(23), self.TWO_RATE)
+        reads = expectation.model['reads']
+        missing = POOLED_JUDGE(base_verdict(expectation), [FakeRun({reads['control hits']: 1000.0})],
+                               expectation.model)
+        self.assertEqual(missing.status, 'unmeasured')
+        _, short_ctrl = self.pooled(self.TWO_RATE, 30.0, 352.0, ctrl_hits=500.0, treat_hits=2200.0)
+        self.assertEqual(short_ctrl.status, 'insufficient_trials')
+        _, short_treat = self.pooled(self.TWO_RATE, 60.0, 160.0, ctrl_hits=1000.0, treat_hits=1000.0)
+        self.assertEqual(short_treat.status, 'insufficient_trials')
+
+    def test_refuses_malformed_overlapping_undersized_or_confounded_two_rate_specs(self):
+        bad = [
+            {**self.TWO_RATE, 'base_learn': None},
+            {**self.TWO_RATE, 'base_learn': []},
+            {**self.TWO_RATE, 'base_learn': [self.BASE_PASSIVE, self.BASE_PASSIVE]},
+            {**self.TWO_RATE, 'base_learn': [ENTRY['trigger_spell']]},
+            {**self.TWO_RATE, 'base_learn': [ENTRY['reset_spell']]},
+            {**self.TWO_RATE, 'control_chance_pct': 0},
+            {**self.TWO_RATE, 'control_chance_pct': 100},
+            {**self.TWO_RATE, 'control_chance_pct': True},
+            {**self.TWO_RATE, 'control_chance_pct': 13, 'chance_pct': 16},
+            {**self.TWO_RATE, 'control_casts': 100},
+            {**self.TWO_RATE, 'control_attempt_auras': self.COND_AURAS_CTRL},
+            {**self.CONDITION, 'control_attempt_auras': self.COND_AURAS_TREAT},
+            {**self.CONDITION, 'control_attempt_auras': None},
+            {**ENTRY, 'control_attempt_auras': self.COND_AURAS_CTRL},
+            {**ENTRY, 'base_learn': [ENTRY['talent']]},
+        ]
+        for entry in bad:
+            with self.subTest(entry=entry), self.assertRaises(ValueError):
+                behaviour_scenario(load_fixture_class_file(23), entry)
+
+    def test_without_two_rate_fields_single_rate_model_and_contract_stay_unchanged(self):
+        scenario, [expectation] = behaviour_scenario(load_fixture_class_file(23), ENTRY)
+        self.assertNotIn('control_chance_pct', expectation.model)
+        self.assertNotIn('control_minimum_trials', expectation.model)
+        self.assertNotIn('disjoint G-20', scenario['contract'])

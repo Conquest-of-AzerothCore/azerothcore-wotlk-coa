@@ -1,9 +1,13 @@
+from pathlib import Path
+import sys
 import unittest
 
 from behaviours import behaviour_scenario
 from compare import Verdict, judge_behaviour
 from periodic_dispel_party import party_pulse_spec, period_bracket
 from profile import DBC_DIR, load_fixture_class_file
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
 from values import Expectation
 

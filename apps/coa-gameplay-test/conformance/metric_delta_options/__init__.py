@@ -19,6 +19,11 @@ def parsed_options(entry: dict) -> tuple[tuple[str, object], ...]:
                  if entry.get(module.NAME) is not None)
 
 
+def forbids_expected(entry: dict) -> bool:
+    return any(getattr(module, 'FORBIDS_EXPECTED', False) and entry.get(module.NAME) is not None
+               for module in option_modules())
+
+
 def checked_options(spec):
     present = dict(spec.options)
     for module in option_modules():
@@ -39,6 +44,12 @@ def option_phase_steps(spec, after: bool) -> list[dict]:
             for step in module.phase_steps(spec, present[module.NAME], after)]
 
 
+def option_attack_phase_steps(spec, after: bool) -> list[dict]:
+    present = dict(spec.options)
+    return [step for module in option_modules() if module.NAME in present and hasattr(module, 'attack_phase_steps')
+            for step in module.attack_phase_steps(spec, present[module.NAME], after)]
+
+
 def option_model(spec) -> dict:
     present = dict(spec.options)
     return {key: value for module in option_modules() if module.NAME in present and hasattr(module, 'model')
@@ -49,6 +60,12 @@ def option_setup_cast_steps(spec, index: int, after: bool) -> list[dict]:
     present = dict(spec.options)
     return [step for module in option_modules() if module.NAME in present and hasattr(module, 'setup_cast_steps')
             for step in module.setup_cast_steps(spec, present[module.NAME], index, after)]
+
+
+def option_setup_cast_target(spec, index: int) -> str | None:
+    present = dict(spec.options)
+    return next((module.setup_cast_target(spec, present[module.NAME], index) for module in option_modules()
+                 if module.NAME in present and hasattr(module, 'setup_cast_target')), None)
 
 
 def option_after_trigger_steps(spec, after: bool) -> list[dict]:

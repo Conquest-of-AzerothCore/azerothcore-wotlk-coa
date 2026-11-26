@@ -119,6 +119,9 @@ enum Creatures
 
     NPC_MAGMUS = 9938,
 
+    NPC_HIGH_INTERROGATOR_GERSTAHN = 9018,
+    NPC_LORD_ROCCOR                = 9025,
+
     NPC_DREDGE_WORM     = 8925,
     NPC_DEEP_STINGER    = 8926,
     NPC_DARK_SCREECHER  = 8927,

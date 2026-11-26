@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "name": "Runemaster: can equip thrown weapons and keep them across relog (#13503)",
+  "contract": [
+    "Issue #13503: Runemasters (class 32) already learn Throw (2764) at creation, but had no Thrown proficiency",
+    "(spell 2567, skill 176) in CoA baseline/proficiency tables, and SkillRaceClassInfo 233 omitted class 32 so",
+    "_LoadSkills would drop skill 176 on relog and _LoadInventory would mail back an equipped thrown weapon.",
+    "Expected: a level 80 Runemaster knows Thrown (2567) and skill 176, equips Light Throwing Knife (28979) in",
+    "the ranged slot (17), keeps it equipped with no mail after relog, and regains 2567 on login if missing."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "runemaster", "race": 1, "class": 32, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Runemaster knows Thrown proficiency (2567)", "actor": "runemaster",
+      "metric": "knows_spell", "spell": 2567, "equals": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Runemaster has Thrown skill (176)", "actor": "runemaster",
+      "metric": "skill_value", "skill": 176, "min": 1 },
+    { "action": "add_item", "actor": "runemaster", "item": 28979 },
+    { "action": "equip", "label": "Runemaster equips Light Throwing Knife (28979)", "actor": "runemaster", "item": 28979, "slot": 17 },
+    { "action": "assert", "label": "DISCRIMINATING: the thrown weapon is equipped in the ranged slot", "actor": "runemaster",
+      "metric": "equipped_item", "slot": 17, "equals": 28979, "within_ms": 3000 },
+    { "action": "relog", "actor": "runemaster" },
+    { "action": "assert", "label": "DISCRIMINATING: the thrown weapon stays equipped after relog", "actor": "runemaster",
+      "metric": "equipped_item", "slot": 17, "equals": 28979, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: the thrown weapon was not mailed back", "actor": "runemaster",
+      "metric": "mail_has_item", "item": 28979, "equals": 0 },
+    { "action": "assert", "label": "Thrown skill stays after relog", "actor": "runemaster",
+      "metric": "skill_value", "skill": 176, "min": 1 },
+    { "action": "unlearn", "label": "simulate existing Runemaster without Thrown", "actor": "runemaster", "spell": 2567 },
+    { "action": "relog", "actor": "runemaster" },
+    { "action": "assert", "label": "Thrown proficiency is restored on login", "actor": "runemaster",
+      "metric": "knows_spell", "spell": 2567, "equals": 1, "within_ms": 10000 }
+  ]
+}

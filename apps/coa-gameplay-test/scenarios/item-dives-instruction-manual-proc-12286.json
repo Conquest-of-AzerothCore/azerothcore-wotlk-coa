@@ -1,0 +1,314 @@
+{
+  "schema": 1,
+  "name": "Dive's Instruction Manual procs on direct damage (#12286)",
+  "contract": [
+    "#12286: Dive's Instruction Manual (proc dummies 304075, 313109, 317109, 321109) never procced. Every dummy",
+    "carries Spell.dbc ProcFlags 0 and the world had no spell_proc row, so SpellMgr::LoadSpellProcs skipped it.",
+    "Tooltip: \"Dealing direct damage\". Flags 69972 (every direct damage source: melee and ranged auto attacks and",
+    "abilities, and harmful spells) as the merged T1 Paladin 6-piece row for \"Dealing damage\". No cooldown in any",
+    "tooltip. spell_proc_chance reads each loaded entry's chance, which equals the record's ProcChance, and",
+    "spell_proc_cooldown_ms reads each loaded cooldown. aura_proc_rate replays the aura's native proc decision,",
+    "including the roll, 40000 times on one synthetic event per check. It procs on a landed melee auto attack, a",
+    "landed melee ability (Heroic Strike 78), a landed ranged auto attack, a landed ranged ability (Arcane Shot",
+    "3044), a landed direct magic spell (Frostbolt 116), at the record's chance; it never procs on a periodic",
+    "Fire tick (Immolate 348), a direct heal (Flash Heal 2061). Before the repair the chance and cooldown lookups",
+    "fail with 'Spell has no proc entry' and every rate reads 0, so the discriminating checks fail instead of",
+    "flaking."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 304075",
+      "actor": "caster",
+      "spell": 304075,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 321109",
+      "actor": "caster",
+      "spell": 321109,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 304075 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 304075,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 321109 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 321109,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 304075 loads the record's 8% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 304075,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 313109 loads the record's 8% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 313109,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 317109 loads the record's 8% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 317109,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 321109 loads the record's 8% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 321109,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 304075 loads no internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 304075,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 313109 loads no internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 313109,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 317109 loads no internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 317109,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 321109 loads no internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 321109,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs 304075 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304075,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee ability (Heroic Strike 78) procs 304075 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304075,
+      "target": "dummy",
+      "trigger_spell": 78,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged auto attack procs 304075 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304075,
+      "target": "dummy",
+      "type_mask": 64,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged ability (Arcane Shot 3044) procs 304075 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304075,
+      "target": "dummy",
+      "trigger_spell": 3044,
+      "type_mask": 256,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed direct magic spell (Frostbolt 116) procs 304075 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304075,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee auto attack procs 321109 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321109,
+      "target": "dummy",
+      "type_mask": 4,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed melee ability (Heroic Strike 78) procs 321109 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321109,
+      "target": "dummy",
+      "trigger_spell": 78,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged auto attack procs 321109 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321109,
+      "target": "dummy",
+      "type_mask": 64,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed ranged ability (Arcane Shot 3044) procs 321109 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321109,
+      "target": "dummy",
+      "trigger_spell": 3044,
+      "type_mask": 256,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed direct magic spell (Frostbolt 116) procs 321109 at 8%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 321109,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 6.5,
+      "max": 9.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic Fire tick (Immolate 348) procs 304075 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304075,
+      "target": "dummy",
+      "trigger_spell": 348,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a direct heal (Flash Heal 2061) procs 304075 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 304075,
+      "target": "caster",
+      "heal": true,
+      "trigger_spell": 2061,
+      "type_mask": 16384,
+      "phase_mask": 2,
+      "spell_type_mask": 2,
+      "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}

@@ -2,7 +2,8 @@ from dataclasses import replace
 import json
 from pathlib import Path
 
-from compare import CONFORMANT, DATA_ONLY, NOT_MEASURED, Verdict, observed, read_verdicts
+from compare import (CLOSED, CONFORMANT, DATA_ONLY, LINKED_FROM, NOT_MEASURED, Verdict, base_roll_references,
+                     linked_references, observed, read_verdicts, resolve_base_roll_links, resolve_linked_statuses)
 from coverage import (BY_METRIC, EVIDENCE, ClauseCoverage, clause_coverage, clause_labels, load_clauses,
                       load_consumption, resolved_labels)
 from values import Expectation
@@ -40,21 +41,66 @@ def hooked_labels(document) -> set[str]:
     return {label for item in document for label in (item['labels'] if isinstance(item, dict) else [item])}
 
 
-def merged_verdicts(runs: list[list[Verdict]]) -> list[Verdict]:
+def selected(verdict: Verdict) -> bool:
+    if verdict.selected is not None:
+        return verdict.selected
+    return verdict.runs is None or bool(verdict.runs)
+
+
+def merged_layers(runs: list[list[Verdict]]) -> list[tuple[int, Verdict]]:
     order, latest = [], {}
-    for run in runs:
+    for index, run in enumerate(runs):
+        earlier = set(latest)
         for verdict in run:
+            if verdict.label in earlier and not selected(verdict):
+                continue
             if verdict.label not in latest:
                 order.append(verdict.label)
-            latest[verdict.label] = verdict
+            latest[verdict.label] = (index, verdict)
     return [latest[label] for label in order]
+
+
+def merged_verdicts(runs: list[list[Verdict]]) -> list[Verdict]:
+    return [verdict for _, verdict in merged_layers(runs)]
+
+
+def recorded_link_status(verdict: Verdict) -> Verdict:
+    if LINKED_FROM in (verdict.detail or {}) or verdict.status != 'closed' or verdict.explanation.startswith(CLOSED):
+        return verdict
+    return replace(verdict, detail={**(verdict.detail or {}), LINKED_FROM: 'unmodelled'})
+
+
+def crossing_labels(verdicts: list[Verdict], origin: dict[str, int], references) -> set[str]:
+    return {verdict.label for verdict in verdicts
+            if any(origin.get(label, origin[verdict.label]) != origin[verdict.label] for label in references(verdict))}
+
+
+def relinked(merged: list[tuple[int, Verdict]]) -> list[Verdict]:
+    origin = {verdict.label: index for index, verdict in merged}
+    verdicts = [verdict for _, verdict in merged]
+    crossing = crossing_labels(verdicts, origin, linked_references)
+    linked = resolve_linked_statuses([recorded_link_status(verdict) if verdict.label in crossing else verdict
+                                      for verdict in verdicts], crossing)
+    return resolve_base_roll_links(linked, crossing_labels(linked, origin, base_roll_references))
+
+
+def layered_labels(layers: list[list[Verdict]]) -> tuple[set[str], set[str]]:
+    seen, taken, skipped = set(), set(), set()
+    for index, layer in enumerate(layers):
+        earlier = set(seen)
+        for verdict in layer:
+            seen.add(verdict.label)
+            if index:
+                (skipped if verdict.label in earlier and not selected(verdict) else taken).add(verdict.label)
+    return taken, skipped
 
 
 def disagreements(runs: list[tuple[str, list[Verdict]]]) -> list[dict]:
     seen = {}
     for name, verdicts in runs:
         for verdict in verdicts:
-            seen.setdefault(verdict.label, []).append((name, verdict))
+            if selected(verdict):
+                seen.setdefault(verdict.label, []).append((name, verdict))
     rows = []
     for label, found in sorted(seen.items()):
         classes = {status_class(verdict) for _, verdict in found}
@@ -99,20 +145,21 @@ def audit_document(class_id: int, ledger: Path, results: list[Path], base_result
     stamps = manifest_stamps(json.loads(Path(manifest).read_text(encoding='utf-8'))) if manifest else {}
     forced = hooked_labels(json.loads(Path(hooked).read_text(encoding='utf-8'))) if hooked else set()
 
+    def hooked_forced(verdicts: list[Verdict]) -> list[Verdict]:
+        return [replace(verdict, status=NOT_MEASURED) if verdict.label in forced else verdict for verdict in verdicts]
+
     def prepared(directory: Path) -> list[Verdict]:
-        verdicts = [stamped(verdict, stamps) for verdict in read_verdicts(directory)[1]]
-        verdicts = [replace(verdict, status=NOT_MEASURED) if verdict.label in forced else verdict
-                    for verdict in verdicts]
+        verdicts = hooked_forced([stamped(verdict, stamps) for verdict in read_verdicts(directory)[1]])
         return [replace(verdict, build=build) for verdict in verdicts] if build else verdicts
 
     base = prepared(base_results) if base_results else []
     runs = [(str(directory), prepared(directory)) for directory in results]
-    verdicts = merged_verdicts([base] + [run for _, run in runs])
+    verdicts = hooked_forced(relinked(merged_layers([base] + [run for _, run in runs])))
     clauses = load_clauses(ledger)
     rows = load_consumption(consumption) if consumption else ()
     result = clause_coverage(clauses, verdicts, build or single_build(verdicts), rows)
     base_labels = {verdict.label for verdict in base}
-    latest = {verdict.label for _, run in runs for verdict in run}
+    latest, skipped = layered_labels([base] + [run for _, run in runs])
     return {'class_id': class_id,
             'inputs': {'ledger': str(ledger), 'results': [name for name, _ in runs],
                        'base_results': str(base_results) if base_results else None,
@@ -120,6 +167,7 @@ def audit_document(class_id: int, ledger: Path, results: list[Path], base_result
                        'consumption': str(consumption) if consumption else None, 'build': build,
                        'result_builds': sorted({str(verdict.build) for _, run in runs for verdict in run})},
             'results_replaced': sorted(latest & base_labels), 'results_added': sorted(latest - base_labels),
+            'results_not_selected': sorted(skipped),
             'results_disagree': disagreements(runs), 'figures': figures(result),
             'no_claim_entries': sum(entry.get('kind') == 'no_claim' for entry in clauses),
             'clauses': clause_rows(result, verdicts),

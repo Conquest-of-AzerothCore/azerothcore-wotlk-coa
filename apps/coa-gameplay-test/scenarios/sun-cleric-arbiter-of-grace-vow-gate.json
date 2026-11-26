@@ -1,0 +1,739 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Arbiter of Grace adds its Glorious Execution mana share only while Vow of Grace is active",
+  "contract": "Arbiter of Grace 301313: 'While Vow of Grace is active, your Glorious Execution now regenerates an additional $807446s3% mana equal to the damage dealt.' ($807446s3 = 15, Vow of Grace 807446 Effect[2] BasePoints 14). Glorious Execution's hits 800691 and 802566 restore mana as 807552: 807451 effect 0 (5% of the damage dealt), plus 807446 effect 2 (15%) while the caster has Arbiter of Grace 301313 and the Vow of Grace aura 803719 (Sun Cleric ADR 0018). Each arm casts Glorious Execution 803913 at its dummy, learns its spell, casts again, and reads the second phase's mana as a ratio of the first: every hit is a critical strike (fixture 984954) with +20000 attack power, so one cast matches the next to within about 1%. Control arm: Vow of Grace cast before both casts, Arbiter of Grace not learned, ratio 1. No Vow arm: Arbiter of Grace learned without Vow of Grace, ratio 1. Vow arm: Arbiter of Grace learned and Vow of Grace cast before both casts, ratio 4 (20% against 5%), band 0.2 (10% off the 15 points gives 3.7 or 4.3). Bands of 0.15 around the ratios of 1.",
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "control",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    },
+    {
+      "id": "no_vow",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    },
+    {
+      "id": "vow",
+      "race": 1,
+      "class": 27,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 20000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control_dummy",
+      "owner": "control",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "no_vow_dummy",
+      "owner": "no_vow",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    },
+    {
+      "id": "vow_dummy",
+      "owner": "vow",
+      "entry": 36,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 707072
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2529
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2529,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "control",
+      "item": 2529
+    },
+    {
+      "action": "equip",
+      "actor": "control",
+      "item": 2529,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "control",
+      "skill": 55,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 803913
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 803719
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803913
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803719,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803913,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "control: the first Glorious Execution restores mana",
+      "actor": "control",
+      "metric": "spell_energize_count",
+      "spell": 807552,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "control: Vow of Grace 803719 is active at the first Glorious Execution",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 803719,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "control",
+      "metric": "spell_energize_total",
+      "spell": 807552,
+      "save_as": "control_first_mana"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "control",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "control",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803913
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "control",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803719,
+      "target": "control"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "control",
+      "spell": 803913,
+      "target": "control_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "control: the second Glorious Execution restores mana",
+      "actor": "control",
+      "metric": "spell_energize_count",
+      "spell": 807552,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "control: Vow of Grace 803719 is active at the second Glorious Execution",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 803719,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING control: Vow of Grace up, Arbiter of Grace not learned, the second mana equals the first",
+      "actor": "control",
+      "metric": "spell_energize_total",
+      "spell": 807552,
+      "relative_to": "control_first_mana",
+      "ratio_to": "control_first_mana",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "learn",
+      "actor": "no_vow",
+      "spell": 707072
+    },
+    {
+      "action": "add_item",
+      "actor": "no_vow",
+      "item": 2529
+    },
+    {
+      "action": "equip",
+      "actor": "no_vow",
+      "item": 2529,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "no_vow",
+      "item": 2529
+    },
+    {
+      "action": "equip",
+      "actor": "no_vow",
+      "item": 2529,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "no_vow",
+      "skill": 55,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "no_vow",
+      "spell": 803913
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "no_vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "no_vow",
+      "spell": 803913
+    },
+    {
+      "action": "cast",
+      "actor": "no_vow",
+      "spell": 803913,
+      "target": "no_vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "no_vow: the first Glorious Execution restores mana",
+      "actor": "no_vow",
+      "metric": "spell_energize_count",
+      "spell": 807552,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "no_vow: Vow of Grace 803719 is not active at the first Glorious Execution",
+      "actor": "no_vow",
+      "metric": "aura",
+      "spell": 803719,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "no_vow",
+      "metric": "spell_energize_total",
+      "spell": 807552,
+      "save_as": "no_vow_first_mana"
+    },
+    {
+      "action": "learn",
+      "actor": "no_vow",
+      "spell": 301313
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "no_vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "no_vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "no_vow",
+      "spell": 803913
+    },
+    {
+      "action": "cast",
+      "actor": "no_vow",
+      "spell": 803913,
+      "target": "no_vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "no_vow: the second Glorious Execution restores mana",
+      "actor": "no_vow",
+      "metric": "spell_energize_count",
+      "spell": 807552,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "no_vow: Vow of Grace 803719 is not active at the second Glorious Execution",
+      "actor": "no_vow",
+      "metric": "aura",
+      "spell": 803719,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "no Vow of Grace: Arbiter of Grace learned adds nothing to the mana",
+      "actor": "no_vow",
+      "metric": "spell_energize_total",
+      "spell": 807552,
+      "relative_to": "no_vow_first_mana",
+      "ratio_to": "no_vow_first_mana",
+      "min": 0.85,
+      "max": 1.15
+    },
+    {
+      "action": "learn",
+      "actor": "vow",
+      "spell": 707072
+    },
+    {
+      "action": "add_item",
+      "actor": "vow",
+      "item": 2529
+    },
+    {
+      "action": "equip",
+      "actor": "vow",
+      "item": 2529,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "vow",
+      "item": 2529
+    },
+    {
+      "action": "equip",
+      "actor": "vow",
+      "item": 2529,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 43,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 94,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 96,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 97,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 498,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "set_skill",
+      "actor": "vow",
+      "skill": 55,
+      "value": 300,
+      "maximum": 300
+    },
+    {
+      "action": "learn",
+      "actor": "vow",
+      "spell": 803913
+    },
+    {
+      "action": "learn",
+      "actor": "vow",
+      "spell": 803719
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 803913
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 803719,
+      "target": "vow"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 803913,
+      "target": "vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "vow: the first Glorious Execution restores mana",
+      "actor": "vow",
+      "metric": "spell_energize_count",
+      "spell": 807552,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "vow: Vow of Grace 803719 is active at the first Glorious Execution",
+      "actor": "vow",
+      "metric": "aura",
+      "spell": 803719,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "actor": "vow",
+      "metric": "spell_energize_total",
+      "spell": 807552,
+      "save_as": "vow_first_mana"
+    },
+    {
+      "action": "learn",
+      "actor": "vow",
+      "spell": 301313
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 984954,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "vow",
+      "spell": 823764,
+      "stacks": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "vow",
+      "power": 0,
+      "value": 1363
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 803913
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "vow",
+      "spell": 803719
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 803719,
+      "target": "vow"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "actor": "vow",
+      "spell": 803913,
+      "target": "vow_dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "vow: the second Glorious Execution restores mana",
+      "actor": "vow",
+      "metric": "spell_energize_count",
+      "spell": 807552,
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "vow: Vow of Grace 803719 is active at the second Glorious Execution",
+      "actor": "vow",
+      "metric": "aura",
+      "spell": 803719,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING Vow of Grace up: Arbiter of Grace adds its 15% share, the second mana is four times the first (20% against 5%)",
+      "actor": "vow",
+      "metric": "spell_energize_total",
+      "spell": 807552,
+      "relative_to": "vow_first_mana",
+      "ratio_to": "vow_first_mana",
+      "min": 3.8,
+      "max": 4.2
+    }
+  ]
+}

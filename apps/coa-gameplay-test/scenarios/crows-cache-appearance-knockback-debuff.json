@@ -1,0 +1,291 @@
+{
+  "schema": 1,
+  "name": "Crow's Cache: players on the spot when it appears are knocked back and take 50% more damage for one minute",
+  "contract": [
+    "When a Crow's Cache chest appears, every living player within 30 yards of the spot is knocked back (one",
+    "SMSG_MOVE_KNOCK_BACK, 22.5 wide and 6 high) and receives Amplify Damage (12248: SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN",
+    "50, all schools, a visible debuff) for 60 seconds instead of its DBC 10 seconds, so sitting on the chest while it",
+    "materializes is punished. A player standing 45 yards away gets neither. The 50% is read from the native incoming",
+    "spell and melee damage calculations against a baseline taken before the cache appears, with the other player as",
+    "the attacker, and is gone again once the debuff expires. The debuff is still present after 15 seconds, past the",
+    "DBC duration, and after 55 seconds, and has ended by 63. The Barrens cache point is used. Requires CrowsCache.Enable=1 and",
+    "Bloodforged.Enable=1 with released Heroic Bloodforged rewards and automatic cycles deferred."
+  ],
+  "players": [
+    {
+      "id": "sitter",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    },
+    {
+      "id": "bystander",
+      "race": 1,
+      "class": 1,
+      "level": 60,
+      "allow_regeneration": false
+    }
+  ],
+  "location": {
+    "x": -763.6296,
+    "y": -3191.6892,
+    "z": 91.666626,
+    "o": 2.3004022,
+    "map": 1
+  },
+  "timeout_ms": 150000,
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "sitter",
+      "value": 1
+    },
+    {
+      "action": "set_phase",
+      "actor": "bystander",
+      "value": 1
+    },
+    {
+      "action": "set_health",
+      "actor": "sitter",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "set_health",
+      "actor": "bystander",
+      "maximum": 100000,
+      "value": 100000
+    },
+    {
+      "action": "teleport",
+      "actor": "bystander",
+      "map": 1,
+      "x": -718.6296,
+      "y": -3191.6892,
+      "z": 91.666626
+    },
+    {
+      "action": "wait",
+      "label": "Let login scripts and the teleport settle",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "The bystander stands 45 yards from the cache point",
+      "actor": "sitter",
+      "metric": "distance",
+      "target": "bystander",
+      "min": 44,
+      "max": 46
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: nobody carries the debuff before the cache",
+      "actor": "sitter",
+      "metric": "aura",
+      "spell": 12248,
+      "equals": 0
+    },
+    {
+      "action": "snapshot",
+      "label": "Incoming spell damage before the cache",
+      "actor": "sitter",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "bystander",
+      "save_as": "spell_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Incoming melee damage before the cache",
+      "actor": "sitter",
+      "metric": "melee_damage_taken",
+      "target": "bystander",
+      "save_as": "melee_before"
+    },
+    {
+      "action": "snapshot",
+      "actor": "sitter",
+      "metric": "server_packets",
+      "opcode": 239,
+      "save_as": "sitter_knockbacks"
+    },
+    {
+      "action": "snapshot",
+      "actor": "bystander",
+      "metric": "server_packets",
+      "opcode": 239,
+      "save_as": "bystander_knockbacks"
+    },
+    {
+      "action": "console",
+      "command": "crows barrens 2",
+      "restore": "crows cancel"
+    },
+    {
+      "action": "assert",
+      "label": "The cache appears",
+      "actor": "sitter",
+      "metric": "nearby_gameobject_count",
+      "entry": 994311,
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "The player on the spot is knocked back once",
+      "actor": "sitter",
+      "metric": "server_packets",
+      "opcode": 239,
+      "relative_to": "sitter_knockbacks",
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "6 high",
+      "actor": "sitter",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 0,
+      "min": -6.01,
+      "max": -5.99
+    },
+    {
+      "action": "assert",
+      "label": "and 22.5 wide",
+      "actor": "sitter",
+      "metric": "server_packet_float",
+      "opcode": 239,
+      "from_end": true,
+      "index": 1,
+      "min": 22.49,
+      "max": 22.51
+    },
+    {
+      "action": "assert",
+      "label": "THE CHANGE: the knocked-back player gets Amplify Damage",
+      "actor": "sitter",
+      "metric": "aura",
+      "spell": 12248,
+      "equals": 1,
+      "within_ms": 1500
+    },
+    {
+      "action": "assert",
+      "label": "as a debuff",
+      "actor": "sitter",
+      "metric": "aura_positive",
+      "spell": 12248,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "that the client shows",
+      "actor": "sitter",
+      "metric": "aura_visible",
+      "spell": 12248,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "for one minute, not the DBC 10 seconds",
+      "actor": "sitter",
+      "metric": "aura_duration_ms",
+      "spell": 12248,
+      "min": 55000,
+      "max": 60000
+    },
+    {
+      "action": "assert",
+      "label": "Incoming spell damage is 50% higher",
+      "actor": "sitter",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "bystander",
+      "ratio_to": "spell_before",
+      "min": 1.499,
+      "max": 1.501
+    },
+    {
+      "action": "assert",
+      "label": "and so is incoming melee damage",
+      "actor": "sitter",
+      "metric": "melee_damage_taken",
+      "target": "bystander",
+      "ratio_to": "melee_before",
+      "min": 1.499,
+      "max": 1.501
+    },
+    {
+      "action": "assert",
+      "label": "The player 45 yards away is not knocked back",
+      "actor": "bystander",
+      "metric": "server_packets",
+      "opcode": 239,
+      "relative_to": "bystander_knockbacks",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "and gets no debuff",
+      "actor": "bystander",
+      "metric": "aura",
+      "spell": 12248,
+      "equals": 0
+    },
+    {
+      "action": "wait",
+      "label": "Wait past the spell's own 10-second duration",
+      "ms": 15000
+    },
+    {
+      "action": "assert",
+      "label": "The debuff is still there after 15 seconds",
+      "actor": "sitter",
+      "metric": "aura",
+      "spell": 12248,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Wait until just before the minute ends",
+      "ms": 40000
+    },
+    {
+      "action": "assert",
+      "label": "The debuff is still there after 55 seconds",
+      "actor": "sitter",
+      "metric": "aura",
+      "spell": 12248,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "The debuff ends after one minute",
+      "actor": "sitter",
+      "metric": "aura",
+      "spell": 12248,
+      "equals": 0,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "and incoming damage is back to normal",
+      "actor": "sitter",
+      "metric": "spell_damage_taken",
+      "spell": 133,
+      "target": "bystander",
+      "ratio_to": "spell_before",
+      "min": 0.999,
+      "max": 1.001
+    },
+    {
+      "action": "console",
+      "command": "crows cancel"
+    }
+  ]
+}

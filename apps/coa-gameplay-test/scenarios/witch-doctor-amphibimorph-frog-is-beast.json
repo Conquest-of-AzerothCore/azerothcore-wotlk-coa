@@ -1,0 +1,157 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Amphibimorph makes a frogged humanoid a Beast",
+  "contract": [
+    "Amphibimorph 500952: 'While transformed into a frog the enemy is considered a Beast.' (aura tooltip",
+    "'Polymorphed. Beast.'). Effect[0] is aura 56 SPELL_AURA_TRANSFORM (creature 216377), Effect[1] aura 60,",
+    "Effect[2] aura 33, all TARGET_UNIT_DEST_AREA_ENEMY 8 yd; 1000 ms cast, no global cooldown, 18% base mana,",
+    "RecoveryTime 120000. The only server meaning of a creature type is a target check such as",
+    "TargetCreatureType: Unit::GetCreatureType read the creature template type for a creature and ignored the",
+    "frog, so Scare Beast 1513 (TargetCreatureType 1 = Beast, 1500 ms cast, 2% base mana) stayed refused with",
+    "SPELL_FAILED_BAD_TARGETS (12) at a frogged Kobold Vermin 6 (Humanoid) in the cycle 9 sweep (12 before and",
+    "12 after the frog). The fix makes a unit carrying 500952 a Beast in Unit::GetCreatureType. Control: the",
+    "Scare Beast attempt at the unfrogged humanoid is refused (12). Then a real Amphibimorph lands on the",
+    "dummy (1300 ms after its cast start), and the same attempt is accepted (no failure reason)."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "doctor",
+      "entry": 6,
+      "level": 60,
+      "health": 50000000,
+      "distance": 3,
+      "stationary": true,
+      "min_level_armor": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Amphibimorph",
+      "actor": "doctor",
+      "spell": 500952
+    },
+    {
+      "action": "learn",
+      "label": "Scare Beast (the Beast-only probe)",
+      "actor": "doctor",
+      "spell": 1513
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the dummy is not a frog yet",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 500952,
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 1513
+    },
+    {
+      "action": "cast",
+      "label": "Scare Beast at the humanoid",
+      "actor": "doctor",
+      "spell": 1513,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Scare Beast is refused at the humanoid (SPELL_FAILED_BAD_TARGETS)",
+      "actor": "doctor",
+      "metric": "cast_failure",
+      "spell": 1513,
+      "equals": 12
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 500952
+    },
+    {
+      "action": "cast",
+      "label": "Amphibimorph at the dummy",
+      "actor": "doctor",
+      "spell": 500952,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "label": "The 1000 ms cast and the frog landed",
+      "ms": 1300
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the dummy is a frog",
+      "actor": "dummy",
+      "metric": "aura",
+      "spell": 500952,
+      "caster": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 1400
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 1513
+    },
+    {
+      "action": "cast",
+      "label": "Scare Beast at the frog",
+      "actor": "doctor",
+      "spell": 1513,
+      "target": "dummy"
+    },
+    {
+      "action": "wait",
+      "ms": 300
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: Scare Beast is accepted at the frog, which is a Beast",
+      "actor": "doctor",
+      "metric": "cast_failure",
+      "spell": 1513,
+      "equals": 0
+    }
+  ]
+}

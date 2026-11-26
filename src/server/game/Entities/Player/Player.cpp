@@ -25,6 +25,7 @@
 #include "ArenaTeamMgr.h"
 #include "ArenaSeasonMgr.h"
 #include "AscensionBazaarTokenReserve.h"
+#include "AscensionDisplayPatch.h"
 #include "AscensionPooledVitality.h"
 #include "AscensionCosmeticPetTokens.h"
 #include "AscensionVanityOwnership.h"
@@ -3037,6 +3038,7 @@ void Player::SendInitialSpells()
     }
 
     SendDirectMessage(&data);
+    AscensionDisplayPatch::ResendSkillLineAbilityRows(this);
 }
 
 void Player::SendUnlearnSpells()
@@ -3293,6 +3295,7 @@ void Player::SendLearnPacket(uint32 spellId, bool learn, bool keepActionButtons 
         data << uint32(spellId);
         data << uint16(0);
         SendDirectMessage(&data);
+        AscensionDisplayPatch::ResendSkillLineAbilityRows(this, spellId);
     }
     else
     {
@@ -3340,8 +3343,9 @@ bool Player::addSpell(uint32 spellId, uint8 addSpecMask, bool updateActive, bool
                     }
                     else if (IsInWorld())
                     {
+                        // The client holds a rank shown as its temporary replacement only under that replacement.
                         WorldPacket data(SMSG_SUPERCEDED_SPELL, 4 + 4);
-                        data << uint32(nextSpellInfo->Id);
+                        data << uint32(GetClientShownSupersededSpell(nextSpellInfo->Id));
                         data << uint32(spellInfo->Id);
                         SendDirectMessage(&data);
                     }
@@ -10627,8 +10631,9 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
                 AuraAlsoModifiesCastingTime(mod->ownerAura))
                 return;
 
-            // xinef: those two mods should be multiplicative (Glyph of Renew)
-            if (mod->op == SPELLMOD_DAMAGE || mod->op == SPELLMOD_DOT)
+            // xinef: those two mods should be multiplicative (Glyph of Renew); Ascension's damage-by-victim mods too
+            if (mod->op == SPELLMOD_DAMAGE || mod->op == SPELLMOD_DOT ||
+                mod->op == SPELLMOD_DAMAGE_VS_PLAYERS || mod->op == SPELLMOD_DAMAGE_VS_CREATURES)
                 totalmul *= CalculatePct(1.0f, 100.0f + mod->value);
             else
                 totalmul += CalculatePct(1.0f, mod->value);
@@ -10675,13 +10680,21 @@ void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, Spell* s
         if (uint64 const nightmare = spell->GetScriptValue(AscensionBloodmage::NightmareTalent))
             totalmul *= CalculatePct(1.0f, 100.0f + float(nightmare));
 
+    int32 reachFlat = 0;
     for (auto mod : m_spellMods[op])
     {
         if (!IsAffectedBySpellmod(spellInfo, mod, spell))
             continue;
 
+        if (op == SPELLMOD_RANGE && AscensionReach::IsReachModifier(mod))
+        {
+            reachFlat = std::max(reachFlat, mod->value);
+            continue;
+        }
+
         calculateSpellMod(mod);
     }
+    totalflat += reachFlat;
 
     if (op == SPELLMOD_CASTING_TIME || op == SPELLMOD_DURATION)
         basevalue = (basevalue + totalflat) > 0 ? (basevalue + totalflat) * totalmul : 0;
@@ -10693,6 +10706,24 @@ template AC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, i
 template AC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, uint32& basevalue, Spell* spell, bool temporaryPet);
 template AC_GAME_API void Player::ApplySpellMod(uint32 spellId, SpellModOp op, float& basevalue, Spell* spell, bool temporaryPet);
 
+SpellSchoolMask Player::GetAscensionSchoolOverride(SpellInfo const* spellInfo, Spell* spell)
+{
+    for (SpellModifier* mod : m_spellMods[SPELLMOD_SCHOOL_OVERRIDE])
+    {
+        if (!IsAffectedBySpellmod(spellInfo, mod, spell))
+            continue;
+
+        if (SpellInfo const* carrier = sSpellMgr->GetSpellInfo(mod->spellId))
+        {
+            // recorded on the cast, so a charged carrier spends its charge on it
+            ApplyModToSpell(mod, spell);
+            return carrier->GetSchoolMask();
+        }
+    }
+
+    return SPELL_SCHOOL_MASK_NONE;
+}
+
 bool Player::UsesAscensionSpellModifierLayout() const
 {
     return GetSession() && GetSession()->IsAscensionCompatEnabled();
@@ -10700,7 +10731,7 @@ bool Player::UsesAscensionSpellModifierLayout() const
 
 uint32 Player::GetClientSpellModCount() const
 {
-    return UsesAscensionSpellModifierLayout() ? MAX_SPELLMOD : MAX_CLIENT_SPELLMOD;
+    return UsesAscensionSpellModifierLayout() ? MAX_ASCENSION_CLIENT_SPELLMOD : MAX_CLIENT_SPELLMOD;
 }
 
 void Player::SendSpellModifier(uint16 opcode, uint8 eff, uint8 op, int32 value, uint32 spellFamily) const
@@ -11984,11 +12015,21 @@ void Player::ModifySpellCooldown(uint32 spellId, int32 cooldown)
     if (itr == m_spellCooldowns.end())
         return;
 
+    uint32 const now = GameTime::GetGameTimeMS().count();
+    if (cooldown < 0)
+    {
+        uint64 const reduction = uint64(-int64(cooldown));
+        if (itr->second.end <= now || uint64(itr->second.end - now) <= reduction)
+        {
+            RemoveSpellCooldown(spellId, true);
+            return;
+        }
+    }
+
     itr->second.end += cooldown;
 
     if (cooldown > 0)
     {
-        uint32 const now = GameTime::GetGameTimeMS().count();
         WorldPacket data;
         BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, itr->second.end > now ? itr->second.end - now : 0);
         SendDirectMessage(&data);
@@ -13060,28 +13101,37 @@ void Player::GetAurasForTarget(Unit* target, bool force /*= false*/)
 
 void Player::SetDailyQuestStatus(uint32 quest_id)
 {
-    if (Quest const* qQuest = sObjectMgr->GetQuestTemplate(quest_id))
+    Quest const* quest = sObjectMgr->GetQuestTemplate(quest_id);
+    if (!quest)
+        return;
+
+    if (quest->IsDFQuest())
+        m_DFQuests.insert(quest_id);
+    else
     {
-        if (!qQuest->IsDFQuest())
+        uint32 emptySlot = PLAYER_MAX_DAILY_QUESTS;
+        uint32 slot = 0;
+        for (; slot < PLAYER_MAX_DAILY_QUESTS; ++slot)
         {
-            for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
-            {
-                if (!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx))
-                {
-                    SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx, quest_id);
-                    m_lastDailyQuestTime = GameTime::GetGameTime().count();              // last daily quest time
-                    m_DailyQuestChanged = true;
-                    break;
-                }
-            }
+            uint32 id = GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + slot);
+            if (id == quest_id)
+                break;
+
+            if (!id && emptySlot == PLAYER_MAX_DAILY_QUESTS)
+                emptySlot = slot;
         }
-        else
+
+        if (slot == PLAYER_MAX_DAILY_QUESTS)
         {
-            m_DFQuests.insert(quest_id);
-            m_lastDailyQuestTime = GameTime::GetGameTime().count();
-            m_DailyQuestChanged = true;
+            if (emptySlot == PLAYER_MAX_DAILY_QUESTS)
+                return;
+
+            SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + emptySlot, quest_id);
         }
     }
+
+    m_lastDailyQuestTime = GameTime::GetGameTime().count();              // last daily quest time
+    m_DailyQuestChanged = true;
 }
 
 bool Player::IsDailyQuestDone(uint32 quest_id)
@@ -14284,6 +14334,21 @@ void Player::SetTemporarySpellReplacement(uint32 original, uint32 replacement, b
         }
         sScriptMgr->OnPlayerTemporarySpellReplacementNotice(this, previous, replacement, true);
     }
+}
+
+uint32 Player::GetClientShownSupersededSpell(uint32 superseded) const
+{
+    auto itr = m_temporarySpellReplacements.find(superseded);
+    if (itr == m_temporarySpellReplacements.end() || !HasActiveSpell(itr->second))
+        return superseded;
+
+    uint32 const replacement = itr->second;
+    bool const shownByAnother = std::any_of(m_temporarySpellReplacements.begin(), m_temporarySpellReplacements.end(),
+        [this, superseded, replacement](auto const& entry)
+        {
+            return entry.first != superseded && entry.second == replacement && HasActiveSpell(entry.first);
+        });
+    return shownByAnother ? superseded : replacement;
 }
 
 uint32 Player::GetTemporarySpellReplacement(uint32 original) const

@@ -4,7 +4,8 @@
   "contract": [
     "Bless 804247 targets an ally and promises a 5% maximum-health heal and mana restoration every ten seconds.",
     "Its effective periodic aura applies to the ally and mirrors to the caster; helper 805360 E1 defines 5%",
-    "maximum mana. The server records the energize as 504877. Check both auras, actual heal events for both",
+    "maximum mana. The server records the energize as 805360 (Sun Cleric ADR 0020). Check both auras, actual heal",
+    "events for both",
     "targets, and the mana event rather than passive mana regeneration. An enemy is not a valid Bless target.",
     "Changing allies must keep the caster copy and remove only the earlier ally copy."
   ],
@@ -140,7 +141,7 @@
       "actor": "c",
       "metric": "spell_energize_count",
       "label": "Bless restores mana on its first tick",
-      "spell": 504877,
+      "spell": 805360,
       "target": "c",
       "equals": 1
     },
@@ -149,7 +150,7 @@
       "actor": "c",
       "metric": "spell_energize_total",
       "label": "The tick restores five percent of maximum mana",
-      "spell": 504877,
+      "spell": 805360,
       "target": "c",
       "ratio_to": "max_mana",
       "min": 0.049,

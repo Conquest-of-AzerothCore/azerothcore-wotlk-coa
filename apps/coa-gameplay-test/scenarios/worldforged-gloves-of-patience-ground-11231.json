@@ -1,13 +1,13 @@
 {
   "schema": 1,
-  "name": "Worldforged Gloves of Patience rest on the Desolace ground (#11231)",
-  "contract": "The Gloves of Patience pickup (entry 254292, guid 6941777) sat 2.26 yd under the terrain at its x/y, the realm-map pass having moved x/y by 20 yd and kept the catalog z. It rests on the ground the server measures there.",
+  "name": "Worldforged Gloves of Patience rest at the Desolace realm-dump spot (#11231, #10469)",
+  "contract": "2026_09_23_05_worldforged_map.sql shifted the Gloves of Patience pickup (The Waiting Fisher, entry 254292, guid 6941777) 19.5 yd south from its first-pass realm-dump spot (6900082 at -1619.320, 1510.320, 57.310) to (-1615.900, 1491.100, 57.310) using the 2-digit Y map pin (0.6092, 0.69). rev_20261105_67 (#11231) only lifted position_z at that shifted X/Y. rev_20261126_10469 restores the authoritative realm-dump coordinates (-1619.320, 1510.320, 57.310), where it rests flush on Desolace ground and opens.",
   "timeout_ms": 60000,
   "location": {
     "map": 1,
-    "x": -1615.9,
-    "y": 1491.1,
-    "z": 60.1,
+    "x": -1617.32,
+    "y": 1510.32,
+    "z": 57.5,
     "o": 0
   },
   "players": [
@@ -30,6 +30,18 @@
     },
     {
       "action": "assert",
+      "label": "DISCRIMINATING: the pickup stands at the restored realm-dump spot, not 19.7 yd south",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "guid": 6941777,
+      "spawn_type": "gameobject",
+      "x": -1619.32,
+      "y": 1510.32,
+      "z": 57.31,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
       "label": "DISCRIMINATING: the pickup rests on the ground",
       "actor": "p",
       "metric": "spawn_ground_gap",
@@ -37,6 +49,15 @@
       "spawn_type": "gameobject",
       "min": -0.3,
       "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "no model or terrain surface lies above the pickup",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6941777,
+      "spawn_type": "gameobject",
+      "min": 5
     },
     {
       "action": "assert",

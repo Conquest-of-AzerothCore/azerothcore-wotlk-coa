@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Worldforged Azure Will sits on Nagapagoda floor in Azshara instead of underground (#13703)",
+  "contract": "#13703 reported the Azure Will pickup (Draconic Wand, gameobject entry 254450, guid 6941422, drops item 515619) in Azshara underground and unobtainable. rev_20261006_65_worldforged_openworld_float_heights.sql dropped position_z to bare terrain (128.9285), 4.23 yd below the Nagapagoda01.wmo floor (133.154). rev_20261126_13703 restores first-pass realm-dump row 6900205 (2502.735, -5426.102, 133.945; +0.791 yd above the pagoda floor). Expected: the pickup stands inside the pagoda above its floor, is within reach, and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 2504.5,
+    "y": -5426.0,
+    "z": 133.2,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the pickup is in the pagoda",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 254450,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup stands at its realm-dump spot (2502.735, -5426.102, 133.945) instead of underground",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": 2502.735,
+      "y": -5426.102,
+      "z": 133.945,
+      "max": 0.3,
+      "guid": 6941422,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the pickup sits above the Nagapagoda01.wmo floor instead of 4.23 yd below it",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "min": 0.0,
+      "max": 1.0,
+      "guid": 6941422,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is not under water",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6941422,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 254450
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "the pickup is within reach and opens",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "its loot is shown",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

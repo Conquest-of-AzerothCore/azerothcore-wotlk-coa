@@ -1,788 +1,424 @@
 {
   "schema": 1,
-  "name": "Demonic Rage grants 1 extra Rage per Demon's Blood stack generated (#856)",
-  "contract": "Demonic Rage 524922 reads 'Generating Demon's Blood stacks now generates 1 additional Rage' (bindmysoul.com/conquest/talents.normalized.json, fetchedAt 2026-07-22T23:10:31.369Z; matches the client's own moa_description: '$/10;s1' = 10/10 = 1). AscensionXoroth::Gain(Player*, uint32) (AscensionXoroth.cpp) is the single central Demon's Blood (500906) stack-gain function, called from every proc/ability path that awards a stack. The fix adds player->EnergizeBySpell(player, 524922, 10, POWER_RAGE) (internal Rage is stored at x10 of the displayed value, matching Unit::RewardRage's own uint32(addRage * 10) convention) at the end of Gain(), gated on player->HasAura(524922). EnergizeBySpell logs a native SendEnergizeSpellLog entry attributed to spell 524922, observable via spell_energize_count/spell_energize_total filtered by that spell and power=1 (Rage) - a signal with zero baseline noise, unlike raw Rage totals which are also driven by Unit::RewardRage's unrelated 'Rage from damage taken/dealt' native mechanic on every melee exchange (a raw ModifyPower call was rejected for the test-observability reason alone). Demonfire Retaliation 573034 ('Grants you a 30% chance to generate a stack of Demonfire when attacked', ProcChance 30 in the installed Spell.dbc) is used as the Gain() trigger via aura_ascension_xoroth_event::Check/Proc (AscensionXorothEvents.cpp case 573034), the same 'damage taken' proc mechanism the Brimstone's Blood scenario (#1587) exercises. Harness constraint (found while debugging #1587/#856): fixture creatures listed in the scenario's own 'creatures' array are forced REACT_PASSIVE twice during setup and CreatureAI::UpdateVictim never selects a victim for a passive creature (CoAGameplayTest.cpp), so such a fixture can never strike the player and no TAKEN-proc contract can be observed against one - confirmed empirically (a diagnostic scenario attacking a fixture dummy for 8s produced zero health loss on the player). The established workaround (apps/coa-gameplay-test/scenarios/bloodmage-blood-bond-ally-damage.json, #1930) is a creature the fixture itself summons: Scholomance Dark Summoner 11582's SmartAI casts Summon Risen Lackey 17618 on itself repeatedly after engaging, and those Lackeys are ordinary spawns that attack normally, not subject to the fixture's forced passivity. Following the same redesign already proven for the sibling Brimstone's Blood scenario (#1587) - reusing a single character across a sequential baseline-then-talented design proved unreliable there even with set_aura force-application after sustained combat - this uses two independent knights, each fighting its own three Dark Summoners for the same equal-length window: 'baseline' only ever knows Demonfire Retaliation, 'talented' also learns and verifies Demonic Rage before combat starts. Because Lackey spawn/engage cadence is not a fixed-interval timer, the test requires only that grants occur for the talented knight and never for the baseline knight over the same window.",
-  "timeout_ms": 400000,
+  "name": "Knight of Xoroth: Demonic Rage grants Rage per Demon's Blood generated, also at the cap (#12430)",
+  "contract": [
+    "Demonic Rage 524922 reads 'Generating Demon's Blood stacks now generates $/10;s1 additional Rage' (s1 = 10, so 1",
+    "Rage). Demon's Blood is 800999; Demonfire 500906 is a different resource (both DBCs). Bloodied Blade 800997",
+    "('Melee Physical damage dealt now generates a stack of Demon's Blood', spell_proc chance 100) casts 800999 on",
+    "every melee physical hit, including at the 10-stack cap. #12430 reports no Demonic Rage at the cap: the grant was",
+    "wired to Demonfire gains instead. Brimstone Bludgeon 520005 hits the target and every enemy within 8 yd and",
+    "generates 1 Demonfire, so with three packed enemies each cast gives three Demon's Blood generations and one",
+    "Demonfire gain. The control cast without the talent logs no 524922 energize. With the talent and Demon's Blood",
+    "capped, five casts give at least 15 generations, so at least 15 energizes of 10 internal Rage each; the old",
+    "Demonfire wiring logs only one per cast (5)."
+  ],
+  "timeout_ms": 120000,
   "players": [
     {
-      "id": "baseline",
+      "id": "k",
       "race": 1,
       "class": 17,
-      "level": 60
-    },
-    {
-      "id": "talented",
-      "race": 1,
-      "class": 17,
-      "level": 60
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "spell_hit_rating": 10000
     }
   ],
   "creatures": [
     {
-      "id": "baseline_s1",
-      "owner": "baseline",
-      "entry": 11582,
+      "id": "e0",
+      "owner": "k",
+      "entry": 36,
       "faction": 14,
       "level": 60,
       "health": 100000000,
-      "distance": 3
+      "distance": 2.0
     },
     {
-      "id": "baseline_s2",
-      "owner": "baseline",
-      "entry": 11582,
+      "id": "e1",
+      "owner": "k",
+      "entry": 36,
       "faction": 14,
       "level": 60,
       "health": 100000000,
-      "distance": 4
+      "distance": 2.5
     },
     {
-      "id": "baseline_s3",
-      "owner": "baseline",
-      "entry": 11582,
+      "id": "e2",
+      "owner": "k",
+      "entry": 36,
       "faction": 14,
       "level": 60,
       "health": 100000000,
-      "distance": 5
-    },
-    {
-      "id": "talented_s1",
-      "owner": "talented",
-      "entry": 11582,
-      "faction": 14,
-      "level": 60,
-      "health": 100000000,
-      "distance": 3
-    },
-    {
-      "id": "talented_s2",
-      "owner": "talented",
-      "entry": 11582,
-      "faction": 14,
-      "level": 60,
-      "health": 100000000,
-      "distance": 4
-    },
-    {
-      "id": "talented_s3",
-      "owner": "talented",
-      "entry": 11582,
-      "faction": 14,
-      "level": 60,
-      "health": 100000000,
-      "distance": 5
+      "distance": 3.0
     }
   ],
   "steps": [
     {
       "action": "wait",
       "label": "Let spawn AI and level scaling settle",
-      "ms": 5000
+      "ms": 3000
     },
     {
-      "action": "set_health",
-      "actor": "baseline",
-      "value": 1000000,
-      "maximum": 1000000,
-      "label": "Give baseline a large health buffer to survive the whole combat window"
+      "action": "add_item",
+      "actor": "k",
+      "item": 629951
     },
     {
-      "action": "learn",
-      "actor": "baseline",
-      "spell": 573034,
-      "label": "Ensure Demonfire Retaliation is known, so Demon's Blood stacks are actively being generated"
-    },
-    {
-      "action": "set_health",
-      "actor": "talented",
-      "value": 1000000,
-      "maximum": 1000000,
-      "label": "Give talented a large health buffer to survive the whole combat window"
+      "action": "equip",
+      "actor": "k",
+      "item": 629951,
+      "slot": 15
     },
     {
       "action": "learn",
-      "actor": "talented",
-      "spell": 573034,
-      "label": "Ensure Demonfire Retaliation is known, so Demon's Blood stacks are actively being generated"
+      "actor": "k",
+      "spell": 800710
+    },
+    {
+      "action": "learn",
+      "actor": "k",
+      "spell": 800997
+    },
+    {
+      "action": "set_aura",
+      "actor": "k",
+      "label": "Force the Bloodied Blade passive aura",
+      "spell": 800997,
+      "stacks": 1
     },
     {
       "action": "assert",
-      "label": "SETUP: baseline does not know Demonic Rage",
-      "actor": "baseline",
+      "actor": "k",
+      "label": "SETUP: Brimstone Bludgeon replaces Sever",
+      "metric": "knows_spell",
+      "spell": 520005,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "label": "SETUP: Demonic Rage is not known for the control cast",
       "metric": "knows_spell",
       "spell": 524922,
       "equals": 0
     },
     {
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 0
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "save_as": "blood_control"
+    },
+    {
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_energize_count",
+      "spell": 524922,
+      "power": 1,
+      "save_as": "rage_control"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
+    },
+    {
+      "action": "cast",
+      "actor": "k",
+      "label": "Control Bludgeon without Demonic Rage",
+      "spell": 520005,
+      "target": "e0"
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "label": "SETUP: the control Bludgeon hits the farthest enemy",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e2",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "stop_attack",
+      "actor": "k"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "label": "CONTROL: the Bludgeon generates Demon's Blood once per enemy hit",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "relative_to": "blood_control",
+      "min": 3
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "label": "CONTROL: without the talent no Demonic Rage energize is logged",
+      "metric": "spell_energize_count",
+      "spell": 524922,
+      "power": 1,
+      "relative_to": "rage_control",
+      "equals": 0
+    },
+    {
       "action": "learn",
-      "actor": "talented",
-      "spell": 524922,
-      "label": "The talented knight learns Demonic Rage before any combat, in a clean state"
+      "actor": "k",
+      "spell": 524922
     },
     {
       "action": "assert",
-      "label": "SETUP: talented knows Demonic Rage",
-      "actor": "talented",
-      "metric": "knows_spell",
-      "spell": 524922,
-      "equals": 1
-    },
-    {
-      "action": "assert",
-      "label": "SETUP: talented's Demonic Rage aura is active",
-      "actor": "talented",
+      "actor": "k",
+      "label": "SETUP: the Demonic Rage aura is active",
       "metric": "aura",
       "spell": 524922,
-      "equals": 1
+      "equals": 1,
+      "within_ms": 2000
     },
     {
-      "action": "snapshot",
-      "actor": "baseline",
-      "metric": "spell_energize_count",
-      "spell": 524922,
-      "power": 1,
-      "save_as": "energize_baseline_before"
-    },
-    {
-      "action": "snapshot",
-      "actor": "baseline",
-      "metric": "spell_energize_total",
-      "spell": 524922,
-      "power": 1,
-      "save_as": "energize_total_baseline_before"
-    },
-    {
-      "action": "snapshot",
-      "actor": "talented",
-      "metric": "spell_energize_count",
-      "spell": 524922,
-      "power": 1,
-      "save_as": "energize_talented_before"
-    },
-    {
-      "action": "snapshot",
-      "actor": "talented",
-      "metric": "spell_energize_total",
-      "spell": 524922,
-      "power": 1,
-      "save_as": "energize_total_talented_before"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1",
-      "label": "baseline engages baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2",
-      "label": "baseline engages baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3",
-      "label": "baseline engages baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1",
-      "label": "talented engages talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2",
-      "label": "talented engages talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3",
-      "label": "talented engages talented_s3"
+      "action": "set_aura",
+      "actor": "k",
+      "label": "Fill Demon's Blood to its base cap",
+      "spell": 800999,
+      "stacks": 10
     },
     {
       "action": "assert",
-      "label": "SETUP: baseline's summoners are engaged",
-      "actor": "baseline_s1",
-      "metric": "combat",
-      "equals": 1,
-      "within_ms": 10000
+      "actor": "k",
+      "label": "SETUP: Demon's Blood is capped",
+      "metric": "aura_stacks",
+      "spell": 800999,
+      "equals": 10
     },
     {
       "action": "assert",
-      "label": "SETUP: talented's summoners are engaged",
-      "actor": "talented_s1",
-      "metric": "combat",
-      "equals": 1,
-      "within_ms": 10000
+      "actor": "k",
+      "label": "SETUP: 10 is Demon's Blood's cap",
+      "metric": "spell_max_stacks",
+      "spell": 800999,
+      "equals": 10
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
+      "action": "set_power",
+      "actor": "k",
+      "power": 1,
+      "value": 0
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "save_as": "blood_capped"
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_energize_count",
+      "spell": 524922,
+      "power": 1,
+      "save_as": "rage_count"
     },
     {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000,
-      "label": "Let the summoned Lackeys land damage-taken trials at the 30% Demon's Blood chance, re-attacking every 10s"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
+      "action": "snapshot",
+      "actor": "k",
+      "metric": "spell_energize_total",
+      "spell": 524922,
+      "power": 1,
+      "save_as": "rage_total"
     },
     {
       "action": "wait",
-      "ms": 10000
+      "label": "Let the global cooldown pass",
+      "ms": 1600
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
+      "action": "cast",
+      "actor": "k",
+      "label": "Capped Bludgeon 1/5",
+      "spell": 520005,
+      "target": "e0"
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
+      "action": "assert",
+      "actor": "k",
+      "label": "SETUP: capped Bludgeon 1 hits the farthest enemy",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e2",
+      "min": 2,
+      "within_ms": 3000
     },
     {
       "action": "wait",
-      "ms": 10000
+      "label": "Let the global cooldown pass",
+      "ms": 1600
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
+      "action": "cast",
+      "actor": "k",
+      "label": "Capped Bludgeon 2/5",
+      "spell": 520005,
+      "target": "e0"
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
+      "action": "assert",
+      "actor": "k",
+      "label": "SETUP: capped Bludgeon 2 hits the farthest enemy",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e2",
+      "min": 3,
+      "within_ms": 3000
     },
     {
       "action": "wait",
-      "ms": 10000
+      "label": "Let the global cooldown pass",
+      "ms": 1600
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
+      "action": "cast",
+      "actor": "k",
+      "label": "Capped Bludgeon 3/5",
+      "spell": 520005,
+      "target": "e0"
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
+      "action": "assert",
+      "actor": "k",
+      "label": "SETUP: capped Bludgeon 3 hits the farthest enemy",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e2",
+      "min": 4,
+      "within_ms": 3000
     },
     {
       "action": "wait",
-      "ms": 10000
+      "label": "Let the global cooldown pass",
+      "ms": 1600
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
+      "action": "cast",
+      "actor": "k",
+      "label": "Capped Bludgeon 4/5",
+      "spell": 520005,
+      "target": "e0"
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
+      "action": "assert",
+      "actor": "k",
+      "label": "SETUP: capped Bludgeon 4 hits the farthest enemy",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e2",
+      "min": 5,
+      "within_ms": 3000
     },
     {
       "action": "wait",
-      "ms": 10000
+      "label": "Let the global cooldown pass",
+      "ms": 1600
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
+      "action": "reset_cooldown",
+      "actor": "k",
+      "spell": 520005
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
+      "action": "cast",
+      "actor": "k",
+      "label": "Capped Bludgeon 5/5",
+      "spell": 520005,
+      "target": "e0"
     },
     {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "baseline",
-      "target": "baseline_s3"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s1"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s2"
-    },
-    {
-      "action": "attack",
-      "actor": "talented",
-      "target": "talented_s3"
-    },
-    {
-      "action": "wait",
-      "ms": 10000
+      "action": "assert",
+      "actor": "k",
+      "label": "SETUP: capped Bludgeon 5 hits the farthest enemy",
+      "metric": "spell_damage_count",
+      "spell": 520005,
+      "target": "e2",
+      "min": 6,
+      "within_ms": 3000
     },
     {
       "action": "stop_attack",
-      "actor": "baseline"
+      "actor": "k"
     },
     {
-      "action": "stop_attack",
-      "actor": "talented"
+      "action": "wait",
+      "ms": 500
     },
     {
       "action": "assert",
-      "label": "SETUP: combat actually generated Demon's Blood stacks for baseline",
-      "actor": "baseline",
+      "actor": "k",
+      "label": "SETUP: Demon's Blood stayed at the cap",
       "metric": "aura_stacks",
-      "spell": 500906,
-      "min": 1
+      "spell": 800999,
+      "equals": 10
     },
     {
       "action": "assert",
-      "label": "CONTRACT (baseline): without the talent, generating Demon's Blood stacks never energizes Rage via 524922",
-      "actor": "baseline",
+      "actor": "k",
+      "label": "SETUP: the capped casts generated Demon's Blood once per enemy hit",
+      "metric": "spell_cast_count",
+      "spell": 800999,
+      "relative_to": "blood_capped",
+      "min": 15
+    },
+    {
+      "action": "assert",
+      "actor": "k",
+      "label": "CONTRACT: every Demon's Blood generation at the cap logs a Demonic Rage energize",
       "metric": "spell_energize_count",
       "spell": 524922,
       "power": 1,
-      "relative_to": "energize_baseline_before",
-      "equals": 0
+      "relative_to": "rage_count",
+      "min": 15
     },
     {
       "action": "assert",
-      "label": "SETUP: combat actually generated Demon's Blood stacks for talented",
-      "actor": "talented",
-      "metric": "aura_stacks",
-      "spell": 500906,
-      "min": 1
-    },
-    {
-      "action": "assert",
-      "label": "CONTRACT: the talented knight energizes Rage via 524922 on generated Demon's Blood stacks",
-      "actor": "talented",
-      "metric": "spell_energize_count",
-      "spell": 524922,
-      "power": 1,
-      "relative_to": "energize_talented_before",
-      "min": 1
-    },
-    {
-      "action": "assert",
-      "label": "CONTRACT: each logged energize grants exactly 1 Rage (10 internal units)",
-      "actor": "talented",
+      "actor": "k",
+      "label": "CONTRACT: each energize grants 1 Rage (10 internal units)",
       "metric": "spell_energize_total",
       "spell": 524922,
       "power": 1,
-      "relative_to": "energize_total_talented_before",
-      "min": 10
+      "relative_to": "rage_total",
+      "min": 150
     }
   ]
 }

@@ -95,6 +95,11 @@ class pyromancer_spells : public AllSpellScript
         if (!player || info->SpellFamilyName != 30)
             return;
         Snapshot(player, spell);
+        if (info->Id == 503864 && State(player).aspectRemaining)
+        {
+            spell->SetScriptValue(504750, State(player).aspectRemaining);
+            State(player).aspectRemaining = 0;
+        }
         if (info->Id == 680369 && !spell->IsTriggered())
         {
             spell->SetScriptValue(680369, Count(player, FlamecastingAura));
@@ -201,9 +206,19 @@ class pyromancer_spells : public AllSpellScript
         uint32 id = info->Id;
         if (id == 503864)
         {
-            State(player).aspectDamage = damage;
-            if (damage && Chance(player, 520770))
-                Cast(player, player, 520927);
+            if (damage)
+            {
+                bool const old = State(player).event;
+                State(player).event = true;
+                if (player->HasAura(707479))
+                    Copy(player, player, 707595, CalculatePct(damage, Amount(707479)));
+                if (Chance(player, 520770))
+                    Cast(player, player, 520927);
+                if (uint64 const remaining = spell->GetScriptValue(504750);
+                    remaining && target->IsAlive() && Chance(player, 504750))
+                    AspectChain(player, target, damage, uint32(remaining - 1));
+                State(player).event = old;
+            }
             return;
         }
         if (Derived(info))

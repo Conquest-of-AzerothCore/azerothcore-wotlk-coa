@@ -184,12 +184,28 @@ void BuffArmy(Player* player, uint32 spell, bool owner)
     for (Creature* unit : Minions(player))
         Cast(player, unit, spell);
 }
+void Evict(Player* player, int32 needed)
+{
+    auto& minions = State(player).minions;
+    while (int32(Capacity(player)) - Used(player) < needed)
+    {
+        auto oldest = std::find_if(minions.begin(), minions.end(),
+                                   [](MinionRecord const& row) { return row.cost != 0; });
+        if (oldest == minions.end())
+            return;
+        ObjectGuid guid = oldest->guid;
+        minions.erase(oldest);
+        if (Creature* unit = player->FindMap() ? ObjectAccessor::GetCreature(*player, guid) : nullptr)
+            unit->DespawnOrUnsummon();
+    }
+}
 void Sync(Player* player)
 {
     if (!player || !player->IsInWorld() || !player->IsAlive() || State(player).syncing)
         return;
     auto& state = State(player);
     state.syncing = true;
+    Evict(player, 0);
     uint8 capacity = Capacity(player);
     int32 free = std::max(0, int32(capacity) - Used(player));
     if (Aura* total = player->GetAura(805011) ? player->GetAura(805011) : player->AddAura(805011, player))

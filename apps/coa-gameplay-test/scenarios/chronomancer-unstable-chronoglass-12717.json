@@ -1,0 +1,64 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Unstable Chronoglass spawns and redirects the next 3 offensive enemy spell casts (#12717)",
+  "contract": [
+    "Unstable Chronoglass 503836 summons creature 506015 (Unstable Chronoglass, display 24868) at target location",
+    "for 30 seconds and redirects the next 3 offensive enemy spell casts onto itself.",
+    "Control: before casting 503836, no 506015 exists and enemy Fire Blast 2136 hits the Chronomancer.",
+    "Test: casting 503836 spawns one 506015 with display 24868 and ~30s remaining duration; the next 3 enemy",
+    "Fire Blast casts aimed at the Chronomancer are redirected onto 506015 (0 hits on Chronomancer, 3 hits on 506015),",
+    "after which 506015 despawns and the 4th Fire Blast hits the Chronomancer normally."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "chrono", "race": 1, "class": 22, "level": 60 },
+    { "id": "enemy", "race": 2, "class": 8, "level": 60, "spell_hit_rating": 10000 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login settle", "ms": 3000 },
+    { "action": "teleport", "actor": "chrono", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "enemy", "map": 0, "x": -9607.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "pvp", "actor": "chrono", "enabled": true },
+    { "action": "pvp", "actor": "enemy", "enabled": true },
+    { "action": "assert", "label": "SETUP: enemy can attack chrono", "actor": "enemy", "metric": "can_attack", "target": "chrono", "equals": 1, "within_ms": 2000 },
+    { "action": "learn", "actor": "chrono", "spell": 503836 },
+    { "action": "learn", "actor": "enemy", "spell": 2136 },
+    { "action": "assert", "label": "CONTROL: no Unstable Chronoglass before cast", "actor": "chrono", "metric": "owned_creature_count", "entry": 506015, "equals": 0 },
+
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "chrono", "ignore_gcd": true },
+    { "action": "assert", "label": "CONTROL: Fire Blast hits chrono when no Chronoglass is up", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "chrono", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: no hits recorded on 506015", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target_entry": 506015, "equals": 0 },
+
+    { "action": "cast", "actor": "chrono", "spell": 503836, "destination": { "x": -9612.06, "y": -288.949, "z": 57.3053 } },
+    { "action": "assert", "label": "Unstable Chronoglass cast accepted", "actor": "chrono", "metric": "cast_failure", "spell": 503836, "equals": 0 },
+    { "action": "assert", "label": "DISCRIMINATING: Unstable Chronoglass 506015 spawns", "actor": "chrono", "metric": "owned_creature_count", "entry": 506015, "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: Unstable Chronoglass uses hourglass display 24868", "actor": "chrono", "metric": "owned_creature_display", "entry": 506015, "equals": 24868 },
+    { "action": "assert", "label": "Unstable Chronoglass lasts 30 seconds", "actor": "chrono", "metric": "owned_creature_remaining_ms", "entry": 506015, "min": 24000, "max": 30500 },
+
+    { "action": "snapshot", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "chrono", "save_as": "chrono_hits0" },
+    { "action": "snapshot", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target_entry": 506015, "save_as": "glass_hits0" },
+
+    { "action": "reset_cooldown", "actor": "enemy", "spell": 2136 },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "chrono", "ignore_gcd": true },
+    { "action": "assert", "label": "DISCRIMINATING: cast 1 redirected to Chronoglass", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target_entry": 506015, "relative_to": "glass_hits0", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: cast 1 did not hit chrono", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "chrono", "relative_to": "chrono_hits0", "equals": 0 },
+
+    { "action": "reset_cooldown", "actor": "enemy", "spell": 2136 },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "chrono", "ignore_gcd": true },
+    { "action": "assert", "label": "DISCRIMINATING: cast 2 redirected to Chronoglass", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target_entry": 506015, "relative_to": "glass_hits0", "equals": 2, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: cast 2 did not hit chrono", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "chrono", "relative_to": "chrono_hits0", "equals": 0 },
+
+    { "action": "reset_cooldown", "actor": "enemy", "spell": 2136 },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "chrono", "ignore_gcd": true },
+    { "action": "assert", "label": "DISCRIMINATING: cast 3 redirected to Chronoglass", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target_entry": 506015, "relative_to": "glass_hits0", "equals": 3, "within_ms": 2000 },
+    { "action": "assert", "label": "DISCRIMINATING: cast 3 did not hit chrono", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "chrono", "relative_to": "chrono_hits0", "equals": 0 },
+
+    { "action": "assert", "label": "DISCRIMINATING: Chronoglass despawns after redirecting 3 casts", "actor": "chrono", "metric": "owned_creature_count", "entry": 506015, "equals": 0, "within_ms": 2000 },
+
+    { "action": "reset_cooldown", "actor": "enemy", "spell": 2136 },
+    { "action": "cast", "actor": "enemy", "spell": 2136, "target": "chrono", "ignore_gcd": true },
+    { "action": "assert", "label": "DISCRIMINATING: cast 4 hits chrono after 3 redirects are spent", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target": "chrono", "relative_to": "chrono_hits0", "equals": 1, "within_ms": 2000 },
+    { "action": "assert", "label": "CONTROL: cast 4 does not hit Chronoglass", "actor": "enemy", "metric": "spell_damage_count", "spell": 2136, "target_entry": 506015, "relative_to": "glass_hits0", "equals": 3 }
+  ]
+}

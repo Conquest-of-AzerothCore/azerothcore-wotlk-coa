@@ -1,0 +1,277 @@
+{
+  "schema": 1,
+  "name": "Bloodmage: Bloodthorns and Greater Bloodthorns replace each other instead of stacking (#13510)",
+  "contract": [
+    "Bloodthorns (SpellRank.dbc first rank 802313, rank 7 501667: 22 Shadow damage shield) and Greater Bloodthorns",
+    "(572116: 22 Shadow damage shield to raid) are the single-target and raid-wide forms of the same SpellFamilyName 26",
+    "SPELL_AURA_DAMAGE_SHIELD (15) buff. Neither belonged to any spell_group, so casting both stacked two Bloodthorns",
+    "auras on the same target (#13510). Grouping 802313 and 572116 in spell_group 2100008 with",
+    "SPELL_GROUP_STACK_RULE_EXCLUSIVE_HIGHEST (4) makes Greater Bloodthorns replace Bloodthorns, equal-strength",
+    "Bloodthorns (501667) replace Greater Bloodthorns, cross-caster casts replace rather than stack, and weaker",
+    "Bloodthorns Rank 1 (802313: 6 damage) fail to downgrade or stack with Greater Bloodthorns while Greater",
+    "Bloodthorns upgrades Rank 1."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "caster1",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "caster2",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "caster_low",
+      "race": 1,
+      "class": 20,
+      "level": 80
+    },
+    {
+      "id": "ally",
+      "race": 1,
+      "class": 1,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let initial state settle",
+      "ms": 3000
+    },
+    {
+      "action": "group",
+      "actor": "caster1",
+      "target": "ally"
+    },
+    {
+      "action": "group",
+      "actor": "caster1",
+      "target": "caster2"
+    },
+    {
+      "action": "group",
+      "actor": "caster1",
+      "target": "caster_low"
+    },
+    {
+      "action": "learn",
+      "actor": "caster1",
+      "spell": 501667
+    },
+    {
+      "action": "learn",
+      "actor": "caster1",
+      "spell": 572116
+    },
+    {
+      "action": "learn",
+      "actor": "caster2",
+      "spell": 501667
+    },
+    {
+      "action": "learn",
+      "actor": "caster2",
+      "spell": 572116
+    },
+    {
+      "action": "learn",
+      "actor": "caster_low",
+      "spell": 802313
+    },
+    {
+      "action": "cast",
+      "label": "Cast Bloodthorns Rank 7 on ally",
+      "actor": "caster1",
+      "spell": 501667,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "PRECONDITION: Bloodthorns Rank 7 is active on ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501667,
+      "caster": "caster1",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Clear global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Greater Bloodthorns from the same caster",
+      "actor": "caster1",
+      "spell": 572116
+    },
+    {
+      "action": "assert",
+      "label": "Greater Bloodthorns lands on ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572116,
+      "caster": "caster1",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Greater Bloodthorns removes Bloodthorns Rank 7 instead of stacking",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501667,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Clear global cooldown",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cast equal-strength Bloodthorns Rank 7 over Greater Bloodthorns",
+      "actor": "caster1",
+      "spell": 501667,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Equal-strength Bloodthorns Rank 7 lands on ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501667,
+      "caster": "caster1",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bloodthorns Rank 7 removes Greater Bloodthorns instead of stacking",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572116,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Second Bloodmage casts Greater Bloodthorns",
+      "actor": "caster2",
+      "spell": 572116
+    },
+    {
+      "action": "assert",
+      "label": "Second caster's Greater Bloodthorns lands on ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572116,
+      "caster": "caster2",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: cross-caster Greater Bloodthorns removes first caster's Bloodthorns",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 501667,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Weaker Bloodthorns Rank 1 cast onto Greater Bloodthorns",
+      "actor": "caster_low",
+      "spell": 802313,
+      "target": "ally"
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: weaker Rank 1 does not stack with or replace Greater Bloodthorns",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802313,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Greater Bloodthorns remains active after weaker Rank 1 cast",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572116,
+      "caster": "caster2",
+      "equals": 1
+    },
+    {
+      "action": "set_aura",
+      "actor": "ally",
+      "spell": 572116,
+      "stacks": 0
+    },
+    {
+      "action": "wait",
+      "label": "Clear global cooldown on caster_low",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Cast Rank 1 Bloodthorns on unbuffed ally",
+      "actor": "caster_low",
+      "spell": 802313,
+      "target": "ally"
+    },
+    {
+      "action": "assert",
+      "label": "Rank 1 Bloodthorns applies on unbuffed ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802313,
+      "caster": "caster_low",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "wait",
+      "label": "Clear global cooldown on caster1",
+      "ms": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Greater Bloodthorns upgrades Rank 1 Bloodthorns",
+      "actor": "caster1",
+      "spell": 572116
+    },
+    {
+      "action": "assert",
+      "label": "Greater Bloodthorns lands on ally",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 572116,
+      "caster": "caster1",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Greater Bloodthorns removes Rank 1 Bloodthorns",
+      "actor": "ally",
+      "metric": "aura",
+      "spell": 802313,
+      "equals": 0,
+      "within_ms": 2000
+    }
+  ]
+}

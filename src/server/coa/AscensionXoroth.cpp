@@ -151,8 +151,6 @@ void Gain(Player* player, uint32 count)
     uint32 maxStacks = uint32(std::max(cap, 0));
     if (Aura* aura = player->AddAura(500906, player))
         aura->SetStackAmount(std::min(maxStacks, previous + count));
-    if (player->HasAura(524922))
-        player->EnergizeBySpell(player, 524922, 10, POWER_RAGE);
 }
 bool Chance(Player* player, uint32 id, uint32 cooldown, float bonus)
 {

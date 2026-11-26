@@ -6,6 +6,7 @@
 #include "AscensionCustomClassData.h"
 #include "AscensionLiveBaselineData.h"
 #include "AscensionSpecialization.h"
+#include "AscensionTalentReplacementData.h"
 #include "Player.h"
 #include <algorithm>
 
@@ -39,6 +40,21 @@ inline bool Refuses(Player const* player, uint32 spellId)
             return entry.ClassId == classId && entry.ProficiencySpellId == spellId &&
                 player->HasSpell(entry.TalentSpellId);
         });
+}
+
+inline bool ReplacedByTalent(Player const* player, uint32 spellId)
+{
+    return player && player->GetTemporarySpellReplacement(spellId) != spellId &&
+        std::any_of(AscensionCompatData::TalentReplacements.begin(), AscensionCompatData::TalentReplacements.end(),
+            [player, spellId](AscensionCompatData::TalentReplacement const& entry)
+            {
+                return entry.ClassId == player->getClass() && entry.OriginalSpellId == spellId;
+            });
+}
+
+inline bool RefusesRow(Player const* player, uint32 spellId)
+{
+    return Refuses(player, spellId) || ReplacedByTalent(player, spellId);
 }
 }
 

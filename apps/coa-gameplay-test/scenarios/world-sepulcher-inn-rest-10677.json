@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "name": "The Sepulcher upper inn starts resting for a Horde character (#10677)",
+  "contract": "Area trigger 5850 (AreaTrigger.dbc 425.51, 1621.24, 139.32, radius 25) covers the upper inn of The Sepulcher, where #10677 stood at (434.80, 1625.41, 141.88), 102 yd from the stock tavern trigger 720. The server had neither an areatrigger nor an areatrigger_tavern row for 5850, so the client's trigger packet was dropped and resting never started. rev_20261124_10677 adds the trigger from the DBC and the tavern row with the Horde mask of 720, so entering the trigger now rests a Horde character.",
+  "timeout_ms": 30000,
+  "location": { "map": 0, "x": 434.802, "y": 1625.41, "z": 141.881, "o": 0 },
+  "players": [ { "id": "p", "race": 5, "class": 1, "level": 33 } ],
+  "steps": [
+    { "action": "assert", "label": "starts outside any rest area", "actor": "p", "metric": "resting", "equals": 0 },
+    { "action": "area_trigger", "actor": "p", "id": 5850 },
+    { "action": "assert", "label": "DISCRIMINATING: entering the upper inn trigger starts resting", "actor": "p", "metric": "resting", "equals": 1, "within_ms": 3000 }
+  ]
+}

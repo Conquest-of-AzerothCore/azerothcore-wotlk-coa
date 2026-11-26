@@ -1,0 +1,147 @@
+{
+  "schema": 1,
+  "name": "Alenna Whisperbough offers Stay a While (1660075) from level 5 without Vulture Cult prerequisite (#10209)",
+  "contract": [
+    "rev_20260924_11_coa_teldrassil_dolanaar.sql gated Stay a While (1660075, offered by Alenna Whisperbough 162881, spawn 9007401 at map 1 9830.92 792.49 1305.521) behind PrevQuestID = 1660071 (A Dark Warning, the final quest of the Shadowglen Vulture Cult chain). Exiles data records 1660075 with prev_quest_id = 0 and min_level = 5, matching the other CoA starting-town Stay a While quests (1660054, 1660060, 1660065, 1660080). Players who reached Dolanaar without finishing 1660071 could not see or accept 1660075 (#10209).",
+    "rev_20261126_10209_alenna_whisperbough_stay_a_while.sql sets PrevQuestID = 0 on 1660075. Expected: in world phase 1 beside Alenna (9007401), a level-4 Night Elf still cannot take 1660075 (MinLevel 5 respected, dialog_status 1), while a level-7 Night Elf who has not completed 1660071 sees dialog_status 8, can take 1660075 (both fail without the fix), listens to Alenna via gossip 85162 option 0 for objective credit (162921), and turns in 1660075."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": 9829.5,
+    "y": 793.5,
+    "z": 1305.6,
+    "o": 5.5
+  },
+  "players": [
+    { "id": "early", "race": 4, "class": 1, "level": 4 },
+    { "id": "ready", "race": 4, "class": 1, "level": 7 }
+  ],
+  "steps": [
+    { "action": "set_phase", "actor": "early", "value": 1 },
+    { "action": "set_phase", "actor": "ready", "value": 1 },
+    { "action": "wait", "label": "Let Dolanaar world spawns activate", "ms": 3000 },
+    {
+      "action": "assert",
+      "label": "SETUP: Alenna Whisperbough world spawn 9007401 is present",
+      "actor": "ready",
+      "metric": "nearby_creature_count",
+      "entry": 162881,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: level-4 Night Elf cannot take Stay a While yet (MinLevel 5)",
+      "actor": "early",
+      "metric": "quest_takeable",
+      "quest": 1660075,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Alenna shows the unavailable marker to the level-4 Night Elf",
+      "actor": "early",
+      "metric": "dialog_status",
+      "entry": 162881,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: level-7 Night Elf has not completed A Dark Warning (1660071)",
+      "actor": "ready",
+      "metric": "quest_rewarded",
+      "quest": 1660071,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: level-7 Night Elf can take Stay a While without completing 1660071",
+      "actor": "ready",
+      "metric": "quest_takeable",
+      "quest": 1660075,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Alenna offers Stay a While (DIALOG_STATUS_AVAILABLE = 8) without 1660071",
+      "actor": "ready",
+      "metric": "dialog_status",
+      "entry": 162881,
+      "equals": 8,
+      "within_ms": 5000
+    },
+    {
+      "action": "quest_accept",
+      "label": "Accept Stay a While from Alenna Whisperbough",
+      "actor": "ready",
+      "entry": 162881,
+      "quest": 1660075
+    },
+    {
+      "action": "assert",
+      "label": "Stay a While is now active in the quest log",
+      "actor": "ready",
+      "metric": "quest_status",
+      "quest": 1660075,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Speak to Alenna to open gossip menu 85162",
+      "actor": "ready",
+      "entry": 162881
+    },
+    {
+      "action": "assert",
+      "label": "Alenna presents the Stay a While listen option",
+      "actor": "ready",
+      "metric": "gossip_options",
+      "min": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "gossip_select",
+      "label": "Select option 0 to listen to Alenna",
+      "actor": "ready",
+      "option": 0
+    },
+    {
+      "action": "assert",
+      "label": "Listening to Alenna grants objective credit 162921",
+      "actor": "ready",
+      "metric": "quest_objective_count",
+      "quest": 1660075,
+      "index": 0,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "Stay a While is ready to turn in",
+      "actor": "ready",
+      "metric": "quest_status",
+      "quest": 1660075,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "quest_turn_in",
+      "label": "Turn in Stay a While to Alenna Whisperbough",
+      "actor": "ready",
+      "entry": 162881,
+      "quest": 1660075
+    },
+    {
+      "action": "assert",
+      "label": "Stay a While is rewarded",
+      "actor": "ready",
+      "metric": "quest_rewarded",
+      "quest": 1660075,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

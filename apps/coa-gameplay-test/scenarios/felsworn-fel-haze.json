@@ -1,7 +1,7 @@
 {
   "schema": 1,
   "name": "Fel Haze grants Blood of Mannoroth full armor penetration (#788)",
-  "contract": "Fel Haze 803903 is SPELL_AURA_ADD_FLAT_MODIFIER (misc=3, SPELLMOD_EFFECT1) with EffectBasePoints=99, DieSides=1, real amount 99+1=100. Its classmask (family 20, dword0 bit21) matches Blood of Mannoroth 802075 by SpellFamilyFlags. Blood of Mannoroth's own effect 0 (SPELL_AURA_MOD_ARMOR_PENETRATION_PCT) has EffectBasePoints=-1, DieSides=1 (a zero-value filler, real amount 0), so the generic Unit::ApplyEffectModifiers path raises its computed value from 0 to 100 (full penetration) once Fel Haze is learned.",
+  "contract": "Fel Haze 803903 is SPELL_AURA_ADD_FLAT_MODIFIER (misc=3, SPELLMOD_EFFECT1) with EffectBasePoints=99, DieSides=1, real amount 99+1=100. Its classmask (family 20, dword0 bit21) matches Blood of Mannoroth 802075 by SpellFamilyFlags. Blood of Mannoroth's own effect 0 (DBC SPELL_AURA_MOD_ARMOR_PENETRATION_PCT, moved by the Felsworn contract to SPELL_AURA_ASCENSION_MOD_IGNORE_ARMOR_PCT, Felsworn ADR 0008) has EffectBasePoints=-1, DieSides=1 (a zero-value filler, real amount 0), so the generic Unit::ApplyEffectModifiers path raises its computed value from 0 to 100 (all armor ignored) once Fel Haze is learned.",
   "timeout_ms": 90000,
   "players": [
     {

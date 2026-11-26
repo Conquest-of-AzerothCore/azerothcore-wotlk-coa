@@ -41,6 +41,11 @@ bool InReach(Creature const* minion, Unit const* target)
     return !Ranged(minion->GetEntry()) ||
            (minion->IsWithinDistInMap(target, 40.0f) && minion->IsWithinLOSInMap(target));
 }
+bool AggressiveTarget(Player const* player, Creature const* minion, Unit const* unit)
+{
+    return unit && player->IsValidAttackTarget(unit) && player->IsHostileTo(unit) && unit->IsHostileTo(player) &&
+           InReach(minion, unit) && minion->IsWithinLOSInMap(unit);
+}
 bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
@@ -134,21 +139,6 @@ uint32 AttackSpell(uint32 entry)
         return 801513;
     default:
         return 0;
-    }
-}
-void Evict(Player* player, int32 needed)
-{
-    auto& minions = State(player).minions;
-    while (int32(Capacity(player)) - Used(player) < needed)
-    {
-        auto oldest = std::find_if(minions.begin(), minions.end(),
-                                   [](MinionRecord const& row) { return row.cost != 0; });
-        if (oldest == minions.end())
-            return;
-        ObjectGuid guid = oldest->guid;
-        minions.erase(oldest);
-        if (Creature* unit = ObjectAccessor::GetCreature(*player, guid))
-            unit->DespawnOrUnsummon();
     }
 }
 }
@@ -621,6 +611,15 @@ class npc_ascension_necromancer : public ScriptedAI
         if (key == 1)
             _command = value;
     }
+    void MoveInLineOfSight(Unit* who) override
+    {
+        Player* player = Owner(me);
+        if (!player || me->IsEngaged() || !me->HasReactState(REACT_AGGRESSIVE) || Pacified(player) ||
+            Stationary(me->GetEntry()) || me->GetEntry() == 523032)
+            return;
+        if (AggressiveTarget(player, me, who) && me->CanStartAttack(who))
+            AttackStart(who);
+    }
     void AttackStart(Unit* target) override
     {
         Player* player = Owner(me);
@@ -812,8 +811,7 @@ class npc_ascension_necromancer : public ScriptedAI
                         target = *player->getAttackers().begin();
                     if (!target && player->HasAura(500982))
                         for (Unit* unit : Nearby(me, 20.0f))
-                            if (player->IsValidAttackTarget(unit) && player->IsHostileTo(unit) &&
-                                me->IsWithinLOSInMap(unit))
+                            if (AggressiveTarget(player, me, unit))
                             {
                                 target = unit;
                                 break;

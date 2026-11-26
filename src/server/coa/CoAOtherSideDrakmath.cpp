@@ -445,8 +445,11 @@ private:
         if (_orbCheck < 200)
             return;
         _orbCheck = 0;
-        std::list<Unit*> players;
-        SelectTargetList(players, 40, SelectTargetMethod::Random, 0, 200.0f, true);
+        std::vector<Player*> players;
+        for (MapReference const& ref : me->GetMap()->GetPlayers())
+            if (Player* player = ref.GetSource())
+                if (player->IsAlive() && !player->IsGameMaster())
+                    players.push_back(player);
         for (auto itr = _orbs.begin(); itr != _orbs.end();)
         {
             Creature* orb = ObjectAccessor::GetCreature(*me, *itr);
@@ -456,8 +459,8 @@ private:
                 continue;
             }
             bool touched = false;
-            for (Unit* player : players)
-                if (player->IsAlive() && orb->GetExactDist2d(player) <= OrbTouch)
+            for (Player* player : players)
+                if (player->IsAlive() && player->InSamePhase(orb) && orb->GetExactDist2d(player) <= OrbTouch)
                     touched = true;
             if (touched)
             {

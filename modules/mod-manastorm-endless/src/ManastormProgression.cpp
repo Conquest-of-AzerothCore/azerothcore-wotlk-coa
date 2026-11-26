@@ -502,11 +502,13 @@ bool ManastormProgression::RecordStageCompletion(
     // published to the online player until the whole transaction commits.
     std::vector<std::shared_ptr<ManastormRewardPublication>>
         rewardPublications;
+    ManastormCoATokenClaims coaTokenClaims;
 
     if (!ManastormRewards::Instance()
         .PrepareStageCompletion(
             run,
             transaction,
+            coaTokenClaims,
             rewardPublications,
             error))
     {
@@ -678,6 +680,10 @@ bool ManastormProgression::RecordStageCompletion(
                 completedUnlockId);
         }
 
+        uint32 const recordedDepth =
+            run.GetRecordedProgressDepth(
+                characterGuid);
+
         transaction->Append(
             "INSERT INTO "
             "`character_manastorm_progress` "
@@ -692,7 +698,7 @@ bool ManastormProgression::RecordStageCompletion(
             characterGuid,
             uint32(uint8(run.GetMode())),
             uint32(trackBit),
-            run.GetDepth());
+            recordedDepth);
 
         transaction->Append(
             "INSERT IGNORE INTO "
@@ -702,7 +708,7 @@ bool ManastormProgression::RecordStageCompletion(
             characterGuid,
             uint32(uint8(run.GetMode())),
             uint32(trackBit),
-            run.GetDepth());
+            recordedDepth);
 
         if (queueTriggeredUnlock)
         {
@@ -798,6 +804,8 @@ bool ManastormProgression::RecordStageCompletion(
             "Unable to commit shared Manastorm progression and rewards.";
         return false;
     }
+
+    coaTokenClaims.Keep();
 
     ManastormRewards::Instance()
         .PublishCommitted(

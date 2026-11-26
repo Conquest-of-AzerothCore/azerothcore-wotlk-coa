@@ -513,20 +513,29 @@ void Loot::AddItem(LootStoreItem const& item)
             generatedLoot.follow_loot_rules = false;
         }
         generatedLoot.count = std::min(count, proto->GetMaxStackSize());
-        generatedLoot.itemIndex = lootItems.size();
-        lootItems.push_back(generatedLoot);
-        count -= proto->GetMaxStackSize();
 
         // In some cases, a dropped item should be visible/lootable only for some players in group
         bool canSeeItemInLootWindow = false;
-        if (auto player = ObjectAccessor::FindPlayer(lootOwnerGUID))
+        Player* lootOwner = ObjectAccessor::FindPlayer(lootOwnerGUID);
+        if (lootOwner)
         {
-            if (auto group = player->GetGroup())
+            Creature* sourceCreature = sourceWorldObjectGUID.IsCreatureOrVehicle() && lootOwner->FindMap()
+                ? lootOwner->FindMap()->GetCreature(sourceWorldObjectGUID)
+                : nullptr;
+            if (auto group = lootOwner->GetGroup())
             {
                 for (auto itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
                 {
                     if (auto member = itr->GetSource())
                     {
+                        if (sourceCreature && !item.conditions.empty())
+                        {
+                            bool canLoot = member->IsAtLootRewardDistance(sourceCreature);
+                            if (!canLoot && !sourceCreature->GetAllowedLooters().empty())
+                                canLoot = sourceCreature->HasAllowedLooter(member->GetGUID());
+                            if (!canLoot)
+                                continue;
+                        }
                         if (generatedLoot.AllowedForPlayer(member, sourceWorldObjectGUID))
                         {
                             canSeeItemInLootWindow = true;
@@ -535,11 +544,19 @@ void Loot::AddItem(LootStoreItem const& item)
                     }
                 }
             }
-            else if (generatedLoot.AllowedForPlayer(player, sourceWorldObjectGUID))
+            else if (generatedLoot.AllowedForPlayer(lootOwner, sourceWorldObjectGUID))
             {
                 canSeeItemInLootWindow = true;
             }
         }
+
+        if (!canSeeItemInLootWindow && lootOwner && !needsQuest && !item.conditions.empty()
+            && sourceWorldObjectGUID.IsCreatureOrVehicle())
+            break;
+
+        generatedLoot.itemIndex = lootItems.size();
+        lootItems.push_back(generatedLoot);
+        count -= proto->GetMaxStackSize();
 
         if (!canSeeItemInLootWindow)
         {

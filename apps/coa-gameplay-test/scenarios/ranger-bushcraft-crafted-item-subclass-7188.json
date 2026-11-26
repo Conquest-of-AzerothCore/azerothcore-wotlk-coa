@@ -1,0 +1,127 @@
+{
+  "schema": 1,
+  "name": "Bushcraft crafted items reach the client with a defined subclass (#7188)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "Item.dbc gives Crude Waterskin 10521 Consumable subclass 120 and Campsite 1041704 subclass 121; ItemSubClass.dbc",
+    "defines neither, and the Bushcraft trade skill window groups its recipes by that subclass.",
+    "Learning Crude Waterskin 802808 or Make Camp 804682 streams the crafted item's SMSG_PATCH_ITEM (0x0932) row with",
+    "subclass 0 (third field), and the next login streams both rows again without owning either item.",
+    "Expected before: no row is streamed, so the client keeps the undefined subclasses."
+  ],
+  "timeout_ms": 120000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "ranger",
+      "race": 1,
+      "class": 21,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 802808
+    },
+    {
+      "action": "learn",
+      "actor": "ranger",
+      "spell": 804682
+    },
+    {
+      "action": "assert",
+      "label": "Learning Crude Waterskin streams its item row",
+      "actor": "ranger",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 10521,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Crude Waterskin row carries subclass 0",
+      "actor": "ranger",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 10521,
+      "index": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Learning Make Camp streams the Campsite row",
+      "actor": "ranger",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 1041704,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "The Campsite row carries subclass 0",
+      "actor": "ranger",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 1041704,
+      "index": 2,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Crude Waterskin was not created, so the stream does not depend on owning it",
+      "actor": "ranger",
+      "metric": "item_count",
+      "item": 10521,
+      "equals": 0
+    },
+    {
+      "action": "relog",
+      "actor": "ranger"
+    },
+    {
+      "action": "wait",
+      "label": "Let the second world entry settle",
+      "ms": 4000
+    },
+    {
+      "action": "client_packet",
+      "actor": "ranger",
+      "opcode": 1377
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the login stream sends the known recipe's Waterskin row again",
+      "actor": "ranger",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 10521,
+      "equals": 2,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the login stream sends the Campsite row again",
+      "actor": "ranger",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 1041704,
+      "equals": 2,
+      "within_ms": 8000
+    }
+  ]
+}

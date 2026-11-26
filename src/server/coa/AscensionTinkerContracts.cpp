@@ -41,7 +41,8 @@ void ApplyContracts(SpellInfo* info)
         info->SpellFamilyFlags = flag96();
         info->StackAmount = 1;
         info->DurationEntry = sSpellDurationStore.LookupEntry(21);
-        info->Attributes |= SPELL_ATTR0_DO_NOT_DISPLAY;
+        info->Attributes |= SPELL_ATTR0_PASSIVE | SPELL_ATTR0_DO_NOT_DISPLAY;
+        info->AttributesCu |= SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED;
     }
     auto dummy = [info](uint8 slot)
     {
@@ -90,6 +91,20 @@ void ApplyContracts(SpellInfo* info)
             info->ManaCost = base->ManaCost;
             info->ManaCostPercentage = base->ManaCostPercentage;
         }
+    }
+    if (id == 505160)
+    {
+        info->EquippedItemClass = -1;
+        info->EquippedItemSubClassMask = 0;
+        info->EquippedItemInventoryTypeMask = 0;
+        info->AttributesEx3 &= ~SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON;
+        info->DmgClass = SPELL_DAMAGE_CLASS_RANGED;
+    }
+    if (id == 505161)
+    {
+        info->EquippedItemClass = -1;
+        info->EquippedItemSubClassMask = 0;
+        info->EquippedItemInventoryTypeMask = 0;
     }
     if (Named(info,500232) || id == 504667 || id == 500612)
     {
@@ -187,7 +202,7 @@ void ApplyContracts(SpellInfo* info)
         info->Effects[1].MiscValue = SPELL_SCHOOL_MASK_ALL;
         dummy(2);
     }
-    if (id == 707278 || id == 578323 || id == 805519 || id == 706698)
+    if (id == 707278 || id == 578323 || id == 805519 || id == 706698 || id == 505161)
         for (auto& effect : info->Effects)
         {
             if (!effect.Effect)

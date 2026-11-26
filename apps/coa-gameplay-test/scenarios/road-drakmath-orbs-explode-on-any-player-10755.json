@@ -1,0 +1,31 @@
+{
+  "schema": 1,
+  "name": "Road to De Other Side: Drak'math's orbs explode on a player who has not drawn threat",
+  "contract": "Issue #10755: the orbs Drak'math the Sinister King (162715) releases from his bursting pillars (orbs 162728) did not explode on contact for some players. An orb explodes with Necrotic Explosion when it comes within 2 yd of a player; the orbs only looked at players on Drak'math's threat list, so a player who had not damaged, healed or been seen by him passed through them. Expected: any living player in the instance touching an orb sets it off and takes the explosion. Drak'math sinks 15 s after the pull and his two side pillars burst into orbs about 7 s later. Necrotic Explosion is logged at 340 (Normal, level 25) to 954 (Mythic); at level 60 on Normal one explosion deals about 340-410, so the bystander loses at least one explosion's worth and, with the orbs of both pillars, no more than six.",
+  "timeout_ms": 90000,
+  "location": {"map": 0, "x": -8914.0, "y": -133.0, "z": 80.6},
+  "players": [
+    {"id": "tank", "race": 1, "class": 1, "level": 60},
+    {"id": "bystander", "race": 1, "class": 1, "level": 60}
+  ],
+  "steps": [
+    {"action": "group", "actor": "tank", "target": "bystander"},
+    {"action": "teleport", "label": "tank enters Road to De Other Side in Drak'math's arena", "actor": "tank", "map": 937, "x": 290.11, "y": 150.62, "z": 248.04, "ignore_access": true},
+    {"action": "assert", "label": "SETUP: tank is in Road to De Other Side", "actor": "tank", "metric": "map_id", "equals": 937, "within_ms": 10000},
+    {"action": "teleport", "label": "bystander waits beyond the east web door, out of Drak'math's sight", "actor": "bystander", "map": 937, "x": 330.0, "y": 152.0, "z": 248.5, "ignore_access": true},
+    {"action": "assert", "label": "SETUP: bystander is in Road to De Other Side", "actor": "bystander", "metric": "map_id", "equals": 937, "within_ms": 10000},
+    {"action": "summon", "label": "Drak'math rises beside the tank", "actor": "tank", "as": "drakmath", "entry": 162715, "distance": 4},
+    {"action": "set_health", "actor": "tank", "value": 200000, "maximum": 200000},
+    {"action": "set_health", "actor": "bystander", "value": 200000, "maximum": 200000},
+    {"action": "wait", "ms": 1000},
+    {"action": "attack_nearby", "label": "the tank pulls Drak'math", "actor": "tank", "entry": 162715, "damage_pct": 1},
+    {"action": "wait", "ms": 10000},
+    {"action": "set_health", "actor": "tank", "value": 200000, "maximum": 200000},
+    {"action": "wait", "ms": 8000},
+    {"action": "set_health", "actor": "tank", "value": 200000, "maximum": 200000},
+    {"action": "assert", "label": "SETUP: the side pillars have burst into orbs", "actor": "bystander", "metric": "nearby_creature_count", "entry": 162728, "min": 1, "within_ms": 15000},
+    {"action": "snapshot", "actor": "bystander", "metric": "health", "save_as": "bystander_before"},
+    {"action": "relocate_to_creature", "label": "the bystander steps into the nearest orb", "actor": "bystander", "entry": 162728, "radius": 60},
+    {"action": "assert", "label": "the orb explodes on the bystander: at least one Necrotic Explosion, at most six", "actor": "bystander", "metric": "health", "relative_to": "bystander_before", "min": -2500, "max": -300, "within_ms": 2000}
+  ]
+}

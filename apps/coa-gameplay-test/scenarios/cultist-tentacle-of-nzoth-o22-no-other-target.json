@@ -1,0 +1,51 @@
+{
+  "schema": 1,
+  "name": "Cultist: Tentacle of N'Zoth removes Thoughtseize out of range with no other target while tentacle stays (O-22)",
+  "contract": "Owner ruling O-22 (2026-11-25, Cultist ADR 0036) on Tentacle of N'Zoth 572103 and Thoughtseize 806596 (Spell.dbc: RangeIndex 11 = 15.0 yd, DurationIndex 31 = 8000 ms, periodic Amplitude = 2000 ms; creature 501464 combat reach 0.75 yd + Harvest Golem 36 combat reach 1.275 yd = 17.025 yd centre-to-centre; 501464 spawns inside SpellRadius[8] = 5.0 yd disk around dummy). Single enemy dummy with no other target in range. Arm 1 (control): dummy moves -10.0 yd along the clear-LOS south -y axis (stays <= 15.0 yd), keeps 806596 == 1 at 300, 2800, and 6800 ms, clears on 8000 ms despawn (9500 ms), and receives 8000 / 2000 = 4 periodic ticks (4th spared by ADR 0016 ExpiryGrace()). Arm 2 (no other target): dummy moves -22.5 yd starting at t = 300 ms under Sprint 11305 (~11.9 yd/s), crossing 17.025 yd at T_exit in ~[1.3, 2.15] s; at 2800 ms and 6800 ms creature 501464 remains alive (1) until its natural 8000 ms despawn while dummy has 806596 == 0, gaining floor(T_exit / 2000) in {0, 1} ticks (cumulative 4..5 across both arms). Return-in-range re-application on the 6000 ms pulse is an unruled observation (ADR 0036) and is intentionally not asserted. Precondition 823764 prevents full Shadow resist. What fails this scenario: leaving 806596 on dummy out of range when no replacement enemy exists (dummy 806596 == 1 at 2800/6800 ms or dummy taking 4 ticks in Arm 2 -> cumulative 8 > 5), despawning 501464 early on losing its target (owned_creature_count == 0 at 2800/6800 ms), or dropping 806596 / failing 4 ticks in the in-range control arm.",
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "caster", "race": 1, "class": 25, "level": 60 }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "caster", "entry": 36, "level": 60, "health": 500000, "dx": 0.0, "dy": -2.0, "stationary": false }
+  ],
+  "steps": [
+    { "action": "learn", "actor": "caster", "spell": 572103 },
+    { "action": "set_aura", "actor": "caster", "target": "caster", "spell": 823764, "stacks": 1 },
+    { "action": "set_aura", "actor": "caster", "target": "dummy", "spell": 11305, "stacks": 1 },
+    { "action": "set_power", "actor": "caster", "power": 0, "value": 2000 },
+    { "action": "reset_cooldown", "actor": "caster", "spell": 572103 },
+    { "action": "cast", "actor": "caster", "spell": 572103, "target": "dummy" },
+    { "action": "wait", "label": "arm1 init", "ms": 300 },
+    { "action": "assert", "label": "arm1_init_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 1 },
+    { "action": "move_point", "actor": "dummy", "dx": 0.0, "dy": -10.0 },
+    { "action": "wait", "label": "arm1 to 2800", "ms": 2500 },
+    { "action": "assert", "label": "arm1_2800_dist", "actor": "caster", "metric": "owned_creature_distance_2d", "entry": 501464, "target": "dummy", "max": 15.0 },
+    { "action": "assert", "label": "arm1_2800_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 1 },
+    { "action": "wait", "label": "arm1 to 6800", "ms": 4000 },
+    { "action": "assert", "label": "arm1_6800_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 1 },
+    { "action": "move_point", "actor": "dummy", "dx": 0.0, "dy": 10.0 },
+    { "action": "wait", "label": "arm1 expire", "ms": 2700 },
+    { "action": "assert", "label": "arm1_end_summon", "actor": "caster", "metric": "owned_creature_count", "entry": 501464, "equals": 0 },
+    { "action": "assert", "label": "arm1_end_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 0 },
+    { "action": "assert", "label": "arm1_ticks", "actor": "caster", "metric": "spell_damage_count", "spell": 806596, "target": "dummy", "periodic": true, "equals": 4 },
+    { "action": "set_aura", "actor": "caster", "target": "dummy", "spell": 11305, "stacks": 1 },
+    { "action": "set_power", "actor": "caster", "power": 0, "value": 2000 },
+    { "action": "reset_cooldown", "actor": "caster", "spell": 572103 },
+    { "action": "cast", "actor": "caster", "spell": 572103, "target": "dummy" },
+    { "action": "wait", "label": "arm2 init", "ms": 300 },
+    { "action": "assert", "label": "arm2_init_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 1 },
+    { "action": "move_point", "actor": "dummy", "dx": 0.0, "dy": -22.5 },
+    { "action": "wait", "label": "arm2 to 2800", "ms": 2500 },
+    { "action": "assert", "label": "arm2_2800_dist", "actor": "caster", "metric": "owned_creature_distance_2d", "entry": 501464, "target": "dummy", "min": 17.025 },
+    { "action": "assert", "label": "arm2_2800_summon", "actor": "caster", "metric": "owned_creature_count", "entry": 501464, "equals": 1 },
+    { "action": "assert", "label": "arm2_2800_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 0 },
+    { "action": "wait", "label": "arm2 to 6800", "ms": 4000 },
+    { "action": "assert", "label": "arm2_6800_summon", "actor": "caster", "metric": "owned_creature_count", "entry": 501464, "equals": 1 },
+    { "action": "assert", "label": "arm2_6800_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 0 },
+    { "action": "wait", "label": "arm2 expire", "ms": 2700 },
+    { "action": "assert", "label": "arm2_end_summon", "actor": "caster", "metric": "owned_creature_count", "entry": 501464, "equals": 0 },
+    { "action": "assert", "label": "arm2_end_aura", "actor": "dummy", "metric": "aura", "spell": 806596, "equals": 0 },
+    { "action": "assert", "label": "arm2_cumul_ticks", "actor": "caster", "metric": "spell_damage_count", "spell": 806596, "target": "dummy", "periodic": true, "min": 4, "max": 5 }
+  ]
+}

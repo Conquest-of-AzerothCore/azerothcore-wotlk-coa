@@ -1,0 +1,52 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth class trainer re-sends its window after a rank purchase so held Skulltaker ranks stay used (#10825)",
+  "contract": [
+    "The Knight of Xoroth class trainer (trainer 900017, Spi'ro 50278) lists Skulltaker rank 1 800168 (level 1),",
+    "rank 2 802416 (level 8, requires 800168), rank 3 802417 (level 16, requires 802416) and rank 4 802418",
+    "(level 24, requires 802417). Learning a rank supersedes the one below it, so the client spellbook no longer",
+    "holds the lower rank. On the next spell learned the 3.3.5 client redraws trainer rows from its own spellbook",
+    "and offers the superseded rank again, which the server refuses as known (#10825). A level-24 knight holding",
+    "ranks 1 and 2 buys rank 3: the purchase must re-send the window, with ranks 2 and 3 known (2) and rank 4",
+    "available (0). Client rendering itself is outside this harness; the re-sent window replaces the redraw."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "k",
+      "race": 1,
+      "class": 17,
+      "level": 24
+    }
+  ],
+  "creatures": [
+    {
+      "id": "trainer",
+      "owner": "k",
+      "entry": 50278,
+      "distance": 2,
+      "faction": 35
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 3000 },
+    { "action": "money", "actor": "k", "copper": 100000, "label": "fixture: enough copper for the lesson" },
+    { "action": "learn", "actor": "k", "spell": 800168 },
+    { "action": "learn", "actor": "k", "spell": 802416 },
+    { "action": "assert", "actor": "k", "metric": "knows_spell", "spell": 802416, "equals": 1, "label": "Skulltaker rank 2 is known" },
+    { "action": "gossip_hello", "actor": "k", "target": "trainer", "label": "right-click the Knight of Xoroth trainer" },
+    { "action": "gossip_select", "actor": "k", "option": 0, "label": "open the class training window" },
+    { "action": "assert", "actor": "k", "metric": "trainer_list_packets", "equals": 1, "label": "one window was sent" },
+    { "action": "assert", "actor": "k", "metric": "trainer_window_state", "spell": 802416, "equals": 2, "label": "rank 2 is a used row" },
+    { "action": "assert", "actor": "k", "metric": "trainer_window_state", "spell": 802417, "equals": 0, "label": "rank 3 is available" },
+
+    { "action": "trainer_buy", "actor": "k", "target": "trainer", "spell": 802417, "label": "buy Skulltaker rank 3" },
+    { "action": "assert", "actor": "k", "metric": "spellbook_buy_succeeded", "spell": 802417, "equals": 1, "label": "rank 3 was granted" },
+    { "action": "assert", "actor": "k", "metric": "knows_spell", "spell": 802417, "equals": 1, "label": "rank 3 was learned" },
+    { "action": "assert", "actor": "k", "metric": "trainer_list_packets", "equals": 2, "label": "the purchase re-sent the window" },
+    { "action": "assert", "actor": "k", "metric": "trainer_window_state", "spell": 802416, "equals": 2, "label": "superseded rank 2 stays a used row" },
+    { "action": "assert", "actor": "k", "metric": "trainer_window_state", "spell": 802417, "equals": 2, "label": "the bought rank is a used row" },
+    { "action": "assert", "actor": "k", "metric": "trainer_window_state", "spell": 802418, "equals": 0, "label": "rank 4 turned available" },
+    { "action": "assert", "actor": "k", "metric": "spellbook_buy_failed", "spell": 802416, "equals": 0, "label": "superseded rank 2 was never offered for purchase" }
+  ]
+}

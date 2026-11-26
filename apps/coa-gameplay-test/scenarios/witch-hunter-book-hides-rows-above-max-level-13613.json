@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Witch Hunter: Book of Ascension omits ranks above MaxPlayerLevel (#13613)",
+  "contract": [
+    "AscensionSpellProgressionData.h carries Bola Throw rank 7 (501342, level 60) and rank 8 (501343,",
+    "level 68, Spell.dbc BaseLevel 68), plus other post-60 ranks such as Witchblight rank 6 (681221, level",
+    "68). BuildRows in modules/mod-spellbook/src/spellbook.cpp never checked CONFIG_MAX_PLAYER_LEVEL, so on",
+    "a level-60 realm the Book of Ascension listed level-68 Bola Throw rank 8 (#13613). With MaxPlayerLevel",
+    "set to 60, a level-60 Witch Hunter holding Bola Throw rank 6 (501341) sees rank 7 (501342) as available",
+    "and can train it, while rank 8 (501343) and Witchblight rank 6 (681221) are omitted from the window and",
+    "a direct purchase request for 501343 is refused."
+  ],
+  "max_player_level": 60,
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "wh",
+      "race": 1,
+      "class": 15,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "wh",
+      "copper": 1000000
+    },
+    {
+      "action": "learn",
+      "label": "Fixture: hold Bola Throw rank 6 so rank 7 is trainable",
+      "actor": "wh",
+      "spell": 501341
+    },
+    {
+      "action": "learn",
+      "actor": "wh",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "wh",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Open the Book of Ascension at MaxPlayerLevel 60",
+      "actor": "wh"
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "trainer_list_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Control: Bola Throw rank 7 (level 60) is available",
+      "actor": "wh",
+      "metric": "trainer_window_state",
+      "spell": 501342,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bola Throw rank 8 (level 68) is omitted above MaxPlayerLevel 60",
+      "actor": "wh",
+      "metric": "trainer_window_state",
+      "spell": 501343,
+      "equals": -1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: spellbook_offers_spell excludes Bola Throw rank 8",
+      "actor": "wh",
+      "metric": "spellbook_offers_spell",
+      "spell": 501343,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Witchblight rank 6 (level 68) is also omitted above MaxPlayerLevel 60",
+      "actor": "wh",
+      "metric": "trainer_window_state",
+      "spell": 681221,
+      "equals": -1
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Control: train Bola Throw rank 7 at the level cap",
+      "actor": "wh",
+      "spell": 501342
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 501342,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "knows_spell",
+      "spell": 501342,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "trainer_list_packets",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Bola Throw rank 7 is now a known row",
+      "actor": "wh",
+      "metric": "trainer_window_state",
+      "spell": 501342,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Bola Throw rank 8 stays absent after republishing",
+      "actor": "wh",
+      "metric": "trainer_window_state",
+      "spell": 501343,
+      "equals": -1
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Direct purchase request for level-68 Bola Throw rank 8 is refused",
+      "actor": "wh",
+      "spell": 501343
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "spellbook_buy_failed",
+      "spell": 501343,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 501343,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "wh",
+      "metric": "knows_spell",
+      "spell": 501343,
+      "equals": 0
+    }
+  ]
+}

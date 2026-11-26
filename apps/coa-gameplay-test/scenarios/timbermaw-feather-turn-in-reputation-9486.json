@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Timbermaw feather and bead turn-ins give 75 reputation (#9486)",
+  "contract": "#9486 reported less Timbermaw Hold reputation for feather turn-ins than on the Ascension realm. Feathers for Grazle (8466), Feathers for Nafien (8467) and Beads for Salfa (8469) reward faction 576 at QuestFactionReward index 3, 75 reputation, with no vanilla 50 override. A dwarf warrior (no reputation racial) starts each turn-in from a known standing. Expected: each turn-in raises Timbermaw Hold by exactly 75.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "p",
+      "race": 3,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_reputation",
+      "actor": "p",
+      "id": 576,
+      "value": 0
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 8466
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 8466
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Feathers for Grazle gives 75 reputation",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 75
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 8467
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 8467
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Feathers for Nafien gives 75 reputation",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 150
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 8469
+    },
+    {
+      "action": "reward_quest",
+      "actor": "p",
+      "quest": 8469
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Beads for Salfa gives 75 reputation",
+      "metric": "reputation",
+      "id": 576,
+      "equals": 225
+    }
+  ]
+}

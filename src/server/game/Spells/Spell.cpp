@@ -623,6 +623,11 @@ Spell::Spell(Unit* caster, SpellInfo const* info, TriggerCastFlags triggerFlags,
             if (Item* pItem = m_caster->ToPlayer()->GetWeaponForAttack(RANGED_ATTACK))
                 m_spellSchoolMask = SpellSchoolMask(1 << pItem->GetTemplate()->Damage[0].DamageType);
 
+    // Ascension's school-change modifier ("your next Lightning Bolt deals Froststorm damage")
+    if (Player* modOwner = m_caster->GetSpellModOwner())
+        if (SpellSchoolMask school = modOwner->GetAscensionSchoolOverride(m_spellInfo, this))
+            m_spellSchoolMask = school;
+
     if (originalCasterGUID)
         m_originalCasterGUID = originalCasterGUID;
     else
@@ -1314,6 +1319,8 @@ void Spell::SelectImplicitConeTargets(SpellEffIndex effIndex, SpellImplicitTarge
             if (uint32 maxTargets = m_spellValue->MaxAffectedTargets)
             {
                 maxTargets += m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS, m_spellInfo);
+                if (Player* modOwner = m_caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MAX_TARGETS, maxTargets, this);
                 Acore::Containers::RandomResize(targets, maxTargets);
             }
 
@@ -1408,6 +1415,8 @@ void Spell::SelectImplicitAreaTargets(SpellEffIndex effIndex, SpellImplicitTarge
         if (uint32 maxTargets = m_spellValue->MaxAffectedTargets)
         {
             maxTargets += m_caster->GetTotalAuraModifierByAffectMask(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS, m_spellInfo);
+            if (Player* modOwner = m_caster->GetSpellModOwner())
+                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MAX_TARGETS, maxTargets, this);
             Acore::Containers::RandomResize(targets, maxTargets);
         }
 
@@ -2226,6 +2235,9 @@ void Spell::SearchChainTargets(std::list<WorldObject*>& targets, uint32 chainTar
     // per-spell override from spell_jump_distance table
     if (m_spellInfo->JumpDistance > 0.0f)
         jumpRadius = m_spellInfo->JumpDistance;
+
+    if (Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_DISTANCE, jumpRadius, this);
 
     // chain lightning/heal spells and similar - allow to jump at larger distance and go out of los
     bool isBouncingFar = (m_spellInfo->HasAttribute(SPELL_ATTR4_BOUNCY_CHAIN_MISSILES)
@@ -6191,9 +6203,38 @@ SpellCastResult Spell::CheckCast(bool strict, uint32* /*param1*/, uint32* /*para
     // Divine Charge explicitly permits its recipients to cast on the finite steed.
     bool divineSteed = m_caster->IsOnDivineSteed();
     bool tinkerMechsuitConsumable = m_CastItem && m_CastItem->GetTemplate()->Class == ITEM_CLASS_CONSUMABLE;
-    bool tinkerMechsuit = m_caster->IsPlayer() && m_caster->getClass() == CLASS_TINKER &&
-        (m_spellInfo->SpellFamilyName == 34 || tinkerMechsuitConsumable) && !m_caster->IsInFlight() &&
-        m_caster->HasAura(801384, m_caster->GetGUID()) && m_caster->HasAura(803451, m_caster->GetGUID());
+    bool const inTinkerMechsuit = m_caster->IsPlayer() && m_caster->ToPlayer()->IsInTinkerMechsuit();
+    bool tinkerMechsuitRacial = false;
+    if (inTinkerMechsuit && m_spellInfo->SpellFamilyName != 34 && !tinkerMechsuitConsumable)
+    {
+        SkillLineAbilityMapBounds bounds = sSpellMgr->GetSkillLineAbilityMapBounds(m_spellInfo->Id);
+        for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
+        {
+            switch (itr->second->SkillLine)
+            {
+                case SKILL_RACIAL_HUMAN:
+                case SKILL_ORC_RACIAL:
+                case SKILL_RACIAL_DWARVEN:
+                case SKILL_RACIAL_NIGHT_ELF:
+                case SKILL_RACIAL_UNDED:
+                case SKILL_RACIAL_TAUREN:
+                case SKILL_RACIAL_GNOME:
+                case SKILL_RACIAL_TROLL:
+                case SKILL_RACIAL_BLOODELF:
+                case SKILL_RACIAL_DRAENEI:
+                case 11125:
+                case 11760:
+                    tinkerMechsuitRacial = true;
+                    break;
+                default:
+                    break;
+            }
+            if (tinkerMechsuitRacial)
+                break;
+        }
+    }
+    bool tinkerMechsuit = inTinkerMechsuit &&
+        (m_spellInfo->SpellFamilyName == 34 || tinkerMechsuitConsumable || tinkerMechsuitRacial);
     if (m_caster->IsMounted() && m_caster->IsPlayer() && !HasTriggeredCastFlag(TRIGGERED_IGNORE_CASTER_MOUNTED_OR_ON_VEHICLE) &&
             !m_spellInfo->IsPassive() && !m_spellInfo->HasAttribute(SPELL_ATTR0_ALLOW_WHILE_MOUNTED) && !divineSteed &&
             !tinkerMechsuit &&

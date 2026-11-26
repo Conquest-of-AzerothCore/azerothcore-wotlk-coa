@@ -1,0 +1,60 @@
+{
+  "schema": 1,
+  "name": "Wildcard: Righteous Radiance grants its buff from direct Fire damage (#13104)",
+  "contract": [
+    "Righteous Radiance (270326) reads 'Using direct damage Fire spells and abilities now grants you Righteous",
+    "Radiance and increases the duration of Holy Fire on the target by 1 second.' Its only DBC trigger is the Holy",
+    "Fire extension 270310; Ascension grants the buff 270308 through an SLS companion spell CoA never teaches, so",
+    "the buff never appeared. A second aura script now casts 270308 on the owner whenever the mystic rule procs.",
+    "A Holy Smite (585) must not grant it; each Fireball (133) adds one stack."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "h",
+      "race": 1,
+      "class": 10,
+      "level": 60,
+      "spell_hit_rating": 10000,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "d",
+      "owner": "h",
+      "entry": 36,
+      "level": 60,
+      "health": 5000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    { "action": "wait", "ms": 5000 },
+    { "action": "learn", "label": "h fixture: Righteous Radiance", "actor": "h", "spell": 270326 },
+    { "action": "learn", "label": "h fixture: Smite", "actor": "h", "spell": 585 },
+    { "action": "learn", "label": "h fixture: Fireball", "actor": "h", "spell": 133 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "assert", "label": "h has the Righteous Radiance talent aura", "actor": "h", "metric": "aura", "spell": 270326, "equals": 1 },
+    { "action": "set_power", "actor": "h", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "h", "spell": 585, "target": "d" },
+    {
+      "action": "assert", "label": "SETUP Smite hit the target",
+      "actor": "h", "metric": "spell_damage_count", "spell": 585, "target": "d", "min": 1, "within_ms": 4000
+    },
+    { "action": "wait", "ms": 500 },
+    { "action": "assert", "label": "CONTROL a Holy spell grants no Righteous Radiance", "actor": "h", "metric": "aura", "spell": 270308, "equals": 0 },
+    { "action": "set_power", "actor": "h", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "h", "spell": 133, "target": "d" },
+    {
+      "action": "assert", "label": "CONTRACT (#13104) a Fireball hit grants Righteous Radiance",
+      "actor": "h", "metric": "aura_stacks", "spell": 270308, "equals": 1, "within_ms": 5000
+    },
+    { "action": "set_power", "actor": "h", "power": 0, "value": 1000 },
+    { "action": "cast", "actor": "h", "spell": 133, "target": "d" },
+    {
+      "action": "assert", "label": "CONTRACT (#13104) a second Fireball adds a stack",
+      "actor": "h", "metric": "aura_stacks", "spell": 270308, "equals": 2, "within_ms": 5000
+    }
+  ]
+}

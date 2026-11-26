@@ -7,6 +7,7 @@
 #include "GridNotifiersImpl.h"
 #include "Item.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
 #include "Player.h"
 #include "Random.h"
 #include "ScriptMgr.h"
@@ -14,11 +15,13 @@
 #include "SpellAuraEffects.h"
 #include "SpellAuras.h"
 #include "SpellMgr.h"
+#include "WorldPacket.h"
 #include <algorithm>
 #include <memory>
 #include <mutex>
 #include <tuple>
 #include <unordered_map>
+#include <vector>
 namespace AscensionSunCleric
 {
 namespace
@@ -101,14 +104,39 @@ uint32 Highest(Player* player, uint32 root)
 }
 void Reduce(Player* player, uint32 root, int32 milliseconds)
 {
+    std::vector<uint32> cleared;
     for (auto const& pair : player->GetSpellMap())
         if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), root))
         {
             if (milliseconds == INT32_MAX)
+            {
                 player->RemoveSpellCooldown(pair.first, true);
+                cleared.push_back(pair.first);
+            }
             else
                 player->ModifySpellCooldown(pair.first, -milliseconds);
         }
+    if (cleared.empty())
+        return;
+    ObjectGuid const owner = player->GetGUID();
+    player->m_Events.AddEventAtOffset([owner, cleared = std::move(cleared)]()
+    {
+        Player* target = ObjectAccessor::FindPlayer(owner);
+        if (!target)
+            return;
+        for (uint32 spellId : cleared)
+        {
+            SpellInfo const* info = sSpellMgr->GetSpellInfo(spellId);
+            if (!info || !target->HasActiveSpell(spellId) || target->HasSpellCooldown(spellId))
+                continue;
+            if (uint32 remaining = target->GetGlobalCooldownMgr().GetGlobalCooldown(info))
+            {
+                WorldPacket data;
+                target->BuildCooldownPacket(data, SPELL_COOLDOWN_FLAG_NONE, spellId, remaining);
+                target->SendDirectMessage(&data);
+            }
+        }
+    }, 0ms);
 }
 void SetHelper(Player* player, uint32 id, bool enabled)
 {
@@ -301,6 +329,13 @@ void Fulfill(Player* player, Spell* spell, Spell* guard, Unit* target)
     if (player->HasAura(707081) && target && player->IsValidAttackTarget(target))
         Cast(player, target, 657125);
 }
+static bool IsBoss(Unit const* target)
+{
+    Creature const* creature = target->ToCreature();
+    return creature && !creature->GetOwnerGUID().IsPlayer() && (creature->IsDungeonBoss() ||
+        sObjectMgr->IsRaidEncounterKillCredit(creature->GetEntry()) ||
+        creature->GetCreatureTemplate()->rank == CREATURE_ELITE_WORLDBOSS);
+}
 void Eclipse(Player* player, Unit* target, uint32 amount)
 {
     if (!amount || !target || !player->IsValidAttackTarget(target))
@@ -309,7 +344,7 @@ void Eclipse(Player* player, Unit* target, uint32 amount)
         effect->SetAmount(int32(std::min<uint64>(INT32_MAX, uint64(std::max(0, effect->GetAmount())) + amount)));
     else
         Copy(player, target, 505340, amount);
-    if (player->HasAura(704579) && (!target->ToCreature() || !target->ToCreature()->IsDungeonBoss()))
+    if (player->HasAura(704579) && !IsBoss(target))
         Cast(player, target, 505342);
 }
 bool Daytime()
@@ -388,13 +423,17 @@ void Refresh(Player* player)
     SetAmount(player, 680639, 1, int32(5 * player->GetStat(STAT_INTELLECT)));
     for (uint32 id : {803500, 803492, 807750, 807751, 807752, 807446, 805481, 805491, 681471})
         player->RemoveAurasDueToSpell(id);
-    bool replacement = player->IsAlive() && player->HasAura(803238) && player->HasSpell(Highest(player, 800231));
+    uint32 sunflare = Highest(player, 800231);
+    bool replacement = player->IsAlive() && player->HasAura(803238) && player->HasSpell(sunflare);
     if (replacement && !player->HasSpell(504764))
         player->learnSpellWithoutAnnouncement(504764);
     for (auto const& pair : player->GetSpellMap())
-        if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231))
-            player->SetTemporarySpellReplacement(pair.first, replacement ? 504764 : 0);
-    if (!replacement)
+        if (player->HasSpell(pair.first) && Named(sSpellMgr->GetSpellInfo(pair.first), 800231) &&
+            (!replacement || pair.first != sunflare))
+            player->SetTemporarySpellReplacement(pair.first, 0);
+    if (replacement)
+        player->SetTemporarySpellReplacement(sunflare, 504764);
+    if (!replacement && !player->HasAura(807059))
         player->removeSpell(504764, SPEC_MASK_ALL, true);
     bool conversion = player->IsAlive() && player->HasAura(Dawn) && player->HasSpell(DawnCast);
     bool const converted = player->HasSpell(RadiantConversion);
@@ -415,8 +454,6 @@ void Refresh(Player* player)
         if (converted)
             player->removeSpell(RadiantConversion, SPEC_MASK_ALL, true);
     }
-    if (!player->IsInCombat())
-        state.firstAttacks.clear();
     state.refreshing = false;
 }
 }

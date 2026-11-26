@@ -1,0 +1,55 @@
+{
+  "spell": 804057,
+  "kind": "metric_delta",
+  "quote": "Calm an enemy, disarming their melee and ranged weapons for $d.",
+  "trigger_spell": 804057,
+  "target": "enemy",
+  "enemy_player_race": 2,
+  "measure_actor": "enemy",
+  "cast_in_before": false,
+  "before_expected": 1,
+  "expected": 1,
+  "expected_gain": 0,
+  "tolerance": 0,
+  "wait_ms": 4500,
+  "expire_ms": 500,
+  "name": "Calm (an enemy player's Auto Shots stop)",
+  "variant": "shooter_ranged",
+  "label_suffix": "shooter_ranged",
+  "metric": "spell_go_count",
+  "fields": {
+    "spell": 75
+  },
+  "enemy_shooter": {
+    "mode": "ranged",
+    "class": 15,
+    "weapons": [
+      {
+        "item": 15809,
+        "slot": 17
+      }
+    ],
+    "skills": [
+      226
+    ],
+    "learn": [],
+    "spell": 75,
+    "relocate": [
+      -12,
+      0
+    ],
+    "window_ms": 5000,
+    "distance_yd": [
+      8,
+      30
+    ],
+    "native_refusals": [
+      [
+        807778,
+        27
+      ]
+    ],
+    "source": "Witch Hunter (class 15) with the crossbow of the 'Boltslinger' set of witch_hunter.json (item 15809, slot 17, skill line 226). Control: the same enemy shoots 5000 ms with no Calm on it; the trial is void unless it fired at least one Auto Shot (SPELL_GO of 75) there."
+  },
+  "observe_source": "Calm 804057 Effect[1] aura 67 MOD_DISARM and Effect[2] aura 254 MOD_DISARM_OFFHAND, no aura 278 (DBC read 2026-11-22). Enemy player race 2. Calm on a player (not Undead or Demon) refuses its own Effect[0] trigger 807778 with reason 27 (SPELL_FAILED_DONT_REPORT): that refusal is native to the cast and is stated in native_refusals; any other refusal voids the ranged trial. Auto Shot 75 SPELL_GO count of the enemy: the control window (no Calm) must read at least 1 (crossbow speed 2800 ms, so at least 1 in 5000 ms), and the window with Calm on the enemy (1000 ms + 4500 ms, the aura read first) must add 0 shots (the tooltip says ranged weapons are disarmed). The only consumer of UNIT_FLAG2_DISARM_RANGED is Unit::CanUseAttackType(RANGED_ATTACK) (Unit.h:1004). Reference search 2026-11-22: nothing found beyond the tooltip, the DBC and the engine code cited."
+}

@@ -353,6 +353,8 @@ SHIPPED_EXCLUSIVE = {'bloodforged-high-risk-drop', 'coa-prestige-chromie-spawns'
                      'battleground-spirit-guide-queue-follows-range',
                      'battleground-spirit-guide-client-queue-request-10146',
                      'mercenary-battleground-team-faction', 'mercenary-war-mode-battleground',
+                     'mercenary-criminal-no-trade-no-queue-9132',
+                     'mercenary-criminal-group-arena-queues-9132',
                      'high-risk-challenge-survives-battleground', 'mercenary-wintergrasp-team-faction',
                      'battleground-wide-bracket-boundary', 'battleground-wide-bracket-group-boundary',
                      'battleground-wide-bracket-catch-up', 'battleground-wide-bracket-pet-catch-up',
@@ -1047,6 +1049,15 @@ class BatchTests(unittest.TestCase):
 
     def test_quest_log_size_cases_run_exclusively_without_a_policy_entry(self):
         self.write(self.definitions / 'scenarios' / 'beta.json', {**SCENARIOS['beta'], 'quest_log_size': 64})
+        code, result = self.simulated('--lanes', '3', '--scenario', 'beta', *SLOW[:3])
+        self.assertEqual(code, 0, self.stderr.getvalue())
+        admissions = self.events('lanes.log')
+        self.assertEqual((admissions[0]['name'], admissions[0]['exclusive'], admissions[0]['running']),
+                         ('Beta', True, []))
+        self.assertEqual(result['simulation']['exclusive'], ['beta'])
+
+    def test_max_player_level_cases_run_exclusively_without_a_policy_entry(self):
+        self.write(self.definitions / 'scenarios' / 'beta.json', {**SCENARIOS['beta'], 'max_player_level': 60})
         code, result = self.simulated('--lanes', '3', '--scenario', 'beta', *SLOW[:3])
         self.assertEqual(code, 0, self.stderr.getvalue())
         admissions = self.events('lanes.log')

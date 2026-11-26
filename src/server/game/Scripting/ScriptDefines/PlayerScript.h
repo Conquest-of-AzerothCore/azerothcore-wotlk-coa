@@ -236,6 +236,7 @@ enum PlayerHook
     PLAYERHOOK_ON_SPELL_CHARGE_CONSUMED,
     PLAYERHOOK_ON_SPELL_COOLDOWN_CALCULATED,
     PLAYERHOOK_CAN_ENTER_MANASTORM,
+    PLAYERHOOK_CAN_RELEASE_SPIRIT,
     PLAYERHOOK_ON_PLAYER_ENVIRONMENTAL_DAMAGE,
     PLAYERHOOK_ON_PLAYER_BREATH_INVERTED,
     PLAYERHOOK_ON_CAN_REGENERATE,
@@ -251,6 +252,7 @@ enum PlayerHook
     PLAYERHOOK_ON_TAKE_MAIL_ITEM,
     PLAYERHOOK_CAN_TAKE_QUEST,
     PLAYERHOOK_CAN_REWARD_QUEST,
+    PLAYERHOOK_CAN_REPEAT_DAILY_QUEST,
     PLAYERHOOK_ON_QUEST_GIVER_CHOOSE_REWARD,
     PLAYERHOOK_ON_REFRESH_QUEST_GIVER,
     PLAYERHOOK_ON_COA_PROGRESS,
@@ -978,6 +980,15 @@ public:
      */
     virtual bool OnPlayerCanEnterManastorm(Player* /*player*/) { return true; }
 
+    /**
+     * @brief This hook is called when a dead player asks to release their spirit.
+     *
+     * @param player Contains information about the Player
+     *
+     * @return true if the player may release now
+     */
+    virtual bool OnPlayerCanReleaseSpirit(Player* /*player*/) { return true; }
+
     // Called when a player withdraws from a bank the Ascension personal/realm bank items
     // open (an item moved out, or money taken out). `kind`: 0 = personal, 1 = realm.
     virtual void OnPlayerBankWithdraw(Player* /*player*/, uint8 /*kind*/) { }
@@ -1120,6 +1131,18 @@ public:
      * @return false to refuse the ordinary quest reward
      */
     [[nodiscard]] virtual bool OnPlayerCanRewardQuest(Player const* /*player*/, Quest const* /*quest*/) { return true; }
+
+    /**
+     * @brief This hook is called when the player already did a daily quest today and the core checks it again.
+     *
+     * @param player Contains information about the Player
+     * @param quest The daily quest
+     * @return true to let the player take and turn in the daily quest once more today
+     */
+    [[nodiscard]] virtual bool OnPlayerCanRepeatDailyQuest(Player const* /*player*/, Quest const* /*quest*/)
+    {
+        return false;
+    }
 
     /**
      * @brief This hook is called after a quest reward request from a validated quest giver, before the core rewards it.

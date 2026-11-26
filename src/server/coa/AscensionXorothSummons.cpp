@@ -1,5 +1,6 @@
 /* Copyright (C) 2016+ AzerothCore, GNU AGPL v3. */
 #include "AscensionXoroth.h"
+#include "CombatManager.h"
 #include "GossipDef.h"
 #include "Map.h"
 #include "MotionMaster.h"
@@ -72,6 +73,43 @@ void Scale(Creature* unit, Player* player)
     unit->SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, damage * .8f);
     unit->SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, damage * 1.2f);
     unit->UpdateDamagePhysical(BASE_ATTACK);
+}
+bool EngagedTarget(Creature* summon, Player* player, Unit* target)
+{
+    return target && target->IsAlive() && player->IsValidAttackTarget(target) && player->IsInCombatWith(target) &&
+           summon->IsWithinDistInMap(target, 40.0f) && summon->IsWithinLOSInMap(target) &&
+           !target->HasBreakableByDamageCrowdControlAura();
+}
+Unit* CombatTarget(Creature* summon, Player* player)
+{
+    if (Unit* target = player->GetVictim(); EngagedTarget(summon, player, target))
+        return target;
+    if (Unit* selected = player->GetSelectedUnit(); EngagedTarget(summon, player, selected))
+        return selected;
+    Unit* nearest = nullptr;
+    auto consider = [&](Unit* candidate)
+    {
+        if (!EngagedTarget(summon, player, candidate))
+            return;
+        if (!nearest || summon->GetDistance(candidate) < summon->GetDistance(nearest))
+            nearest = candidate;
+    };
+    for (Unit* attacker : player->getAttackers())
+        consider(attacker);
+    if (nearest)
+        return nearest;
+    if (Unit* helper = summon->getAttackerForHelper();
+        helper && helper->IsAlive() && player->IsValidAttackTarget(helper) &&
+        summon->IsWithinDistInMap(helper, 40.0f) && summon->IsWithinLOSInMap(helper) &&
+        !helper->HasBreakableByDamageCrowdControlAura())
+        return helper;
+    for (auto const& [guid, reference] : player->GetCombatManager().GetPvECombatRefs())
+        if (!reference->IsSuppressedFor(player))
+            consider(reference->GetOther(player));
+    for (auto const& [guid, reference] : player->GetCombatManager().GetPvPCombatRefs())
+        if (!reference->IsSuppressedFor(player))
+            consider(reference->GetOther(player));
+    return nearest;
 }
 struct npc_ascension_xoroth_summon : public ScriptedAI
 {
@@ -190,8 +228,7 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
             me->AttackStop();
         if (!me->GetVictim())
         {
-            Unit* target = player->GetVictim();
-            if (target && player->IsValidAttackTarget(target))
+            if (Unit* target = CombatTarget(me, player))
                 AttackStart(target);
             else if (me->GetMotionMaster()->GetCurrentMovementGeneratorType() != FOLLOW_MOTION_TYPE)
             {
@@ -204,8 +241,12 @@ struct npc_ascension_xoroth_summon : public ScriptedAI
                                                   me->GetEntry() != 50301);
             }
         }
-        bool engaged = UpdateVictim();
-        if ((engaged && me->GetEntry() == 50375) || (me->GetEntry() == 50301 && me->GetVictim()))
+        if (me->GetEntry() == 50301)
+        {
+            if (me->GetVictim())
+                DoMeleeAttackIfReady();
+        }
+        else if (UpdateVictim() && me->GetEntry() == 50375)
             DoMeleeAttackIfReady();
     }
 };

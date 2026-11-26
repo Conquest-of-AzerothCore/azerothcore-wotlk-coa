@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Barbarian Axe Twirling chains Throw Weapon, Javelin Toss, Gutspiller, and Berserker Axe to 2 additional enemies (#13667)",
+  "contract": [
+    "Axe Twirling (800401) adds SPELLMOD_JUMP_TARGETS +2 (BasePoints 1 + DieSides 1) over EffectSpellClassMask",
+    "(262144, 786436, 0), covering Throw Weapon (804136, 806876-806881, 572614), Javelin Toss (504217), Gutspiller",
+    "(805832, 806882-806887), and Berserker Axe (804138, 503408-503414). Four DBC defects broke multi-target hits:",
+    "(1) Throw Weapon carried ChainTarget 1 on effect 0 (NORMALIZED_WEAPON_DMG) but 0 on effect 1",
+    "(WEAPON_PERCENT_DAMAGE), so target 3 received only effect 0 which EffectWeaponDmg defers to effect 1 (0 damage);",
+    "(2) Javelin Toss carried ChainTarget 0 on both weapon-damage effects, capping 0 + 2 at 1 additional target;",
+    "(3) Gutspiller lacked SPELL_ATTR4_BOUNCY_CHAIN_MISSILES (0x40000), capping SearchChainTargets at 7.5 yd from the",
+    "primary target instead of bouncing 7.5 yd per jump; (4) Berserker Axe's triggered missile 806960 carried",
+    "RangeIndex 4 (30 yd) instead of 13 (Anywhere), failing CheckRange on chained targets beyond 30 yd from the caster.",
+    "With targets at 24, 29 (5 yd from t0), and 35 yd (6 yd from t1, 11 yd from t0, > 30 yd from caster), all four",
+    "abilities must damage and apply their debuffs to all three targets while Axe Twirling is active, and Throw Weapon",
+    "must hit only t0 without Axe Twirling."
+  ],
+  "timeout_ms": 120000,
+  "location": { "map": 0, "x": -8917.41, "y": -115.853, "z": 82.3711, "o": 0 },
+  "players": [
+    {
+      "id": "b",
+      "race": 1,
+      "class": 12,
+      "level": 80,
+      "ranged_hit_rating": 10000,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    { "id": "t0", "owner": "b", "entry": 36, "level": 80, "health": 5000000, "distance": 24, "reaction": 0, "stationary": true },
+    { "id": "t1", "owner": "b", "entry": 36, "level": 80, "health": 5000000, "distance": 29, "reaction": 0, "stationary": true },
+    { "id": "t2", "owner": "b", "entry": 36, "level": 80, "health": 5000000, "distance": 35, "reaction": 0, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login, spawns, and level-80 scaling settle", "ms": 5000 },
+    { "action": "specialization", "actor": "b", "id": 1 },
+    { "action": "add_item", "actor": "b", "item": 585 },
+    { "action": "equip", "actor": "b", "item": 585, "slot": 17 },
+    { "action": "learn", "actor": "b", "spell": 804136 },
+    { "action": "learn", "actor": "b", "spell": 572614 },
+    { "action": "learn", "actor": "b", "spell": 806887 },
+    { "action": "learn", "actor": "b", "spell": 503414 },
+    { "action": "learn", "actor": "b", "spell": 800401 },
+    { "action": "wait", "ms": 1000 },
+    { "action": "stop_attack", "actor": "b" },
+
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "cast", "label": "CONTROL: Throw Weapon without Axe Twirling", "actor": "b", "spell": 572614, "target": "t0" },
+    { "action": "wait", "label": "Wait for 2500 + 500 ms ranged cast and missile flight", "ms": 5000 },
+    { "action": "assert", "label": "CONTROL: Throw Weapon hits t0 without Axe Twirling", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t0", "min": 1 },
+    { "action": "assert", "label": "CONTROL: Throw Weapon does not chain to t1 without Axe Twirling", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t1", "equals": 0 },
+    { "action": "assert", "label": "CONTROL: Throw Weapon does not chain to t2 without Axe Twirling", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t2", "equals": 0 },
+
+    { "action": "cast", "label": "Activate Axe Twirling (800401)", "actor": "b", "spell": 800401 },
+    { "action": "assert", "label": "Axe Twirling buff is active", "actor": "b", "metric": "aura", "spell": 800401, "equals": 1, "within_ms": 2000 },
+    { "action": "wait", "ms": 1000 },
+
+    { "action": "snapshot", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t0", "save_as": "tw_t0" },
+    { "action": "snapshot", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t1", "save_as": "tw_t1" },
+    { "action": "snapshot", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t2", "save_as": "tw_t2" },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Throw Weapon with Axe Twirling active", "actor": "b", "spell": 572614, "target": "t0" },
+    { "action": "wait", "label": "Wait for 3000 ms ranged cast and 35 yd flight", "ms": 5000 },
+    { "action": "assert", "label": "Throw Weapon damages t0 with Axe Twirling", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t0", "relative_to": "tw_t0", "min": 1 },
+    { "action": "assert", "label": "Throw Weapon damages t1 with Axe Twirling", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t1", "relative_to": "tw_t1", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Throw Weapon damages t2 (effect 1 now chains to target 3)", "actor": "b", "metric": "spell_damage_count", "spell": 572614, "target": "t2", "relative_to": "tw_t2", "min": 1 },
+
+    { "action": "learn", "label": "Learn Sen'jin's Guidance (707661) for Javelin Toss (504217)", "actor": "b", "spell": 707661 },
+    { "action": "assert", "label": "Javelin Toss (504217) is learned", "actor": "b", "metric": "knows_spell", "spell": 504217, "equals": 1, "within_ms": 2000 },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Javelin Toss with Axe Twirling active", "actor": "b", "spell": 504217, "target": "t0" },
+    { "action": "wait", "label": "Wait for 3000 ms ranged cast and 35 yd flight", "ms": 5000 },
+    { "action": "assert", "label": "Javelin Toss damages t0 with Axe Twirling", "actor": "b", "metric": "spell_damage_count", "spell": 504217, "target": "t0", "min": 1 },
+    { "action": "assert", "label": "Javelin Toss damages t1 with Axe Twirling", "actor": "b", "metric": "spell_damage_count", "spell": 504217, "target": "t1", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Javelin Toss damages t2 (ChainTarget 1 + 2 = 3 targets)", "actor": "b", "metric": "spell_damage_count", "spell": 504217, "target": "t2", "min": 1 },
+
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Gutspiller Rank 7 (806887) with Axe Twirling active", "actor": "b", "spell": 806887, "target": "t0" },
+    { "action": "assert", "label": "Gutspiller bleed applies to t0", "actor": "t0", "metric": "aura", "spell": 806887, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Gutspiller bleed applies to t1", "actor": "t1", "metric": "aura", "spell": 806887, "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: Gutspiller bounces to t2 at 11 yd from t0 via SPELL_ATTR4_BOUNCY_CHAIN_MISSILES", "actor": "t2", "metric": "aura", "spell": 806887, "equals": 1, "within_ms": 3000 },
+    { "action": "wait", "label": "Wait for 2 s bleed ticks and 6 s Guts Spilled (520577) trigger", "ms": 7500 },
+    { "action": "assert", "label": "Gutspiller periodic bleed damages t0", "actor": "b", "metric": "spell_damage_count", "spell": 806887, "target": "t0", "min": 1 },
+    { "action": "assert", "label": "Gutspiller periodic bleed damages t1", "actor": "b", "metric": "spell_damage_count", "spell": 806887, "target": "t1", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Gutspiller periodic bleed damages t2", "actor": "b", "metric": "spell_damage_count", "spell": 806887, "target": "t2", "min": 1 },
+    { "action": "assert", "label": "Guts Spilled (520577) damages t0", "actor": "b", "metric": "spell_damage_count", "spell": 520577, "target": "t0", "min": 1 },
+    { "action": "assert", "label": "Guts Spilled (520577) damages t1", "actor": "b", "metric": "spell_damage_count", "spell": 520577, "target": "t1", "min": 1 },
+    { "action": "assert", "label": "DISCRIMINATING: Guts Spilled (520577) damages t2", "actor": "b", "metric": "spell_damage_count", "spell": 520577, "target": "t2", "min": 1 },
+
+    { "action": "set_aura", "actor": "b", "spell": 801761, "stacks": 1 },
+    { "action": "set_power", "actor": "b", "power": 3, "value": 100 },
+    { "action": "cast", "label": "Berserker Axe Rank 8 (503414) with Axe Twirling active", "actor": "b", "spell": 503414, "target": "t0" },
+    { "action": "wait", "label": "Wait for 806960 missiles over 35 yd flight", "ms": 2500 },
+    { "action": "assert", "label": "Berserker Axe hits t0 with both axes", "actor": "b", "metric": "spell_damage_count", "spell": 806960, "target": "t0", "min": 2 },
+    { "action": "assert", "label": "Berserker Axe hits t1 with both axes", "actor": "b", "metric": "spell_damage_count", "spell": 806960, "target": "t1", "min": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: Berserker Axe hits chained t2 beyond 30 yd with both axes (806960 RangeIndex 13)", "actor": "b", "metric": "spell_damage_count", "spell": 806960, "target": "t2", "min": 2 },
+    { "action": "assert", "label": "Berserker Axe applies 2 armor-reduction stacks (561020) to t0", "actor": "t0", "metric": "aura_stacks", "spell": 561020, "equals": 2 },
+    { "action": "assert", "label": "Berserker Axe applies 2 armor-reduction stacks (561020) to t1", "actor": "t1", "metric": "aura_stacks", "spell": 561020, "equals": 2 },
+    { "action": "assert", "label": "DISCRIMINATING: Berserker Axe applies 2 armor-reduction stacks (561020) to chained t2", "actor": "t2", "metric": "aura_stacks", "spell": 561020, "equals": 2 }
+  ]
+}

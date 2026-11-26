@@ -51,6 +51,7 @@ public:
         uint8 Charges = 0;
         uint8 RecalculateMask = 0;
         int32 MaxDuration = 0;
+        int32 Duration = 0;
         std::array<int32, 3> Amounts{};
         std::array<int32, 3> BaseAmounts{};
     };
@@ -63,11 +64,33 @@ public:
 
     std::unordered_map<ObjectGuid::LowType, StageRecovery> StageRecoveries;
 
+    struct StageLink
+    {
+        uint32 Spell = 0;
+        ObjectGuid Caster;
+        ObjectGuid Target;
+        uint32 DestinationInstanceId = 0;
+        int32 Duration = 0;
+        uint8 Charges = 0;
+    };
+
+    std::vector<StageLink> StageLinks;
+
     uint64 GetRunId() const { return _runId; }
     uint64 GetSeed() const { return _seed; }
 
     ObjectGuid::LowType GetOwnerGuid() const { return _ownerGuid; }
     std::vector<ObjectGuid::LowType> const& GetMembers() const { return _members; }
+
+    struct MemberStageXPState
+    {
+        ObjectGuid::LowType Guid = 0;
+        uint32 PersonalBestDepth = 0;
+        uint64 DamageDealt = 0;
+        uint64 UnhealedCreatureDamage = 0;
+        uint64 CreditedHeal = 0;
+        uint8 Level = 1;
+    };
 
     bool RemoveMember(ObjectGuid::LowType guid)
     {
@@ -84,6 +107,220 @@ public:
         CompanionTransfers.erase(guid);
         StageRecoveries.erase(guid);
         return true;
+    }
+
+    void SetCheckpointBypassed(bool value) noexcept { _checkpointBypassed = value; }
+    bool IsCheckpointBypassed() const noexcept { return _checkpointBypassed; }
+
+    void SetGroupHealthMultiplier(double value) noexcept { _groupHealthMultiplier = value; }
+    double GetGroupHealthMultiplier() const noexcept { return _groupHealthMultiplier; }
+
+    uint32 GetStageMemberCount() const noexcept
+    {
+        return std::max<uint32>(uint32(_peakStageMemberCount), uint32(_members.size()));
+    }
+
+    bool IsGroupRun() const noexcept
+    {
+        return _mode != ManastormMode::Solo || GetStageMemberCount() > 1;
+    }
+
+    void SetMemberXPBaseline(ObjectGuid::LowType guid, uint32 personalBestDepth, uint8 level) noexcept
+    {
+        if (level > _stageHighestMemberLevel)
+            _stageHighestMemberLevel = level;
+        if (_members.size() > _peakStageMemberCount)
+            _peakStageMemberCount = uint8(std::min<std::size_t>(_members.size(), ManastormLimits::MaxMembers));
+
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+        {
+            if (_memberXPStates[i].Guid != guid)
+                continue;
+
+            _memberXPStates[i].PersonalBestDepth = personalBestDepth;
+            _memberXPStates[i].Level = level;
+            return;
+        }
+
+        if (_memberXPCount < _memberXPStates.size())
+        {
+            _memberXPStates[_memberXPCount] = MemberStageXPState{ guid, personalBestDepth, 0, 0, 0, level };
+            ++_memberXPCount;
+        }
+    }
+
+    void UpdateMemberLevel(ObjectGuid::LowType guid, uint8 level) noexcept
+    {
+        if (level > _stageHighestMemberLevel)
+            _stageHighestMemberLevel = level;
+
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+        {
+            if (_memberXPStates[i].Guid != guid)
+                continue;
+
+            _memberXPStates[i].Level = level;
+            return;
+        }
+    }
+
+    void RecordMemberDamageDealt(ObjectGuid::LowType guid, uint64 points) noexcept
+    {
+        if (!points || !IsGroupRun())
+            return;
+
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+        {
+            if (_memberXPStates[i].Guid != guid)
+                continue;
+
+            uint64 const maxScore = std::numeric_limits<uint64>::max();
+            uint64 const added = points > maxScore - _totalStageDamageDealt
+                ? maxScore - _totalStageDamageDealt
+                : points;
+            _memberXPStates[i].DamageDealt = added > maxScore - _memberXPStates[i].DamageDealt
+                ? maxScore
+                : _memberXPStates[i].DamageDealt + added;
+            _totalStageDamageDealt += added;
+            return;
+        }
+    }
+
+    void RecordMemberCreatureDamageTaken(ObjectGuid::LowType guid, uint64 basisPoints) noexcept
+    {
+        if (!basisPoints || !IsGroupRun())
+            return;
+
+        constexpr uint64 MaxUnhealedBasisPoints = 10000;
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+        {
+            if (_memberXPStates[i].Guid != guid)
+                continue;
+
+            uint64 const remainingCap = MaxUnhealedBasisPoints > _memberXPStates[i].UnhealedCreatureDamage
+                ? MaxUnhealedBasisPoints - _memberXPStates[i].UnhealedCreatureDamage
+                : 0;
+            _memberXPStates[i].UnhealedCreatureDamage += std::min(basisPoints, remainingCap);
+            return;
+        }
+    }
+
+    void RecordMemberCrossHeal(
+        ObjectGuid::LowType healerGuid,
+        ObjectGuid::LowType targetGuid,
+        uint64 healBasisPoints) noexcept
+    {
+        if (!healBasisPoints || healerGuid == targetGuid || !IsGroupRun())
+            return;
+
+        MemberStageXPState* healerState = nullptr;
+        MemberStageXPState* targetState = nullptr;
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+        {
+            if (_memberXPStates[i].Guid == healerGuid)
+                healerState = &_memberXPStates[i];
+            else if (_memberXPStates[i].Guid == targetGuid)
+                targetState = &_memberXPStates[i];
+        }
+
+        if (!healerState || !targetState || !targetState->DamageDealt || !targetState->UnhealedCreatureDamage)
+            return;
+
+        uint64 const credited = std::min(healBasisPoints, targetState->UnhealedCreatureDamage);
+        targetState->UnhealedCreatureDamage -= credited;
+
+        uint64 const maxScore = std::numeric_limits<uint64>::max();
+        uint64 const added = credited > maxScore - _totalStageCreditedHeal
+            ? maxScore - _totalStageCreditedHeal
+            : credited;
+        healerState->CreditedHeal = added > maxScore - healerState->CreditedHeal
+            ? maxScore
+            : healerState->CreditedHeal + added;
+        _totalStageCreditedHeal += added;
+    }
+
+    uint32 GetMemberPersonalBestDepth(ObjectGuid::LowType guid) const noexcept
+    {
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+            if (_memberXPStates[i].Guid == guid)
+                return _memberXPStates[i].PersonalBestDepth;
+
+        return _depth > 0 ? _depth - 1 : 0;
+    }
+
+    uint64 GetMemberDamageDealt(ObjectGuid::LowType guid) const noexcept
+    {
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+            if (_memberXPStates[i].Guid == guid)
+                return _memberXPStates[i].DamageDealt;
+
+        return 0;
+    }
+
+    uint64 GetMemberCreditedHeal(ObjectGuid::LowType guid) const noexcept
+    {
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+            if (_memberXPStates[i].Guid == guid)
+                return _memberXPStates[i].CreditedHeal;
+
+        return 0;
+    }
+
+    uint64 GetTotalStageDamageDealt() const noexcept { return _totalStageDamageDealt; }
+    uint64 GetTotalStageCreditedHeal() const noexcept { return _totalStageCreditedHeal; }
+    uint32 GetStageKillCount() const noexcept { return _stageKillCount; }
+
+    void IncrementStageKillCount() noexcept
+    {
+        if (_stageKillCount != std::numeric_limits<uint32>::max())
+            ++_stageKillCount;
+    }
+
+    uint8 GetHighestMemberLevel() const noexcept
+    {
+        return std::max(_creatureLevel, _stageHighestMemberLevel);
+    }
+
+    uint32 GetRecordedProgressDepth(ObjectGuid::LowType guid) const noexcept
+    {
+        if (_checkpointBypassed || !IsGroupRun())
+            return _depth;
+
+        uint64 const nextPersonal = uint64(GetMemberPersonalBestDepth(guid)) + 1ULL;
+        return uint32(std::min<uint64>(_depth, nextPersonal));
+    }
+
+    void AdvanceMemberPersonalDepths() noexcept
+    {
+        bool const capStep = !_checkpointBypassed && IsGroupRun();
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+        {
+            uint64 const candidate = capStep
+                ? std::min<uint64>(_depth, uint64(_memberXPStates[i].PersonalBestDepth) + 1ULL)
+                : uint64(_depth);
+            if (candidate > _memberXPStates[i].PersonalBestDepth)
+                _memberXPStates[i].PersonalBestDepth = uint32(candidate);
+        }
+    }
+
+    void ResetStageCombatScores() noexcept
+    {
+        _totalStageDamageDealt = 0;
+        _totalStageCreditedHeal = 0;
+        _stageKillCount = 0;
+        _peakStageMemberCount = uint8(std::min<std::size_t>(_members.size(), ManastormLimits::MaxMembers));
+        _stageHighestMemberLevel = _creatureLevel;
+        for (uint8 i = 0; i < _memberXPCount; ++i)
+        {
+            _memberXPStates[i].DamageDealt = 0;
+            _memberXPStates[i].UnhealedCreatureDamage = 0;
+            _memberXPStates[i].CreditedHeal = 0;
+            if (std::find(_members.begin(), _members.end(), _memberXPStates[i].Guid) != _members.end() &&
+                _memberXPStates[i].Level > _stageHighestMemberLevel)
+            {
+                _stageHighestMemberLevel = _memberXPStates[i].Level;
+            }
+        }
     }
 
     ManastormMode GetMode() const { return _mode; }
@@ -878,6 +1115,16 @@ private:
     // A `.manastorm reload` therefore cannot mutate an already-created stage.
     ManastormSegment _segment;
     ManastormScalingPoint _scaling;
+
+    std::array<MemberStageXPState, ManastormLimits::MaxMembers> _memberXPStates{};
+    uint8 _memberXPCount = 0;
+    uint8 _peakStageMemberCount = 0;
+    uint8 _stageHighestMemberLevel = 1;
+    uint32 _stageKillCount = 0;
+    uint64 _totalStageDamageDealt = 0;
+    uint64 _totalStageCreditedHeal = 0;
+    double _groupHealthMultiplier = 0.0;
+    bool _checkpointBypassed = false;
 };
 
 #endif

@@ -224,6 +224,23 @@ uint32 ResolveGenericTier(Player* player, uint32 cacheItemId)
     return chosen ? chosen : lowest;
 }
 
+uint32 BestArmorClass(Player const* player)
+{
+    if (player->HasSkill(SKILL_PLATE_MAIL))
+        return ITEM_SUBCLASS_ARMOR_PLATE;
+    if (player->HasSkill(SKILL_MAIL))
+        return ITEM_SUBCLASS_ARMOR_MAIL;
+    if (player->HasSkill(SKILL_LEATHER))
+        return ITEM_SUBCLASS_ARMOR_LEATHER;
+    return ITEM_SUBCLASS_ARMOR_CLOTH;
+}
+
+bool IsLowerArmorClass(ItemTemplate const* item, uint32 bestArmorClass)
+{
+    return item->Class == ITEM_CLASS_ARMOR && item->InventoryType != INVTYPE_CLOAK &&
+        item->SubClass >= ITEM_SUBCLASS_ARMOR_CLOTH && item->SubClass < bestArmorClass;
+}
+
 bool PickReward(Player* player, CallboardPool const& pool, uint32 averageItemLevel,
     AscensionCacheRewards::Reward& out)
 {
@@ -235,6 +252,15 @@ bool PickReward(Player* player, CallboardPool const& pool, uint32 averageItemLev
             (!proto->GetSkill() || player->GetSkillValue(proto->GetSkill())))
             usable.push_back(&reward);
     }
+
+    uint32 const bestArmorClass = BestArmorClass(player);
+    std::vector<AscensionCacheRewards::Reward const*> bestArmor;
+    for (AscensionCacheRewards::Reward const* reward : usable)
+        if (!IsLowerArmorClass(sObjectMgr->GetItemTemplate(reward->itemId), bestArmorClass))
+            bestArmor.push_back(reward);
+    if (!bestArmor.empty())
+        usable = std::move(bestArmor);
+
     usable = AscensionSpecLoot::PreferSpecialization(player, usable,
         [](AscensionCacheRewards::Reward const* reward) { return sObjectMgr->GetItemTemplate(reward->itemId); });
 

@@ -12,7 +12,8 @@ from hits import MAIN_HAND, MAX_ACCELERATED_SCENARIO_MS, UNMODELLED, creature_fi
 from procs import swing_interval
 from profile import CASTER, DBC_DIR, base_steps, measurement, player_fixture
 from tooltip import Records
-from values import FORCED_CRIT_RATING, TARGET, Expectation, armed_for, dataset, facts_of, required_aura_steps
+from values import (FORCED_CRIT_RATING, TARGET, Expectation, armed_for, dataset, facts_of, pay_power_steps,
+                    required_aura_steps)
 
 BEHAVIOUR_EXPIRY = 'behaviour_expiry'
 EXPIRY_KIND = 'expiry'
@@ -343,16 +344,14 @@ def duration_refresh_expiry(class_file: dict, entry: dict) -> tuple[dict, list[E
     def apply(arm: ExpiryArm | None) -> list[dict]:
         cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.apply_spell, 'target': TARGET}
         return [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': 1},
-                {'action': 'set_power', 'actor': CASTER, 'power': facts_apply.power_type,
-                 'value': facts_apply.mana_cost},
+                *pay_power_steps(facts_apply.power_type, facts_apply.mana_cost),
                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.apply_spell},
                 acted(cast, arm) if arm else cast]
 
     def breaker(arm: ExpiryArm | None) -> list[dict]:
         cast = {'action': 'cast', 'actor': CASTER, 'spell': spec.breaker_spell, 'target': TARGET}
         return [{'action': 'set_aura', 'actor': CASTER, 'spell': spec.gating_aura, 'stacks': spec.gating_stacks},
-                {'action': 'set_power', 'actor': CASTER, 'power': facts_breaker.power_type,
-                 'value': facts_breaker.mana_cost},
+                *pay_power_steps(facts_breaker.power_type, facts_breaker.mana_cost),
                 {'action': 'reset_cooldown', 'actor': CASTER, 'spell': spec.breaker_spell},
                 acted(cast, arm) if arm else cast]
 
@@ -378,9 +377,10 @@ def duration_refresh_expiry(class_file: dict, entry: dict) -> tuple[dict, list[E
                                                    [without, with_arm])]
 
 
-def striker_fixture(class_file: dict, striker_entry: int) -> dict:
+def striker_fixture(class_file: dict, striker_entry: int, melee_hit_bonus: bool = False) -> dict:
     return {'id': STRIKER, 'owner': CASTER, 'entry': striker_entry, 'level': class_file['level'],
-            'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100}
+            'health': STRIKER_HEALTH, 'distance': STRIKER_DISTANCE, 'reaction': 1, 'spell_hit_bonus': 100,
+            **({'melee_hit_bonus': 100} if melee_hit_bonus else {})}
 
 
 def duration_ratio_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Expectation]]:
@@ -407,8 +407,9 @@ def duration_ratio_expiry(class_file: dict, entry: dict) -> tuple[dict, list[Exp
         f'learned and {with_arm.expected_ms:g} ms after it ({spec.expected_ratio:g} of it) once learned; the '
         f'arms are {MECHANIC_DR_RESET_MS + MECHANIC_GAP_MARGIN_MS} ms apart after the first effect ends, so '
         f'neither cast is diminished.', steps)
-    scenario['creatures'] = [striker_fixture(class_file, spec.striker_entry)]
-    return finished(scenario), [expiry_expectation(expiry_label(spec.spell), spec.spell, spec.vehicle_spell,
+    scenario['creatures'] = [striker_fixture(class_file, spec.striker_entry, spec.striker_melee_hit_bonus)]
+    label = expiry_label(spec.spell) + (f' {spec.variant}' if spec.variant else '')
+    return finished(scenario), [expiry_expectation(label, spec.spell, spec.vehicle_spell,
                                                    str(spec.expected_ratio), prose_rule(spec.quote, spec.spell),
                                                    [without, with_arm])]
 
@@ -471,8 +472,7 @@ def trigger_duration_expiry(class_file: dict, entry: dict) -> tuple[dict, list[E
             len({facts.power_type for facts in costs}) > 1:
         raise NotModelled(f'{observe} and {trigger["spell"]} need separate power steps; one of them would fall '
                           f'between the act and the readings')
-    prepare = [{'action': 'set_power', 'actor': CASTER, 'power': costs[0].power_type,
-                'value': sum(facts.mana_cost for facts in costs)}] if costs else []
+    prepare = pay_power_steps(costs[0].power_type, sum(facts.mana_cost for facts in costs)) if costs else []
     prepare += [{'action': 'reset_cooldown', 'actor': CASTER, 'spell': spell} for spell in (observe, trigger['spell'])]
 
     def tail(name: str) -> list[dict]:
@@ -611,7 +611,9 @@ def built(build, class_file: dict, label: str, spell: int, entry: dict) -> tuple
 
 def behaviour_expiry(class_file: dict, entry: dict) -> tuple[dict | None, list[Expectation]] | None:
     build = BEHAVIOUR_EXPIRIES.get(entry.get('kind'))
-    return built(build, class_file, expiry_label(entry['spell']), entry['spell'], entry) if build else None
+    label = expiry_label(entry['spell']) + (f' {entry["variant"]}' if entry.get('kind') == 'duration_ratio'
+                                            and entry.get('variant') else '')
+    return built(build, class_file, label, entry['spell'], entry) if build else None
 
 
 def trigger_expiry(class_file: dict, entry: dict) -> tuple[dict | None, list[Expectation]] | None:

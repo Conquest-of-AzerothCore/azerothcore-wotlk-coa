@@ -292,9 +292,7 @@ void ActivateModule(Player* player, uint32 id)
     auto previous = state.moduleTargets;
     state.moduleTargets.clear();
     state.module = id;
-    SetHelper(player,707495,true);
-    if (Aura* aura = player->GetAura(707495))
-        aura->SetScriptValue(707495,id);
+    player->RemoveAurasDueToSpell(707495);
     for (ObjectGuid guid : previous)
         if (Player* ally = ObjectAccessor::FindPlayer(guid))
             for (uint32 other : TinkerModules)
@@ -381,6 +379,7 @@ void Refresh(Player* player)
         player->RemoveAurasDueToSpell(707251);
     if (!player->HasAura(572545) || !player->HasAura(653232))
         player->RemoveAurasDueToSpell(653282);
+    player->RemoveAurasDueToSpell(707495);
     state.refreshing = false;
 }
 }

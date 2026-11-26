@@ -15,13 +15,15 @@ namespace ManastormModuleConfig
         uint8 affixMinimumLevel = 50;
         constexpr double DefaultExperienceRate = 0.3;
         double experienceRate = DefaultExperienceRate;
+        bool prestigeExperienceEnabled = true;
+        uint32 prestigeExperienceBonusPercent = 300;
+        bool experienceBonusControlEnabled = true;
         bool weeklyCacheLockoutEnabled = true;
         uint32 weeklyCacheLockoutLimit = 5;
         bool coaLootModeEnabled = false;
         bool coaFirstClearEnabled = true;
         bool coaRepeatEnabled = true;
         bool coaFirstClearResetsWithWindow = true;
-        uint32 coaTokenCap = 1000;
         uint32 coaTokenWindowSeconds = 86400;
         ManastormClientMode clientMode = ManastormClientMode::Ascension;
         bool followReleaseStage = false;
@@ -42,7 +44,6 @@ namespace ManastormModuleConfig
         coaRepeatEnabled = sConfigMgr->GetOption<bool>("Manastorm.CoALootMode.Repeat.Enabled", true);
         coaFirstClearResetsWithWindow =
             sConfigMgr->GetOption<bool>("Manastorm.CoALootMode.FirstClear.ResetWithWindow", true);
-        coaTokenCap = std::clamp(sConfigMgr->GetOption<int32>("Manastorm.CoALootMode.TokenCap", 1000), 0, 1000000);
         coaTokenWindowSeconds = uint32(std::clamp(
             sConfigMgr->GetOption<int32>("Manastorm.CoALootMode.WindowHours", 24), 1, 168)) * 3600;
         weeklyCacheLockoutEnabled = sConfigMgr->GetOption<bool>("Manastorm.WeeklyCacheLockout.Enabled", true);
@@ -58,6 +59,10 @@ namespace ManastormModuleConfig
         if (!validRate)
             LOG_ERROR("module.manastorm.endless", "Invalid Manastorm.ExperienceRate={}; expected 0 or more, using {}.",
                 requestedRate, DefaultExperienceRate);
+        prestigeExperienceEnabled = sConfigMgr->GetOption<bool>("CoAPrestige.Enable", true);
+        prestigeExperienceBonusPercent = sConfigMgr->GetOption<uint32>("CoAPrestige.ExperienceBonusPercent", 300);
+        experienceBonusControlEnabled = sConfigMgr->GetOption<bool>("DestinyWeaver.Enable", true) &&
+            sConfigMgr->GetOption<bool>("DestinyWeaver.ExperienceBonusControl", true);
         uint32 const requestedMode = sConfigMgr->GetOption<uint32>("Manastorm.ClientMode", 2);
         followReleaseStage = sConfigMgr->GetOption<bool>("Manastorm.FollowReleaseStage", false);
         objectiveRaidSkull = sConfigMgr->GetOption<bool>("Manastorm.Objective.RaidSkull", true);
@@ -87,7 +92,6 @@ namespace ManastormModuleConfig
     bool CoAFirstClearEnabled() { return coaFirstClearEnabled; }
     bool CoARepeatEnabled() { return coaRepeatEnabled; }
     bool CoAFirstClearResetsWithWindow() { return coaFirstClearResetsWithWindow; }
-    uint32 CoATokenCap() { return coaTokenCap; }
     uint32 CoATokenWindowSeconds() { return coaTokenWindowSeconds; }
 
     uint32 WeeklyCacheLockoutLimit()
@@ -101,6 +105,9 @@ namespace ManastormModuleConfig
     }
 
     double ExperienceRate() { return experienceRate; }
+    bool PrestigeExperienceEnabled() { return prestigeExperienceEnabled; }
+    uint32 PrestigeExperienceBonusPercent() { return prestigeExperienceBonusPercent; }
+    bool ExperienceBonusControlEnabled() { return experienceBonusControlEnabled; }
 
     bool Enabled()
     {

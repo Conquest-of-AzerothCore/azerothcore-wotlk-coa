@@ -1,0 +1,180 @@
+{
+  "schema": 1,
+  "name": "Bloodmail 6-piece stacks Fateful Harvest on nearby deaths (#12204)",
+  "contract": [
+    "#12204: the Bloodmail 6-piece bonus 823733 reads 'Whenever a nearby enemy dies, your critical strike chance",
+    "increases by 1%. Stacks up to 7 times and lasts 20 sec.' CoA's tier set harvest (AscensionTierSetHarvest)",
+    "already grants each listed bonus's trigger spell to every player within 40 yards when a hostile creature",
+    "dies; the Beaststalker, The Elements and Valor bonuses use the same Fateful Harvest buff 823701, but 823733",
+    "was not listed, so the Bloodmail kill buff never appeared. A Mage kills a dummy before the bonus is applied",
+    "(CONTROL: no stack), then two dummies with only 823733 on: the first kill gives one stack of 823701 and the",
+    "second two. Before the repair both kills with the bonus leave 823701 absent, so the discriminating checks",
+    "fail."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "m",
+      "race": 1,
+      "class": 8,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "control",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 10,
+      "distance": 6,
+      "stationary": true
+    },
+    {
+      "id": "first",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 10,
+      "distance": 8,
+      "stationary": true
+    },
+    {
+      "id": "second",
+      "owner": "m",
+      "entry": 36,
+      "level": 80,
+      "health": 10,
+      "distance": 10,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "m",
+      "spell": 116
+    },
+    {
+      "action": "set_power",
+      "actor": "m",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Fateful Harvest yet",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 823701,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Kill the control dummy before the bonus is on",
+      "actor": "m",
+      "spell": 116,
+      "target": "control"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the control dummy dies",
+      "actor": "control",
+      "metric": "health",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "wait",
+      "label": "Let a harvest that should not happen land",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a kill without the 6-piece bonus grants no stack",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 823701,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "label": "Bloodmail 6-piece bonus",
+      "actor": "m",
+      "spell": 823733,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the 6-piece bonus is active",
+      "actor": "m",
+      "metric": "aura",
+      "spell": 823733,
+      "equals": 1
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Kill the first nearby dummy",
+      "actor": "m",
+      "spell": 116,
+      "target": "first"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the first dummy dies",
+      "actor": "first",
+      "metric": "health",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the first nearby death gives one stack",
+      "actor": "m",
+      "metric": "aura_stacks",
+      "spell": 823701,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Global cooldown",
+      "ms": 1600
+    },
+    {
+      "action": "cast",
+      "label": "Kill the second nearby dummy",
+      "actor": "m",
+      "spell": 116,
+      "target": "second"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the second dummy dies",
+      "actor": "second",
+      "metric": "health",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the second nearby death stacks it to two",
+      "actor": "m",
+      "metric": "aura_stacks",
+      "spell": 823701,
+      "equals": 2,
+      "within_ms": 2000
+    }
+  ]
+}

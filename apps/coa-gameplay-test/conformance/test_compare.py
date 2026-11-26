@@ -10,6 +10,7 @@ import tempfile
 import unittest
 from unittest import mock
 
+from block_value import BLOCK_VALUE_LABEL, BLOCK_VALUE_TERMS
 from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, ENGINE_ROUNDING, NOT_MEASURED,
                      PER_LEVEL_ROUNDING, PER_LEVEL_UNMODELLED, per_level_loss, per_level_unmodelled,
                      PERCENT_POINT_METRICS,
@@ -17,7 +18,7 @@ from compare import (ALERT_COLUMNS, CONFORMANT, DATA_ONLY, EFFECT_VALUE_SCOPE, E
                      BuildMismatch, DbcTooltips, ScenarioDrift, Verdict, evaluate,
                      alert_rows, banded_status, compare, delta_margin, log_query_of, measured_values,
                      observation_lines, owner_fallback, question_detail, read_verdicts, resolve_linked_statuses,
-                     apply_value_links, resolve_base_roll_links,
+                     apply_value_links, resolve_base_roll_links, SUPERSEDED_BY, judge_expectation, resolve_superseded,
                      write_outputs)
 from behaviours import BEHAVIOUR_METRIC_DELTA
 from bonus_data import BonusRow, BonusTable
@@ -104,6 +105,8 @@ class Workspace:
         self.runs = {}
         self.cast_failures = {}
         self.builds = {}
+        self.max_step_ms = '25'
+        self.class_file = CLASS_FILE
 
     def close(self):
         shutil.rmtree(self.root, ignore_errors=True)
@@ -130,8 +133,8 @@ class Workspace:
             self.builds[folder] = self.builds.pop(key)
 
     def manifest(self, known_modifiers=None, **base_overrides):
-        manifest = {'schema': 1, 'class_id': CLASS_FILE['class_id'], 'class_name': CLASS_FILE['name'],
-                    'level': CLASS_FILE['level'], 'class_file': CLASS_FILE, 'scenarios': self.scenarios,
+        manifest = {'schema': 1, 'class_id': self.class_file['class_id'], 'class_name': self.class_file['name'],
+                    'level': self.class_file['level'], 'class_file': self.class_file, 'scenarios': self.scenarios,
                     'known_modifiers': known_modifiers if known_modifiers is not None else
                     [{**asdict(CLASS_TUNING), 'base_points': -1, 'real_points_per_level': -0.4}]}
         path = self.root / 'out' / 'manifest.json'
@@ -144,7 +147,7 @@ class Workspace:
             every = [{'index': str(index), **step} for index, step in enumerate(base + steps)]
             commit, binary = self.builds.get(key, (WORKSPACE_COMMIT, WORKSPACE_BUILD))
             result = {'schema': '1', 'run_id': f'run-{key}', 'scenario': key, 'status': 'passed',
-                      'message': 'All assertions passed', 'max_step_ms': '25', 'steps': every,
+                      'message': 'All assertions passed', 'max_step_ms': self.max_step_ms, 'steps': every,
                       'server_version': f'AzerothCore rev. {commit} 2026-11-10 11:09:47 +0100 (test branch)'}
             if key in self.cast_failures:
                 result['cast_failures'] = self.cast_failures[key]
@@ -286,6 +289,55 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([item], ['$s2'], [assert_step(label, '-50')], reader)
         self.assertEqual((verdicts[label].status, verdicts[label].expected), ('ok', -50.0))
 
+    def per_tick_verdict(self, read, ticks=6):
+        label = '1001 effect_value 2002e0 #0'
+        text = '${($d*1000/$T1)*($m1+0+$SP*.05)}'
+        model = {'effect_spell': 2002, 'effect': 0, **({'ticks': ticks} if ticks else {})}
+        item = expectation(label, 'effect_value', text, 'read flat', model=model)
+        reader = constant_reader(Displayed(text, 54.0, None, 'flat', 2002))
+        return self.value_run([item], [text], [assert_step(label, read)], reader)[label]
+
+    def test_a_per_tick_foreign_total_is_judged_against_its_per_tick_part(self):
+        verdict = self.per_tick_verdict('9')
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 9.0))
+        self.assertIn('divided by its 6 ticks', verdict.explanation)
+
+    def test_a_per_tick_foreign_total_read_above_its_per_tick_part_alerts(self):
+        verdict = self.per_tick_verdict('34')
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0))
+
+    def test_seeded_mutant_reading_the_whole_total_per_tick_alerts(self):
+        verdict = self.per_tick_verdict('54')
+        self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0))
+
+    def test_one_point_off_per_tick_alerts_as_six_points_off_the_total(self):
+        for read in ('8', '10'):
+            verdict = self.per_tick_verdict(read)
+            self.assertEqual((verdict.status, verdict.expected), ('alert', 9.0), read)
+            self.fresh()
+        verdict = self.per_tick_verdict('9')
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('|measured x 6 - total|', verdict.explanation)
+
+    def test_a_per_tick_per_level_term_is_the_total_term_divided_by_its_ticks(self):
+        text = '${($d*1000/$T1)*($m1+0)}'
+        label = '1001 effect_value e0 #0'
+        fields = {(RANK, 'EffectRealPointsPerLevel[0]'): 1.085, (RANK, 'BaseLevel'): 22, (RANK, 'SpellLevel'): 22,
+                  (RANK, 'MaxLevel'): 30}
+        reader = FakeTooltips(lambda caster, forced: [Displayed(text, 6 * 60.58, 0, 'flat')], {(RANK, 0): (51, 1)},
+                              fields, lambda caster, forced: [Displayed(text, 6 * 51.9, 0, 'flat')])
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'effect_spell': RANK, 'effect': 0,
+                                                                         'ticks': 6})
+        steps = [assert_step(label, '59')] + [assert_step(effect_modifier_label(label, op), '1000')
+                                              for op in ('all', 0)]
+        verdict = self.value_run([item], [text], steps, reader)[label]
+        self.assertEqual(verdict.status, 'ok')
+        self.assertEqual(verdict.detail[PER_LEVEL_ROUNDING]['truncated_to'], 8.0)
+
+    def test_an_unlisted_total_token_keeps_its_undivided_expectation(self):
+        verdict = self.per_tick_verdict('54', ticks=None)
+        self.assertEqual((verdict.status, verdict.expected), ('ok', 54.0))
+
     def rolled_verdict(self, reads, value_of_roll=lambda roll: roll, samples=None):
         text = '${$m1+0+$AP*0.45}'
         label = '1001 effect_value e0 #0'
@@ -417,6 +469,42 @@ class CompareTest(unittest.TestCase):
         offset = fmean(values) * 0.5
         reads = [math.trunc(values[index % len(values)] + offset) for index in range(needed)]
         self.assertEqual(self.rolled_verdict(reads).status, 'alert')
+
+    def block_rolled_verdict(self, reads, block):
+        text = '${$m1+0+$AP*0.45}'
+        label = '1001 effect_value e0 #0'
+
+        def tokens(caster, forced):
+            roll = forced[2] if forced else 100
+            return [Displayed(text, roll + caster.ap * 0.45, 0, 'flat')]
+
+        reader = FakeTooltips(tokens, {(RANK, 0): (99, 10)})
+        reader.class_file = {BLOCK_VALUE_TERMS: [{'spell': SPELL, 'effect': 0, 'source': 'seeded code term'}]}
+        labels = sample_labels(label, len(reads))
+        item = expectation(label, 'effect_value', text, 'read flat', 0, {'samples': len(reads)})
+        steps = [assert_step(name, str(read)) for name, read in zip(labels, reads)]
+        if block is not None:
+            steps.append(assert_step(BLOCK_VALUE_LABEL, str(block)))
+        return self.value_run([item], [text], steps, reader)[label]
+
+    def test_a_listed_block_value_is_added_to_every_roll_before_the_truncation(self):
+        values, needed = rolled_reads_needed()
+        reads = [math.trunc(values[index % len(values)] + 11) for index in range(needed)]
+        verdict = self.block_rolled_verdict(reads, 11)
+        self.assertEqual(verdict.status, 'ok')
+        self.assertIn('plus the read block value 11 on effect 0 (seeded code term)', verdict.explanation)
+        self.assertAlmostEqual(verdict.expected, fmean(values) + 11)
+
+    def test_seeded_reads_without_the_listed_block_value_alert(self):
+        values, needed = rolled_reads_needed()
+        reads = [math.trunc(values[index % len(values)]) for index in range(needed)]
+        self.assertEqual(self.block_rolled_verdict(reads, 11).status, 'alert')
+
+    def test_a_listed_block_value_the_run_does_not_read_is_unmeasured(self):
+        values, needed = rolled_reads_needed()
+        verdict = self.block_rolled_verdict([math.trunc(value) for value in values][:needed], None)
+        self.assertEqual(verdict.status, 'unmeasured')
+        self.assertIn("reads no 'block_value'", verdict.explanation)
 
     def narrow_roll_verdict(self, read, fraction):
         text = '${$803153m1+$803153ppl1+$AP*0.25+$sph*.25}'
@@ -664,10 +752,66 @@ class CompareTest(unittest.TestCase):
                     self.linked_hit(self.BASE_ROLL_CONTRAST, 'ok')]
         self.assertEqual(resolve_base_roll_links(verdicts)[0].status, 'ok')
 
+    def test_a_refused_base_roll_is_accepted_again_from_its_own_read_once_its_links_pass(self):
+        refused = self.base_roll_verdict()
+        self.assertEqual(refused.detail['base_roll_only']['read_status'], 'ok')
+        verdicts = [refused, self.linked_hit(self.BASE_ROLL_HIT, 'ok'), self.linked_hit(self.BASE_ROLL_CONTRAST, 'ok')]
+        accepted = resolve_base_roll_links(verdicts, {self.BASE_ROLL_LABEL})[0]
+        self.assertEqual(accepted.status, 'ok')
+        self.assertNotIn('not accepted', accepted.explanation)
+        verdicts[2] = self.linked_hit(self.BASE_ROLL_CONTRAST, 'alert')
+        again = resolve_base_roll_links(resolve_base_roll_links(verdicts))[0]
+        self.assertEqual(again.status, 'alert')
+        self.assertEqual(again.explanation.count('not accepted'), 1)
+        self.assertEqual(resolve_base_roll_links(verdicts, set())[0], refused)
+
     def test_a_base_roll_only_token_without_a_named_hit_label_is_an_alert(self):
         verdict = self.base_roll_verdict(links=False)
         self.assertEqual(verdict.status, 'alert')
         self.assertIn('names no power_term_label and no contrast_label', verdict.explanation)
+
+    CARRIER_TEXT = '${$m1+0+$AP*0.159426}'
+
+    def carrier_verdicts(self, measured='28', aura=227, term=0.159426):
+        def tokens(caster, forced):
+            return [Displayed(self.CARRIER_TEXT, 28 + caster.ap * term, 0, 'flat')]
+
+        labels = {'effect_value': '1001 effect_value e0 #0', 'aura_amount': '1001 aura_amount e0 #0'}
+        items = [expectation(label, check, self.CARRIER_TEXT, 'read flat', 0) for check, label in labels.items()]
+        reader = FakeTooltips(tokens, fields={(RANK, 'EffectApplyAuraName[0]'): aura})
+        steps = [assert_step(label, measured) for label in labels.values()]
+        verdicts = self.value_run(items, [self.CARRIER_TEXT], steps, reader)
+        return [verdicts[label] for label in labels.values()]
+
+    def test_an_aura_227_carrier_amount_is_judged_on_its_token_without_power(self):
+        for verdict in self.carrier_verdicts():
+            self.assertEqual(verdict.status, 'ok')
+            self.assertAlmostEqual(verdict.expected, 28)
+            detail = verdict.detail['trigger_with_value']
+            self.assertAlmostEqual(detail['full_value'], 28 + 313 * 0.159426)
+            self.assertAlmostEqual(detail['power_term'], 313 * 0.159426)
+            self.assertIn('SpellAuraEffects.cpp:6566', verdict.explanation)
+
+    def test_an_aura_227_carrier_amount_holding_the_power_term_is_an_alert(self):
+        for verdict in self.carrier_verdicts(measured=str(round(28 + 313 * 0.159426, 2))):
+            self.assertEqual(verdict.status, 'alert')
+
+    def test_mutant_an_aura_227_carrier_judged_on_its_full_token_alerts(self):
+        with mock.patch('compare.judge_trigger_with_value', return_value=None):
+            for verdict in self.carrier_verdicts():
+                self.assertEqual(verdict.status, 'alert')
+                self.assertAlmostEqual(verdict.expected, 28 + 313 * 0.159426)
+
+    def test_another_aura_keeps_its_full_token(self):
+        for verdict in self.carrier_verdicts(aura=226):
+            self.assertEqual(verdict.status, 'alert')
+            self.assertNotIn('trigger_with_value', verdict.detail or {})
+
+    def test_an_aura_227_carrier_without_a_power_term_keeps_its_plain_judgement(self):
+        for verdict in self.carrier_verdicts(term=0.0):
+            self.assertEqual(verdict.status, 'ok')
+            self.assertNotIn('trigger_with_value', verdict.detail or {})
+            self.assertIn('read with the measured stats', verdict.explanation)
 
     def test_a_base_roll_only_token_whose_hit_labels_are_not_in_the_comparison_is_an_alert(self):
         verdict = self.base_roll_verdict()
@@ -849,6 +993,86 @@ class CompareTest(unittest.TestCase):
                                   constant_reader(Displayed('$d', 20000.0, None, 'duration_ms')))
         self.assertEqual((verdicts[label].status, verdicts[label].low), ('ok', 19925.0))
 
+    def test_aura_duration_carry_in_is_opt_in_aura_only_and_preserves_one_percent_sensitivity(self):
+        from compare import AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY, aura_duration_map_update_carry_in
+        label = '1001 aura_duration_ms #0'
+        cd_label = '1001 cooldown_ms'
+
+        def judge_aura(expected_ms, actual_ms, max_step='1', opt_in=True, steps=None):
+            self.fresh()
+            self.workspace.max_step_ms = max_step
+            self.workspace.class_file = ({**CLASS_FILE, AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY: opt_in}
+                                         if opt_in is not None else CLASS_FILE)
+            run_steps = steps if steps is not None else [
+                plain_step('cast'), assert_step('1001 cast_failure', '0'), assert_step('1001 aura_present', '1'),
+                assert_step(label, str(actual_ms))]
+            verdicts = self.value_run(
+                [expectation(label, 'aura_duration_ms', '$d', 'read duration_ms')],
+                ['$d'], run_steps, constant_reader(Displayed('$d', float(expected_ms), None, 'duration_ms')))
+            return verdicts[label]
+
+        def judge_cooldown(expected_ms, actual_ms, max_step='1', opt_in=True):
+            self.fresh()
+            self.workspace.max_step_ms = max_step
+            self.workspace.class_file = ({**CLASS_FILE, AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY: opt_in}
+                                         if opt_in is not None else CLASS_FILE)
+            run_steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'),
+                         assert_step(cd_label, str(actual_ms))]
+            verdicts = self.value_run(
+                [expectation(cd_label, 'cooldown_ms', str(expected_ms), 'max(RecoveryTime, CategoryRecoveryTime)')],
+                [], run_steps, constant_reader())
+            return verdicts[cd_label]
+
+        default_v = judge_aura(15000, 14990, '1', opt_in=None)
+        false_v = judge_aura(15000, 14990, '1', opt_in=False)
+        self.assertEqual((default_v.status, default_v.low, default_v.high), ('alert', 14997.0, 15000.0))
+        self.assertEqual((false_v.status, false_v.low, false_v.high), ('alert', 14997.0, 15000.0))
+        self.assertNotIn('map-update carry-in', default_v.explanation)
+        self.assertEqual(default_v.explanation, false_v.explanation)
+
+        cd_v = judge_cooldown(15000, 14990, '1', opt_in=True)
+        self.assertEqual((cd_v.status, cd_v.low, cd_v.high), ('alert', 14998.0, 15000.0))
+        self.assertNotIn('map-update carry-in', cd_v.explanation)
+        self.assertEqual(judge_cooldown(500, 495, '1', opt_in=True).status, 'alert')
+
+        ok_502216 = judge_aura(15000, 14990, '1', opt_in=True)
+        self.assertEqual((ok_502216.status, ok_502216.low, ok_502216.high), ('ok', 14988.0, 15000.0))
+        self.assertIn('plus 9 ms map-update carry-in', ok_502216.explanation)
+        self.assertEqual(judge_aura(15000, 14988, '1', opt_in=True).status, 'ok')
+        self.assertEqual(judge_aura(15000, 14987, '1', opt_in=True).status, 'alert')
+        self.assertEqual(judge_aura(15000, 15001, '1', opt_in=True).status, 'alert')
+
+        one_step_8ms = judge_aura(15000, 14983, '8', opt_in=True,
+                                  steps=[plain_step('cast'), assert_step(label, '14983')])
+        self.assertEqual((one_step_8ms.status, one_step_8ms.low), ('ok', 14983.0))
+        self.assertEqual(judge_aura(15000, 14982, '8', opt_in=True,
+                                    steps=[plain_step('cast'), assert_step(label, '14982')]).status, 'alert')
+        three_step_8ms = judge_aura(15000, 14967, '8', opt_in=True)
+        self.assertEqual((three_step_8ms.status, three_step_8ms.low), ('ok', 14967.0))
+        self.assertEqual(judge_aura(15000, 14966, '8', opt_in=True).status, 'alert')
+
+        for duration_ms, one_pct_short, one_tick_short in (
+                (1000, 990, 500), (15000, 14850, 12000), (60000, 59400, 57000)):
+            with self.subTest(duration_ms=duration_ms, kind='one_pct_short'):
+                self.assertEqual(judge_aura(duration_ms, one_pct_short, '1', opt_in=True).status, 'alert')
+            with self.subTest(duration_ms=duration_ms, kind='one_tick_short'):
+                self.assertEqual(judge_aura(duration_ms, one_tick_short, '1', opt_in=True).status, 'alert')
+        short_1000 = judge_aura(1000, 990, '1', opt_in=True)
+        self.assertEqual(short_1000.low, 997.0)
+        self.assertNotIn('map-update carry-in', short_1000.explanation)
+
+        no_cast = judge_aura(15000, 15000, '1', opt_in=True, steps=[assert_step(label, '15000')])
+        self.assertEqual((no_cast.status, no_cast.low), ('ok', 15000.0))
+        self.assertNotIn('map-update carry-in', no_cast.explanation)
+
+        at_ten = judge_aura(15000, 14990, '10', opt_in=True)
+        self.assertEqual((at_ten.status, at_ten.low), ('ok', 14970.0))
+        self.assertNotIn('map-update carry-in', at_ten.explanation)
+
+        for bad in (1, 'true', None, []):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                aura_duration_map_update_carry_in({AURA_DURATION_MAP_UPDATE_CARRY_IN_KEY: bad})
+
     def test_foreign_aura_grant_duration_on_the_ally_matches_the_duration_token(self):
         label = '1001 aura_duration_ms 2002 #0'
         steps = [plain_step('cast'), assert_step('1001 cast_failure', '0'),
@@ -925,6 +1149,28 @@ class CompareTest(unittest.TestCase):
         verdicts = self.value_run([expectation(label, 'power_cost', '15', 'ManaCost divisor 10')], [],
                                   [assert_step(label, '150')], constant_reader())
         self.assertEqual((verdicts[label].status, verdicts[label].measured), ('ok', 15.0))
+
+    def test_base_mana_percent_power_cost_is_compared_and_alerts_on_mismatch(self):
+        label = '1001 power_cost'
+        rule = 'ManaCost 0 + 12% of base_mana 1512 divisor 1'
+        ok = self.value_run([expectation(label, 'power_cost', '181', rule)], [],
+                            [assert_step(label, '181')], constant_reader())
+        self.assertEqual((ok[label].status, ok[label].measured, ok[label].expected), ('ok', 181.0, 181.0))
+        self.fresh()
+        bad = self.value_run([expectation(label, 'power_cost', '181', rule)], [],
+                             [assert_step(label, '196')], constant_reader())
+        self.assertEqual(bad[label].status, 'alert')
+
+    def test_base_health_percent_power_cost_is_compared_and_alerts_on_mismatch(self):
+        label = '1001 power_cost'
+        rule = 'ManaCost 0 + 10% of base_health 1418 divisor 1'
+        ok = self.value_run([expectation(label, 'power_cost', '141', rule)], [],
+                            [assert_step(label, '141')], constant_reader())
+        self.assertEqual((ok[label].status, ok[label].measured, ok[label].expected), ('ok', 141.0, 141.0))
+        self.fresh()
+        bad = self.value_run([expectation(label, 'power_cost', '141', rule)], [],
+                             [assert_step(label, '155')], constant_reader())
+        self.assertEqual(bad[label].status, 'alert')
 
     def test_known_aura_absent_is_an_alert(self):
         label = 'known_aura 887007'
@@ -1267,6 +1513,25 @@ class CalcAmountAndBuildTest(unittest.TestCase):
                       f'- `{self.LABEL}`', report)
         self.assertIn(f'- Build judged: commit {WORKSPACE_COMMIT}, worldserver sha256 {WORKSPACE_BUILD}', report)
 
+    def test_a_rule_only_verdict_is_selected_without_a_run_and_an_unrun_measurement_is_not(self):
+        self.value('568')
+        for key, label, rule in (('conformance-templar-value-1002', '1002 effect_value #0', 'closed: no value'),
+                                 ('conformance-templar-value-1003', '1003 effect_value #0', 'read flat')):
+            self.workspace.scenario(key, 'value', [expectation(label, 'effect_value', self.TOKEN.text, rule, 0)],
+                                    [self.TOKEN.text], None)
+            self.workspace.scenarios[-1]['file'] = None
+        manifest, results = self.workspace.manifest()
+
+        def selection():
+            comparison = evaluate(manifest, results, tooltips=constant_reader(self.TOKEN), hit_model=reference_hit)
+            return {verdict.label: (verdict.status, verdict.runs, verdict.selected) for verdict in comparison.verdicts}
+
+        self.assertEqual(selection(), {self.LABEL: ('ok', [f'run-{VALUE_KEY}'], True),
+                                       '1002 effect_value #0': ('closed', [], True),
+                                       '1003 effect_value #0': ('alert', [], False)})
+        with mock.patch('compare.rule_only_labels', return_value=set()):
+            self.assertFalse(selection()['1002 effect_value #0'][2])
+
     def test_every_verdict_carries_the_build_and_the_run_that_produced_it(self):
         self.value('305')
         self.workspace.scenario('conformance-templar-value-1002', 'value',
@@ -1345,6 +1610,32 @@ class GameplayClockGateTest(unittest.TestCase):
 
     def test_a_real_clock_run_of_a_real_clock_only_scenario_is_judged_normally(self):
         self.assertEqual(self.verdict_of('real').status, 'ok')
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HealAbsorbReadTest(unittest.TestCase):
+    def verdict_of(self, before, after):
+        model = {'kind': 'metric_delta', 'before_label': 'before', 'after_label': 'after', 'expected': 99.0,
+                 'before_expected': 0.0, 'tolerance': 0, 'metric': 'spell_heal_absorb_total'}
+        item = Expectation('561201 behaviour_metric_delta heal_absorb', BEHAVIOUR_METRIC_DELTA, SPELL, RANK, None,
+                           '99', 'prose: "absorbs the next 99 healing on the target" (561201)', model)
+        workspace = Workspace()
+        self.addCleanup(workspace.close)
+        workspace.scenario('heal-absorb', 'behaviour', [item],
+                           steps=[assert_step('before', before), assert_step('after', after)])
+        manifest, results = workspace.manifest()
+        return {verdict.label: verdict for verdict in compare(manifest, results)}[item.label]
+
+    def test_the_absorbed_healing_of_the_learned_arm_passes(self):
+        self.assertEqual(self.verdict_of('0', '99').status, 'ok')
+
+    def test_a_skipped_absorb_field_or_the_landed_heal_read_in_its_place_alerts(self):
+        for after in ('0', '1401'):
+            with self.subTest(after=after):
+                self.assertEqual(self.verdict_of('0', after).status, 'alert')
+
+    def test_an_absorb_in_the_not_learned_control_alerts(self):
+        self.assertEqual(self.verdict_of('99', '99').status, 'alert')
 
 
 class PassiveDeltaTest(unittest.TestCase):
@@ -2080,6 +2371,111 @@ class GenerateTest(unittest.TestCase):
             shutil.rmtree(out)
 
 
+SUPERSEDING = ['572027 hit_mean gate stacks 0', '572027 hit_mean gate']
+SUPERSEDED_ENTRY = {'spell': 572027, 'reason': 'seeded: its hits land on the debuff it applies',
+                    'replaced_by': SUPERSEDING, 'ruling': 'seeded mentor decision D-1'}
+
+
+def superseded_generate(out: Path, entries) -> dict:
+    from conformance import generate
+
+    def listed(class_id):
+        return {**load_fixture_class_file(class_id), 'superseded_hits': entries}
+
+    with mock.patch('conformance.load_class_file', listed):
+        return json.loads(generate(CLASS_FILE['class_id'], out, spells=[RIGHTEOUS_UPHEAVAL]).read_text(
+            encoding='utf-8'))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class SupersededHitTest(unittest.TestCase):
+    def test_a_superseded_hit_is_a_closed_record_without_a_scenario_naming_its_replacements(self):
+        out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+        try:
+            manifest = superseded_generate(out, [SUPERSEDED_ENTRY])
+            [entry] = [entry for entry in manifest['scenarios'] if entry['kind'] == 'hit']
+            [item] = entry['expectations']
+            self.assertEqual((entry['key'], entry['file'], item['label'], item['check']),
+                             ('conformance-templar-hit-572027', None, '572027 hit_mean', 'unmodelled'))
+            self.assertEqual(item['rule'], 'closed: no check needed: seeded: its hits land on the debuff it applies')
+            self.assertEqual(item['model'], {SUPERSEDED_BY: SUPERSEDING})
+            verdict = judge_expectation(manifest, entry, None, Expectation(**item), None, None, None)
+            self.assertEqual((verdict.status, verdict.detail), ('closed', {SUPERSEDED_BY: SUPERSEDING}))
+        finally:
+            shutil.rmtree(out)
+
+    def test_mutant_without_the_key_the_plain_hit_is_generated_as_before(self):
+        out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+        try:
+            manifest = superseded_generate(out, [])
+            hits = [entry for entry in manifest['scenarios'] if entry['kind'] == 'hit']
+            self.assertEqual([entry['key'] for entry in hits],
+                             ['conformance-templar-hit-572027-part-1', 'conformance-templar-hit-572027-part-2'])
+            self.assertTrue(all(entry['file'] for entry in hits))
+        finally:
+            shutil.rmtree(out)
+
+    def test_an_entry_without_its_replacing_labels_is_refused(self):
+        for broken in ({key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'replaced_by'},
+                       {**SUPERSEDED_ENTRY, 'replaced_by': []},
+                       {**SUPERSEDED_ENTRY, 'replaced_by': ['572027 hit_mean']},
+                       {**SUPERSEDED_ENTRY, 'reason': ' '},
+                       {**SUPERSEDED_ENTRY, 'unknown_key': 1}):
+            out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+            try:
+                with self.subTest(broken=sorted(broken)), self.assertRaises(ValueError):
+                    superseded_generate(out, [broken])
+            finally:
+                shutil.rmtree(out)
+
+
+    def test_mutant_a_class_other_than_27_without_a_mentor_ruling_is_refused(self):
+        without = {key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'ruling'}
+        for broken in (without, {**SUPERSEDED_ENTRY, 'ruling': ''}, {**SUPERSEDED_ENTRY, 'ruling': 'the author says so'},
+                       {**SUPERSEDED_ENTRY, 'ruling': 17}):
+            out = Path(tempfile.mkdtemp(prefix='conformance-superseded-'))
+            try:
+                with self.subTest(ruling=broken.get('ruling')), self.assertRaisesRegex(ValueError, 'ruling'):
+                    superseded_generate(out, [broken])
+            finally:
+                shutil.rmtree(out)
+
+    def test_class_27_needs_no_ruling_and_a_ruling_is_accepted_elsewhere(self):
+        from conformance import superseded_hit
+
+        without = {key: value for key, value in SUPERSEDED_ENTRY.items() if key != 'ruling'}
+        for class_id, entry in ((27, without), (27, SUPERSEDED_ENTRY), (23, SUPERSEDED_ENTRY)):
+            with self.subTest(class_id=class_id, ruling='ruling' in entry):
+                self.assertEqual(superseded_hit({'class_id': class_id, 'superseded_hits': [entry]}, 572027), entry)
+
+
+class ResolveSupersededTest(unittest.TestCase):
+    def closed(self):
+        return Verdict('572027 hit_mean', 'closed', None, None, None, None, 'closed: no check needed: seeded',
+                       check='unmodelled', detail={SUPERSEDED_BY: SUPERSEDING})
+
+    def test_a_superseded_hit_stays_closed_only_with_every_replacement_ok(self):
+        resolved = resolve_superseded([self.closed(), verdict(SUPERSEDING[0], 'ok'), verdict(SUPERSEDING[1], 'ok')])
+        self.assertEqual(resolved[0].status, 'closed')
+        self.assertIn(f'replaced by "{SUPERSEDING[0]}" (ok), "{SUPERSEDING[1]}" (ok)', resolved[0].explanation)
+
+    def test_mutant_a_missing_replacement_alerts(self):
+        resolved = resolve_superseded([self.closed(), verdict(SUPERSEDING[0], 'ok')])
+        self.assertEqual(resolved[0].status, 'alert')
+        self.assertIn(f'"{SUPERSEDING[1]}" (missing)', resolved[0].explanation)
+
+    def test_mutant_an_alerting_or_unmeasured_replacement_alerts(self):
+        for status in ('alert', 'unmeasured', 'tolerated'):
+            with self.subTest(status=status):
+                resolved = resolve_superseded([self.closed(), verdict(SUPERSEDING[0], status),
+                                               verdict(SUPERSEDING[1], 'ok')])
+                self.assertEqual(resolved[0].status, 'alert')
+
+    def test_a_closed_verdict_without_replacements_is_left_alone(self):
+        plain = Verdict('1 hit_mean', 'closed', None, None, None, None, 'closed: no check needed: x')
+        self.assertEqual(resolve_superseded([plain]), [plain])
+
+
 def verdict(label: str, status: str) -> Verdict:
     return Verdict(label, status, None, None, None, None, '')
 
@@ -2113,6 +2509,14 @@ class ResolveLinkedStatusesTest(unittest.TestCase):
         resolved = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'ok')])
         self.assertEqual(resolved[0].status, 'unmodelled')
         self.assertIn('(status unmodelled)', resolved[0].explanation)
+
+    def test_a_resolved_link_records_its_own_status_and_resolves_again_from_it(self):
+        first = resolve_linked_statuses([linked_verdict('1 e0', '2 proc_rate', 'ok'), verdict('2 proc_rate', 'ok')])
+        self.assertEqual((first[0].status, first[0].detail['linked_from']), ('closed', 'unmodelled'))
+        again = resolve_linked_statuses([first[0], verdict('2 proc_rate', 'alert')], {'1 e0'})
+        self.assertEqual((again[0].status, again[0].detail['linked_from']), ('unmodelled', 'unmodelled'))
+        self.assertIn('(status alert)', again[0].explanation)
+        self.assertEqual(resolve_linked_statuses([first[0], verdict('2 proc_rate', 'alert')], set())[0], first[0])
 
     def test_an_unrelated_verdict_passes_through_unchanged(self):
         plain = verdict('1 e0', 'ok')

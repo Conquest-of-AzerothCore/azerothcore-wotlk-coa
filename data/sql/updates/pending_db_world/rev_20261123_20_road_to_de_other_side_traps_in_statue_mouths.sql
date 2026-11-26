@@ -1,0 +1,19 @@
+-- Road's statue traps moved into the statue mouths: 2 yards back towards the wall and 2 yards lower.
+UPDATE `creature` SET `position_x` = 415.247, `position_y` = 54.585, `position_z` = 270.150 WHERE `guid` = 9370601 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 432.193, `position_y` = 46.685, `position_z` = 270.150 WHERE `guid` = 9370602 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 411.397, `position_y` = 45.635, `position_z` = 275.580 WHERE `guid` = 9370603 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 427.853, `position_y` = 37.965, `position_z` = 275.580 WHERE `guid` = 9370604 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 406.878, `position_y` = 35.976, `position_z` = 282.910 WHERE `guid` = 9370605 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 423.322, `position_y` = 28.304, `position_z` = 282.910 WHERE `guid` = 9370606 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 366.958, `position_y` = -50.594, `position_z` = 295.650 WHERE `guid` = 9370607 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 382.662, `position_y` = -57.926, `position_z` = 295.650 WHERE `guid` = 9370608 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 363.187, `position_y` = -58.345, `position_z` = 300.310 WHERE `guid` = 9370609 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 379.153, `position_y` = -65.785, `position_z` = 300.310 WHERE `guid` = 9370610 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 359.068, `position_y` = -66.404, `position_z` = 305.220 WHERE `guid` = 9370611 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 375.622, `position_y` = -74.136, `position_z` = 305.220 WHERE `guid` = 9370612 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 318.178, `position_y` = -151.774, `position_z` = 330.326 WHERE `guid` = 9370613 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 336.038, `position_y` = -160.084, `position_z` = 330.470 WHERE `guid` = 9370614 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 314.017, `position_y` = -161.015, `position_z` = 337.240 WHERE `guid` = 9370615 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 332.126, `position_y` = -169.393, `position_z` = 337.240 WHERE `guid` = 9370616 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 309.057, `position_y` = -170.215, `position_z` = 344.220 WHERE `guid` = 9370617 AND `id` = 162975;
+UPDATE `creature` SET `position_x` = 328.205, `position_y` = -179.261, `position_z` = 344.220 WHERE `guid` = 9370618 AND `id` = 162975;

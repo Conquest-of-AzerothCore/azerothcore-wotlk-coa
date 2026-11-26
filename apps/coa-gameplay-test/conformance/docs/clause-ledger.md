@@ -43,13 +43,19 @@ A JSON array. Each entry is one clause:
 - `effectiveness_of` (optional, a `"claim"` entry without `claims`, ADR 0268): the spell id of the buff X in a clause
   that increases "the effectiveness of X". When X's entries, of any `kind`, state exactly one value in all (a `${...}`
   formula, a `$` token other than a duration, radius or range, or a literal number), the entries carrying it are added
-  to the claim's words for the state-promise match; with two or more values, or none, nothing changes. Templar:
-  Martyr 300530 names Gift of Zeal 300923.
+  to the claim's words for the state-promise match; with two or more values, or none, nothing changes. An entry of
+  X that is a whole `@ext:...:ext@` extension text is left out of the count and the words (ADR 1135, provisional): its
+  literal numbers ("Can only have 1 ...") restate a rule, not the buff's value. Templar: Martyr 300530 names Gift of
+  Zeal 300923; Witch Doctor: Loa Empowerment 706368 names Power Wuju 707676.
 - `promise_of` (optional, a `"claim"` entry, ADR 0707): the exact text of an earlier clause of the same spell. Its
   words join every claim's words for the state-promise match only (`STATE_PROMISES` and the contrast rows), so a
   clause that continues a sentence ("increasing by $s1% every ...") is promised the state its subject clause names
   ("critical strike chance"). A source that is not an earlier clause of the spell is refused. Witch Hunter: Slayer's
   Mark 804068.
+- `state_promise` (optional, on a declared claim, ADR 1283): a metric of the closed map `CLAIM_STATE_PROMISES`
+  (`coverage.py`; only `casting`, which adds `channel\w*`). For that claim only, the metric's promise words gain the
+  mapped words. Refused on a clause, for a metric outside the map, or when the claim's own words do not say the
+  mapped words. Felsworn: Carve 800206 "you can channel while moving".
 
 ### Stated claims
 
@@ -287,12 +293,28 @@ not in the table fails the whole run (`EvidenceError`, no default):
   `stat_gain` verdict gets it from its judge under attribution reads and names its read, ADR 0258), and the clause
   text names the stat (`coverage.STATE_PROMISES`, for example `armor` needs "armor", `spell_power` "spell power" or
   "spell damage"; `max_power` takes the power names of `passives.POWER_NAMES` and `combat_rating` "rating" or a
-  `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A metric in `coverage.CONTRAST_PROOF` (kind modules add rows) is behaviour only when `detail.contrast` equals its
+  `passives.RATING_NAMES` phrase such as "armor penetration", ADR 0190). A `stat_exact` read in a learned or
+  own-cast `behaviour_metric_delta` contrast also counts as behaviour for a clause naming `primary attributes`
+  (`coverage.PRIMARY_ATTRIBUTES_WORDS`, ADR 1304), only when the claim's own conformant `stat_exact` verdicts cover
+  all five primary attributes (`0..4`: Strength, Agility, Stamina, Intellect, Spirit) via stamped `detail.stat`; a
+  claim measuring fewer than all five stays data conformant. A metric in `coverage.CONTRAST_PROOF` (kind modules add
+  rows) is behaviour only when `detail.contrast` equals its
   row's contrast, whatever the claim words say (ADR 0616), unless the metric also has a `STATE_PROMISES` row: then the
   clause or its row must use those words. A readback metric has such a row only to gate its contrast proof, as
-  `spell_done_crit_chance` does with the crit words (ADR 0691), and `spell_taken_crit_chance`, the target-side
-  chance with the attacker's conditional rules, the same way (ADR 0800). A `behaviour_group_stack_cap` state read
-  is behaviour for a no-stack clause ("does not stack", `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
+  `spell_done_crit_chance` does with the crit words (ADR 0691), `spell_taken_crit_chance`, the target-side
+  chance with the attacker's conditional rules, the same way (ADR 0800), and `spell_hit_bonus_taken`, the target's
+  `SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE` modifier queried by `Unit::MagicSpellHitResult`, with the hit-chance words
+  and a real learned contrast (ADR 1290). `spell_done_crit_chance_scripted`, the done
+  chance passed through the CoA crit hook (`ScriptMgr::OnSpellCritChance`), takes the same row and crit words plus a
+  partner gate (`coverage.PARTNERED_CONTRASTS`, ADR 1188): its learned verdict is behaviour only when the ledger row's
+  conformant learned verdicts of the metric hold a non-zero expected gain and, unless every row of the spell joined is
+  a plain unconditional stat sentence (`coverage.PLAIN_CRIT_SENTENCE`), also a zero gain. That the zero arm's fixture
+  breaks the condition, and that each condition has an arm, is a review check; the tool does not see it.
+  `critical_block_chance` (the engine's `SPELL_AURA_MOD_BLOCK_CRIT_CHANCE` total, ADR 1193) is a readback with the learned
+  contrast, the words "critical block" and the same partner gate; its text is never a plain crit sentence, so the zero
+  arm is always required. A
+  `behaviour_group_stack_cap` state read is behaviour for a no-stack clause ("does not stack",
+  `coverage.NO_STACK_WORDS`, ADR 0424): it reads the consumed
   value after the spell alone and after the similar spell too, and only equal readings (`compare.STACKED_SAME`,
   ADR 0446) prove the clause. A `setup_only_after` condition contrast (a state read without and with the condition
   set up, the talent known in both phases) is behaviour for a claim that states that condition: its words start with

@@ -10,6 +10,11 @@ copies are pooled; the kept share is judged as a proc rate (Wilson 99% interval 
 `chance_pct`), below `procs.band_trials_needed` as G-20 step 1 (`insufficient_trials`, interval stated). The contract
 states the casts, the band's need and, when sized, the residual failure probability of a conformant server per run.
 
+`aura_stacks` (default 1, ADR 1278) sets `aura` at that many stacks before every cast of both arms, for a consumer
+that costs more than one stack (a consumer's `CasterAuraSpell` is already set by its cast step). Felsworn: Infernal
+Doom 804219 "Ruin now has a $s1% chance not to consume Felfury" (Felfury 800058 at 2 stacks before every Ruin 501298,
+control Twin Slice 801901).
+
 No server mutant reaches the rate: the roll is a script constant (`roll_chance_i`), which no spell modifier changes;
 the seeded tests alert on a consumed control and on a rate far off the band.
 

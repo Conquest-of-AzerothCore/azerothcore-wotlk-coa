@@ -1,0 +1,313 @@
+{
+  "schema": 1,
+  "name": "Witch Doctor Unstable Concoction heals allies within 20 yd of the marked target",
+  "contract": [
+    "Unstable Concoction 802487: 'healing nearby allies within $802489a1 yds' (802489 EffectRadiusIndex 9 = 20",
+    "yd; 'Heals up to $i allies', MaxAffectedTargets 5). The class code casts 802489 on Allies(player, target,",
+    "10.0f, 5) (AscensionWitchDoctorAbilities.cpp:234-240 at 6cdbd8c441; Allies at",
+    "AscensionWitchDoctorCompletion.cpp:62-76), a script search with both object sizes (IsWithinDistInMap;",
+    "players 1.5 yd each) that keeps only friendly units in line of sight of the centre: 13 yd centre to centre",
+    "today, 23 yd under the tooltip (G-29 mechanism 3). Bracket (cycle 8 lead R3-e2, M-48): the marked target",
+    "is the Witch Doctor itself (Frog Bones 801663, Potion Toss 801661 at the doctor, then Loa's Brew 801670 at",
+    "the doctor, the class entry brew sequence), with grouped allies at 3 yd (control: healed in every build),",
+    "22.5 yd (0.5 yd inside the tooltip edge: healed only after a radius fix) and 23.5 yd (0.5 yd beyond: never).",
+    "Three allies and the doctor stay under the cap of 5. All four are race 1 at the Northshire creation point;",
+    "the line runs along +x, relocate keeps z, so the 3D distance equals the read 2D distance, and every unit",
+    "stays in grid cells a 10 or 20 yd search visits (cell edge at x = -8933.33). Potion Toss needs its",
+    "CasterAuraSpell 801702 (Has Ingredient Marker): Cauldron Brewer 92085 is learned first, so the real Frog",
+    "Bones gives the marker (SyncIngredients, AscensionWitchDoctorBrewing.cpp:38-45; brew_marker ok in final05)",
+    "and the scenario reads it instead of setting it. Line of sight from the doctor along the line is read by a",
+    "real Renew 25222 (RangeIndex 5 = 40 yd, no SPELL_ATTR2 ignore-LOS bit) at the far ally after the reads: the",
+    "edge ally stands on the same segment at the same height, so a landed Renew shows that the edge arm is not",
+    "lost to line of sight. A probable defect by code read; this scenario is its reproduction."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "doctor",
+      "race": 1,
+      "class": 13,
+      "level": 60,
+      "spell_hit_rating": 10000
+    },
+    {
+      "id": "near_ally",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "edge_ally",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    },
+    {
+      "id": "far_ally",
+      "race": 1,
+      "class": 13,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "label": "Loa's Brew",
+      "actor": "doctor",
+      "spell": 801670
+    },
+    {
+      "action": "learn",
+      "label": "Ingredient: Frog Bones",
+      "actor": "doctor",
+      "spell": 801663
+    },
+    {
+      "action": "learn",
+      "label": "Potion Toss",
+      "actor": "doctor",
+      "spell": 801661
+    },
+    {
+      "action": "learn",
+      "label": "Cauldron Brewer (keeps the Ingredient marker)",
+      "actor": "doctor",
+      "spell": 92085
+    },
+    {
+      "action": "learn",
+      "label": "Unstable Concoction",
+      "actor": "doctor",
+      "spell": 802487
+    },
+    {
+      "action": "learn",
+      "label": "Renew (line of sight check)",
+      "actor": "doctor",
+      "spell": 25222
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "near_ally"
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "edge_ally"
+    },
+    {
+      "action": "group",
+      "actor": "doctor",
+      "target": "far_ally"
+    },
+    {
+      "action": "relocate",
+      "actor": "near_ally",
+      "dx": 3
+    },
+    {
+      "action": "relocate",
+      "actor": "edge_ally",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "edge_ally",
+      "dx": 2.5
+    },
+    {
+      "action": "relocate",
+      "actor": "far_ally",
+      "dx": 20
+    },
+    {
+      "action": "relocate",
+      "actor": "far_ally",
+      "dx": 3.5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Witch Doctor's combat reach is 1.5 yd",
+      "actor": "doctor",
+      "metric": "combat_reach",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the edge ally's combat reach is 1.5 yd",
+      "actor": "edge_ally",
+      "metric": "combat_reach",
+      "min": 1.49,
+      "max": 1.51
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the near ally stands 3 yd away",
+      "actor": "near_ally",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 2.9,
+      "max": 3.1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the edge ally stands 22.5 yd away (edge 20 + 1.5 + 1.5 = 23)",
+      "actor": "edge_ally",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 22.4,
+      "max": 22.6
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the far ally stands 23.5 yd away",
+      "actor": "far_ally",
+      "metric": "distance_2d",
+      "target": "doctor",
+      "min": 23.4,
+      "max": 23.6
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 801663
+    },
+    {
+      "action": "cast",
+      "label": "Frog Bones makes an Ingredient",
+      "actor": "doctor",
+      "spell": 801663,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "doctor",
+      "spell": 801661
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Cauldron Brewer and the real Frog Bones give the Has Ingredient Marker 801702",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 801702,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Potion Toss marks the Witch Doctor",
+      "actor": "doctor",
+      "spell": 801661,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the Witch Doctor carries Unstable Concoction",
+      "actor": "doctor",
+      "metric": "aura",
+      "spell": 802488,
+      "equals": 1
+    },
+    {
+      "action": "cast",
+      "label": "Loa's Brew on the marked target",
+      "actor": "doctor",
+      "spell": 801670,
+      "target": "doctor"
+    },
+    {
+      "action": "wait",
+      "label": "Brew cast (2000 ms) and the explosion",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the explosion heals the marked Witch Doctor",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 802489,
+      "target": "doctor",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally 3 yd away is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 802489,
+      "target": "near_ally",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "THE FIX: the ally 22.5 yd away, inside the 20 yd radius, is healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 802489,
+      "target": "edge_ally",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: the ally 23.5 yd away, beyond the radius, is not healed",
+      "actor": "doctor",
+      "metric": "spell_heal_count",
+      "spell": 802489,
+      "target": "far_ally",
+      "equals": 0
+    },
+    {
+      "action": "set_power",
+      "actor": "doctor",
+      "power": 0,
+      "value": 2000
+    },
+    {
+      "action": "cast",
+      "label": "Renew at the far ally (needs line of sight)",
+      "actor": "doctor",
+      "spell": 25222,
+      "target": "far_ally"
+    },
+    {
+      "action": "wait",
+      "ms": 600
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the doctor has line of sight to the far ally (Renew accepted)",
+      "actor": "doctor",
+      "metric": "cast_failure",
+      "spell": 25222,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the far ally carries the doctor's Renew",
+      "actor": "far_ally",
+      "metric": "aura",
+      "spell": 25222,
+      "equals": 1
+    }
+  ]
+}

@@ -404,6 +404,12 @@ struct npc_ascension_animated_blood : public ScriptedAI
 
     void UpdateAI(uint32 diff) override
     {
+        if (Player* owner = ObjectAccessor::GetPlayer(*me, me->GetOwnerGUID()))
+            if (bool travelling = owner->IsMounted() || owner->IsInFlight(); travelling != Travelling)
+            {
+                Travelling = travelling;
+                me->SetImmuneToNPC(travelling);
+            }
         if (!UpdateVictim())
             return;
         if (BloodStrikeTimer <= diff)
@@ -425,6 +431,7 @@ struct npc_ascension_animated_blood : public ScriptedAI
     }
 
     uint32 BloodStrikeTimer = 2000;
+    bool Travelling = false;
 };
 
 void HunterAndHuntedCharge(Player* player)
@@ -945,18 +952,29 @@ class aura_ascension_bloodmage_coagulation : public AuraScript
     }
 };
 
-constexpr uint32 TaldaramsTormentEnergizeRage = 30;
+constexpr uint32 SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE = 582765;
+constexpr uint32 SPELL_THE_COUNCIL_ASSEMBLED = 504103;
+constexpr uint32 SPELL_ATHERANNS_ACUITY = 504105;
 
 class aura_ascension_bloodmage_taldarams_torment : public AuraScript
 {
     PrepareAuraScript(aura_ascension_bloodmage_taldarams_torment);
+
+    bool Validate(SpellInfo const*) override
+    {
+        return ValidateSpellInfo({SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE, SPELL_ATHERANNS_ACUITY});
+    }
 
     void Tick(AuraEffect const*)
     {
         Unit* caster = GetCaster();
         if (!caster)
             return;
-        caster->EnergizeBySpell(caster, GetId(), TaldaramsTormentEnergizeRage, POWER_RAGE);
+        SpellInfo const* energize = sSpellMgr->GetSpellInfo(SPELL_TALDARAMS_TORMENT_ENERGIZE_RAGE);
+        int32 rage = caster->CalculateSpellDamage(caster, energize, EFFECT_0);
+        caster->EnergizeBySpell(caster, GetId(), uint32(std::max(rage, 0)), POWER_RAGE);
+        if (caster->HasAura(SPELL_THE_COUNCIL_ASSEMBLED))
+            caster->CastSpell(caster, SPELL_ATHERANNS_ACUITY, true);
     }
 
     void Register() override

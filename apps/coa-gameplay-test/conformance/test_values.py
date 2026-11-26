@@ -16,7 +16,9 @@ from values import (ALLY, AURA_STATE_FROZEN, AURA_STATE_HEALTHLESS_20_PERCENT, A
                     CALC_AMOUNT_HOOKS_METRIC, CHECKS, FIXTURE_MAX_HEALTH, GCD_WAIT_MS, GENERIC, TARGET, UNMEASURABLE, UNREADABLE, Expectation, Unmodelled,
                     calc_amount_hooks_label, conditional_extra_values, effect_modifier_label,
                     disabled_foreign_effects, facts_of, fixture_health_step, foreign_aura_grants, foreign_effect,
-                    foreign_radius, periodic_reason, required_target_health_steps, sample_labels, value_scenario)
+                    foreign_radius, pay_power_steps, periodic_reason, required_target_health_steps, sample_labels,
+                    value_scenario, HEALTH_POWER, OVER_TICKS_REASON, PER_TICK_FOREIGN_TOTALS, per_tick_ticks,
+                    structure_stats, REMOVED_RADIUS, RankFacts, first_aura_effect)
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import run
@@ -57,6 +59,10 @@ OATH_CHAIN = 704576
 SPELL_POWER_SCHOOLS = 6
 STAT_COUNT = 5
 SETTLE_MS = 5000
+MALICE_OF_GULDAN = 800214
+FELSTRIKE = 802678
+FELSTRIKE_LABEL = '800214 effect_value 802678e0 #1'
+FELSTRIKE_TOTAL = '${($d*1000/$T1)*($802678m1+$802678ppl1+$SP*.05)}'
 LIBERTY = 705266
 SCOURGEBANE_STRIKE = 801832
 IRON_PENANCE = 523712
@@ -694,6 +700,65 @@ class ClientDbcValueScenarioTest(unittest.TestCase):
         self.assertIn('500694 effect_value 803153e0 #0', [item.label for item in expectations])
         self.assertNotIn('500694 effect_value 803153e0 #0', [item['label'] for item in periodic_totals])
 
+    def malice_of_guldan(self, class_file):
+        spell = ClassSpell(MALICE_OF_GULDAN, str(MALICE_OF_GULDAN), (MALICE_OF_GULDAN,), MALICE_OF_GULDAN, 1, False)
+        return value_scenario(class_file, spell, MALICE_OF_GULDAN)
+
+    def test_an_expanded_foreign_total_is_probed_in_its_expansion(self):
+        records = Records(DataSet(DBC_DIR))
+        caster = structure_stats(self.class_file)
+        values = read_tooltip(DataSet(DBC_DIR), MALICE_OF_GULDAN, caster).values
+        ordinal = next(index for index, shown in enumerate(values) if shown.text == FELSTRIKE_TOTAL)
+        shown = values[ordinal]
+        self.assertTrue(periodic_reason(records, MALICE_OF_GULDAN, caster, shown, (FELSTRIKE, 0),
+                                        ordinal).startswith(OVER_TICKS_REASON))
+        self.assertIn('unreadable with a scaled duration or period',
+                      periodic_reason(records, MALICE_OF_GULDAN, caster, shown, (FELSTRIKE, 0)))
+
+    def test_an_unlisted_expanded_foreign_total_is_left_to_the_hit_scenario(self):
+        scenario, expectations, periodic_totals = self.malice_of_guldan(self.class_file)
+        self.assertNotIn(FELSTRIKE_LABEL, [item.label for item in expectations])
+        self.assertIn({'label': FELSTRIKE_LABEL, 'effect': 0, 'effect_spell': FELSTRIKE}, periodic_totals)
+        self.assertFalse(self.steps_of(scenario, FELSTRIKE_LABEL))
+
+    def test_a_listed_foreign_total_keeps_its_effect_value_read_judged_per_tick(self):
+        listed = {**self.class_file, PER_TICK_FOREIGN_TOTALS: [{'spell': FELSTRIKE, 'effect': 0, 'reason': 'x'}]}
+        scenario, expectations, periodic_totals = self.malice_of_guldan(listed)
+        run.validate(scenario)
+        item, = [item for item in expectations if item.label == FELSTRIKE_LABEL]
+        self.assertEqual((item.check, item.displayed, item.model),
+                         ('effect_value', FELSTRIKE_TOTAL, {'effect_spell': FELSTRIKE, 'effect': 0, 'ticks': 6}))
+        self.assertTrue(item.rule.startswith('read flat per tick'))
+        self.assertNotIn(FELSTRIKE_LABEL, [entry['label'] for entry in periodic_totals])
+        step, = [step for step in self.steps_of(scenario, FELSTRIKE_LABEL) if step['metric'] == 'spell_effect_value']
+        self.assertEqual((step['spell'], step['effect']), (FELSTRIKE, 0))
+
+    def test_a_foreign_ticking_token_with_an_unreadable_probe_is_unmeasurable(self):
+        reason = 'periodic token read mixed with a scaled duration or period'
+        original = periodic_reason
+
+        def probe(records, rank_id, caster, shown, token=None, ordinal=None):
+            if token == (FELSTRIKE, 0):
+                return reason
+            return original(records, rank_id, caster, shown, token, ordinal)
+
+        with mock.patch('values.periodic_reason', side_effect=probe):
+            scenario, expectations, periodic_totals = self.malice_of_guldan(self.class_file)
+        item, = [item for item in expectations if item.label == FELSTRIKE_LABEL]
+        self.assertEqual(item.rule, UNMEASURABLE + reason)
+        self.assertNotIn(FELSTRIKE_LABEL, [entry['label'] for entry in periodic_totals])
+        self.assertFalse(self.steps_of(scenario, FELSTRIKE_LABEL))
+
+    def test_a_listed_foreign_effect_read_per_tick_is_refused(self):
+        listed = {**self.class_file, PER_TICK_FOREIGN_TOTALS: [{'spell': 803153, 'effect': 0, 'reason': 'x'}]}
+        spell = ClassSpell(500694, '500694', (500694,), 500694, 1, False)
+        with self.assertRaisesRegex(ValueError, 'is no total over its ticks'):
+            value_scenario(listed, spell, 500694)
+
+    def test_a_listed_rolled_effect_is_refused(self):
+        with self.assertRaisesRegex(ValueError, 'whose points roll'):
+            per_tick_ticks(Records(DataSet(DBC_DIR)), VINDICATION_RANK_2, 0)
+
     def test_trailing_digit_on_a_proc_count_token_is_unmeasurable_not_unreadable(self):
         scenario, expectations = self.build(LIGHTKEEPER, LIGHTKEEPER)
         run.validate(scenario)
@@ -833,6 +898,61 @@ class FixtureHealthStepTest(unittest.TestCase):
         self.assertEqual(fixture_health_step(CASTER, 100)['actor'], CASTER)
 
 
+IMMOLATION_AURA = 800207
+IMMOLATION_AURA_HEALTH_COST = 10
+
+
+def raw_power_steps(power_type, cost, actor=CASTER):
+    return [{'action': 'set_power', 'actor': actor, 'power': power_type, 'value': cost}]
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HealthPowerCostTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.records = Records(DataSet(DBC_DIR))
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
+        cls.spells = {spell.spell_id: spell for spell in class_spells(DBC_DIR, TEMPLAR_CLASS_ID, HEADER)}
+
+    def health_paid_scenario(self, pay=pay_power_steps):
+        def health_paid(records, rank_id):
+            facts = facts_of(records, rank_id)
+            return replace(facts, power_type=HEALTH_POWER) if rank_id == ARGENT_BLADE_RANK_2 else facts
+
+        with mock.patch('values.facts_of', health_paid), mock.patch('values.pay_power_steps', pay):
+            scenario, _, _ = value_scenario(self.class_file, self.spells[ARGENT_BLADE], ARGENT_BLADE_RANK_2)
+        return scenario
+
+    def test_immolation_aura_is_paid_from_health_after_a_health_check(self):
+        facts = facts_of(self.records, IMMOLATION_AURA)
+        self.assertEqual((facts.power_type, facts.mana_cost), (HEALTH_POWER, IMMOLATION_AURA_HEALTH_COST))
+        self.assertEqual(pay_power_steps(facts.power_type, facts.mana_cost),
+                         [{'action': 'assert', 'label': 'SETUP: caster health pays the 10 health cost',
+                           'actor': CASTER, 'metric': 'health', 'min': IMMOLATION_AURA_HEALTH_COST + 1}])
+
+    def test_other_power_types_keep_their_set_power_step(self):
+        self.assertEqual(pay_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST, 'ally'),
+                         raw_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST, 'ally'))
+        self.assertEqual(list(pay_power_steps(ENERGY, ARGENT_BLADE_RANK_2_ENERGY_COST)[0]),
+                         ['action', 'actor', 'power', 'value'])
+
+    def test_a_health_paid_value_scenario_checks_the_health_before_the_cast_and_passes_the_validator(self):
+        scenario = self.health_paid_scenario()
+        run.validate(scenario)
+        steps = scenario['steps']
+        self.assertEqual([step for step in steps if step['action'] == 'set_power'], [])
+        checks = [step for step in steps if step.get('metric') == 'health']
+        self.assertEqual([(step['action'], step['actor'], step['min']) for step in checks],
+                         [('assert', CASTER, ARGENT_BLADE_RANK_2_ENERGY_COST + 1)])
+        cast = next(index for index, step in enumerate(steps) if step['action'] == 'cast')
+        self.assertLess(steps.index(checks[0]), cast)
+
+    def test_mutant_writing_the_health_power_type_is_refused_by_the_validator(self):
+        scenario = self.health_paid_scenario(raw_power_steps)
+        with self.assertRaisesRegex(ValueError, 'value is too large'):
+            run.validate(scenario)
+
+
 DECIMATE = 804194
 LESSER_SHADOW_HOUND = 50224
 HOUNDMASTERS_CALL = 802273
@@ -894,6 +1014,243 @@ class SummonAuraCarrierTest(unittest.TestCase):
         self.assertEqual((read['actor'], read['metric']), (CASTER, 'aura_duration_ms'))
         self.assertFalse([step for step in scenario['steps'] if step.get('label', '').startswith('SETUP:')])
         self.assertTrue(expectations[f'{DECIMATE} aura_amount e0 #1'].rule.startswith('read '))
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class ValueAllyCastTest(unittest.TestCase):
+    ALLY_ONLY = 503498
+    BLESSED_ONLY = 804250
+    BLESS = 804247
+
+    @classmethod
+    def setUpClass(cls):
+        cls.class_file = load_fixture_class_file(TEMPLAR_CLASS_ID)
+
+    def build(self, spell_id, entries):
+        class_file = {**self.class_file, **({'value_ally_casts': entries} if entries is not None else {})}
+        scenario, _, _ = value_scenario(class_file, ClassSpell(spell_id, 'Test', (spell_id,), spell_id, 0, False),
+                                        spell_id)
+        return scenario
+
+    def casts(self, scenario):
+        return [step for step in scenario['steps'] if step['action'] == 'cast']
+
+    def test_a_listed_ally_spell_is_cast_at_the_ally_fixture(self):
+        scenario = self.build(self.ALLY_ONLY, [{'spell': self.ALLY_ONLY}])
+        run.validate(scenario)
+        cast, = self.casts(scenario)
+        self.assertEqual((cast['spell'], cast['target']), (self.ALLY_ONLY, ALLY))
+        self.assertEqual([player['id'] for player in scenario['players']], [CASTER, ALLY])
+
+    def test_without_the_list_the_cast_keeps_no_target(self):
+        for entries in (None, [], [{'spell': self.BLESS}]):
+            cast, = self.casts(self.build(self.ALLY_ONLY, entries))
+            self.assertNotIn('target', cast)
+
+    def test_setup_casts_are_learned_and_cast_at_the_ally_with_a_settle_before_the_cast(self):
+        scenario = self.build(self.BLESSED_ONLY, [{'spell': self.BLESSED_ONLY, 'setup_casts': [self.BLESS]}])
+        run.validate(scenario)
+        steps = scenario['steps']
+        setup, cast = self.casts(scenario)
+        self.assertEqual((setup['spell'], setup['target'], cast['spell'], cast['target']),
+                         (self.BLESS, ALLY, self.BLESSED_ONLY, ALLY))
+        self.assertIn({'action': 'learn', 'actor': CASTER, 'spell': self.BLESS}, steps)
+        between = steps[steps.index(setup) + 1:steps.index(cast)]
+        self.assertEqual([step['action'] for step in between if step['action'] == 'wait'], ['wait'])
+        self.assertGreaterEqual(sum(step['ms'] for step in between if step['action'] == 'wait'), 1500)
+
+    def test_an_entry_takes_spell_and_setup_casts_only(self):
+        for entry in ({'spell': self.ALLY_ONLY, 'target': 'ally'}, {'spell': self.ALLY_ONLY, 'setup_casts': 804247},
+                      {'spell': self.ALLY_ONLY, 'setup_casts': ['804247']}):
+            with self.assertRaises(ValueError):
+                self.build(self.ALLY_ONLY, [entry])
+        with self.assertRaises(ValueError):
+            self.build(self.ALLY_ONLY, [{'spell': self.ALLY_ONLY}, {'spell': self.ALLY_ONLY}])
+
+    def test_ally_cast_reads_ally_and_raid_auras_on_ally_and_groups_for_raid_targets(self):
+        for spell_id, expect_group, metrics in (
+                (500751, True, ('aura', 'aura_duration_ms', 'aura_amount')),
+                (520345, False, ('aura', 'aura_amplitude_ms', 'aura_duration_ms')),
+                (704476, False, ('aura', 'aura_duration_ms', 'aura_amount'))):
+            with self.subTest(spell=spell_id):
+                class_file = {**self.class_file, 'value_ally_casts': [{'spell': spell_id}]}
+                scenario, _, _ = value_scenario(
+                    class_file, ClassSpell(spell_id, 'Test', (spell_id,), spell_id, 0, False), spell_id)
+                run.validate(scenario)
+                steps = scenario['steps']
+                cast, = self.casts(scenario)
+                self.assertEqual((cast['spell'], cast['target']), (spell_id, ALLY))
+                self.assertEqual(any(step.get('action') == 'group' for step in steps), expect_group)
+                aura_steps = [step for step in steps if step.get('metric') in metrics and step.get('spell') == spell_id]
+                self.assertTrue(aura_steps)
+                self.assertTrue(all(step['actor'] == ALLY for step in aura_steps))
+                plain, _, _ = value_scenario(
+                    {k: v for k, v in self.class_file.items() if k != 'value_ally_casts'},
+                    ClassSpell(spell_id, 'Test', (spell_id,), spell_id, 0, False), spell_id)
+                plain_auras = [step for step in plain['steps']
+                               if step.get('metric') in metrics and step.get('spell') == spell_id]
+                self.assertTrue(all(step['actor'] == CASTER for step in plain_auras))
+
+
+class FirstAuraEffectTest(unittest.TestCase):
+    FACTS = RankFacts(passive=False, effects=(50, 28, 27), aura_names=(0, 0, 8), target_a=(47, 47, 31),
+                      target_b=(0, 0, 0), power_type=0, mana_cost=0, mana_cost_per_level=0, mana_cost_percentage=11,
+                      recast_ms=180000, cast_time_ms=0, caster_aura_spell=0, target_aura_state=0)
+
+    def test_the_first_aura_effect_is_found(self):
+        self.assertEqual(first_aura_effect(self.FACTS), 2)
+
+    def test_a_removed_effect_is_no_aura(self):
+        self.assertIsNone(first_aura_effect(self.FACTS, frozenset({2})))
+
+
+WITCH_DOCTOR_CLASS_ID = 13
+VOODOO_CAULDRON = 804684
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class RemovedOwnEffectTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        class_file = load_class_file(WITCH_DOCTOR_CLASS_ID)
+        kept = [entry for entry in class_file.get('removed_own_effects', []) if entry['spell'] != VOODOO_CAULDRON]
+        cls.kept = {**class_file, 'removed_own_effects': kept}
+        cls.removed = {**class_file, 'removed_own_effects': kept + [
+            {'spell': VOODOO_CAULDRON, 'effect': 2, 'reason': 'fixture: the load contract zeroes Effect[2]'}]}
+        cls.cauldron = next(spell for spell in class_spells(DBC_DIR, WITCH_DOCTOR_CLASS_ID, HEADER)
+                            if VOODOO_CAULDRON in spell.ranks)
+
+    def read(self, class_file: dict) -> tuple[dict, dict]:
+        scenario, expectations, _ = value_scenario(class_file, self.cauldron, VOODOO_CAULDRON)
+        return scenario, {expectation.label: expectation.rule for expectation in expectations}
+
+    def test_the_removed_radius_and_aura_are_unmeasurable_and_not_read(self):
+        scenario, rules = self.read(self.removed)
+        self.assertEqual(rules[f'{VOODOO_CAULDRON} effect_radius e2 #2'], UNMEASURABLE + REMOVED_RADIUS)
+        for label in (f'{VOODOO_CAULDRON} aura_duration_ms #0', f'{VOODOO_CAULDRON} aura_duration_ms #3'):
+            self.assertEqual(rules[label], UNMEASURABLE + 'the spell is passive or applies no aura')
+        metrics = [step.get('metric') for step in scenario['steps']]
+        self.assertNotIn('spell_effect_radius', metrics)
+        self.assertNotIn('aura_duration_ms', metrics)
+        self.assertIn('cooldown_ms', metrics)
+        run.validate(scenario)
+
+    def test_without_the_class_fact_the_effect_is_read(self):
+        scenario, rules = self.read(self.kept)
+        self.assertEqual(rules[f'{VOODOO_CAULDRON} effect_radius e2 #2'], 'read radius_yards')
+        self.assertIn('spell_effect_radius', [step.get('metric') for step in scenario['steps']])
+
+
+DREADFALL = 806175
+CULTIST_CLASS_ID = 25
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class HonourMinRangeTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cultist = load_class_file(CULTIST_CLASS_ID)
+        cls.records = Records(DataSet(DBC_DIR))
+        cls.dreadfall = ClassSpell(DREADFALL, 'Dreadfall', (DREADFALL,), DREADFALL, 0, False)
+
+    def test_non_ranged_minimum_range_requires_opt_in_and_places_dummy_at_midpoint(self):
+        from hits import hit_parts
+        from values import DUMMY_DISTANCE, HONOUR_MIN_RANGE_KEY, cast_distance
+        self.assertEqual(cast_distance(self.records, DREADFALL), DUMMY_DISTANCE)
+        self.assertEqual(cast_distance(self.records, DREADFALL, min_range=True), 24.0)
+        without = {key: value for key, value in self.cultist.items() if key != HONOUR_MIN_RANGE_KEY}
+        with_opt = {**without, HONOUR_MIN_RANGE_KEY: True}
+        sc_plain, _, _ = value_scenario(without, self.dreadfall, DREADFALL)
+        sc_opt, _, _ = value_scenario(with_opt, self.dreadfall, DREADFALL)
+        self.assertEqual(sc_plain['creatures'][0]['distance'], DUMMY_DISTANCE)
+        self.assertEqual(sc_opt['creatures'][0]['distance'], 24.0)
+        run.validate(sc_opt)
+        hit_plain, = hit_parts(without, self.dreadfall, 1, DREADFALL)
+        hit_opt, = hit_parts(with_opt, self.dreadfall, 1, DREADFALL)
+        self.assertEqual(hit_plain[0]['creatures'][0]['distance'], DUMMY_DISTANCE)
+        self.assertEqual(hit_opt[0]['creatures'][0]['distance'], 24.0)
+        run.validate(hit_opt[0])
+
+    def test_non_boolean_honour_min_range_is_refused(self):
+        from values import HONOUR_MIN_RANGE_KEY, honour_min_range
+        for bad in (1, 'true', None, []):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                honour_min_range({HONOUR_MIN_RANGE_KEY: bad})
+
+
+VOIDBORNE = 681104
+
+
+@unittest.skipUnless(DBC_DIR.is_dir(), f'client DBC set not found at {DBC_DIR}')
+class BaseManaPowerCostTest(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.cultist = load_class_file(CULTIST_CLASS_ID)
+        cls.dreadfall = ClassSpell(DREADFALL, 'Dreadfall', (DREADFALL,), DREADFALL, 0, False)
+        cls.voidborne = ClassSpell(VOIDBORNE, 'Voidborne', (VOIDBORNE,), VOIDBORNE, 0, False)
+
+    def test_base_mana_power_cost_judges_mana_percent_spells_only_when_opted_in(self):
+        from values import BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY
+        without = {key: value for key, value in self.cultist.items()
+                   if key not in (BASE_MANA_POWER_COST_KEY, BASE_HEALTH_KEY)}
+        with_opt = {**without, BASE_MANA_POWER_COST_KEY: True}
+        with_health = {**with_opt, BASE_HEALTH_KEY: {'value': 1418}}
+        without_opt_with_health = {**without, BASE_HEALTH_KEY: {'value': 1418}}
+        sc_plain, exp_plain, _ = value_scenario(without, self.dreadfall, DREADFALL)
+        sc_opt, exp_opt, _ = value_scenario(with_opt, self.dreadfall, DREADFALL)
+        pc_plain = next(item for item in exp_plain if item.check == 'power_cost')
+        pc_opt = next(item for item in exp_opt if item.check == 'power_cost')
+        self.assertTrue(pc_plain.rule.startswith(UNREADABLE))
+        self.assertNotIn('server create mana/health', sc_plain['contract'])
+        self.assertEqual(pc_opt.displayed, '181')
+        self.assertEqual(pc_opt.rule, 'ManaCost 0 + 12% of base_mana 1512 divisor 1')
+        self.assertIn('server create mana/health', sc_opt['contract'])
+        self.assertIn('CalcPowerCost', sc_opt['contract'])
+        sc_health_no_key, exp_health_no_key, _ = value_scenario(with_opt, self.voidborne, VOIDBORNE)
+        pc_health_no_key = next(item for item in exp_health_no_key if item.check == 'power_cost')
+        self.assertTrue(pc_health_no_key.rule.startswith(UNREADABLE))
+        self.assertNotIn('server create mana/health', sc_health_no_key['contract'])
+        _, exp_health_no_opt, _ = value_scenario(without_opt_with_health, self.voidborne, VOIDBORNE)
+        pc_health_no_opt = next(item for item in exp_health_no_opt if item.check == 'power_cost')
+        self.assertTrue(pc_health_no_opt.rule.startswith(UNREADABLE))
+        sc_health, exp_health, _ = value_scenario(with_health, self.voidborne, VOIDBORNE)
+        pc_health = next(item for item in exp_health if item.check == 'power_cost')
+        self.assertEqual(pc_health.displayed, '141')
+        self.assertEqual(pc_health.rule, 'ManaCost 0 + 10% of base_health 1418 divisor 1')
+        self.assertIn('server create mana/health', sc_health['contract'])
+
+    def test_invalid_base_mana_power_cost_config_is_refused(self):
+        from values import (BASE_HEALTH_KEY, BASE_MANA_POWER_COST_KEY, base_health_for_power_cost,
+                            base_mana_for_power_cost)
+        for bad in (
+                {BASE_MANA_POWER_COST_KEY: 1},
+                {BASE_MANA_POWER_COST_KEY: True},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 1, 'value': 1512}},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 0}},
+                {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': True}}):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                base_mana_for_power_cost(bad)
+        valid_mana = {BASE_MANA_POWER_COST_KEY: True, 'base_mana': {'power': 0, 'value': 1512}}
+        for bad_health in (1418, {}, {'value': 0}, {'value': -5}, {'value': True}):
+            with self.subTest(bad_health=bad_health), self.assertRaises(ValueError):
+                base_health_for_power_cost({**valid_mana, BASE_HEALTH_KEY: bad_health})
+
+
+class CastAuraStacksTest(unittest.TestCase):
+    def test_cast_aura_steps_supports_plain_ids_and_spell_stack_pairs(self):
+        from values import cast_aura_steps
+        class_file = {'cast_auras': [{'spell': 572846, 'auras': [[500706, 70], 680603]}]}
+        self.assertEqual(cast_aura_steps(class_file, 572846), [
+            {'action': 'set_aura', 'actor': CASTER, 'spell': 500706, 'stacks': 70},
+            {'action': 'set_aura', 'actor': CASTER, 'spell': 680603, 'stacks': 1},
+        ])
+        self.assertEqual(cast_aura_steps(class_file, 999999), [])
+
+    def test_invalid_cast_aura_entries_are_refused(self):
+        from values import cast_aura_steps
+        for bad in (0, True, [500706], [500706, 0], [500706, True], [True, 5], [500706, 70, 1], '500706'):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                cast_aura_steps({'cast_auras': [{'spell': 572846, 'auras': [bad]}]}, 572846)
 
 
 if __name__ == '__main__':

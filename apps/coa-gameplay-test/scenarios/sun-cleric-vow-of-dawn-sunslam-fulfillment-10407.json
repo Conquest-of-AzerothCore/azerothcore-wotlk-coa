@@ -1,0 +1,206 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Vow of Dawn bounces to 6 total targets under Dawn on Glorious Execution and every Sunslam tick (#10407)",
+  "contract": [
+    "Issue #10407: Vow of Dawn (803491) -> Dawn (804584 -> 807440) -> Glorious Execution (800626) or Sunslam (805629)",
+    "must hit 3 targets without Dawn (primary + Amount(803492) = 2 bounces) and 6 targets with Dawn Fulfillment active",
+    "(primary + (2 + 1) * 2 - 1 = 5 bounces). Per Sun Cleric ADR 0027 (owner ruling O-23) and #12951, every Sunslam",
+    "tick (805639) counts as its own direct hit for every Vow, including Vow of Dawn's bounce count. On unfixed main,",
+    "AscensionSunClericEvents.cpp defined tickGuard for both 805639 and 807058, but defined a separate bounceGuard that",
+    "only checked 807058 and fell back to the shared channeled Sunslam Spell* for 805639: tick 1 bounced 5 times and",
+    "set script value 803491 on the channel, suppressing Vow of Dawn bounces on subsequent ticks (5 or 10 total bounces",
+    "instead of 20). Phase 1 verifies Glorious Execution without Dawn bounces 2 times (3 targets total). Phase 2",
+    "verifies Glorious Execution under Dawn Fulfillment bounces 5 times (6 targets total). Phase 3 (DISCRIMINATING)",
+    "verifies all four Sunslam ticks (805639) under Dawn Fulfillment each bounce 5 times (20 total 803493 casts), never",
+    "bouncing onto the primary target or a distant control dummy 22 yd away."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "cleric",
+      "race": 1,
+      "class": 27,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "attack_power": 5000
+    }
+  ],
+  "creatures": [
+    { "id": "primary", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 3, "stationary": true },
+    { "id": "n1", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 4, "stationary": true },
+    { "id": "n2", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 5, "stationary": true },
+    { "id": "n3", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 6, "stationary": true },
+    { "id": "n4", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 7, "stationary": true },
+    { "id": "n5", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 8, "stationary": true },
+    { "id": "n6", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 9, "stationary": true },
+    { "id": "far", "owner": "cleric", "entry": 36, "level": 80, "health": 1000000, "distance": 25, "stationary": true }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "cleric", "spell": 707072 },
+    { "action": "add_item", "actor": "cleric", "item": 2529 },
+    { "action": "equip", "actor": "cleric", "item": 2529, "slot": 15 },
+    { "action": "add_item", "actor": "cleric", "item": 2529 },
+    { "action": "equip", "actor": "cleric", "item": 2529, "slot": 16 },
+    { "action": "set_skill", "actor": "cleric", "skill": 55, "value": 400, "maximum": 400 },
+    { "action": "learn", "actor": "cleric", "spell": 803491 },
+    { "action": "learn", "actor": "cleric", "spell": 804584 },
+    { "action": "learn", "actor": "cleric", "spell": 800626 },
+    { "action": "learn", "actor": "cleric", "spell": 805629 },
+    { "action": "set_power", "actor": "cleric", "power": 0, "value": 2500 },
+    { "action": "cast", "label": "Take Vow of Dawn", "actor": "cleric", "spell": 803491 },
+    {
+      "action": "assert",
+      "label": "SETUP: Vow of Dawn is active",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 803491,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    { "action": "wait", "label": "Clear Vow of Dawn 1000 ms category-133 GCD", "ms": 1200 },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_cast_count", "spell": 803493, "save_as": "bounces_before_ge_base" },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_damage_count", "spell": 800691, "target": "primary", "save_as": "ge_hits_before_base" },
+    { "action": "set_power", "actor": "cleric", "power": 0, "value": 2500 },
+    { "action": "cast", "label": "Phase 1: Glorious Execution without Dawn", "actor": "cleric", "spell": 800626, "target": "primary" },
+    {
+      "action": "assert",
+      "label": "SETUP: Glorious Execution main-hand hit landed",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800691,
+      "target": "primary",
+      "relative_to": "ge_hits_before_base",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let Vow of Dawn bounces resolve", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: Glorious Execution without Dawn bounces twice (3 targets total)",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 803493,
+      "relative_to": "bounces_before_ge_base",
+      "equals": 2
+    },
+    { "action": "wait", "label": "Clear Glorious Execution 1500 ms category-133 GCD", "ms": 800 },
+    { "action": "reset_cooldown", "actor": "cleric", "spell": 800626 },
+    { "action": "set_aura", "label": "Fill 20 Solar Power to arm Dawn", "actor": "cleric", "spell": 500149, "stacks": 20 },
+    {
+      "action": "assert",
+      "label": "SETUP: 20 Solar Power arms Dawn readiness marker",
+      "actor": "cleric",
+      "metric": "aura",
+      "spell": 704396,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "cast", "label": "Activate Dawn", "actor": "cleric", "spell": 804584 },
+    {
+      "action": "assert",
+      "label": "SETUP: Dawn is active with 10 charges",
+      "actor": "cleric",
+      "metric": "aura_charges",
+      "spell": 807440,
+      "equals": 10,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Clear Dawn 1500 ms category-134 GCD", "ms": 1600 },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_cast_count", "spell": 803493, "save_as": "bounces_before_ge_dawn" },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_damage_count", "spell": 800691, "target": "primary", "save_as": "ge_hits_before_dawn" },
+    { "action": "set_power", "actor": "cleric", "power": 0, "value": 2500 },
+    { "action": "cast", "label": "Phase 2: Glorious Execution under Dawn", "actor": "cleric", "spell": 800626, "target": "primary" },
+    {
+      "action": "assert",
+      "label": "SETUP: Glorious Execution main-hand hit landed under Dawn",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 800691,
+      "target": "primary",
+      "relative_to": "ge_hits_before_dawn",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    { "action": "wait", "label": "Let Vow of Dawn Fulfillment bounces resolve", "ms": 1000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: Glorious Execution under Dawn bounces 5 times (6 targets total)",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 803493,
+      "relative_to": "bounces_before_ge_dawn",
+      "equals": 5
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Glorious Execution spent 1 Dawn charge",
+      "actor": "cleric",
+      "metric": "aura_charges",
+      "spell": 807440,
+      "equals": 9
+    },
+    { "action": "wait", "label": "Clear Glorious Execution 1500 ms GCD and 1000 ms Dawn Fulfillment ICD", "ms": 1000 },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_cast_count", "spell": 803493, "save_as": "bounces_before_sunslam" },
+    { "action": "snapshot", "actor": "cleric", "metric": "spell_damage_count", "spell": 805639, "target": "primary", "save_as": "sunslam_ticks_before" },
+    { "action": "set_power", "actor": "cleric", "power": 0, "value": 2500 },
+    { "action": "cast", "label": "Phase 3: Channel Sunslam under Dawn", "actor": "cleric", "spell": 805629, "target": "primary" },
+    {
+      "action": "assert",
+      "label": "SETUP: Sunslam channel starts",
+      "actor": "cleric",
+      "metric": "cast_failure",
+      "spell": 805629,
+      "equals": 0,
+      "within_ms": 1500
+    },
+    { "action": "wait", "label": "Let all four 1-second Sunslam ticks complete", "ms": 4500 },
+    {
+      "action": "assert",
+      "label": "SETUP: All four Sunslam ticks landed on primary",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 805639,
+      "target": "primary",
+      "relative_to": "sunslam_ticks_before",
+      "equals": 4
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Every Sunslam tick under Dawn bounces Vow of Dawn 5 times (20 bounces total, 6 targets per tick)",
+      "actor": "cleric",
+      "metric": "spell_cast_count",
+      "spell": 803493,
+      "relative_to": "bounces_before_sunslam",
+      "equals": 20
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Sunslam spent 1 Dawn charge",
+      "actor": "cleric",
+      "metric": "aura_charges",
+      "spell": 807440,
+      "equals": 8
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Primary target never takes a Vow of Dawn bounce",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 803493,
+      "target": "primary",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Distant target 22 yd away takes no Vow of Dawn bounce",
+      "actor": "cleric",
+      "metric": "spell_damage_count",
+      "spell": 803493,
+      "target": "far",
+      "equals": 0
+    }
+  ]
+}

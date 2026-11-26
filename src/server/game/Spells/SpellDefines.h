@@ -104,10 +104,27 @@ enum SpellModOp
     SPELLMOD_RESIST_DISPEL_CHANCE   = 28,
     SPELLMOD_CRIT_DAMAGE_BONUS_2    = 29, //one not used spell
     SPELLMOD_SPELL_COST_REFUND_ON_FAIL = 30,
-    SPELLMOD_MAX_AURA_STACKS        = 31  // Ascension: maximum stacks of an already stackable aura
+    SPELLMOD_MAX_AURA_STACKS        = 31, // Ascension: maximum stacks of an already stackable aura
+    // Ascension server-side operations. The client stores modifiers at bit * 31 + op, so these are never sent.
+    SPELLMOD_AP_COEFFICIENT         = 32, // direct attack power coefficient (flat: points of attack power)
+    // spellmod 33
+    SPELLMOD_MAX_TARGETS            = 34, // maximum affected targets (the area cap; chains use SPELLMOD_JUMP_TARGETS)
+    SPELLMOD_SCHOOL_OVERRIDE        = 35, // the spell deals the school of the aura carrying the modifier
+    SPELLMOD_DAMAGE_VS_PLAYERS      = 36, // damage done to player-controlled units
+    SPELLMOD_CRIT_HEALING_BONUS     = 37, // critical heal bonus (SPELLMOD_CRIT_DAMAGE_BONUS for heals)
+    SPELLMOD_DAMAGE_VS_CREATURES    = 38, // damage done to units not controlled by a player
+    SPELLMOD_AP_DOT_COEFFICIENT     = 39, // periodic attack power coefficient
+    SPELLMOD_SP_DOT_COEFFICIENT     = 40, // periodic spell power coefficient
+    SPELLMOD_SP_COEFFICIENT         = 41, // spell power coefficient (flat: points of spell power)
+    SPELLMOD_AP_COEFFICIENT_2       = 42, // same as SPELLMOD_AP_COEFFICIENT
+    // spellmod 43, 44
+    SPELLMOD_AP_DOT_COEFFICIENT_2   = 45, // same as SPELLMOD_AP_DOT_COEFFICIENT
+    SPELLMOD_JUMP_DISTANCE          = 46  // chain jump distance
 };
 
-#define MAX_SPELLMOD 32
+#define MAX_SPELLMOD 47
+// Operations the Ascension client can store (see SPELLMOD_AP_COEFFICIENT).
+#define MAX_ASCENSION_CLIENT_SPELLMOD 32
 // Both the stock handler and Ascension's mode-zero handler use a stride of 31.
 #define MAX_CLIENT_SPELLMOD 31
 

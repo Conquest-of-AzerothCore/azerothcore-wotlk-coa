@@ -20,12 +20,14 @@ namespace ManastormModuleConfig
     uint32 cap = 5;
     bool WeeklyCacheLockoutEnabled() { return enabled; }
     uint32 WeeklyCacheLockoutLimit() { return cap; }
-    uint32 CoATokenCap() { return 1000; }
 }
 namespace ManastormCoALoot
 {
     constexpr uint32 TokenItem = 975001;
-    uint32 Remaining(uint32 earned, uint32 cap) { return earned < cap ? cap - earned : 0; }
+}
+namespace AscensionBazaarTokenCap
+{
+    struct Allowance { uint32 cap = 0, earned = 0, start = 0, end = 0; };
 }
 struct ManastormCoATokenState
 {
@@ -131,6 +133,7 @@ struct ManastormRewards {
     uint32 GetActiveGameModeMask(uint32) const { return 0; }
     bool IsCoALootMode(uint32) const { return false; }
     bool LoadCoATokenState(uint32, ManastormCoATokenState&) const { return false; }
+    AscensionBazaarTokenCap::Allowance CoAAccountAllowance(uint32) const { return {}; }
     std::vector<ManastormRewardVisibilityRecord> BuildVisibilityRecords(ObjectGuid::LowType,bool,uint32 = 0) const;
     bool LoadWeeklyCacheAllowance(ObjectGuid::LowType, ManastormWeeklyCacheAllowance&) const;
     bool PrepareNormalCacheReward(ObjectGuid::LowType,bool, ManastormRewardStateSnapshot const&,

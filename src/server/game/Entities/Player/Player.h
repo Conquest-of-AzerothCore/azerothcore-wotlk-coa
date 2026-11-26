@@ -1497,7 +1497,7 @@ public:
     bool SatisfyQuestBreadcrumb(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestNextChain(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const;
-    bool SatisfyQuestDay(Quest const* qInfo, bool msg) const;
+    bool SatisfyQuestDay(Quest const* qInfo, bool msg, bool allowRepeat = true) const;
     bool SatisfyQuestWeek(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestMonth(Quest const* qInfo, bool msg) const;
     bool SatisfyQuestSeasonal(Quest const* qInfo, bool msg) const;
@@ -1529,6 +1529,13 @@ public:
     [[nodiscard]] uint16 GetQuestSlotCounter(uint16 slot, uint8 counter) const { return (uint16)(m_questLogSlots[slot].Counters >> (counter * 16)); }
     [[nodiscard]] uint32 GetQuestSlotTime(uint16 slot)    const { return m_questLogSlots[slot].Time; }
     [[nodiscard]] bool HasOverflowQuests() const { return m_questLogSlots.HasOverflow(); }
+    [[nodiscard]] bool IsQuestLogExtended() const { return m_questLogExtended; }
+    [[nodiscard]] uint16 GetClientQuestLogSlots() const;
+    [[nodiscard]] bool CanClientSwapQuestSlots(uint16 slot1, uint16 slot2) const;
+    void SetQuestLogExtended(bool extended, uint8 clientMaxSlots = MAX_QUEST_LOG_SIZE);
+    void MarkQuestSlotExtendedDirty(uint16 slot);
+    void FlushQuestLogExtended();
+    void SendQuestLogExtendedSnapshot();
     void SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer = 0);
     void SetQuestSlotCounter(uint16 slot, uint8 counter, uint16 count);
     void SetQuestSlotState(uint16 slot, uint32 state);
@@ -1811,6 +1818,7 @@ public:
     // Transient action replacements; never written to character spell ownership.
     void SetTemporarySpellReplacement(uint32 original, uint32 replacement, bool redirect = true);
     [[nodiscard]] uint32 GetTemporarySpellReplacement(uint32 original) const;
+    [[nodiscard]] uint32 GetClientShownSupersededSpell(uint32 superseded) const;
     // Replacement the server casts in place of a client request. Aliases published with `redirect = false`
     // keep the client-side swap but leave a request for the original spell alone (#6972).
     [[nodiscard]] uint32 GetCastReplacement(uint32 original) const;
@@ -1837,6 +1845,8 @@ public:
     void RestoreSpellMods(Spell* spell, uint32 ownerAuraId = 0, Aura* aura = nullptr);
     void RestoreAllSpellMods(uint32 ownerAuraId = 0, Aura* aura = nullptr);
     static void ApplyModToSpell(SpellModifier* mod, Spell* spell);
+    // Ascension's school-change modifier: the school of the aura carrying it, or SPELL_SCHOOL_MASK_NONE
+    SpellSchoolMask GetAscensionSchoolOverride(SpellInfo const* spellInfo, Spell* spell);
     [[nodiscard]] static bool HasSpellModApplied(SpellModifier* mod, Spell* spell);
     void SetSpellModTakingSpell(Spell* spell, bool apply);
 
@@ -2900,7 +2910,12 @@ protected:
     SeasonalEventQuestMap m_seasonalquests;
     QuestLogSlots m_questLogSlots;
     bool m_questLogPromotionPending = false;
+    bool m_questLogExtended = false;
+    uint8 m_questLogExtendedClientSlots = MAX_QUEST_LOG_SIZE;
+    uint64 m_questLogExtendedDirty = 0;
+    uint16 m_questLogExtendedCapacity = 0;
     void MirrorQuestSlot(uint16 slot);
+    [[nodiscard]] uint8 QuestLogExtendedSize() const;
     uint16 MoveQuestToNativeLog(uint16 slot);
     void PinTimedQuestsToNativeLog();
 

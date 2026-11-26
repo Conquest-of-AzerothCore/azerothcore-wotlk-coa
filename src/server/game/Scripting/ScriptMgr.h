@@ -520,6 +520,7 @@ public: /* PlayerScript */
     void OnPlayerSetSkill(Player* player, uint32 skillId, uint32 value, uint32 max, uint32 step, uint32 newValue);
     bool OnPlayerCanResurrect(Player* player);
     bool OnPlayerCanEnterManastorm(Player* player);
+    bool OnPlayerCanReleaseSpirit(Player* player);
     void OnPlayerBankWithdraw(Player* player, uint8 kind);
     bool OnPlayerEnvironmentalDamage(Player* player, uint32 type, uint32 damage);
     bool OnPlayerBreathInverted(Player* player);
@@ -536,6 +537,7 @@ public: /* PlayerScript */
     void OnPlayerTakeMailItem(Player* player, Mail const* mail, uint32 itemEntry);
     bool OnPlayerCanTakeQuest(Player const* player, Quest const* quest);
     bool OnPlayerCanRewardQuest(Player const* player, Quest const* quest);
+    bool OnPlayerCanRepeatDailyQuest(Player const* player, Quest const* quest);
     bool OnPlayerQuestGiverChooseReward(Player* player, Object* questGiver, Quest const* quest, uint32 reward);
     bool OnPlayerRefreshQuestGiver(Player* player, Object* questGiver, Quest const* quest);
     void OnPlayerCoAProgress(Player* player, CoAProgressEvent event, uint32 value);
@@ -644,7 +646,7 @@ public: /* UnitScript */
     bool IfNormalReaction(Unit const* unit, Unit const* target, ReputationRank& repRank);
     bool CanUnitAttack(Unit const* attacker, Unit const* target, SpellInfo const* spell);
     bool CanUnitAssist(Unit const* assister, Unit const* target, SpellInfo const* spell);
-    Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* spell);
+    Unit* SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* spell, bool& ignoreM2Los);
     bool CanSetPhaseMask(Unit const* unit, uint32 newPhaseMask, bool update);
     bool IsCustomBuildValuesUpdate(Unit const* unit, uint8 updateType, ByteBuffer& fieldBuffer, Player const* target, uint16 index);
     bool ShouldTrackValuesUpdatePosByIndex(Unit const* unit, uint8 updateType, uint16 index);

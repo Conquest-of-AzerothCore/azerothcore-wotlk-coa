@@ -1,0 +1,109 @@
+{
+ "schema": 1,
+ "name": "Harness set_combat_avoidance block fixture",
+ "contract": "The block key of set_combat_avoidance applies a CR_BLOCK rating fixture through Player::ApplyRatingMod, so the engine's UpdateBlockPercentage holds the requested chance: a Sun Cleric with the one-hand Truncheon 2524 and shield 231296 reads a native block chance below 100, at least 100 after block 100, and between 40 and 41 after a repeat at 40 (the repeat replaces the first fixture instead of adding to it). A Sun Cleric without a shield is refused (rejected: true) and keeps a block chance below 50. The fixture is removed when the scenario dismisses its actors.",
+ "timeout_ms": 30000,
+ "players": [
+  {
+   "id": "blocker",
+   "race": 1,
+   "class": 27,
+   "level": 60,
+   "allow_regeneration": false
+  },
+  {
+   "id": "plain",
+   "race": 1,
+   "class": 27,
+   "level": 60,
+   "allow_regeneration": false
+  }
+ ],
+ "steps": [
+  {
+   "action": "wait",
+   "label": "Let spawn AI and level scaling settle",
+   "ms": 5000
+  },
+  {
+   "action": "learn",
+   "actor": "blocker",
+   "spell": 107
+  },
+  {
+   "action": "learn",
+   "actor": "plain",
+   "spell": 107
+  },
+  {
+   "action": "add_item",
+   "actor": "blocker",
+   "item": 2524
+  },
+  {
+   "action": "equip",
+   "actor": "blocker",
+   "item": 2524,
+   "slot": 15
+  },
+  {
+   "action": "add_item",
+   "actor": "blocker",
+   "item": 231296
+  },
+  {
+   "action": "equip",
+   "actor": "blocker",
+   "item": 231296,
+   "slot": 16
+  },
+  {
+   "action": "assert",
+   "label": "Native block chance with the shield is below 100",
+   "actor": "blocker",
+   "metric": "block_chance",
+   "max": 99.999
+  },
+  {
+   "action": "set_combat_avoidance",
+   "label": "Block fixture at 100",
+   "actor": "blocker",
+   "block": 100
+  },
+  {
+   "action": "assert",
+   "label": "The block fixture reaches 100",
+   "actor": "blocker",
+   "metric": "block_chance",
+   "min": 100
+  },
+  {
+   "action": "set_combat_avoidance",
+   "label": "Block fixture repeated at 40",
+   "actor": "blocker",
+   "block": 40
+  },
+  {
+   "action": "assert",
+   "label": "A repeat replaces the previous block fixture",
+   "actor": "blocker",
+   "metric": "block_chance",
+   "min": 40,
+   "max": 41
+  },
+  {
+   "action": "set_combat_avoidance",
+   "label": "Block fixture without a shield",
+   "actor": "plain",
+   "block": 50,
+   "rejected": true
+  },
+  {
+   "action": "assert",
+   "label": "A refused block fixture leaves no block chance",
+   "actor": "plain",
+   "metric": "block_chance",
+   "max": 49
+  }
+ ]
+}

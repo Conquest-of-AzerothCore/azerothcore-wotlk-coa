@@ -1,0 +1,93 @@
+{
+    "schema":  1,
+    "name":  "A caravan cart passenger relogs at the cart, not under it (#6292)",
+    "contract":  "#6292: the first free seat of a caravan cart (Vehicle 1532 seat 0, VehicleSeat 527) has AttachmentOffset z -0.55, so a seated player stands 0.55 yd below the cart. Logging out saved that seat position, and the next login put the player under the terrain. The save now records the cart position for a caravan cart passenger. The scenario seats a player on a stationary cart owned by a second player, relogs the passenger through the native save, and asserts that the player comes back at the cart height instead of 0.55 yd below it.",
+    "timeout_ms":  60000,
+    "location":  {
+                     "map":  0,
+                     "x":  -8914.0,
+                     "y":  -133.0,
+                     "z":  80.6,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "p",
+                        "race":  1,
+                        "class":  1,
+                        "level":  10
+                    },
+                    {
+                        "id":  "w",
+                        "race":  1,
+                        "class":  1,
+                        "level":  10
+                    }
+                ],
+    "creatures":  [
+                      {
+                          "id":  "cart",
+                          "owner":  "w",
+                          "entry":  50476,
+                          "level":  1,
+                          "distance":  3
+                      }
+                  ],
+    "steps":  [
+                  {
+                      "action":  "wait",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "spell_click_nearby",
+                      "actor":  "p",
+                      "entry":  50476
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "SETUP: the player rides the caravan cart",
+                      "actor":  "p",
+                      "metric":  "vehicle_base_entry",
+                      "equals":  50476,
+                      "within_ms":  3000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "SETUP: the seat holds the player 0.55 yd below the cart",
+                      "actor":  "p",
+                      "metric":  "nearby_creature_height",
+                      "entry":  50476,
+                      "target":  "p",
+                      "min":  0.4,
+                      "max":  0.7
+                  },
+                  {
+                      "action":  "relog",
+                      "actor":  "p"
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "the player is off the cart after the relog",
+                      "actor":  "p",
+                      "metric":  "vehicle_base_entry",
+                      "equals":  0
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "DISCRIMINATING: the player logs in at the cart height (was 0.55 yd below it)",
+                      "actor":  "p",
+                      "metric":  "nearby_creature_height",
+                      "entry":  50476,
+                      "target":  "p",
+                      "min":  -0.15,
+                      "max":  0.15
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "the player is alive",
+                      "actor":  "p",
+                      "metric":  "alive",
+                      "equals":  1
+                  }
+              ]
+}

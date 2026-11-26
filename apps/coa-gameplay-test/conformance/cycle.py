@@ -19,7 +19,8 @@ CONFORMANCE = Path('apps/coa-gameplay-test/conformance')
 NOT_RECORDED = 'not recorded'
 DEFAULT_RUNNER = ('python3', '-B', 'tools/verify_all.py')
 DEFAULT_DISK_CHECKS = ({'name': '/', 'command': ['df', '-P', '/']},)
-DEFAULT_GATE_PATHS = ('apps', 'src', 'data/sql/updates')
+DEFAULT_GATE_PATHS = ('apps', 'src', 'data/sql/updates', 'data/sql/archive', 'data/sql/base', 'data/sql/custom',
+                      'data/coa-world', 'modules')
 CHECKPOINT_JSON = 'checkpoint.json'
 CHECKPOINT_MD = 'checkpoint.md'
 PAIR_FILE = 'pair.json'

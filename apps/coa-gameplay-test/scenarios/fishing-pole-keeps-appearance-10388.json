@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Transmog: equipped fishing pole keeps fishing pole appearance over weapon transmog (#10388)",
+  "contract": [
+    "Fishing poles share the main-hand equipment slot (slot 15) and AppearanceCategories.dbc category 13 with regular main-hand weapons. Applying a weapon transmog (e.g. Apprentice's Staff 20978 via Appearances.dbc row 29449) and then equipping a Fishing Pole 6256 must not overwrite the fishing pole's visible item with the staff appearance.",
+    "Equipping Strong Fishing Pole appearance 788 (SourceItem 6365) while wearing Fishing Pole 6256 must apply the fishing pole transmog, switching back to staff appearance 29449 must revert the fishing pole's visible item to 6256, and re-equipping Bent Staff 35 must restore the staff transmog 20978.",
+    "Before the repair, equipping Fishing Pole 6256 while staff appearance 29449 is active leaves visible_item slot 15 set to 20978 instead of 6256."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "angler", "race": 1, "class": 22, "level": 16 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login scripts settle", "ms": 3000 },
+    { "action": "add_item", "actor": "angler", "item": 35 },
+    { "action": "add_item", "actor": "angler", "item": 6256 },
+    { "action": "equip", "actor": "angler", "item": 35, "slot": 15 },
+    {
+      "action": "assert", "label": "SETUP: the character equips Bent Staff in main hand", "actor": "angler",
+      "metric": "equipped_item", "slot": 15, "equals": 35
+    },
+    { "action": "apply_appearances", "actor": "angler", "selection": { "13": 29449 } },
+    {
+      "action": "assert", "label": "SETUP: staff transmog is accepted", "actor": "angler",
+      "metric": "server_packet_contains", "opcode": 1688, "text": "APPLY_APPEARANCES_OK", "equals": 1
+    },
+    {
+      "action": "assert", "label": "CONTROL: Bent Staff displays Apprentice's Staff transmog", "actor": "angler",
+      "metric": "visible_item", "slot": 15, "equals": 20978
+    },
+    {
+      "action": "set_skill", "label": "SETUP: grant Fishing skill (356) required for fishing pole proficiency",
+      "actor": "angler", "skill": 356, "value": 1, "maximum": 75
+    },
+    { "action": "equip", "actor": "angler", "item": 6256, "slot": 15 },
+    {
+      "action": "assert", "label": "SETUP: Fishing Pole is equipped in main hand", "actor": "angler",
+      "metric": "equipped_item", "slot": 15, "equals": 6256
+    },
+    {
+      "action": "assert", "label": "DISCRIMINATING: Fishing Pole keeps its own appearance instead of the staff transmog",
+      "actor": "angler", "metric": "visible_item", "slot": 15, "equals": 6256
+    },
+    { "action": "apply_appearances", "actor": "angler", "selection": { "13": 788 } },
+    {
+      "action": "assert", "label": "DISCRIMINATING: a fishing pole transmog still applies to the equipped Fishing Pole",
+      "actor": "angler", "metric": "visible_item", "slot": 15, "equals": 6365
+    },
+    { "action": "apply_appearances", "actor": "angler", "selection": { "13": 29449 } },
+    {
+      "action": "assert", "label": "DISCRIMINATING: re-applying a staff transmog restores the Fishing Pole's own appearance",
+      "actor": "angler", "metric": "visible_item", "slot": 15, "equals": 6256
+    },
+    { "action": "equip", "actor": "angler", "item": 35, "slot": 15 },
+    {
+      "action": "assert", "label": "CONTROL: re-equipping Bent Staff restores the active staff transmog", "actor": "angler",
+      "metric": "visible_item", "slot": 15, "equals": 20978
+    }
+  ]
+}

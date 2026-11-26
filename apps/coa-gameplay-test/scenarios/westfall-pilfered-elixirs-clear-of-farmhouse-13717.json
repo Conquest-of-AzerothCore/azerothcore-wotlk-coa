@@ -1,0 +1,119 @@
+{
+  "schema": 1,
+  "name": "Potions for Sentinel Hill: the Pilfered Elixirs crate stands on the Jansen Stead floor (#13717)",
+  "contract": "The Pilfered Elixirs crate (entry 480103, guid 9001102) for quest 1313 sat 0.59 yd under the Jansen Stead farmhouse floor with a wall through it (clearance 0.19 yd), so players could not click it. It stands on the floor, clear of the walls, and a player on the quest opens it and takes the elixirs (480203).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9848.0,
+    "y": 1037.5,
+    "z": 34.3,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the crate stands on the floor, not under it",
+      "metric": "spawn_ground_gap",
+      "min": -0.15,
+      "max": 0.5,
+      "actor": "p",
+      "guid": 9001102,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: no wall cuts through it",
+      "metric": "spawn_clearance",
+      "min": 1.0,
+      "actor": "p",
+      "guid": 9001102,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "it stays at the Jansen Stead point the quest tracks",
+      "metric": "spawn_distance",
+      "x": -9845.18,
+      "y": 1036.06,
+      "z": 34.0,
+      "max": 2.0,
+      "actor": "p",
+      "guid": 9001102,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "prepare_quest",
+      "actor": "p",
+      "quest": 1313,
+      "complete": false
+    },
+    {
+      "action": "destroy_item",
+      "actor": "p",
+      "item": 480203
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: the player is on Potions for Sentinel Hill without the elixirs",
+      "actor": "p",
+      "metric": "quest_status",
+      "quest": 1313,
+      "equals": 3,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 6478,
+      "target_gameobject": 480103
+    },
+    {
+      "action": "wait",
+      "ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "the crate opens from the floor beside it",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 6478,
+      "equals": 0
+    },
+    {
+      "action": "loot_slot",
+      "actor": "p",
+      "item": 480203
+    },
+    {
+      "action": "close_loot",
+      "actor": "p"
+    },
+    {
+      "action": "assert",
+      "label": "the player takes the Pilfered Elixirs",
+      "actor": "p",
+      "metric": "item_count",
+      "item": 480203,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,239 @@
+{
+  "schema": 1,
+  "name": "Hellfire Imps ignore unengaged distant targets, assist on AoE, and defend when hit (#10181)",
+  "contract": [
+    "#10181 reported three defects in npc_ascension_xoroth_summon (AscensionXorothSummons.cpp): (1) right-clicking a",
+    "distant enemy (CMSG_ATTACKSWING without entering combat) sent Hellfire Imps (50301) to pull it, (2) AoE hits like",
+    "Meatsaw (578119) left imps idle because player->GetVictim() stayed null, and (3) enemies hitting the knight left",
+    "imps idle because player->getAttackers() and PvE combat refs were never checked. Expected: (1) starting melee",
+    "attack on a passive enemy 18 yd away leaves that enemy undamaged, (2) hitting a nearby enemy with Meatsaw while",
+    "not auto-attacking causes the imp to engage and damage it, and (3) when an enemy attacks an idle knight, the",
+    "knight's imp defends the knight and damages the attacker."
+  ],
+  "timeout_ms": 120000,
+  "players": [
+    {
+      "id": "knight_aoe",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    },
+    {
+      "id": "knight_defend",
+      "race": 1,
+      "class": 17,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "spell_hit_rating": 10000,
+      "expertise_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "distant",
+      "owner": "knight_aoe",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 18,
+      "stationary": true
+    },
+    {
+      "id": "aoe_enemy",
+      "owner": "knight_aoe",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    },
+    {
+      "id": "attacker",
+      "owner": "knight_defend",
+      "entry": 36,
+      "level": 1,
+      "health": 1000000,
+      "distance": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "learn",
+      "actor": "knight_aoe",
+      "spell": 804883
+    },
+    {
+      "action": "learn",
+      "actor": "knight_aoe",
+      "spell": 578119
+    },
+    {
+      "action": "learn",
+      "actor": "knight_defend",
+      "spell": 804883
+    },
+    {
+      "action": "set_power",
+      "actor": "knight_aoe",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp for distant right-click test",
+      "actor": "knight_aoe",
+      "spell": 804883
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: knight_aoe has one Hellfire Imp",
+      "actor": "knight_aoe",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "distant",
+      "metric": "health",
+      "save_as": "distant_before"
+    },
+    {
+      "action": "attack",
+      "label": "Right-click distant enemy 18 yd away without entering combat",
+      "actor": "knight_aoe",
+      "target": "distant"
+    },
+    {
+      "action": "wait",
+      "label": "Allow time an unfixed imp would need to run 18 yd and swing",
+      "ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: imp does not pull unengaged distant target",
+      "actor": "distant",
+      "metric": "health",
+      "relative_to": "distant_before",
+      "equals": 0
+    },
+    {
+      "action": "stop_attack",
+      "actor": "knight_aoe"
+    },
+    {
+      "action": "reset_cooldown",
+      "actor": "knight_aoe",
+      "spell": 804883
+    },
+    {
+      "action": "set_power",
+      "actor": "knight_aoe",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Call a fresh Hellfire Imp for AoE test",
+      "actor": "knight_aoe",
+      "spell": 804883
+    },
+    {
+      "action": "wait",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "knight_aoe",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Hit nearby enemy with Meatsaw AoE without auto-attacking",
+      "actor": "knight_aoe",
+      "spell": 578119,
+      "target": "aoe_enemy"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Meatsaw damaged aoe_enemy",
+      "actor": "knight_aoe",
+      "metric": "spell_damage_count",
+      "spell": 578119,
+      "target": "aoe_enemy",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "aoe_enemy",
+      "metric": "health",
+      "save_as": "aoe_after_meatsaw"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: imp engages and damages enemy hit by AoE",
+      "actor": "aoe_enemy",
+      "metric": "health",
+      "relative_to": "aoe_after_meatsaw",
+      "max": -1,
+      "within_ms": 6000
+    },
+    {
+      "action": "set_power",
+      "actor": "knight_defend",
+      "power": 1,
+      "value": 1000
+    },
+    {
+      "action": "cast",
+      "label": "Call: Hellfire Imp for defensive test",
+      "actor": "knight_defend",
+      "spell": 804883
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: knight_defend has one Hellfire Imp",
+      "actor": "knight_defend",
+      "metric": "owned_creature_count",
+      "entry": 50301,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "snapshot",
+      "actor": "attacker",
+      "metric": "health",
+      "save_as": "attacker_before"
+    },
+    {
+      "action": "creature_attack",
+      "label": "Enemy attacks idle knight_defend",
+      "actor": "attacker",
+      "target": "knight_defend"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: imp defends knight_defend and damages attacker",
+      "actor": "attacker",
+      "metric": "health",
+      "relative_to": "attacker_before",
+      "max": -1,
+      "within_ms": 8000
+    }
+  ]
+}

@@ -1,0 +1,531 @@
+{
+  "schema": 1,
+  "name": "Witching Hourglass procs on direct damage and healing spells (#13090)",
+  "contract": [
+    "#13090: Witching Hourglass (proc dummies 5011142, 5011143, 5011144, 5011145, 5011146, 5011147, 5011148,",
+    "5011149, 5011150, 5011151, 5011152, 5012142, 5012143, 5012144, 5012145, 5012146, 5012147, 5012148, 5012149,",
+    "5012150, 5012151, 5012152) never procced. Every dummy carries Spell.dbc ProcFlags 0 and the world had no",
+    "spell_proc row, so SpellMgr::LoadSpellProcs skipped it. Tooltip: \"Your direct damage and healing spells ...",
+    "(45 sec cd)\". Flags 81920 (harmful and helpful magic spells) as the stock records with that wording, damage",
+    "and heals. Chance from each record (100 on the heroic dungeon copies, 15 on the level 70 copies), by the PR",
+    "author's ruling. spell_proc_chance reads each loaded entry's chance, which equals the record's ProcChance,",
+    "and spell_proc_cooldown_ms reads each loaded cooldown. aura_proc_rate replays the aura's native proc",
+    "decision, including the roll, 40000 times on one synthetic event per check. It procs on a landed direct",
+    "magic spell (Frostbolt 116), a direct heal (Flash Heal 2061), at the record's chance; it never procs on a",
+    "heal over time tick (Rejuvenation 774), a periodic Shadow tick (Shadow Word: Pain 589), a landed melee",
+    "ability (Heroic Strike 78). Before the repair the chance and cooldown lookups fail with 'Spell has no proc",
+    "entry' and every rate reads 0, so the discriminating checks fail instead of flaking."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "caster",
+      "race": 1,
+      "class": 1,
+      "level": 80,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "caster",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 4
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 5000
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 5011142",
+      "actor": "caster",
+      "spell": 5011142,
+      "stacks": 1
+    },
+    {
+      "action": "set_aura",
+      "label": "Proc dummy 5012142",
+      "actor": "caster",
+      "spell": 5012142,
+      "stacks": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 5011142 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 5011142,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: proc dummy 5012142 is applied",
+      "actor": "caster",
+      "metric": "aura",
+      "spell": 5012142,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011142 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011142,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011143 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011143,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011144 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011144,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011145 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011145,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011146 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011146,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011147 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011147,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011148 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011148,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011149 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011149,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011150 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011150,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011151 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011151,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011152 loads the record's 100% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5011152,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012142 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012142,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012143 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012143,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012144 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012144,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012145 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012145,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012146 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012146,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012147 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012147,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012148 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012148,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012149 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012149,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012150 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012150,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012151 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012151,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012152 loads the record's 15% chance",
+      "actor": "caster",
+      "metric": "spell_proc_chance",
+      "spell": 5012152,
+      "equals": 15
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011142 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011142,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011143 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011143,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011144 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011144,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011145 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011145,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011146 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011146,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011147 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011147,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011148 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011148,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011149 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011149,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011150 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011150,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011151 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011151,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5011152 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5011152,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012142 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012142,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012143 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012143,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012144 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012144,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012145 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012145,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012146 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012146,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012147 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012147,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012148 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012148,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012149 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012149,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012150 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012150,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012151 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012151,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 5012152 loads the tooltip's 45 s internal cooldown",
+      "actor": "caster",
+      "metric": "spell_proc_cooldown_ms",
+      "spell": 5012152,
+      "equals": 45000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed direct magic spell (Frostbolt 116) procs 5011142 at 100%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 5011142,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a direct heal (Flash Heal 2061) procs 5011142 at 100%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 5011142,
+      "target": "caster",
+      "heal": true,
+      "trigger_spell": 2061,
+      "type_mask": 16384,
+      "phase_mask": 2,
+      "spell_type_mask": 2,
+      "hit_mask": 1,
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a landed direct magic spell (Frostbolt 116) procs 5012142 at 15%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 5012142,
+      "target": "dummy",
+      "trigger_spell": 116,
+      "type_mask": 65536,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: a direct heal (Flash Heal 2061) procs 5012142 at 15%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 5012142,
+      "target": "caster",
+      "heal": true,
+      "trigger_spell": 2061,
+      "type_mask": 16384,
+      "phase_mask": 2,
+      "spell_type_mask": 2,
+      "hit_mask": 1,
+      "min": 13.5,
+      "max": 16.5
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a heal over time tick (Rejuvenation 774) procs 5011142 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 5011142,
+      "target": "caster",
+      "heal": true,
+      "trigger_spell": 774,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 2,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a periodic Shadow tick (Shadow Word: Pain 589) procs 5011142 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 5011142,
+      "target": "dummy",
+      "trigger_spell": 589,
+      "type_mask": 262144,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: a landed melee ability (Heroic Strike 78) procs 5011142 at 0%",
+      "actor": "caster",
+      "metric": "aura_proc_rate",
+      "spell": 5011142,
+      "target": "dummy",
+      "trigger_spell": 78,
+      "type_mask": 16,
+      "phase_mask": 2,
+      "spell_type_mask": 1,
+      "hit_mask": 1,
+      "equals": 0
+    }
+  ]
+}

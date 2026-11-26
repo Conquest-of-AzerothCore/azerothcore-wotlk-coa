@@ -1,0 +1,113 @@
+{
+  "schema": 1,
+  "name": "Splinter Guard rests on the Venture Co. lumbermill floor (#9996)",
+  "contract": "#9996 reported Splinter Guard (gameobject 95749, guid 6941135, item 415101) missing in Stranglethorn Vale. rev_20261006_65 lowered it to bare terrain z=11.423 under Westfall_Lumbermill.wmo (floor 13.3983, headroom 1.68 yd). Restoring the first-pass realm-dump coordinates (-11986.000, -540.594, 14.043) places it on the lumbermill floor (14.0886, gap -0.046 yd, headroom 6.39 yd under ceiling 20.7311) so it is visible and lootable.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -11986.0,
+    "y": -540.594,
+    "z": 14.089,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Splinter Guard is spawned in the area",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95749,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: pickup stands at its realm-dump lumbermill floor position",
+      "actor": "p",
+      "metric": "spawn_distance",
+      "x": -11986.0,
+      "y": -540.594,
+      "z": 14.043,
+      "max": 0.3,
+      "guid": 6941135,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: pickup is above the lumbermill floor, not trapped underneath it",
+      "actor": "p",
+      "metric": "spawn_headroom",
+      "guid": 6941135,
+      "spawn_type": "gameobject",
+      "min": 5.0,
+      "max": 8.0
+    },
+    {
+      "action": "assert",
+      "label": "pickup rests flush on the lumbermill floor",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6941135,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "label": "pickup is not underwater",
+      "actor": "p",
+      "metric": "spawn_submerged",
+      "guid": 6941135,
+      "spawn_type": "gameobject",
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 95749
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "label": "pickup opens cleanly from the lumbermill floor",
+      "actor": "p",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "pickup yields its loot",
+      "actor": "p",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

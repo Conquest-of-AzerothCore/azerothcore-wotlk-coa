@@ -292,6 +292,7 @@ void Spell::EffectUnused(SpellEffIndex /*effIndex*/)
 namespace
 {
 constexpr uint32 ASCENSION_EARTHSHAPING_AURA = 680441;
+constexpr uint32 ASCENSION_MARK_OF_ORDER_AURA = 806269;
 constexpr uint32 ASCENSION_STATIC_AURA = 803102;
 constexpr uint32 ASCENSION_THUNDER_WARD_AURA = 800098;
 constexpr uint32 ASCENSION_CHARGED_CONDUIT_AURA = 803790;
@@ -424,10 +425,12 @@ void ModifyAscensionAuraStacks(Unit* caster, Unit* target, uint32 auraSpellId, i
     if (Aura* aura = target->GetAura(auraSpellId))
     {
         // Earthshaping's authored contract explicitly forbids refreshing its
-        // lifetime when another stack is gained. Other auras keep native
-        // ModStackAmount behavior.
+        // lifetime when another stack is gained, and Mark of Order's periodic
+        // self-stacking (806270 -> 806269) must preserve its remaining duration
+        // so the 20 s buff expires instead of refreshing indefinitely. Other
+        // auras keep native ModStackAmount behavior.
         bool preserveDuration = delta > 0 &&
-            auraSpellId == ASCENSION_EARTHSHAPING_AURA;
+            (auraSpellId == ASCENSION_EARTHSHAPING_AURA || auraSpellId == ASCENSION_MARK_OF_ORDER_AURA);
         int32 remaining = aura->GetDuration();
         aura->ModStackAmount(delta);
         if (preserveDuration)
@@ -853,7 +856,9 @@ void Spell::EffectAscensionRefreshAura(SpellEffIndex effIndex)
     if (!target || !effect.MiscValue)
         return;
 
-    Aura* aura = target->GetAura(effect.MiscValue);
+    Aura* aura = target->GetAuraOfRankedSpell(effect.MiscValue, m_caster->GetGUID());
+    if (!aura)
+        aura = target->GetAuraOfRankedSpell(effect.MiscValue);
     if (!aura)
         return;
 
@@ -2566,8 +2571,9 @@ void Spell::EffectHeal(SpellEffIndex effIndex)
 
             addhealth += tickheal * tickcount;
 
-            // Glyph of Swiftmend
-            if (!caster->HasAura(54824))
+            // Glyph of Swiftmend (118033: the classless glyph; Ascension's 54824 is another glyph)
+            // 415014 Everliving (Mystic Enchant): the HoTs stay too
+            if (!caster->HasAura(54824) && !caster->HasAura(118033) && !caster->HasAura(415014))
                 unitTarget->RemoveAura(targetAura->GetId(), targetAura->GetCasterGUID());
 
             //addhealth += tickheal * tickcount;

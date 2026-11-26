@@ -1,0 +1,159 @@
+{
+    "schema":  1,
+    "name":  "Camp Narache keeps a single Squealer Thornmantle after kills (#4903)",
+    "contract":  "Squealer Thornmantle 3229 lives in nested pool 484 (max_limit 1) whose children 485-488 each hold one Squealer and one Bristleback Shaman 2953 with 76 s timers. Killing both members of the active child queues two respawn timers; the first re-rolls the mother pool and may despawn that child, so the second timer is stale. Expected: the stale timer is dropped and exactly one Squealer is up after every cycle. Before the fix the stale timer re-rolled the mother pool again and left two Squealers in about 3 of 4 cycles, so three cycles leave a residual pass chance of about 1/64 for the broken tree; the fixed tree always passes.",
+    "timeout_ms":  600000,
+    "location":  {
+                     "map":  1,
+                     "x":  -3106.76,
+                     "y":  -1200.36,
+                     "z":  85.7,
+                     "o":  0
+                 },
+    "players":  [
+                    {
+                        "id":  "hero",
+                        "race":  6,
+                        "class":  1,
+                        "level":  60,
+                        "melee_hit_rating":  10000,
+                        "expertise_rating":  10000
+                    }
+                ],
+    "steps":  [
+                  {
+                      "action":  "set_phase",
+                      "label":  "SETUP: join the world phase the camp lives in",
+                      "actor":  "hero",
+                      "value":  1
+                  },
+                  {
+                      "action":  "wait",
+                      "label":  "Let the Camp Narache grid load",
+                      "ms":  3000
+                  },
+                  {
+                      "action":  "set_health",
+                      "actor":  "hero",
+                      "maximum":  100000,
+                      "value":  100000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "SETUP: one Squealer is up at the start",
+                      "actor":  "hero",
+                      "metric":  "map_creature_count",
+                      "entry":  3229,
+                      "equals":  1,
+                      "within_ms":  10000
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "label":  "Cycle 1: kill the Squealer",
+                      "actor":  "hero",
+                      "entry":  3229,
+                      "kill":  true
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "Cycle 1: the Squealer is dead",
+                      "actor":  "hero",
+                      "metric":  "map_creature_count",
+                      "entry":  3229,
+                      "equals":  0,
+                      "within_ms":  10000
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "label":  "Cycle 1: kill the paired Bristleback Shaman of the same pool child",
+                      "actor":  "hero",
+                      "entry":  2953,
+                      "kill":  true
+                  },
+                  {
+                      "action":  "wait",
+                      "label":  "Cycle 1: wait past both 76 s respawn timers, including the stale one of the despawned child",
+                      "ms":  120000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "DISCRIMINATING: cycle 1 leaves exactly one Squealer",
+                      "actor":  "hero",
+                      "metric":  "map_creature_count",
+                      "entry":  3229,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "label":  "Cycle 2: kill the Squealer",
+                      "actor":  "hero",
+                      "entry":  3229,
+                      "kill":  true
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "Cycle 2: the Squealer is dead",
+                      "actor":  "hero",
+                      "metric":  "map_creature_count",
+                      "entry":  3229,
+                      "equals":  0,
+                      "within_ms":  10000
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "label":  "Cycle 2: kill the paired Bristleback Shaman of the same pool child",
+                      "actor":  "hero",
+                      "entry":  2953,
+                      "kill":  true
+                  },
+                  {
+                      "action":  "wait",
+                      "label":  "Cycle 2: wait past both 76 s respawn timers, including the stale one of the despawned child",
+                      "ms":  120000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "DISCRIMINATING: cycle 2 leaves exactly one Squealer",
+                      "actor":  "hero",
+                      "metric":  "map_creature_count",
+                      "entry":  3229,
+                      "equals":  1
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "label":  "Cycle 3: kill the Squealer",
+                      "actor":  "hero",
+                      "entry":  3229,
+                      "kill":  true
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "Cycle 3: the Squealer is dead",
+                      "actor":  "hero",
+                      "metric":  "map_creature_count",
+                      "entry":  3229,
+                      "equals":  0,
+                      "within_ms":  10000
+                  },
+                  {
+                      "action":  "attack_nearby",
+                      "label":  "Cycle 3: kill the paired Bristleback Shaman of the same pool child",
+                      "actor":  "hero",
+                      "entry":  2953,
+                      "kill":  true
+                  },
+                  {
+                      "action":  "wait",
+                      "label":  "Cycle 3: wait past both 76 s respawn timers, including the stale one of the despawned child",
+                      "ms":  120000
+                  },
+                  {
+                      "action":  "assert",
+                      "label":  "DISCRIMINATING: cycle 3 leaves exactly one Squealer",
+                      "actor":  "hero",
+                      "metric":  "map_creature_count",
+                      "entry":  3229,
+                      "equals":  1
+                  }
+              ]
+}

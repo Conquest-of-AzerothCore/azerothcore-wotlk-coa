@@ -97,6 +97,7 @@ struct Options
     unsigned extraBluePercent = DefaultExtraBluePercent;
     unsigned extraBlueRaidItemPercent = DefaultExtraBlueRaidItemPercent;
     unsigned endgameRareMinRequiredLevel = DefaultEndgameRareMinRequiredLevel;
+    unsigned hiddenCacheBlueMinRequiredLevel = DefaultHiddenCacheBlueMinRequiredLevel;
     HiddenCacheChances rareHiddenCache = DefaultRareHiddenCache;
     HiddenCacheChances epicHiddenCache = DefaultEpicHiddenCache;
     std::array<float, 4> ephemeralKeyPercent = DefaultEphemeralKeyPercent;
@@ -496,6 +497,8 @@ private:
             DefaultEliteEpicPercent);
         options.endgameRareMinRequiredLevel = std::min<uint32>(60, sConfigMgr->GetOption<uint32>(
             "Bloodforged.EndgameRareMinRequiredLevel", DefaultEndgameRareMinRequiredLevel));
+        options.hiddenCacheBlueMinRequiredLevel = std::min<uint32>(60, sConfigMgr->GetOption<uint32>(
+            "Bloodforged.HiddenCacheBlueMinRequiredLevel", DefaultHiddenCacheBlueMinRequiredLevel));
         options.eliteHeroicUpgradePercent = sConfigMgr->GetOption<float>("Bloodforged.EliteHeroicUpgradePercent",
             DefaultEliteHeroicUpgradePercent);
         options.highRiskEliteExtraKeyPercent = sConfigMgr->GetOption<float>(
@@ -675,7 +678,7 @@ void FillHiddenCache(Settings const& current, Loot& loot, int tier, Player* open
     unsigned const level = 60;
     if (tier == 0)
     {
-        AddRareMobItem(loot, PickFrom(pools.normal[1], level));
+        AddRareMobItem(loot, PickFrom(pools.normal[1], current.options.hiddenCacheBlueMinRequiredLevel));
         return;
     }
     uint32 const epic = PickFrom(pools.normal[2], level);

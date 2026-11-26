@@ -339,6 +339,13 @@ public:
             return;
 
         OverflowView* view = player->CustomData.Get<OverflowView>(ViewKey);
+        if (player->IsQuestLogExtended())
+        {
+            if (view)
+                CloseWindow(player, *view);
+            return;
+        }
+
         if (!view && !player->HasOverflowQuests())
             return;
 
@@ -366,6 +373,13 @@ public:
     }
 
 private:
+    static void CloseWindow(Player* player, OverflowView const& view)
+    {
+        if (!view.Sent.empty() || view.WindowCodeSent)
+            SendAddon(player, "EMPTY");
+        player->CustomData.Erase(ViewKey);
+    }
+
     static void Refresh(Player* player, OverflowView& view, bool force)
     {
         std::vector<std::string> messages = BuildMessages(player);
@@ -395,12 +409,16 @@ private:
         uint16 const slot = questId ? player->FindQuestSlot(questId) : MAX_QUEST_LOG_SIZE;
         bool const overflow = slot >= NATIVE_QUEST_LOG_SIZE && slot < MAX_QUEST_LOG_SIZE;
 
-        if (action == "PROMOTE" && overflow && !player->PromoteQuestToNativeLog(questId))
+        bool const window = !player->IsQuestLogExtended();
+        if (action == "PROMOTE" && overflow && !player->PromoteQuestToNativeLog(questId) && window)
             SendAddon(player, "ERROR Your quest log has no quest that can make room.");
         else if (action == "ABANDON" && overflow)
             player->GetSession()->AbandonQuestLogSlot(slot);
 
-        Refresh(player, *player->CustomData.GetDefault<OverflowView>(ViewKey), action == "LIST");
+        if (window)
+            Refresh(player, *player->CustomData.GetDefault<OverflowView>(ViewKey), action == "LIST");
+        else if (action == "LIST")
+            SendAddon(player, "EMPTY");
     }
 };
 }

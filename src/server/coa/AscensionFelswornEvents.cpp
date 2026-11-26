@@ -9,6 +9,7 @@
 #include "SpellMgr.h"
 #include "SpellScript.h"
 #include <algorithm>
+#include <utility>
 
 namespace
 {
@@ -50,7 +51,7 @@ class aura_ascension_felsworn_event : public AuraScript
         switch (id)
         {
         case 92087:
-            return info && melee && crit && !periodic;
+            return info && info->Id != 800208 && melee && crit && !periodic;
         case 300480:
             return !periodic && Chance(player, id);
         case 681376:
@@ -68,7 +69,7 @@ class aura_ascension_felsworn_event : public AuraScript
             return Named(info, 801312) && crit && !periodic;
         case 704610:
             return info && (Named(info, 801904) || info->Id == 520262 || info->Id == 572585) && !periodic &&
-                   Chance(player, id);
+                   std::exchange(State(player).assaultRoll, false) && Chance(player, id);
         case 300478:
             return Named(info, 801312) && crit && !periodic && Chance(player, id, 5000);
         case 574143:
@@ -204,6 +205,8 @@ class aura_ascension_felsworn_event : public AuraScript
             break;
         case 300490:
             Cast(player, player, 806104);
+            if (Aura* felforged = player->GetAura(806104))
+                felforged->SetScriptValue(806104, 0);
             break;
         case 805249:
             Cast(player, player, 521210);

@@ -1,0 +1,62 @@
+{
+  "schema": 1,
+  "name": "Lord Aliden Perenolde stands inside his manor (#12819)",
+  "contract": "#12819: for Elysa's quest 507 the client's objective point (QuestSuperTrack 2413 -> SuperTrack 4215, map 0 at 1273.19, -413.0, 105.0) is inside the Perenolde manor, but Lord Aliden Perenolde (2423, guid 16900) stood outside on the hill at 1227.89, -317.491, 48.39. The manor floor at that point is 0.32 yd above the SuperTrack height (spawn_ground_gap -0.32 at z 105.0). Expected: he stands at the objective point on the manor floor, z 105.32, and the floor is the ground under him.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": 1273.19,
+    "y": -413.0,
+    "z": 106.0,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Lord Aliden is in the area",
+      "metric": "nearby_creature_count",
+      "entry": 2423,
+      "min": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Lord Aliden stands at the quest's objective point",
+      "metric": "spawn_distance",
+      "guid": 16900,
+      "spawn_type": "creature",
+      "x": 1273.19,
+      "y": -413.0,
+      "z": 105.32,
+      "max": 0.3
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Lord Aliden stands on the manor floor (-0.2 to 0.35 yd)",
+      "metric": "spawn_ground_gap",
+      "guid": 16900,
+      "spawn_type": "creature",
+      "min": -0.2,
+      "max": 0.35
+    }
+  ]
+}

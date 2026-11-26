@@ -17,6 +17,11 @@ void ApplyContracts(SpellInfo* info)
         return;
     if ((info->Id == 680369 || info->Id == 280586) && info->Effects[EFFECT_1].IsAura(SPELL_AURA_MOD_ROOT))
         info->AttributesCu &= ~SPELL_ATTR0_CU_NEGATIVE;
+    if (info->Id == 900755)
+    {
+        info->DurationEntry = sSpellDurationStore.LookupEntry(21);
+        return;
+    }
     if (info->SpellFamilyName != 30)
         return;
     uint32 id = info->Id;
@@ -128,8 +133,11 @@ void ApplyContracts(SpellInfo* info)
         mod(0, SPELL_AURA_ADD_PCT_MODIFIER, 0, SPELLMOD_CASTING_TIME, flag96(2097152, 0, 0));
         info->StackAmount = 1;
     }
-    if (id == 900755)
-        info->DurationEntry = sSpellDurationStore.LookupEntry(21);
+    if (id == 300755)
+    {
+        dummy(1);
+        info->Effects[1].Amplitude = 0;
+    }
     if (id == 806783)
         info->Effects[0].SpellClassMask = flag96(2, 0, 1048576);
     if (id == 802804)

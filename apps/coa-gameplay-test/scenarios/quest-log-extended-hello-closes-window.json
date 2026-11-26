@@ -1,0 +1,297 @@
+{
+  "schema": 1,
+  "name": "Quest log: HELLO after the Extra Quests window was shown closes it with EMPTY",
+  "contract": [
+    "With Quests.LogSize 64 and 26 quests, the server pushes the Extra Quests window and lists quest 7 before the client announces 0x8F6. Once HELLO is applied, the server sends one COAQLOG EMPTY so the window hides, sends no further list, and answers a later LIST with EMPTY."
+  ],
+  "timeout_ms": 90000,
+  "quest_log_size": 64,
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 20
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the fixture settle",
+      "ms": 2000
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 5",
+      "actor": "hero",
+      "quest": 5,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 12",
+      "actor": "hero",
+      "quest": 12,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 13",
+      "actor": "hero",
+      "quest": 13,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 14",
+      "actor": "hero",
+      "quest": 14,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 35",
+      "actor": "hero",
+      "quest": 35,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 37",
+      "actor": "hero",
+      "quest": 37,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 39",
+      "actor": "hero",
+      "quest": 39,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 40",
+      "actor": "hero",
+      "quest": 40,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 52",
+      "actor": "hero",
+      "quest": 52,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 85",
+      "actor": "hero",
+      "quest": 85,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 109",
+      "actor": "hero",
+      "quest": 109,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 111",
+      "actor": "hero",
+      "quest": 111,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 152",
+      "actor": "hero",
+      "quest": 152,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 163",
+      "actor": "hero",
+      "quest": 163,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 170",
+      "actor": "hero",
+      "quest": 170,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 182",
+      "actor": "hero",
+      "quest": 182,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 183",
+      "actor": "hero",
+      "quest": 183,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 217",
+      "actor": "hero",
+      "quest": 217,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 224",
+      "actor": "hero",
+      "quest": 224,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 237",
+      "actor": "hero",
+      "quest": 237,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 239",
+      "actor": "hero",
+      "quest": 239,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 250",
+      "actor": "hero",
+      "quest": 250,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 255",
+      "actor": "hero",
+      "quest": 255,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 263",
+      "actor": "hero",
+      "quest": 263,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 302",
+      "actor": "hero",
+      "quest": 302,
+      "complete": false
+    },
+    {
+      "action": "prepare_quest",
+      "label": "Fixture: log quest 7",
+      "actor": "hero",
+      "quest": 7,
+      "complete": false
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: quest 7 is in the first overflow slot",
+      "actor": "hero",
+      "metric": "quest_log_slot",
+      "quest": 7,
+      "equals": 25
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: before HELLO the Extra Quests window lists the overflow quest",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tBEGIN 1 64",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "The client announces the extended quest log (0x8F6, version 1, 64 slots)",
+      "actor": "hero",
+      "opcode": 2294,
+      "fields": [
+        {
+          "u8": 1
+        },
+        {
+          "u8": 64
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "The server answers with the 0x8F7 snapshot",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2295,
+      "within_ms": 2000,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "After HELLO the window is told the overflow list is empty",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tEMPTY",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "addon_message",
+      "label": "The window asks for its list again",
+      "actor": "hero",
+      "prefix": "COAQLOG",
+      "text": "LIST"
+    },
+    {
+      "action": "assert",
+      "label": "LIST from an extended client is answered with EMPTY",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tEMPTY",
+      "equals": 2,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Let further refreshes pass",
+      "ms": 2500
+    },
+    {
+      "action": "assert",
+      "label": "No further window list follows",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tBEGIN 1 64",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "EMPTY is sent once per request",
+      "actor": "hero",
+      "metric": "whispers_received",
+      "from": "hero",
+      "text": "COAQLOG\tEMPTY",
+      "equals": 2
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "schema": 1,
+  "name": "Standard of Recovery streams its overridden aura base points so tooltips match the heal (#13513)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1. AscensionGuardian::ApplyContracts zeroes Standard of Recovery aura 500266's",
+    "Effect[0].BasePoints on the server (#8369) so aura_ascension_guardian_recovery::Tick heals 1 + floor(0.25 x STR)",
+    "(x 1.06 from Effect[1]) rather than adding Spell.dbc's flat 80 base (BasePoints 79 + DieSides 1). Both the cast",
+    "tooltip 500260 ('${$500266m1+$STR*.25}') and the buff tooltip 500266 ('${$w1+$STR*.25}') read 500266's client",
+    "EffectBasePoints[0] (DBC field 80), which stayed at 79 because 500266 was never registered in ClientSpellPatches",
+    "or synced in ApplyServerSpellSelectors, advertising ~90+ health at low level while healing ~10-12 (#13513, #12988).",
+    "Expected: the login SMSG_PATCH_SPELL stream (opcode 2346) delivers row 500266 with wire word 80 (EffectBasePoints[0])",
+    "equal to 0 while preserving wire word 81 (EffectBasePoints[1]) equal to 5 (+6% healing received), and row 500260",
+    "still references ${$500266m1+$STR*.25}."
+  ],
+  "timeout_ms": 60000,
+  "players": [
+    { "id": "guardian", "race": 1, "class": 18, "level": 14 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let the login spell patch stream settle", "ms": 7000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: shared description stream is captured (Runeshroud 500639)",
+      "actor": "guardian",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500639,
+      "text": "Requires Runeshroud",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: cast tooltip 500260 still bills $500266m1 + 0.25 x STR",
+      "actor": "guardian",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 500260,
+      "text": "${$500266m1+$STR*.25}",
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: login patch stream delivers row 500266",
+      "actor": "guardian",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 500266,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: 500266 wire word 80 (EffectBasePoints[0]) is 0 instead of Spell.dbc's 79",
+      "actor": "guardian",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500266,
+      "index": 80,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: 500266 wire word 81 (EffectBasePoints[1]) preserves +6% healing received (5 + DieSides 1)",
+      "actor": "guardian",
+      "metric": "server_packet_u32",
+      "opcode": 2346,
+      "row": 500266,
+      "index": 81,
+      "equals": 5
+    }
+  ]
+}

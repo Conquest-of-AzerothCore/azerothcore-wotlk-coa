@@ -1,0 +1,73 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric Calm is refused on a silence-immune enemy (owner ruling O-6)",
+  "contract": [
+    "Owner ruling O-6 (2026-11-21): Calm 804057 is refused as a whole on a silence-immune target. The tooltip reads",
+    "\"Enemies that are immune to silence effects cannot be affected by this.\" Spell.dbc 804057 carries the disarm",
+    "auras 67 and 254 with EffectMechanic 3 (DISARM); only its trigger 807778 carries Mechanic 9 (SILENCE), so",
+    "before the fix the disarm landed on a silence-immune enemy. The Sun Cleric cast check now answers",
+    "SPELL_FAILED_IMMUNE (38) when the target holds a native SILENCE mechanic immunity. Two Undead targets of the",
+    "same level: Brittlebones Skeleton 201 (creature_immunities -93, fear and horror only) is the control and is",
+    "disarmed and pacified; Bloodmage Thalnos 4543 (creature_immunities -273, SILENCE in its MechanicsMask) is made",
+    "silence immune by its creature template immunity, proved by the native effect-immunity query against",
+    "807778 effect 0 (MOD_PACIFY, mechanic SILENCE), and refuses the whole cast: no disarm, no pacify. Both casters",
+    "carry spell hit rating so a miss cannot leave an aura absent."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {"id": "control_caster", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000},
+    {"id": "immune_caster", "race": 1, "class": 27, "level": 60, "spell_hit_rating": 10000}
+  ],
+  "creatures": [
+    {"id": "control_target", "owner": "control_caster", "entry": 201, "level": 60, "faction": 14, "distance": 3},
+    {"id": "immune_target", "owner": "immune_caster", "entry": 4543, "level": 60, "faction": 14, "distance": 3}
+  ],
+  "steps": [
+    {"action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000},
+    {"action": "learn", "actor": "control_caster", "spell": 804057},
+    {"action": "learn", "actor": "immune_caster", "spell": 804057},
+    {
+      "action": "assert", "label": "The control target is not immune to the silence mechanic",
+      "actor": "control_target", "metric": "spell_effect_immune", "spell": 807778, "effect": 0,
+      "target": "control_caster", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The immune target is immune to the silence mechanic by its creature template",
+      "actor": "immune_target", "metric": "spell_effect_immune", "spell": 807778, "effect": 0,
+      "target": "immune_caster", "equals": 1
+    },
+    {"action": "cast", "actor": "control_caster", "spell": 804057, "target": "control_target"},
+    {
+      "action": "assert", "label": "Control: the disarm lands on the enemy without silence immunity",
+      "actor": "control_target", "metric": "aura", "spell": 804057, "caster": "control_caster", "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Control: the Undead enemy is also pacified and rooted",
+      "actor": "control_target", "metric": "aura", "spell": 807778, "caster": "control_caster", "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert", "label": "Control: the cast was not refused",
+      "actor": "control_caster", "metric": "cast_failure", "spell": 804057, "equals": 0
+    },
+    {"action": "cast", "actor": "immune_caster", "spell": 804057, "target": "immune_target"},
+    {
+      "action": "assert", "label": "The cast on the silence-immune enemy is refused as immune",
+      "actor": "immune_caster", "metric": "cast_failure", "spell": 804057, "equals": 38, "within_ms": 3000
+    },
+    {"action": "wait", "label": "Wait through the cast window before asserting absence", "ms": 3000},
+    {
+      "action": "assert", "label": "No disarm on the silence-immune enemy",
+      "actor": "immune_target", "metric": "aura", "spell": 804057, "caster": "immune_caster", "equals": 0
+    },
+    {
+      "action": "assert", "label": "No pacify or root on the silence-immune enemy",
+      "actor": "immune_target", "metric": "aura", "spell": 807778, "caster": "immune_caster", "equals": 0
+    },
+    {
+      "action": "assert", "label": "The refused cast leaves Calm off cooldown",
+      "actor": "immune_caster", "metric": "cooldown_ms", "spell": 804057, "equals": 0
+    }
+  ]
+}

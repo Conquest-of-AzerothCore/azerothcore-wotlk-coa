@@ -3,7 +3,8 @@
   "name": "Chat log: the daily cleanup deletes rows older than CoA.ChatLog.KeepDays and keeps the rest",
   "contract": [
     "With CoA.ChatLog.KeepDays = 30 (the default), the chat log's daily cleanup deletes every coa_chat_log row whose time is more than 30 days before the cleanup and keeps every newer row.",
-    "One whisper writes one row; a cleanup now and one 29 days later keep it, one 31 days later deletes it."
+    "One whisper writes one row; a cleanup now and one 29 days later keep it, one 31 days later deletes it.",
+    "The background cleanup the worldserver runs at startup and once a day deletes the same rows: a second whisper's row is gone after a background cleanup 31 days later."
   ],
   "timeout_ms": 60000,
   "chat_log": true,
@@ -26,6 +27,10 @@
     {"action": "chat_log_cleanup", "label": "Cleanup 29 days later", "actor": "keeper", "days_ahead": 29},
     {"action": "assert", "label": "Kept after 29 days", "actor": "keeper", "metric": "chat_log_rows", "chat_type": "whisper", "equals": 1},
     {"action": "chat_log_cleanup", "label": "Cleanup 31 days later", "actor": "keeper", "days_ahead": 31},
-    {"action": "assert", "label": "Deleted after 31 days", "actor": "keeper", "metric": "chat_log_rows", "chat_type": "whisper", "equals": 0}
+    {"action": "assert", "label": "Deleted after 31 days", "actor": "keeper", "metric": "chat_log_rows", "chat_type": "whisper", "equals": 0},
+    {"action": "whisper", "actor": "keeper", "to": "Chatlogkfrd", "text": "keep me too"},
+    {"action": "assert", "label": "One new row", "actor": "keeper", "metric": "chat_log_rows", "chat_type": "whisper", "equals": 1},
+    {"action": "chat_log_cleanup", "label": "Background cleanup 31 days later", "actor": "keeper", "days_ahead": 31, "background": true},
+    {"action": "assert", "label": "Deleted by the background cleanup", "actor": "keeper", "metric": "chat_log_rows", "chat_type": "whisper", "equals": 0, "within_ms": 10000}
   ]
 }

@@ -505,7 +505,7 @@ class Server:
         try:
             attempt.directory.mkdir(parents=True)
             scenario_path = attempt.directory / 'scenario.json'
-            scenario_path.write_text(json.dumps(case.scenario, indent=2) + '\n', encoding='utf-8')
+            scenario_path.write_text(json.dumps(case.scenario, indent=2) + '\n', encoding='utf-8', newline='\n')
             attempt.scenario_sha256 = run.sha256(scenario_path)
             write_json(self.case_directory / f'case-{attempt.sequence:06d}.json',
                        self.case_record(attempt, scenario_path))
@@ -1208,7 +1208,8 @@ def run_batch(args, directory=catalog.DIRECTORY):
             case.exclusive = (world_phase or process_global or case.scenario.get('creature_scaling', False)
                               or case.scenario.get('ptr_character_copy', False)
                               or 'vanity_ownership' in case.scenario or 'two_side' in case.scenario
-                              or 'quest_log_size' in case.scenario or case.scenario.get('chat_log', False)
+                              or 'quest_log_size' in case.scenario or 'max_player_level' in case.scenario
+                              or case.scenario.get('chat_log', False)
                               or case.scenario.get('battleground_kill_xp', False)
                               or (not case.exploratory and case.key in exclusive) or case.hour is not None)
     output = args.output.resolve()
@@ -1253,7 +1254,7 @@ def interrupt(signum, frame):
 
 
 def parser():
-    result = argparse.ArgumentParser(description=CLI_DESCRIPTION,
+    result = argparse.ArgumentParser(description=CLI_DESCRIPTION, fromfile_prefix_chars='@',
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
     result.add_argument('--worldserver', type=Path, required=True)
     result.add_argument('--config', type=Path, required=True, help='Source worldserver config; never changed')

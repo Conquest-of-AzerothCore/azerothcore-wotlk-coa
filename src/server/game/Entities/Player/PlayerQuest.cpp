@@ -29,6 +29,7 @@
 #include "MapMgr.h"
 #include "Player.h"
 #include "PoolMgr.h"
+#include "QuestLogExtended.h"
 #include "QuestPackets.h"
 #include "ReputationMgr.h"
 #include "ScriptMgr.h"
@@ -1316,7 +1317,8 @@ bool Player::SatisfyQuestExclusiveGroup(Quest const* qInfo, bool msg) const
 
         // not allow have daily quest if daily quest from exclusive group already recently completed
         Quest const* Nquest = sObjectMgr->GetQuestTemplate(exclude_Id);
-        if (!SatisfyQuestDay(Nquest, false) || !SatisfyQuestWeek(Nquest, false) || !SatisfyQuestSeasonal(Nquest, false))
+        if (!SatisfyQuestDay(Nquest, false, false) || !SatisfyQuestWeek(Nquest, false) ||
+            !SatisfyQuestSeasonal(Nquest, false))
         {
             if (msg)
                 SendCanTakeQuestResponse(INVALIDREASON_DONT_HAVE_REQ);
@@ -1416,7 +1418,7 @@ bool Player::SatisfyQuestPrevChain(Quest const* qInfo, bool msg) const
     return true;
 }
 
-bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg) const
+bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg, bool allowRepeat) const
 {
     if (!qInfo->IsDaily() && !qInfo->IsDFQuest())
         return true;
@@ -1433,7 +1435,8 @@ bool Player::SatisfyQuestDay(Quest const* qInfo, bool msg) const
     for (uint32 quest_daily_idx = 0; quest_daily_idx < PLAYER_MAX_DAILY_QUESTS; ++quest_daily_idx)
     {
         uint32 id = GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1 + quest_daily_idx);
-        if (qInfo->GetQuestId() == id)
+        if (qInfo->GetQuestId() == id &&
+            (!allowRepeat || !sScriptMgr->OnPlayerCanRepeatDailyQuest(this, qInfo)))
             return false;
 
         if (!id)
@@ -1947,7 +1950,8 @@ void Player::AdjustQuestReqItemCount(Quest const* quest, QuestStatusData& questS
 
 uint16 Player::FindQuestSlot(uint32 quest_id) const
 {
-    return m_questLogSlots.Find(quest_id, quest_id ? MAX_QUEST_LOG_SIZE : GetQuestLogCapacity());
+    return m_questLogSlots.Find(quest_id, quest_id ? MAX_QUEST_LOG_SIZE
+        : m_questLogExtended ? uint16(QuestLogExtendedSize()) : GetQuestLogCapacity());
 }
 
 uint16 Player::GetQuestLogCapacity() const
@@ -1959,7 +1963,10 @@ uint16 Player::GetQuestLogCapacity() const
 void Player::MirrorQuestSlot(uint16 slot)
 {
     if (slot >= NATIVE_QUEST_LOG_SIZE)
+    {
+        MarkQuestSlotExtendedDirty(slot);
         return;
+    }
 
     QuestLogSlot const& entry = m_questLogSlots[slot];
     uint16 const field = PLAYER_QUEST_LOG_1_1 + slot * MAX_QUEST_OFFSET;
@@ -1970,6 +1977,90 @@ void Player::MirrorQuestSlot(uint16 slot)
 
     if (!entry.QuestId && m_questLogSlots.HasOverflow())
         m_questLogPromotionPending = true;
+}
+
+namespace
+{
+    std::pair<uint32, uint32> ExtendedQuestLevelAndXP(Player* player, uint32 questId)
+    {
+        Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
+        if (!quest)
+            return { 0, 0 };
+
+        return { uint32(player->GetQuestLevel(quest)), AscensionQuestLog::RewardXPForDisplay(player, quest) };
+    }
+}
+
+uint8 Player::QuestLogExtendedSize() const
+{
+    return uint8(std::min<uint16>(GetQuestLogCapacity(),
+        std::clamp<uint16>(m_questLogExtendedClientSlots, NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE)));
+}
+
+uint16 Player::GetClientQuestLogSlots() const
+{
+    return m_questLogExtended
+        ? std::clamp<uint16>(m_questLogExtendedClientSlots, NATIVE_QUEST_LOG_SIZE, MAX_QUEST_LOG_SIZE)
+        : NATIVE_QUEST_LOG_SIZE;
+}
+
+void Player::SetQuestLogExtended(bool extended, uint8 clientMaxSlots)
+{
+    m_questLogExtended = extended;
+    m_questLogExtendedClientSlots = clientMaxSlots;
+    m_questLogExtendedDirty = 0;
+}
+
+void Player::MarkQuestSlotExtendedDirty(uint16 slot)
+{
+    if (m_questLogExtended && slot >= NATIVE_QUEST_LOG_SIZE && slot < MAX_QUEST_LOG_SIZE)
+        m_questLogExtendedDirty |= uint64(1) << slot;
+}
+
+void Player::FlushQuestLogExtended()
+{
+    if (!m_questLogExtended)
+        return;
+
+    if (GetQuestLogCapacity() != m_questLogExtendedCapacity)
+    {
+        SendQuestLogExtendedSnapshot();
+        return;
+    }
+
+    if (!m_questLogExtendedDirty)
+        return;
+
+    std::vector<QuestLogExtended::Entry> entries;
+    for (uint16 slot = NATIVE_QUEST_LOG_SIZE; slot < MAX_QUEST_LOG_SIZE; ++slot)
+    {
+        if (!(m_questLogExtendedDirty & (uint64(1) << slot)))
+            continue;
+
+        QuestLogSlot const& source = m_questLogSlots[slot];
+        auto const [level, rewardXP] = source.QuestId
+            ? ExtendedQuestLevelAndXP(this, source.QuestId) : std::pair<uint32, uint32>{ 0, 0 };
+        QuestLogExtended::Entry entry{ uint8(slot), source.QuestId, source.State, {}, source.Time, level, rewardXP };
+        for (uint8 i = 0; i < 4; ++i)
+            entry.Counters[i] = uint16(source.Counters >> (i * 16));
+        entries.push_back(entry);
+    }
+
+    m_questLogExtendedDirty = 0;
+    WorldPacket data = QuestLogExtended::BuildState(entries, QuestLogExtendedSize(), false);
+    SendDirectMessage(&data);
+}
+
+void Player::SendQuestLogExtendedSnapshot()
+{
+    if (!m_questLogExtended)
+        return;
+
+    m_questLogExtendedDirty = 0;
+    m_questLogExtendedCapacity = GetQuestLogCapacity();
+    WorldPacket data = QuestLogExtended::BuildState(QuestLogExtended::Snapshot(m_questLogSlots,
+        [this](uint32 questId) { return ExtendedQuestLevelAndXP(this, questId); }), QuestLogExtendedSize(), true);
+    SendDirectMessage(&data);
 }
 
 void Player::SetQuestSlot(uint16 slot, uint32 quest_id, uint32 timer)
@@ -2024,6 +2115,24 @@ namespace
         Quest const* quest = sObjectMgr->GetQuestTemplate(questId);
         return quest && quest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED);
     }
+}
+
+bool Player::CanClientSwapQuestSlots(uint16 slot1, uint16 slot2) const
+{
+    uint16 const clientSlots = GetClientQuestLogSlots();
+    if (slot1 == slot2 || slot1 >= clientSlots || slot2 >= clientSlots)
+        return false;
+
+    auto const canMove = [this](uint16 from, uint16 to)
+    {
+        uint32 const questId = m_questLogSlots[from].QuestId;
+        if (!questId)
+            return true;
+        if (!m_questLogSlots[to].QuestId && to >= QuestLogExtendedSize())
+            return false;
+        return to < NATIVE_QUEST_LOG_SIZE || !IsQuestPinnedToNativeLog(questId);
+    };
+    return canMove(slot1, slot2) && canMove(slot2, slot1);
 }
 
 uint16 Player::MoveQuestToNativeLog(uint16 slot)

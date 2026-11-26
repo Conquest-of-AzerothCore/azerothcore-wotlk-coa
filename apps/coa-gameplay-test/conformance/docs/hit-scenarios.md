@@ -66,7 +66,9 @@ read this way: an aura the server makes periodic (`AuraEffect::CalculatePeriodic
 amplitude 1500) keeps its `$/1000;s1` as an `effect_value` in ms. A token of another spell (`${($500564d*1000/$500564T1)*(...)}` in
 Feast of Talons 500056) is classed by that spell's effect (ADR 0676): a `total` over its ticks goes to
 `periodic_totals` under its foreign label (`500056 effect_value 500564e0 #0`, with `effect_spell`), never to a
-one-tick `spell_effect_value` read; a `tick` or `mixed` foreign token keeps its read.
+one-tick `spell_effect_value` read; a `tick` foreign token keeps its read, a `mixed` or unreadable one is
+`unmeasurable` (ADR 1248), and a total that the class file lists in `per_tick_foreign_totals` keeps its read,
+judged per tick ([value-scenarios.md](value-scenarios.md)).
 
 `hits_per_cast` clearing the combined event count (above) proves a `heal` kind's events landed somewhere, but not on
 whom: two heals both landing on the ally would still clear `minimum_hits` for Temple Guardian. A class file's
@@ -117,9 +119,10 @@ integer steps: for Argent Blade 807268, 2.15 x ((min + max) / 2 + AP / 14 x 3.3)
 A ranged weapon attack (`DmgClass` 3 with a bow/gun/crossbow/thrown mask, the ranged-slot attribute or the hunter
 family, `hits.ranged_weapon_attack`, `SpellInfo::IsRangedWeaponSpell`) reads the ranged attack power in place of AP
 (`hits.weapon_attacker`, ADR 0680). The hit scenario's dummy stands at `values.cast_distance` of the rank: the midpoint
-of the spell's hostile range for a `SPELL_RANGE_RANGED` range (Shadowblast's range 114, 0-35 yd: 17.5 yd), the 3 yd
-melee distance otherwise; the value scenario's dummy does the same, and a missile cast from the ranged distance is
-waited for before the value scenario's aura reads (`values.missile_wait_ms`). The behaviour kinds `hit_ratio`,
+of the spell's hostile range for a `SPELL_RANGE_RANGED` range (Shadowblast's range 114, 0-35 yd: 17.5 yd) or, when the
+class file sets `"honour_min_range": true` (ADR 1316), any range with `RangeMin[0] > 0` (Cultist Dreadfall 806175,
+range 94, 8-40 yd: 24 yd), and the 3 yd melee distance otherwise; the value scenario's dummy does the same, and a
+missile cast from the ranged distance is waited for before the value scenario's aura reads (`values.missile_wait_ms`). The behaviour kinds `hit_ratio`,
 `script_hit`, `cost_gate` and `cast_applies_aura` (and its expiry pair) place their dummy by the same rule
 (`behaviours.dummy_placement`, ADR 0687): the spell cast at the dummy (the cast or observed spell of a `hit_ratio`
 that does not swing, the first `script_hit` cast at the dummy, the `cost_gate` gated spell, the `cast_applies_aura`

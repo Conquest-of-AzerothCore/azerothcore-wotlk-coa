@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "name": "World: Resting buff 997615 applies in capital city inns and all resting areas (#10436)",
+  "contract": "AscensionInnRest.cpp previously gated Resting (997615, whose expiry grants Well Rested 997616 for +8% monster-kill XP) on HasRestFlag(REST_FLAG_IN_TAVERN) only. Capital cities and their inns (Stormwind's Gilded Rose, Ironforge's Stonefire Tavern, Orgrimmar's Broken Tusk, Undercity, Thunder Bluff, Darnassus, Silvermoon, Exodar, Dalaran) use REST_FLAG_IN_CITY, and faction rest-zone inns (Valgarde, Westguard Inn, etc.) use REST_FLAG_IN_FACTION_AREA, so none of them ever granted 997615 even though PLAYER_FLAGS_RESTING was active. Checking HasPlayerFlag(PLAYER_FLAGS_RESTING) && IsAlive() covers taverns, capital cities, and faction rest zones uniformly. An Alliance character standing by Innkeeper Allison (6740) in Stormwind's Gilded Rose must receive 997615 without a tavern area trigger, lose it when teleporting outdoors to Elwynn Forest, regain it inside Goldshire's Lion's Pride Inn (area trigger 562), and lose it upon death.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -8867.8,
+    "y": 673.7,
+    "z": 98.0,
+    "o": 0
+  },
+  "players": [
+    { "id": "p", "race": 1, "class": 1, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login and zone rest flags settle in Stormwind", "ms": 3000 },
+    { "action": "assert", "label": "SETUP: Stormwind Gilded Rose sets PLAYER_FLAGS_RESTING via REST_FLAG_IN_CITY", "actor": "p", "metric": "resting", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "DISCRIMINATING: capital city inn grants Resting buff 997615", "actor": "p", "metric": "aura", "spell": 997615, "equals": 1, "within_ms": 3000 },
+    { "action": "teleport", "label": "Leave Stormwind for Elwynn Forest outdoors", "actor": "p", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053 },
+    { "action": "assert", "label": "Outdoors clears PLAYER_FLAGS_RESTING", "actor": "p", "metric": "resting", "equals": 0, "within_ms": 5000 },
+    { "action": "assert", "label": "Leaving the resting area removes unfinished Resting buff 997615", "actor": "p", "metric": "aura", "spell": 997615, "equals": 0, "within_ms": 3000 },
+    { "action": "teleport", "label": "Enter Goldshire Lion's Pride Inn", "actor": "p", "map": 0, "x": -9483.25, "y": -17.9883, "z": 56.9634 },
+    { "action": "area_trigger", "actor": "p", "id": 562 },
+    { "action": "assert", "label": "Goldshire tavern trigger sets resting", "actor": "p", "metric": "resting", "equals": 1, "within_ms": 3000 },
+    { "action": "assert", "label": "Tavern resting still grants Resting buff 997615", "actor": "p", "metric": "aura", "spell": 997615, "equals": 1, "within_ms": 3000 },
+    { "action": "die", "label": "Dying inside a rest area drops unfinished rest", "actor": "p" },
+    { "action": "assert", "label": "Dead player does not retain Resting buff 997615", "actor": "p", "metric": "aura", "spell": 997615, "equals": 0, "within_ms": 3000 }
+  ]
+}

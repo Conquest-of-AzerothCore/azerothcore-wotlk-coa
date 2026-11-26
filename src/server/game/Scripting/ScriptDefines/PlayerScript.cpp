@@ -145,8 +145,14 @@ void ScriptMgr::OnPlayerBeforeSendLoot(Player* player, ObjectGuid lootGuid, Loot
 
 void ScriptMgr::OnPlayerGiveXP(Player* player, uint32& amount, Unit* victim, uint8 xpSource)
 {
-    amount = static_cast<uint32>(std::min(double(amount) * sWorld->getRate(RATE_XP_GLOBAL),
-        double(std::numeric_limits<uint32>::max())));
+    if (amount > 0)
+    {
+        float const rate = sWorld->getRate(RATE_XP_GLOBAL);
+        amount = rate > 0.0f
+            ? std::max<uint32>(1u, static_cast<uint32>(std::min(double(amount) * rate,
+                double(std::numeric_limits<uint32>::max()))))
+            : 0;
+    }
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_GIVE_EXP, script->OnPlayerGiveXP(player, amount, victim, xpSource));
 }
 
@@ -1034,6 +1040,11 @@ bool ScriptMgr::OnPlayerCanEnterManastorm(Player* player)
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_ENTER_MANASTORM, !script->OnPlayerCanEnterManastorm(player));
 }
 
+bool ScriptMgr::OnPlayerCanReleaseSpirit(Player* player)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_RELEASE_SPIRIT, !script->OnPlayerCanReleaseSpirit(player));
+}
+
 void ScriptMgr::OnPlayerBankWithdraw(Player* player, uint8 kind)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_BANK_WITHDRAW, script->OnPlayerBankWithdraw(player, kind));
@@ -1171,6 +1182,12 @@ bool ScriptMgr::OnPlayerCanTakeQuest(Player const* player, Quest const* quest)
 bool ScriptMgr::OnPlayerCanRewardQuest(Player const* player, Quest const* quest)
 {
     CALL_ENABLED_BOOLEAN_HOOKS(PlayerScript, PLAYERHOOK_CAN_REWARD_QUEST, !script->OnPlayerCanRewardQuest(player, quest));
+}
+
+bool ScriptMgr::OnPlayerCanRepeatDailyQuest(Player const* player, Quest const* quest)
+{
+    CALL_ENABLED_BOOLEAN_HOOKS_WITH_DEFAULT_FALSE(PlayerScript, PLAYERHOOK_CAN_REPEAT_DAILY_QUEST,
+        script->OnPlayerCanRepeatDailyQuest(player, quest));
 }
 
 bool ScriptMgr::OnPlayerQuestGiverChooseReward(Player* player, Object* questGiver, Quest const* quest, uint32 reward)

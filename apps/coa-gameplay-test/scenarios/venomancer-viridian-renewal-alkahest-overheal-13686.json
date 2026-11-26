@@ -1,0 +1,252 @@
+{
+  "schema": 1,
+  "name": "Venomancer: Alkahest grants Viridian Renewal for instant Emerald Veil even on full-health targets (#13686)",
+  "contract": [
+    "Viridian Renewal (706938, CharacterAdvancement 7121) tooltip: 'Healing done by Alkahest now causes your next Emerald Veil to be instant cast.' Its buff 707097 applies SPELL_AURA_ADD_PCT_MODIFIER (-100% SPELLMOD_CASTING_TIME) on SpellFamilyName 35 mask (0, 0, 0x40000), which matches every Emerald Veil rank (800926..801152, base cast time 2500 ms).",
+    "AscensionVenomancerEvents.cpp gated 706938 on HealInfo::GetEffectiveHeal(), which is 0 whenever Alkahest heals a full-health target, so overhealing with Alkahest never granted 707097 and Emerald Veil stayed a 2500 ms cast.",
+    "Expected: casting Alkahest rank 8 (578310) on a full-health self grants Viridian Renewal (707097) once (not twice on a self-heal), drops Emerald Veil rank 6 (801152) cast time from 2500 ms to 0 ms, lets Emerald Veil complete immediately and consume 707097 so cast time returns to 2500 ms, and still procs on an injured target. A control Venomancer without 706938 gains neither 707097 nor any cast-time reduction."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "venomancer",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    },
+    {
+      "id": "control",
+      "race": 1,
+      "class": 29,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn settle",
+      "ms": 3000
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 578310
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 801152
+    },
+    {
+      "action": "learn",
+      "actor": "venomancer",
+      "spell": 706938
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 578310
+    },
+    {
+      "action": "learn",
+      "actor": "control",
+      "spell": 801152
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Viridian Renewal passive is active on the Venomancer",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 706938,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Venomancer starts at full health",
+      "actor": "venomancer",
+      "metric": "health_pct",
+      "equals": 100
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Emerald Veil starts at its 2500 ms base cast time",
+      "actor": "venomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 801152,
+      "equals": 2500
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no Viridian Renewal buff before casting Alkahest",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 707097,
+      "equals": 0
+    },
+    {
+      "action": "cast",
+      "label": "Venomancer casts Alkahest on full-health self",
+      "actor": "venomancer",
+      "spell": 578310,
+      "target": "venomancer"
+    },
+    {
+      "action": "cast",
+      "label": "Control casts Alkahest on full-health self",
+      "actor": "control",
+      "spell": 578310,
+      "target": "control"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Venomancer Alkahest heal landed",
+      "actor": "venomancer",
+      "metric": "spell_heal_count",
+      "spell": 578310,
+      "target": "venomancer",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: control Alkahest heal landed",
+      "actor": "control",
+      "metric": "spell_heal_count",
+      "spell": 578310,
+      "target": "control",
+      "min": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: full-health Alkahest grants Viridian Renewal buff",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 707097,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: self-cast Alkahest triggers Viridian Renewal once, not twice",
+      "actor": "venomancer",
+      "metric": "spell_cast_count",
+      "spell": 707097,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Viridian Renewal makes Emerald Veil instant (0 ms)",
+      "actor": "venomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 801152,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Viridian Renewal, Alkahest grants no buff",
+      "actor": "control",
+      "metric": "aura",
+      "spell": 707097,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: without Viridian Renewal, Emerald Veil keeps its 2500 ms cast time",
+      "actor": "control",
+      "metric": "spell_cast_time_ms",
+      "spell": 801152,
+      "equals": 2500
+    },
+    {
+      "action": "wait",
+      "label": "Ensure global cooldown is clear",
+      "ms": 500
+    },
+    {
+      "action": "snapshot",
+      "actor": "venomancer",
+      "metric": "spell_cast_count",
+      "spell": 801152,
+      "save_as": "veil_casts_before"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Emerald Veil while Viridian Renewal is active",
+      "actor": "venomancer",
+      "spell": 801152,
+      "target": "venomancer"
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil cast was accepted",
+      "actor": "venomancer",
+      "metric": "cast_failure",
+      "spell": 801152,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Emerald Veil completes immediately instead of taking 2500 ms",
+      "actor": "venomancer",
+      "metric": "spell_cast_count",
+      "spell": 801152,
+      "relative_to": "veil_casts_before",
+      "equals": 1,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil consumes the Viridian Renewal buff",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 707097,
+      "equals": 0,
+      "within_ms": 500
+    },
+    {
+      "action": "assert",
+      "label": "Emerald Veil cast time returns to 2500 ms after consuming Viridian Renewal",
+      "actor": "venomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 801152,
+      "equals": 2500
+    },
+    {
+      "action": "wait",
+      "label": "Wait out global cooldown before injured test",
+      "ms": 1600
+    },
+    {
+      "action": "set_health",
+      "label": "Injure the Venomancer to test effective healing too",
+      "actor": "venomancer",
+      "value": 100
+    },
+    {
+      "action": "cast",
+      "label": "Venomancer casts Alkahest on injured self",
+      "actor": "venomancer",
+      "spell": 578310,
+      "target": "venomancer"
+    },
+    {
+      "action": "assert",
+      "label": "Injured Alkahest also grants Viridian Renewal",
+      "actor": "venomancer",
+      "metric": "aura",
+      "spell": 707097,
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "Injured Alkahest also makes Emerald Veil instant",
+      "actor": "venomancer",
+      "metric": "spell_cast_time_ms",
+      "spell": 801152,
+      "equals": 0
+    }
+  ]
+}
