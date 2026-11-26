@@ -2414,7 +2414,7 @@
       "critical": false,
       "trials": 3,
       "void_on_cast_failure": true,
-      "observe_source": "$s1 = 35 (560259 Effect[0]=190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools, BasePoints 34 + DieSides 1 = +35%, RadiusIndex 12 = 100 yd; Spell.dbc). Animated Blood 573357 summons 315301 in warmup (DurationIndex 8 = 15000 ms; ReplacePreviousBrood at AscensionBloodmageTalents.cpp:384 replaces prior brood on each arm's warmup); Bloodbolt 578305 engages dummy via CreatureAI::OwnerAttacked, triggering Blood Strike 589023 (Shadow, DieSides 1, zero variance) at +2000 ms then every 3000 ms (AscensionBloodmageTalents.cpp:390-435). Precondition aura 823764 on caster (Unit.cpp:2600 reads SPELL_AURA_MOD_TARGET_RESISTANCE from the summon's owner) and on 315301 removes dummy magic resist; fixture spell_power 20000 scales Blood Strike cleanly; 3 trials x 4000 ms = 12000 ms fits inside 15000 ms summon duration. Control without 560259 vs treatment with real learn of 560259 measures +35% (+-2 pt band excludes 0% and +70%). Reference search 2026-11-26: coa-history 573357 Animated Blood 799 casts / 1601 summons in 26 logs (560259 passive 0 events); bindmysoul/ascension-data lists 560259; installed Spell.dbc governs."
+      "observe_source": "$s1 = 35 (560259 Effect[0]=190 SPELL_EFFECT_ASCENSION_APPLY_AURA_TO_SUMMONS, aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools, BasePoints 34 + DieSides 1 = +35%, RadiusIndex 12 = 100 yd; Spell.dbc). Animated Blood 573357 summons 315301 in warmup (DurationIndex 8 = 15000 ms; ReplacePreviousBrood at AscensionBloodmageTalents.cpp:384 replaces prior brood on each arm's warmup); Bloodbolt 578305 engages dummy via CreatureAI::OwnerAttacked, triggering Blood Strike 589023 (Shadow, DieSides 1, zero variance) at +2000 ms then every 3000 ms (AscensionBloodmageTalents.cpp:390-435). Precondition aura 823764 on caster (Unit.cpp:2593-2597 reads player->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask) from the summon's player owner) and on 315301 removes dummy magic resist; fixture spell_power 20000 scales Blood Strike cleanly; 3 trials x 4000 ms = 12000 ms fits inside 15000 ms summon duration. Control without 560259 vs treatment with real learn of 560259 measures +35% (+-2 pt band excludes 0% and +70%). Reference search 2026-11-26: coa-history 573357 Animated Blood 799 casts / 1601 summons in 26 logs (560259 passive 0 events); bindmysoul/ascension-data lists 560259; installed Spell.dbc governs."
     },
     {
       "spell": 801960,
@@ -2817,7 +2817,7 @@
       "area_dummies": {
         "placed": [
           {
-            "dx": 12.5,
+            "dx": 12.6,
             "dy": 0,
             "before_expected": 0,
             "expected": 1
@@ -2827,6 +2827,22 @@
             "dy": 0,
             "before_expected": 0,
             "expected": 0
+          }
+        ]
+      },
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "dummy"
+            ],
+            "metric": "combat_reach",
+            "before_expected": 1.275,
+            "expected": 1.275,
+            "tolerance": 0.01,
+            "precondition": true,
+            "source": "dummy entry 36 combat_reach 1.275 yd (Spell.cpp:9450-9461 adds unitTarget->GetCombatReach() to effectiveRange)"
           }
         ]
       },
@@ -2841,7 +2857,7 @@
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Radius edge for 806214 ($806214a1 = 10 yd, EffectRadiusIndex 13): Spell.cpp:1305 adds player GetLeewayBonusRadius() (+2.66 yd, Object.cpp:1787-1808) to TARGET_UNIT_CONE_ENEMY_54 (54) and WorldObjectSpellConeTargetCheck inherits WorldObjectSpellAreaTargetCheck (Spell.cpp:9437-9442, +1.275 yd dummy entry 36 combat_reach), giving effective edge 10 + 1.275 + 2.66 = 13.935 yd. area_dummies.edge rejects leeway=true for TargetA=54 (LEEWAY_TARGETS={15,20,56}), so area_dummies.placed brackets 13.935 yd within +-10%: area1 at (12.5, 0) (10.3% inside) is struck once while area2 at (15.3, 0) (9.8% beyond) takes 0 hits. Reference search 2026-11-26: see cone_edge."
+      "observe_source": "Radius edge for 806214 ($806214a1 = 10 yd, EffectRadiusIndex 13): Spell.cpp:1305 adds player GetLeewayBonusRadius() (+2.66 yd, Object.cpp:1787-1808) to TARGET_UNIT_CONE_ENEMY_54 (54) and WorldObjectSpellConeTargetCheck inherits WorldObjectSpellAreaTargetCheck (Spell.cpp:9450-9461, +1.275 yd dummy entry 36 combat_reach, verified by precondition combat_reach arm), giving effective edge 10 + 1.275 + 2.66 = 13.935 yd. area_dummies.edge rejects leeway=true for TargetA=54 (LEEWAY_TARGETS={15,20,56}), so area_dummies.placed brackets 13.935 yd strictly inside +-10%: area1 at (12.6, 0) (9.58% inside) is struck once while area2 at (15.3, 0) (9.80% beyond) takes 0 hits. Reference search 2026-11-26: see cone_edge."
     },
     {
       "spell": 704115,
@@ -2881,11 +2897,11 @@
       },
       "before_expected": 0,
       "expected": 642,
-      "tolerance": 60,
+      "tolerance": 2,
       "wait_ms": 3500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Gate check: 704115 tooltip states Aortic Assault triggers 806214 for ${$806214m1*$<scalingbp>+$AP*0.5} = 703.959 Physical (~642 after dummy armor) ONLY when 704115 is learned (control before learning 704115 must deal 0). Aortic Assault 807785 Effect[2] SPELL_AURA_PERIODIC_TRIGGER_SPELL -> 806214 is not gated on 704115 in src/server/ (expected ALERT if before > 0). Reference search 2026-11-26: see cone_edge."
+      "observe_source": "Gate check: 704115 tooltip states Aortic Assault triggers 806214 for ${$806214m1*$<scalingbp>+$AP*0.5} = 703.959 Physical (zero variance, EffectDieSides=1; ~642 after dummy armor) ONLY when 704115 is learned (control before learning 704115 must deal 0; tolerance 2 strictly excludes buggy ap_bonus=0.6 value 662 even if ungated trigger is fixed). Aortic Assault 807785 Effect[2] SPELL_AURA_PERIODIC_TRIGGER_SPELL -> 806214 is not gated on 704115 in src/server/ (expected ALERT if before > 0). Reference search 2026-11-26: see cone_edge."
     },
     {
       "spell": 704115,
@@ -2973,7 +2989,7 @@
     },
     {
       "spell": 704652,
-      "name": "Relentless (Physical crit cuts Aortic Assault CD by 1 sec: opens at 19.08s)",
+      "name": "Relentless (Physical crit cuts Aortic Assault CD by 1 sec: opens at 19.04s)",
       "kind": "metric_delta",
       "variant": "cd_cut_open",
       "label_suffix": "cd_cut_open",
@@ -3031,7 +3047,7 @@
         {
           "spell": 807785,
           "target": "caster",
-          "delay_ms": 13980,
+          "delay_ms": 13940,
           "in_before": true,
           "reset_cooldown": false
         }
@@ -3063,7 +3079,7 @@
           }
         ]
       },
-      "observe_source": "$/1000;807358s1 = 1000 ms (807358 Effect[0]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on 806212 chain -> 807785 Aortic Assault 20000 ms CD; pending_db_world/rev_20260920_51_bloodmage_physical_crit_procs.sql links 704652 -> 807357 -> 807358 on Physical crit). Dummy at 18 yd with relocate_before_trigger -10 yd puts priming 807785 at 20-28 yd (outside its 13.9 yd cone so 0 crits during priming); Lunge 500126 (DmgClass 0, 5-30 yd) closes to dummy at +3500 ms; forced-crit Bloodfang Bite 572551 at +5100 ms lands exactly 1 Physical crit (verified by spell_cast_count(807358) = 0 before, 1 after); attempt 807785 at +19080 ms (80 ms past 19000 ms, excluding a 900 ms cut): refused 67 without 704652, succeeds (0) with 704652. Reference search 2026-11-26: coa-history 807357 Relentless 19841 refreshes / 1671 dose applies across 14 logs; bindmysoul lists 704652; installed Spell.dbc governs."
+      "observe_source": "$/1000;807358s1 = 1000 ms (807358 Effect[0]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on 806212 chain -> 807785 Aortic Assault 20000 ms CD; pending_db_world/rev_20260920_51_bloodmage_physical_crit_procs.sql links 704652 -> 807357 -> 807358 on Physical crit). Dummy at 18 yd with relocate_before_trigger -10 yd puts priming 807785 at 20-28 yd (outside its 13.9 yd cone so 0 crits during priming); Lunge 500126 (DmgClass 0, 5-30 yd) closes to dummy at +3500 ms; forced-crit Bloodfang Bite 572551 at +5100 ms lands exactly 1 Physical crit (verified by spell_cast_count(807358) = 0 before, 1 after); attempt 807785 at +19040 ms nominal (3500 + 1600 + 13940 ms, so with ~27-30 ms 3-wait jitter it lands at ~19067-19070 ms, strictly inside (19000, 19100) ms, excluding a 900 ms cut): refused 67 without 704652, succeeds (0) with 704652. Reference search 2026-11-26: coa-history 807357 Relentless 19841 refreshes / 1671 dose applies across 14 logs; bindmysoul lists 704652; installed Spell.dbc governs."
     },
     {
       "spell": 704652,
@@ -3157,7 +3173,7 @@
           }
         ]
       },
-      "observe_source": "Upper bound companion to cd_cut_open: same single-crit isolation (priming 807785 at 20-28 yd hits 0 enemies; Lunge + Bloodfang Bite fires 807358 once, verified 0 -> 1); attempt 807785 at +18920 ms (80 ms before reduced 19000 ms CD, excluding a 1100 ms cut): refused 67 in both phases. Together cd_cut_open and cd_cut_bound bracket the 1000 ms cut inside +-10%. Reference search 2026-11-26: see cd_cut_open."
+      "observe_source": "Upper bound companion to cd_cut_open: same single-crit isolation (priming 807785 at 20-28 yd hits 0 enemies; Lunge + Bloodfang Bite fires 807358 once, verified 0 -> 1); attempt 807785 at +18920 ms nominal (3500 + 1600 + 13820 ms, ~18947-18950 ms with 3-wait jitter, strictly inside (18900, 19000) ms, excluding a 1100 ms cut): refused 67 in both phases. Together cd_cut_open and cd_cut_bound bracket the 1000 ms cut strictly inside +-10%. Reference search 2026-11-26: see cd_cut_open."
     },
     {
       "spell": 704652,
@@ -3251,11 +3267,11 @@
       },
       "before_expected": 500,
       "expected": 250,
-      "tolerance": 25,
+      "tolerance": 15,
       "wait_ms": 3400,
       "expire_ms": 11000,
       "void_on_cast_failure": true,
-      "observe_source": "5-stack scaling arm for 807357 Effect[0] (-10% per stack * 5 = -50%): five forced melee crits of Bloodfang Bite 572551 grant 5 stacks of 807357 after learning 704652, cutting Aortic Assault 806502 strike interval from 500 ms (control) to 250 ms (tolerance 25 ms excludes 500 ms and 450 ms). Reference search 2026-11-26: see cd_cut_open."
+      "observe_source": "5-stack scaling arm for 807357 Effect[0] (-10% per stack * 5 = -50%): five forced melee crits of Bloodfang Bite 572551 grant 5 stacks of 807357 after learning 704652, cutting Aortic Assault 806502 strike interval from 500 ms (control) to 250 ms (tolerance 15 ms = [235, 265] ms strictly excludes +-10% = 225/275 ms as well as 500 ms and 450 ms). Reference search 2026-11-26: see cd_cut_open."
     },
     {
       "spell": 704652,
@@ -3397,11 +3413,11 @@
         ],
         "expired": [
           24300,
-          25000
+          24900
         ]
       },
       "void_on_cast_failure": true,
-      "observe_source": "$/1000;807359s1 = 2000 ms (807359 Effect[0]=177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION +2000 ms on 800772 chain -> 802580 Taldaram's Torment, triggered from 807357 Effect[2] on 806502 strike; pending_db_world/rev_20260920_51_bloodmage_physical_crit_procs.sql). Taldaram's Torment 802580 (15000 ms base duration) cast at -3200 ms, Bloodfang Bite 572551 crit at -1600 ms grants 1 stack of 807357, Aortic Assault 807785 at t=0 delivers 6 strikes (+12000 ms -> total 27000 ms from cast = 23800 ms after 807785): present (1) in game_time [22800, 23400] ms and expired (0) in [24300, 25000] ms (within +-10% of the +12000 ms extension, excluding +10800 ms or +13200 ms). Reference search 2026-11-26: coa-history 802580 6516 refreshes in 17 logs, 807357 19841 refreshes in 14 logs."
+      "observe_source": "$/1000;807359s1 = 2000 ms (807359 Effect[0]=177 SPELL_EFFECT_ASCENSION_MODIFY_AURA_DURATION +2000 ms on 800772 chain -> 802580 Taldaram's Torment, triggered from 807357 Effect[2] on 806502 strike; pending_db_world/rev_20260920_51_bloodmage_physical_crit_procs.sql). Taldaram's Torment 802580 (15000 ms base duration) cast at -3200 ms, Bloodfang Bite 572551 crit at -1600 ms grants 1 stack of 807357, Aortic Assault 807785 at t=0 delivers 6 strikes (+12000 ms -> total 27000 ms from cast = 23800 ms after 807785): present (1) in game_time [22800, 23400] ms and expired (0) in [24300, 24900] ms (strictly inside +-10% of the +12000 ms extension, excluding +10800 ms / 22600 ms and +13200 ms / 24982 ms). Reference search 2026-11-26: coa-history 802580 6516 refreshes in 17 logs, 807357 19841 refreshes in 14 logs."
     },
     {
       "spell": 704652,
@@ -3780,19 +3796,32 @@
     },
     {
       "spell": 706683,
-      "name": "Festering Maw (Bite Wound heal triggers 706718 Lunge CD cut)",
+      "name": "Festering Maw (Bite Wound heal cuts Lunge CD by 1 sec per proc: opens at 22.15s after 3 procs)",
       "kind": "metric_delta",
-      "variant": "bite_wound_proc",
-      "label_suffix": "bite_wound_proc",
+      "variant": "lunge_cd_cut_open",
+      "label_suffix": "lunge_cd_cut_open",
       "quote": "Healing with Bite Wound now reduces the cooldown of Lunge by 1 sec.",
-      "trigger_spell": 706718,
+      "trigger_spell": 500126,
       "gate_spell": 706683,
+      "learn": [
+        704653
+      ],
       "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_trigger": {
+        "dx": -10
+      },
       "caster_health": [
         5000,
         10000
       ],
       "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
         [
           706654,
           1,
@@ -3800,17 +3829,24 @@
           "caster"
         ]
       ],
-      "attack_swings": 1,
-      "metric": "spell_cast_count",
+      "after_trigger_casts": [
+        {
+          "spell": 500126,
+          "target": "dummy",
+          "delay_ms": 22150,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
       "fields": {
-        "spell": 706718
+        "spell": 500126
       },
-      "before_expected": 0,
-      "expected": 2,
-      "after_at_least": 1,
-      "after_at_most": 4,
-      "wait_ms": 500,
-      "expire_ms": 500,
+      "before_expected": 67,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 100,
+      "expire_ms": 26000,
       "ally_arm": {
         "allies": 0,
         "arms": [
@@ -3823,14 +3859,114 @@
               "spell": 706654,
               "target": "caster"
             },
-            "before_expected": 2,
-            "expected": 4,
-            "tolerance": 2,
-            "source": "Bite Wound 706654 (AscensionBloodmageSecondary.cpp:107-148) heals caster on each auto-attack swing in both phases (1 dual-wield interval = ~2 heals before, ~4 cumulative after)"
+            "before_expected": 3,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Cruel Intent 704653 delivers 3 auto-attacks on Lunge 500126, triggering 3 Bite Wound 706654 heals per phase (3 before, 6 cumulative after)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 706718
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Festering Maw 706683 fires 706718 (-1000 ms Lunge CD) 0 times without 706683 and exactly 3 times with 706683 (-3000 ms total on 25000 ms CD -> 22000 ms)"
           }
         ]
       },
-      "observe_source": "Positive arm companion to no_bite_wound_control: with Bite Wound 706654 active on dummy (aura_ascension_bloodmage_bite_wound at AscensionBloodmageSecondary.cpp:107-148 heals caster for 50% of auto-attack damage, verified via spell_heal_count(706654)), 1 Eternal dual-wield swing interval fires 706718 (Effect[0]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on Lunge 500126) 0 times without 706683 and 1..4 times with 706683 learned. Combined with no_bite_wound_control (ALERT: fires ungated without Bite Wound), proves 706718 fires on melee swings rather than gated on Bite Wound heals. Reference search 2026-11-26: see no_bite_wound_control."
+      "observe_source": "Positive cooldown-cut arm for 706683 (706718 Effect[0]=165 SPELL_EFFECT_ASCENSION_MODIFY_COOLDOWN -1000 ms on Lunge 500126 25000 ms CD): Cruel Intent 704653 precondition triggers 3 melee auto-attacks on Lunge 500126 with Bite Wound 706654 active on dummy (3 Bite Wound heals per phase verified via spell_heal_count(706654) = 3 -> 6, and 3 casts of 706718 verified via spell_cast_count(706718) = 0 -> 3 -> -3000 ms total CD cut to 22000 ms). relocate_before_trigger -10 yd keeps Lunge inside 5-30 yd range before each cast; retry at +22150 ms nominal (~22160 ms with single-wait jitter, strictly inside (22000, 22300) ms, excluding -10% = 900 ms per proc / 2700 ms total): refused 67 without 706683, succeeds (0) with 706683. Combined with no_bite_wound_control (ALERT: fires ungated without Bite Wound), proves the -1000 ms Lunge CD cut works while its Bite Wound gate is broken. Reference search 2026-11-26: see no_bite_wound_control."
+    },
+    {
+      "spell": 706683,
+      "name": "Festering Maw (Lunge CD cut bounded: still refused at 21.80s after 3 procs)",
+      "kind": "metric_delta",
+      "variant": "lunge_cd_cut_bound",
+      "label_suffix": "lunge_cd_cut_bound",
+      "quote": "Healing with Bite Wound now reduces the cooldown of Lunge by 1 sec.",
+      "trigger_spell": 500126,
+      "gate_spell": 706683,
+      "learn": [
+        704653
+      ],
+      "target": "dummy",
+      "dummy_distance": 15,
+      "relocate_before_trigger": {
+        "dx": -10
+      },
+      "caster_health": [
+        5000,
+        10000
+      ],
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          706654,
+          1,
+          "dummy",
+          "caster"
+        ]
+      ],
+      "after_trigger_casts": [
+        {
+          "spell": 500126,
+          "target": "dummy",
+          "delay_ms": 21800,
+          "in_before": true,
+          "reset_cooldown": false
+        }
+      ],
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 500126
+      },
+      "before_expected": 67,
+      "expected": 67,
+      "tolerance": 0,
+      "wait_ms": 100,
+      "expire_ms": 26000,
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_heal_count",
+            "fields": {
+              "spell": 706654,
+              "target": "caster"
+            },
+            "before_expected": 3,
+            "expected": 6,
+            "tolerance": 0,
+            "source": "Cruel Intent 704653 delivers 3 auto-attacks on Lunge 500126, triggering 3 Bite Wound 706654 heals per phase (3 before, 6 cumulative after)"
+          },
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 706718
+            },
+            "before_expected": 0,
+            "expected": 3,
+            "tolerance": 0,
+            "source": "Festering Maw 706683 fires 706718 0 times before and exactly 3 times after (-3000 ms total)"
+          }
+        ]
+      },
+      "observe_source": "Upper bound companion to lunge_cd_cut_open: same 3-proc Bite Wound + Cruel Intent setup (spell_heal_count(706654) = 3 -> 6, spell_cast_count(706718) = 0 -> 3), retrying Lunge 500126 at +21800 ms nominal (~21810 ms with single-wait jitter, strictly inside (21700, 22000) ms, excluding +10% = 1100 ms per proc / 3300 ms total): refused 67 in both phases. Together lunge_cd_cut_open and lunge_cd_cut_bound bracket the -1000 ms per proc Lunge cooldown cut strictly inside +-10%. Reference search 2026-11-26: see no_bite_wound_control."
     },
     {
       "spell": 707622,
@@ -4009,10 +4145,10 @@
       },
       "before_expected": 0,
       "expected": 44,
-      "tolerance": 1,
+      "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "$s1 = 20 (504241 Effect[0] aura 237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER MiscValue 127 all schools, BasePoints 19 + DieSides 1 = 20%; Spell.dbc; Unit.cpp:10294). Under G-13, spell damage is a spell-power stat claim. At reference AP 223, int32(223 * 20 / 100) = +44 Shadow SP (school 5) after real learn vs 0 control. Reference search 2026-11-26: coa-history 504241 0 events (passive), 802469 Reave 2038 casts in 14 logs; bindmysoul/ascension-data lists 504241; installed Spell.dbc governs."
+      "observe_source": "$s1 = 20 (504241 Effect[0] aura 237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER MiscValue 127 all schools, BasePoints 19 + DieSides 1 = 20%; Spell.dbc; Unit.cpp:10294). Under G-13, spell damage is a spell-power stat claim. At reference AP 223, int32(223 * 20 / 100) = +44 Shadow SP (school 5, tolerance 0) after real learn vs 0 control. Reference search 2026-11-26: coa-history 504241 0 events (passive), 802469 Reave 2038 casts in 14 logs; bindmysoul/ascension-data lists 504241; installed Spell.dbc governs."
     },
     {
       "spell": 504241,
@@ -4038,10 +4174,10 @@
       },
       "before_expected": 0,
       "expected": 240,
-      "tolerance": 1,
+      "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "AP-scaling arm for 504241 Effect[0] (20% of AP): with fixture 35785 Attack Power 980, AP = 223 + 980 = 1203 -> int32(1203 * 20 / 100) = +240 Shadow SP (delta +196 over baseline +44 proves 20% AP scaling, excludes Rank 2 40% = 481). Reference search 2026-11-26: see sp_from_ap_base."
+      "observe_source": "AP-scaling arm for 504241 Effect[0] (20% of AP): with fixture 35785 Attack Power 980, AP = 223 + 980 = 1203 -> int32(1203 * 20 / 100) = +240 Shadow SP (tolerance 0; delta +196 over baseline +44 proves 20% AP scaling, excludes Rank 2 40% = 481). Reference search 2026-11-26: see sp_from_ap_base."
     },
     {
       "spell": 504241,
@@ -4105,10 +4241,10 @@
       },
       "before_expected": 0,
       "expected": 89,
-      "tolerance": 1,
+      "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "$s1 = 40 (504895 Effect[0] aura 237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER MiscValue 127 all schools, BasePoints 39 + DieSides 1 = 40%; Spell.dbc; Unit.cpp:10294). At reference AP 223, int32(223 * 40 / 100) = +89 Shadow SP (school 5) after real learn vs 0 control. Reference search 2026-11-26: coa-history 504895 0 events (passive), 802469 Reave 2038 casts in 14 logs; ascension-data lists 504895; installed Spell.dbc governs."
+      "observe_source": "$s1 = 40 (504895 Effect[0] aura 237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER MiscValue 127 all schools, BasePoints 39 + DieSides 1 = 40%; Spell.dbc; Unit.cpp:10294). At reference AP 223, int32(223 * 40 / 100) = +89 Shadow SP (school 5, tolerance 0) after real learn vs 0 control. Reference search 2026-11-26: coa-history 504895 0 events (passive), 802469 Reave 2038 casts in 14 logs; ascension-data lists 504895; installed Spell.dbc governs."
     },
     {
       "spell": 504895,
@@ -4134,10 +4270,10 @@
       },
       "before_expected": 0,
       "expected": 481,
-      "tolerance": 1,
+      "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "AP-scaling arm for 504895 Effect[0] (40% of AP): with fixture 35785 Attack Power 980, AP = 1203 -> int32(1203 * 40 / 100) = +481 Shadow SP (delta +392 over baseline +89 proves 40% AP scaling, excludes Rank 1 20% = 240). Reference search 2026-11-26: see sp_from_ap_base."
+      "observe_source": "AP-scaling arm for 504895 Effect[0] (40% of AP): with fixture 35785 Attack Power 980, AP = 1203 -> int32(1203 * 40 / 100) = +481 Shadow SP (tolerance 0; delta +392 over baseline +89 proves 40% AP scaling, excludes Rank 1 20% = 240). Reference search 2026-11-26: see sp_from_ap_base."
     },
     {
       "spell": 504895,

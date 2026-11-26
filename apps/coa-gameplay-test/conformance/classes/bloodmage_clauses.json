@@ -3673,7 +3673,8 @@
     "clause": "Healing with Bite Wound now reduces the cooldown of Lunge by 1 sec.",
     "labels": [
       "706683 behaviour_metric_delta no_bite_wound_control",
-      "706683 behaviour_metric_delta bite_wound_proc"
+      "706683 behaviour_metric_delta lunge_cd_cut_open",
+      "706683 behaviour_metric_delta lunge_cd_cut_bound"
     ],
     "kind": "claim"
   },
