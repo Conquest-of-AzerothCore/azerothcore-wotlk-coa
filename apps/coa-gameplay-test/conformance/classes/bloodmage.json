@@ -2467,18 +2467,19 @@
       "tolerance": 0,
       "wait_ms": 2500,
       "expire_ms": 10500,
-      "observe_source": "Unchained 92113 Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL (Amplitude 10000 ms) triggers Accursed 807528 (Effect[0] aura 313 SPELL_AURA_313, EffectSpellClassMask [538968064, 8192, 3223322880]; /srv/coa/server-data/dbc Spell.dbc); Unit::CanCastSpellWhileMoving (Unit.cpp:5069) checks HasAuraTypeWithAffectMask(SPELL_AURA_313, info). Bloodmoon Blast 501614 (level 60 rank, ExcludeCasterAuraSpell 802877 Mortal Form, SpellFamilyFlags[1] 8192 matching 807528, CastingTimeIndex 5 = 2000 ms, InterruptFlags 47 with bit 0x01 MOVEMENT) is cast while moving forward: refused with 51 (SPELL_FAILED_MOVING) before learning 92113 (0 hits), succeeds (0) and lands 1 hit within wait_ms 2500 (500 ms buffer past 2000 ms cast) after learning 92113 and waiting expire_ms 10500 (> 10000 ms periodic trigger amplitude so 807528 applies). Reference search 2026-11-26: coa-history spell 92113: 0 events in 186 logs (passive); coabuildhub spells_master_index.json and bindmysoul talents.normalized.json 92113 match verbatim."
+      "observe_source": "Unchained 92113 (Accursed / ChrSpecs 27 Tab 52 Ferocity) Effect[0] aura 23 SPELL_AURA_PERIODIC_TRIGGER_SPELL (Amplitude 10000 ms) triggers Accursed 807528 (Effect[0] aura 313 SPELL_AURA_313, EffectSpellClassMask [538968064, 8192, 3223322880]; /srv/coa/server-data/dbc Spell.dbc); Unit::CanCastSpellWhileMoving (Unit.cpp:5069) checks HasAuraTypeWithAffectMask(SPELL_AURA_313, info) and Spell::prepare (Spell.cpp:3659-3669) returns SPELL_FAILED_MOVING (51) when moving with InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT (0x01). G-23 subset split & CoA spec-exclusivity (.agents/docs/systems/ascension-talents.md:111, SpecializationOf / ApplyKnownEntriesUpload): a character holds at most one specialization + Class (Tab 87) + Baseline SkillLineAbility, so Sanguine/Blood (Tab 26) cast-time spells Keleseth's Calamity 561179 and Valanar's Vengeance 572795 cannot be co-owned with Accursed 92113. Across all 4 co-obtainable cast-time damaging Mortal Form spells (Baseline Bloodmoon Blast 501614, Class Scarlet Delirium 803688, Accursed Veinburst 504819, Accursed Hemoburst 572855), 807528 covers 4/4 (100%); Veinburst (InterruptFlags 10) and Hemoburst (46) lack bit 0x01, while Bloodmoon Blast (single-target direct nuke, 2000 ms, InterruptFlags 47, SpellFamilyFlags[1] 8192) and Scarlet Delirium (AoE periodic leech/fear, 2000 ms, InterruptFlags 47, SpellFamilyFlags[2] 256) are both gated by movement and tested in distinct shapes. Bloodmoon Blast 501614 fails with 51 before 92113 (0 hits) and succeeds (0) with 1 hit within wait_ms 2500 after 92113 (expire_ms 10500). Reference search 2026-11-26: coa-history 92113: 0 events (passive); coabuildhub and bindmysoul 92113 match verbatim."
     },
     {
       "spell": 92113,
-      "name": "Unchained (healing Mortal Form spell Dark Liturgy still refused while moving)",
+      "name": "Unchained (damaging AoE Mortal Form spell Scarlet Delirium castable while moving)",
       "kind": "metric_delta",
-      "variant": "moving_cast_healing_control",
-      "label_suffix": "moving_cast_healing_control",
+      "variant": "moving_cast_scarlet_delirium",
+      "label_suffix": "moving_cast_scarlet_delirium",
       "quote": "Your damaging Mortal Form spells can now be cast while moving.",
-      "trigger_spell": 572575,
+      "trigger_spell": 803688,
       "gate_spell": 92113,
-      "target": "caster",
+      "target": "dummy",
+      "dummy_distance": 3,
       "measure_actor": "caster",
       "caster_health": [
         10000,
@@ -2488,16 +2489,73 @@
       "moving_before_trigger": {
         "flag": "forward"
       },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "ally_arm": {
+        "allies": 0,
+        "arms": [
+          {
+            "actors": [
+              "caster"
+            ],
+            "metric": "spell_cast_count",
+            "fields": {
+              "spell": 803688
+            },
+            "before_expected": 0,
+            "expected": 1,
+            "tolerance": 0,
+            "source": "Confirms Scarlet Delirium 803688 completed its 2000 ms cast while moving forward after learning Unchained 92113."
+          }
+        ]
+      },
       "metric": "cast_failure",
       "fields": {
-        "spell": 572575
+        "spell": 803688
+      },
+      "before_expected": 51,
+      "expected": 0,
+      "tolerance": 0,
+      "wait_ms": 2500,
+      "expire_ms": 10500,
+      "observe_source": "Second co-obtainable damaging Mortal Form spell (different shape from single-target direct nuke Bloodmoon Blast 501614, G-23): Scarlet Delirium 803688 (Class Tab 87 801074 level-60 rank, co-obtainable with Accursed 92113; ExcludeCasterAuraSpell 802877, AoE TargetA 22 / TargetB 15 Effect[1] aura 53 SPELL_AURA_PERIODIC_LEECH, CastingTimeIndex 5 = 2000 ms, InterruptFlags 47 with bit 0x01 MOVEMENT, SpellFamilyFlags[2] 256 matching 807528 mask [538968064, 8192, 3223322880]; /srv/coa/server-data/dbc Spell.dbc). Cast while holding forward movement flag: refused with 51 (SPELL_FAILED_MOVING, 0 casts completed) before 92113; succeeds (0, 1 completed cast within wait_ms 2500) after learning 92113 and waiting expire_ms 10500. Reference search 2026-11-26: see moving_cast_bloodmoon."
+    },
+    {
+      "spell": 92113,
+      "name": "Unchained (healing Mortal Form spell Sanguine Mend still refused while moving)",
+      "kind": "metric_delta",
+      "variant": "moving_cast_healing_control",
+      "label_suffix": "moving_cast_healing_control",
+      "quote": "Your damaging Mortal Form spells can now be cast while moving.",
+      "trigger_spell": 504085,
+      "gate_spell": 92113,
+      "target": "caster",
+      "measure_actor": "caster",
+      "caster_health": [
+        10000,
+        10000
+      ],
+      "cast_power": 300,
+      "disable_regeneration": true,
+      "moving_before_trigger": {
+        "flag": "forward"
+      },
+      "metric": "cast_failure",
+      "fields": {
+        "spell": 504085
       },
       "before_expected": 51,
       "expected": 51,
       "tolerance": 0,
-      "wait_ms": 2500,
+      "wait_ms": 3000,
       "expire_ms": 10500,
-      "observe_source": "Scope control for 'damaging' on Unchained 92113: Dark Liturgy 572575 (level 56/60 rank, ExcludeCasterAuraSpell 802877 Mortal Form, CastingTimeIndex 5 = 2000 ms, InterruptFlags 41 with bit 0x01 MOVEMENT, SpellFamilyFlags[1] 2048 outside 807528 mask [538968064, 8192, 3223322880]) is a non-damaging Mortal Form heal. Cast while moving forward: refused with 51 (SPELL_FAILED_MOVING) both before and after learning 92113 (expire_ms 10500). Reference search 2026-11-26: see moving_cast_bloodmoon."
+      "observe_source": "Scope control for 'damaging' on Unchained 92113 using a co-obtainable Baseline healing Mortal Form spell: Sanguine Mend 504085 (Baseline SkillLineAbility, ExcludeCasterAuraSpell 802877, Effect[0] 10 HEAL, CastingTimeIndex 19 = 2500 ms, InterruptFlags 15 with bit 0x01 MOVEMENT, ManaCost 200 Rage, SpellFamilyFlags[0] 524288 outside 807528 mask [538968064, 8192, 3223322880]). Cast while moving forward: refused with 51 (SPELL_FAILED_MOVING) both before and after learning 92113 (expire_ms 10500). Reference search 2026-11-26: see moving_cast_bloodmoon."
     },
     {
       "spell": 504134,
@@ -2539,7 +2597,7 @@
       "tolerance": 0,
       "wait_ms": 500,
       "expire_ms": 1600,
-      "observe_source": "Crimson Tide 504134 has ExcludeCasterAuraSpell 802877 (rewritten from 524861 by AscensionBloodmage::RuntimeExcludeCasterAuraSpell, AscensionPooledVitality.h:36-40; /srv/coa/server-data/dbc Spell.dbc). Spell::CheckCast (Spell.cpp:5951-5952) returns SPELL_FAILED_CASTER_AURASTATE (22) when the caster holds 802877. Before phase (Mortal Form, no Cursed Form): cast succeeds (0). After phase: a real cast of Blood Curse 562720 applies 802877 via SyncCursedFormRequirement (AscensionBloodmageTalents.cpp:288-292), and 504134 is refused with 22. Reference search 2026-11-26: coa-history spell 504134: 415 SPELL_CAST_SUCCESS and 2712 SPELL_PERIODIC_DAMAGE events across 3 logs; coabuildhub spells_master_index.json 504282 (rank 1) states 'Requires Mortal Form' verbatim."
+      "observe_source": "Crimson Tide 504134 stores ExcludeCasterAuraSpell = 802877 directly in /srv/coa/server-data/dbc Spell.dbc (AscensionBloodmage::RuntimeExcludeCasterAuraSpell at AscensionPooledVitality.h:36-40 only rewrites 524861 -> 802877 and is a no-op for 504134). Spell::CheckCast (Spell.cpp:5951-5952) returns SPELL_FAILED_CASTER_AURASTATE (22) when the caster holds 802877. Before phase (Mortal Form, no Cursed Form): cast succeeds (0). After phase: a real cast of Blood Curse 562720 applies 802877 via SyncCursedFormRequirement (AscensionBloodmageTalents.cpp:288-292), and 504134 is refused with 22. Reference search 2026-11-26: coa-history spell 504134: 415 SPELL_CAST_SUCCESS and 2712 SPELL_PERIODIC_DAMAGE events across 3 logs; coabuildhub spells_master_index.json 504282 (rank 1) states 'Requires Mortal Form' verbatim."
     },
     {
       "spell": 504134,
@@ -3184,7 +3242,7 @@
       "wait_ms": 15500,
       "expire_ms": 500,
       "void_on_cast_failure": true,
-      "observe_source": "Taldaram's Torment 802580 tooltip states '@ext:Periodic damage dealt through this can critically strike.:ext@' and Spell.dbc sets AttributesEx7 = 58720258 (bit 0x2 SPELL_ATTR7_CAN_CRIT set). Under forced spell critical strike rating (force_crit spell, verified by direct_crit_control on Bloodbolt 578305) and 823764 spellpen, all 5 periodic ticks over 15000 ms (wait_ms 15500) must critically strike (0 before cast -> 5 critical ticks of 5 total). Precedent: Necromancer Flesh to Worms 501861 (ADR 0012). Reference search 2026-11-26: coa-history spell 802580: 1740 critical ticks out of 5087 SPELL_PERIODIC_DAMAGE events (34.2%) across 17 live logs."
+      "observe_source": "Taldaram's Torment 802580 tooltip states '@ext:Periodic damage dealt through this can critically strike.:ext@'. Under forced spell critical strike rating (force_crit spell, verified by direct_crit_control on Bloodbolt 578305) and 823764 spellpen, all 5 periodic ticks over 15000 ms (wait_ms 15500) must critically strike (0 before cast -> 5 critical ticks of 5 total). Precedent: Necromancer Flesh to Worms 501861 (ADR 0012). Reference search 2026-11-26: coa-history spell 802580: 1740 critical ticks out of 5087 SPELL_PERIODIC_DAMAGE events (34.2%) across 17 live logs."
     },
     {
       "spell": 802580,
@@ -3395,7 +3453,7 @@
       "wait_ms": 500,
       "expire_ms": 1600,
       "void_on_cast_failure": true,
-      "observe_source": "Battleweaver 801963 cap 8 (Spell.dbc 505366 StackAmount 8; AscensionBloodmageBloodShards.cpp:38 MAX_SHARDS = 8, :87 std::min<uint8>(MAX_SHARDS, Shards(player) + count)). Thirty-six casts of Bloodfang Bite 572551 (35 setup + 1 trigger, 525031 Cursed Form marker precondition fixture) roll roll_chance_i(50) 36 times: Binomial(36, 0.5) has P(X < 8) = 0.00011 (0.011% per run, 0.022% per pair <= 0.1%) and P(X >= 9) = 99.96%. Before learning 801963 (control): 0 stacks; after learning 801963: capped at exactly 8 stacks (never 9+). Reference search 2026-11-26: coabuildhub/bindmysoul 801963 state 'up to 8'."
+      "observe_source": "Battleweaver 801963 cap 8 (Spell.dbc 505366 StackAmount 8; AscensionBloodmageBloodShards.cpp:38 MAX_SHARDS = 8, :87 std::min<uint8>(MAX_SHARDS, Shards(player) + count)). Thirty-six casts of Bloodfang Bite 572551 (35 setup + 1 trigger, 525031 Cursed Form marker precondition fixture) roll roll_chance_i(50) 36 times: Binomial(36, 0.5) has P(X < 8) = 0.000156 (0.0156% per run, 0.0313% per pair <= 0.1%) and P(X >= 9) = 99.94%. Before learning 801963 (control): 0 stacks; after learning 801963: capped at exactly 8 stacks (never 9+). Reference search 2026-11-26: coabuildhub/bindmysoul 801963 state 'up to 8'."
     },
     {
       "spell": 801963,
@@ -3645,7 +3703,7 @@
       "tolerance": 0.05,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Adrenaline Boost 680675 Effect[0] aura 112 (AscensionBloodmageTalents.cpp:338-340 converts MiscValue 20000 -> ASCENSION_STATE_MASKED_CRIT, MiscValueB 23 AURA_STATE_HEALTH_ABOVE_75_PERCENT, BasePoints 19 + DieSides 1 = +20% = $s1, EffectSpellClassMask [16777216, 9437185, 67127433] matching Bloodfang Bite 572551 SpellFamilyFlags[1] 8388608, CasterAuraSpell 525031; Spell.dbc). spell_taken_crit_chance (Player::SpellDoneCritChance + Unit::SpellTakenCritChance -> GetAscensionConditionalCombatModifier, Unit.cpp:10659, 4404-4405) read before (dummy 99%, 680675 unlearned) and after a real learn of 680675 (dummy 76%, just above 75%): +20.0 points (Felsworn 802180 Fel Cannon precedent). Reference search 2026-11-26: coa-history 680675: 0 events (passive), 680678 Adrenaline: 491 SPELL_AURA_APPLIED in 3 logs; coabuildhub/bindmysoul 680675 match verbatim."
+      "observe_source": "Adrenaline Boost 680675 (Fleshweaver / ChrSpecs 25 Tab 93) Effect[0] aura 112 (AscensionBloodmageTalents.cpp:338-340 converts MiscValue 20000 -> ASCENSION_STATE_MASKED_CRIT, MiscValueB 23 AURA_STATE_HEALTH_ABOVE_75_PERCENT, BasePoints 19 + DieSides 1 = +20% = $s1, EffectSpellClassMask [16777216, 9437185, 67127433]; Spell.dbc). G-23 subset split & CoA spec-exclusivity (.agents/docs/systems/ascension-talents.md:111, SpecializationOf / ApplyKnownEntriesUpload): a character holds at most one specialization + Class (Tab 87) + Baseline SkillLineAbility, so Eternal/Packleader (Tab 53) Rotclaw 503484 and Accursed/Ferocity (Tab 52) Reave 802469 and Aortic Assault 807785 cannot be co-owned with Fleshweaver 680675. Across all 4 co-obtainable damaging Cursed Form abilities (Baseline Bloodfang Bite 572551, Claw Sweep 500444, Ravenous Strike 501679, Lunge 500126), 680675's mask covers 4/4 (100%); the only excluded Baseline Cursed Form ability is non-damaging taunt Bare Fangs 801957. Bloodfang Bite 572551 (single-target direct melee, SpellFamilyFlags[1] 8388608, CasterAuraSpell 525031) spell_taken_crit_chance (Unit.cpp:10659, 4404-4405) read before (dummy 99%, unlearned) and after learning 680675 (dummy 76%, just above 75%): +20.0 points (Felsworn 802180 precedent). Reference search 2026-11-26: coa-history 680675: 0 events (passive), 680678 Adrenaline: 491 SPELL_AURA_APPLIED in 3 logs; coabuildhub/bindmysoul 680675 match verbatim."
     },
     {
       "spell": 680675,
@@ -3677,12 +3735,12 @@
     },
     {
       "spell": 680675,
-      "name": "Adrenaline Boost (Night Hunter's Howl crit +20% above 75% health)",
+      "name": "Adrenaline Boost (Claw Sweep crit +20% above 75% health)",
       "kind": "metric_delta",
-      "variant": "crit_howl_above_75",
-      "label_suffix": "crit_howl_above_75",
+      "variant": "crit_claw_sweep_above_75",
+      "label_suffix": "crit_claw_sweep_above_75",
       "quote": "Increases the critical strike chance of abilities that require Cursed Form on enemies above 75% or below 35% health by $s1%.",
-      "trigger_spell": 501682,
+      "trigger_spell": 500444,
       "gate_spell": 680675,
       "target": "dummy",
       "cast_in_before": false,
@@ -3692,7 +3750,7 @@
       ],
       "metric": "spell_taken_crit_chance",
       "fields": {
-        "spell": 501682,
+        "spell": 500444,
         "target": "dummy"
       },
       "before_expected": 0,
@@ -3701,7 +3759,35 @@
       "tolerance": 0.05,
       "wait_ms": 500,
       "expire_ms": 500,
-      "observe_source": "Second Cursed Form ability check for Adrenaline Boost 680675 Effect[0] (G-23): Night Hunter's Howl 501682 (CasterAuraSpell 524861, SpellFamilyFlags[2] 2048 matching 680675 mask word 2 67127433, AoE Shadow melee-class ability). spell_taken_crit_chance read at dummy 76% HP after learning 680675 gains +20.0 points. Reference search 2026-11-26: see crit_bite_above_75."
+      "observe_source": "Second co-obtainable Fleshweaver/Baseline Cursed Form ability check (AoE swipe shape, G-23): Claw Sweep 500444 (Baseline SkillLineAbility, CasterAuraSpell 525031, TargetA 22 / TargetB 16 AoE Physical melee swipe, SpellFamilyFlags[2] 16384 matching 680675 mask word 2 67127433). spell_taken_crit_chance read at dummy 76% HP after learning 680675 gains +20.0 points. Reference search 2026-11-26: see crit_bite_above_75."
+    },
+    {
+      "spell": 680675,
+      "name": "Adrenaline Boost (Ravenous Strike crit +20% below 35% health)",
+      "kind": "metric_delta",
+      "variant": "crit_ravenous_below_35",
+      "label_suffix": "crit_ravenous_below_35",
+      "quote": "Increases the critical strike chance of abilities that require Cursed Form on enemies above 75% or below 35% health by $s1%.",
+      "trigger_spell": 501679,
+      "gate_spell": 680675,
+      "target": "dummy",
+      "cast_in_before": false,
+      "phase_target_health_pct": [
+        99,
+        34
+      ],
+      "metric": "spell_taken_crit_chance",
+      "fields": {
+        "spell": 501679,
+        "target": "dummy"
+      },
+      "before_expected": 0,
+      "expected": 20,
+      "expected_gain": 20,
+      "tolerance": 0.05,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "Third co-obtainable Fleshweaver/Baseline Cursed Form ability check (health-leech Rage-builder shape, G-23): Ravenous Strike 501679 (Baseline SkillLineAbility, CasterAuraSpell 525031, Effect[0] 9 HEALTH_LEECH Physical melee strike, SpellFamilyFlags[1] 1 matching 680675 mask word 1 9437185). spell_taken_crit_chance read at dummy 34% HP after learning 680675 gains +20.0 points. Reference search 2026-11-26: see crit_bite_above_75."
     },
     {
       "spell": 680675,
@@ -3864,7 +3950,7 @@
       "wait_ms": 500,
       "expire_ms": 2500,
       "void_on_cast_failure": true,
-      "observe_source": "Adrenaline Boost 680675 Effect[1] aura 42 triggers Adrenaline 680678 (Effect[0] aura 108 SPELLMOD_CASTING_TIME -100% on EffectSpellClassMask[1] 10240 = Bloodmoon Blast 8192 | Dark Liturgy 2048; StackAmount 1, Charges 1 via rev_1791369330435982571.sql; spell_proc ProcFlags 20 HitMask 2 Chance 50 via rev_20260920_70_bloodmage_adrenaline_boost_proc.sql). Setup cast Bloodfang Bite 572551 (DmgClass 2 melee ability, 525031 fixture does not set 802877 so Mortal Form spells stay castable) with force_crit melee and forced_roll 680675 triggers 680678 in the after phase only. Casting Bloodmoon Blast 501614 (2000 ms base cast) and reading at wait_ms 500: still casting (1, 0 hits) before 680675; finished immediately (0, 1 hit, 680678 consumed to 0) after learning 680675. Reference search 2026-11-26: coa-history 680678: 491 SPELL_AURA_APPLIED / 490 SPELL_AURA_REMOVED across 3 logs; coabuildhub/bindmysoul 680675 match verbatim."
+      "observe_source": "Adrenaline Boost 680675 Effect[1] aura 42 triggers Adrenaline 680678 (Effect[0] aura 108 SPELLMOD_CASTING_TIME -100% on EffectSpellClassMask[1] 10240 = Bloodmoon Blast 8192 | Dark Liturgy 2048; StackAmount 1, Charges 1 via rev_1791369330435982571.sql; spell_proc ProcFlags 20 HitMask 2 Chance 50 via rev_20260920_70_bloodmage_adrenaline_boost_proc.sql). Setup cast Bloodfang Bite 572551 (DmgClass 2 melee ability, 525031 fixture does not set 802877 so Mortal Form spells stay castable) with force_crit melee and forced_roll 680675 triggers 680678 in the after phase only. Casting Bloodmoon Blast 501614 (2000 ms base cast) and reading at wait_ms 500: still casting (1, 0 hits; finishes during expire_ms 2500 -> 1) before 680675; finished immediately (0, cumulative 2 hits = 1 before + 1 instant after, 680678 consumed to 0) after learning 680675. Reference search 2026-11-26: coa-history 680678: 491 SPELL_AURA_APPLIED / 490 SPELL_AURA_REMOVED across 3 logs; coabuildhub/bindmysoul 680675 match verbatim."
     },
     {
       "spell": 680675,

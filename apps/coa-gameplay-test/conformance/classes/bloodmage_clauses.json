@@ -92,6 +92,7 @@
     "clause": "Your damaging Mortal Form spells can now be cast while moving.",
     "labels": [
       "92113 behaviour_metric_delta moving_cast_bloodmoon",
+      "92113 behaviour_metric_delta moving_cast_scarlet_delirium",
       "92113 behaviour_metric_delta moving_cast_healing_control"
     ],
     "kind": "claim"
@@ -2289,7 +2290,8 @@
         "labels": [
           "680675 behaviour_metric_delta crit_bite_above_75",
           "680675 behaviour_metric_delta crit_bite_below_35",
-          "680675 behaviour_metric_delta crit_howl_above_75",
+          "680675 behaviour_metric_delta crit_claw_sweep_above_75",
+          "680675 behaviour_metric_delta crit_ravenous_below_35",
           "680675 behaviour_metric_delta crit_mortal_control"
         ]
       },
