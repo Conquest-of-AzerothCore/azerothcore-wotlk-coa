@@ -371,7 +371,6 @@ public: /* PlayerScript */
     void OnPlayerSpellChargeConsumed(Player* player, SpellInfo const* spellInfo, Spell* spell, uint32 recoveryMs, uint64 nowEpochMs);
     void OnPlayerSendSpellChargeStates(Player const* player);
     void OnPlayerSpellCooldownCalculated(Player* player, SpellInfo const* spellInfo, Spell* spell, uint32 recoveryMs);
-    void OnPlayerSpellCooldownsCleared(Player* player, uint32 spellId, uint32 maxRecoveryMs);
     void OnPlayerDelete(ObjectGuid guid, uint32 accountId);
     void OnPlayerFailedDelete(ObjectGuid guid, uint32 accountId);
     void OnPlayerBindToInstance(Player* player, Difficulty difficulty, uint32 mapid, bool permanent);

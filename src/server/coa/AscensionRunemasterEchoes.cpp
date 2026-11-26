@@ -351,7 +351,7 @@ class player_ascension_runemaster_echoes : public PlayerScript
 public:
     player_ascension_runemaster_echoes() : PlayerScript("player_ascension_runemaster_echoes",
         {PLAYERHOOK_ON_UPDATE, PLAYERHOOK_ON_LOGOUT, PLAYERHOOK_ON_AFTER_SPEC_SLOT_CHANGED, PLAYERHOOK_ON_NORMALIZE_ACTION_BUTTON_SPELL,
-         PLAYERHOOK_ON_SPELL_CHARGE_CONSUMED, PLAYERHOOK_ON_SPELL_COOLDOWN_CALCULATED, PLAYERHOOK_ON_SPELL_COOLDOWNS_CLEARED}) { }
+         PLAYERHOOK_ON_SPELL_CHARGE_CONSUMED, PLAYERHOOK_ON_SPELL_COOLDOWN_CALCULATED}) { }
 
     void OnPlayerUpdate(Player* player, uint32 diff) override
     {
@@ -454,29 +454,6 @@ public:
         ledger.LastRecovery = recovery;
         ledger.ProvisionalUntil = 0;
         Store(player, ledger);
-    }
-
-    void OnPlayerSpellCooldownsCleared(Player* player, uint32 spellId, uint32 maxRecoveryMs) override
-    {
-        if (!IsRunemaster(player) || !HasContract())
-            return;
-        if (spellId && spellId != ZENITH && spellId != ECHOES_ZENITH)
-            return;
-        SpellInfo const* base = sSpellMgr->GetSpellInfo(ZENITH);
-        SpellInfo const* canonical = sSpellMgr->GetSpellInfo(ECHOES_ZENITH);
-        if (maxRecoveryMs && (base->RecoveryTime >= maxRecoveryMs || canonical->ChargeRecoveryTime >= maxRecoveryMs))
-            return;
-        if (spellId)
-            player->GetSpellCooldownMap().erase(spellId == ZENITH ? ECHOES_ZENITH : ZENITH);
-        bool const hasLedger = player->FindPlayerSettings(LEDGER_KEY) != nullptr;
-        bool const hasPool = player->HasStoredSpellCharges(canonical);
-        if (!Owns(player, ZENITH) && !hasLedger && !hasPool)
-            return;
-        if (hasPool || hasLedger)
-            player->SetSpellCharges(canonical, {canonical->MaxCharges, 0, canonical->ChargeRecoveryTime});
-        if (hasLedger)
-            Store(player, Ledger{});
-        SendAscensionRunemasterEchoesCooldown(player);
     }
 };
 }

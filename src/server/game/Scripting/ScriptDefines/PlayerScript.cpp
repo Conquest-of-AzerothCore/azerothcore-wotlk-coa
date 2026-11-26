@@ -1153,11 +1153,6 @@ void ScriptMgr::OnPlayerSpellCooldownCalculated(Player* player, SpellInfo const*
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_SPELL_COOLDOWN_CALCULATED, script->OnPlayerSpellCooldownCalculated(player, spellInfo, spell, recoveryMs));
 }
 
-void ScriptMgr::OnPlayerSpellCooldownsCleared(Player* player, uint32 spellId, uint32 maxRecoveryMs)
-{
-    CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_SPELL_COOLDOWNS_CLEARED, script->OnPlayerSpellCooldownsCleared(player, spellId, maxRecoveryMs));
-}
-
 void ScriptMgr::OnPlayerLearnPetTalent(Player* player, Pet* pet, uint32 spellId)
 {
     CALL_ENABLED_HOOKS(PlayerScript, PLAYERHOOK_ON_LEARN_PET_TALENT, script->OnPlayerLearnPetTalent(player, pet, spellId));

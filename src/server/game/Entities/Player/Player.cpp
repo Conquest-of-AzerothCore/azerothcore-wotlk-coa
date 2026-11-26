@@ -3959,8 +3959,6 @@ void Player::RemoveSpellCooldown(uint32 spell_id, bool update /* = false */)
 
     if (update)
         SendClearCooldown(spell_id, this);
-
-    sScriptMgr->OnPlayerSpellCooldownsCleared(this, spell_id, 0);
 }
 
 void Player::RemoveCategoryCooldown(uint32 cat)
@@ -4002,8 +4000,6 @@ void Player::RemoveArenaSpellCooldowns(bool removeActivePetCooldowns)
                  && itr->second.maxduration < 10 * MINUTE * IN_MILLISECONDS) // xinef: dont clear cooldowns that have maxduration > 10 minutes (eg item cooldowns with no spell.dbc cooldown info)
             RemoveSpellCooldown(itr->first, true);
     }
-
-    sScriptMgr->OnPlayerSpellCooldownsCleared(this, 0, 10 * MINUTE * IN_MILLISECONDS);
 
     // pet cooldowns
     if (removeActivePetCooldowns)
@@ -4053,8 +4049,6 @@ void Player::RemoveAllSpellCooldown()
 
         m_spellCooldowns.clear();
     }
-
-    sScriptMgr->OnPlayerSpellCooldownsCleared(this, 0, 0);
 }
 
 void Player::_LoadSpellCooldowns(PreparedQueryResult result)
