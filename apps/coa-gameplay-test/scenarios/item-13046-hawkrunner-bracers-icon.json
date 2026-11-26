@@ -1,0 +1,76 @@
+{
+  "schema": 1,
+  "name": "Hawkrunner Bracers display 7183 reaches the client with a bracer inventory icon (#13046)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "Hawkrunner Bracers 521075 (and its 7 upgraded tiers, the only 8 items in Item.dbc using display 7183)",
+    "carry texture Leather_Horde_B_03Red_Bracer_AL with glove icon INV_Gauntlets_15 in ItemDisplayInfo.dbc.",
+    "Sibling ItemDisplayInfo rows with Leather_Horde_B_03Red_Bracer_AL (11684, 24602) use INV_Bracer_08.",
+    "The login stream sends display 7183 as SMSG_PATCH_ITEM_DISPLAY_INFO (opcode 2411) with INV_Bracer_08.",
+    "Expected before: the stream has no row 7183.",
+    "Socketless packet construction does not establish that the client replaces its existing row or renders the icon."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "hero",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the login stream sends display 7183",
+      "actor": "hero",
+      "metric": "server_packets",
+      "opcode": 2411,
+      "row": 7183,
+      "equals": 1,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "Display 7183 carries the INV_Bracer_08 icon",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2411,
+      "row": 7183,
+      "text": "INV_Bracer_08",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "Display 7183 no longer carries the INV_Gauntlets_15 glove icon",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2411,
+      "row": 7183,
+      "text": "INV_Gauntlets_15",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Display 7183 keeps its client bracer texture",
+      "actor": "hero",
+      "metric": "server_packet_contains",
+      "opcode": 2411,
+      "row": 7183,
+      "text": "Leather_Horde_B_03Red_Bracer_AL",
+      "equals": 1
+    }
+  ]
+}
