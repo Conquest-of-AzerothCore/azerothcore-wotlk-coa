@@ -41,11 +41,6 @@ bool InReach(Creature const* minion, Unit const* target)
     return !Ranged(minion->GetEntry()) ||
            (minion->IsWithinDistInMap(target, 40.0f) && minion->IsWithinLOSInMap(target));
 }
-bool MinionMayHunt(Creature const* minion, Player const* owner, Unit const* target)
-{
-    return minion && owner && target && owner->IsValidAttackTarget(target) &&
-           (!target->HasStealthAura() || minion->CanSeeOrDetect(target));
-}
 bool Follows(uint32 entry)
 {
     return !Stationary(entry) && entry != 523032 && entry != 542065;
@@ -457,7 +452,7 @@ bool Summon(Player* player, uint32 spell, Unit* target, Position const& position
                 }
                 else if (stationary)
                     unit->GetMotionMaster()->MoveIdle();
-                else if (target && MinionMayHunt(unit, player, target) && !player->HasAura(500983))
+                else if (target && player->IsValidAttackTarget(target) && !player->HasAura(500983))
                     unit->AI()->AttackStart(target);
                 else
                     unit->GetMotionMaster()->MoveFollow(player, distance, angle);
@@ -626,16 +621,11 @@ class npc_ascension_necromancer : public ScriptedAI
         if (key == 1)
             _command = value;
     }
-    bool CanAIAttack(Unit const* target) const override
-    {
-        Player const* player = Owner(me);
-        return player && MinionMayHunt(me, player, target);
-    }
     void AttackStart(Unit* target) override
     {
         Player* player = Owner(me);
         if (player && !Stationary(me->GetEntry()) && me->GetEntry() != 523032 && !Pacified(player) && target &&
-            MinionMayHunt(me, player, target) && InReach(me, target))
+            player->IsValidAttackTarget(target) && InReach(me, target))
             ScriptedAI::AttackStart(target);
     }
     void Regroup(Player* player)
@@ -655,11 +645,11 @@ class npc_ascension_necromancer : public ScriptedAI
     }
     Unit* BreathTarget(Player* player)
     {
-        if (Unit* victim = me->GetVictim(); victim && MinionMayHunt(me, player, victim))
+        if (Unit* victim = me->GetVictim(); victim && player->IsValidAttackTarget(victim))
             return victim;
         Unit* nearest = nullptr;
         for (auto const& [guid, reference] : player->GetCombatManager().GetPvECombatRefs())
-            if (Unit* enemy = reference->GetOther(player); MinionMayHunt(me, player, enemy) &&
+            if (Unit* enemy = reference->GetOther(player); player->IsValidAttackTarget(enemy) &&
                 me->IsWithinDistInMap(enemy, 40.0f) && me->IsWithinLOSInMap(enemy) &&
                 (!nearest || me->GetDistance(enemy) < me->GetDistance(nearest)))
                 nearest = enemy;
@@ -680,8 +670,7 @@ class npc_ascension_necromancer : public ScriptedAI
         Player* player = Owner(me);
         Unit* target = ObjectAccessor::GetUnit(*me, _target);
         if (action != 1 || !player || Pacified(player) || !target || !target->IsAlive() || !InReach(me, target) ||
-            !MinionMayHunt(me, player, target) || !Responds(me->GetEntry(), _command) ||
-            me->HasUnitState(UNIT_STATE_CONTROLLED))
+            !Responds(me->GetEntry(), _command) || me->HasUnitState(UNIT_STATE_CONTROLLED))
             return;
         AttackStart(target);
         if (_command == 500991)
@@ -803,11 +792,8 @@ class npc_ascension_necromancer : public ScriptedAI
                 {
                     me->SetReactState(REACT_PASSIVE);
                 }
-                if (Unit* victim = me->GetVictim(); victim && (!InReach(me, victim) || !MinionMayHunt(me, player, victim)))
-                {
+                if (Unit* victim = me->GetVictim(); victim && !InReach(me, victim))
                     me->AttackStop();
-                    me->InterruptNonMeleeSpells(false);
-                }
                 if (passive)
                 {
                     me->AttackStop();
@@ -820,20 +806,13 @@ class npc_ascension_necromancer : public ScriptedAI
                 else if (!me->GetVictim() && me->GetEntry() != 523032)
                 {
                     Unit* target = ObjectAccessor::GetUnit(*me, State(player).focus);
-                    if (!target || !MinionMayHunt(me, player, target) || !InReach(me, target))
+                    if (!target || !player->IsValidAttackTarget(target) || !InReach(me, target))
                         target = player->GetVictim();
-                    if (target && (!MinionMayHunt(me, player, target) || !InReach(me, target)))
-                        target = nullptr;
                     if (!target && !player->getAttackers().empty())
-                        for (Unit* attacker : player->getAttackers())
-                            if (MinionMayHunt(me, player, attacker) && InReach(me, attacker))
-                            {
-                                target = attacker;
-                                break;
-                            }
+                        target = *player->getAttackers().begin();
                     if (!target && player->HasAura(500982))
                         for (Unit* unit : Nearby(me, 20.0f))
-                            if (MinionMayHunt(me, player, unit) && player->IsHostileTo(unit) &&
+                            if (player->IsValidAttackTarget(unit) && player->IsHostileTo(unit) &&
                                 me->IsWithinLOSInMap(unit))
                             {
                                 target = unit;
@@ -864,8 +843,7 @@ class npc_ascension_necromancer : public ScriptedAI
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
                 {
-                    if (Unit* victim = me->GetVictim(); victim && InReach(me, victim) &&
-                        MinionMayHunt(me, player, victim))
+                    if (Unit* victim = me->GetVictim(); victim && InReach(me, victim))
                         if (uint32 ability = AttackSpell(me->GetEntry()))
                             if (!me->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
                                 Cast(me, victim, ability);
@@ -923,7 +901,7 @@ class npc_ascension_necromancer : public ScriptedAI
             if (event == 10)
             {
                 if (!Pacified(player) && !me->HasUnitState(UNIT_STATE_CONTROLLED))
-                    if (Unit* victim = me->GetVictim(); victim && MinionMayHunt(me, player, victim))
+                    if (Unit* victim = me->GetVictim(); victim && player->IsValidAttackTarget(victim))
                         Cast(me, victim, 704706);
                 _events.ScheduleEvent(10, 1s);
             }
@@ -947,7 +925,7 @@ class npc_ascension_necromancer : public ScriptedAI
         }
         if (me->GetEntry() == 523032 && !_exploded)
             for (Unit* nearby : Nearby(me, 2.5f))
-                if (MinionMayHunt(me, player, nearby))
+                if (player->IsValidAttackTarget(nearby))
                 {
                     _events.RescheduleEvent(3, 1ms);
                     break;

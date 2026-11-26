@@ -56,7 +56,6 @@ public:
 
     void KilledUnit(Unit* /*victim*/) override;
     void AttackStart(Unit* target) override;
-    bool CanAIAttack(Unit const* target) const override;
     void MovementInform(uint32 moveType, uint32 data) override;
     void OwnerAttackedBy(Unit* attacker) override;
     void OwnerAttacked(Unit* target) override;

@@ -438,11 +438,6 @@ void PetAI::KilledUnit(Unit* victim)
         HandleReturnMovement(); // Return
 }
 
-bool PetAI::CanAIAttack(Unit const* target) const
-{
-    return target && (!target->HasStealthAura() || me->CanSeeOrDetect(target));
-}
-
 void PetAI::AttackStart(Unit* target)
 {
     // Overrides Unit::AttackStart to correctly evaluate Pet states
@@ -739,9 +734,6 @@ bool PetAI::CanAttack(Unit* target, SpellInfo const* spellInfo)
         //me->InterruptNonMeleeSpells(false);
         return false;
     }
-
-    if (target->HasStealthAura() && !me->CanSeeOrDetect(target))
-        return false;
 
     // xinef: check unit states of pet
     if (me->HasUnitState(UNIT_STATE_LOST_CONTROL))
