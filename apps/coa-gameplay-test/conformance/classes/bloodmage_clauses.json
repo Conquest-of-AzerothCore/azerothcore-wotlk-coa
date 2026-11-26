@@ -1053,14 +1053,16 @@
   {
     "spell": 504710,
     "clause": "Transforms your Blood Curse into Accursed Form.",
-    "labels": [],
+    "labels": [
+      "504710 behaviour_metric_delta transform"
+    ],
     "kind": "claim"
   },
   {
     "spell": 504710,
     "clause": "Embrace your demonic curse for $d,",
     "labels": [
-      "504710 spell_duration 562572 #0"
+      "504710 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -1068,7 +1070,7 @@
     "spell": 504710,
     "clause": "entering an improved Cursed Form, increasing your attack power by $804699s2% of your Agility",
     "labels": [
-      "504710 effect_value 804699e1 #1"
+      "504710 behaviour_metric_delta agility_ap"
     ],
     "kind": "claim"
   },
@@ -1079,13 +1081,13 @@
       {
         "claim": "reduce all healing done to the target by $504553s1%",
         "labels": [
-          "504710 effect_value 504553e0 #2"
+          "504710 behaviour_metric_delta marrowbite_heal_cut"
         ]
       },
       {
         "claim": "for $504553d",
         "labels": [
-          "504710 spell_duration 504553 #3"
+          "504710 behaviour_metric_delta marrowbite_duration"
         ]
       }
     ],
@@ -1095,7 +1097,7 @@
     "spell": 504710,
     "clause": "stacking $504553u times.",
     "labels": [
-      "504710 max_stacks 504553 #4"
+      "504710 behaviour_metric_delta marrowbite_stacks"
     ],
     "kind": "claim"
   },
@@ -1103,7 +1105,10 @@
     "spell": 504710,
     "clause": "@ext:While in a Cursed Form you are treated as if you were a Demon, and you are protected from Polymorph spells. This ability goes on cooldown upon returning to Mortal Form.:ext@",
     "labels": [
-      "504710 effect_value #5"
+      "504710 behaviour_metric_delta demon_type",
+      "504710 behaviour_metric_delta immune_polymorph",
+      "504710 behaviour_metric_delta cooldown_after_expiry_blocked",
+      "504710 behaviour_metric_delta cooldown_after_expiry_ready"
     ],
     "kind": "claim"
   },
@@ -2077,21 +2082,26 @@
     "spell": 562720,
     "clause": "Ascend into a Cursed Form for $d, enabling the use of unique abilities, causing you to generate health and Rage over time.",
     "labels": [
-      "562720 aura_duration_ms #0"
+      "562720 behaviour_metric_delta duration",
+      "562720 behaviour_metric_delta periodic_rage",
+      "562720 behaviour_metric_delta periodic_heal"
     ],
     "kind": "claim"
   },
   {
     "spell": 562720,
     "clause": "This ability goes on cooldown upon returning to Mortal Form.",
-    "labels": [],
+    "labels": [
+      "562720 behaviour_metric_delta cooldown_after_expiry_blocked",
+      "562720 behaviour_metric_delta cooldown_after_expiry_ready"
+    ],
     "kind": "claim"
   },
   {
     "spell": 562720,
     "clause": "@ext:While in a Cursed Form you are treated as if you were a Demon.:ext@",
     "labels": [
-      "562720 effect_value #1"
+      "562720 behaviour_metric_delta demon_type"
     ],
     "kind": "claim"
   },
@@ -2372,7 +2382,7 @@
     "spell": 572855,
     "clause": "$?a802877[][]Requires Mortal Form",
     "labels": [
-      "572855 effect_value #4"
+      "572855 behaviour_metric_delta mortal_form_gate"
     ],
     "kind": "claim"
   },
@@ -2380,14 +2390,17 @@
     "spell": 572855,
     "clause": "Unleash a powerful burst of blood at an enemy, dealing ${$m1+0+$AP*.65+$SP*.5} Shadow damage.",
     "labels": [
-      "572855 effect_value e0 #0"
+      "572855 behaviour_metric_delta damage_ap",
+      "572855 behaviour_metric_delta damage_sp"
     ],
     "kind": "claim"
   },
   {
     "spell": 572855,
     "clause": "This ability is guaranteed to critically strike against bleeding targets.",
-    "labels": [],
+    "labels": [
+      "572855 behaviour_metric_delta bleed_crit"
+    ],
     "kind": "claim"
   },
   {
@@ -2397,13 +2410,14 @@
       {
         "claim": "Extends the duration of your next Cursed Form by $/1000;572856s1 sec",
         "labels": [
-          "572855 effect_value 572856e0 #1"
+          "572855 behaviour_metric_delta extend_1stack_held",
+          "572855 behaviour_metric_delta extend_1stack_gone"
         ]
       },
       {
         "claim": "for $572856d",
         "labels": [
-          "572855 spell_duration 572856 #2"
+          "572855 behaviour_metric_delta hemoturgy_duration"
         ]
       }
     ],
@@ -2413,7 +2427,9 @@
     "spell": 572855,
     "clause": "stacking $572856u times.",
     "labels": [
-      "572855 max_stacks 572856 #3"
+      "572855 behaviour_metric_delta hemoturgy_stack_cap",
+      "572855 behaviour_metric_delta extend_2stacks_held",
+      "572855 behaviour_metric_delta extend_2stacks_gone"
     ],
     "kind": "claim"
   },
@@ -2509,7 +2525,8 @@
     "spell": 680661,
     "clause": "Removes the health cost of Accursed Form and entering it now instantly restores $680662s1% of your maximum health.",
     "labels": [
-      "680661 effect_value 680662e0 #0"
+      "680661 behaviour_metric_delta cost_removed",
+      "680661 behaviour_metric_delta heal_pct"
     ],
     "kind": "claim"
   },
@@ -3467,21 +3484,27 @@
     "spell": 704644,
     "clause": "Increases spell haste of all party and raid members by $s1%.",
     "labels": [
-      "704644 effect_value e0 #0"
+      "704644 behaviour_party_stat_ratio party_haste"
     ],
     "kind": "claim"
   },
   {
     "spell": 704644,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
-    "kind": "claim"
+    "labels": [
+      "704644 behaviour_metric_delta no_stack",
+      "704644 behaviour_metric_delta no_stack_aura"
+    ],
+    "kind": "claim",
+    "promise_of": "Increases spell haste of all party and raid members by $s1%."
   },
   {
     "spell": 704644,
     "clause": "In addition, while a Cursed Form is active, your global cooldowns are reduced by $804845s3%.",
     "labels": [
-      "704644 effect_value 804845e2 #1"
+      "704644 behaviour_metric_delta gcd_reduced_ready",
+      "704644 behaviour_metric_delta gcd_reduced_early_blocked",
+      "704644 behaviour_metric_delta gcd_mortal_control"
     ],
     "kind": "claim"
   },
@@ -5137,7 +5160,9 @@
     "spell": 804223,
     "clause": "While in Accursed Form, you now deal $s1% increased damage to targets below 35% maximum health.",
     "labels": [
-      "804223 effect_value e0 #0"
+      "804223 behaviour_metric_delta damage_below_35",
+      "804223 behaviour_metric_delta damage_above_35_control",
+      "804223 behaviour_metric_delta damage_no_accursed_control"
     ],
     "kind": "claim"
   },
@@ -5145,7 +5170,8 @@
     "spell": 804223,
     "clause": "Dealing direct damage to enemies below 35% maximum health now leeches health equal to $s2% of the damage dealt.",
     "labels": [
-      "804223 effect_value e1 #1"
+      "804223 behaviour_metric_delta leech_below_35",
+      "804223 behaviour_metric_delta leech_above_35_control"
     ],
     "kind": "claim"
   },
@@ -5389,7 +5415,7 @@
     "spell": 804851,
     "clause": "Upon exiting Accursed Form, you gain $504264s1% movement speed",
     "labels": [
-      "804851 effect_value 504264e0 #0"
+      "804851 behaviour_metric_delta move_speed"
     ],
     "kind": "claim"
   },
@@ -5397,7 +5423,8 @@
     "spell": 804851,
     "clause": "and spell haste for $504264d.",
     "labels": [
-      "804851 spell_duration 504264 #1"
+      "804851 behaviour_metric_delta spell_haste",
+      "804851 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
@@ -5888,7 +5915,8 @@
     "spell": 807487,
     "clause": "When you activate a Cursed Form you now charge to your target if they are within $804854R yds.",
     "labels": [
-      "807487 effect_value #2"
+      "807487 behaviour_metric_delta charge_in_range",
+      "807487 behaviour_metric_delta charge_out_of_range"
     ],
     "kind": "claim"
   },
@@ -5896,7 +5924,7 @@
     "spell": 807487,
     "clause": "If they're an enemy you root them for $804854d.",
     "labels": [
-      "807487 spell_duration 804854 #0"
+      "807487 behaviour_metric_delta root_duration"
     ],
     "kind": "claim"
   },
@@ -5904,7 +5932,10 @@
     "spell": 807487,
     "clause": "Upon expiration, your Accursed Form can be reactivated to cause you to erupt in a burst of blood magic, leeching ${$681310m1+0+$sps*.33+$AP*.125} health from nearby enemies and teleporting you backwards.",
     "labels": [
-      "807487 effect_value 681310e0 #1"
+      "807487 behaviour_metric_delta bloodgale_arm",
+      "807487 behaviour_metric_delta bloodgale_leech_sp",
+      "807487 behaviour_metric_delta bloodgale_leech_ap",
+      "807487 behaviour_metric_delta bloodgale_teleport_back"
     ],
     "kind": "claim"
   },
@@ -6001,7 +6032,11 @@
   {
     "spell": 807788,
     "clause": "For the first 5 sec after activating a Cursed Form, your Bloodfang Bite is now guaranteed to critically strike.",
-    "labels": [],
+    "labels": [
+      "807788 behaviour_metric_delta window_duration",
+      "807788 behaviour_metric_delta crit_in_window",
+      "807788 behaviour_metric_delta crit_after_window"
+    ],
     "kind": "claim"
   },
   {
