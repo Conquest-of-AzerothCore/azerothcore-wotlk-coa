@@ -228,7 +228,909 @@
   "talent_modifiers": [],
   "rotation": [],
   "stack": [],
-  "behaviours": [],
+  "behaviours": [
+    {
+      "spell": 504116,
+      "name": "Fang Over Fang (20% chance on Bloodfang Bite cast to reset Reave)",
+      "kind": "cooldown_reset_rate",
+      "label_suffix": "reset_rate",
+      "quote": "Casting Bloodfang Bite now has a $h% chance to reset the cooldown of Reave.",
+      "talent": 504116,
+      "trigger_spell": 572551,
+      "reset_spell": 802469,
+      "chance_pct": 20,
+      "trial_casts": true,
+      "cast_power": 300,
+      "attempt_auras": [
+        {
+          "spell": 525031,
+          "stacks": 1,
+          "source": "precondition fixture: Bloodfang Bite 572551 requires CasterAuraSpell 525031 Cursed Form (Spell.dbc)"
+        }
+      ],
+      "control_casts": 50,
+      "casts": 2000,
+      "parts": 10,
+      "cast_wait_ms": 1600,
+      "residual_target": 0.001,
+      "min_detectable": 4,
+      "observe_source": "$h = 20 (504116 Spell.dbc ProcChance 20, Effect[0] aura 42 SPELL_AURA_PROC_TRIGGER_SPELL -> 504117 Effect[0] 195 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN MiscValue 800490 Reave, MiscValueB 1 resetCategory; pending_db_world/rev_20260920_57_bloodmage_fang_over_fang_proc.sql spell_proc scopes 504116 to Bloodfang Bite SpellFamilyMask1 8388608 at SpellPhaseMask 1 PROC_SPELL_PHASE_CAST with Chance 0 deferring to DBC ProcChance 20). Player::RemoveCategoryCooldown(752) calls RemoveSpellCooldown(rank, true) sending SMSG_CLEAR_COOLDOWN 0x1DE for 802469. Trigger: Bloodfang Bite 572551 (level 60 rank, 300 Rage, instant, 1500 ms GCD, CasterAuraSpell 525031). Control: 500 casts (50 x 10 parts) without 504116 (0 resets). Treatment: 20000 casts (2000 x 10 parts >= 19386 needed for residual_target 0.001 per pair and min_detectable 4 pts, G-20 +-2 pt band around 20%). Reference search 2026-11-26: coa-history 504116/504117: 0 events in 186 logs (passive/reset); coabuildhub spells_master_index.json 504116 matches verbatim."
+    },
+    {
+      "spell": 504116,
+      "name": "Fang Over Fang (Reave 15s cooldown cleared and castable)",
+      "kind": "cost_gate",
+      "label_suffix": "reave_reset",
+      "quote": "Casting Bloodfang Bite now has a $h% chance to reset the cooldown of Reave.",
+      "gated_spell": 802469,
+      "resource": "cooldown",
+      "reduction": 15000,
+      "resets": true,
+      "after_casts": [
+        [
+          572551,
+          "dummy"
+        ]
+      ],
+      "after_wait_ms": 2000,
+      "margin_ms": 2000,
+      "forced_roll": 504116,
+      "target": "dummy",
+      "observe_source": "504116 Effect[0] triggers 504117 SPELL_EFFECT_ASCENSION_RESET_COOLDOWN (MiscValue 800490, MiscValueB 1), clearing Reave category 752 cooldown (15000 ms on level 58/60 rank 802469, Spell.dbc). With forced_roll 504116 (SPELLMOD_CHANCE_OF_SUCCESS +1000% mutant, removed and read 0 at end), primes Reave 802469, casts Bloodfang Bite 572551 at +2000 ms, and attempts Reave 802469 at +4000 ms (past Bloodfang Bite's 1500 ms GCD, 11 s before Reave's 15 s cooldown): refused SPELL_FAILED_NOT_READY without 504116 (control), succeeds with 504116. Reference search 2026-11-26: coa-history 504116/504117: 0 events in 186 logs; coabuildhub spells_master_index.json 504116 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (non-crit Shadow damage generates 1 Blood Shard)",
+      "kind": "metric_delta",
+      "variant": "shadow_one",
+      "label_suffix": "shadow_one",
+      "quote": "Shadow Damage dealt now generates 1 Blood Shard,",
+      "trigger_spell": 578305,
+      "gate_spell": 804849,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 505366
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "804849 Blood Shards (AscensionBloodmageBloodShards.cpp:229-234): Shadow damage hit (SchoolMask & 32) calls GenerateShards(player, critical ? 2 : 1), updating counter aura 505366 (StackAmount 8, Spell.dbc). Bloodbolt 578305 (SchoolMask 32 Shadow, level 60 rank, 300 Rage, instant, speed 30 -> 100 ms flight at 3 yd) with 823764 beeg spellpen and 16255 set to -100% crit guarantees a non-crit Shadow hit: 0 stacks before learning 804849 (control), 1 stack after. Reference search 2026-11-26: coa-history 504115 Blood Shard: 65560 SPELL_DAMAGE hits across 18 logs (804849/505366 passive/counter 0 events); coabuildhub spells_master_index.json 804849 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (Physical damage generates 0 Blood Shards)",
+      "kind": "metric_delta",
+      "variant": "nonshadow_zero",
+      "label_suffix": "nonshadow_zero",
+      "quote": "Shadow Damage dealt now generates 1 Blood Shard,",
+      "trigger_spell": 572551,
+      "gate_spell": 804849,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          525031,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 505366
+      },
+      "before_expected": 0,
+      "expected": 0,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "School condition control for 804849 Blood Shards: Bloodfang Bite 572551 (SchoolMask 1 Physical, CasterAuraSpell 525031 precondition fixture) with 16255 -100% crit generates 0 stacks of 505366 both before and after learning 804849 (AscensionBloodmageBloodShards.cpp:229-230 checks SchoolMask & SPELL_SCHOOL_MASK_SHADOW). Reference search 2026-11-26: coa-history 504115 has 65560 hits in 18 logs; coabuildhub 804849 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (critical Shadow damage generates 2 Blood Shards)",
+      "kind": "metric_delta",
+      "variant": "shadow_crit_two",
+      "label_suffix": "shadow_crit_two",
+      "quote": "plus 1 additional if it critically strikes,",
+      "trigger_spell": 578305,
+      "gate_spell": 804849,
+      "target": "dummy",
+      "cast_power": 300,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 505366
+      },
+      "before_expected": 0,
+      "expected": 2,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "804849 Blood Shards (AscensionBloodmageBloodShards.cpp:234): GenerateShards(player, critical ? 2 : 1). Bloodbolt 578305 (SchoolMask 32 Shadow) with force_crit spell and 823764 beeg spellpen guarantees a Shadow critical strike: 0 stacks of 505366 before learning 804849 (control), 2 stacks after (1 base + 1 crit). Reference search 2026-11-26: coa-history 504115 has 65560 hits in 18 logs; coabuildhub 804849 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (lasts 10 min / 600000 ms)",
+      "kind": "metric_delta",
+      "variant": "duration",
+      "label_suffix": "duration",
+      "quote": "for $505349d,",
+      "trigger_spell": 578305,
+      "gate_spell": 804849,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura",
+      "fields": {
+        "spell": 505349
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 580000,
+      "expiry_wait_ms": 40000,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          575000,
+          585000
+        ],
+        "expired": [
+          615000,
+          625000
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$505349d = 600000 ms (Spell.dbc 505349 DurationIndex 6 = 600000 ms, 10 min; AscensionBloodmageBloodShards.cpp:101-111 syncs counter 505366 to 505349 and clears all shards on 505349 expiry). Uncast before phase reads 0 (control). One Bloodbolt 578305 cast generates Blood Shards: 505349 reads present (1) at 580000 ms (game_time [575000, 585000], above 540000 ms = -10%) and expired (0) at 620000 ms (game_time [615000, 625000], below 660000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 505349: 0 events in 186 logs (504115: 65560 hits); coabuildhub 804849 says 'for 10 min'."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (stacks cap at 8)",
+      "kind": "metric_delta",
+      "variant": "cap_eight",
+      "label_suffix": "cap_eight",
+      "quote": "up to 8.",
+      "trigger_spell": 578305,
+      "gate_spell": 804849,
+      "target": "dummy",
+      "cast_power": 300,
+      "force_crit": "spell",
+      "setup_casts": [
+        578305,
+        578305,
+        578305,
+        578305,
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 505366
+      },
+      "before_expected": 0,
+      "expected": 8,
+      "wait_ms": 500,
+      "expire_ms": 1600,
+      "void_on_cast_failure": true,
+      "observe_source": "804849 Blood Shards cap 8 (Spell.dbc 505366 StackAmount 8; AscensionBloodmageBloodShards.cpp:38 MAX_SHARDS = 8, :87 std::min<uint8>(MAX_SHARDS, Shards(player) + count)). Six forced-crit Bloodbolt 578305 casts (5 setup + 1 trigger, attempting 12 shards total): 0 stacks before learning 804849 (control), capped at exactly 8 stacks after. Reference search 2026-11-26: coa-history 504115: 65560 hits in 18 logs; coabuildhub 804849 says 'up to 8'."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (Veinburst expends all stacks to 0)",
+      "kind": "metric_delta",
+      "variant": "veinburst_expends",
+      "label_suffix": "veinburst_expends",
+      "quote": "Dealing damage with Veinburst will now expend all stacks of Blood Shards, each dealing ${$504115m1+$AP*0.05+$SP*.1} Spellshadow damage to your target.",
+      "trigger_spell": 504819,
+      "gate_spell": 504819,
+      "learn": [
+        804849
+      ],
+      "cast_in_before": false,
+      "setup_in_before": true,
+      "setup_casts": [
+        578305,
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "aura_stacks",
+      "fields": {
+        "spell": 505366
+      },
+      "before_expected": 2,
+      "expected": 0,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "804849 Blood Shards (AscensionBloodmageBloodShards.cpp:200-220): Veinburst (504819, rank 8 level 58/60 of 504260) hitting the dummy calls ClearShards(player) and returns before GenerateShards. Before phase (no Veinburst cast): 2 non-crit Bloodbolt 578305 casts build 2 stacks of 505366. After phase: 2 more Bloodbolts + Veinburst 504819 expends all stacks to 0. Reference search 2026-11-26: coa-history 504115: 65560 hits in 18 logs; coabuildhub 804849 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (Veinburst launches 1 Spellshadow hit per expended stack)",
+      "kind": "metric_delta",
+      "variant": "veinburst_shard_count",
+      "label_suffix": "veinburst_shard_count",
+      "quote": "Dealing damage with Veinburst will now expend all stacks of Blood Shards, each dealing ${$504115m1+$AP*0.05+$SP*.1} Spellshadow damage to your target.",
+      "trigger_spell": 504819,
+      "gate_spell": 804849,
+      "setup_casts": [
+        578305,
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 300,
+      "force_crit": "spell",
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "metric": "spell_damage_count",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 4,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "804849 Blood Shards (AscensionBloodmageBloodShards.cpp:204-219): Veinburst 504819 launches one 504115 Blood Shard (Spell.dbc SchoolMask 96 = 32 Shadow | 64 Arcane = Spellshadow) per stack, spaced 100 ms apart plus 100 ms missile flight at 3 yd. Two forced-crit Bloodbolt 578305 casts build 4 shards when 804849 is learned (0 before). Veinburst 504819 produces 0 hits of 504115 (school_mask 96) before learning 804849 and exactly 4 Spellshadow hits after. Reference search 2026-11-26: coa-history 504115: 65560 SPELL_DAMAGE hits in 18 logs; coabuildhub 804849 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (1 shard Spellshadow damage at reference stats: 29)",
+      "kind": "metric_delta",
+      "variant": "veinburst_damage_base",
+      "label_suffix": "veinburst_damage_base",
+      "quote": "Dealing damage with Veinburst will now expend all stacks of Blood Shards, each dealing ${$504115m1+$AP*0.05+$SP*.1} Spellshadow damage to your target.",
+      "trigger_spell": 504819,
+      "gate_spell": 804849,
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 29,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "Tooltip formula ${$504115m1+$AP*0.05+$SP*.1}: Spell.dbc 504115 Effect[0] BasePoints 17 + DieSides 1 = 18 ($504115m1), SchoolMask 96 (Spellshadow); bloodmage.json reference_stats AP = 223, Shadow SP = 0 -> 18 + 223*0.05 + 0 = 29.15 -> int32 29 (G-27 truncation, AscensionBloodmageBloodShards.cpp:136-139). One non-crit Bloodbolt 578305 (16255 -100% crit, 823764 beeg spellpen) generates 1 shard; Veinburst 504819 deals 0 without 804849 and 29 Spellshadow damage with it. Reference search 2026-11-26: coa-history 504115: 65560 hits in 18 logs; coabuildhub 804849 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (1 shard Spellshadow damage at +20000 SP: 2029)",
+      "kind": "metric_delta",
+      "variant": "veinburst_damage_sp",
+      "label_suffix": "veinburst_damage_sp",
+      "quote": "Dealing damage with Veinburst will now expend all stacks of Blood Shards, each dealing ${$504115m1+$AP*0.05+$SP*.1} Spellshadow damage to your target.",
+      "trigger_spell": 504819,
+      "gate_spell": 804849,
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 300,
+      "player_spell_power": {
+        "amount": 20000,
+        "hit_arm": true
+      },
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 2029,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "SP scaling arm for ${$504115m1+$AP*0.05+$SP*.1}: 504115 $m1 = 18, AP = 223, Shadow SP = 20000 -> 18 + 223*0.05 + 20000*0.1 = 2029.15 -> int32 2029 (delta +2000 over base 29 proves 0.10 SP coefficient). One non-crit Bloodbolt 578305 (16255 -100% crit, 823764 beeg spellpen) generates 1 shard; Veinburst 504819 deals 0 without 804849 and 2029 Spellshadow damage with it. Reference search 2026-11-26: coa-history 504115: 65560 hits in 18 logs; coabuildhub 804849 matches verbatim."
+    },
+    {
+      "spell": 804849,
+      "name": "Blood Shards (1 shard Spellshadow damage at +980 AP: 78)",
+      "kind": "metric_delta",
+      "variant": "veinburst_damage_ap",
+      "label_suffix": "veinburst_damage_ap",
+      "quote": "Dealing damage with Veinburst will now expend all stacks of Blood Shards, each dealing ${$504115m1+$AP*0.05+$SP*.1} Spellshadow damage to your target.",
+      "trigger_spell": 504819,
+      "gate_spell": 804849,
+      "setup_casts": [
+        578305
+      ],
+      "setup_wait_ms": 1600,
+      "target": "dummy",
+      "cast_power": 300,
+      "phase_auras": [
+        [
+          823764,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          16255,
+          1,
+          "caster",
+          "caster"
+        ],
+        [
+          35785,
+          1,
+          "caster",
+          "caster"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "spell_damage_total",
+      "fields": {
+        "spell": 504115,
+        "target": "dummy",
+        "school_mask": 96
+      },
+      "before_expected": 0,
+      "expected": 78,
+      "wait_ms": 2500,
+      "expire_ms": 500,
+      "void_on_cast_failure": true,
+      "observe_source": "AP scaling arm for ${$504115m1+$AP*0.05+$SP*.1}: 504115 $m1 = 18, AP = 223 + 980 (fixture aura 35785 Attack Power 980) = 1203, Shadow SP = 0 -> 18 + 1203*0.05 = 78.15 -> int32 78 (delta +49 over base 29 proves 0.05 AP coefficient). One non-crit Bloodbolt 578305 (16255 -100% crit, 823764 beeg spellpen) generates 1 shard; Veinburst 504819 deals 0 without 804849 and 78 Spellshadow damage with it. Reference search 2026-11-26: coa-history 504115: 65560 hits in 18 logs; coabuildhub 804849 matches verbatim."
+    },
+    {
+      "spell": 680696,
+      "name": "Gruesome Rituals (+9% Shadow damage at 9 stacks of Pooled Vitality)",
+      "kind": "hit_ratio",
+      "variant": "nine_stacks_shadow",
+      "label_suffix": "nine_stacks_shadow",
+      "quote": "Your damage dealt is now increased by $s1% for each stack of Pooled Vitality.",
+      "expected": 1.09,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            680687,
+            9
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680696
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            680687,
+            9
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 1 (680696 Effect[0] aura 107 SPELL_AURA_ADD_FLAT_MODIFIER, MiscValue 12 SPELLMOD_EFFECT2, BasePoints 0 + DieSides 1 = +1, EffectSpellClassMask[0] 536870912 matching Pooled Vitality 680687 Effect[1] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE MiscValue 127 all schools, BasePoints -1 + 1 = 0% base -> +1% per stack; Spell.dbc). Precondition fixture: Pooled Vitality 680687 set to 9 stacks (below 10-stack Empowered threshold, reapplied after learning 680696 so CalcValue applies SPELLMOD_EFFECT2). Bloodbolt 578305 at +20000 SP with 823764 beeg spellpen measures +9% (+-2 pt band excludes 0%, +5%, +18%). Reference search 2026-11-26: coa-history 680696/680687: 0 events in 186 logs; coabuildhub spells_master_index.json 680696 matches verbatim."
+    },
+    {
+      "spell": 680696,
+      "name": "Gruesome Rituals (+5% Shadow damage at 5 stacks of Pooled Vitality)",
+      "kind": "hit_ratio",
+      "variant": "five_stacks_shadow",
+      "label_suffix": "five_stacks_shadow",
+      "quote": "Your damage dealt is now increased by $s1% for each stack of Pooled Vitality.",
+      "expected": 1.05,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            680687,
+            5
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680696
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ],
+          [
+            680687,
+            5
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Per-stack linearity check for 680696 Gruesome Rituals (+1% per stack of Pooled Vitality 680687): at 5 stacks of Pooled Vitality (precondition fixture, reapplied after learning 680696), Bloodbolt 578305 at +20000 SP with 823764 beeg spellpen measures +5% (+-2 pt band [3%, 7%], disjoint from 0% and 9%). Reference search 2026-11-26: coa-history 680696/680687: 0 events in 186 logs; coabuildhub 680696 matches verbatim."
+    },
+    {
+      "spell": 680696,
+      "name": "Gruesome Rituals (+9% Physical damage at 9 stacks of Pooled Vitality)",
+      "kind": "hit_ratio",
+      "variant": "nine_stacks_physical",
+      "label_suffix": "nine_stacks_physical",
+      "quote": "Your damage dealt is now increased by $s1% for each stack of Pooled Vitality.",
+      "expected": 1.09,
+      "observe_spell": 572551,
+      "learn": [
+        572551
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "attack_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            525031,
+            1
+          ],
+          [
+            680687,
+            9
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          680696
+        ],
+        "auras": [
+          [
+            525031,
+            1
+          ],
+          [
+            680687,
+            9
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "Physical-school check for 680696 Gruesome Rituals (Pooled Vitality 680687 Effect[1] aura 79 MiscValue 127 all schools, Spell.dbc): Bloodfang Bite 572551 (SchoolMask 1 Physical, CasterAuraSpell 525031 precondition fixture) at +20000 AP with 9 stacks of Pooled Vitality measures +9% (+-2 pt band excludes 0% and +18%). Reference search 2026-11-26: coa-history 680696/680687: 0 events in 186 logs; coabuildhub 680696 matches verbatim."
+    },
+    {
+      "spell": 560001,
+      "name": "Eternal Presence (party/raid melee attack power +5%)",
+      "kind": "party_stat_ratio",
+      "variant": "party_ap",
+      "label_suffix": "party_ap",
+      "raid": true,
+      "quote": "Increases the attack power of party and raid members by $s1%.",
+      "expected": 1.05,
+      "metric": "attack_power",
+      "radius_reason": "$s1 = 5 (560001 Effect[0] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 166 SPELL_AURA_MOD_ATTACK_POWER_PCT, BasePoints 4 + DieSides 1 = 5, EffectRadiusIndex 287 = 100 yd; no distance token in tooltip; Spell.dbc). Grouped raid ally outside caster subgroup reads attack_power before and after real learn of 560001. Reference search 2026-11-26: coa-history 560001/560010: 0 events in 186 logs; coabuildhub spells_master_index.json 560001 matches verbatim."
+    },
+    {
+      "spell": 560001,
+      "name": "Eternal Presence (party/raid ranged attack power +5%)",
+      "kind": "party_stat_ratio",
+      "variant": "party_rap",
+      "label_suffix": "party_rap",
+      "raid": true,
+      "quote": "Increases the attack power of party and raid members by $s1%.",
+      "expected": 1.05,
+      "metric": "ranged_attack_power",
+      "radius_reason": "$s1 = 5 (560001 Effect[1] 65 SPELL_EFFECT_APPLY_AREA_AURA_RAID, aura 167 SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT, BasePoints 4 + DieSides 1 = 5, EffectRadiusIndex 287 = 100 yd; Spell.dbc). Grouped raid ally outside caster subgroup reads ranged_attack_power before and after real learn of 560001. Reference search 2026-11-26: coa-history 560001/560010: 0 events in 186 logs; coabuildhub 560001 matches verbatim."
+    },
+    {
+      "spell": 560001,
+      "name": "Eternal Presence (group stack cap with Unleashed Rage)",
+      "kind": "group_stack_cap",
+      "quote": "Does not stack with similar effects.",
+      "effect": 0,
+      "partner": 30802,
+      "partner_effect": 1,
+      "metric": "attack_power",
+      "fields": {},
+      "observe_source": "pending_db_world/rev_20260908_05_guardian_completion.sql spell_group 2000180 (stack_rule 3 SPELL_GROUP_STACK_RULE_EXCLUSIVE_SAME_EFFECT; SpellMgr.cpp:2200 auras 166/167) groups 560001 (+5%, Effect[0] aura 166) with 30802 Unleashed Rage (+4%, Effect[1] aura 166). Attack power is read baseline, after learning 560001 alone (+5%), and after also learning 30802: combined reading stays at +5% (not +9%). Reference search 2026-11-26: coa-history 560001: 0 events in 186 logs; coabuildhub 560001 matches verbatim."
+    },
+    {
+      "spell": 560001,
+      "name": "Eternal Presence (gain attack power equal to 15% of damage taken)",
+      "kind": "metric_delta",
+      "variant": "ap_from_damage",
+      "label_suffix": "ap_from_damage",
+      "quote": "In addition, you now gain attack power equal to $s3% of the damage taken for $560010d.",
+      "trigger_spell": 60235,
+      "gate_spell": 560001,
+      "cast_in_before": false,
+      "target": "caster",
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 500,
+        "in_before": true
+      },
+      "phase_auras": [
+        [
+          16255,
+          1,
+          "striker",
+          "striker"
+        ]
+      ],
+      "phase_aura_amounts": [
+        [
+          16255,
+          0,
+          -100
+        ]
+      ],
+      "metric": "attack_power",
+      "fields": {},
+      "before_expected": 223,
+      "expected": 407.4,
+      "tolerance": 1.0,
+      "wait_ms": 200,
+      "expire_ms": 11000,
+      "observe_source": "$s3 = 15 (560001 Effect[2] aura 354 BasePoints 14 + DieSides 1 = 15, TriggerSpell 560010; pending_db_world/rev_20260920_91_bloodmage_eternal_presence_proc.sql spell_proc ProcFlags 1048576 TAKEN_DAMAGE Chance 100 Cooldown 10000 + aura_ascension_eternal_presence in AscensionBloodmageVitality.cpp:285-314). Striker casts Light of the Naaru 41394 (1100 exact Holy damage, unmitigated, non-crit via striker 16255 -100% crit). Before learning 560001: AP = 223 (control). After learning 560001: +165 flat AP from 560010 (floor(1100 * 15 / 100)) times 1.05 from 560001 Effect[0] (+5% AP) -> (223 + 165) * 1.05 = 407.4 (tolerance 1.0 excludes 0% = 234.15 and 30% = 580.65). Reference search 2026-11-26: coa-history 560001/560010: 0 events in 186 logs; coabuildhub 560001 matches verbatim."
+    },
+    {
+      "spell": 560001,
+      "name": "Eternal Presence (560010 buff lasts 10 sec)",
+      "kind": "metric_delta",
+      "variant": "buff_duration",
+      "label_suffix": "buff_duration",
+      "quote": "In addition, you now gain attack power equal to $s3% of the damage taken for $560010d.",
+      "trigger_spell": 60235,
+      "gate_spell": 560001,
+      "gate_timing": "start",
+      "trigger_only_after": true,
+      "target": "caster",
+      "caster_health": [
+        100000,
+        100000
+      ],
+      "after_trigger_strike": {
+        "spell": 41394,
+        "delay_ms": 100,
+        "count": 1,
+        "wait_ms": 100
+      },
+      "metric": "aura",
+      "fields": {
+        "spell": 560010
+      },
+      "before_expected": 0,
+      "expected": 1,
+      "after_expiry_expected": 0,
+      "wait_ms": 9100,
+      "expiry_wait_ms": 1600,
+      "expire_ms": 500,
+      "game_time": {
+        "after": [
+          9150,
+          9650
+        ],
+        "expired": [
+          10700,
+          11090
+        ]
+      },
+      "void_on_cast_failure": true,
+      "observe_source": "$560010d = 10000 ms (Spell.dbc 560010 DurationIndex 1 = 10000 ms). Unstruck control phase reads 0. After striker casts Light of the Naaru 41394 at +100 ms, aura 560010 reads present (1) at game_time [9200, 9600] ms (> 9000 ms = -10%) and expired (0) at game_time [10600, 11000] ms (< 11000 ms = +10%), excluding 10% off on both sides. Reference search 2026-11-26: coa-history 560001/560010: 0 events in 186 logs; coabuildhub 560001 matches verbatim."
+    },
+    {
+      "spell": 560001,
+      "name": "Eternal Presence (10 sec ICD blocks re-trigger at ~9.4 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_held",
+      "label_suffix": "icd_held",
+      "quote": "Can only occur once every 10 sec.",
+      "trigger_spell": 60235,
+      "gate_spell": 560001,
+      "gate_timing": "start",
+      "target": "caster",
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 560010
+      },
+      "before_expected": 1,
+      "expected": 1,
+      "wait_ms": 300,
+      "expire_ms": 8800,
+      "observe_source": "pending_db_world/rev_20260920_91_bloodmage_eternal_presence_proc.sql sets spell_proc.Cooldown = 10000 ms on 560001. First striker cast of Light of the Naaru 41394 triggers 560010 (spell_cast_count = 1); second strike ~9.4 s later (300 ms strike wait + 300 ms trigger wait + 8800 ms expire_ms, past -10% = 9.0 s) is blocked by the 10 s ICD so count stays 1. Reference search 2026-11-26: coa-history 560001/560010: 0 events in 186 logs; coabuildhub 560001 matches verbatim."
+    },
+    {
+      "spell": 560001,
+      "name": "Eternal Presence (10 sec ICD reopens by ~10.5 sec)",
+      "kind": "metric_delta",
+      "variant": "icd_reopen",
+      "label_suffix": "icd_reopen",
+      "quote": "Can only occur once every 10 sec.",
+      "trigger_spell": 60235,
+      "gate_spell": 560001,
+      "gate_timing": "start",
+      "target": "caster",
+      "strike": {
+        "spell": 41394,
+        "health": 100000,
+        "max_health": 100000,
+        "count": 1,
+        "wait_ms": 300
+      },
+      "metric": "spell_cast_count",
+      "fields": {
+        "spell": 560010
+      },
+      "before_expected": 1,
+      "expected": 2,
+      "wait_ms": 300,
+      "expire_ms": 9900,
+      "observe_source": "Companion to icd_held: first striker cast of Light of the Naaru 41394 triggers 560010 (spell_cast_count = 1); second strike ~10.5 s later (300 + 300 + 9900 ms, below +10% = 11.0 s) reopens the 10 s ICD so count becomes 2. Together icd_held (~9.4 s) and icd_reopen (~10.5 s) bracket the 10 s ICD inside +-10%. Reference search 2026-11-26: coa-history 560001/560010: 0 events in 186 logs; coabuildhub 560001 matches verbatim."
+    },
+    {
+      "spell": 704642,
+      "name": "Atherann's Wickedness (Shadow damage +4%)",
+      "kind": "hit_ratio",
+      "variant": "shadow_damage",
+      "label_suffix": "shadow_damage",
+      "quote": "Increases your Shadow damage dealt by $s1%",
+      "expected": 1.04,
+      "observe_spell": 578305,
+      "learn": [
+        578305
+      ],
+      "cast_power": 300,
+      "fixture": {
+        "spell_power": 20000
+      },
+      "control": {
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "treatment": {
+        "learn": [
+          704642
+        ],
+        "auras": [
+          [
+            823764,
+            1
+          ]
+        ]
+      },
+      "critical": false,
+      "trials": 20,
+      "void_on_cast_failure": true,
+      "observe_source": "$s1 = 4 (704642 Effect[0] aura 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE, MiscValue 32 Shadow, BasePoints 3 + DieSides 1 = 4; Spell.dbc). Bloodbolt 578305 (SchoolMask 32 Shadow) at +20000 SP with 823764 beeg spellpen measures +4% (+-2 pt G-19 band [2%, 6%], excluding 0% and +8%). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    },
+    {
+      "spell": 704642,
+      "name": "Atherann's Wickedness (melee hit chance +3%)",
+      "kind": "metric_delta",
+      "variant": "melee_hit",
+      "label_suffix": "melee_hit",
+      "quote": "and increases your hit chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704642,
+      "target": "caster",
+      "metric": "melee_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 3 (704642 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + DieSides 1 = 3; Spell.dbc). StatSystem.cpp:1031 adds aura 333 into Player::m_modMeleeHitChance. Reads live melee_hit_chance before and after a real learn of 704642 (expected gain +3.0 points, control is before learn). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    },
+    {
+      "spell": 704642,
+      "name": "Atherann's Wickedness (spell hit chance +3%)",
+      "kind": "metric_delta",
+      "variant": "spell_hit",
+      "label_suffix": "spell_hit",
+      "quote": "and increases your hit chance by $s2%.",
+      "trigger_spell": 60235,
+      "gate_spell": 704642,
+      "target": "caster",
+      "metric": "spell_hit_chance",
+      "fields": {},
+      "before_expected": 0,
+      "expected": 3,
+      "expected_gain": 3,
+      "tolerance": 0.01,
+      "wait_ms": 500,
+      "expire_ms": 500,
+      "observe_source": "$s2 = 3 (704642 Effect[1] aura 333 SPELL_AURA_ASCENSION_MOD_HIT_CHANCE_ALL_PCT, BasePoints 2 + DieSides 1 = 3; Spell.dbc). StatSystem.cpp:1043 adds aura 333 into Player::m_modSpellHitChance. Reads live spell_hit_chance before and after a real learn of 704642 (expected gain +3.0 points, control is before learn). Reference search 2026-11-26: coa-history 704642: 0 events in 186 logs (passive); coabuildhub spells_master_index.json 704642 matches verbatim."
+    }
+  ],
   "player_observations": [],
   "player_tooltip_readings": [],
   "hit_notes": [],

@@ -593,7 +593,10 @@
     "spell": 504116,
     "clause": "Casting Bloodfang Bite now has a $h% chance to reset the cooldown of Reave.",
     "labels": [
-      "504116 effect_value #0"
+      "504116 behaviour_metric_delta reset_rate",
+      "504116 cost_gate 802469 reave_reset without",
+      "504116 cost_gate 802469 reave_reset with",
+      "504116 cost_gate 802469 reave_reset released"
     ],
     "kind": "claim"
   },
@@ -1484,14 +1487,17 @@
     "spell": 560001,
     "clause": "Increases the attack power of party and raid members by $s1%.",
     "labels": [
-      "560001 effect_value e0 #0"
+      "560001 behaviour_party_stat_ratio party_ap",
+      "560001 behaviour_party_stat_ratio party_rap"
     ],
     "kind": "claim"
   },
   {
     "spell": 560001,
     "clause": "Does not stack with similar effects.",
-    "labels": [],
+    "labels": [
+      "560001 behaviour_group_stack_cap"
+    ],
     "kind": "claim"
   },
   {
@@ -1501,13 +1507,13 @@
       {
         "claim": "gain attack power equal to $s3% of the damage taken",
         "labels": [
-          "560001 effect_value e2 #1"
+          "560001 behaviour_metric_delta ap_from_damage"
         ]
       },
       {
         "claim": "for $560010d",
         "labels": [
-          "560001 spell_duration 560010 #2"
+          "560001 behaviour_metric_delta buff_duration"
         ]
       }
     ],
@@ -1516,7 +1522,10 @@
   {
     "spell": 560001,
     "clause": "Can only occur once every 10 sec.",
-    "labels": [],
+    "labels": [
+      "560001 behaviour_metric_delta icd_held",
+      "560001 behaviour_metric_delta icd_reopen"
+    ],
     "kind": "claim"
   },
   {
@@ -2341,7 +2350,9 @@
     "spell": 680696,
     "clause": "Your damage dealt is now increased by $s1% for each stack of Pooled Vitality.",
     "labels": [
-      "680696 effect_value e0 #0"
+      "680696 behaviour_hit_ratio nine_stacks_shadow",
+      "680696 behaviour_hit_ratio five_stacks_shadow",
+      "680696 behaviour_hit_ratio nine_stacks_physical"
     ],
     "kind": "claim"
   },
@@ -3041,7 +3052,7 @@
     "spell": 704642,
     "clause": "Increases your Shadow damage dealt by $s1%",
     "labels": [
-      "704642 effect_value e0 #0"
+      "704642 behaviour_hit_ratio shadow_damage"
     ],
     "kind": "claim"
   },
@@ -3049,7 +3060,8 @@
     "spell": 704642,
     "clause": "and increases your hit chance by $s2%.",
     "labels": [
-      "704642 effect_value e1 #1"
+      "704642 behaviour_metric_delta melee_hit",
+      "704642 behaviour_metric_delta spell_hit"
     ],
     "kind": "claim"
   },
@@ -4689,34 +4701,45 @@
   {
     "spell": 804849,
     "clause": "Shadow Damage dealt now generates 1 Blood Shard,",
-    "labels": [],
+    "labels": [
+      "804849 behaviour_metric_delta shadow_one",
+      "804849 behaviour_metric_delta nonshadow_zero"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804849,
     "clause": "plus 1 additional if it critically strikes,",
-    "labels": [],
+    "labels": [
+      "804849 behaviour_metric_delta shadow_crit_two"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804849,
     "clause": "for $505349d,",
     "labels": [
-      "804849 spell_duration 505349 #0"
+      "804849 behaviour_metric_delta duration"
     ],
     "kind": "claim"
   },
   {
     "spell": 804849,
     "clause": "up to 8.",
-    "labels": [],
+    "labels": [
+      "804849 behaviour_metric_delta cap_eight"
+    ],
     "kind": "claim"
   },
   {
     "spell": 804849,
     "clause": "Dealing damage with Veinburst will now expend all stacks of Blood Shards, each dealing ${$504115m1+$AP*0.05+$SP*.1} Spellshadow damage to your target.",
     "labels": [
-      "804849 effect_value 504115e0 #1"
+      "804849 behaviour_metric_delta veinburst_expends",
+      "804849 behaviour_metric_delta veinburst_shard_count",
+      "804849 behaviour_metric_delta veinburst_damage_base",
+      "804849 behaviour_metric_delta veinburst_damage_sp",
+      "804849 behaviour_metric_delta veinburst_damage_ap"
     ],
     "kind": "claim"
   },
