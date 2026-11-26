@@ -53,11 +53,12 @@
     { "action": "set_aura", "actor": "p", "spell": 10040, "stacks": 3 },
     {
       "action": "assert",
-      "label": "SETUP: QA mana headroom exceeds 20000",
+      "label": "SETUP: QA mana pool is ~36000 so 2% mana return per 531129 cast is 700-740",
       "actor": "p",
       "metric": "max_power",
       "power": 0,
-      "min": 25000,
+      "min": 35000,
+      "max": 37000,
       "within_ms": 2000
     },
     { "action": "set_power", "actor": "p", "power": 0, "value": 20000 },
@@ -96,28 +97,52 @@
     },
     { "action": "set_power", "actor": "p", "power": 6, "value": 0 },
     { "action": "set_power", "actor": "p", "power": 0, "value": 20000 },
+    { "action": "snapshot", "actor": "p", "metric": "spell_cast_count", "spell": 531129, "save_as": "of_casts_ranged_before" },
     { "action": "snapshot", "actor": "p", "metric": "power", "power": 6, "save_as": "rp_ranged_before" },
     { "action": "snapshot", "actor": "p", "metric": "power", "power": 0, "save_as": "mana_ranged_before" },
     { "action": "cast", "label": "Send ranged Crypt Fiends onto the distant stationary golem", "actor": "p", "spell": 500991, "target": "golem" },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: triggered Frozen Barbs from ranged Crypt Fiends restore Runic Power via 531128",
+      "label": "DISCRIMINATING: triggered Frozen Barbs from ranged Crypt Fiends trigger Overwhelming Forces 531129",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 531129,
+      "relative_to": "of_casts_ranged_before",
+      "min": 1,
+      "within_ms": 300000
+    },
+    { "action": "unlearn", "actor": "p", "spell": 531128 },
+    {
+      "action": "assert",
+      "label": "SETUP: unlearning 531128 freezes ranged Overwhelming Force procs before reading deltas",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 50323,
+      "spell": 531128,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    { "action": "snapshot", "actor": "p", "metric": "spell_cast_count", "spell": 531129, "relative_to": "of_casts_ranged_before", "save_as": "of_casts_ranged" },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: triggered Frozen Barbs restore exactly 2 Runic Power (20 raw) per 531129 cast",
       "actor": "p",
       "metric": "power",
       "power": 6,
       "relative_to": "rp_ranged_before",
-      "min": 1,
-      "within_ms": 300000
+      "ratio_to": "of_casts_ranged",
+      "equals": 20
     },
     {
       "action": "assert",
-      "label": "DISCRIMINATING: triggered Frozen Barbs also restore maximum mana via 531128",
+      "label": "DISCRIMINATING: triggered Frozen Barbs restore bounded 2% max mana (700-740) per 531129 cast",
       "actor": "p",
       "metric": "power",
       "power": 0,
       "relative_to": "mana_ranged_before",
-      "min": 1,
-      "within_ms": 2000
+      "ratio_to": "of_casts_ranged",
+      "min": 700,
+      "max": 740
     },
     {
       "action": "assert",
@@ -128,6 +153,7 @@
       "entry": 50323,
       "min": 1
     },
+    { "action": "learn", "actor": "p", "spell": 531128 },
     { "action": "wait", "label": "Clear GCD before raising Greater Skeletal Warriors", "ms": 1600 },
     { "action": "set_power", "actor": "p", "power": 0, "value": 20000 },
     { "action": "cast", "label": "Raise first Greater Skeletal Warrior", "actor": "p", "spell": 504901 },
@@ -198,28 +224,52 @@
     },
     { "action": "set_power", "actor": "p", "power": 6, "value": 0 },
     { "action": "set_power", "actor": "p", "power": 0, "value": 20000 },
+    { "action": "snapshot", "actor": "p", "metric": "spell_cast_count", "spell": 531129, "save_as": "of_casts_skel_before" },
     { "action": "snapshot", "actor": "p", "metric": "power", "power": 6, "save_as": "rp_skel_before" },
     { "action": "snapshot", "actor": "p", "metric": "power", "power": 0, "save_as": "mana_skel_before" },
     { "action": "cast", "label": "Send Greater Skeletal Warriors onto the golem", "actor": "p", "spell": 500991, "target": "golem" },
     {
       "action": "assert",
-      "label": "Greater Skeletal Warriors restore Runic Power via Overwhelming Force",
+      "label": "Greater Skeletal Warriors trigger Overwhelming Forces 531129",
+      "actor": "p",
+      "metric": "spell_cast_count",
+      "spell": 531129,
+      "relative_to": "of_casts_skel_before",
+      "min": 1,
+      "within_ms": 180000
+    },
+    { "action": "unlearn", "actor": "p", "spell": 531128 },
+    {
+      "action": "assert",
+      "label": "SETUP: unlearning 531128 freezes melee Overwhelming Force procs before reading deltas",
+      "actor": "p",
+      "metric": "owned_creature_count",
+      "entry": 51065,
+      "spell": 531128,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    { "action": "snapshot", "actor": "p", "metric": "spell_cast_count", "spell": 531129, "relative_to": "of_casts_skel_before", "save_as": "of_casts_skel" },
+    {
+      "action": "assert",
+      "label": "Greater Skeletal Warriors restore exactly 2 Runic Power (20 raw) per 531129 cast",
       "actor": "p",
       "metric": "power",
       "power": 6,
       "relative_to": "rp_skel_before",
-      "min": 1,
-      "within_ms": 180000
+      "ratio_to": "of_casts_skel",
+      "equals": 20
     },
     {
       "action": "assert",
-      "label": "Greater Skeletal Warriors restore maximum mana via Overwhelming Force",
+      "label": "Greater Skeletal Warriors restore bounded 2% max mana (700-740) per 531129 cast",
       "actor": "p",
       "metric": "power",
       "power": 0,
       "relative_to": "mana_skel_before",
-      "min": 1,
-      "within_ms": 2000
+      "ratio_to": "of_casts_skel",
+      "min": 700,
+      "max": 740
     }
   ]
 }
