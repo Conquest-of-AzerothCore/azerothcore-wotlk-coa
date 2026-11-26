@@ -1,0 +1,71 @@
+{
+  "schema": 1,
+  "name": "Mark of Order builds to 5 stacks and expires without self-refreshing (#13443)",
+  "contract": "Mark of Order 704488 applies Mark of Order 806269 (20 s duration, StackAmount 5) when Fortify Timeline 804491 heals. Every 1 s, 806269 triggers 806270 (SPELL_EFFECT_ASCENSION_MODIFY_AURA_STACKS +1 on 806269). Live Ascension combat logs (2026-08-29-18.43.47 WoWCombatLog.txt) confirm 806269 grows to 5 stacks over 4 s and expires at 20.00 s without resetting its timer on 806270 ticks. Previously ModifyAscensionAuraStacks called Aura::ModStackAmount(+1), whose RefreshTimers reset 806269 back to 20,000 ms every second forever. After applying 806269 via Fortify Timeline 804491, it must reach 5 stacks, then after 4 more seconds have remaining duration at most 15,000 ms (unfixed stays 19,000-20,000 ms), and then expire naturally within its 20 s window.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login state settle", "ms": 3000 },
+    { "action": "learn", "actor": "chronomancer", "spell": 704488 },
+    { "action": "learn", "actor": "chronomancer", "spell": 804491 },
+    {
+      "action": "assert",
+      "label": "SETUP: no Mark of Order before casting Fortify Timeline",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "equals": 0
+    },
+    { "action": "set_health", "actor": "chronomancer", "value": 2000 },
+    { "action": "cast", "actor": "chronomancer", "spell": 804491 },
+    {
+      "action": "assert",
+      "label": "SETUP: Fortify Timeline applies Mark of Order",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Mark of Order builds to 5 stacks",
+      "actor": "chronomancer",
+      "metric": "aura_stacks",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "equals": 5,
+      "within_ms": 8000
+    },
+    { "action": "wait", "label": "Wait past full stacks to verify duration counts down", "ms": 4000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mark of Order duration is not refreshed back to 20 s at full stacks",
+      "actor": "chronomancer",
+      "metric": "aura_duration_ms",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "max": 15000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Mark of Order expires naturally instead of lasting forever",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 806269,
+      "caster": "chronomancer",
+      "equals": 0,
+      "within_ms": 16000
+    }
+  ]
+}

@@ -1,0 +1,217 @@
+{
+  "schema": 1,
+  "name": "Knight of Xoroth: Book of Ascension requires Shieldgore rank 1 before rank 2 (#13501)",
+  "contract": [
+    "Shieldgore rank 2 (806869, level 18) is the second rank of Shieldgore rank 1 (804353, Spell.dbc,",
+    "spell_ranks rev_20260924_4930_shieldgore_ranks.sql, AscensionTalentReplacementData.h). PR #8608 fixed",
+    "ReqAbility1 = 804353 on the Knight of Xoroth class trainer (900017), but SpellbookOfferData.h kept",
+    "FirstSpellId = 0 for 806869, so the Book of Ascension sent RequiredAbility = 0 in SMSG_TRAINER_LIST",
+    "while ranks 3-7 required 806869-806873. A level 60 Defiance knight holds only rank 7 (806874) in the",
+    "client spellbook; on the next spell learned the client redraws rows against its spellbook and marks",
+    "only rank 2 as available because its RequiredAbility was 0, stalling the Train button (#13501).",
+    "Expected: both on open and after training another spell, the book sends RequiredAbility = 804353 and",
+    "state = 2 (Known) for 806869, keeps rank 3 requiring 806869, and refuses direct purchase of 806869."
+  ],
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "knight",
+      "race": 1,
+      "class": 17,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let login hooks settle",
+      "ms": 3000
+    },
+    {
+      "action": "money",
+      "actor": "knight",
+      "copper": 1000000
+    },
+    {
+      "action": "specialization",
+      "label": "Choose Defiance to acquire Shieldgore",
+      "actor": "knight",
+      "id": 17
+    },
+    {
+      "action": "wait",
+      "ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Defiance owns the Shieldgore talent",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 301302,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: level 60 Defiance holds Shieldgore rank 7",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 806874,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: client spellbook holds Shieldgore rank 7",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 806874,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: client spellbook does not hold Shieldgore rank 1",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 804353,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: client spellbook does not hold Shieldgore rank 2",
+      "actor": "knight",
+      "metric": "client_knows_spell",
+      "spell": 806869,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Skulltaker rank 1 is known",
+      "actor": "knight",
+      "metric": "knows_spell",
+      "spell": 800168,
+      "equals": 1
+    },
+    {
+      "action": "learn",
+      "actor": "knight",
+      "spell": 97930
+    },
+    {
+      "action": "cast",
+      "actor": "knight",
+      "spell": 97930
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "owned_creature_count",
+      "entry": 75115,
+      "equals": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "gossip_hello",
+      "label": "Open the Book of Ascension",
+      "actor": "knight"
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "trainer_list_packets",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Shieldgore rank 2 requires Shieldgore rank 1 in the book window",
+      "actor": "knight",
+      "metric": "trainer_window_ability",
+      "spell": 806869,
+      "equals": 804353
+    },
+    {
+      "action": "assert",
+      "label": "Shieldgore rank 2 is a known row",
+      "actor": "knight",
+      "metric": "trainer_window_state",
+      "spell": 806869,
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "Control: Shieldgore rank 3 requires rank 2",
+      "actor": "knight",
+      "metric": "trainer_window_ability",
+      "spell": 806870,
+      "equals": 806869
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Skulltaker rank 2 is available to train",
+      "actor": "knight",
+      "metric": "trainer_window_state",
+      "spell": 802416,
+      "equals": 0
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Train another spell in the same window",
+      "actor": "knight",
+      "spell": 802416
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 802416,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "trainer_list_packets",
+      "equals": 2
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Shieldgore rank 2 still requires rank 1 after training another spell",
+      "actor": "knight",
+      "metric": "trainer_window_ability",
+      "spell": 806869,
+      "equals": 804353
+    },
+    {
+      "action": "assert",
+      "label": "Shieldgore rank 2 remains a known row after training another spell",
+      "actor": "knight",
+      "metric": "trainer_window_state",
+      "spell": 806869,
+      "equals": 2
+    },
+    {
+      "action": "trainer_buy",
+      "label": "Direct purchase of Shieldgore rank 2 is refused",
+      "actor": "knight",
+      "spell": 806869
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spellbook_buy_failed",
+      "spell": 806869,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "knight",
+      "metric": "spellbook_buy_succeeded",
+      "spell": 806869,
+      "equals": 0
+    }
+  ]
+}

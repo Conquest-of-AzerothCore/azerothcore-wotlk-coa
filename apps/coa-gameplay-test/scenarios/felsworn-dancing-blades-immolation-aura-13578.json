@@ -1,0 +1,65 @@
+{
+  "schema": 1,
+  "name": "Felsworn: critical Immolation Aura ticks do not trigger Dancing Blades, a critical melee ability still does (#13578)",
+  "contract": "Dancing Blades 92087 reads 'Critical strikes with melee abilities now trigger Dancing Blades, dealing off-hand Weapon Damage to up to $800598i nearby enemies'. Immolation Aura 572617 (Spell.dbc) is a periodic aura: Effect[0] aura 227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE, EffectAmplitude 3000, EffectTriggerSpell 800208 (Immolation, SCHOOL_DAMAGE on nearby enemies within 5 yd), with SPELL_ATTR5_EXTRA_INITIAL_PERIOD so ticks land at 0, 3 and 6 s. The tick 800208 has DmgClass 2 (melee), so its critical chance is the weapon critical chance and its hits carry PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS; it is the damage of a fire aura, not a melee ability. Expected: with melee critical strikes forced (melee_crit_rating 100000) every Immolation tick on the dummy is critical, and Dancing Blades 800598 is never cast through 6 s of ticks; a critical Twin Slice 801901 (DmgClass 2 melee ability striking with both weapons) afterwards still casts 800598, so the passive is active. 800598 has SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON, so a one-handed sword and a dagger are equipped with Dual Wield. 823764 removes the dummy's magic resistance so no tick is fully resisted. The caster's health is raised because Immolation Aura costs 50 health per second.",
+  "timeout_ms": 60000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 4,
+      "class": 14,
+      "level": 60,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    { "id": "dummy", "owner": "felsworn", "entry": 36, "level": 60, "health": 1000000, "distance": 3 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 3000 },
+    { "action": "learn", "actor": "felsworn", "spell": 201 },
+    { "action": "learn", "actor": "felsworn", "spell": 1180 },
+    { "action": "learn", "actor": "felsworn", "spell": 674 },
+    { "action": "learn", "actor": "felsworn", "spell": 801901 },
+    { "action": "learn", "actor": "felsworn", "spell": 572617 },
+    { "action": "learn", "label": "Dancing Blades passive", "actor": "felsworn", "spell": 92087 },
+    { "action": "add_item", "actor": "felsworn", "item": 25 },
+    { "action": "add_item", "actor": "felsworn", "item": 2092 },
+    { "action": "equip", "label": "Worn Shortsword in the main hand", "actor": "felsworn", "item": 25, "slot": 15 },
+    { "action": "equip", "label": "Worn Dagger in the off hand", "actor": "felsworn", "item": 2092, "slot": 16 },
+    { "action": "set_aura", "label": "Remove the dummy's magic resistance", "actor": "felsworn", "spell": 823764, "stacks": 1 },
+    { "action": "set_health", "actor": "felsworn", "value": 20000, "maximum": 20000 },
+    { "action": "wait", "ms": 2000 },
+    { "action": "cast", "actor": "felsworn", "spell": 572617 },
+    {
+      "action": "assert", "label": "Immolation Aura is cast",
+      "actor": "felsworn", "metric": "cast_failure", "spell": 572617, "equals": 0, "within_ms": 2000
+    },
+    { "action": "wait", "label": "Ticks at 0, 3 and 6 s", "ms": 7000 },
+    {
+      "action": "assert", "label": "Three Immolation ticks critically hit the dummy",
+      "actor": "felsworn", "metric": "spell_damage_count", "spell": 800208, "target": "dummy", "critical": true,
+      "min": 3
+    },
+    {
+      "action": "assert", "label": "Critical Immolation ticks do not cast Dancing Blades",
+      "actor": "felsworn", "metric": "spell_cast_count", "spell": 800598, "equals": 0
+    },
+    {
+      "action": "assert", "label": "Dancing Blades deals no damage from Immolation ticks",
+      "actor": "felsworn", "metric": "spell_damage_count", "spell": 800598, "target": "dummy", "equals": 0
+    },
+    { "action": "set_power", "actor": "felsworn", "power": 3, "value": 100 },
+    { "action": "cast", "actor": "felsworn", "spell": 801901, "target": "dummy" },
+    {
+      "action": "assert", "label": "Twin Slice is cast",
+      "actor": "felsworn", "metric": "cast_failure", "spell": 801901, "equals": 0, "within_ms": 2000
+    },
+    {
+      "action": "assert", "label": "A critical Twin Slice still triggers Dancing Blades",
+      "actor": "felsworn", "metric": "spell_cast_count", "spell": 800598, "min": 1, "within_ms": 2000
+    }
+  ]
+}

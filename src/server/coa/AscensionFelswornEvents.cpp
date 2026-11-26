@@ -51,7 +51,7 @@ class aura_ascension_felsworn_event : public AuraScript
         switch (id)
         {
         case 92087:
-            return info && melee && crit && !periodic;
+            return info && info->Id != 800208 && melee && crit && !periodic;
         case 300480:
             return !periodic && Chance(player, id);
         case 681376:

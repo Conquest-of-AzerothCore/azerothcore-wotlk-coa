@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Necromancer Ice Barrage shards hit at talented 36 yd max range (#10258)",
+  "contract": "#10258 reported that Ice Barrage (501994, rank 4 of 801760) cast at or near its talented 36 yd max range goes on cooldown, fires the initial visual and aggros the target, but deals zero damage. Curse of the Lich (300240) adds +6 yd SPELLMOD_RANGE to SpellFamilyName 29 mask (0x20000000, 0x44, 0x08000000), raising Ice Barrage's parent ranks (SpellFamilyFlags 0, 0x40, 0; RangeIndex 4 = 30 yd) to 36 yd. Its Effect 0 periodic trigger (250 ms) casts shard spell 803779, which carried RangeIndex 4 (30 yd) and SpellFamilyFlags (0, 0, 0x40) outside 300240's mask, so Spell::CheckRange rejected every triggered shard at 31-36 yd with SPELL_FAILED_OUT_OF_RANGE while Effect 1 (804328 Frozen, RangeIndex 6 = 100 yd) still landed. Giving 803779 RangeIndex 6 (Vision Range, 100 yd, matching sibling 804328) lets shards hit targets within Ice Barrage's talented range. Expected: with Curse of the Lich (300240) learned, Ice Barrage (501994) reaches 36 yd and deals shard damage (803779, >= 3 hits, total > 0) to a stationary target at 36 yd as well as to a control target at 20 yd.",
+  "timeout_ms": 90000,
+  "location": {
+    "map": 0,
+    "x": -8917.41,
+    "y": -115.853,
+    "z": 82.3711,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "necro",
+      "race": 5,
+      "class": 23,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_power": 100,
+      "allow_regeneration": false
+    }
+  ],
+  "creatures": [
+    {
+      "id": "near_golem",
+      "owner": "necro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 20,
+      "stationary": true
+    },
+    {
+      "id": "far_golem",
+      "owner": "necro",
+      "entry": 36,
+      "level": 80,
+      "health": 1000000,
+      "distance": 36,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI and level scaling settle", "ms": 5000 },
+    { "action": "learn", "actor": "necro", "spell": 501994 },
+    { "action": "learn", "actor": "necro", "spell": 300240 },
+    {
+      "action": "assert",
+      "label": "SETUP: Curse of the Lich passive aura is active",
+      "actor": "necro",
+      "metric": "aura",
+      "spell": 300240,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ice Barrage rank 4 (501994) reaches 36 yd with Curse of the Lich",
+      "actor": "necro",
+      "metric": "spell_max_range",
+      "spell": 501994,
+      "min": 35.99,
+      "max": 36.01
+    },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    {
+      "action": "cast",
+      "label": "CONTROL: cast Ice Barrage at 20 yd",
+      "actor": "necro",
+      "spell": 501994,
+      "target": "near_golem"
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ice Barrage aura lands at 20 yd",
+      "actor": "near_golem",
+      "metric": "aura",
+      "spell": 501994,
+      "caster": "necro",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: Ice Barrage shards (803779) hit at 20 yd",
+      "actor": "necro",
+      "metric": "spell_damage_count",
+      "spell": 803779,
+      "target": "near_golem",
+      "min": 3,
+      "within_ms": 6000
+    },
+    { "action": "wait", "label": "Let barrage finish", "ms": 1500 },
+    { "action": "reset_cooldown", "actor": "necro", "spell": 501994 },
+    { "action": "set_power", "actor": "necro", "power": 6, "value": 500 },
+    {
+      "action": "cast",
+      "label": "Cast Ice Barrage at talented 36 yd max range",
+      "actor": "necro",
+      "spell": 501994,
+      "target": "far_golem"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Ice Barrage aura lands at 36 yd",
+      "actor": "far_golem",
+      "metric": "aura",
+      "spell": 501994,
+      "caster": "necro",
+      "equals": 1,
+      "within_ms": 4000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ice Barrage shards (803779) hit at 36 yd",
+      "actor": "necro",
+      "metric": "spell_damage_count",
+      "spell": 803779,
+      "target": "far_golem",
+      "min": 3,
+      "within_ms": 8000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Ice Barrage deals positive shard damage at 36 yd",
+      "actor": "necro",
+      "metric": "spell_damage_total",
+      "spell": 803779,
+      "target": "far_golem",
+      "min": 1
+    }
+  ]
+}

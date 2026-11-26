@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cctype>
 #include <cmath>
+#include <filesystem>
 #include <initializer_list>
 #include <map>
 #include <string>
@@ -164,6 +165,36 @@ struct Config
     }
 } config;
 auto* sConfigMgr = &config;
+struct World
+{
+    std::string dataPath;
+    std::string const& GetDataPath() const { return dataPath; }
+} world;
+auto* sWorld = &world;
+struct ItemDisplayInfoRow
+{
+    std::array<uint32, 25> ints{};
+    std::array<std::string, 25> strings{};
+};
+std::vector<ItemDisplayInfoRow> itemDisplayInfos;
+class ClientDBC
+{
+public:
+    class Record
+    {
+    public:
+        explicit Record(ItemDisplayInfoRow const& row) : _row(row) { }
+        uint32 GetUInt32(uint32 field) const { return _row.ints.at(field); }
+        std::string_view GetString(uint32 field) const { return _row.strings.at(field); }
+
+    private:
+        ItemDisplayInfoRow const& _row;
+    };
+
+    bool Load(std::string const&, uint32) { return !itemDisplayInfos.empty(); }
+    uint32 GetRecordCount() const { return uint32(itemDisplayInfos.size()); }
+    Record GetRecord(uint32 row) const { return Record(itemDisplayInfos.at(row)); }
+};
 struct WorldScript
 {
     WorldScript(char const*, std::vector<uint16>) { }

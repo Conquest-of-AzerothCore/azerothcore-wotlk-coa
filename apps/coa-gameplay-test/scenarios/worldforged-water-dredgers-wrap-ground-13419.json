@@ -1,0 +1,50 @@
+{
+  "schema": 1,
+  "name": "Worldforged Water Dredger's Wrap pickup in Un'Goro Crater rests on the ground (#13419)",
+  "contract": "Waterlogged Chest (object 95923, guid 6942409, drops Worldforged Water Dredger's Wrap 515406) at (-7027.300, -1167.400) in Un'Goro Crater sat 0.80 yd underground at z -274.259 because the realm-map pass moved it south from first-pass row 6901321 without updating z. rev_20261126_13419 raises it to terrain height -273.462 so it is present and grounded (spawn_ground_gap within +/-0.3 yd).",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -7027.3,
+    "y": -1167.4,
+    "z": -273.462,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 1,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Waterlogged Chest 95923 stands at its Un'Goro Crater spot",
+      "actor": "p",
+      "metric": "nearby_gameobject_count",
+      "entry": 95923,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Waterlogged Chest 6942409 rests on the ground, not underground (#13419)",
+      "actor": "p",
+      "metric": "spawn_ground_gap",
+      "guid": 6942409,
+      "spawn_type": "gameobject",
+      "min": -0.3,
+      "max": 0.3
+    }
+  ]
+}

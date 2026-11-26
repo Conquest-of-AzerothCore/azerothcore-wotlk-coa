@@ -15,6 +15,9 @@ namespace ManastormModuleConfig
         uint8 affixMinimumLevel = 50;
         constexpr double DefaultExperienceRate = 0.3;
         double experienceRate = DefaultExperienceRate;
+        bool prestigeExperienceEnabled = true;
+        uint32 prestigeExperienceBonusPercent = 300;
+        bool experienceBonusControlEnabled = true;
         bool weeklyCacheLockoutEnabled = true;
         uint32 weeklyCacheLockoutLimit = 5;
         bool coaLootModeEnabled = false;
@@ -56,6 +59,10 @@ namespace ManastormModuleConfig
         if (!validRate)
             LOG_ERROR("module.manastorm.endless", "Invalid Manastorm.ExperienceRate={}; expected 0 or more, using {}.",
                 requestedRate, DefaultExperienceRate);
+        prestigeExperienceEnabled = sConfigMgr->GetOption<bool>("CoAPrestige.Enable", true);
+        prestigeExperienceBonusPercent = sConfigMgr->GetOption<uint32>("CoAPrestige.ExperienceBonusPercent", 300);
+        experienceBonusControlEnabled = sConfigMgr->GetOption<bool>("DestinyWeaver.Enable", true) &&
+            sConfigMgr->GetOption<bool>("DestinyWeaver.ExperienceBonusControl", true);
         uint32 const requestedMode = sConfigMgr->GetOption<uint32>("Manastorm.ClientMode", 2);
         followReleaseStage = sConfigMgr->GetOption<bool>("Manastorm.FollowReleaseStage", false);
         objectiveRaidSkull = sConfigMgr->GetOption<bool>("Manastorm.Objective.RaidSkull", true);
@@ -98,6 +105,9 @@ namespace ManastormModuleConfig
     }
 
     double ExperienceRate() { return experienceRate; }
+    bool PrestigeExperienceEnabled() { return prestigeExperienceEnabled; }
+    uint32 PrestigeExperienceBonusPercent() { return prestigeExperienceBonusPercent; }
+    bool ExperienceBonusControlEnabled() { return experienceBonusControlEnabled; }
 
     bool Enabled()
     {

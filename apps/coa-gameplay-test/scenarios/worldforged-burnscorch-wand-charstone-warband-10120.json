@@ -1,0 +1,188 @@
+{
+  "schema": 1,
+  "name": "Burnscorch Wand and Charstone Warband rest flush on Burning Steppes ground (#10120)",
+  "contract": "#10120 reported Burnscorch Wand (entry 254654, guid 6940209) clipping into the ground and Charstone Warband (entry 1345022, guid 6975008) floating in Burning Steppes. On base, guid 6940209 sat at (-7985.900, -2113.900, 128.254) where terrain is 128.3712 (-0.117 yd), and guid 6975008 sat at (-7981.200, -2111.900, 128.250) where terrain is 127.7573 (+0.493 yd). Expected: guid 6940209 stands at first-pass realm-dump (-7985.380, -2114.510, 128.254; ground_gap +0.008 yd), guid 6975008 rests at terrain height 127.7573 (ground_gap 0.000 yd), and both open and drop loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -7983.5,
+    "y": -2113.5,
+    "z": 127.897,
+    "o": 3.5
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Burnscorch Wand pickup is present nearby",
+      "metric": "nearby_gameobject_count",
+      "entry": 254654,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: Charstone Warband pickup is present nearby",
+      "metric": "nearby_gameobject_count",
+      "entry": 1345022,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Burnscorch Wand stands at its restored realm-dump position",
+      "metric": "spawn_distance",
+      "x": -7985.38,
+      "y": -2114.51,
+      "z": 128.254,
+      "max": 0.3,
+      "guid": 6940209,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Burnscorch Wand rests flush on terrain instead of clipping -0.117 yd",
+      "metric": "spawn_ground_gap",
+      "min": -0.05,
+      "max": 0.1,
+      "guid": 6940209,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Charstone Warband rests at terrain height 127.7573",
+      "metric": "spawn_distance",
+      "x": -7981.2,
+      "y": -2111.9,
+      "z": 127.7573,
+      "max": 0.3,
+      "guid": 6975008,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: Charstone Warband rests flush on terrain instead of floating +0.493 yd",
+      "metric": "spawn_ground_gap",
+      "min": -0.1,
+      "max": 0.1,
+      "guid": 6975008,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Burnscorch Wand has open headroom",
+      "metric": "spawn_headroom",
+      "min": 5.0,
+      "guid": 6940209,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Charstone Warband has open headroom",
+      "metric": "spawn_headroom",
+      "min": 5.0,
+      "guid": 6975008,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Burnscorch Wand is not submerged",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6940209,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Charstone Warband is not submerged",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6975008,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 254654
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Burnscorch Wand opens without cast failure",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Burnscorch Wand drops item 410204 in its open loot window",
+      "metric": "loot_count",
+      "item": 410204,
+      "equals": 1,
+      "within_ms": 3000
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 1345022
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Charstone Warband opens without cast failure",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "Charstone Warband drops item 500821 in its open loot window",
+      "metric": "loot_count",
+      "item": 500821,
+      "equals": 1,
+      "within_ms": 3000
+    }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Aion of Desolation spawns only in Deadwind Pass, not Swamp of Sorrows (#10183)",
+  "contract": "#10183 reported Aion of Desolation (item 354459, ilvl 60, reqLevel 55, Coalescence of Agony 254503) spawning in The Shifting Mire, Swamp of Sorrows (level 35 zone) at guid 6940027 (-10067.8, -3212.5, 23.291). Both the CoA realm dump (6900238) and CoA sidekick data place 254503 solely in Deadwind Pass (guid 6940026, -10355.5, -1912.46, 46.568). Expected: guid 6940027 in Swamp of Sorrows is not spawned and guid 6940026 in Deadwind Pass remains spawned.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -10067.8,
+    "y": -3212.5,
+    "z": 23.8,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 19,
+      "level": 80
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the stray Swamp of Sorrows pickup is not spawned",
+      "metric": "spawn_active",
+      "spawn": 6940027,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 0,
+      "x": -10355.5,
+      "y": -1912.46,
+      "z": 47.0,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the Deadwind Pass pickup remains spawned",
+      "metric": "spawn_active",
+      "spawn": 6940026,
+      "equals": 1
+    }
+  ]
+}

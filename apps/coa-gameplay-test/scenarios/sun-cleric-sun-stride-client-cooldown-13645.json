@@ -1,0 +1,103 @@
+{
+  "schema": 1,
+  "name": "Sun Cleric: Sun Stride streams cleared cooldown-on-event flags and sends SMSG_SPELL_COOLDOWN on cast (#13645)",
+  "contract": "Older and non-Descension client Spell.dbc builds carry SPELL_ATTR0_COOLDOWN_ON_EVENT (0x02000000) on Sun Stride 680700 (Attributes 0x2000010, AttributesEx 0x10088000, AttributesEx5 0x8). SpellInfoCorrections clears SPELL_ATTR0_COOLDOWN_ON_EVENT on the server so the 24 s cooldown starts on cast, but 680700 was neither registered in ClientSpellPatches (SMSG_PATCH_SPELL 2346) nor pushed via SMSG_SPELL_COOLDOWN on cast. Clients whose Spell.dbc still carried the flag therefore locked Sun Stride in a pending-event state with no timer until a map change resynced spells. Registering 680700 in ClientSpellPatches streams its server Attributes (16), AttributesEx (32768), and AttributesEx5 (0) at login, and OnSpellCast pushes a native SMSG_SPELL_COOLDOWN matching Player::GetSpellCooldownDelay(680700) (24000 ms base, 20000 ms with Leap of the Valkyrie 301295) while preserving the solar trail rider 681434 and recast lockout.",
+  "timeout_ms": 90000,
+  "players": [
+    { "id": "cleric", "race": 1, "class": 27, "level": 80 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let spawn AI, level scaling and the login spell patch stream settle", "ms": 7000 },
+    {
+      "action": "assert",
+      "label": "CONTROL: the login spell patch stream reaches this session",
+      "actor": "cleric", "metric": "server_packets", "opcode": 2346, "row": 500639, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: Sun Stride is streamed in SMSG_PATCH_SPELL",
+      "actor": "cleric", "metric": "server_packets", "opcode": 2346, "row": 680700, "min": 1, "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: streamed Sun Stride Attributes clear SPELL_ATTR0_COOLDOWN_ON_EVENT",
+      "actor": "cleric", "metric": "server_packet_u32", "opcode": 2346, "row": 680700, "index": 4, "equals": 16
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: streamed Sun Stride AttributesEx match server spell data",
+      "actor": "cleric", "metric": "server_packet_u32", "opcode": 2346, "row": 680700, "index": 5, "equals": 32768
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: streamed Sun Stride AttributesEx5 match server spell data",
+      "actor": "cleric", "metric": "server_packet_u32", "opcode": 2346, "row": 680700, "index": 9, "equals": 0
+    },
+    { "action": "learn", "actor": "cleric", "spell": 680700 },
+    {
+      "action": "assert",
+      "label": "SETUP: no server cooldown before casting Sun Stride",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 680700, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: no SMSG_SPELL_COOLDOWN sent for Sun Stride before cast",
+      "actor": "cleric", "metric": "spell_cooldown_packet_ms", "spell": 680700, "equals": -1
+    },
+    { "action": "cast", "label": "Cast Sun Stride without cooldown talents", "actor": "cleric", "spell": 680700, "target": "cleric" },
+    {
+      "action": "assert",
+      "label": "SETUP: Sun Stride cast succeeds",
+      "actor": "cleric", "metric": "cast_failure", "spell": 680700, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Sun Stride aura is applied",
+      "actor": "cleric", "metric": "aura", "spell": 680700, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: Sun Stride solar trail visual rider is still applied",
+      "actor": "cleric", "metric": "aura", "spell": 681434, "equals": 1, "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: server records the 24 s cooldown",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 680700, "min": 23000, "max": 24000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: server sends live SMSG_SPELL_COOLDOWN for Sun Stride on cast",
+      "actor": "cleric", "metric": "spell_cooldown_packet_ms", "spell": 680700, "min": 23000, "max": 24000
+    },
+    { "action": "cast", "label": "Immediate recast while on cooldown", "actor": "cleric", "spell": 680700, "target": "cleric" },
+    {
+      "action": "assert",
+      "label": "CONTRACT: recast during cooldown fails with SPELL_FAILED_NOT_READY",
+      "actor": "cleric", "metric": "cast_failure", "spell": 680700, "equals": 67
+    },
+    { "action": "wait", "label": "Let the 24 s cooldown expire", "ms": 24500 },
+    {
+      "action": "assert",
+      "label": "CONTRACT: cooldown clears after 24 s",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 680700, "equals": 0
+    },
+    { "action": "learn", "label": "Learn Leap of the Valkyrie rank 2 (-4 s Sun Stride cooldown)", "actor": "cleric", "spell": 301295 },
+    { "action": "cast", "label": "Recast Sun Stride with Leap of the Valkyrie", "actor": "cleric", "spell": 680700, "target": "cleric" },
+    {
+      "action": "assert",
+      "label": "CONTRACT: recast after cooldown expires succeeds",
+      "actor": "cleric", "metric": "cast_failure", "spell": 680700, "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: server cooldown reflects Leap of the Valkyrie (-4 s)",
+      "actor": "cleric", "metric": "cooldown_ms", "spell": 680700, "min": 19000, "max": 20000
+    },
+    {
+      "action": "assert",
+      "label": "CONTRACT: live SMSG_SPELL_COOLDOWN carries the modified 20 s cooldown",
+      "actor": "cleric", "metric": "spell_cooldown_packet_ms", "spell": 680700, "min": 19000, "max": 20000
+    }
+  ]
+}

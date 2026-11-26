@@ -1,0 +1,282 @@
+{
+  "schema": 1,
+  "name": "Felsworn: Immolation Aura ticks do not trigger Dancing Blades (#13578)",
+  "contract": [
+    "Dancing Blades 92087 reads: 'Critical strikes with melee abilities now trigger Dancing Blades, dealing",
+    "off-hand Weapon Damage to up to $800598i nearby enemies.' Immolation Aura (all ranks, active level-60",
+    "rank 572617) applies SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE (227, 3000 ms period, extra initial",
+    "tick) triggering Immolation 800208 (DmgClass 2 SPELL_DAMAGE_CLASS_MELEE, SchoolMask 4 Fire,",
+    "SPELL_EFFECT_SCHOOL_DAMAGE). Because 800208 carries DmgClass 2 and 92087 allows triggered procs",
+    "(PROC_ATTR_TRIGGERED_CAN_PROC, needed for Twin Slice / Azzinoth's Assault / Annihilan Strike / Fury",
+    "Unleashed), 800208 crits entered aura_ascension_felsworn_event case 92087 with melee=true,",
+    "periodic=false and fired Dancing Blades 800598. Live CoA combat logs record 0/214 Dancing Blades",
+    "triggers from isolated 800208 crits while melee abilities such as Twin Slice 803462/520243 trigger",
+    "at 100%. The fix excludes 800208 from case 92087 in AscensionFelswornEvents.cpp.",
+    "With melee crit guaranteed (melee_crit_rating 100000) and dual-wield weapons equipped (main-hand 25,",
+    "off-hand 2092), Immolation Aura 572617 must produce at least 2 critical 800208 ticks on the dummy",
+    "while triggering 0 casts and 0 hits of Dancing Blades 800598 (discriminating: fails without the fix).",
+    "After cancelling Immolation Aura, casting Twin Slice 547211 must crit (803462) and trigger Dancing",
+    "Blades 800598 (positive control)."
+  ],
+  "timeout_ms": 90000,
+  "players": [
+    {
+      "id": "felsworn",
+      "race": 1,
+      "class": 14,
+      "level": 80,
+      "melee_hit_rating": 10000,
+      "expertise_rating": 10000,
+      "melee_crit_rating": 100000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "felsworn",
+      "entry": 36,
+      "health": 1000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let spawn AI and level scaling settle",
+      "ms": 4000
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 201
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 1180
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 674
+    },
+    {
+      "action": "add_item",
+      "actor": "felsworn",
+      "item": 25
+    },
+    {
+      "action": "equip",
+      "actor": "felsworn",
+      "item": 25,
+      "slot": 15
+    },
+    {
+      "action": "add_item",
+      "actor": "felsworn",
+      "item": 2092
+    },
+    {
+      "action": "equip",
+      "actor": "felsworn",
+      "item": 2092,
+      "slot": 16
+    },
+    {
+      "action": "set_skill",
+      "actor": "felsworn",
+      "skill": 43,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "set_skill",
+      "actor": "felsworn",
+      "skill": 173,
+      "value": 400,
+      "maximum": 400
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 92087
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 572617
+    },
+    {
+      "action": "learn",
+      "actor": "felsworn",
+      "spell": 547211
+    },
+    {
+      "action": "set_health",
+      "actor": "felsworn",
+      "value": 10000,
+      "maximum": 10000
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: melee hit guaranteed",
+      "actor": "felsworn",
+      "metric": "melee_hit_chance",
+      "min": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 800208,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "immolation_crits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 800598,
+      "save_as": "db_casts_immol"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 800598,
+      "target": "dummy",
+      "save_as": "db_hits_immol"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Immolation Aura (572617)",
+      "actor": "felsworn",
+      "spell": 572617
+    },
+    {
+      "action": "assert",
+      "label": "Immolation Aura cast succeeds",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 572617,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Immolation Aura aura is active",
+      "actor": "felsworn",
+      "metric": "aura",
+      "spell": 572617,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "label": "Allow multiple 3000ms Immolation ticks (initial + 3s + 6s)",
+      "ms": 7000
+    },
+    {
+      "action": "assert",
+      "label": "Immolation (800208) critically struck at least twice",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 800208,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "immolation_crits",
+      "min": 2
+    },
+    {
+      "action": "assert",
+      "label": "Immolation crits do not cast Dancing Blades (800598)",
+      "actor": "felsworn",
+      "metric": "spell_cast_count",
+      "spell": 800598,
+      "relative_to": "db_casts_immol",
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Immolation crits deal no Dancing Blades (800598) damage",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 800598,
+      "target": "dummy",
+      "relative_to": "db_hits_immol",
+      "equals": 0
+    },
+    {
+      "action": "cancel_aura",
+      "actor": "felsworn",
+      "spell": 572617
+    },
+    {
+      "action": "wait",
+      "label": "Wait past GCD before positive control cast",
+      "ms": 1600
+    },
+    {
+      "action": "set_power",
+      "actor": "felsworn",
+      "power": 3,
+      "value": 100
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803462,
+      "target": "dummy",
+      "critical": true,
+      "save_as": "ts_crits"
+    },
+    {
+      "action": "snapshot",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 800598,
+      "target": "dummy",
+      "save_as": "db_hits_ts"
+    },
+    {
+      "action": "cast",
+      "label": "Positive control: Twin Slice (547211)",
+      "actor": "felsworn",
+      "spell": 547211,
+      "target": "dummy"
+    },
+    {
+      "action": "assert",
+      "label": "Twin Slice cast succeeds",
+      "actor": "felsworn",
+      "metric": "cast_failure",
+      "spell": 547211,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Twin Slice main-hand strike critically hits",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 803462,
+      "target": "dummy",
+      "critical": true,
+      "relative_to": "ts_crits",
+      "min": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Positive control: Twin Slice crit still triggers Dancing Blades (800598)",
+      "actor": "felsworn",
+      "metric": "spell_damage_count",
+      "spell": 800598,
+      "target": "dummy",
+      "relative_to": "db_hits_ts",
+      "min": 1,
+      "within_ms": 2000
+    }
+  ]
+}

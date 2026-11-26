@@ -118,6 +118,7 @@ std::vector<Creature*> Minions(Player* player, bool raisedOnly = false);
 uint8 Cost(Player* player, uint32 spell);
 uint8 Capacity(Player* player);
 uint8 Used(Player* player);
+void Evict(Player* player, int32 needed);
 void Sync(Player* player);
 void Prune(Player* player, bool all = false);
 bool IsMinion(Player* player, Unit const* unit, bool raisedOnly = false);

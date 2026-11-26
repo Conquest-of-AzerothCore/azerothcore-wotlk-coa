@@ -1,0 +1,61 @@
+{
+  "schema": 1,
+  "name": "Jane's Lucky Hat has a single pickup in Fungal Rock (#12375)",
+  "contract": "#12375 (and duplicate #13430): Jane's Lucky Hat (item 515362, object 96173) had two spawns in Fungal Rock cave in Un'Goro Crater: guid 6941881 at the CoA realm-dump spot (-6262.0, -2000.8, -261.251) and duplicate cross-realm copy guid 6941882 at (-6359.0, -2024.5, -259.030). Expected: guid 6941882 is not spawned while guid 6941881 remains spawned.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -6359.0,
+    "y": -2024.5,
+    "z": -259.03,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 1,
+      "class": 12,
+      "level": 60
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the duplicate Jane's Lucky Hat copy 6941882 is not spawned",
+      "metric": "spawn_active",
+      "spawn": 6941882,
+      "equals": 0
+    },
+    {
+      "action": "teleport",
+      "actor": "p",
+      "map": 1,
+      "x": -6262.0,
+      "y": -2000.8,
+      "z": -261.251,
+      "o": 0
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the realm-dump Jane's Lucky Hat pickup 6941881 remains spawned",
+      "metric": "spawn_active",
+      "spawn": 6941881,
+      "equals": 1
+    }
+  ]
+}

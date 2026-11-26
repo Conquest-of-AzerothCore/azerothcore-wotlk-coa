@@ -1,4 +1,5 @@
 #include "ManastormExperience.h"
+#include "ManastormExperienceFormula.h"
 #include "ManastormModuleConfig.h"
 #include "ManastormRun.h"
 #include "LFGMgr.h"
@@ -90,6 +91,7 @@ bool ManastormExperience::PrepareCompletion(ManastormRun const& run,
         return true;
 
     uint32 const maxLevel = sWorld->getIntConfig(CONFIG_MAX_PLAYER_LEVEL);
+    uint8 highestLevel = run.GetHighestMemberLevel();
     std::vector<std::pair<ObjectGuid::LowType, uint8>> recipients;
     for (ObjectGuid::LowType guid : run.GetMembers())
     {
@@ -123,6 +125,8 @@ bool ManastormExperience::PrepareCompletion(ManastormRun const& run,
         if (level >= maxLevel)
             return true;
 
+        highestLevel = std::max(highestLevel, level);
+
         if (blocksExperience)
             continue;
 
@@ -132,9 +136,30 @@ bool ManastormExperience::PrepareCompletion(ManastormRun const& run,
         recipients.emplace_back(guid, level);
     }
 
+    uint32 const memberCount = run.GetStageMemberCount();
+    double const groupFactor =
+        ManastormExperienceFormula::FloorGroupEffortFactor(memberCount, run.GetGroupHealthMultiplier()) *
+        ManastormExperienceFormula::RaidSizeFactor(memberCount);
+    uint64 const totalDamage = run.GetTotalStageDamageDealt();
+    uint64 const totalHeal = run.GetTotalStageCreditedHeal();
+
     for (auto const& [guid, level] : recipients)
     {
         if (level >= maxLevel)
+            continue;
+
+        double const memberFactor =
+            groupFactor *
+            ManastormExperienceFormula::LevelGapFactor(level, highestLevel, maxLevel) *
+            ManastormExperienceFormula::CombatContributionFactor(
+                memberCount,
+                run.GetMemberDamageDealt(guid),
+                totalDamage,
+                run.GetMemberCreditedHeal(guid),
+                totalHeal,
+                false,
+                true);
+        if (memberFactor <= 0.0)
             continue;
 
         lfg::LfgReward const* reward = sLFGMgr->GetRandomDungeonReward(_dungeonId, level);
@@ -145,8 +170,8 @@ bool ManastormExperience::PrepareCompletion(ManastormRun const& run,
             return false;
         }
 
-        uint32 const baseXP =
-            ClampXP(double(quest->XPValue(level)) * _multiplier * ManastormModuleConfig::ExperienceRate());
+        uint32 const baseXP = ClampXP(
+            double(quest->XPValue(level)) * _multiplier * ManastormModuleConfig::ExperienceRate() * memberFactor);
         if (!baseXP)
             continue;
 

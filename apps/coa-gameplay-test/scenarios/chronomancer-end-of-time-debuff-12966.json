@@ -1,0 +1,171 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: End of Time debuff tooltip and all-school damage reduction (#12966)",
+  "contract": [
+    "#12966: End of Time talent (807690) reads 'At the end of the duration of Clasp of Infinity, you launch an Anomaly Spike at affected enemies and their damage dealt is reduced by $525050s2% for $525050d.'",
+    "In Spell.dbc, debuff 525050 (DurationIndex 35 = 4000 ms) carries Effect[1] SPELL_AURA_MOD_DAMAGE_PERCENT_DONE (-10%) with EffectMiscValue[1] = 126 (magic schools only, excluding Physical) and stale ToolTip[enUS] 'Magic Damage taken is increased by ${$w2}%.'",
+    "The fix streams the corrected debuff ToolTip ('Damage dealt reduced by ${-$w2}%.') through coa_client_spell_description (SMSG_PATCH_SPELL opcode 2346) and sets 525050 Effect[1] MiscValue to SPELL_SCHOOL_MASK_ALL (127) in AscensionChronomancerRipple.cpp.",
+    "DISCRIMINATING: SMSG_PATCH_SPELL row 525050 carries the corrected damage-dealt wording without 'Magic Damage taken', and after Clasp of Infinity (805847) expires on a hostile player, End of Time (525050) reduces both physical weapon_damage_min and magic spell_damage_done by 10% and restores weapon_damage_min when it expires. Rendered client text is outside the harness."
+  ],
+  "timeout_ms": 90000,
+  "location": { "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+  "players": [
+    { "id": "chrono", "race": 1, "class": 22, "level": 60, "spell_hit_rating": 10000 },
+    { "id": "victim", "race": 2, "class": 1, "level": 60 }
+  ],
+  "steps": [
+    { "action": "wait", "label": "Let login patch stream and level scaling settle", "ms": 7000 },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: SMSG_PATCH_SPELL streams End of Time debuff row 525050",
+      "actor": "chrono",
+      "metric": "server_packets",
+      "opcode": 2346,
+      "row": 525050,
+      "min": 1,
+      "within_ms": 5000
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: row 525050 carries the damage-dealt reduction tooltip",
+      "actor": "chrono",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 525050,
+      "text": "Damage dealt reduced by ${-$w2}%.",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: the contradictory 'Magic Damage taken' text is gone from row 525050",
+      "actor": "chrono",
+      "metric": "server_packet_contains",
+      "opcode": 2346,
+      "row": 525050,
+      "text": "Magic Damage taken",
+      "equals": 0
+    },
+    { "action": "teleport", "actor": "chrono", "map": 0, "x": -9617.06, "y": -288.949, "z": 57.3053, "o": 0 },
+    { "action": "teleport", "actor": "victim", "map": 0, "x": -9614.06, "y": -288.949, "z": 57.3053, "o": 3.14159 },
+    { "action": "pvp", "actor": "chrono", "enabled": true },
+    { "action": "pvp", "actor": "victim", "enabled": true },
+    { "action": "set_health", "actor": "chrono", "maximum": 1000000, "value": 1000000 },
+    { "action": "set_health", "actor": "victim", "maximum": 1000000, "value": 1000000 },
+    { "action": "learn", "actor": "chrono", "spell": 805847 },
+    { "action": "learn", "actor": "chrono", "spell": 807690 },
+    {
+      "action": "assert",
+      "label": "SETUP: End of Time talent passive is active",
+      "actor": "chrono",
+      "metric": "aura",
+      "spell": 807690,
+      "caster": "chrono",
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: victim has positive baseline physical main-hand weapon damage",
+      "actor": "victim",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "min": 1
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline physical main-hand weapon damage before End of Time",
+      "actor": "victim",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "save_as": "phys_before"
+    },
+    {
+      "action": "snapshot",
+      "label": "Baseline Frostbolt magic spell damage before End of Time",
+      "actor": "victim",
+      "metric": "spell_damage_done",
+      "spell": 116,
+      "target": "chrono",
+      "base": 1000,
+      "save_as": "magic_before"
+    },
+    {
+      "action": "cast",
+      "label": "Cast Clasp of Infinity on hostile victim",
+      "actor": "chrono",
+      "spell": 805847,
+      "target": "victim"
+    },
+    {
+      "action": "assert",
+      "label": "SETUP: Clasp of Infinity debuff lands on victim",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 805847,
+      "caster": "chrono",
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "End of Time debuff applies when Clasp of Infinity expires",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 525050,
+      "caster": "chrono",
+      "equals": 1,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "End of Time Effect[1] aura amount is -10",
+      "actor": "victim",
+      "metric": "aura_amount",
+      "spell": 525050,
+      "caster": "chrono",
+      "effect": 1,
+      "equals": -10
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: End of Time reduces physical main-hand damage dealt by 10%",
+      "actor": "victim",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "ratio_to": "phys_before",
+      "min": 0.895,
+      "max": 0.905
+    },
+    {
+      "action": "assert",
+      "label": "CONTROL: End of Time reduces magic spell damage dealt by 10%",
+      "actor": "victim",
+      "metric": "spell_damage_done",
+      "spell": 116,
+      "target": "chrono",
+      "base": 1000,
+      "ratio_to": "magic_before",
+      "min": 0.895,
+      "max": 0.905
+    },
+    {
+      "action": "assert",
+      "label": "End of Time expires after its 4 s duration",
+      "actor": "victim",
+      "metric": "aura",
+      "spell": 525050,
+      "caster": "chrono",
+      "equals": 0,
+      "within_ms": 6000
+    },
+    {
+      "action": "assert",
+      "label": "Physical main-hand damage returns to baseline after expiry",
+      "actor": "victim",
+      "metric": "weapon_damage_min",
+      "hand": 0,
+      "ratio_to": "phys_before",
+      "min": 0.995,
+      "max": 1.005
+    }
+  ]
+}

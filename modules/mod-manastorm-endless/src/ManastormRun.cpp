@@ -49,6 +49,10 @@ ManastormRun::ManastormRun(
     _affixEligibleConfiguredSpawnIds.insert(
         segment.AffixEligibleSpawnIds.begin(),
         segment.AffixEligibleSpawnIds.end());
+
+    uint32 const defaultBest = _depth > 0 ? _depth - 1 : 0;
+    for (ObjectGuid::LowType memberGuid : _members)
+        SetMemberXPBaseline(memberGuid, defaultBest, _creatureLevel);
 }
 
 void ManastormRun::RecordRecentObjective(
@@ -151,4 +155,5 @@ void ManastormRun::PrepareNextStage(
 
     _activeHeartGuids.clear();
     _bossHeartThresholdMask = 0;
+    ResetStageCombatScores();
 }

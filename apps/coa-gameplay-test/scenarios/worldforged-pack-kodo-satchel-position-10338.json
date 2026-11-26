@@ -1,0 +1,122 @@
+{
+  "schema": 1,
+  "name": "Worldforged Pack Kodo Satchel rests on open ground outside the rock spire (#10338)",
+  "contract": "#10338 reported Pack Kodo Satchel (entry 515519, guid 6942018) buried inside a rock spire in Thousand Needles. The map-pass + recorded-heights row at (-4934.2, -1357.0, -51.947) sat -5.81 yd under the -46.1354 terrain inside Thousandrock15.m2. Expected: the pickup stands at its first-pass realm-dump spot (-4926.17, -1363.49, -51.947) on open 9.2 deg terrain (floor -52.2181, gap +0.271 yd), is grounded with open headroom, not submerged, and opens with loot.",
+  "timeout_ms": 60000,
+  "location": {
+    "map": 1,
+    "x": -4928.0,
+    "y": -1364.5,
+    "z": -52.06,
+    "o": 0.5
+  },
+  "players": [
+    {
+      "id": "p",
+      "race": 2,
+      "class": 1,
+      "level": 35
+    }
+  ],
+  "steps": [
+    {
+      "action": "set_phase",
+      "actor": "p",
+      "value": 1
+    },
+    {
+      "action": "wait",
+      "ms": 3000
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "SETUP: the Pack Kodo Satchel pickup is in the area",
+      "metric": "nearby_gameobject_count",
+      "entry": 515519,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup stands at its restored first-pass spot",
+      "metric": "spawn_distance",
+      "x": -4926.17,
+      "y": -1363.49,
+      "z": -51.947,
+      "max": 0.3,
+      "guid": 6942018,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "DISCRIMINATING: the pickup rests on the ground instead of buried -5.81 yd inside the rock spire",
+      "metric": "spawn_ground_gap",
+      "min": -0.1,
+      "max": 0.45,
+      "guid": 6942018,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is classified as grounded",
+      "metric": "spawn_placement",
+      "tolerance": 0.5,
+      "equals": 0,
+      "guid": 6942018,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup has open sky headroom",
+      "metric": "spawn_headroom",
+      "min": 5,
+      "guid": 6942018,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is not submerged",
+      "metric": "spawn_submerged",
+      "equals": 0,
+      "guid": 6942018,
+      "spawn_type": "gameobject"
+    },
+    {
+      "action": "set_aura",
+      "actor": "p",
+      "spell": 642,
+      "stacks": 1
+    },
+    {
+      "action": "cast",
+      "actor": "p",
+      "spell": 3365,
+      "target_gameobject": 515519
+    },
+    {
+      "action": "wait",
+      "ms": 5500
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "the pickup is within reach and opens",
+      "metric": "cast_failure",
+      "spell": 3365,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "p",
+      "label": "its loot is shown",
+      "metric": "loot_count",
+      "min": 1,
+      "within_ms": 3000
+    }
+  ]
+}

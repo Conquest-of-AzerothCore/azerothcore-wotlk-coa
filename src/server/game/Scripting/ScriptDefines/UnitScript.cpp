@@ -146,11 +146,11 @@ bool ScriptMgr::CanUnitAssist(Unit const* assister, Unit const* target, SpellInf
     CALL_ENABLED_BOOLEAN_HOOKS(UnitScript, UNITHOOK_CAN_UNIT_ASSIST, !script->CanUnitAssist(assister, target, spell));
 }
 
-Unit* ScriptMgr::SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* spell)
+Unit* ScriptMgr::SpellMagnetTarget(Unit* attacker, Unit* victim, SpellInfo const* spell, bool& ignoreM2Los)
 {
     Unit* result = nullptr;
     CALL_ENABLED_HOOKS(UnitScript, UNITHOOK_SPELL_MAGNET_TARGET,
-        if (!result) result = script->SpellMagnetTarget(attacker, victim, spell));
+        if (!result) result = script->SpellMagnetTarget(attacker, victim, spell, ignoreM2Los));
     return result;
 }
 

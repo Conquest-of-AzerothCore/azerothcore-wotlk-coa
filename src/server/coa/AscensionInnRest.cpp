@@ -20,11 +20,11 @@ public:
 
     void OnPlayerUpdate(Player* player, uint32) override
     {
-        bool inInn = player->HasRestFlag(REST_FLAG_IN_TAVERN) && player->IsAlive();
-        if (inInn == player->HasAura(SPELL_RESTING))
+        bool resting = player->HasPlayerFlag(PLAYER_FLAGS_RESTING) && player->IsAlive();
+        if (resting == player->HasAura(SPELL_RESTING))
             return;
 
-        if (inInn)
+        if (resting)
             player->CastSpell(player, SPELL_RESTING, TRIGGERED_FULL_MASK);
         else
             player->RemoveAurasDueToSpell(SPELL_RESTING);

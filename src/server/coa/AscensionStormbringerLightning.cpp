@@ -6,6 +6,7 @@
 #include "SpellAuraEffects.h"
 #include "SpellInfo.h"
 #include "SpellMgr.h"
+#include "SpellScript.h"
 
 #include <algorithm>
 #include <limits>
@@ -104,9 +105,45 @@ private:
         owner->CastSpell(target, SPELL_THUNDER_WAVE_STRIKE, true);
     }
 };
+
+class spell_ascension_eye_of_the_storm_pulse : public SpellScript
+{
+    PrepareSpellScript(spell_ascension_eye_of_the_storm_pulse);
+
+    void FilterUnitTarget(WorldObject*& target)
+    {
+        if (!target || !target->ToUnit() || !target->ToUnit()->IsAlive())
+            target = nullptr;
+    }
+
+    void FilterAreaTargets(std::list<WorldObject*>& targets)
+    {
+        targets.remove_if([](WorldObject const* target)
+        {
+            return !target || !target->ToUnit() || !target->ToUnit()->IsAlive();
+        });
+    }
+
+    void ClearDeadAnchor()
+    {
+        Unit const* target = GetSpell()->m_targets.GetUnitTarget();
+        if (target && !target->IsAlive())
+            GetSpell()->m_targets.RemoveObjectTarget();
+    }
+
+    void Register() override
+    {
+        OnObjectTargetSelect += SpellObjectTargetSelectFn(spell_ascension_eye_of_the_storm_pulse::FilterUnitTarget,
+            EFFECT_ALL, TARGET_UNIT_TARGET_ENEMY);
+        OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(
+            spell_ascension_eye_of_the_storm_pulse::FilterAreaTargets, EFFECT_ALL, TARGET_UNIT_DEST_AREA_ENEMY);
+        OnCast += SpellCastFn(spell_ascension_eye_of_the_storm_pulse::ClearDeadAnchor);
+    }
+};
 }
 
 void AddSC_AscensionStormbringerLightning()
 {
     new stormbringer_lightning_procs();
+    RegisterSpellScript(spell_ascension_eye_of_the_storm_pulse);
 }

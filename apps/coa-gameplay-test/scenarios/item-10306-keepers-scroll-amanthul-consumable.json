@@ -1,0 +1,134 @@
+{
+  "schema": 1,
+  "name": "Keeper's Scroll: Aman'thul is a non-equippable consumable, not a main-hand weapon (#10306)",
+  "contract": [
+    "Requires CoA.SendDisplayPatches=1.",
+    "Keeper's Scroll: Aman'thul (246199) is a consumable scroll (Class 0, Subclass 1) sold on the Ethereal Bazaar Consumables vendor list (900012) alongside sibling Keeper's Scrolls (246194, 97388, 696661-696665), all of which have InventoryType 0 and zero weapon damage/delay.",
+    "Both item_template and Item.dbc had InventoryType 21 (Main Hand) plus 0.8-0.8 damage and 2000 ms delay, causing it to display as a Main-Hand weapon.",
+    "Querying item 246199 (CMSG_ITEM_QUERY_SINGLE, opcode 86) must return SMSG_ITEM_QUERY_SINGLE_RESPONSE (opcode 88) with InventoryType 0 (u32 index 6 after the 4 name strings), zero Damage[0].DamageMin/DamageMax (float indices 24/25 with StatsCount 0), and Delay 0 (u32 index 37), and must stream SMSG_PATCH_ITEM (opcode 2354) for row 246199 with ClassID 0, SubclassID 1, DisplayInfoID 67491, and InventoryType 0."
+  ],
+  "timeout_ms": 60000,
+  "location": {
+    "map": 0,
+    "x": -9465,
+    "y": 64,
+    "z": 56,
+    "o": 0
+  },
+  "players": [
+    {
+      "id": "buyer",
+      "race": 1,
+      "class": 1,
+      "level": 10
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "label": "Let the first world entry and its patch stream settle",
+      "ms": 3000
+    },
+    {
+      "action": "client_packet",
+      "label": "Query Keeper's Scroll: Aman'thul (246199) as when browsing the Ethereal Bazaar",
+      "actor": "buyer",
+      "opcode": 86,
+      "consumed": false,
+      "fields": [
+        {
+          "u32": 246199
+        }
+      ]
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: item query response reports InventoryType 0 (non-equippable), not 21 (Main Hand)",
+      "actor": "buyer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 246199,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 6,
+      "equals": 0,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Item query response has zero DamageMin1",
+      "actor": "buyer",
+      "metric": "server_packet_float",
+      "opcode": 88,
+      "row": 246199,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 24,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Item query response has zero DamageMax1",
+      "actor": "buyer",
+      "metric": "server_packet_float",
+      "opcode": 88,
+      "row": 246199,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 25,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Item query response has zero weapon delay",
+      "actor": "buyer",
+      "metric": "server_packet_u32",
+      "opcode": 88,
+      "row": 246199,
+      "offset": 16,
+      "skip_strings": 4,
+      "index": 37,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "DISCRIMINATING: server streams SMSG_PATCH_ITEM for 246199 once",
+      "actor": "buyer",
+      "metric": "server_packets",
+      "opcode": 2354,
+      "row": 246199,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "assert",
+      "label": "Streamed Item.dbc row keeps ClassID 0 (Consumable)",
+      "actor": "buyer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 246199,
+      "index": 1,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "label": "Streamed Item.dbc row keeps DisplayInfoID 67491",
+      "actor": "buyer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 246199,
+      "index": 5,
+      "equals": 67491
+    },
+    {
+      "action": "assert",
+      "label": "Streamed Item.dbc row sets InventoryType 0",
+      "actor": "buyer",
+      "metric": "server_packet_u32",
+      "opcode": 2354,
+      "row": 246199,
+      "index": 6,
+      "equals": 0
+    }
+  ]
+}

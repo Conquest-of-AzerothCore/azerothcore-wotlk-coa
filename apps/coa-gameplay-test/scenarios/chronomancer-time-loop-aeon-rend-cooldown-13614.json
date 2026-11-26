@@ -1,0 +1,587 @@
+{
+  "schema": 1,
+  "name": "Chronomancer: Time Loop keeps Chromatic Shard cooldown synced and procs Aeon Rend (#13614)",
+  "contract": [
+    "Issue #13614 reports two defects during Pure Chaos Time Loop (807571 -> 807989 -> owned Chromatic Shard 567544):",
+    "(1) Chromatic Shard no longer gets its cooldown reduced by Infinite Power (92118) until manually cast again,",
+    "and (2) Aeon Rend (583248) does not proc during Time Loop.",
+    "Root cause 1: Time Loop casts 567544 with TRIGGERED_FULL_MASK (skipping server cooldown), but Spell::SendSpellGo",
+    "omits CAST_FLAG_PENDING because Chromatic Shard has a 3500 ms base cast time, so the client starts a fake 30 s",
+    "category-888 cooldown on every Time Loop tick while the server holds 0 s (or a shorter remaining cooldown), making",
+    "Infinite Power unable to shrink the desynced client timer. Time Loop now sends SMSG_CLEAR_COOLDOWN and re-sends",
+    "SMSG_SPELL_COOLDOWN with the server remaining cooldown if any (and Aeon Rend Restrike clears the client cooldown",
+    "when no server cooldown is active).",
+    "Root cause 2: Time Loop cast 567544 with TRIGGERED_DISALLOW_PROC_EVENTS and Aeon Rend 583248 lacked",
+    "PROC_ATTR_TRIGGERED_CAN_PROC (AttributesMask 2), blocking Aeon Rend on Time Loop shards despite live CoA logs",
+    "(2026-08-15-11.24.03) proving restrikes occur during Time Loop. Stripping TRIGGERED_DISALLOW_PROC_EVENTS from",
+    "Time Loop and adding AttributesMask 2 to 583248 enables Aeon Rend during Time Loop without chain-proccing.",
+    "Phase 1A verifies ready Shard stays client-ready across Time Loop; Phase 1B verifies cooling Shard receives",
+    "SMSG_SPELL_COOLDOWN with the true remaining delay and shrinks from Infinite Power; Phase 2 runs 14 Time Loop",
+    "windows (42 shards, (0.75)^42 < 5.7e-6) and verifies Aeon Rend procs with owned rank 9 and leaves Shard ready."
+  ],
+  "timeout_ms": 150000,
+  "players": [
+    {
+      "id": "chronomancer",
+      "race": 1,
+      "class": 22,
+      "level": 80,
+      "spell_hit_rating": 10000,
+      "spell_crit_rating": 10000
+    }
+  ],
+  "creatures": [
+    {
+      "id": "dummy",
+      "owner": "chronomancer",
+      "entry": 3444,
+      "health": 5000000,
+      "distance": 3,
+      "stationary": true
+    }
+  ],
+  "steps": [
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let spawn AI and level scaling settle"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 567544
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 92118
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 801291
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 567544,
+      "equals": 1
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "knows_spell",
+      "spell": 801292,
+      "equals": 0
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 92118,
+      "equals": 1,
+      "within_ms": 2000
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Phase 1A: Time Loop while Chromatic Shard is ready"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_go_count",
+      "spell": 567544,
+      "min": 2,
+      "label": "SETUP: Time Loop sent SMSG_SPELL_GO for owned Chromatic Shard rank 9"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "equals": 0,
+      "label": "Server keeps Chromatic Shard off cooldown during Time Loop"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "client_cooldown_ready",
+      "spell": 567544,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "DISCRIMINATING (#13614): client does not hold a fake 30s cooldown after Time Loop"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_go_count",
+      "spell": 567544,
+      "save_as": "loop_go_count"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "client_cooldown_clears",
+      "spell": 567544,
+      "ratio_to": "loop_go_count",
+      "equals": 1,
+      "label": "DISCRIMINATING (#13614): every Time Loop Shard SMSG_SPELL_GO clears the fake client cooldown"
+    },
+    {
+      "action": "spell_mod_mutant",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "op": 10,
+      "percent": -100
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 567544,
+      "target": "dummy",
+      "label": "Phase 1B: manually cast Chromatic Shard to start its real 30s cooldown"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "min": 25000,
+      "within_ms": 2000
+    },
+    {
+      "action": "wait",
+      "ms": 5000,
+      "label": "Let cooldown decay to ~25s before Time Loop"
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Trigger Time Loop while Chromatic Shard is cooling down"
+    },
+    {
+      "action": "wait",
+      "ms": 3500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cooldown_packet_ms",
+      "spell": 567544,
+      "min": 1000,
+      "max": 26000,
+      "label": "DISCRIMINATING (#13614): Time Loop resyncs client cooldown to real server remaining instead of 30s"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "save_as": "cd_before_ip"
+    },
+    {
+      "action": "snapshot",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 92118,
+      "save_as": "ip_before"
+    },
+    {
+      "action": "cast",
+      "actor": "chronomancer",
+      "spell": 801291,
+      "target": "dummy",
+      "label": "Cast instant Timerend to trigger Infinite Power"
+    },
+    {
+      "action": "wait",
+      "ms": 500
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 92118,
+      "relative_to": "ip_before",
+      "min": 1,
+      "within_ms": 1000,
+      "label": "Infinite Power procced on Timerend cast"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "cooldown_ms",
+      "spell": 567544,
+      "relative_to": "cd_before_ip",
+      "max": -2000,
+      "label": "Infinite Power reduces Chromatic Shard cooldown after Time Loop"
+    },
+    {
+      "action": "learn",
+      "actor": "chronomancer",
+      "spell": 583248,
+      "label": "Phase 2: learn Aeon Rend (25% restrike chance)"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "aura",
+      "spell": 583248,
+      "equals": 1,
+      "within_ms": 1000
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 583248,
+      "equals": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 1 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 2 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 3 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 4 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 5 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 6 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 7 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 8 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 9 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 10 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 11 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 12 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 13 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 0
+    },
+    {
+      "action": "set_aura",
+      "actor": "chronomancer",
+      "target": "dummy",
+      "caster": "chronomancer",
+      "spell": 807571,
+      "stacks": 1,
+      "label": "Time Loop Aeon Rend window 14 of 14"
+    },
+    {
+      "action": "wait",
+      "ms": 3200
+    },
+    {
+      "action": "wait",
+      "ms": 500,
+      "label": "Let final shard missile and any restrike resolve"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_proc_count",
+      "spell": 583248,
+      "min": 1,
+      "label": "DISCRIMINATING (#13614): Aeon Rend procs from Time Loop Chromatic Shards (42 shards, P(0)=5.6e-6)"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "spell_cast_count",
+      "spell": 801292,
+      "equals": 0,
+      "label": "Neither Time Loop nor Aeon Rend falls back to rank 1 Chromatic Shard"
+    },
+    {
+      "action": "assert",
+      "actor": "chronomancer",
+      "metric": "client_cooldown_ready",
+      "spell": 567544,
+      "equals": 1,
+      "within_ms": 1000,
+      "label": "Client Chromatic Shard cooldown stays clear after Time Loop and Aeon Rend restrikes"
+    }
+  ]
+}
