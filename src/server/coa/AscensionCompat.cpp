@@ -7000,6 +7000,12 @@ public:
         }
     }
 
+  static bool IsFishingPole(ItemTemplate const* proto)
+  {
+    return proto && proto->Class == ITEM_CLASS_WEAPON &&
+           proto->SubClass == ITEM_SUBCLASS_WEAPON_FISHING_POLE;
+  }
+
   void OnVisibleItemSet(Player *player, uint8 slot, Item *item) {
     if (!item)
       return;
@@ -7008,13 +7014,17 @@ public:
     if (!state)
       return;
 
+    bool const equippedFishingPole = IsFishingPole(item->GetTemplate());
     uint8 itemCategoryId = AppearanceCategoryForEquipmentSlot(slot);
     if (itemCategoryId)
     {
       uint32 appearanceId = state->ActiveAppearances[itemCategoryId];
       auto appearanceItr = _appearances.find(appearanceId);
       if (appearanceItr != _appearances.end() &&
-          appearanceItr->second.SourceItem) {
+          appearanceItr->second.SourceItem &&
+          (!equippedFishingPole ||
+           IsFishingPole(sObjectMgr->GetItemTemplate(appearanceItr->second.SourceItem))))
+      {
         player->SetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + slot * 2,
                                appearanceItr->second.SourceItem);
         if (state->CollectedAppearances.contains(appearanceId) &&
@@ -7022,6 +7032,9 @@ public:
           sScriptMgr->OnPlayerCoAProgress(player, CoAProgressEvent::Transmogrified, appearanceId);
       }
     }
+
+    if (equippedFishingPole)
+      return;
 
     uint8 effectCategoryId = WeaponEffectCategoryForEquipmentSlot(slot);
     if (!effectCategoryId || !state->CanSeeSpellAppearances)
