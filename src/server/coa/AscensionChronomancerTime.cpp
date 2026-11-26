@@ -475,7 +475,7 @@ public:
 
     void ModifySpellEffectBaseValue(Unit const* caster, SpellInfo const* info, uint8 index, float& value) override
     {
-        Player const* player = caster ? caster->ToPlayer() : nullptr;
+        Player* player = caster && caster->IsPlayer() ? caster->GetSpellModOwner() : nullptr;
         if (!player || player->getClass() != CLASS_CHRONOMANCER || !info ||
             info->Id != SingularityCoreTrigger || index != EFFECT_0 ||
             info->Effects[EFFECT_0].Effect != SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
